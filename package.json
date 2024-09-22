@@ -19,6 +19,8 @@
         "@mui/styled-engine-sc": "^6.1.1",
         "@tauri-apps/api": ">=2.0.0-rc.0",
         "@tauri-apps/plugin-shell": ">=2.0.0-rc.0",
+        "@tauri-apps/plugin-store": ">=2.0.0-rc.0",
+        "axios": "^1.7.7",
         "polished": "^4.3.1",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",

@@ -9,6 +9,20 @@ When an implementation of overlay began, put these dependencies in header:
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 ```
 
+Implement support for BTTV, by calling api `https://api.betterttv.net/3/cached/users/twitch/<USER_ID>` or `https://api.betterttv.net/3/cached/users/youtube/<CHANNEL_ID>`
+and image tag like `<img src="https://cdn.betterttv.net/emote/<EMOTE_ID>/3x.<IMAGE_TYPE>" />`
+
+
+### App directories on linux
+
+| DIR TYPE           | LOCATION                                    |
+|--------------------|---------------------------------------------|
+| app_cache_dir      | ~/.cache/io.github.voguh.unichat            |
+| app_config_dir     | ~/.config/io.github.voguh.unichat           |
+| app_data_dir       | ~/.local/share/io.github.voguh.unichat      |
+| app_local_data_dir | ~/.local/share/io.github.voguh.unichat      |
+| app_log_dir        | ~/.local/share/io.github.voguh.unichat/logs |
+
 
 ### Build
 
