@@ -1,0 +1,28 @@
+{
+    "reactFuncionalComponent": {
+        "prefix": ["reactFuncionalComponent", "rfc"],
+        "description": "Creates a new react functional component",
+        "body": [
+            "import React from 'react'",
+            "",
+            "interface Props {",
+            "  children?: React.ReactNode",
+            "}",
+            "",
+            "export function ${TM_DIRECTORY/^.+\\/(.*)$/$1/}(props: Props): React.ReactNode {",
+            "  return <>${TM_DIRECTORY/^.+\\/(.*)$/$1/} works!</>",
+            "}",
+            "",
+        ],
+    },
+    "stypedComponents": {
+        "prefix": ["stypedComponents", "styled"],
+        "description": "Creates a new styled components content",
+        "body": [
+            "import styled from 'styled-components'",
+            "",
+            "export const ${TM_DIRECTORY/^.+\\/(.*)$/$1/}StyledContainer = styled.div``",
+            "",
+        ],
+    }
+}
