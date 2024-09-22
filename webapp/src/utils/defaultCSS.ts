@@ -1,3 +1,4 @@
+export const defaultCSS = `
 @import url(https://fonts.googleapis.com/css?family=Roboto:700);
 
 :root {
@@ -108,3 +109,4 @@ html, body {
 #main-container > .message-item > .message > img {
   height: var(--font-size);
 }
+`

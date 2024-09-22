@@ -1,7 +1,7 @@
 import { Store } from '@tauri-apps/plugin-store'
 
 export class StorageService {
-  private readonly _store: Store
+  private _store: Store
 
   constructor() {
     this._store = new Store('unichat.db')
