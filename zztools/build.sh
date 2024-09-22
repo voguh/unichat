@@ -20,11 +20,11 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
 
-# Install Node 18.17.0
+# Install Node 18.20.0
 nvm i v18.20.0
 
 # Install Yarn
-corepack enable pnpm
+npm install -g pnpm
 
 cargo clean
 pnpm install
