@@ -6,26 +6,28 @@ export const DashboardStyledContainer = styled.div`
   padding: 8px;
 
   display: grid;
-  grid-template-areas: 'TOP PRV' 'EDT PRV';
-  grid-template-columns: 1fr 500px;
-  grid-template-rows: 38px 1fr;
+  grid-template-areas: 'SID CTT' 'SID CTT';
+  grid-template-columns: 48px 1fr;
+  grid-template-rows: 46px 1fr;
   gap: 8px;
 
-  > .top-bar {
-    grid-area: TOP;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    padding: 4px;
-    gap: 4px;
+  > .sidebar {
+    grid-area: SID;
+    padding: 8px;
+
+    > button {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      min-height: 32px;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   }
 
-  > .editor {
-    grid-area: EDT;
-    overflow: hidden;
-  }
-
-  > .preview {
-    grid-area: PRV;
+  > .content {
+    grid-area: CTT;
   }
 `
