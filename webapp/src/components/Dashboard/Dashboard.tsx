@@ -1,6 +1,4 @@
-import 'react-toastify/dist/ReactToastify.css'
 import React from 'react'
-import { ToastContainer } from 'react-toastify'
 
 import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
@@ -13,7 +11,7 @@ interface Props {
   children?: React.ReactNode
 }
 
-export function Dashboard(props: Props): React.ReactNode {
+export function Dashboard(_props: Props): React.ReactNode {
   return (
     <DashboardStyledContainer>
       <Paper className="sidebar">
@@ -26,7 +24,6 @@ export function Dashboard(props: Props): React.ReactNode {
       <div className="content">
         <DashboardHome />
       </div>
-      <ToastContainer position="bottom-center" theme="dark" />
     </DashboardStyledContainer>
   )
 }
