@@ -1,3 +1,4 @@
+// #[tauri::command]
 // fn open_devtools(app: tauri::AppHandle) {
 //     let window = app.get_window("main").unwrap();
 //     window.open_devtools();
