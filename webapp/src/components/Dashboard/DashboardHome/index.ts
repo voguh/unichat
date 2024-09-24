@@ -1,1 +1,1 @@
-export * from './DashboardHome.tsx'
+export * from './DashboardHome'

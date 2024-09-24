@@ -18,7 +18,7 @@ interface Props {
   children?: React.ReactNode
 }
 
-export function DashboardHome(props: Props): React.ReactNode {
+export function DashboardHome(_props: Props): React.ReactNode {
   const [selectedTab, setSelectedTab] = React.useState('HTML')
   const [editingText, setEditingText] = React.useState('')
 
@@ -35,7 +35,7 @@ export function DashboardHome(props: Props): React.ReactNode {
     setSelectedTab(newTab)
   }
 
-  function onChangeData(value: Parameters<OnChange>[0], ev: Parameters<OnChange>[1]): void {
+  function onChangeData(value: Parameters<OnChange>[0], _ev: Parameters<OnChange>[1]): void {
     setEditingText(value)
 
     if (debounceRef.current != null) {
