@@ -26,9 +26,6 @@ importers:
       '@tauri-apps/api':
         specifier: '>=2.0.0-rc.0'
         version: 2.0.0-rc.5
-      '@tauri-apps/plugin-sql':
-        specifier: '>=2.0.0-rc.0'
-        version: 2.0.0-rc.1
       polished:
         specifier: ^4.3.1
         version: 4.3.1
@@ -703,9 +700,6 @@ packages:
     resolution: {integrity: sha512-wdjZg/M3dcxiqgWG6VRnABpX0dYxRww93t0d1MYoZxFDrnyoUz5kYwFQ0v4J9u0qenEgskjoypvon7V/Nj9qrg==}
     engines: {node: '>= 10'}
     hasBin: true
-
-  '@tauri-apps/plugin-sql@2.0.0-rc.1':
-    resolution: {integrity: sha512-F8Wq+L8SdVt76WCU161WCeM5CLkh3gzKblXhXyFFJ8m+BY1P83zVyCxriems3mYULvPPtFwlg8NEgLJycS1HYQ==}
 
   '@testing-library/dom@10.4.0':
     resolution: {integrity: sha512-pemlzrSESWbdAloYml3bAJMEfNh1Z7EduzqPKprCH5S341frlpYnUEW0H72dLxa6IsYr+mPno20GiSm+h9dEdQ==}
@@ -2899,10 +2893,6 @@ snapshots:
       '@tauri-apps/cli-win32-arm64-msvc': 2.0.0-rc.16
       '@tauri-apps/cli-win32-ia32-msvc': 2.0.0-rc.16
       '@tauri-apps/cli-win32-x64-msvc': 2.0.0-rc.16
-
-  '@tauri-apps/plugin-sql@2.0.0-rc.1':
-    dependencies:
-      '@tauri-apps/api': 2.0.0-rc.5
 
   '@testing-library/dom@10.4.0':
     dependencies:
