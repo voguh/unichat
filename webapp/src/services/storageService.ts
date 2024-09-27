@@ -1,18 +1,25 @@
-import { Store } from '@tauri-apps/plugin-store'
+import { invoke } from '@tauri-apps/api/core'
 
 export class StorageService {
-  private _store: Store
-
-  constructor() {
-    this._store = new Store('unichat.db')
-  }
-
   public async getItem<T>(key: string): Promise<T> {
-    return await this._store.get<T>(key)
+    try {
+      const response = await invoke<string>('select_from_settings', { key })
+      if (response == null) {
+        return null
+      }
+
+      return JSON.parse(response)
+    } catch (e) {
+      return null
+    }
   }
 
   public async setItem<T>(key: string, value: T): Promise<void> {
-    await this._store.set(key, value)
+    try {
+      await invoke('save_in_settings', { key, value: JSON.stringify(value) })
+    } catch (e) {
+      console.log(e)
+    }
   }
 }
 

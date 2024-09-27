@@ -21,6 +21,11 @@
             "csp": null
         }
     },
+    "plugins": {
+        "sql": {
+            "preload": ["sqlite:unichat.db"]
+        }
+    },
     "bundle": {
         "active": true,
         "targets": ["appimage", "dmg", "msi"],
