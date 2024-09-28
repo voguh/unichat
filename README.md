@@ -26,7 +26,7 @@ and image tag like `<img src="https://cdn.betterttv.net/emote/<EMOTE_ID>/3x.<IMA
 
 ### Build
 
-Install all dependencies before following [official tutorial](https://v2.tauri.app/start/prerequisites/)
+Install all dependencies before following [oficial tutorial](https://v2.tauri.app/start/prerequisites/)
 After that, just run build with:
 
 ```sh

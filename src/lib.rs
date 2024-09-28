@@ -1,4 +1,4 @@
-use tauri::Manager;
+use tauri::{LogicalPosition, LogicalSize, Manager, WebviewBuilder, WebviewUrl};
 use tauri_plugin_sql::{DbInstances, Migration, MigrationKind};
 
 const DATABASE_KEY: &str = "sqlite:unichat.db";
@@ -33,8 +33,23 @@ async fn save_in_settings(app: tauri::AppHandle, key: &str, value: &str) -> Resu
     query.execute(pool).await.map(|_| ()).map_err(|e| e.to_string())
 }
 
-fn setup(_app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     println!("Tauri setup");
+
+    let window = app.get_window("main").unwrap();
+    let window_size = window.inner_size().unwrap();
+
+    let pos_x = 8 + 48 + 8;
+    let pos_y = 8;
+    let width = window_size.width - (pos_x + 8);
+    let height = window_size.height - (pos_y + 8);
+    let url = WebviewUrl::External("about:blank".parse().unwrap());
+    let pos = LogicalPosition::new(pos_x, pos_y);
+    let size = LogicalSize::new(width, height);
+
+    window.add_child(WebviewBuilder::new("youtube-chat", url.clone()), pos, size).unwrap();
+    window.add_child(WebviewBuilder::new("twitch-chat", url.clone()), pos, size).unwrap();
+
     Ok(())
 }
 
