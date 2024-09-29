@@ -33,6 +33,18 @@ async fn save_in_settings(app: tauri::AppHandle, key: &str, value: &str) -> Resu
     query.execute(pool).await.map(|_| ()).map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+async fn show_webview(app: tauri::AppHandle, label: &str) -> Result<(), String> {
+    let webview = app.get_webview(label).unwrap();
+    webview.show().map(|_| ()).map_err(|_| format!("An error occurred on try to show \"{}\" webview", label))
+}
+
+#[tauri::command]
+async fn hide_webview(app: tauri::AppHandle, label: &str) -> Result<(), String> {
+    let webview = app.get_webview(label).unwrap();
+    webview.hide().map(|_| ()).map_err(|_| format!("An error occurred on try to show \"{}\" webview", label))
+}
+
 fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     println!("Tauri setup");
 
@@ -47,8 +59,11 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let pos = LogicalPosition::new(pos_x, pos_y);
     let size = LogicalSize::new(width, height);
 
-    window.add_child(WebviewBuilder::new("youtube-chat", url.clone()), pos, size).unwrap();
-    window.add_child(WebviewBuilder::new("twitch-chat", url.clone()), pos, size).unwrap();
+    let youtube_chat = window.add_child(WebviewBuilder::new("youtube-chat", url.clone()), pos, size).unwrap();
+    let twitch_chat = window.add_child(WebviewBuilder::new("twitch-chat", url.clone()), pos, size).unwrap();
+
+    youtube_chat.hide().unwrap();
+    twitch_chat.hide().unwrap();
 
     Ok(())
 }
@@ -64,7 +79,7 @@ pub fn run() {
 
     tauri::Builder::default().setup(setup)
         .plugin(tauri_plugin_sql::Builder::default().add_migrations(DATABASE_KEY, migrations).build())
-        .invoke_handler(tauri::generate_handler![select_from_settings,save_in_settings])
+        .invoke_handler(tauri::generate_handler![select_from_settings,save_in_settings,show_webview,hide_webview])
         .run(tauri::generate_context!())
         .expect("Error while running UniChat application");
 }
