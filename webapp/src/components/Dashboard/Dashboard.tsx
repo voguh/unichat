@@ -28,8 +28,7 @@ export function Dashboard(_props: Props): React.ReactNode {
 
   React.useEffect(() => {
     async function init(): Promise<void> {
-      await invoke('hide_webview', { label: `youtube-chat` })
-      await invoke('hide_webview', { label: `twitch-chat` })
+      await invoke('hide_webviews')
 
       if (selectedTab !== 'editor') {
         await invoke('show_webview', { label: `${selectedTab}-chat` })
