@@ -1,4 +1,4 @@
-# Rust Tauri + React + Typescript
+# Voguh's UniChat
 
 ### TODO
 
