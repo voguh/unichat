@@ -13,16 +13,15 @@ Implement support for BTTV, by calling api `https://api.betterttv.net/3/cached/u
 and image tag like `<img src="https://cdn.betterttv.net/emote/<EMOTE_ID>/3x.<IMAGE_TYPE>" />`
 
 
-### App directories on linux
+### App directories
 
-| DIR TYPE           | LOCATION                                    |
-|--------------------|---------------------------------------------|
-| app_cache_dir      | ~/.cache/io.github.voguh.unichat            |
-| app_config_dir     | ~/.config/io.github.voguh.unichat           |
-| app_data_dir       | ~/.local/share/io.github.voguh.unichat      |
-| app_local_data_dir | ~/.local/share/io.github.voguh.unichat      |
-| app_log_dir        | ~/.local/share/io.github.voguh.unichat/logs |
-
+| DIR TYPE           | LOCATION ON LINUX                           | LOCATION ON WINDOWS                          |
+|--------------------|---------------------------------------------|----------------------------------------------|
+| app_cache_dir      | ~/.cache/io.github.voguh.unichat            | ~\AppData\Local\io.github.voguh.unichat      |
+| app_config_dir     | ~/.config/io.github.voguh.unichat           | ~\AppData\Roaming\io.github.voguh.unichat    |
+| app_data_dir       | ~/.local/share/io.github.voguh.unichat      | ~\AppData\Roaming\io.github.voguh.unichat    |
+| app_local_data_dir | ~/.local/share/io.github.voguh.unichat      | ~\AppData\Local\io.github.voguh.unichat      |
+| app_log_dir        | ~/.local/share/io.github.voguh.unichat/logs | ~\AppData\Local\io.github.voguh.unichat\logs |
 
 ### Build
 
