@@ -1,15 +1,35 @@
-use tauri::{LogicalPosition, LogicalSize, Manager, WebviewBuilder, WebviewUrl};
+use tauri::{LogicalPosition, LogicalSize, Manager, PhysicalSize, WebviewBuilder, WebviewUrl};
 
 #[tauri::command]
 async fn show_webview(app: tauri::AppHandle, label: &str) -> Result<(), String> {
+    let window = app.get_window("main").unwrap();
+    let window_size = window.inner_size().unwrap();
+
+    for (key, value) in app.webviews() {
+        if key != "main" && key != label {
+            value.hide().unwrap();
+        }
+    }
+
+    let size = PhysicalSize::new(64, window_size.height);
+    app.get_webview("main").unwrap().set_size(size).unwrap();
+
     let webview = app.get_webview(label).unwrap();
     webview.show().map(|_| ()).map_err(|_| format!("An error occurred on try to show \"{}\" webview", label))
 }
 
 #[tauri::command]
 async fn hide_webview(app: tauri::AppHandle, label: &str) -> Result<(), String> {
-    let webview = app.get_webview(label).unwrap();
-    webview.hide().map(|_| ()).map_err(|_| format!("An error occurred on try to show \"{}\" webview", label))
+    let window = app.get_window("main").unwrap();
+    let window_size = window.inner_size().unwrap();
+
+    for (key, value) in app.webviews() {
+        if key != "main" && key != label {
+            value.hide().unwrap();
+        }
+    }
+
+    app.get_webview("main").unwrap().set_size(window_size).map(|_| ()).map_err(|_| format!("An error occurred on try to show \"{}\" webview", label))
 }
 
 fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
