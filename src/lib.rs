@@ -40,7 +40,7 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
     let youtube_url = WebviewUrl::External("https://youtube.com".parse().unwrap());
     let twitch_url = WebviewUrl::External("https://twitch.tv".parse().unwrap());
-    let pos = LogicalPosition::new(0, 0);
+    let pos = LogicalPosition::new(64, 0);
     let size = LogicalSize::new(window_size.width - 64, window_size.height);
 
     let youtube_chat = window.add_child(WebviewBuilder::new("youtube-chat", youtube_url), pos, size).unwrap();
