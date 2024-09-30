@@ -49,12 +49,6 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     youtube_chat.hide().unwrap();
     twitch_chat.hide().unwrap();
 
-    println!("app_cache_dir.....: {}", app.path().app_cache_dir().unwrap().to_str().unwrap());
-    println!("app_config_dir....: {}", app.path().app_config_dir().unwrap().to_str().unwrap());
-    println!("app_data_dir......: {}", app.path().app_data_dir().unwrap().to_str().unwrap());
-    println!("app_local_data_dir: {}", app.path().app_local_data_dir().unwrap().to_str().unwrap());
-    println!("app_log_dir.......: {}", app.path().app_log_dir().unwrap().to_str().unwrap());
-
     Ok(())
 }
 
