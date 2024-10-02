@@ -132,7 +132,8 @@ fn on_window_event(window: &Window, event: &WindowEvent) {
 pub fn run() {
     tauri::Builder::default().setup(setup)
         .plugin(tauri_plugin_store::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![show_webview, hide_webviews,youtube::on_message])
+        .plugin(tauri_plugin_log::Builder::new().build())
+        .invoke_handler(tauri::generate_handler![show_webview,hide_webviews,youtube::on_message])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())
         .expect("Error while running UniChat application");
