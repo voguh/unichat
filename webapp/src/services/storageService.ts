@@ -1,12 +1,15 @@
-import { Store } from '@tauri-apps/plugin-store'
+import { createStore, Store } from '@tauri-apps/plugin-store'
 
 export class StorageService {
-  private _listeners: Map<string, ((key: string, value: any) => void)[]>
+  private readonly _listeners: Map<string, ((key: string, value: any) => void)[]>
   private _store: Store
 
   constructor() {
     this._listeners = new Map()
-    this._store = new Store('unichat.db')
+  }
+
+  public async init(): Promise<void> {
+    this._store = await createStore('unichat.db', { autoSave: (30 * 60 * 1000) as any })
   }
 
   public async getItem<T>(key: string): Promise<T> {
