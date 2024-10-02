@@ -1,29 +1,19 @@
+import Paper from '@mui/material/Paper'
 import styled from 'styled-components'
 
-export const DashboardHomeStyledContainer = styled.div`
+export const DashboardHomeStyledContainer = styled(Paper)`
   width: 100%;
   height: 100%;
+  padding: 8px;
   display: grid;
-  grid-template-areas: 'TOP PRV' 'EDT PRV';
-  grid-template-columns: 1fr 500px;
-  grid-template-rows: 46px 1fr;
+  grid-template-areas: 'YT TW';
   gap: 8px;
 
-  > .top-bar {
-    grid-area: TOP;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    padding: 8px;
-    gap: 4px;
+  > #youtube-chat-text-field {
+    grid-area: YT;
   }
 
-  > .editor {
-    grid-area: EDT;
-    overflow: hidden;
-  }
-
-  > .preview {
-    grid-area: PRV;
+  > #twitch-chat-text-field {
+    grid-area: TW;
   }
 `

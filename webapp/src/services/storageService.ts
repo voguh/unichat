@@ -1,20 +1,17 @@
 import { Store } from '@tauri-apps/plugin-store'
 
 export class StorageService {
+  private _listeners: Map<string, ((key: string, value: any) => void)[]>
   private _store: Store
 
   constructor() {
+    this._listeners = new Map()
     this._store = new Store('unichat.db')
   }
 
   public async getItem<T>(key: string): Promise<T> {
     try {
-      const response = await this._store.get<string>(key)
-      if (response == null) {
-        return null
-      }
-
-      return JSON.parse(response)
+      return this._store.get<T>(key)
     } catch (_err) {
       return null
     }
@@ -22,10 +19,36 @@ export class StorageService {
 
   public async setItem<T>(key: string, value: T): Promise<void> {
     try {
-      await this._store.set(key, JSON.stringify(value))
-    } catch (e) {
-      console.log(e)
+      await this._store.set(key, value)
+
+      const listeners = this._listeners.get(key)
+      for (const listener of listeners ?? []) {
+        listener(key, value)
+      }
+    } catch (err) {
+      console.error(err)
     }
+  }
+
+  public addEventListener<T>(key: string, cb: (key: string, value: T) => void): void {
+    let listeners = this._listeners.get(key)
+    if (listeners == null) {
+      listeners = []
+    }
+
+    listeners.push(cb)
+
+    this._listeners.set(key, listeners)
+  }
+
+  public removeEventListener<T>(key: string, cb: (key: string, value: T) => void): void {
+    let listeners = this._listeners.get(key)
+
+    if (listeners != null) {
+      listeners = listeners.filter((item) => item !== cb)
+    }
+
+    this._listeners.set(key, listeners)
   }
 }
 

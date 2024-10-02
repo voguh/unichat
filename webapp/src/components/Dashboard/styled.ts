@@ -24,6 +24,16 @@ export const DashboardStyledContainer = styled.div`
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative;
+
+      > .active {
+        width: 8px;
+        height: 8px;
+        border-radius: 8px;
+        position: absolute;
+        right: 0;
+        bottom: 0;
+      }
     }
   }
 
