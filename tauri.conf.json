@@ -8,6 +8,7 @@
         "frontendDist": "./webapp/dist"
     },
     "app": {
+        "withGlobalTauri": true,
         "windows": [
             {
                 "title": "Voguh's UniChat",

@@ -10,7 +10,7 @@ pub const SCRAPPING_JS: &str = r#"
                     const actions = parsed?.continuationContents?.liveChatContinuation?.actions;
 
                     if (actions != null && actions.length > 0) {
-                        console.log(actions);
+                        await window.__TAURI__.core.invoke('on_message', { payload: JSON.stringify(actions) })
                     }
                 }
             } catch (err) {
@@ -23,3 +23,8 @@ pub const SCRAPPING_JS: &str = r#"
         writable: true
     });
 "#;
+
+#[tauri::command]
+pub fn on_message(payload: &str) {
+    println!("Event payload: {}", payload)
+}

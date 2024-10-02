@@ -1,6 +1,6 @@
 use tauri::{Manager, PhysicalPosition, PhysicalSize, WebviewBuilder, WebviewUrl, WebviewWindowBuilder, Window, WindowEvent};
 
-mod js_def;
+mod youtube;
 
 #[tauri::command]
 fn show_webview(app: tauri::AppHandle, label: &str) {
@@ -20,7 +20,7 @@ fn show_webview(app: tauri::AppHandle, label: &str) {
         let webview = app.get_webview(label).unwrap();
         webview.show().unwrap();
     } else {
-        for (key, value) in app.webview_windows()  {
+        for (key, value) in app.webview_windows() {
             if key != "main" && key != label {
                 value.hide().unwrap();
             }
@@ -46,7 +46,7 @@ fn hide_webviews(app: tauri::AppHandle) {
         let webview = app.get_webview("main").unwrap();
         webview.set_size(window_size).unwrap();
     } else {
-        for (key, value) in app.webview_windows()  {
+        for (key, value) in app.webview_windows() {
             if key != "main" {
                 value.hide().unwrap();
             }
@@ -73,7 +73,7 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         youtube_chat.hide().unwrap();
         twitch_chat.hide().unwrap();
 
-        youtube_chat.eval(js_def::SCRAPPING_JS).unwrap();
+        youtube_chat.eval(youtube::SCRAPPING_JS).unwrap();
     } else {
         let webview_window = app.get_webview_window("main").unwrap();
 
@@ -88,7 +88,8 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         youtube_chat.hide().unwrap();
         twitch_chat.hide().unwrap();
 
-        youtube_chat.eval(js_def::SCRAPPING_JS).unwrap();
+        youtube_chat.eval(youtube::SCRAPPING_JS).unwrap();
+        youtube_chat.open_devtools();
     }
 
     Ok(())
@@ -114,7 +115,6 @@ fn on_window_event(window: &Window, event: &WindowEvent) {
                         window.set_size(size).unwrap()
                     }
                 }
-
             }
             WindowEvent::Destroyed => {
                 for (key, window) in app.windows() {
@@ -132,7 +132,7 @@ fn on_window_event(window: &Window, event: &WindowEvent) {
 pub fn run() {
     tauri::Builder::default().setup(setup)
         .plugin(tauri_plugin_store::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![show_webview,hide_webviews])
+        .invoke_handler(tauri::generate_handler![show_webview, hide_webviews,youtube::on_message])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())
         .expect("Error while running UniChat application");
