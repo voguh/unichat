@@ -13,7 +13,7 @@ export default function App(): JSX.Element {
 
   React.useEffect(() => {
     async function init(): Promise<void> {
-      await storageService.init()
+      await storageService.createStore()
       setLoading(false)
     }
 

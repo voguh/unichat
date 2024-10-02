@@ -8,26 +8,38 @@ export class StorageService {
     this._listeners = new Map()
   }
 
-  public async init(): Promise<void> {
-    this._store = await createStore('unichat.db', { autoSave: (30 * 60 * 1000) as any })
+  public async createStore(): Promise<void> {
+    this._store = await createStore('unichat.db')
   }
 
   public async getItem<T>(key: string): Promise<T> {
     try {
+      if (this._store == null) {
+        await this.createStore()
+      }
+
       return this._store.get<T>(key)
-    } catch (_err) {
+    } catch (err) {
+      console.error(err)
+
       return null
     }
   }
 
   public async setItem<T>(key: string, value: T): Promise<void> {
     try {
+      if (this._store == null) {
+        await this.createStore()
+      }
+
       await this._store.set(key, value)
 
       const listeners = this._listeners.get(key)
       for (const listener of listeners ?? []) {
         listener(key, value)
       }
+
+      await this._store.save()
     } catch (err) {
       console.error(err)
     }
