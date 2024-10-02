@@ -3,5 +3,5 @@
     "identifier": "default",
     "description": "Capability for the main window",
     "windows": ["main"],
-    "permissions": ["store:allow-get", "store:allow-set", "log:default"]
+    "permissions": ["store:allow-get", "store:allow-set"]
 }

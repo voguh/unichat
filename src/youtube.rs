@@ -1,7 +1,7 @@
 use serde_json::Value;
 
 pub const SCRAPPING_JS: &str = r#"
-    if (window.fetch.__WRAPPED__ !== true) {
+    if (window.fetch.__WRAPPED__ == null) {
         const originalFetch = window.fetch;
         Object.defineProperty(window, "fetch", {
             value: async (...args) => {
@@ -14,7 +14,7 @@ pub const SCRAPPING_JS: &str = r#"
                         if (actions != null && actions.length > 0) {
                             await window.__TAURI__.core.invoke('on_message', { actions })
                         }
-                    }).catch(err => window.__TAURI__.log.error(err.message))
+                    }).catch(err => console.error(err))
                 }
 
                 return res;
@@ -25,7 +25,7 @@ pub const SCRAPPING_JS: &str = r#"
 
         Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true })
     } else {
-        window.__TAURI__.log.info("Fetch already was wrapped!")
+        console.log("Fetch already was wrapped!")
     }
 "#;
 

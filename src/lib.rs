@@ -59,7 +59,6 @@ fn update_webview_url(app: tauri::AppHandle, label: &str, url: &str) {
     let webview = app.get_webview(label).unwrap();
 
     webview.eval(format!("window.location.href='{}'", url).as_str()).unwrap();
-
     if label == "youtube-chat" && url != "about:blank" {
         webview.eval(youtube::SCRAPPING_JS).unwrap();
     }
@@ -137,7 +136,6 @@ fn on_window_event(window: &Window, event: &WindowEvent) {
 pub fn run() {
     tauri::Builder::default().setup(setup)
         .plugin(tauri_plugin_store::Builder::default().build())
-        .plugin(tauri_plugin_log::Builder::new().build())
         .invoke_handler(tauri::generate_handler![show_webview,hide_webviews,update_webview_url,youtube::on_message])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())
