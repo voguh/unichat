@@ -1,5 +1,7 @@
 use tauri::{Manager, PhysicalPosition, PhysicalSize, WebviewBuilder, WebviewUrl, WebviewWindowBuilder, Window, WindowEvent};
 
+mod js_def;
+
 #[tauri::command]
 fn show_webview(app: tauri::AppHandle, label: &str) {
     if std::env::consts::OS != "linux" {
@@ -70,6 +72,8 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
         youtube_chat.hide().unwrap();
         twitch_chat.hide().unwrap();
+
+        youtube_chat.eval(js_def::SCRAPPING_JS).unwrap();
     } else {
         let webview_window = app.get_webview_window("main").unwrap();
 
@@ -83,6 +87,8 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
         youtube_chat.hide().unwrap();
         twitch_chat.hide().unwrap();
+
+        youtube_chat.eval(js_def::SCRAPPING_JS).unwrap();
     }
 
     Ok(())
