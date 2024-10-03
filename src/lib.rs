@@ -74,7 +74,6 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default().setup(setup)
-        .plugin(tauri_plugin_localhost::Builder::new(9527).build())
         .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             commands::show_webview,
