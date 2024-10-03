@@ -1,4 +1,6 @@
-use tauri::{Manager, PhysicalPosition, PhysicalSize, WebviewBuilder, WebviewUrl, WebviewWindowBuilder, Window, WindowEvent};
+use std::{str::FromStr, thread::sleep};
+
+use tauri::{Manager, PhysicalPosition, PhysicalSize, WebviewBuilder, WebviewUrl, WebviewWindowBuilder};
 
 mod youtube;
 
@@ -55,13 +57,16 @@ fn hide_webviews(app: tauri::AppHandle) {
 }
 
 #[tauri::command]
-fn update_webview_url(app: tauri::AppHandle, label: &str, url: &str) {
-    let webview = app.get_webview(label).unwrap();
+async fn update_webview_url(app: tauri::AppHandle, label: &str, url: &str) -> Result<(), String> {
+    let mut webview = app.get_webview(label).unwrap();
 
-    webview.eval(format!("window.location.href='{}'", url).as_str()).unwrap();
+    webview.navigate(tauri::Url::from_str(url).unwrap()).unwrap();
+    sleep(std::time::Duration::from_secs(2));
     if label == "youtube-chat" && url != "about:blank" {
         webview.eval(youtube::SCRAPPING_JS).unwrap();
     }
+
+    Ok(())
 }
 
 fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
@@ -99,12 +104,12 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn on_window_event(window: &Window, event: &WindowEvent) {
+fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     if std::env::consts::OS == "linux" && window.label() == "main" {
         let app = window.app_handle();
 
         match event {
-            WindowEvent::Moved(window_pos) => {
+            tauri::WindowEvent::Moved(window_pos) => {
                 let pos = PhysicalPosition::new(window_pos.x + 64, window_pos.y);
                 for (key, window) in app.windows() {
                     if key != "main" {
@@ -112,7 +117,7 @@ fn on_window_event(window: &Window, event: &WindowEvent) {
                     }
                 }
             }
-            WindowEvent::Resized(window_size) => {
+            tauri::WindowEvent::Resized(window_size) => {
                 let size = PhysicalSize::new(window_size.width - 64, window_size.height);
                 for (key, window) in app.windows() {
                     if key != "main" {
@@ -120,7 +125,7 @@ fn on_window_event(window: &Window, event: &WindowEvent) {
                     }
                 }
             }
-            WindowEvent::Destroyed => {
+            tauri::WindowEvent::Destroyed => {
                 for (key, window) in app.windows() {
                     if key != "main" {
                         window.destroy().unwrap();
