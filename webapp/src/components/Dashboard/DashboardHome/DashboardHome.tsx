@@ -1,84 +1,199 @@
 import React from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
+import Button from '@mui/material/Button'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
+import MenuItem from '@mui/material/MenuItem'
+import Paper from '@mui/material/Paper'
+import Select, { SelectChangeEvent } from '@mui/material/Select'
 import TextField from '@mui/material/TextField'
+import { invoke } from '@tauri-apps/api/core'
+import * as clipboard from '@tauri-apps/plugin-clipboard-manager'
 
 import { storageService } from '~/services/storageService'
 import { TWITCH_CHAT_URL_KEY, YOUTUBE_CHAT_URL_KEY } from '~/utils/constants'
+import { Strings } from '~/utils/Strings'
 
 import { DashboardHomeStyledContainer } from './styled'
 
-interface Props {
-  children?: React.ReactNode
+interface FormData {
+  youtubeChatUrl: string
+  twitchChatUrl: string
 }
 
-export function DashboardHome(_props: Props): React.ReactNode {
-  const debounceRef = React.useRef<NodeJS.Timeout>()
+const defaultValues: FormData = {
+  youtubeChatUrl: '',
+  twitchChatUrl: ''
+}
 
-  const [youtubeChatUrl, setYouTubeChatUrl] = React.useState('')
-  const [twitchChatUrl, setTwitchChatUrl] = React.useState('')
+export function DashboardHome(): React.ReactNode {
+  const [selectedWidget, setSelectedWidget] = React.useState('default')
+  const [widgets, setWidgets] = React.useState<string[]>([])
 
-  async function debounceOnSave(key: string, data: string): Promise<void> {
-    debounceRef.current = null
-    await storageService.setItem(`unichat::${key}-url`, data)
-    toast.success(`Url of ${key} saved!`)
+  const [serverRunning, setServerRunning] = React.useState(false)
+
+  const [savingStatus, setSavingStatus] = React.useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [serverChanging, setServerChanging] = React.useState(false)
+
+  const { control, handleSubmit, reset } = useForm({ defaultValues, mode: 'all' })
+
+  function onChangeWidget(evt: SelectChangeEvent<string>): void {
+    setSelectedWidget(evt.target.value)
   }
 
-  function onChange(event: React.ChangeEvent<HTMLInputElement>): void {
-    event.persist()
-    if (debounceRef.current != null) {
-      clearTimeout(debounceRef.current)
+  async function handleServerChange(): Promise<void> {
+    try {
+      setServerChanging(true)
+      if (serverRunning) {
+        await invoke('stop_overlay_server')
+        toast.info('Overlays server stopped!')
+      } else {
+        await invoke('start_overlay_server')
+        toast.info('Overlays server started!')
+      }
+    } catch (err) {
+      toast.error((err as Error).message)
+    } finally {
+      setServerChanging(false)
     }
-
-    if (event.target.name === 'youtube-chat') {
-      setYouTubeChatUrl(event.target.value)
-    } else {
-      setTwitchChatUrl(event.target.value)
-    }
-
-    debounceRef.current = setTimeout(() => debounceOnSave(event.target.name, event.target.value), 3000)
   }
 
-  async function init(): Promise<void> {
-    const youtubeChatUrl = await storageService.getItem<string>(YOUTUBE_CHAT_URL_KEY)
-    if (youtubeChatUrl != null) {
-      setYouTubeChatUrl(youtubeChatUrl)
-    }
+  async function onSubmit(formData: FormData): Promise<void> {
+    try {
+      setSavingStatus('saving')
 
-    const twitchChatUrl = await storageService.getItem<string>(TWITCH_CHAT_URL_KEY)
-    if (twitchChatUrl != null) {
-      setTwitchChatUrl(twitchChatUrl)
+      await storageService.setItem(YOUTUBE_CHAT_URL_KEY, formData.youtubeChatUrl)
+      await storageService.setItem(TWITCH_CHAT_URL_KEY, formData.twitchChatUrl)
+
+      if (Strings.isValidYouTubeChatUrl(formData.youtubeChatUrl)) {
+        await invoke('update_webview_url', { label: `youtube-chat`, url: formData.youtubeChatUrl })
+      } else {
+        await invoke('update_webview_url', { label: `youtube-chat`, url: 'about:blank' })
+      }
+
+      if (Strings.isValidTwitchChatUrl(formData.twitchChatUrl)) {
+        await invoke('update_webview_url', { label: `twitch-chat`, url: formData.twitchChatUrl })
+      } else {
+        await invoke('update_webview_url', { label: `twitch-chat`, url: 'about:blank' })
+      }
+
+      setSavingStatus('saved')
+      toast.success('Successfully saved')
+    } catch (err) {
+      console.error(err)
+      setSavingStatus('error')
+      toast.error('An error occurred on save')
     }
   }
 
   React.useEffect(() => {
+    async function init(): Promise<void> {
+      const youtubeChatUrl = await storageService.getItem<string>(YOUTUBE_CHAT_URL_KEY)
+      const twitchChatUrl = await storageService.getItem<string>(TWITCH_CHAT_URL_KEY)
+
+      const widgets = await invoke<string[]>('list_overlay_widgets')
+      setWidgets(widgets)
+
+      reset({ youtubeChatUrl, twitchChatUrl })
+    }
+
     init()
+
+    const intervalRef = setInterval(async () => {
+      const active = await invoke<boolean>('overlay_server_status')
+      setServerRunning(active)
+    }, 1000)
+
+    return () => {
+      if (intervalRef != null) {
+        clearInterval(intervalRef)
+      }
+    }
   }, [])
 
   return (
     <DashboardHomeStyledContainer>
-      <TextField
-        size="small"
-        variant="filled"
-        fullWidth
-        id="youtube-chat-text-field"
-        name="youtube-chat"
-        label="YouTube chat url"
-        placeholder="https://www.youtube.com/live_chat?v={VIDEO_ID}"
-        value={youtubeChatUrl}
-        onChange={onChange}
-      />
-      <TextField
-        size="small"
-        variant="filled"
-        fullWidth
-        id="twitch-chat-text-field"
-        name="twitch-chat"
-        label="Twtich chat url"
-        placeholder="https://www.twitch.tv/popout/{CHANNEL_NAME}/chat"
-        value={twitchChatUrl}
-        onChange={onChange}
-      />
+      <form className="fields" onSubmit={handleSubmit(onSubmit)}>
+        <Paper className="fields-actions">
+          <Button
+            type="submit"
+            color={savingStatus === 'saving' ? 'warning' : savingStatus === 'error' ? 'error' : 'primary'}
+          >
+            {savingStatus === 'saving' ? 'Saving...' : savingStatus === 'error' ? 'Error' : 'Save'}
+          </Button>
+          <Button
+            type="button"
+            disabled={serverChanging}
+            color={serverRunning ? 'error' : 'success'}
+            onClick={handleServerChange}
+          >
+            <i className={`fas fa-${serverRunning ? 'stop' : 'play'}`} />
+            {serverRunning ? 'Stop overlay server' : 'Start overlay server'}
+          </Button>
+        </Paper>
+
+        <Paper className="fields-values">
+          <Controller
+            control={control}
+            name="youtubeChatUrl"
+            render={function ControllerRender({ field, fieldState }): JSX.Element {
+              return (
+                <TextField
+                  {...field}
+                  error={!!fieldState.error}
+                  size="small"
+                  variant="outlined"
+                  fullWidth
+                  label="YouTube chat url"
+                  placeholder="https://www.youtube.com/live_chat?v={VIDEO_ID}"
+                />
+              )
+            }}
+          />
+          <Controller
+            control={control}
+            name="twitchChatUrl"
+            render={function ControllerRender({ field, fieldState }): JSX.Element {
+              return (
+                <TextField
+                  {...field}
+                  error={!!fieldState.error}
+                  size="small"
+                  variant="outlined"
+                  fullWidth
+                  label="Twtich chat url"
+                  placeholder="https://www.twitch.tv/popout/{CHANNEL_NAME}/chat"
+                />
+              )
+            }}
+          />
+        </Paper>
+      </form>
+      <Paper className="preview">
+        <Paper className="preview-header">
+          <FormControl fullWidth size="small" variant="outlined">
+            <InputLabel id="unichat-widget">Overlay widget</InputLabel>
+            <Select labelId="unichat-widget" label="Overlay widget" value={selectedWidget} onChange={onChangeWidget}>
+              {widgets.map((widget) => (
+                <MenuItem key={widget} value={widget}>
+                  {widget}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <Button>
+            <i className="fas fa-folder" />
+          </Button>
+
+          <Button onClick={() => clipboard.writeText(`http://localhost:9527/widgets/${selectedWidget}`)}>
+            <i className="fas fa-globe" />
+          </Button>
+        </Paper>
+        <iframe src={`http://localhost:9527/widgets/${selectedWidget}`} />
+      </Paper>
     </DashboardHomeStyledContainer>
   )
 }

@@ -1,19 +1,73 @@
-import Paper from '@mui/material/Paper'
 import styled from 'styled-components'
 
-export const DashboardHomeStyledContainer = styled(Paper)`
+export const DashboardHomeStyledContainer = styled.div`
   width: 100%;
   height: 100%;
-  padding: 8px;
   display: grid;
-  grid-template-areas: 'YT TW';
+  grid-template-areas: 'FDS PRV';
+  grid-template-columns: 1fr 500px;
+  grid-template-rows: 1fr;
   gap: 8px;
 
-  > #youtube-chat-text-field {
-    grid-area: YT;
+  > .fields {
+    grid-area: FDS;
+
+    display: grid;
+    grid-template-areas: 'ACT' 'FDS';
+    grid-template-rows: min-content 1fr;
+    gap: 8px;
+
+    > div {
+      padding: 8px;
+
+      &.fields-actions {
+        grid-area: ACT;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+
+        > button {
+          justify-content: center;
+          align-items: center;
+          gap: 8px;
+        }
+      }
+
+      &.fields-values {
+        grid-area: FDS;
+        width: 100%;
+        height: 100%;
+        padding: 16px 8px 8px 8px;
+
+        > *:not(:first-child) {
+          margin-top: 16px;
+        }
+      }
+    }
   }
 
-  > #twitch-chat-text-field {
-    grid-area: TW;
+  > .preview {
+    grid-area: PRV;
+    overflow: hidden;
+    position: relative;
+
+    > .preview-header {
+      display: flex;
+      gap: 8px;
+      padding: 16px 8px 8px 8px;
+
+      > button {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+      }
+    }
+
+    > iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   }
 `

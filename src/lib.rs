@@ -74,11 +74,17 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default().setup(setup)
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_store::Builder::default().build())
+        .manage(commands::ServerState::default())
         .invoke_handler(tauri::generate_handler![
             commands::show_webview,
             commands::hide_webviews,
             commands::update_webview_url,
+            commands::start_overlay_server,
+            commands::stop_overlay_server,
+            commands::overlay_server_status,
+            commands::list_overlay_widgets,
             youtube::on_message
         ])
         .on_window_event(on_window_event)
