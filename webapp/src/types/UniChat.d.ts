@@ -8,7 +8,8 @@ export type UniChatEvent =
   | UniChatDonateEvent
 
 export interface UniChatEmote {
-  key: string
+  type: string
+  tooltip: string
   url: string
 }
 
@@ -22,11 +23,14 @@ export interface UniChatMessageEvent {
     platform: string
 
     messageId: string
-    message: UniChatMessageEventDetailMessage
+    messageHtml: string
+    messageRaw: string
+    emotes: UniChatEmote[]
 
     authorId: string
     authorUsername: string
     authorDisplayName: string
+    authorDisplayColor: string
     authorProfilePictureUrl: string
     authorBadges: UniChatAuthorBadge[]
     authorType: UniChatAuthorType
@@ -35,10 +39,10 @@ export interface UniChatMessageEvent {
   }
 }
 
-export interface UniChatMessageEventDetailMessage {
-  html: string
-  raw: string
-  emotes: UniChatEmote[]
+export interface UniChatAuthorBadge {
+  type: string
+  tooltip: string
+  url: string
 }
 
 /* ============================================================================================== */
