@@ -39,6 +39,8 @@ export function DashboardHome(): React.ReactNode {
 
   const { control, handleSubmit, reset } = useForm({ defaultValues, mode: 'all' })
 
+  const iframeRef = React.useRef<HTMLIFrameElement>(null)
+
   function onChangeWidget(evt: SelectChangeEvent<string>): void {
     setSelectedWidget(evt.target.value)
   }
@@ -58,6 +60,13 @@ export function DashboardHome(): React.ReactNode {
     } finally {
       setServerChanging(false)
     }
+  }
+
+  async function reloadIframe(): Promise<void> {
+    const widgets = await invoke<string[]>('list_overlay_widgets')
+    setWidgets(widgets)
+
+    iframeRef.current?.contentWindow.location.reload()
   }
 
   async function onSubmit(formData: FormData): Promise<void> {
@@ -184,15 +193,15 @@ export function DashboardHome(): React.ReactNode {
             </Select>
           </FormControl>
 
-          <Button>
-            <i className="fas fa-folder" />
+          <Button onClick={reloadIframe}>
+            <i className="fas fa-sync" />
           </Button>
 
           <Button onClick={() => clipboard.writeText(`http://localhost:9527/widgets/${selectedWidget}`)}>
             <i className="fas fa-globe" />
           </Button>
         </Paper>
-        <iframe src={`http://localhost:9527/widgets/${selectedWidget}`} />
+        <iframe ref={iframeRef} src={`http://localhost:9527/widgets/${selectedWidget}`} sandbox="allow-scripts" />
       </Paper>
     </DashboardHomeStyledContainer>
   )
