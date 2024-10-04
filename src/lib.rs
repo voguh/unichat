@@ -61,6 +61,12 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
                 }
             }
             tauri::WindowEvent::Destroyed => {
+                let state = app.state::<webserver::WebServerState>();
+                let mut web_server_handle = state.handle.lock().unwrap();
+                if let Some(h) = web_server_handle.take() {
+                    h.abort();
+                }
+
                 for (key, window) in app.windows() {
                     if key != "main" {
                         window.destroy().unwrap();
@@ -77,7 +83,7 @@ pub fn run() {
     tauri::Builder::default().setup(setup)
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_store::Builder::default().build())
-        .manage(webserver::ServerState::default())
+        .manage(webserver::WebServerState::default())
         .invoke_handler(tauri::generate_handler![
             commands::show_webview,
             commands::hide_webviews,

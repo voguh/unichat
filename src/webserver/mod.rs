@@ -9,7 +9,7 @@ use tokio::task::JoinHandle;
 mod routes;
 
 #[derive(Default)]
-pub struct ServerState {
+pub struct WebServerState {
     pub handle: Arc<Mutex<Option<JoinHandle<()>>>>,
 }
 
@@ -26,7 +26,7 @@ pub async fn start_overlay_server<R: Runtime>(app: tauri::AppHandle<R>) -> Resul
         }).bind(("127.0.0.1", 9527)).unwrap().run().await.unwrap()
     });
 
-    let state = app.state::<ServerState>();
+    let state = app.state::<WebServerState>();
     *state.handle.lock().unwrap() = Some(handle);
 
     Ok(())
@@ -34,7 +34,7 @@ pub async fn start_overlay_server<R: Runtime>(app: tauri::AppHandle<R>) -> Resul
 
 #[tauri::command]
 pub async fn stop_overlay_server<R: Runtime>(app: tauri::AppHandle<R>) -> Result<(), String> {
-    let state = app.state::<ServerState>();
+    let state = app.state::<WebServerState>();
     let mut handle = state.handle.lock().unwrap();
 
     if let Some(h) = handle.take() {
@@ -47,7 +47,7 @@ pub async fn stop_overlay_server<R: Runtime>(app: tauri::AppHandle<R>) -> Result
 
 #[tauri::command]
 pub async fn overlay_server_status<R: Runtime>(app: tauri::AppHandle<R>) -> Result<bool, String> {
-    let state = app.state::<ServerState>();
+    let state = app.state::<WebServerState>();
     let handle = state.handle.lock().unwrap();
 
     Ok(handle.is_some())
