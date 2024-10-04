@@ -1,6 +1,7 @@
 use tauri::{Manager, PhysicalPosition, PhysicalSize, WebviewBuilder, WebviewUrl, WebviewWindowBuilder};
 
 mod commands;
+mod events;
 mod youtube;
 mod webserver;
 

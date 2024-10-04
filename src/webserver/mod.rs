@@ -19,7 +19,7 @@ pub async fn start_overlay_server<R: Runtime>(app: tauri::AppHandle<R>) -> Resul
     let handle = tokio::spawn(async move {
         HttpServer::new(move || {
             App::new().wrap(Logger::default())
-                .service(routes::events_stream)
+                .service(routes::ws)
                 .service(Files::new("/widgets", &widgets_dir).prefer_utf8(true).index_file("index.html"))
         }).bind(("127.0.0.1", 9527)).unwrap().run().await.unwrap()
     });
