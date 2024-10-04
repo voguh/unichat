@@ -39,7 +39,7 @@ pub const SCRAPPING_JS: &str = r#"
         }
 
         function buildBadges(badges) {
-            return badges.map((badge) => {
+            return (badges ?? []).map((badge) => {
                     const render = badge.liveChatAuthorBadgeRenderer
 
                     if ("customThumbnail" in render) {
