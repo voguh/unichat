@@ -2,6 +2,7 @@ use tauri::{Manager, PhysicalPosition, PhysicalSize, WebviewBuilder, WebviewUrl,
 
 mod commands;
 mod youtube;
+mod webserver;
 
 fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     println!("Tauri setup");
@@ -76,16 +77,16 @@ pub fn run() {
     tauri::Builder::default().setup(setup)
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_store::Builder::default().build())
-        .manage(commands::ServerState::default())
+        .manage(webserver::ServerState::default())
         .invoke_handler(tauri::generate_handler![
             commands::show_webview,
             commands::hide_webviews,
             commands::update_webview_url,
-            commands::start_overlay_server,
-            commands::stop_overlay_server,
-            commands::overlay_server_status,
             commands::list_overlay_widgets,
-            youtube::on_message
+            youtube::on_message,
+            webserver::start_overlay_server,
+            webserver::stop_overlay_server,
+            webserver::overlay_server_status
         ])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())

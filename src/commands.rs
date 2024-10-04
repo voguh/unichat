@@ -1,8 +1,6 @@
-use std::{str::FromStr, sync::{Arc, Mutex}, thread::sleep};
+use std::{str::FromStr, thread::sleep};
 
 use tauri::{Manager, PhysicalSize, Runtime};
-use tokio::task::JoinHandle;
-use warp::Filter;
 
 use crate::youtube;
 
@@ -72,48 +70,6 @@ pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &st
 }
 
 /* ================================================================================================================== */
-
-pub type ServerHandle = JoinHandle<()>;
-
-#[derive(Default)]
-pub struct ServerState {
-    handle: Arc<Mutex<Option<ServerHandle>>>,
-}
-
-#[tauri::command]
-pub async fn start_overlay_server<R: Runtime>(app: tauri::AppHandle<R>) -> Result<(), String> {
-    let widgets_dir = warp::fs::dir(app.path().app_data_dir().unwrap().join("widgets"));
-
-    let handle = tokio::spawn(async move {
-        warp::serve(warp::path("widgets").and(widgets_dir)).run(([127, 0, 0, 1], 9527)).await;
-    });
-
-    let state = app.state::<ServerState>();
-    *state.handle.lock().unwrap() = Some(handle);
-
-    Ok(())
-}
-
-#[tauri::command]
-pub async fn stop_overlay_server<R: Runtime>(app: tauri::AppHandle<R>) -> Result<(), String> {
-    let state = app.state::<ServerState>();
-    let mut handle = state.handle.lock().unwrap();
-
-    if let Some(h) = handle.take() {
-        h.abort();
-        Ok(())
-    } else {
-        Err("Server is not running".into())
-    }
-}
-
-#[tauri::command]
-pub async fn overlay_server_status<R: Runtime>(app: tauri::AppHandle<R>) -> Result<bool, String> {
-    let state = app.state::<ServerState>();
-    let handle = state.handle.lock().unwrap();
-
-    Ok(handle.is_some())
-}
 
 #[tauri::command]
 pub async fn list_overlay_widgets<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
