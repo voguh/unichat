@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use actix_files::Files;
-use actix_web::{App, HttpServer};
+use actix_web::{middleware::Logger, App, HttpServer};
 use routes::events_stream;
 use tauri::{Manager, Runtime};
 use tokio::task::JoinHandle;
@@ -20,6 +20,7 @@ pub async fn start_overlay_server<R: Runtime>(app: tauri::AppHandle<R>) -> Resul
     let handle = tokio::spawn(async move {
         HttpServer::new(move || {
             App::new()
+                .wrap(Logger::default())
                 .service(events_stream)
                 .service(Files::new("/widgets", &widgets_dir).prefer_utf8(true).index_file("index.html"))
         }).bind(("127.0.0.1", 9527)).unwrap().run().await.unwrap()
