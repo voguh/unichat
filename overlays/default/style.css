@@ -1,0 +1,69 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:600,700);
+
+:root {
+    --background-color: #FFFFFF00;
+    --text-color: #FFFFFF;
+    --hide-interval: 15s;
+}
+
+body {
+    background: var(--background-color);
+    color: var(--text-color);
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.6), 0 0 2px rgba(0, 0, 0, 0.6);
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+#main-container {
+    font: 600 16px "Open Sans";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 10px 15px;
+    padding-top: 100px;
+}
+
+#main-container > div {
+    margin-bottom: 5px;
+    background: linear-gradient(rgba(70, 70, 70, 0.6), rgba(50, 50, 50, 0.7));
+    padding: 5px 10px 10px;
+    animation: flipInX 500ms ease; /* , fadeOutUp 1s ease var(--hide-interval) forwards; */
+    -webkit-animation: flipInX 500ms ease; /* , fadeOutUp 1s ease var(--hide-interval) forwards; */
+    border-radius: 3px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+#main-container > div > .meta {
+    display: block;
+    line-height: 1em;
+}
+
+#main-container > div > .meta > .name {
+    font-size: 0.6em;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+#main-container > div > .meta > .badges > .badge {
+    float: right;
+    padding-left: 5px;
+    height: 0.8em;
+}
+
+#main-container > div > .message {
+    word-wrap: break-word;
+    line-height: 1.5em;
+}
+
+#main-container > div > .message > .img {
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 16px;
+}
+
