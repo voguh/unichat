@@ -72,14 +72,14 @@ pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &st
 /* ================================================================================================================== */
 
 #[tauri::command]
-pub async fn list_overlay_widgets<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
-    let widgets_dir = app.path().app_data_dir().unwrap().join("widgets");
+pub async fn list_overlays<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
+    let overlays_dir = app.path().app_data_dir().unwrap().join("overlays");
 
 
-    if widgets_dir.is_dir() {
+    if overlays_dir.is_dir() {
         let mut folders: Vec<String> = Vec::new();
 
-        let entries = std::fs::read_dir(&widgets_dir).unwrap();
+        let entries = std::fs::read_dir(&overlays_dir).unwrap();
         for entry in entries {
             let path = entry.unwrap().path();
             if path.is_dir() {
@@ -91,7 +91,7 @@ pub async fn list_overlay_widgets<R: Runtime>(app: tauri::AppHandle<R>) -> Resul
 
         Ok(folders)
     } else {
-        Err(String::from_str("An error occurred on iterate over widgets dir").unwrap())
+        Err(String::from_str("An error occurred on iterate over overlays dir").unwrap())
     }
 
 }

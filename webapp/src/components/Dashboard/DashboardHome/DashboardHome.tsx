@@ -29,8 +29,8 @@ const defaultValues: FormData = {
 }
 
 export function DashboardHome(): React.ReactNode {
-  const [selectedWidget, setSelectedWidget] = React.useState('default')
-  const [widgets, setWidgets] = React.useState<string[]>([])
+  const [selectedOverlay, setSelectedOverlay] = React.useState('default')
+  const [overlays, setOverlays] = React.useState<string[]>([])
 
   const [savingStatus, setSavingStatus] = React.useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
@@ -38,13 +38,13 @@ export function DashboardHome(): React.ReactNode {
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
-  function onChangeWidget(evt: SelectChangeEvent<string>): void {
-    setSelectedWidget(evt.target.value)
+  function onChangeOverlay(evt: SelectChangeEvent<string>): void {
+    setSelectedOverlay(evt.target.value)
   }
 
   async function reloadIframe(): Promise<void> {
-    const widgets = await invoke<string[]>('list_overlay_widgets')
-    setWidgets(widgets)
+    const overlays = await invoke<string[]>('list_overlays')
+    setOverlays(overlays)
 
     iframeRef.current?.contentWindow.location.reload()
   }
@@ -83,8 +83,8 @@ export function DashboardHome(): React.ReactNode {
       const youtubeChatUrl = await storageService.getItem<string>(YOUTUBE_CHAT_URL_KEY)
       const twitchChatUrl = await storageService.getItem<string>(TWITCH_CHAT_URL_KEY)
 
-      const widgets = await invoke<string[]>('list_overlay_widgets')
-      setWidgets(widgets)
+      const overlays = await invoke<string[]>('list_overlays')
+      setOverlays(overlays)
 
       reset({ youtubeChatUrl, twitchChatUrl })
     }
@@ -144,11 +144,11 @@ export function DashboardHome(): React.ReactNode {
       <Paper className="preview">
         <Paper className="preview-header">
           <FormControl fullWidth size="small" variant="outlined">
-            <InputLabel id="unichat-widget">Overlay widget</InputLabel>
-            <Select labelId="unichat-widget" label="Overlay widget" value={selectedWidget} onChange={onChangeWidget}>
-              {widgets.map((widget) => (
-                <MenuItem key={widget} value={widget}>
-                  {widget}
+            <InputLabel id="unichat-overlay">Overlay</InputLabel>
+            <Select labelId="unichat-overlay" label="Overlay" value={selectedOverlay} onChange={onChangeOverlay}>
+              {overlays.map((overlay) => (
+                <MenuItem key={overlay} value={overlay}>
+                  {overlay}
                 </MenuItem>
               ))}
             </Select>
@@ -158,11 +158,11 @@ export function DashboardHome(): React.ReactNode {
             <i className="fas fa-sync" />
           </Button>
 
-          <Button onClick={() => clipboard.writeText(`http://localhost:9527/widgets/${selectedWidget}`)}>
+          <Button onClick={() => clipboard.writeText(`http://localhost:9527/overlays/${selectedOverlay}`)}>
             <i className="fas fa-globe" />
           </Button>
         </Paper>
-        <iframe ref={iframeRef} src={`http://localhost:9527/widgets/${selectedWidget}`} sandbox="allow-scripts" />
+        <iframe ref={iframeRef} src={`http://localhost:9527/overlays/${selectedOverlay}`} sandbox="allow-scripts" />
       </Paper>
     </DashboardHomeStyledContainer>
   )
