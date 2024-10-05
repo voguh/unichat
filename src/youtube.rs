@@ -101,7 +101,7 @@ pub const SCRAPPING_JS: &str = r#"
                         authorId: payload.authorExternalChannelId,
                         authorUsername: null,
                         authorDisplayName: payload.authorName.simpleText,
-                        authorDisplayColor: userType == 'MODERATOR' ? '#5e84f1' : userType === 'SPONSOR' ? '#2ba640' : userType === 'BROADCASTER' ? '#ffd600' : '#ffffffb2',
+                        authorDisplayColor: userType === 'MODERATOR' ? '#5e84f1' : userType === 'SPONSOR' ? '#2ba640' : userType === 'BROADCASTER' ? '#ffd600' : '#ffffffb2',
                         authorProfilePictureUrl: payload.authorPhoto.thumbnails.at(-1).url,
                         authorBadges: badges,
                         authorType: userType,
