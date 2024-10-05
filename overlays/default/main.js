@@ -1,3 +1,6 @@
+const MAIN_CONTAINER = document.querySelector("#main-container")
+const MESSAGE_TEMPLATE = document.querySelector("#chatlist_item").innerHTML
+
 function buildBadges(badges) {
   let badgeJoin = ''
 
@@ -20,8 +23,6 @@ function removeChildren() {
 }
 
 $(document).ready(function () {
-    const MAIN_CONTAINER = document.querySelector("#main-container")
-    const MESSAGE_TEMPLATE = document.querySelector("#chatlist_item").innerHTML
 
     const socket = new WebSocket('ws://localhost:9527/ws')
     socket.addEventListener("message", function (event) {
