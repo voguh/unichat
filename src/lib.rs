@@ -6,7 +6,21 @@ mod youtube;
 mod webserver;
 
 fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
-    println!("Tauri setup");
+    let widgets_dir = app.path().app_data_dir().unwrap().join("widgets");
+
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+    let handle = runtime.spawn(async move {
+        actix_web::HttpServer::new(move || {
+            actix_web::App::new().wrap(actix_web::middleware::Logger::default())
+                .service(webserver::routes::ws)
+                .service(actix_files::Files::new("/widgets", &widgets_dir).prefer_utf8(true).index_file("index.html"))
+        }).bind(("127.0.0.1", 9527)).unwrap().run().await.unwrap()
+    });
+
+    let state = app.state::<webserver::WebServerState>();
+    *state.handle.lock().unwrap() = Some(handle);
+
+    /* ========================================================================================== */
 
     let window = app.get_window("main").unwrap();
     let window_pos = window.inner_position().unwrap();
@@ -61,7 +75,7 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
                     }
                 }
             }
-            tauri::WindowEvent::Destroyed => {
+            tauri::WindowEvent::CloseRequested { .. } => {
                 let state = app.state::<webserver::WebServerState>();
                 let mut web_server_handle = state.handle.lock().unwrap();
                 if let Some(h) = web_server_handle.take() {
@@ -90,10 +104,7 @@ pub fn run() {
             commands::hide_webviews,
             commands::update_webview_url,
             commands::list_overlay_widgets,
-            youtube::on_message,
-            webserver::start_overlay_server,
-            webserver::stop_overlay_server,
-            webserver::overlay_server_status
+            youtube::on_message
         ])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())

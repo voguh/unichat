@@ -38,11 +38,13 @@ export class StorageService {
       for (const listener of listeners ?? []) {
         listener(key, value)
       }
-
-      await this._store.save()
     } catch (err) {
       console.error(err)
     }
+  }
+
+  public async save(): Promise<void> {
+    await this._store.save()
   }
 
   public addEventListener<T>(key: string, cb: (key: string, value: T) => void): void {

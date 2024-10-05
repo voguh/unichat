@@ -32,10 +32,7 @@ export function DashboardHome(): React.ReactNode {
   const [selectedWidget, setSelectedWidget] = React.useState('default')
   const [widgets, setWidgets] = React.useState<string[]>([])
 
-  const [serverRunning, setServerRunning] = React.useState(false)
-
   const [savingStatus, setSavingStatus] = React.useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
-  const [serverChanging, setServerChanging] = React.useState(false)
 
   const { control, handleSubmit, reset } = useForm({ defaultValues, mode: 'all' })
 
@@ -43,23 +40,6 @@ export function DashboardHome(): React.ReactNode {
 
   function onChangeWidget(evt: SelectChangeEvent<string>): void {
     setSelectedWidget(evt.target.value)
-  }
-
-  async function handleServerChange(): Promise<void> {
-    try {
-      setServerChanging(true)
-      if (serverRunning) {
-        await invoke('stop_overlay_server')
-        toast.info('Overlays server stopped!')
-      } else {
-        await invoke('start_overlay_server')
-        toast.info('Overlays server started!')
-      }
-    } catch (err) {
-      toast.error((err as Error).message)
-    } finally {
-      setServerChanging(false)
-    }
   }
 
   async function reloadIframe(): Promise<void> {
@@ -75,6 +55,7 @@ export function DashboardHome(): React.ReactNode {
 
       await storageService.setItem(YOUTUBE_CHAT_URL_KEY, formData.youtubeChatUrl)
       await storageService.setItem(TWITCH_CHAT_URL_KEY, formData.twitchChatUrl)
+      await storageService.save()
 
       if (Strings.isValidYouTubeChatUrl(formData.youtubeChatUrl)) {
         await invoke('update_webview_url', { label: `youtube-chat`, url: formData.youtubeChatUrl })
@@ -109,17 +90,6 @@ export function DashboardHome(): React.ReactNode {
     }
 
     init()
-
-    const intervalRef = setInterval(async () => {
-      const active = await invoke<boolean>('overlay_server_status')
-      setServerRunning(active)
-    }, 1000)
-
-    return () => {
-      if (intervalRef != null) {
-        clearInterval(intervalRef)
-      }
-    }
   }, [])
 
   return (
@@ -131,15 +101,6 @@ export function DashboardHome(): React.ReactNode {
             color={savingStatus === 'saving' ? 'warning' : savingStatus === 'error' ? 'error' : 'primary'}
           >
             {savingStatus === 'saving' ? 'Saving...' : savingStatus === 'error' ? 'Error' : 'Save'}
-          </Button>
-          <Button
-            type="button"
-            disabled={serverChanging}
-            color={serverRunning ? 'error' : 'success'}
-            onClick={handleServerChange}
-          >
-            <i className={`fas fa-${serverRunning ? 'stop' : 'play'}`} />
-            {serverRunning ? 'Stop overlay server' : 'Start overlay server'}
           </Button>
         </Paper>
 
