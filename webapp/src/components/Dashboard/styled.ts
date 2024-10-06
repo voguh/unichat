@@ -14,6 +14,9 @@ export const DashboardStyledContainer = styled.div`
   > .sidebar {
     grid-area: SID;
     padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 
     > button {
       width: 32px;
