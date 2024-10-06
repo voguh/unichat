@@ -23,7 +23,6 @@ function removeChildren() {
 }
 
 $(document).ready(function () {
-
     const socket = new WebSocket('ws://localhost:9527/ws')
     socket.addEventListener("message", function (event) {
         const data = JSON.parse(event.data)
