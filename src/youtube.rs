@@ -116,6 +116,13 @@ pub const SCRAPPING_JS: &str = r#"
                     type: "unichat:remove_message",
                     detail: { platform: "youtube", messageId: payload.targetItemId }
                 }
+            } else if ("removeChatItemByAuthorAction" in action) {
+                const payload = action.removeChatItemByAuthorAction
+
+                return {
+                    type: "unichat:remove_user",
+                    detail: { platform: "youtube", messageId: payload.externalChannelId }
+                }
             }
         }
 
@@ -129,7 +136,7 @@ pub const SCRAPPING_JS: &str = r#"
                         const actions = parsed?.continuationContents?.liveChatContinuation?.actions;
 
                         if (actions != null && actions.length > 0) {
-                            await window.__TAURI__.core.invoke('on_message', { actions: actions.map(action => youtubeiToUnichatEvent(action)) })
+                            await window.__TAURI__.core.invoke('on_youtube_message', { actions: actions.map(action => youtubeiToUnichatEvent(action)) })
                         }
                     }).catch(err => console.error(err))
                 }
@@ -147,8 +154,9 @@ pub const SCRAPPING_JS: &str = r#"
 "#;
 
 #[tauri::command]
-pub async fn on_message(actions: Vec<Value>) -> Result<(), String> {
+pub async fn on_youtube_message(actions: Vec<Value>) -> Result<(), String> {
     for action in actions {
+        print!("{action}");
         events::INSTANCE.lock().unwrap().emit("unichat:event", action.to_string().as_str());
     }
 

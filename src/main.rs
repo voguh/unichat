@@ -10,7 +10,28 @@ mod events;
 mod youtube;
 mod webserver;
 
-fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+fn create_webview<R: tauri::Runtime>(app: &tauri::App<R>, window: &tauri::Window<R>, label: &str, url: WebviewUrl) {
+    let window_pos = window.inner_position().unwrap();
+    let window_size = window.inner_size().unwrap();
+
+    let pos = LogicalPosition::new(64, 0);
+    let size = LogicalSize::new(window_size.width - 64, window_size.height);
+
+    if std::env::consts::OS != "linux" {
+        let new_webview = window.add_child(WebviewBuilder::new(label, url), pos, size).unwrap();
+        new_webview.hide().unwrap();
+    } else {
+        let webview_window = app.get_webview_window("main").unwrap();
+
+        let new_window = WebviewWindowBuilder::new(app, label, url)
+            .inner_size(size.width as f64, size.height as f64).position((window_pos.x + pos.x) as f64, (window_pos.y + pos.y) as f64)
+            .resizable(false).decorations(false).parent(&webview_window).unwrap().build().unwrap();
+
+        new_window.hide().unwrap();
+    }
+}
+
+fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::error::Error>> {
     let overlays_dir = app.path().app_data_dir().unwrap().join("overlays");
     if !&overlays_dir.exists() {
         fs::create_dir(&overlays_dir).unwrap();
@@ -31,33 +52,8 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     /* ========================================================================================== */
 
     let window = app.get_window("main").unwrap();
-    let window_pos = window.inner_position().unwrap();
-    let window_size = window.inner_size().unwrap();
-
-    let url = WebviewUrl::External("about:blank".parse().unwrap());
-    let pos = LogicalPosition::new(64, 0);
-    let size = LogicalSize::new(window_size.width - 64, window_size.height);
-
-    if std::env::consts::OS != "linux" {
-        let youtube_chat = window.add_child(WebviewBuilder::new("youtube-chat", url.clone()), pos, size).unwrap();
-        let twitch_chat = window.add_child(WebviewBuilder::new("twitch-chat", url.clone()), pos, size).unwrap();
-
-        youtube_chat.hide().unwrap();
-        twitch_chat.hide().unwrap();
-    } else {
-        let webview_window = app.get_webview_window("main").unwrap();
-
-        let youtube_chat = WebviewWindowBuilder::new(app, "youtube-chat", url.clone())
-            .inner_size(size.width as f64, size.height as f64).position((window_pos.x + pos.x) as f64, (window_pos.y + pos.y) as f64)
-            .resizable(false).decorations(false).parent(&webview_window).unwrap().build().unwrap();
-
-        let twitch_chat = WebviewWindowBuilder::new(app, "twitch-chat", url.clone())
-            .inner_size(size.width as f64, size.height as f64).position((window_pos.x + pos.x) as f64, (window_pos.y + pos.y) as f64)
-            .resizable(false).decorations(false).parent(&webview_window).unwrap().build().unwrap();
-
-        youtube_chat.hide().unwrap();
-        twitch_chat.hide().unwrap();
-    }
+    create_webview(app, &window, "youtube-chat", WebviewUrl::External("https://youtube.com".parse().unwrap()));
+    create_webview(app, &window, "twitch-chat", WebviewUrl::External("https://twitch.tv".parse().unwrap()));
 
     Ok(())
 }
@@ -111,7 +107,7 @@ fn main() {
             commands::hide_webviews,
             commands::update_webview_url,
             commands::list_overlays,
-            youtube::on_message
+            youtube::on_youtube_message
         ])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())
