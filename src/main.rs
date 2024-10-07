@@ -5,10 +5,10 @@ use std::fs;
 
 use tauri::{LogicalPosition, LogicalSize, Manager, WebviewBuilder, WebviewUrl, WebviewWindowBuilder};
 
+mod actix;
 mod commands;
 mod events;
 mod youtube;
-mod webserver;
 
 fn create_webview<R: tauri::Runtime>(app: &tauri::App<R>, window: &tauri::Window<R>, label: &str, url: WebviewUrl) {
     let window_pos = window.inner_position().unwrap();
@@ -37,17 +37,7 @@ fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::
         fs::create_dir(&overlays_dir).unwrap();
     }
 
-    let runtime = tokio::runtime::Runtime::new().unwrap();
-    let handle = runtime.spawn(async move {
-        actix_web::HttpServer::new(move || {
-            actix_web::App::new().wrap(actix_web::middleware::Logger::default())
-                .service(webserver::routes::ws)
-                .service(actix_files::Files::new("/overlays", &overlays_dir).prefer_utf8(true).index_file("index.html"))
-        }).bind(("127.0.0.1", 9527)).unwrap().run().await.unwrap()
-    });
-
-    let state = app.state::<webserver::WebServerState>();
-    *state.handle.lock().unwrap() = Some(handle);
+    actix::register_actix(app, overlays_dir);
 
     /* ========================================================================================== */
 
@@ -80,7 +70,7 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
                 }
             }
             tauri::WindowEvent::CloseRequested { .. } => {
-                let state = app.state::<webserver::WebServerState>();
+                let state = app.state::<actix::ActixState>();
                 let mut web_server_handle = state.handle.lock().unwrap();
                 if let Some(h) = web_server_handle.take() {
                     h.abort();
@@ -101,7 +91,7 @@ fn main() {
     tauri::Builder::default().setup(setup)
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_store::Builder::default().build())
-        .manage(webserver::WebServerState::default())
+        .manage(actix::ActixState::default())
         .invoke_handler(tauri::generate_handler![
             commands::show_webview,
             commands::hide_webviews,
