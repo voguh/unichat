@@ -61,7 +61,7 @@ html, body {
     line-height: 1.5em;
 }
 
-#main-container > div > .message > .img {
+#main-container > div > .message > img {
     background-repeat: no-repeat;
     background-position: center;
     height: 16px;
