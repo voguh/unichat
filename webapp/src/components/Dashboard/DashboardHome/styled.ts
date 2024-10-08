@@ -66,7 +66,7 @@ export const DashboardHomeStyledContainer = styled.div`
 
     > iframe {
       width: 100%;
-      height: 100%;
+      height: calc(100% - 64px);
       border: none;
     }
   }
