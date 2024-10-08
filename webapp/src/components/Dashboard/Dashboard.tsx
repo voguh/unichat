@@ -10,7 +10,6 @@ import { DashboardStyledContainer } from './styled'
 const TABS = {
   home: { icon: 'fas fa-home fa-xl', component: DashboardHome },
   youtube: { icon: 'fab fa-youtube fa-xl', component: () => <></> },
-  twitch: { icon: 'fab fa-twitch fa-xl', component: () => <></> }
 }
 
 interface Props {

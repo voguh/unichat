@@ -13,19 +13,17 @@ import { invoke } from '@tauri-apps/api/core'
 import * as clipboard from '@tauri-apps/plugin-clipboard-manager'
 
 import { storageService } from '~/services/storageService'
-import { TWITCH_CHAT_URL_KEY, YOUTUBE_CHAT_URL_KEY } from '~/utils/constants'
+import { YOUTUBE_CHAT_URL_KEY } from '~/utils/constants'
 import { Strings } from '~/utils/Strings'
 
 import { DashboardHomeStyledContainer } from './styled'
 
 interface FormData {
   youtubeChatUrl: string
-  twitchChatUrl: string
 }
 
 const defaultValues: FormData = {
-  youtubeChatUrl: '',
-  twitchChatUrl: ''
+  youtubeChatUrl: ''
 }
 
 export function DashboardHome(): React.ReactNode {
@@ -54,19 +52,12 @@ export function DashboardHome(): React.ReactNode {
       setSavingStatus('saving')
 
       await storageService.setItem(YOUTUBE_CHAT_URL_KEY, formData.youtubeChatUrl)
-      await storageService.setItem(TWITCH_CHAT_URL_KEY, formData.twitchChatUrl)
       await storageService.save()
 
       if (Strings.isValidYouTubeChatUrl(formData.youtubeChatUrl)) {
         await invoke('update_webview_url', { label: `youtube-chat`, url: formData.youtubeChatUrl })
       } else {
         await invoke('update_webview_url', { label: `youtube-chat`, url: 'about:blank' })
-      }
-
-      if (Strings.isValidTwitchChatUrl(formData.twitchChatUrl)) {
-        await invoke('update_webview_url', { label: `twitch-chat`, url: formData.twitchChatUrl })
-      } else {
-        await invoke('update_webview_url', { label: `twitch-chat`, url: 'about:blank' })
       }
 
       setSavingStatus('saved')
@@ -81,12 +72,11 @@ export function DashboardHome(): React.ReactNode {
   React.useEffect(() => {
     async function init(): Promise<void> {
       const youtubeChatUrl = await storageService.getItem<string>(YOUTUBE_CHAT_URL_KEY)
-      const twitchChatUrl = await storageService.getItem<string>(TWITCH_CHAT_URL_KEY)
 
       const overlays = await invoke<string[]>('list_overlays')
       setOverlays(overlays)
 
-      reset({ youtubeChatUrl, twitchChatUrl })
+      reset({ youtubeChatUrl })
     }
 
     init()
@@ -118,23 +108,6 @@ export function DashboardHome(): React.ReactNode {
                   fullWidth
                   label="YouTube chat url"
                   placeholder="https://www.youtube.com/live_chat?v={VIDEO_ID}"
-                />
-              )
-            }}
-          />
-          <Controller
-            control={control}
-            name="twitchChatUrl"
-            render={function ControllerRender({ field, fieldState }): JSX.Element {
-              return (
-                <TextField
-                  {...field}
-                  error={!!fieldState.error}
-                  size="small"
-                  variant="outlined"
-                  fullWidth
-                  label="Twtich chat url"
-                  placeholder="https://www.twitch.tv/popout/{CHANNEL_NAME}/chat"
                 />
               )
             }}

@@ -23,7 +23,6 @@ fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::
 
     let window = app.get_window("main").unwrap();
     render::create_render(app, &window, "youtube-chat", WebviewUrl::External("https://youtube.com".parse().unwrap()));
-    render::create_render(app, &window, "twitch-chat", WebviewUrl::External("https://twitch.tv".parse().unwrap()));
 
     Ok(())
 }
