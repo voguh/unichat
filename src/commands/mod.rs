@@ -95,3 +95,14 @@ pub async fn list_overlays<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Vec<S
     }
 
 }
+
+/* ================================================================================================================== */
+
+#[tauri::command]
+pub async fn open_overlays_dir<R: Runtime>(app: tauri::AppHandle<R>) -> Result<(), String> {
+    let overlays_dir = app.path().app_data_dir().unwrap().join("overlays");
+
+    showfile::show_path_in_file_manager(overlays_dir);
+
+    Ok(())
+}

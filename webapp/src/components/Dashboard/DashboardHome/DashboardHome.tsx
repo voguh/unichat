@@ -40,6 +40,10 @@ export function DashboardHome(): React.ReactNode {
     setSelectedOverlay(evt.target.value)
   }
 
+  async function openOverlaysDir(): Promise<void> {
+    invoke('open_overlays_dir')
+  }
+
   async function reloadIframe(): Promise<void> {
     const overlays = await invoke<string[]>('list_overlays')
     setOverlays(overlays)
@@ -126,6 +130,10 @@ export function DashboardHome(): React.ReactNode {
               ))}
             </Select>
           </FormControl>
+
+          <Button onClick={openOverlaysDir}>
+            <i className="fas fa-folder" />
+          </Button>
 
           <Button onClick={reloadIframe}>
             <i className="fas fa-sync" />

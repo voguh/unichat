@@ -79,6 +79,7 @@ fn main() {
             commands::hide_webviews,
             commands::update_webview_url,
             commands::list_overlays,
+            commands::open_overlays_dir,
             youtube::on_youtube_message
         ])
         .on_window_event(on_window_event)
