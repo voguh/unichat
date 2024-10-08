@@ -1,12 +1,12 @@
-use std::sync::{Arc, LazyLock, Mutex};
-use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::{LazyLock, Mutex};
+
+use tokio::sync::broadcast;
 
 pub struct EventEmitter {
-    pub tx: Sender<serde_json::Value>,
-    pub rx: Arc<Mutex<Receiver<serde_json::Value>>>
+    pub tx: broadcast::Sender<serde_json::Value>,
 }
 
 pub static INSTANCE: LazyLock<Mutex<EventEmitter>> = LazyLock::new(|| {
-    let (tx, rx) = channel::<serde_json::Value>();
-    Mutex::new(EventEmitter { tx, rx: Arc::new(Mutex::new(rx)) })
+    let (tx, _rx) = broadcast::channel::<serde_json::Value>(1000);
+    Mutex::new(EventEmitter { tx })
 });
