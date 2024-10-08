@@ -3,33 +3,13 @@
 
 use std::fs;
 
-use tauri::{LogicalPosition, LogicalSize, Manager, WebviewBuilder, WebviewUrl, WebviewWindowBuilder};
+use tauri::{LogicalPosition, LogicalSize, Manager, WebviewUrl};
 
 mod actix;
 mod commands;
 mod events;
+mod render;
 mod youtube;
-
-fn create_webview<R: tauri::Runtime>(app: &tauri::App<R>, window: &tauri::Window<R>, label: &str, url: WebviewUrl) {
-    let window_pos = window.inner_position().unwrap();
-    let window_size = window.inner_size().unwrap();
-
-    let pos = LogicalPosition::new(64, 0);
-    let size = LogicalSize::new(window_size.width - 64, window_size.height);
-
-    if std::env::consts::OS != "linux" {
-        let new_webview = window.add_child(WebviewBuilder::new(label, url), pos, size).unwrap();
-        new_webview.hide().unwrap();
-    } else {
-        let webview_window = app.get_webview_window("main").unwrap();
-
-        let new_window = WebviewWindowBuilder::new(app, label, url)
-            .inner_size(size.width as f64, size.height as f64).position((window_pos.x + pos.x) as f64, (window_pos.y + pos.y) as f64)
-            .resizable(false).decorations(false).parent(&webview_window).unwrap().build().unwrap();
-
-        new_window.hide().unwrap();
-    }
-}
 
 fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::error::Error>> {
     let overlays_dir = app.path().app_data_dir().unwrap().join("overlays");
@@ -42,8 +22,8 @@ fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::
     /* ========================================================================================== */
 
     let window = app.get_window("main").unwrap();
-    create_webview(app, &window, "youtube-chat", WebviewUrl::External("https://youtube.com".parse().unwrap()));
-    create_webview(app, &window, "twitch-chat", WebviewUrl::External("https://twitch.tv".parse().unwrap()));
+    render::create_render(app, &window, "youtube-chat", WebviewUrl::External("https://youtube.com".parse().unwrap()));
+    render::create_render(app, &window, "twitch-chat", WebviewUrl::External("https://twitch.tv".parse().unwrap()));
 
     Ok(())
 }
@@ -61,6 +41,7 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
                     }
                 }
             }
+
             tauri::WindowEvent::Resized(window_size) => {
                 let size = LogicalSize::new(window_size.width - 64, window_size.height);
                 for (key, window) in app.windows() {
@@ -69,11 +50,12 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
                     }
                 }
             }
-            tauri::WindowEvent::CloseRequested { .. } => {
+
+            tauri::WindowEvent::Destroyed => {
                 let state = app.state::<actix::ActixState>();
-                let mut web_server_handle = state.handle.lock().unwrap();
-                if let Some(h) = web_server_handle.take() {
-                    h.abort();
+                let mut actix_handler = state.handle.lock().unwrap();
+                if let Some(handler) = actix_handler.take() {
+                    handler.abort();
                 }
 
                 for (key, window) in app.windows() {
@@ -82,6 +64,7 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
                     }
                 }
             }
+
             _ => {}
         }
     }
