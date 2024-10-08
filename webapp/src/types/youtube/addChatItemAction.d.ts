@@ -1,3 +1,7 @@
+import { Accessibility, AuthorName, AuthorPhoto } from './__utils'
+import { YouTubeBadge } from './splited/badges'
+import { YouTubeEmote } from './splited/emotes'
+
 export interface AddChatItemAction {
   addChatItemAction: AddChatItemActionPayload
 }
@@ -9,35 +13,24 @@ export interface AddChatItemActionPayload {
   item: { liveChatTextMessageRenderer: LiveChatTextMessageRenderer }
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 export interface LiveChatTextMessageRenderer {
   id: string
   message: { runs: LiveChatTextMessageRenderRuns[] }
   authorExternalChannelId: string
-  authorName: { simpleText: string }
-  authorPhoto: { thumbnails: Thumbnail[] }
-  authorBadges: LiveChatAuthorBadgeRenderer[]
+  authorName: AuthorName
+  authorPhoto: AuthorPhoto
+  authorBadges: { liveChatAuthorBadgeRenderer: YouTubeBadge }[]
   timestampUsec: string
   contextMenuEndpoint: ContextMenuEndpoint
   contextMenuAccessibility: Accessibility
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 export interface LiveChatTextMessageRenderRunEmoji {
-  emoji: {
-    emojiId: string
-    shortcuts: string[]
-    searchTerms: string[]
-    isCustomEmoji: boolean
-    image: LiveChatTextMessageRenderRunEmojiImage
-  }
-}
-
-export interface LiveChatTextMessageRenderRunEmojiImage {
-  thumbnails: Thumbnail[]
-  accessibility: Accessibility
+  emoji: YouTubeEmote
 }
 
 export interface LiveChatTextMessageRenderRunText {
@@ -69,24 +62,6 @@ export interface LiveChatTextMessageRenderRunLinkNavigatorEndpointUrlEndpoint {
 }
 
 export type LiveChatTextMessageRenderRuns = LiveChatTextMessageRenderRunEmoji | LiveChatTextMessageRenderRunText
-
-/* ============================================================================================== */
-
-export interface LiveChatAuthorBadgeRendererInternal {
-  icon: { iconType: string }
-  tooltip: string
-  accessibility: Accessibility
-}
-
-export interface LiveChatAuthorBadgeRendererCustom {
-  customThumbnail: { thumbnails: Thumbnail[] }
-  tooltip: string
-  accessibility: Accessibility
-}
-
-export type LiveChatAuthorBadgeRenderer = {
-  liveChatAuthorBadgeRenderer: LiveChatAuthorBadgeRendererInternal | LiveChatAuthorBadgeRendererCustom
-}
 
 /* ============================================================================================== */
 

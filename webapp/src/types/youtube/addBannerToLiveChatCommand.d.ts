@@ -1,3 +1,5 @@
+import { Accessibility, AuthorPhoto } from './__utils'
+
 export interface AddBannerToLiveChatCommand {
   addBannerToLiveChatCommand: {
     bannerProperties: BannerProperties
@@ -19,7 +21,7 @@ export interface LiveChatBannerRenderer {
 }
 
 export interface LiveChatBannerRedirectRenderer {
-  authorPhoto: { thumbnails: Thumbnail[] }
+  authorPhoto: AuthorPhoto
   bannerMessage: { runs: LiveChatBannerRedirectRendererRun[] }
   contextMenuButton: { buttonRenderer: ContextMenuButtonRenderer }
 }

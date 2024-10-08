@@ -1,6 +1,7 @@
 import { UniChatAuthorBadge, UniChatAuthorType, UniChatEmote, UniChatEvent } from 'unichat/types/unichat'
 import { YouTubeAction } from 'unichat/types/youtube'
-import { LiveChatAuthorBadgeRenderer, LiveChatTextMessageRenderRuns } from 'unichat/types/youtube/addChatItemAction'
+import { LiveChatTextMessageRenderRuns } from 'unichat/types/youtube/addChatItemAction'
+import { YouTubeBadge } from 'unichat/types/youtube/splited/badges'
 
 function buildMessageHtml(runs: LiveChatTextMessageRenderRuns[]): string {
   return runs
@@ -44,7 +45,7 @@ function buildEmotes(runs: LiveChatTextMessageRenderRuns[]): UniChatEmote[] {
     .filter((e) => e)
 }
 
-function buildBadges(badges: LiveChatAuthorBadgeRenderer[]): UniChatAuthorBadge[] {
+function buildBadges(badges: { liveChatAuthorBadgeRenderer: YouTubeBadge }[]): UniChatAuthorBadge[] {
   return (badges ?? [])
     .map((badge) => {
       const render = badge.liveChatAuthorBadgeRenderer
