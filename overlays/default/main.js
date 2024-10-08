@@ -41,9 +41,9 @@ $(document).ready(function () {
                 $(MAIN_CONTAINER).append(message)
             }
         } else if (data.type === 'unichat:remove_message') {
-            MAIN_CONTAINER.querySelector(`div[data-id=${data.messageId}]`)?.remove()
+            MAIN_CONTAINER.querySelector(`div[data-id="${data.detail.messageId}"]`)?.remove()
         } else if (data.type === 'unichat:remove_user') {
-            const messages = MAIN_CONTAINER.querySelectorAll(`div[data-from=${data.authorId}]`)
+            const messages = MAIN_CONTAINER.querySelectorAll(`div[data-from="${data.detail.authorId}"]`)
             for (const message of (messages ?? [])) {
                 message.remove()
             }
