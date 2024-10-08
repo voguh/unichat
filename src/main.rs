@@ -3,7 +3,7 @@
 
 use std::fs;
 
-use tauri::{LogicalPosition, LogicalSize, Manager, WebviewUrl};
+use tauri::{LogicalPosition, LogicalSize, Manager};
 
 mod actix;
 mod commands;
@@ -22,7 +22,7 @@ fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::
     /* ========================================================================================== */
 
     let window = app.get_window("main").unwrap();
-    render::create_render(app, &window, "youtube-chat", WebviewUrl::External("https://youtube.com".parse().unwrap()));
+    render::create_render(app, &window, "youtube-chat", String::from("https://youtube.com"));
 
     Ok(())
 }
