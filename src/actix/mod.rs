@@ -10,7 +10,7 @@ pub struct ActixState {
 }
 
 pub fn register_actix<R: tauri::Runtime>(app: &tauri::App<R>, overlays_dir: PathBuf) {
-    let handle = tauri::async_runtime::spawn(async move {
+    let handler = tauri::async_runtime::spawn(async move {
         actix_web::HttpServer::new(move || {
             actix_web::App::new().wrap(actix_web::middleware::Logger::default())
                 .service(routes::ws)
@@ -19,5 +19,5 @@ pub fn register_actix<R: tauri::Runtime>(app: &tauri::App<R>, overlays_dir: Path
     });
 
     let state = app.state::<ActixState>();
-    *state.handle.lock().unwrap() = Some(handle);
+    *state.handle.lock().unwrap() = Some(handler);
 }
