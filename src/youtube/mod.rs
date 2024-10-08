@@ -209,7 +209,9 @@ pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, act
     }
 
     for action in actions {
-        events::INSTANCE.lock().unwrap().emit("unichat:event", action.to_string().as_str());
+        if let Err(err) = events::INSTANCE.lock().unwrap().tx.send(action) {
+            println!("An error occurred on send youtube action: {err}")
+        }
     }
 
     Ok(())
