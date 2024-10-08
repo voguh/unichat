@@ -101,65 +101,93 @@ function getUserColorByBadges(badges: UniChatAuthorBadge[]): string {
   }
 }
 
-export function youtubeiToUnichatEvent(action: YouTubeAction): UniChatEvent {
+function youtubeiToUnichatEvent(action: YouTubeAction): UniChatEvent {
   if ('addChatItemAction' in action) {
     const payload = action.addChatItemAction.item.liveChatTextMessageRenderer
-    const badges = buildBadges(payload.authorBadges)
 
-    return {
-      type: 'unichat:message',
-      detail: {
-        messageId: payload.id,
-        messageHtml: buildMessageHtml(payload.message.runs),
-        messageRaw: buildMessageRaw(payload.message.runs),
-        emotes: buildEmotes(payload.message.runs),
+    if (payload != null) {
+      const badges = buildBadges(payload.authorBadges)
 
-        platform: 'youtube',
+      return {
+        type: 'unichat:message',
+        detail: {
+          channelId: '',
+          channelName: '',
+          platform: 'youtube',
 
-        authorId: payload.authorExternalChannelId,
-        authorUsername: null,
-        authorDisplayName: payload.authorName.simpleText,
-        authorDisplayColor: getUserColorByBadges(badges),
-        authorProfilePictureUrl: payload.authorPhoto.thumbnails.at(-1).url,
-        authorBadges: badges,
-        authorType: getUserTypeByBadges(badges),
+          messageId: payload.id,
+          messageHtml: buildMessageHtml(payload.message.runs),
+          messageRaw: buildMessageRaw(payload.message.runs),
+          emotes: buildEmotes(payload.message.runs),
 
-        timestamp: parseInt(payload.timestampUsec, 10)
+          authorId: payload.authorExternalChannelId,
+          authorUsername: null,
+          authorDisplayName: payload.authorName.simpleText,
+          authorDisplayColor: getUserColorByBadges(badges),
+          authorProfilePictureUrl: payload.authorPhoto.thumbnails.at(-1).url,
+          authorBadges: badges,
+          authorType: getUserTypeByBadges(badges),
+
+          timestamp: parseInt(payload.timestampUsec, 10)
+        }
       }
     }
   } else if ('removeChatItemAction' in action) {
     const payload = action.removeChatItemAction
 
-    return {
-      type: 'unichat:remove_message',
-      detail: { platform: 'youtube', messageId: payload.targetItemId }
+    if (payload != null) {
+      return {
+        type: 'unichat:remove_message',
+        detail: {
+          channelId: '',
+          channelName: '',
+          platform: 'youtube',
+
+          messageId: payload.targetItemId
+        }
+      }
     }
   } else if ('removeChatItemByAuthorAction' in action) {
     const payload = action.removeChatItemByAuthorAction
 
-    return {
-      type: 'unichat:remove_user',
-      detail: { platform: 'youtube', authorId: payload.externalChannelId }
+    if (payload != null) {
+      return {
+        type: 'unichat:remove_user',
+        detail: {
+          channelId: '',
+          channelName: '',
+          platform: 'youtube',
+
+          authorId: payload.externalChannelId
+        }
+      }
     }
   } else if ('addBannerToLiveChatCommand' in action) {
     const payload = action.addBannerToLiveChatCommand
-    const bannerType = payload.bannerRenderer.liveChatBannerRenderer.bannerType
 
-    if (bannerType === 'LIVE_CHAT_BANNER_TYPE_CROSS_CHANNEL_REDIRECT') {
-      const render = payload.bannerRenderer.liveChatBannerRenderer.contents.liveChatBannerRedirectRenderer
+    if (payload != null) {
+      const bannerType = payload.bannerRenderer.liveChatBannerRenderer.bannerType
 
-      if ('bold' in render.bannerMessage.runs[0]) {
-        const raider = render.bannerMessage.runs[0].text.trim()
+      if (bannerType === 'LIVE_CHAT_BANNER_TYPE_CROSS_CHANNEL_REDIRECT') {
+        const render = payload.bannerRenderer.liveChatBannerRenderer.contents.liveChatBannerRedirectRenderer
 
-        return {
-          type: 'unichat:raid',
-          detail: {
-            platform: 'youtube',
-            authorId: '',
-            authorUsername: '',
-            authorDisplayName: raider,
-            authorProfilePictureUrl: render.authorPhoto.thumbnails.at(-1).url,
-            viewerCount: -1
+        if ('bold' in render.bannerMessage.runs[0]) {
+          const raider = render.bannerMessage.runs[0].text.trim()
+
+          return {
+            type: 'unichat:raid',
+            detail: {
+              channelId: '',
+              channelName: '',
+              platform: 'youtube',
+
+              authorId: '',
+              authorUsername: '',
+              authorDisplayName: raider,
+              authorProfilePictureUrl: render.authorPhoto.thumbnails.at(-1).url,
+
+              viewerCount: -1
+            }
           }
         }
       }

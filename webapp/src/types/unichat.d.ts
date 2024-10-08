@@ -20,6 +20,8 @@ export type UniChatAuthorType = 'BROADCASTER' | 'MODERATOR' | 'VIP' | 'SPONSOR' 
 export interface UniChatMessageEvent {
   type: 'unichat:message'
   detail: {
+    channelId: string
+    channelName: string
     platform: string
 
     messageId: string
@@ -50,6 +52,8 @@ export interface UniChatAuthorBadge {
 export interface UniChatRemoveMessageEvent {
   type: 'unichat:remove_message'
   detail: {
+    channelId: string
+    channelName: string
     platform: string
 
     messageId: string
@@ -61,6 +65,8 @@ export interface UniChatRemoveMessageEvent {
 export interface UniChatRemoveUserEvent {
   type: 'unichat:remove_user'
   detail: {
+    channelId: string
+    channelName: string
     platform: string
 
     authorId: string
@@ -72,6 +78,8 @@ export interface UniChatRemoveUserEvent {
 export interface UniChatRaidEvent {
   type: 'unichat:raid'
   detail: {
+    channelId: string
+    channelName: string
     platform: string
 
     authorId: string
@@ -88,6 +96,8 @@ export interface UniChatRaidEvent {
 export interface UniChatSponsorEvent {
   type: 'unichat:sponsor'
   detail: {
+    channelId: string
+    channelName: string
     platform: string
 
     authorId: string
@@ -106,6 +116,8 @@ export interface UniChatSponsorEvent {
 export interface UniChatSponsorGiftEvent {
   type: 'unichat:sponsor_gift'
   detail: {
+    channelId: string
+    channelName: string
     platform: string
 
     authorId: string
@@ -124,6 +136,8 @@ export interface UniChatSponsorGiftEvent {
 export interface UniChatDonateEvent {
   type: 'unichat:donate'
   detail: {
+    channelId: string
+    channelName: string
     platform: string
 
     authorId: string
