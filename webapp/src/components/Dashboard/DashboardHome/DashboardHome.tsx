@@ -12,9 +12,9 @@ import TextField from '@mui/material/TextField'
 import { invoke } from '@tauri-apps/api/core'
 import * as clipboard from '@tauri-apps/plugin-clipboard-manager'
 
-import { storageService } from '~/services/storageService'
-import { YOUTUBE_CHAT_URL_KEY } from '~/utils/constants'
-import { Strings } from '~/utils/Strings'
+import { storageService } from 'unichat/services/storageService'
+import { YOUTUBE_CHAT_URL_KEY } from 'unichat/utils/constants'
+import { Strings } from 'unichat/utils/Strings'
 
 import { DashboardHomeStyledContainer } from './styled'
 

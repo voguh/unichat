@@ -33,7 +33,7 @@ export default defineConfig(async () => ({
   resolve: {
     alias: {
       '@mui/styled-engine': '@mui/styled-engine-sc',
-      '~': path.resolve(__dirname, 'src')
+      unichat: path.resolve(__dirname, 'src')
     }
   },
 

@@ -82,7 +82,7 @@ module.exports = {
       'warn',
       {
         newlinesBetween: 'always',
-        groups: [['/^react/', '/^node:/'], 'module', '/^~//', ['parent', 'sibling', 'index']],
+        groups: [['/^react/', '/^node:/'], 'module', '/^unichat//', ['parent', 'sibling', 'index']],
         alphabetize: { order: 'asc', ignoreCase: true }
       }
     ],

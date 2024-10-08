@@ -1,6 +1,6 @@
-import { UniChatAuthorBadge, UniChatAuthorType, UniChatEmote, UniChatEvent } from '~/types/unichat'
-import { YouTubeAction } from '~/types/youtube'
-import { LiveChatAuthorBadgeRenderer, LiveChatTextMessageRenderRuns } from '~/types/youtube/addChatItemAction'
+import { UniChatAuthorBadge, UniChatAuthorType, UniChatEmote, UniChatEvent } from 'unichat/types/unichat'
+import { YouTubeAction } from 'unichat/types/youtube'
+import { LiveChatAuthorBadgeRenderer, LiveChatTextMessageRenderRuns } from 'unichat/types/youtube/addChatItemAction'
 
 function buildMessageHtml(runs: LiveChatTextMessageRenderRuns[]): string {
   return runs
