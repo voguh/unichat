@@ -8,8 +8,8 @@ import { DashboardHome } from './DashboardHome'
 import { DashboardStyledContainer } from './styled'
 
 const TABS = {
-  home: { icon: 'fas fa-home fa-xl', component: DashboardHome },
-  youtube: { icon: 'fab fa-youtube fa-xl', component: () => <></> },
+  home: { icon: 'fas fa-home fa-xl' },
+  youtube: { icon: 'fab fa-youtube fa-xl' }
 }
 
 interface Props {
@@ -18,12 +18,6 @@ interface Props {
 
 export function Dashboard(_props: Props): React.ReactNode {
   const [selectedTab, setSelectedTab] = React.useState<keyof typeof TABS>('home')
-
-  const ComponentRender = React.useCallback(() => {
-    const Component = TABS[selectedTab].component
-
-    return <Component />
-  }, [selectedTab])
 
   React.useEffect(() => {
     async function init(): Promise<void> {
@@ -53,8 +47,8 @@ export function Dashboard(_props: Props): React.ReactNode {
           )
         })}
       </Paper>
-      <div className="content">
-        <ComponentRender />
+      <div className="content" style={{ display: selectedTab === 'home' ? 'unset' : 'none' }}>
+        <DashboardHome />
       </div>
     </DashboardStyledContainer>
   )
