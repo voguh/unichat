@@ -1,0 +1,62 @@
+{
+  "addBannerToLiveChatCommand": {
+    "bannerRenderer": {
+      "liveChatBannerRenderer": {
+        "actionId": "XXXXXXXXXXXXXXXXXXXX",
+        "bannerType": "LIVE_CHAT_BANNER_TYPE_CROSS_CHANNEL_REDIRECT",
+        "targetId": "live-chat-banner",
+        "isStackable": true,
+        "contents": {
+          "liveChatBannerRedirectRenderer": {
+            "authorPhoto": {
+              "thumbnails": [
+                { "width": 32, "height": 32, "url": "XXXXXXXXXXXXXXXXXXXX" },
+                { "width": 64, "height": 64, "url": "XXXXXXXXXXXXXXXXXXXX" }
+              ]
+            },
+            "bannerMessage": {
+              "runs": [
+                {
+                  "fontFace": "FONT_FACE_ROBOTO_REGULAR",
+                  "text": "Don't miss out! People are going to watch something from ",
+                  "textColor": 4294967295
+                },
+                {
+                  "bold": true,
+                  "fontFace": "FONT_FACE_ROBOTO_REGULAR",
+                  "text": "XXXXXXXXXXXXXXXXXXXX",
+                  "textColor": 4294967295
+                }
+              ]
+            },
+            "contextMenuButton": {
+              "buttonRenderer": {
+                "icon": { "iconType": "MORE_VERT" },
+                "accessibility": { "label": "Chat actions" },
+                "accessibilityData": { "accessibilityData": { "label": "Chat actions" } },
+                "command": {
+                  "commandMetadata": { "webCommandMetadata": { "ignoreNavigation": true } },
+                  "liveChatItemContextMenuEndpoint": { "params": "XXXXXXXXXXXXXXXXXXXX" }
+                }
+              }
+            },
+            "inlineActionButton": {
+              "buttonRenderer": {
+                "isDisabled": false,
+                "size": "SIZE_DEFAULT",
+                "style": "STYLE_DEFAULT",
+                "text": { "runs": [{ "text": "Go now" }] },
+                "command": {
+                  "watchEndpoint": { "videoId": "XXXXXXXXXXXXXXXXXXXX" },
+                  "commandMetadata": {
+                    "webCommandMetadata": { "rootVe": 3832, "url": "XXXXXXXXXXXXXXXXXXXX", "webPageType": "WEB_PAGE_TYPE_WATCH" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -12,5 +12,11 @@ rulers = 80, 100, 120
 [.github/**/*]
 indent_size = 2
 
+[docs/**/*]
+indent_size = 2
+
+[examples/**/*]
+indent_size = 2
+
 [webapp/**/*]
 indent_size = 2
