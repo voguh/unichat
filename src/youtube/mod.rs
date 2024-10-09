@@ -202,19 +202,23 @@ pub const SCRAPPING_JS: &str = r#"
 
 #[tauri::command]
 pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, actions: Vec<Value>, actions_raw: Vec<Value>) -> Result<(), String> {
-    let events_path = app.path().app_data_dir().unwrap().join("events.txt");
-    for action_raw in actions_raw {
-        let mut file = fs::OpenOptions::new().append(true).create(true).open(&events_path).unwrap();
-        writeln!(file, "{action_raw}").unwrap();
-    }
-
-    let events_parsed_path = app.path().app_data_dir().unwrap().join("events-parsed.txt");
-    for action in actions {
-        let mut file = fs::OpenOptions::new().append(true).create(true).open(&events_parsed_path).unwrap();
-        writeln!(file, "{action}").unwrap();
-
+    for action in actions.clone() {
         if let Err(err) = events::INSTANCE.lock().unwrap().tx.send(action) {
             println!("An error occurred on send youtube action: {err}")
+        }
+    }
+
+    #[cfg(debug_assertions)] {
+        let events_path = app.path().app_data_dir().unwrap().join("events.txt");
+        for action_raw in &actions_raw {
+            let mut file = fs::OpenOptions::new().append(true).create(true).open(&events_path).unwrap();
+            writeln!(file, "{action_raw}").unwrap();
+        }
+
+        let events_parsed_path = app.path().app_data_dir().unwrap().join("events-parsed.txt");
+        for action in actions {
+            let mut file = fs::OpenOptions::new().append(true).create(true).open(&events_parsed_path).unwrap();
+            writeln!(file, "{action}").unwrap();
         }
     }
 
