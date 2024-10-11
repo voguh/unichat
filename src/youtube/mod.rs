@@ -7,20 +7,8 @@ use crate::events;
 
 pub const SCRAPPING_JS: &str = r#"
     if (window.fetch.__WRAPPED__ == null) {
-        function buildMessageHtml(runs) {
-        return runs.map((run) => {
-                if ('text' in run) {
-                    return run.text.replace(/</g, '&lt;').replace(/>/g, '&gt;').trim()
-                } else {
-                    const emote = run.emoji
-
-                    return `<img src="${emote.image.thumbnails.at(-1).url}" aria-label="${emote.searchTerms[0]}" />`
-                }
-            }).join(' ').trim()
-        }
-
         function buildMessageRaw(runs) {
-        return runs.map((run) => {
+            return runs.map((run) => {
                 if ('text' in run) {
                     return run.text.replace(/</g, '&lt;').replace(/>/g, '&gt;').trim()
                 } else {
@@ -30,7 +18,7 @@ pub const SCRAPPING_JS: &str = r#"
         }
 
         function buildEmotes(runs) {
-        return runs.map((run) => {
+            return runs.map((run) => {
                 if ('emoji' in run) {
                     return {
                         type: run.emoji.searchTerms[0],
@@ -42,7 +30,7 @@ pub const SCRAPPING_JS: &str = r#"
         }
 
         function buildBadges(badges) {
-        return (badges ?? []).map((badge) => {
+            return (badges ?? []).map((badge) => {
                 const render = badge.liveChatAuthorBadgeRenderer
 
                 if ('customThumbnail' in render) {
@@ -99,20 +87,22 @@ pub const SCRAPPING_JS: &str = r#"
 
         function youtubeiToUnichatEvent(action) {
             if ('addChatItemAction' in action) {
-                const payload = action.addChatItemAction.item.liveChatTextMessageRenderer
+                const item = action.addChatItemAction.item
 
-                if (payload != null) {
+                if ('liveChatTextMessageRenderer' in item) {
+                    const payload = item.liveChatTextMessageRenderer
                     const badges = buildBadges(payload.authorBadges)
 
                     return {
                         type: 'unichat:message',
                         detail: {
-                            messageId: payload.id,
-                            messageHtml: buildMessageHtml(payload.message.runs),
-                            messageRaw: buildMessageRaw(payload.message.runs),
-                            emotes: buildEmotes(payload.message.runs),
-
+                            channelId: null,
+                            channelName: null,
                             platform: 'youtube',
+
+                            messageId: payload.id,
+                            messageText: buildMessageHtml(payload.message.runs),
+                            emotes: buildEmotes(payload.message.runs),
 
                             authorId: payload.authorExternalChannelId,
                             authorUsername: null,
@@ -132,7 +122,13 @@ pub const SCRAPPING_JS: &str = r#"
                 if (payload != null) {
                     return {
                         type: 'unichat:remove_message',
-                        detail: { platform: 'youtube', messageId: payload.targetItemId }
+                        detail: {
+                            channelId: null,
+                            channelName: null,
+                            platform: 'youtube',
+
+                            messageId: payload.targetItemId
+                        }
                     }
                 }
             } else if ('removeChatItemByAuthorAction' in action) {
@@ -141,7 +137,13 @@ pub const SCRAPPING_JS: &str = r#"
                 if (payload != null) {
                     return {
                         type: 'unichat:remove_user',
-                        detail: { platform: 'youtube', authorId: payload.externalChannelId }
+                        detail: {
+                            channelId: null,
+                            channelName: null,
+                            platform: 'youtube',
+
+                            authorId: payload.externalChannelId
+                        }
                     }
                 }
             } else if ('addBannerToLiveChatCommand' in action) {
@@ -159,11 +161,15 @@ pub const SCRAPPING_JS: &str = r#"
                             return {
                                 type: 'unichat:raid',
                                 detail: {
+                                    channelId: null,
+                                    channelName: null,
                                     platform: 'youtube',
+
                                     authorId: '',
                                     authorUsername: '',
                                     authorDisplayName: raider,
                                     authorProfilePictureUrl: render.authorPhoto.thumbnails.at(-1).url,
+
                                     viewerCount: -1
                                 }
                             }
@@ -173,14 +179,14 @@ pub const SCRAPPING_JS: &str = r#"
             }
         }
 
-        const originalFetch = window.fetch;
+        const originalFetch = window.fetch
         Object.defineProperty(window, "fetch", {
             value: async (...args) => {
-                const res = await originalFetch(...args);
+                const res = await originalFetch(...args)
 
                 if (res.url.startsWith("https://www.youtube.com/youtubei/v1/live_chat/get_live_chat") && res.ok) {
                     res.clone().json().then(async (parsed) => {
-                        const actions = parsed?.continuationContents?.liveChatContinuation?.actions;
+                        const actions = parsed?.continuationContents?.liveChatContinuation?.actions
 
                         if (actions != null && actions.length > 0) {
                             await window.__TAURI__.core.invoke('on_youtube_message', { actionsRaw: actions, actions: actions.map(action => youtubeiToUnichatEvent(action)).filter(e => e) })
@@ -188,11 +194,11 @@ pub const SCRAPPING_JS: &str = r#"
                     }).catch(err => console.error(err))
                 }
 
-                return res;
+                return res
             },
             configurable: true,
             writable: true
-        });
+        })
 
         Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true })
     } else {
