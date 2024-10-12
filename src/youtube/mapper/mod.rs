@@ -38,8 +38,8 @@ pub struct ThumbnailsWrapper {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Thumbnail {
-    pub width: u32,
-    pub height: u32,
+    pub width: Option<u32>,
+    pub height: Option<u32>,
     pub url: String
 }
 
