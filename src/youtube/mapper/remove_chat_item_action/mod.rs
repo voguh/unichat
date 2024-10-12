@@ -26,7 +26,7 @@ pub fn parse(value: serde_json::Value) -> Option<UniChatEvent> {
         }
 
         Err(err) => {
-            eprintln!("error: {:?}", err)
+            eprintln!("renive_chat_item_action error: {:?}", err)
         }
     }
 

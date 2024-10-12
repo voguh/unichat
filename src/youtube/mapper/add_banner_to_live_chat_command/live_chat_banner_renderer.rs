@@ -72,7 +72,7 @@ pub fn parse(value: serde_json::Value) -> Option<UniChatEvent> {
         }
 
         Err(err) => {
-            eprintln!("error: {:?}", err)
+            eprintln!("live_chat_banner_renderer error: {:?}", err)
         }
     }
 
