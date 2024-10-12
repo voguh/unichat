@@ -13,8 +13,8 @@ function buildBadges(badges) {
 
 function buildMessage(message, emotes) {
     return emotes.reduce((message, emote) => {
-        return message.replaceAll(emote.type, `<img src="${emote.url}" data-type="${emote.type}" />`)
-    }, message)
+        return message.replaceAll(emote.type, `<img src="${emote.url}" />`)
+    }, message.replace(/\</g, '&lt;').replace(/\>/g, '&gt;'))
 }
 
 function removeChildren() {
