@@ -1,0 +1,60 @@
+{
+  "addChatItemAction": {
+    "clientId": "XXXXXXXXXXXXXXXXXXXX",
+    "item": {
+      "liveChatSponsorshipsGiftPurchaseAnnouncementRenderer": {
+        "id": "XXXXXXXXXXXXXXXXXXXX",
+
+        "authorExternalChannelId": "XXXXXXXXXXXXXXXXXXXX",
+
+        "header": {
+          "liveChatSponsorshipsHeaderRenderer": {
+            "primaryText": {
+              "runs": [
+                { "bold": true, "text": "Gifted " },
+                { "bold": true, "text": "20" },
+                { "bold": true, "text": " " },
+                { "bold": true, "text": "XXXXXXXXXXXXXXXXXXXX" },
+                { "bold": true, "text": " memberships" }
+              ]
+            },
+
+            "image": { "thumbnails": [ { "url": "XXXXXXXXXXXXXXXXXXXX" } ] },
+
+            "authorBadges": [
+              {
+                "liveChatAuthorBadgeRenderer": {
+                  "tooltip": "XXXXXXXXXXXXXXXXXXXX",
+                  "customThumbnail": {
+                    "thumbnails": [
+                      { "width": 16, "height": 16, "url": "XXXXXXXXXXXXXXXXXXXX" },
+                      { "width": 32, "height": 32, "url": "XXXXXXXXXXXXXXXXXXXX" }
+                    ]
+                  },
+                  "accessibility": { "accessibilityData": { "label": "XXXXXXXXXXXXXXXXXXXX" } }
+                }
+              }
+            ],
+            "authorName": { "simpleText": "XXXXXXXXXXXXXXXXXXXX" },
+            "authorPhoto": {
+              "thumbnails": [
+                { "width": 32, "height": 32, "url": "https://yt4.ggpht.com/XXXXXXXXXXXXXXXXXXXX" },
+                { "width": 64, "height": 64, "url": "https://yt4.ggpht.com/XXXXXXXXXXXXXXXXXXXX" }
+              ]
+            },
+
+            "contextMenuAccessibility": { "accessibilityData": { "label": "XXXXXXXXXXXXXXXXXXXX" } },
+            "contextMenuEndpoint": {
+              "clickTrackingParams": "XXXXXXXXXXXXXXXXXXXX",
+              "commandMetadata": { "webCommandMetadata": { "ignoreNavigation": true } },
+              "liveChatItemContextMenuEndpoint": { "params": "XXXXXXXXXXXXXXXXXXXX" }
+            }
+          }
+        },
+
+        "timestampUsec": "XXXXXXXXXXXXXXXXXXXX"
+      }
+    }
+  },
+  "clickTrackingParams": "XXXXXXXXXXXXXXXXXXXX"
+}
