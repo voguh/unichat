@@ -41,11 +41,12 @@ struct BannerMessageRuns {
     text_color: u32
 }
 
-pub fn parse(value: serde_json::Value) -> Option<UniChatEvent> {
-    let mut event: Option<UniChatEvent> = None;
+pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_json::Error> {
 
     match serde_json::from_value::<LiveChatBannerRenderer>(value)  {
         Ok(parsed) => {
+            let mut event: Option<UniChatEvent> = None;
+
             if parsed.banner_type == "LIVE_CHAT_BANNER_TYPE_CROSS_CHANNEL_REDIRECT" {
                 if let Some(renderer) = parsed.contents.live_chat_banner_redirect_renderer {
                     let first_run = renderer.banner_message.runs.first().unwrap();
@@ -69,12 +70,12 @@ pub fn parse(value: serde_json::Value) -> Option<UniChatEvent> {
                     }
                 }
             }
+
+            Ok(event)
         }
 
         Err(err) => {
-            eprintln!("live_chat_banner_renderer error: {:?}", err)
+            Err(err)
         }
     }
-
-    event
 }

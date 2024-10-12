@@ -45,18 +45,16 @@ pub struct Thumbnail {
 
 /* <============================================================================================> */
 
-pub fn parse(payload: serde_json::Value) -> Option<UniChatEvent> {
-    let mut event: Option<UniChatEvent> = None;
-
+pub fn parse(payload: &serde_json::Value) -> Result<Option<UniChatEvent>, serde_json::Error> {
     if let Some(value) = payload.get("addChatItemAction") {
-        event = add_chat_item_action::parse(value)
+        add_chat_item_action::parse(value)
     } else if let Some(value) = payload.get("removeChatItemAction") {
-        event = remove_chat_item_action::parse(value.clone())
+        remove_chat_item_action::parse(value.clone())
     } else if let Some(value) = payload.get("removeChatItemByAuthorAction") {
-        event = remove_chat_item_by_author_action::parse(value.clone())
+        remove_chat_item_by_author_action::parse(value.clone())
     } else if let Some(value) = payload.get("addBannerToLiveChatCommand") {
-        event = add_banner_to_live_chat_command::parse(value)
+        add_banner_to_live_chat_command::parse(value)
+    } else {
+        Ok(None)
     }
-
-    event
 }

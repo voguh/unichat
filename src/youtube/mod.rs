@@ -1,6 +1,5 @@
 use std::{fs, io::Write};
 
-use mapper::parse;
 use serde_json::Value;
 use tauri::Manager;
 
@@ -39,22 +38,25 @@ pub const SCRAPPING_JS: &str = r#"
 
 #[tauri::command]
 pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, actions: Vec<Value>) -> Result<(), String> {
-    for action in actions.clone() {
-        #[cfg(debug_assertions)] {
-            let events_path = app.path().app_data_dir().unwrap().join("events.txt");
-            let mut file = fs::OpenOptions::new().append(true).create(true).open(&events_path).unwrap();
-            writeln!(file, "{action}").unwrap();
-        }
+    let unknown_action_path = app.path().app_data_dir().unwrap().join("unknown_actions.txt");
+    let parse_errors_path = app.path().app_data_dir().unwrap().join("parse_errors.txt");
 
-        if let Some(parsed) = parse(action) {
-            #[cfg(debug_assertions)] {
-                let events_parsed_path = app.path().app_data_dir().unwrap().join("events-parsed.txt");
-                let mut file = fs::OpenOptions::new().append(true).create(true).open(&events_parsed_path).unwrap();
-                writeln!(file, "{}", serde_json::to_string(&parsed).unwrap()).unwrap();
+    for action in actions.clone() {
+        match mapper::parse(&action) {
+            Ok(Some(parsed)) => {
+                if let Err(err) = events::INSTANCE.lock().unwrap().tx.send(parsed) {
+                    println!("An error occurred on send unichat event: {err}")
+                }
             }
 
-            if let Err(err) = events::INSTANCE.lock().unwrap().tx.send(parsed) {
-                println!("An error occurred on send unichat event: {err}")
+            Ok(None) => {
+                let mut file = fs::OpenOptions::new().append(true).create(true).open(&unknown_action_path).unwrap();
+                writeln!(file, "{}", serde_json::to_string(&action).unwrap()).unwrap();
+            }
+
+            Err(err) => {
+                let mut file = fs::OpenOptions::new().append(true).create(true).open(&parse_errors_path).unwrap();
+                writeln!(file, "{} -- {}", err, serde_json::to_string(&action).unwrap()).unwrap();
             }
         }
     }

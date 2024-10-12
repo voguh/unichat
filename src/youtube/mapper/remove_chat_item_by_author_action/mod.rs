@@ -8,12 +8,10 @@ struct RemoveChatItemByAuthorAction {
     external_channel_id: String
 }
 
-pub fn parse(value: serde_json::Value) -> Option<UniChatEvent> {
-    let mut event: Option<UniChatEvent> = None;
-
+pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_json::Error> {
     match serde_json::from_value::<RemoveChatItemByAuthorAction>(value) {
         Ok(parsed) => {
-            event = Some(UniChatEvent::RemoveAuthor {
+            Ok(Some(UniChatEvent::RemoveAuthor {
                 event_type: String::from("unichat:remove_message"),
                 detail: UniChatRemoveAuthorEventPayload {
                     channel_id: None,
@@ -22,13 +20,11 @@ pub fn parse(value: serde_json::Value) -> Option<UniChatEvent> {
 
                     author_id: parsed.external_channel_id.clone()
                 }
-            })
+            }))
         }
 
         Err(err) => {
-            eprintln!("remove_chat_item_by_author_action error: {:?}", err)
+            Err(err)
         }
     }
-
-    event
 }

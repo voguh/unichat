@@ -148,12 +148,10 @@ fn get_author_type(badges: &Option<Vec<LiveChatAuthorBadgeRenderer>>) -> String 
     String::from(author_type)
 }
 
-pub fn parse(value: serde_json::Value) -> Option<UniChatEvent> {
-    let mut event: Option<UniChatEvent> = None;
-
+pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_json::Error> {
     match serde_json::from_value::<LiveChatTextMessageRenderer>(value) {
         Ok(parsed) => {
-            event = Some(UniChatEvent::Message {
+            Ok(Some(UniChatEvent::Message {
                 event_type: String::from("unichat:message"),
                 detail: UniChatMessageEventPayload {
                     channel_id: None,
@@ -174,13 +172,11 @@ pub fn parse(value: serde_json::Value) -> Option<UniChatEvent> {
 
                     timestamp: parsed.timestamp_usec.parse::<u64>().unwrap()
                 }
-            })
+            }))
         }
 
         Err(err) => {
-            eprintln!("live_chat_text_message_renderer error: {:?}", err)
+            Err(err)
         }
     }
-
-    event
 }
