@@ -121,7 +121,7 @@ pub struct UniChatRaidEventPayload {
     pub author_display_name: String,
     pub author_profile_picture_url: String,
 
-    pub viewer_count: u16
+    pub viewer_count: Option<u16>
 }
 
 /* <============================================================================================> */
@@ -134,13 +134,12 @@ pub struct UniChatSponsorEvent {
     pub platform: String,
 
     pub author_id: String,
-    pub author_username: String,
+    pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_profile_picture_url: String,
 
     pub tier: String,
-    pub tier_name: String,
-    pub months: u16
+    pub months: Option<u16>
 }
 
 /* <============================================================================================> */
@@ -153,12 +152,11 @@ pub struct UniChatSponsorGiftEvent {
     pub platform: String,
 
     pub author_id: String,
-    pub author_username: String,
+    pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_profile_picture_url: String,
 
     pub tier: String,
-    pub tier_name: String,
     pub count: u16
 }
 
@@ -172,7 +170,7 @@ pub struct UniChatDonateGiftEvent {
     pub platform: String,
 
     pub author_id: String,
-    pub author_username: String,
+    pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_profile_picture_url: String,
 

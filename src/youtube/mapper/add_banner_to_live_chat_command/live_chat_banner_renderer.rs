@@ -64,7 +64,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_jso
                                 author_display_name: String::from(first_run.text.trim()),
                                 author_profile_picture_url: renderer.author_photo.thumbnails.last().unwrap().url.clone(),
 
-                                viewer_count: 0
+                                viewer_count: None
                             }
                         })
                     }

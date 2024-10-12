@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
 
 use crate::events::unichat::{UniChatBadge, UniChatEmote, UniChatEvent, UniChatMessageEventPayload};
-use crate::youtube::mapper::{AuthorBadges, AuthorName, ThumbnailsWrapper};
+use crate::youtube::mapper::{AuthorName, ThumbnailsWrapper};
+
+use super::LiveChatAuthorBadgeRenderer;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -36,13 +38,6 @@ struct MessageRunEmoji {
     search_terms: Vec<String>,
     shortcuts: Vec<String>,
     image: ThumbnailsWrapper
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-struct LiveChatAuthorBadgeRenderer {
-    #[serde(rename = "liveChatAuthorBadgeRenderer")]
-    renderer: AuthorBadges
 }
 
 /* <============================================================================================> */
