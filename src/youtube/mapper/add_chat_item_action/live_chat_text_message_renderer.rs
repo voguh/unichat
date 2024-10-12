@@ -109,7 +109,7 @@ fn build_author_badges(badges: &Option<Vec<LiveChatAuthorBadgeRenderer>>) -> Vec
                     "verified" => pbadges.push(UniChatBadge {
                         badge_type: String::from("verified"),
                         tooltip: String::from("Verified"),
-                        url: String::from("https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/1")
+                        url: String::from("https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/1")
                     }),
                     _ => {}
                 };
