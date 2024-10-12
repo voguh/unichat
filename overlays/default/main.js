@@ -43,7 +43,7 @@ $(document).ready(function () {
             message = message.replaceAll("{author_color}", detail.authorDisplayColor)
             message = message.replaceAll("{message}", buildMessage(detail.messageText, detail.emotes))
 
-            if (MAIN_CONTAINER.querySelector(`div[data-id=${data.messageId}]`) == null) {
+            if (MAIN_CONTAINER.querySelector(`div[data-id=${detail.messageId}]`) == null) {
                 $(MAIN_CONTAINER).append(message)
             }
         } else if (data.type === 'unichat:remove_message') {
