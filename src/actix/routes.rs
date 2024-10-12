@@ -12,7 +12,8 @@ async fn ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Erro
         loop {
             match rx.recv().await {
                 Ok(received) => {
-                    if let Err(err) = session.text(serde_json::to_string(&received).unwrap()).await {
+                    let parsed = serde_json::to_string(&received).unwrap();
+                    if let Err(err) = session.text(parsed).await {
                         println!("An error occurred on send message to client, exiting loop: {err}");
                         break;
                     }

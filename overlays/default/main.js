@@ -11,6 +11,12 @@ function buildBadges(badges) {
   return badgeJoin
 }
 
+function buildMessage(message, emotes) {
+    return emotes.reduce((message, emote) => {
+        return message.replaceAll(emote.type, `<img src="${emote.url}" data-type="${emote.type}" />`)
+    }, message)
+}
+
 function removeChildren() {
   if(MAIN_CONTAINER.children > 50) {
     MAIN_CONTAINER.firstChild.remove()
@@ -35,7 +41,7 @@ $(document).ready(function () {
             message = message.replaceAll("{badges}", buildBadges(detail.authorBadges))
             message = message.replaceAll("{author_display_name}", detail.authorDisplayName)
             message = message.replaceAll("{author_color}", detail.authorDisplayColor)
-            message = message.replaceAll("{message}", detail.messageHtml)
+            message = message.replaceAll("{message}", buildMessage(detail.messageText, detail.emotes))
 
             if (MAIN_CONTAINER.querySelector(`div[data-id=${data.messageId}]`) == null) {
                 $(MAIN_CONTAINER).append(message)

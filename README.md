@@ -33,3 +33,13 @@ pnpm build
 
 Implement support for BTTV, by calling api `https://api.betterttv.net/3/cached/users/youtube/<CHANNEL_ID>`
 and image tag like `<img src="https://cdn.betterttv.net/emote/<EMOTE_ID>/3x.<IMAGE_TYPE>" />`
+
+- [x] Implement `Message` event;
+- [x] Implement `RemoveMessage` event;
+- [x] Implement `RemoveAuthor` event;
+- [x] Implement `Raid` event;
+- [ ] Implement `Sponsor` event;
+- [ ] Implement `SponsorGift` event;
+- [ ] Implement `Donate` event;
+- [ ] Implement an way to get youtube channel id or store in `unichat.db`
+- [ ] Implement overlay with bttv support;
