@@ -32,7 +32,7 @@ struct MessageRun {
 #[serde(rename_all = "camelCase")]
 struct MessageRunEmoji {
     emoji_id: String,
-    is_custom_emoji: bool,
+    is_custom_emoji: Option<bool>,
     search_terms: Vec<String>,
     shortcuts: Vec<String>,
     image: ThumbnailsWrapper
