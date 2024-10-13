@@ -14,7 +14,7 @@ mod youtube;
 fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::error::Error>> {
     let overlays_dir = app.path().app_data_dir().unwrap().join("overlays");
     if !&overlays_dir.exists() {
-        fs::create_dir(&overlays_dir).unwrap();
+        fs::create_dir_all(&overlays_dir).unwrap();
     }
 
     actix::register_actix(app, overlays_dir);
