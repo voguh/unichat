@@ -23,6 +23,19 @@
               }
             },
             {
+              "emoji": {
+                "emojiId": "👍🏻",
+                "image": {
+                  "accessibility": { "accessibilityData": { "label": "👍🏻" } },
+                  "thumbnails": [
+                    {
+                      "url": "XXXXXXXXXXXXXXXXXXXX"
+                    }
+                  ]
+                }
+              }
+            },
+            {
               "text": "XXXXXXXXXXXXXXXXXXXX",
               "navigationEndpoint": {
                 "commandMetadata": {

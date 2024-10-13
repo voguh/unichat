@@ -35,12 +35,20 @@ struct MessageRun {
 struct MessageRunEmoji {
     emoji_id: String,
     is_custom_emoji: Option<bool>,
-    search_terms: Vec<String>,
-    shortcuts: Vec<String>,
+    search_terms: Option<Vec<String>>,
+    shortcuts: Option<Vec<String>>,
     image: ThumbnailsWrapper
 }
 
 /* <============================================================================================> */
+
+fn get_emoji_type(emoji: &MessageRunEmoji) -> String {
+    if let Some(search_terms) = &emoji.search_terms {
+        search_terms.first().unwrap().clone()
+    } else {
+        emoji.emoji_id.clone()
+    }
+}
 
 fn build_message(runs: &Vec<MessageRun>) -> String {
     let mut str_message = Vec::new();
@@ -49,7 +57,7 @@ fn build_message(runs: &Vec<MessageRun>) -> String {
         if let Some(text) = &run.text {
             str_message.push(text.clone());
         } else if let Some(emoji) = &run.emoji {
-            str_message.push(emoji.search_terms.first().unwrap().clone())
+            str_message.push(get_emoji_type(emoji))
         }
     }
 
@@ -62,8 +70,8 @@ fn build_emotes(runs: &Vec<MessageRun>) -> Vec<UniChatEmote> {
     for run in runs {
         if let Some(emoji) = &run.emoji {
             emotes.push(UniChatEmote {
-                emote_type: emoji.search_terms.first().unwrap().clone(),
-                tooltip: emoji.search_terms.first().unwrap().clone(),
+                emote_type: get_emoji_type(emoji),
+                tooltip: get_emoji_type(emoji),
                 url: emoji.image.thumbnails.last().unwrap().url.clone()
             });
         }
