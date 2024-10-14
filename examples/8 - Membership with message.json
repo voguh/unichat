@@ -5,13 +5,15 @@
       "liveChatMembershipItemRenderer": {
         "id": "XXXXXXXXXXXXXXXXXXXX",
 
-        "headerSubtext": {
+        "headerPrimaryText": {
           "runs": [
-            { "text": "Welcome to " },
+            { "text": "Member for " },
             { "text": "XXXXXXXXXXXXXXXXXXXX" },
-            { "text": "!" }
+            { "text": " months" }
           ]
         },
+        "headerSubtext": { "simpleText": "XXXXXXXXXXXXXXXXXXXX" },
+        "message": { "runs": [{ "text": "XXXXXXXXXXXXXXXXXXXX" }] },
 
         "authorExternalChannelId": "XXXXXXXXXXXXXXXXXXXX",
         "authorName": { "simpleText": "XXXXXXXXXXXXXXXXXXXX" },
@@ -31,8 +33,8 @@
         ],
         "authorPhoto": {
           "thumbnails": [
-            { "width": 32, "height": 32, "url": "https://yt4.ggpht.com/ytc/XXXXXXXXXXXXXXXXXXXX" },
-            { "width": 64, "height": 64, "url": "https://yt4.ggpht.com/ytc/XXXXXXXXXXXXXXXXXXXX" }
+            { "width": 32, "height": 32, "url": "https://yt4.ggpht.com/XXXXXXXXXXXXXXXXXXXX" },
+            { "width": 64, "height": 64, "url": "https://yt4.ggpht.com/XXXXXXXXXXXXXXXXXXXX" }
           ]
         },
 

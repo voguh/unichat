@@ -139,7 +139,8 @@ pub struct UniChatSponsorEvent {
     pub author_profile_picture_url: String,
 
     pub tier: String,
-    pub months: Option<u16>
+    pub months: u16,
+    pub message: Option<String>
 }
 
 /* <============================================================================================> */

@@ -56,7 +56,7 @@ pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, act
 
             Err(err) => {
                 let mut file = fs::OpenOptions::new().append(true).create(true).open(&parse_errors_path).unwrap();
-                writeln!(file, "{} -- {}", err, serde_json::to_string(&action).unwrap()).unwrap();
+                writeln!(file, "{}:{}:{} -- {}", err, err.line(), err.column(), serde_json::to_string(&action).unwrap()).unwrap();
             }
         }
     }
