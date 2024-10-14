@@ -1,13 +1,14 @@
 use std::{str::FromStr, thread::sleep};
 
-use tauri::{Manager, PhysicalSize, Runtime};
+use tauri::{LogicalPosition, LogicalSize, Manager, PhysicalSize, Runtime};
 
 use crate::youtube;
 
 #[tauri::command]
 pub fn show_webview<R: Runtime>(app: tauri::AppHandle<R>, label: &str) {
+    let window = app.get_window("main").unwrap();
+
     if std::env::consts::OS != "linux" {
-        let window = app.get_window("main").unwrap();
         let window_size = window.inner_size().unwrap();
 
         for (key, value) in app.webviews() {
@@ -30,6 +31,14 @@ pub fn show_webview<R: Runtime>(app: tauri::AppHandle<R>, label: &str) {
 
         let webview_window = app.get_webview_window(label).unwrap();
         webview_window.show().unwrap();
+
+        let window_pos = window.inner_position().unwrap();
+        let pos = LogicalPosition::new(window_pos.x + 64, window_pos.y);
+        webview_window.set_position(pos).unwrap();
+
+        let window_size = window.inner_size().unwrap();
+        let size = LogicalSize::new(window_size.width - 64, window_size.height);
+        webview_window.set_size(size).unwrap();
     }
 }
 
