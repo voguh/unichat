@@ -21,6 +21,13 @@
 
             "image": { "thumbnails": [ { "url": "XXXXXXXXXXXXXXXXXXXX" } ] },
 
+            "authorName": { "simpleText": "XXXXXXXXXXXXXXXXXXXX" },
+            "authorPhoto": {
+              "thumbnails": [
+                { "width": 32, "height": 32, "url": "https://yt4.ggpht.com/XXXXXXXXXXXXXXXXXXXX" },
+                { "width": 64, "height": 64, "url": "https://yt4.ggpht.com/XXXXXXXXXXXXXXXXXXXX" }
+              ]
+            },
             "authorBadges": [
               {
                 "liveChatAuthorBadgeRenderer": {
@@ -35,13 +42,6 @@
                 }
               }
             ],
-            "authorName": { "simpleText": "XXXXXXXXXXXXXXXXXXXX" },
-            "authorPhoto": {
-              "thumbnails": [
-                { "width": 32, "height": 32, "url": "https://yt4.ggpht.com/XXXXXXXXXXXXXXXXXXXX" },
-                { "width": 64, "height": 64, "url": "https://yt4.ggpht.com/XXXXXXXXXXXXXXXXXXXX" }
-              ]
-            },
 
             "contextMenuAccessibility": { "accessibilityData": { "label": "XXXXXXXXXXXXXXXXXXXX" } },
             "contextMenuEndpoint": {
