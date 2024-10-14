@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::events::unichat::{UniChatEmote, UniChatEvent};
 
-use super::{AuthorBadges, ThumbnailsWrapper};
+use super::{AuthorBadge, ThumbnailsWrapper};
 
 mod live_chat_membership_item_renderer;
 mod live_chat_sponsorships_gift_purchase_announcement_renderer;
@@ -12,7 +12,7 @@ mod live_chat_text_message_renderer;
 #[serde(rename_all = "camelCase")]
 pub struct LiveChatAuthorBadgeRenderer {
     #[serde(rename = "liveChatAuthorBadgeRenderer")]
-    renderer: AuthorBadges
+    renderer: AuthorBadge
 }
 
 #[derive(Serialize, Deserialize, Debug)]

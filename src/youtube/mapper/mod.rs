@@ -15,7 +15,7 @@ pub struct AuthorName {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct AuthorBadges {
+pub struct AuthorBadge {
     pub tooltip: String,
     pub icon: Option<StandardIcon>,
     pub custom_thumbnail: Option<ThumbnailsWrapper>
