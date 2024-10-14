@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::events::unichat::{UniChatEvent, UniChatSponsorEvent};
 use crate::youtube::mapper::{AuthorName, ThumbnailsWrapper};
 
-use super::{build_message, LiveChatAuthorBadgeRenderer, MessageRun};
+use super::{build_message, LiveChatAuthorBadgeRenderer, Message, MessageRun};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -12,7 +12,7 @@ struct LiveChatMembershipItemRenderer {
 
     pub header_primary_text: Option<HeaderPrimaryText>,
     pub header_subtext: HeaderSubtext,
-    pub message: Option<Vec<MessageRun>>,
+    pub message: Option<Message>,
 
     pub author_external_channel_id: String,
     pub author_name: AuthorName,
@@ -71,9 +71,9 @@ fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> u16 {
     months
 }
 
-fn optional_build_message(runs: &Option<Vec<MessageRun>>) -> Option<String> {
-    if let Some(runs) = runs {
-        Some(build_message(runs))
+fn optional_build_message(message: &Option<Message>) -> Option<String> {
+    if let Some(message) = message {
+        Some(build_message(&message.runs))
     } else {
         None
     }
