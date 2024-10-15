@@ -20,9 +20,11 @@ struct LiveChatTextMessageRenderer {
 /* <============================================================================================> */
 
 fn get_badge_icon_type(badge: &LiveChatAuthorBadgeRenderer) -> String {
-    let renderer = &badge.renderer;
+    let renderer = &badge.live_chat_author_badge_renderer;
     if let Some(icon) = &renderer.icon {
         icon.icon_type.clone()
+    } else if badge.live_chat_author_badge_renderer.custom_thumbnail.is_some() {
+        String::from("CUSTOM")
     } else {
         String::from("")
     }
@@ -32,11 +34,11 @@ fn get_author_color(badges: &Option<Vec<LiveChatAuthorBadgeRenderer>>) -> String
     let mut author_color = "#ffffffb2";
 
     if let Some(badges) = badges {
-        if badges.iter().any(|badge| get_badge_icon_type(&badge) == "OWNER") {
+        if badges.iter().any(|badge| get_badge_icon_type(badge) == "OWNER") {
             author_color = "#ffd600"
-        } else if badges.iter().any(|badge| get_badge_icon_type(&badge) == "MODERATOR") {
+        } else if badges.iter().any(|badge| get_badge_icon_type(badge) == "MODERATOR") {
             author_color = "#5e84f1"
-        } else if badges.iter().any(|badge| badge.renderer.custom_thumbnail.is_some()) {
+        } else if badges.iter().any(|badge| get_badge_icon_type(badge) == "CUSTOM") {
             author_color = "#2ba640"
         }
     }
@@ -49,7 +51,7 @@ fn build_author_badges(badges: &Option<Vec<LiveChatAuthorBadgeRenderer>>) -> Vec
 
     if let Some(badges) = badges {
         for badge in badges {
-            let renderer = &badge.renderer;
+            let renderer = &badge.live_chat_author_badge_renderer;
             if let Some(icon) = &renderer.icon {
                 match icon.icon_type.as_str() {
                     "OWNER" => pbadges.push(UniChatBadge {
@@ -91,7 +93,7 @@ fn get_author_type(badges: &Option<Vec<LiveChatAuthorBadgeRenderer>>) -> String 
             author_type = "BROADCASTER"
         } else if badges.iter().any(|badge| get_badge_icon_type(badge) == "MODERATOR") {
             author_type = "MODERATOR"
-        } else if badges.iter().any(|badge| badge.renderer.custom_thumbnail.is_some()) {
+        } else if badges.iter().any(|badge| get_badge_icon_type(badge) == "CUSTOM") {
             author_type = "SPONSOR"
         }
     }

@@ -30,9 +30,9 @@ struct LiveChatSponsorshipsHeaderRenderer {
 
     pub image: ThumbnailsWrapper,
 
-    pub author_badges: LiveChatAuthorBadgeRenderer,
     pub author_name: AuthorName,
-    pub author_photo: ThumbnailsWrapper
+    pub author_photo: ThumbnailsWrapper,
+    pub author_badges: LiveChatAuthorBadgeRenderer
 }
 
 #[derive(Serialize, Deserialize, Debug)]

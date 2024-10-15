@@ -11,8 +11,7 @@ mod live_chat_text_message_renderer;
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct LiveChatAuthorBadgeRenderer {
-    #[serde(rename = "liveChatAuthorBadgeRenderer")]
-    renderer: AuthorBadge
+    live_chat_author_badge_renderer: AuthorBadge
 }
 
 #[derive(Serialize, Deserialize, Debug)]

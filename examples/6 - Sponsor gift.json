@@ -19,7 +19,7 @@
               ]
             },
 
-            "image": { "thumbnails": [ { "url": "XXXXXXXXXXXXXXXXXXXX" } ] },
+            "image": { "thumbnails": [{ "url": "XXXXXXXXXXXXXXXXXXXX" }] },
 
             "authorName": { "simpleText": "XXXXXXXXXXXXXXXXXXXX" },
             "authorPhoto": {
@@ -34,8 +34,8 @@
                   "tooltip": "XXXXXXXXXXXXXXXXXXXX",
                   "customThumbnail": {
                     "thumbnails": [
-                      { "width": 16, "height": 16, "url": "XXXXXXXXXXXXXXXXXXXX" },
-                      { "width": 32, "height": 32, "url": "XXXXXXXXXXXXXXXXXXXX" }
+                      { "width": 16, "height": 16, "url": "https://yt3.ggpht.com/XXXXXXXXXXXXXXXXXXXX" },
+                      { "width": 32, "height": 32, "url": "https://yt3.ggpht.com/XXXXXXXXXXXXXXXXXXXX" }
                     ]
                   },
                   "accessibility": { "accessibilityData": { "label": "XXXXXXXXXXXXXXXXXXXX" } }
