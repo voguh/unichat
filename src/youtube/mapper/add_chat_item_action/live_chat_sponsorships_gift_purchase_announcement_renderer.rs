@@ -32,7 +32,7 @@ struct LiveChatSponsorshipsHeaderRenderer {
 
     pub author_name: AuthorName,
     pub author_photo: ThumbnailsWrapper,
-    pub author_badges: LiveChatAuthorBadgeRenderer
+    pub author_badges: Option<Vec<LiveChatAuthorBadgeRenderer>>
 }
 
 #[derive(Serialize, Deserialize, Debug)]
