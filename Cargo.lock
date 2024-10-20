@@ -4465,7 +4465,6 @@ dependencies = [
  "actix-files",
  "actix-web",
  "actix-ws",
- "bytestring",
  "futures-util",
  "serde",
  "serde_json",
