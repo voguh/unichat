@@ -1,4 +1,4 @@
-import { createStore, Store } from '@tauri-apps/plugin-store'
+import { load, Store } from '@tauri-apps/plugin-store'
 
 export class StorageService {
   private readonly _listeners: Map<string, ((key: string, value: any) => void)[]>
@@ -9,7 +9,7 @@ export class StorageService {
   }
 
   public async createStore(): Promise<void> {
-    this._store = await createStore('unichat.db')
+    this._store = await load('unichat.db')
   }
 
   public async getItem<T>(key: string): Promise<T> {

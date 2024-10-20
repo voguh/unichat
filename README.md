@@ -43,3 +43,9 @@ and image tag like `<img src="https://cdn.betterttv.net/emote/<EMOTE_ID>/3x.<IMA
 - [ ] Implement `Donate` event;
 - [ ] Implement an way to get youtube channel id or store in `unichat.db`
 - [ ] Implement overlay with bttv support;
+
+
+### Known issues
+
+Tauri does not work properly on Linux with Wayland (GNOME), the detected bugs are: "the chat window is not resized
+correctly" and "the window decorator buttons do not respect the user's settings, position, and visible buttons."

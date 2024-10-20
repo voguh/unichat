@@ -11,9 +11,9 @@ pub fn create_render<R: tauri::Runtime>(app: &tauri::App<R>, window: &tauri::Win
     let size = LogicalSize::new(window_size.width - 64, window_size.height);
 
     let settings_path = app.path().app_data_dir().unwrap().join("unichat.db");
-    let store = StoreBuilder::new(app.handle(), settings_path).build();
-    let url = store.load().ok().and_then(|_| store.get(format!("{label}-url")))
-        .and_then(|parsed| parsed.as_str().map(|s| s.to_string())).unwrap_or(default_url);
+    let store = StoreBuilder::new(app.handle(), settings_path).build().unwrap();
+    let url = store.get(format!("{label}-url")).and_then(|value| value.as_str().map(|s| s.to_string()))
+        .unwrap_or(default_url);
 
     let webview_url = WebviewUrl::External(url.parse().unwrap());
 
