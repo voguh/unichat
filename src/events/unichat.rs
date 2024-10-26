@@ -36,7 +36,7 @@ pub enum UniChatEvent {
     Donate {
         #[serde(rename = "type")]
         event_type: String,
-        detail: UniChatDonateGiftEvent
+        detail: UniChatDonateEvent
     }
 }
 
@@ -165,7 +165,7 @@ pub struct UniChatSponsorGiftEvent {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct UniChatDonateGiftEvent {
+pub struct UniChatDonateEvent {
     pub channel_id: Option<String>,
     pub channel_name: Option<String>,
     pub platform: String,
@@ -173,7 +173,10 @@ pub struct UniChatDonateGiftEvent {
     pub author_id: String,
     pub author_username: Option<String>,
     pub author_display_name: String,
+    pub author_display_color: String,
     pub author_profile_picture_url: String,
+    pub author_badges: Vec<UniChatBadge>,
+    pub author_type: String,
 
     pub value: f32,
     pub currency: String,
