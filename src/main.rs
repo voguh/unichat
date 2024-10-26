@@ -28,24 +28,28 @@ fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::
 }
 
 fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
-    if std::env::consts::OS == "linux" && window.label() == "main" {
-        let app = window.app_handle();
+    let app = window.app_handle();
 
+    if window.label() == "main" {
         match event {
             tauri::WindowEvent::Moved(window_pos) => {
-                let pos = LogicalPosition::new(window_pos.x + 64, window_pos.y);
-                for (key, window) in app.windows() {
-                    if key != "main" {
-                        window.set_position(pos).unwrap();
+                if std::env::consts::OS == "linux" {
+                    let pos = LogicalPosition::new(window_pos.x + 64, window_pos.y);
+                    for (key, window) in app.windows() {
+                        if key != "main" {
+                            window.set_position(pos).unwrap();
+                        }
                     }
                 }
             }
 
             tauri::WindowEvent::Resized(window_size) => {
-                let size = LogicalSize::new(window_size.width - 64, window_size.height);
-                for (key, window) in app.windows() {
-                    if key != "main" {
-                        window.set_size(size).unwrap()
+                if std::env::consts::OS == "linux" {
+                    let size = LogicalSize::new(window_size.width - 64, window_size.height);
+                    for (key, window) in app.windows() {
+                        if key != "main" {
+                            window.set_size(size).unwrap()
+                        }
                     }
                 }
             }
