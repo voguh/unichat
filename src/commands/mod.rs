@@ -1,6 +1,6 @@
 use std::{str::FromStr, thread::sleep};
 
-use tauri::{LogicalPosition, LogicalSize, Manager, PhysicalSize, Runtime};
+use tauri::{LogicalPosition, LogicalSize, Manager, Runtime};
 
 use crate::youtube;
 
@@ -17,7 +17,7 @@ pub fn show_webview<R: Runtime>(app: tauri::AppHandle<R>, label: &str) {
             }
         }
 
-        let size = PhysicalSize::new(64, window_size.height);
+        let size = LogicalSize::new(64, window_size.height);
         app.get_webview("main").unwrap().set_size(size).unwrap();
 
         let webview = app.get_webview(label).unwrap();
