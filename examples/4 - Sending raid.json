@@ -6,6 +6,7 @@
         "bannerType": "LIVE_CHAT_BANNER_TYPE_CROSS_CHANNEL_REDIRECT",
         "targetId": "live-chat-banner",
         "isStackable": true,
+
         "contents": {
           "liveChatBannerRedirectRenderer": {
             "authorPhoto": {
@@ -29,6 +30,7 @@
                 }
               ]
             },
+
             "contextMenuButton": {
               "buttonRenderer": {
                 "icon": { "iconType": "MORE_VERT" },
