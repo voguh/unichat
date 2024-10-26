@@ -47,5 +47,14 @@ and image tag like `<img src="https://cdn.betterttv.net/emote/<EMOTE_ID>/3x.<IMA
 
 ### Known issues
 
-Tauri does not work properly on Linux with Wayland (GNOME), the detected bugs are: "the chat window is not resized
-correctly" and "the window decorator buttons do not respect the user's settings, position, and visible buttons."
+In my tests, I noticed that Tauri has issues with Wayland (tested only on Fedora 40 with GNOME).
+
+Below are the issues I detected:
+- `The chat window is not resized correctly`
+- `The window decorator buttons do not respect the user's settings, position, and visible buttons.`
+
+This issue can be worked around by setting the GDK_BACKEND variable to x11.
+
+In VSCode, the environment variable `GDK_BACKEND` is already set to `x11`, so the issue usually doesn’t
+occur if you run the project through the integrated terminal. If you use an external terminal, just
+run it with `GDK_BACKEND="x11" pnpm dev`.
