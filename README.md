@@ -40,7 +40,7 @@ and image tag like `<img src="https://cdn.betterttv.net/emote/<EMOTE_ID>/3x.<IMA
 - [x] Implement `Raid` event;
 - [x] Implement `Sponsor` event;
 - [x] Implement `SponsorGift` event;
-- [ ] Implement `Donate` event;
+- [x] Implement `Donate` event;
 - [ ] Implement an way to get youtube channel id or store in `unichat.db`
 - [ ] Implement overlay with bttv support;
 
