@@ -180,5 +180,8 @@ pub struct UniChatDonateEvent {
 
     pub value: f32,
     pub currency: String,
-    pub message: String
+
+    pub message_id: String,
+    pub message: String,
+    pub emotes: Vec<UniChatEmote>,
 }

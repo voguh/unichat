@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::events::unichat::{UniChatDonateEvent, UniChatEvent};
+use crate::events::unichat::{UniChatDonateEvent, UniChatEmote, UniChatEvent};
 use crate::youtube::mapper::{AuthorName, ThumbnailsWrapper};
 
-use super::{build_author_badges, build_message, get_author_color, get_author_type, LiveChatAuthorBadgeRenderer, Message};
+use super::{build_author_badges, build_emotes, build_message, get_author_color, get_author_type, LiveChatAuthorBadgeRenderer, Message};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -11,7 +11,7 @@ struct LiveChatPaidMessageRenderer {
     id: String,
 
     purchase_amount_text: PurchaseAmountText,
-    message: Message,
+    message: Option<Message>,
 
     author_external_channel_id: String,
     author_name: AuthorName,
@@ -45,6 +45,21 @@ fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> (String, 
     (currency, raw_value.parse().unwrap_or(0.0))
 }
 
+fn build_option_message(message: &Option<Message>) -> String {
+    if let Some(message) = message {
+        build_message(&message.runs)
+    } else {
+        String::from("")
+    }
+}
+
+fn build_option_emotes(message: &Option<Message>) -> Vec<UniChatEmote> {
+    if let Some(message) = message {
+        build_emotes(&message.runs)
+    } else {
+        Vec::new()
+    }
+}
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_json::Error> {
     match serde_json::from_value::<LiveChatPaidMessageRenderer>(value) {
@@ -68,7 +83,10 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_jso
 
                     value: purchase_value,
                     currency: purchase_currency,
-                    message: build_message(&parsed.message.runs)
+
+                    message_id: parsed.id,
+                    message: build_option_message(&parsed.message),
+                    emotes: build_option_emotes(&parsed.message)
                 }
             }))
         }
