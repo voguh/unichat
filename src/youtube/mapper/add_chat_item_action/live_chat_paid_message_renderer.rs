@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::events::unichat::{UniChatDonateEvent, UniChatEmote, UniChatEvent};
+use crate::events::unichat::{UniChatDonateEventPayload, UniChatEmote, UniChatEvent};
 use crate::youtube::mapper::{AuthorName, ThumbnailsWrapper};
 
 use super::{build_author_badges, build_emotes, build_message, get_author_color, get_author_type, LiveChatAuthorBadgeRenderer, Message};
@@ -68,7 +68,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_jso
 
             Ok(Some(UniChatEvent::Donate {
                 event_type: String::from("unichat:donate"),
-                detail: UniChatDonateEvent {
+                detail: UniChatDonateEventPayload {
                     channel_id: None,
                     channel_name: None,
                     platform: String::from("youtube"),

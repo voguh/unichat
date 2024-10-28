@@ -29,10 +29,6 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_jso
                     channel_name: None,
                     platform: String::from("youtube"),
 
-                    message_id: parsed.id,
-                    message_text: build_message(&parsed.message.runs),
-                    emotes: build_emotes(&parsed.message.runs),
-
                     author_id: parsed.author_external_channel_id,
                     author_username: None,
                     author_display_name: parsed.author_name.simple_text,
@@ -41,7 +37,9 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_jso
                     author_profile_picture_url: parsed.author_photo.thumbnails.last().unwrap().url.clone(),
                     author_type: get_author_type(&parsed.author_badges),
 
-                    timestamp: parsed.timestamp_usec.parse::<u64>().unwrap()
+                    message_id: parsed.id,
+                    message_text: build_message(&parsed.message.runs),
+                    emotes: build_emotes(&parsed.message.runs)
                 }
             }))
         }
