@@ -10,7 +10,6 @@ import Paper from '@mui/material/Paper'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import TextField from '@mui/material/TextField'
 import { invoke } from '@tauri-apps/api/core'
-import * as clipboard from '@tauri-apps/plugin-clipboard-manager'
 
 import { storageService } from 'unichat/services/storageService'
 import { YOUTUBE_CHAT_URL_KEY } from 'unichat/utils/constants'
@@ -56,7 +55,6 @@ export function DashboardHome(): React.ReactNode {
       setSavingStatus('saving')
 
       await storageService.setItem(YOUTUBE_CHAT_URL_KEY, formData.youtubeChatUrl)
-      await storageService.save()
 
       if (Strings.isValidYouTubeChatUrl(formData.youtubeChatUrl)) {
         await invoke('update_webview_url', { label: `youtube-chat`, url: formData.youtubeChatUrl })
@@ -139,7 +137,7 @@ export function DashboardHome(): React.ReactNode {
             <i className="fas fa-sync" />
           </Button>
 
-          <Button onClick={() => clipboard.writeText(`http://localhost:9527/overlays/${selectedOverlay}`)}>
+          <Button onClick={() => navigator.clipboard.writeText(`http://localhost:9527/overlays/${selectedOverlay}`)}>
             <i className="fas fa-globe" />
           </Button>
         </Paper>

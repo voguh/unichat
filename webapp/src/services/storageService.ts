@@ -1,24 +1,15 @@
-import { load, Store } from '@tauri-apps/plugin-store'
+import { invoke } from '@tauri-apps/api/core'
 
 export class StorageService {
   private readonly _listeners: Map<string, ((key: string, value: any) => void)[]>
-  private _store: Store
 
   constructor() {
     this._listeners = new Map()
   }
 
-  public async createStore(): Promise<void> {
-    this._store = await load('unichat.db')
-  }
-
   public async getItem<T>(key: string): Promise<T> {
     try {
-      if (this._store == null) {
-        await this.createStore()
-      }
-
-      return this._store.get<T>(key)
+      return invoke<T>('store_get_item', { key })
     } catch (err) {
       console.error(err)
 
@@ -28,23 +19,15 @@ export class StorageService {
 
   public async setItem<T>(key: string, value: T): Promise<void> {
     try {
-      if (this._store == null) {
-        await this.createStore()
-      }
-
-      await this._store.set(key, value)
-
       const listeners = this._listeners.get(key)
       for (const listener of listeners ?? []) {
         listener(key, value)
       }
+
+      return invoke<void>('store_set_item', { key, value })
     } catch (err) {
       console.error(err)
     }
-  }
-
-  public async save(): Promise<void> {
-    await this._store.save()
   }
 
   public addEventListener<T>(key: string, cb: (key: string, value: T) => void): void {

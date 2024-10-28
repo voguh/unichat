@@ -9,13 +9,19 @@ mod actix;
 mod commands;
 mod events;
 mod render;
+mod store;
 mod youtube;
 
 fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::error::Error>> {
+
     let overlays_dir = app.path().app_data_dir().unwrap().join("overlays");
     if !&overlays_dir.exists() {
         fs::create_dir_all(&overlays_dir).unwrap();
     }
+
+    store::setup(app);
+
+    /* ========================================================================================== */
 
     actix::register_actix(app, overlays_dir);
 
@@ -77,8 +83,8 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
 async fn main() {
     tauri::async_runtime::set(tokio::runtime::Handle::current());
     tauri::Builder::default().setup(setup)
-        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(tauri_plugin_log::Builder::new().level(log::LevelFilter::Info).build())
         .manage(actix::ActixState::default())
         .invoke_handler(tauri::generate_handler![
             commands::show_webview,
@@ -86,6 +92,8 @@ async fn main() {
             commands::update_webview_url,
             commands::list_overlays,
             commands::open_overlays_dir,
+            store::store_get_item,
+            store::store_set_item,
             youtube::on_youtube_message
         ])
         .on_window_event(on_window_event)

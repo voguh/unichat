@@ -1,5 +1,7 @@
+use std::sync::Arc;
+
 use tauri::{LogicalPosition, LogicalSize, Manager, WebviewBuilder, WebviewUrl, WebviewWindowBuilder};
-use tauri_plugin_store::StoreBuilder;
+use tauri_plugin_store::Store;
 
 use crate::youtube;
 
@@ -10,8 +12,7 @@ pub fn create_render<R: tauri::Runtime>(app: &tauri::App<R>, window: &tauri::Win
     let pos = LogicalPosition::new(64, 0);
     let size = LogicalSize::new(window_size.width - 64, window_size.height);
 
-    let settings_path = app.path().app_data_dir().unwrap().join("unichat.db");
-    let store = StoreBuilder::new(app.handle(), settings_path).build().unwrap();
+    let store = app.state::<Arc<Store<R>>>();
     let url = store.get(format!("{label}-url")).and_then(|value| value.as_str().map(|s| s.to_string()))
         .unwrap_or(default_url);
 
