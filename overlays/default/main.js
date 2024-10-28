@@ -48,7 +48,7 @@ $(document).ready(function () {
             }
         } else if (data.type === 'unichat:remove_message') {
             MAIN_CONTAINER.querySelector(`div[data-id="${data.detail.messageId}"]`)?.remove()
-        } else if (data.type === 'unichat:remove_user') {
+        } else if (data.type === 'unichat:remove_author') {
             const messages = MAIN_CONTAINER.querySelectorAll(`div[data-from="${data.detail.authorId}"]`)
             for (const message of (messages ?? [])) {
                 message.remove()
