@@ -1,2 +1,2 @@
-/pubic
-/dist
+**/dist
+**/build
