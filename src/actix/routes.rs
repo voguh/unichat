@@ -1,35 +1,26 @@
-use actix_web::{get, web, Error, HttpRequest, HttpResponse};
-use tokio::sync::broadcast;
+use actix_web::{get, web, HttpRequest, HttpResponse};
 
 use crate::events;
 
 #[get("/ws")]
-async fn ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
+async fn ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, actix_web::Error> {
     let (res, mut session, _stream) = actix_ws::handle(&req, stream)?;
 
-    let mut rx = events::INSTANCE.lock().unwrap().tx.subscribe();
-    tokio::spawn(async move {
-        loop {
-            match rx.recv().await {
-                Ok(received) => {
-                    let parsed = serde_json::to_string(&received).unwrap();
-                    if let Err(err) = session.text(parsed).await {
-                        println!("An error occurred on send message to client, exiting loop: {err}");
-                        break;
-                    }
-                }
+    actix_web::rt::spawn(async move {
+        let mut rx = events::event_emitter().subscribe();
 
-                Err(broadcast::error::RecvError::Closed) => {
-                    println!("Transmitter disconnected, exiting loop");
-                    break;
-                }
-
-                Err(broadcast::error::RecvError::Lagged(_)) => {
-                    println!("Receiver lagged behind, skipping messages");
-                }
+        while let Ok(received) = rx.recv().await {
+            let parsed = serde_json::to_string(&received).unwrap();
+            if let Err(err) = session.text(parsed).await {
+                println!("An error occurred on send message to client, exiting loop: {err}");
+                break;
             }
-        };
+        }
+
+        let _ = session.close(None).await;
+        drop(rx);
+        println!("Client disconnected");
     });
 
-    Ok(res)
+    return Ok(res);
 }

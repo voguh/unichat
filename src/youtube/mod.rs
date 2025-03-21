@@ -44,8 +44,8 @@ pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, act
     for action in actions.clone() {
         match mapper::parse(&action) {
             Ok(Some(parsed)) => {
-                if let Err(err) = events::INSTANCE.lock().unwrap().tx.send(parsed) {
-                    println!("An error occurred on send unichat event: {err}")
+                if let Err(err) = events::event_emitter().emit(parsed) {
+                    println!("An error occurred on send unichat event: {err}");
                 }
             }
 
