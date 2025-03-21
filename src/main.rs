@@ -13,17 +13,24 @@ mod store;
 mod youtube;
 
 fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::error::Error>> {
-
     let overlays_dir = app.path().app_data_dir().unwrap().join("overlays");
     if !&overlays_dir.exists() {
         fs::create_dir_all(&overlays_dir).unwrap();
     }
 
-    store::setup(app);
+    /* ========================================================================================== */
+
+    events::init(app);
 
     /* ========================================================================================== */
 
-    actix::register_actix(app, overlays_dir);
+    let store = store::new(app);
+    app.manage(store);
+
+    /* ========================================================================================== */
+
+    let http_server = actix::new(app, overlays_dir);
+    app.manage(actix::ActixState{ handle: http_server });
 
     /* ========================================================================================== */
 
@@ -61,11 +68,8 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
             }
 
             tauri::WindowEvent::Destroyed => {
-                let state = app.state::<actix::ActixState>();
-                let mut actix_handler = state.handle.lock().unwrap();
-                if let Some(handler) = actix_handler.take() {
-                    handler.abort();
-                }
+                let actix = app.state::<actix::ActixState>();
+                actix.handle.abort();
 
                 for (key, window) in app.windows() {
                     if key != "main" {
@@ -79,13 +83,10 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     }
 }
 
-#[tokio::main]
-async fn main() {
-    tauri::async_runtime::set(tokio::runtime::Handle::current());
+fn main() {
     tauri::Builder::default().setup(setup)
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_log::Builder::new().level(log::LevelFilter::Info).build())
-        .manage(actix::ActixState::default())
         .invoke_handler(tauri::generate_handler![
             commands::show_webview,
             commands::hide_webviews,
