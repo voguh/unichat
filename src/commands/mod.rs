@@ -1,4 +1,5 @@
-use std::{str::FromStr, thread::sleep};
+use std::str::FromStr;
+use std::thread::sleep;
 
 use tauri::{LogicalPosition, LogicalSize, Manager, Runtime};
 
@@ -67,7 +68,7 @@ pub fn hide_webviews(app: tauri::AppHandle) {
 
 #[tauri::command]
 pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &str, url: &str) -> Result<(), String> {
-    let mut webview = app.get_webview(label).unwrap();
+    let webview = app.get_webview(label).unwrap();
 
     webview.navigate(tauri::Url::from_str(url).unwrap()).unwrap();
     sleep(std::time::Duration::from_secs(2));
@@ -75,7 +76,7 @@ pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &st
         webview.eval(youtube::SCRAPPING_JS).unwrap();
     }
 
-    Ok(())
+    return Ok(());
 }
 
 /* ================================================================================================================== */
@@ -98,7 +99,7 @@ pub async fn list_overlays<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Vec<S
             }
         }
 
-        Ok(folders)
+        return Ok(folders);
     } else {
         Err(String::from_str("An error occurred on iterate over overlays dir").unwrap())
     }
@@ -110,8 +111,7 @@ pub async fn list_overlays<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Vec<S
 #[tauri::command]
 pub async fn open_overlays_dir<R: Runtime>(app: tauri::AppHandle<R>) -> Result<(), String> {
     let overlays_dir = app.path().app_data_dir().unwrap().join("overlays");
-
     showfile::show_path_in_file_manager(overlays_dir);
 
-    Ok(())
+    return Ok(());
 }
