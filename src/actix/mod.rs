@@ -1,16 +1,13 @@
-use std::{path::PathBuf, sync::{Arc, Mutex}};
-
-use tauri::Manager;
+use std::path::PathBuf;
 
 pub mod routes;
 
-#[derive(Default)]
 pub struct ActixState {
-    pub handle: Arc<Mutex<Option<tokio::task::JoinHandle<()>>>>
+    pub handle: tauri::async_runtime::JoinHandle<()>
 }
 
-pub fn register_actix<R: tauri::Runtime>(app: &tauri::App<R>, overlays_dir: PathBuf) {
-    let handler = tokio::spawn(async move {
+pub fn new<R: tauri::Runtime>(_app: &tauri::App<R>, overlays_dir: PathBuf) -> tauri::async_runtime::JoinHandle<()> {
+    let handler = tauri::async_runtime::spawn(async move {
         actix_web::HttpServer::new(move || {
             actix_web::App::new().wrap(actix_web::middleware::Logger::default())
                 .service(routes::ws)
@@ -20,6 +17,5 @@ pub fn register_actix<R: tauri::Runtime>(app: &tauri::App<R>, overlays_dir: Path
         .run().await.expect("An error occurred on run actix server")
     });
 
-    let state = app.state::<ActixState>();
-    *state.handle.lock().unwrap() = Some(handler);
+    return handler;
 }
