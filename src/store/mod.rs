@@ -19,12 +19,13 @@ pub async fn store_set_item<R: tauri::Runtime>(app: AppHandle<R>, key: String, v
     Ok(store.set(key, value))
 }
 
-pub fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) {
+pub fn new<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Arc<Store<R>> {
     let mut defaults = HashMap::new();
-    defaults.insert(String::from(YOUTUBE_CHAT_URL_KEY), Value::from(""));
-    defaults.insert(String::from(TWITCH_CHANNEL_NAME_KEY), Value::from(""));
+    defaults.insert(String::from(YOUTUBE_CHAT_URL_KEY), Value::from("about:blank"));
+    defaults.insert(String::from(TWITCH_CHANNEL_NAME_KEY), Value::from("about:blank"));
 
     let store_path = app.path().app_data_dir().unwrap().join("unichat.db");
     let store = StoreBuilder::new(app.handle(), store_path).defaults(defaults).build().unwrap();
-    app.manage(store);
+
+    return store;
 }
