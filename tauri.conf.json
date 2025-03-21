@@ -1,6 +1,6 @@
 {
     "$schema": "https://schema.tauri.app/config/2.0.5",
-    "identifier": "io.github.voguh.unichat",
+    "identifier": "unichat",
     "build": {
         "beforeDevCommand": "pnpm dev:ui",
         "beforeBuildCommand": "pnpm build:ui",
