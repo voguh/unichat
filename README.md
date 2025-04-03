@@ -6,13 +6,13 @@ with the chat with support for BTTV emotes and customization using HTML/CSS/JS.
 
 ### App directories
 
-| DIR TYPE           | LOCATION ON LINUX                           | LOCATION ON WINDOWS                          | LOCATION ON MAC                                        |
-|--------------------|---------------------------------------------|----------------------------------------------|--------------------------------------------------------|
-| app_cache_dir      | ~/.cache/io.github.voguh.unichat            | ~\AppData\Local\io.github.voguh.unichat      | ~/Library/Caches/io.github.voguh.unichat               |
-| app_config_dir     | ~/.config/io.github.voguh.unichat           | ~\AppData\Roaming\io.github.voguh.unichat    | ~/Library/Application\ Support/io.github.voguh.unichat |
-| app_data_dir       | ~/.local/share/io.github.voguh.unichat      | ~\AppData\Roaming\io.github.voguh.unichat    | ~/Library/Application\ Support/io.github.voguh.unichat |
-| app_local_data_dir | ~/.local/share/io.github.voguh.unichat      | ~\AppData\Local\io.github.voguh.unichat      | ~/Library/Application\ Support/io.github.voguh.unichat |
-| app_log_dir        | ~/.local/share/io.github.voguh.unichat/logs | ~\AppData\Local\io.github.voguh.unichat\logs | ~/Library/Logs/io.github.voguh.unichat                 |
+| DIR TYPE           | LOCATION ON LINUX           | LOCATION ON WINDOWS          | LOCATION ON MAC                        |
+|--------------------|-----------------------------|------------------------------|----------------------------------------|
+| app_cache_dir      | ~/.cache/unichat            | ~\AppData\Local\unichat      | ~/Library/Caches/unichat               |
+| app_config_dir     | ~/.config/unichat           | ~\AppData\Roaming\unichat    | ~/Library/Application\ Support/unichat |
+| app_data_dir       | ~/.local/share/unichat      | ~\AppData\Roaming\unichat    | ~/Library/Application\ Support/unichat |
+| app_local_data_dir | ~/.local/share/unichat      | ~\AppData\Local\unichat      | ~/Library/Application\ Support/unichat |
+| app_log_dir        | ~/.local/share/unichat/logs | ~\AppData\Local\unichat\logs | ~/Library/Logs/unichat                 |
 
 
 ### Build
