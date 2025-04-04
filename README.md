@@ -24,9 +24,25 @@ and image tag like `<img src="https://cdn.betterttv.net/emote/<EMOTE_ID>/3x.<IMA
 ## Build
 
 Install all dependencies before following [oficial tutorial](https://v2.tauri.app/start/prerequisites/)
-After that, just run build with:
+then just run `pnpm build`.
 
-```sh
+Following an example using ubuntu 24.04 docker image.
+
+```bash
+docker run -v .:/home/ubuntu/unichat --rm -it ubuntu:24.04 bash
+
+export DEBIAN_FRONTEND=noninteractive
+apt update && apt upgrade -y
+apt install -y git curl wget build-essential ca-certificates file libwebkit2gtk-4.1-dev libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+
+su - ubuntu
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
+nvm i 22.14.0
+corepack enable pnpm
+corepack prepare pnpm@10.7.1 --activate
+pnpm config set store-dir ~/.pnpm-store
+pnpm install
 pnpm build
 ```
 
