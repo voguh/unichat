@@ -13,38 +13,38 @@ mod mapper;
 
 pub const SCRAPPING_JS: &str = r#"
     if (window.fetch.__WRAPPED__ == null) {
-        const originalFetch = window.fetch
+        const originalFetch = window.fetch;
         Object.defineProperty(window, "fetch", {
             value: async (...args) => {
-                const res = await originalFetch(...args)
+                const res = await originalFetch(...args);
 
                 if (res.url.startsWith("https://www.youtube.com/youtubei/v1/live_chat/get_live_chat") && res.ok) {
                     res.clone().json().then(async (parsed) => {
-                        const actions = parsed?.continuationContents?.liveChatContinuation?.actions
+                        const actions = parsed?.continuationContents?.liveChatContinuation?.actions;
 
                         if (actions != null && actions.length > 0) {
-                            await window.__TAURI__.core.invoke('on_youtube_message', { actions })
+                            await window.__TAURI__.core.invoke("on_youtube_message", { actions });
                         }
                     }).catch((err) => {
-                        window.__TAURI__.core.invoke('on_youtube_error', { error: JSON.stringify(err.stack) }).then(() => console.log("YouTube error event emitted!"))
-                    })
+                        window.__TAURI__.core.invoke("on_youtube_error", { error: JSON.stringify(err.stack) }).then(() => console.log("YouTube error event emitted!"));
+                    });
                 }
 
-                return res
+                return res;
             },
             configurable: true,
             writable: true
-        })
+        });
 
         setInterval(() => {
             if (window.fetch.__WRAPPED__) {
-                window.__TAURI__.core.invoke('on_youtube_ping').then(() => console.log("YouTube ping event emitted!"))
+                window.__TAURI__.core.invoke("on_youtube_ping").then(() => console.log("YouTube ping event emitted!"));
             }
-        }, 5000)
+        }, 5000);
 
-        window.__TAURI__.core.invoke('on_youtube_ready', { url: window.location.href }).then(() => console.log("YouTube ready event emitted!"))
-        Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true })
-        console.log("Fetch wrapped!")
+        window.__TAURI__.core.invoke("on_youtube_ready", { url: window.location.href }).then(() => console.log("YouTube ready event emitted!"));
+        Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
+        console.log("Fetch wrapped!");
 
         const unichatWarn = document.createElement("div");
         unichatWarn.style.position = "absolute";
@@ -58,7 +58,7 @@ pub const SCRAPPING_JS: &str = r#"
         unichatWarn.innerHTML = "UniChat installed! You can close this window.";
         document.body.appendChild(unichatWarn);
     } else {
-        console.log("Fetch already was wrapped!")
+        console.log("Fetch already was wrapped!");
     }
 "#;
 
@@ -74,6 +74,7 @@ fn dispatch_event<R: tauri::Runtime>(app: tauri::AppHandle<R>, event_type: &str,
 
 #[tauri::command]
 pub async fn on_youtube_ready<R: tauri::Runtime>(app: tauri::AppHandle<R>, url: &str) -> Result<(), String> {
+    log::info!("YouTube scrapper js registered!");
     let payload = serde_json::json!({ "status": "ready", "url": url });
 
     return dispatch_event(app, "unichat://youtube:ready", payload);
@@ -89,7 +90,7 @@ pub async fn on_youtube_ping<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Res
 #[tauri::command]
 pub async fn on_youtube_error<R: tauri::Runtime>(app: tauri::AppHandle<R>, error: &str) -> Result<(), String> {
     let payload = serde_json::json!({ "status": "error", "error": error });
-    log::error!(target: "youtube-chat", "js-error:{}", error);
+    log::error!("js-error:{}", error);
 
     return dispatch_event(app, "unichat://youtube:error", payload);
 }
@@ -122,7 +123,7 @@ pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, act
                 }
 
                 if let Err(err) = events::event_emitter().emit(parsed) {
-                    log::error!(target: "youtube-chat","An error occurred on send unichat event: {}", err);
+                    log::error!("An error occurred on send unichat event: {}", err);
                 }
             }
 
