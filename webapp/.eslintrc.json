@@ -7,7 +7,8 @@
   "extends": [
     "standard",
     "plugin:@typescript-eslint/recommended",
-    "plugin:react/recommended"
+    "plugin:react/recommended",
+    "plugin:prettier/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -17,7 +18,7 @@
       "jsx": true
     }
   },
-  "plugins": ["import", "@typescript-eslint", "react", "react-hooks", "prettier", "eslint-plugin-import-helpers", "vitest"],
+  "plugins": ["import", "@typescript-eslint", "prettier", "react", "react-hooks", "prettier", "eslint-plugin-import-helpers", "vitest"],
   "rules": {
     "prettier/prettier": "warn",
 
