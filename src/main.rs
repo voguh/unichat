@@ -69,8 +69,7 @@ fn main() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_log::Builder::new().level(log::LevelFilter::Info).build())
         .invoke_handler(tauri::generate_handler![
-            commands::show_webview,
-            commands::hide_webviews,
+            commands::toggle_webview,
             commands::update_webview_url,
             commands::list_overlays,
             commands::open_overlays_dir,
@@ -78,6 +77,7 @@ fn main() {
             store::store_set_item,
             youtube::on_youtube_ready,
             youtube::on_youtube_ping,
+            youtube::on_youtube_error,
             youtube::on_youtube_message
         ])
         .on_window_event(on_window_event)

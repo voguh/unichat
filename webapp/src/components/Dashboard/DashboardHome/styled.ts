@@ -5,7 +5,7 @@ export const DashboardHomeStyledContainer = styled.div`
   height: 100%;
   display: grid;
   grid-template-areas: "FDS PRV";
-  grid-template-columns: 1fr 500px;
+  grid-template-columns: 1fr 400px;
   grid-template-rows: 1fr;
   gap: 8px;
 
@@ -56,7 +56,7 @@ export const DashboardHomeStyledContainer = styled.div`
 
     > .preview-header {
       display: flex;
-      gap: 8px;
+      gap: 4px;
       padding: 16px 8px 8px 8px;
 
       > button {

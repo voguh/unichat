@@ -8,7 +8,6 @@ import { DashboardHome } from "./DashboardHome";
 import { DashboardStyledContainer } from "./styled";
 
 const TABS = {
-  home: { icon: "fas fa-home fa-xl" },
   youtube: { icon: "fab fa-youtube fa-xl" }
 };
 
@@ -17,31 +16,16 @@ interface Props {
 }
 
 export function Dashboard(_props: Props): React.ReactNode {
-  const [selectedTab, setSelectedTab] = React.useState<keyof typeof TABS>("home");
-
-  React.useEffect(() => {
-    async function init(): Promise<void> {
-      await invoke("hide_webviews");
-
-      if (["home"].every((noWebviewTab) => noWebviewTab !== selectedTab)) {
-        await invoke("show_webview", { label: `${selectedTab}-chat` });
-      }
-    }
-
-    init();
-  }, [selectedTab]);
+  async function toggleWebview(id: string): Promise<void> {
+    invoke("toggle_webview", { label: `${id}-chat` });
+  }
 
   return (
     <DashboardStyledContainer>
       <Paper className="sidebar">
         {Object.entries(TABS).map(([id, { icon }]) => {
           return (
-            <Button
-              key={id}
-              size="small"
-              variant={id === selectedTab ? "contained" : "text"}
-              onClick={() => setSelectedTab(id as keyof typeof TABS)}
-            >
+            <Button key={id} size="small" onClick={() => toggleWebview(id)}>
               <i className={icon} />
             </Button>
           );

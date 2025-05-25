@@ -6,24 +6,16 @@ use tauri::{Manager, Runtime};
 use crate::youtube;
 
 #[tauri::command]
-pub fn show_webview<R: Runtime>(app: tauri::AppHandle<R>, label: &str) {
-    for (key, value) in app.webview_windows() {
-        if key != "main" && key != label {
-            value.hide().unwrap();
-        }
-    }
-
+pub fn toggle_webview<R: Runtime>(app: tauri::AppHandle<R>, label: &str) -> Result<(), String> {
     let webview_window = app.get_webview_window(label).unwrap();
-    webview_window.show().unwrap();
-}
+    if webview_window.is_visible().map_err(|e| format!("{:?}", e))? {
+        webview_window.hide().map_err(|e| format!("{:?}", e))?;
+    } else {
+        webview_window.show().map_err(|e| format!("{:?}", e))?;
 
-#[tauri::command]
-pub fn hide_webviews(app: tauri::AppHandle) {
-    for (key, value) in app.webview_windows() {
-        if key != "main" {
-            value.hide().unwrap();
-        }
     }
+
+    return Ok(());
 }
 
 #[tauri::command]

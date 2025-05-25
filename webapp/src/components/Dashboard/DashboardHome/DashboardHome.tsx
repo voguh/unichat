@@ -10,9 +10,11 @@ import Paper from "@mui/material/Paper";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import { invoke } from "@tauri-apps/api/core";
+import * as event from "@tauri-apps/api/event";
 
 import { storageService } from "unichat/services/storageService";
 import { YOUTUBE_CHAT_URL_KEY } from "unichat/utils/constants";
+import { IPCYoutubeEvents, IPCYouTubeStatusEvent, IPCYouTubeStatusPingEvent } from "unichat/utils/IPCYoutubeEvents";
 import { Strings } from "unichat/utils/Strings";
 
 import { ScrapperStatus } from "./ScrapperStatus";
@@ -26,7 +28,14 @@ const defaultValues: FormData = {
   youtubeChatUrl: ""
 };
 
+const DEFAULT_STATUS_EVENT: IPCYouTubeStatusEvent = {
+  type: IPCYoutubeEvents.YOUTUBE_IDLE,
+  status: "idle",
+  timestamp: Date.now()
+};
+
 export function DashboardHome(): React.ReactNode {
+  const [statusEvent, setStatusEvent] = React.useState<IPCYouTubeStatusEvent>(DEFAULT_STATUS_EVENT);
   const [selectedOverlay, setSelectedOverlay] = React.useState("default");
   const [overlays, setOverlays] = React.useState<string[]>([]);
 
@@ -85,20 +94,42 @@ export function DashboardHome(): React.ReactNode {
     init();
   }, []);
 
+  function handleStatus(): void {
+    setStatusEvent((statusEvent) => {
+      if ([IPCYoutubeEvents.YOUTUBE_PING].includes(statusEvent.type) && Date.now() - statusEvent.timestamp > 5000) {
+        return { type: IPCYoutubeEvents.YOUTUBE_ERROR, status: "error", error: null, timestamp: Date.now() };
+      }
+
+      return statusEvent;
+    });
+  }
+
+  React.useEffect(() => {
+    const interval = setInterval(handleStatus, 5000);
+    const unlisten = event.listen<IPCYouTubeStatusPingEvent>(IPCYoutubeEvents.YOUTUBE_PING, ({ payload }) => {
+      setStatusEvent(payload);
+    });
+
+    return () => {
+      clearInterval(interval);
+      unlisten.then(() => console.log(`Unsubscribed from ${IPCYoutubeEvents.YOUTUBE_PING} event`));
+    };
+  }, []);
+
   return (
     <DashboardHomeStyledContainer>
       <form className="fields" onSubmit={handleSubmit(onSubmit)}>
         <Paper className="fields-actions">
-          <Button
-            type="submit"
-            color={savingStatus === "saving" ? "warning" : savingStatus === "error" ? "error" : "primary"}
-          >
-            {savingStatus === "saving" ? "Saving..." : savingStatus === "error" ? "Error" : "Save"}
-          </Button>
-
-          <div className="status">
-            <ScrapperStatus />
+          <div>
+            <Button
+              type="submit"
+              color={savingStatus === "saving" ? "warning" : savingStatus === "error" ? "error" : "primary"}
+            >
+              {savingStatus === "saving" ? "Saving..." : savingStatus === "error" ? "Error" : "Save"}
+            </Button>
           </div>
+
+          <ScrapperStatus statusEvent={statusEvent} />
         </Paper>
 
         <Paper className="fields-values">

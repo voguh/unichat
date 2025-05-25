@@ -1,4 +1,6 @@
 use std::fs;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
 use std::io::Write;
 
 use serde_json::Value;
@@ -22,7 +24,9 @@ pub const SCRAPPING_JS: &str = r#"
                         if (actions != null && actions.length > 0) {
                             await window.__TAURI__.core.invoke('on_youtube_message', { actions })
                         }
-                    }).catch(err => console.error(err))
+                    }).catch((err) => {
+                        window.__TAURI__.core.invoke('on_youtube_error', { error: JSON.stringify(err.stack) }).then(() => console.log("YouTube error event emitted!"))
+                    })
                 }
 
                 return res
@@ -44,19 +48,38 @@ pub const SCRAPPING_JS: &str = r#"
     }
 "#;
 
+/* ================================================================================================================== */
+
+fn dispatch_event<R: tauri::Runtime>(app: tauri::AppHandle<R>, event_type: &str, mut payload: Value) -> Result<(), String> {
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| format!("Failed to get current time: {}", e))?;
+    payload["type"] = serde_json::json!(event_type);
+    payload["timestamp"] = serde_json::json!(now.as_millis());
+
+    return app.emit(event_type, payload).map_err(|e| format!("Failed to emit event: {}", e));
+}
+
 #[tauri::command]
 pub async fn on_youtube_ready<R: tauri::Runtime>(app: tauri::AppHandle<R>, url: &str) -> Result<(), String> {
     let payload = serde_json::json!({ "status": "ready", "url": url });
-    app.emit("youtube::ready", payload).unwrap();
-    return Ok(());
+
+    return dispatch_event(app, "unichat://youtube:ready", payload);
 }
 
 #[tauri::command]
 pub async fn on_youtube_ping<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result<(), String> {
-    let payload: Value = serde_json::json!({ "status": "ping" });
-    app.emit("youtube::ping", payload).unwrap();
-    return Ok(());
+    let payload = serde_json::json!({ "status": "working" });
+
+    return dispatch_event(app, "unichat://youtube:ping", payload);
 }
+
+#[tauri::command]
+pub async fn on_youtube_error<R: tauri::Runtime>(app: tauri::AppHandle<R>, error: &str) -> Result<(), String> {
+    let payload = serde_json::json!({ "status": "error", "error": error });
+
+    return dispatch_event(app, "unichat://youtube:error", payload);
+}
+
+/* ================================================================================================================== */
 
 #[tauri::command]
 pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, actions: Vec<Value>) -> Result<(), String> {

@@ -13,17 +13,20 @@
             {
                 "label": "main",
                 "title": "Voguh's UniChat",
-                "width": 1280,
-                "height": 720,
-                "minWidth": 800,
-                "minHeight": 600
+                "width": 1024,
+                "height": 576,
+                "maxWidth": 1280,
+                "maxHeight": 720,
+                "minWidth": 1024,
+                "minHeight": 576,
+                "maximizable": false
             },
             {
                 "label": "youtube-chat",
-                "title": "Voguh's UniChat - YouTube chat",
+                "title": "YouTube chat",
                 "url": "about:blank",
-                "width": 800,
-                "height": 600,
+                "width": 400,
+                "height": 576,
                 "visible": false,
                 "resizable": false,
                 "maximizable": false
