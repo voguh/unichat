@@ -104,16 +104,23 @@ pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, act
     let parse_errors_path = app.path().app_data_dir().unwrap().join("parse_errors.txt");
     let mut errors_file = fs::OpenOptions::new().append(true).create(true).open(&parse_errors_path).unwrap();
 
-    let debug_events_path = app.path().app_data_dir().unwrap().join("debug_events_log.txt");
-    let mut debug_file = fs::OpenOptions::new().append(true).create(true).open(&debug_events_path).unwrap();
+    let debug_raw_events_path = app.path().app_data_dir().unwrap().join("debug_raw_events_log.txt");
+    let mut debug_raw_file = fs::OpenOptions::new().append(true).create(true).open(&debug_raw_events_path).unwrap();
+
+    let debug_parsed_events_path = app.path().app_data_dir().unwrap().join("debug_parsed_events_log.txt");
+    let mut debug_parsed_file = fs::OpenOptions::new().append(true).create(true).open(&debug_parsed_events_path).unwrap();
 
     for action in actions.clone() {
         if is_dev() {
-            writeln!(debug_file, "{}", serde_json::to_string(&action).unwrap()).unwrap();
+            writeln!(debug_raw_file, "{}", serde_json::to_string(&action).unwrap()).unwrap();
         }
 
         match mapper::parse(&action) {
             Ok(Some(parsed)) => {
+                if is_dev() {
+                    writeln!(debug_parsed_file, "{}", serde_json::to_string(&parsed).unwrap()).unwrap();
+                }
+
                 if let Err(err) = events::event_emitter().emit(parsed) {
                     log::error!(target: "youtube-chat","An error occurred on send unichat event: {}", err);
                 }
