@@ -21,164 +21,182 @@ import { ScrapperStatus } from "./ScrapperStatus";
 import { DashboardHomeStyledContainer } from "./styled";
 
 interface FormData {
-  youtubeChatUrl: string;
+    youtubeChatUrl: string;
 }
 
 const defaultValues: FormData = {
-  youtubeChatUrl: ""
+    youtubeChatUrl: ""
 };
 
 const DEFAULT_STATUS_EVENT: IPCYouTubeStatusEvent = {
-  type: IPCYoutubeEvents.YOUTUBE_IDLE,
-  status: "idle",
-  timestamp: Date.now()
+    type: IPCYoutubeEvents.YOUTUBE_IDLE,
+    status: "idle",
+    timestamp: Date.now()
 };
 
 export function DashboardHome(): React.ReactNode {
-  const [statusEvent, setStatusEvent] = React.useState<IPCYouTubeStatusEvent>(DEFAULT_STATUS_EVENT);
-  const [selectedOverlay, setSelectedOverlay] = React.useState("default");
-  const [overlays, setOverlays] = React.useState<string[]>([]);
+    const [statusEvent, setStatusEvent] = React.useState<IPCYouTubeStatusEvent>(DEFAULT_STATUS_EVENT);
+    const [selectedOverlay, setSelectedOverlay] = React.useState("default");
+    const [overlays, setOverlays] = React.useState<string[]>([]);
 
-  const [savingStatus, setSavingStatus] = React.useState<"idle" | "saving" | "saved" | "error">("idle");
+    const [savingStatus, setSavingStatus] = React.useState<"idle" | "saving" | "saved" | "error">("idle");
 
-  const { control, handleSubmit, reset } = useForm({ defaultValues, mode: "all" });
+    const { control, handleSubmit, reset } = useForm({ defaultValues, mode: "all" });
 
-  const iframeRef = React.useRef<HTMLIFrameElement>(null);
+    const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
-  function onChangeOverlay(evt: SelectChangeEvent<string>): void {
-    setSelectedOverlay(evt.target.value);
-  }
-
-  async function openOverlaysDir(): Promise<void> {
-    invoke("open_overlays_dir");
-  }
-
-  async function reloadIframe(): Promise<void> {
-    const overlays = await invoke<string[]>("list_overlays");
-    setOverlays(overlays);
-
-    iframeRef.current?.contentWindow.location.reload();
-  }
-
-  async function onSubmit(formData: FormData): Promise<void> {
-    try {
-      setSavingStatus("saving");
-
-      await storageService.setItem(YOUTUBE_CHAT_URL_KEY, formData.youtubeChatUrl);
-
-      if (Strings.isValidYouTubeChatUrl(formData.youtubeChatUrl)) {
-        await invoke("update_webview_url", { label: "youtube-chat", url: formData.youtubeChatUrl });
-      } else {
-        await invoke("update_webview_url", { label: "youtube-chat", url: "about:blank" });
-      }
-
-      setSavingStatus("saved");
-      toast.success("Successfully saved");
-    } catch (err) {
-      console.error(err);
-      setSavingStatus("error");
-      toast.error("An error occurred on save");
-    }
-  }
-
-  React.useEffect(() => {
-    async function init(): Promise<void> {
-      const youtubeChatUrl = await storageService.getItem<string>(YOUTUBE_CHAT_URL_KEY);
-
-      const overlays = await invoke<string[]>("list_overlays");
-      setOverlays(overlays);
-
-      reset({ youtubeChatUrl });
+    function onChangeOverlay(evt: SelectChangeEvent<string>): void {
+        setSelectedOverlay(evt.target.value);
     }
 
-    init();
-  }, []);
+    async function openOverlaysDir(): Promise<void> {
+        invoke("open_overlays_dir");
+    }
 
-  function handleStatus(): void {
-    setStatusEvent((statusEvent) => {
-      if ([IPCYoutubeEvents.YOUTUBE_PING].includes(statusEvent.type) && Date.now() - statusEvent.timestamp > 5000) {
-        return { type: IPCYoutubeEvents.YOUTUBE_ERROR, status: "error", error: null, timestamp: Date.now() };
-      }
+    async function reloadIframe(): Promise<void> {
+        const overlays = await invoke<string[]>("list_overlays");
+        setOverlays(overlays);
 
-      return statusEvent;
-    });
-  }
+        iframeRef.current?.contentWindow.location.reload();
+    }
 
-  React.useEffect(() => {
-    const interval = setInterval(handleStatus, 5000);
-    const unlisten = event.listen<IPCYouTubeStatusPingEvent>(IPCYoutubeEvents.YOUTUBE_PING, ({ payload }) => {
-      setStatusEvent(payload);
-    });
+    async function onSubmit(formData: FormData): Promise<void> {
+        try {
+            setSavingStatus("saving");
 
-    return () => {
-      clearInterval(interval);
-      unlisten.then(() => console.log(`Unsubscribed from ${IPCYoutubeEvents.YOUTUBE_PING} event`));
-    };
-  }, []);
+            await storageService.setItem(YOUTUBE_CHAT_URL_KEY, formData.youtubeChatUrl);
 
-  return (
-    <DashboardHomeStyledContainer>
-      <form className="fields" onSubmit={handleSubmit(onSubmit)}>
-        <Paper className="fields-actions">
-          <div>
-            <Button
-              type="submit"
-              color={savingStatus === "saving" ? "warning" : savingStatus === "error" ? "error" : "primary"}
-            >
-              {savingStatus === "saving" ? "Saving..." : savingStatus === "error" ? "Error" : "Save"}
-            </Button>
-          </div>
+            if (Strings.isValidYouTubeChatUrl(formData.youtubeChatUrl)) {
+                await invoke("update_webview_url", { label: "youtube-chat", url: formData.youtubeChatUrl });
+            } else {
+                await invoke("update_webview_url", { label: "youtube-chat", url: "about:blank" });
+            }
 
-          <ScrapperStatus statusEvent={statusEvent} />
-        </Paper>
+            setSavingStatus("saved");
+            toast.success("Successfully saved");
+        } catch (err) {
+            console.error(err);
+            setSavingStatus("error");
+            toast.error("An error occurred on save");
+        }
+    }
 
-        <Paper className="fields-values">
-          <Controller
-            control={control}
-            name="youtubeChatUrl"
-            render={function ControllerRender({ field, fieldState }): JSX.Element {
-              return (
-                <TextField
-                  {...field}
-                  error={!!fieldState.error}
-                  size="small"
-                  variant="outlined"
-                  fullWidth
-                  label="YouTube chat url"
-                  placeholder="https://www.youtube.com/live_chat?v={VIDEO_ID}"
+    React.useEffect(() => {
+        async function init(): Promise<void> {
+            const youtubeChatUrl = await storageService.getItem<string>(YOUTUBE_CHAT_URL_KEY);
+
+            const overlays = await invoke<string[]>("list_overlays");
+            setOverlays(overlays);
+
+            reset({ youtubeChatUrl });
+        }
+
+        init();
+    }, []);
+
+    function handleStatus(): void {
+        setStatusEvent((statusEvent) => {
+            if (
+                [IPCYoutubeEvents.YOUTUBE_PING].includes(statusEvent.type) &&
+                Date.now() - statusEvent.timestamp > 5000
+            ) {
+                return { type: IPCYoutubeEvents.YOUTUBE_ERROR, status: "error", error: null, timestamp: Date.now() };
+            }
+
+            return statusEvent;
+        });
+    }
+
+    React.useEffect(() => {
+        const interval = setInterval(handleStatus, 5000);
+        const unlisten = event.listen<IPCYouTubeStatusPingEvent>(IPCYoutubeEvents.YOUTUBE_PING, ({ payload }) => {
+            setStatusEvent(payload);
+        });
+
+        return () => {
+            clearInterval(interval);
+            unlisten.then(() => console.log(`Unsubscribed from ${IPCYoutubeEvents.YOUTUBE_PING} event`));
+        };
+    }, []);
+
+    return (
+        <DashboardHomeStyledContainer>
+            <form className="fields" onSubmit={handleSubmit(onSubmit)}>
+                <Paper className="fields-actions">
+                    <div>
+                        <Button
+                            type="submit"
+                            color={
+                                savingStatus === "saving" ? "warning" : savingStatus === "error" ? "error" : "primary"
+                            }
+                        >
+                            {savingStatus === "saving" ? "Saving..." : savingStatus === "error" ? "Error" : "Save"}
+                        </Button>
+                    </div>
+
+                    <ScrapperStatus statusEvent={statusEvent} />
+                </Paper>
+
+                <Paper className="fields-values">
+                    <Controller
+                        control={control}
+                        name="youtubeChatUrl"
+                        render={function ControllerRender({ field, fieldState }): JSX.Element {
+                            return (
+                                <TextField
+                                    {...field}
+                                    error={!!fieldState.error}
+                                    size="small"
+                                    variant="outlined"
+                                    fullWidth
+                                    label="YouTube chat url"
+                                    placeholder="https://www.youtube.com/live_chat?v={VIDEO_ID}"
+                                />
+                            );
+                        }}
+                    />
+                </Paper>
+            </form>
+            <Paper className="preview">
+                <Paper className="preview-header">
+                    <FormControl fullWidth size="small" variant="outlined">
+                        <InputLabel id="unichat-overlay">Overlay</InputLabel>
+                        <Select
+                            labelId="unichat-overlay"
+                            label="Overlay"
+                            value={selectedOverlay}
+                            onChange={onChangeOverlay}
+                        >
+                            {overlays.map((overlay) => (
+                                <MenuItem key={overlay} value={overlay}>
+                                    {overlay}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <Button onClick={openOverlaysDir}>
+                        <i className="fas fa-folder" />
+                    </Button>
+
+                    <Button onClick={reloadIframe}>
+                        <i className="fas fa-sync" />
+                    </Button>
+
+                    <Button
+                        onClick={() =>
+                            navigator.clipboard.writeText(`http://localhost:9527/overlays/${selectedOverlay}`)
+                        }
+                    >
+                        <i className="fas fa-globe" />
+                    </Button>
+                </Paper>
+                <iframe
+                    ref={iframeRef}
+                    src={`http://localhost:9527/overlays/${selectedOverlay}`}
+                    sandbox="allow-scripts"
                 />
-              );
-            }}
-          />
-        </Paper>
-      </form>
-      <Paper className="preview">
-        <Paper className="preview-header">
-          <FormControl fullWidth size="small" variant="outlined">
-            <InputLabel id="unichat-overlay">Overlay</InputLabel>
-            <Select labelId="unichat-overlay" label="Overlay" value={selectedOverlay} onChange={onChangeOverlay}>
-              {overlays.map((overlay) => (
-                <MenuItem key={overlay} value={overlay}>
-                  {overlay}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Button onClick={openOverlaysDir}>
-            <i className="fas fa-folder" />
-          </Button>
-
-          <Button onClick={reloadIframe}>
-            <i className="fas fa-sync" />
-          </Button>
-
-          <Button onClick={() => navigator.clipboard.writeText(`http://localhost:9527/overlays/${selectedOverlay}`)}>
-            <i className="fas fa-globe" />
-          </Button>
-        </Paper>
-        <iframe ref={iframeRef} src={`http://localhost:9527/overlays/${selectedOverlay}`} sandbox="allow-scripts" />
-      </Paper>
-    </DashboardHomeStyledContainer>
-  );
+            </Paper>
+        </DashboardHomeStyledContainer>
+    );
 }
