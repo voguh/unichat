@@ -76,6 +76,7 @@ pub async fn on_youtube_ping<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Res
 #[tauri::command]
 pub async fn on_youtube_error<R: tauri::Runtime>(app: tauri::AppHandle<R>, error: &str) -> Result<(), String> {
     let payload = serde_json::json!({ "status": "error", "error": error });
+    log::error!("youtube-chat: {}", error);
 
     return dispatch_event(app, "unichat://youtube:error", payload);
 }
