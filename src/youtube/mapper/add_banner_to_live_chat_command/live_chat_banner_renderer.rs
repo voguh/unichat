@@ -37,8 +37,8 @@ struct BannerMessage {
 struct BannerMessageRuns {
     text: String,
     bold: Option<bool>,
-    font_face: String,
-    text_color: u32
+    font_face: Option<String>,
+    text_color: Option<u32>
 }
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_json::Error> {
