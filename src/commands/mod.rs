@@ -1,79 +1,39 @@
 use std::str::FromStr;
 use std::thread::sleep;
 
-use tauri::{LogicalPosition, LogicalSize, Manager, Runtime};
+use tauri::{Manager, Runtime};
 
 use crate::youtube;
 
 #[tauri::command]
 pub fn show_webview<R: Runtime>(app: tauri::AppHandle<R>, label: &str) {
-    let window = app.get_window("main").unwrap();
-
-    if std::env::consts::OS != "linux" {
-        let window_size = window.inner_size().unwrap();
-
-        for (key, value) in app.webviews() {
-            if key != "main" && key != label {
-                value.hide().unwrap();
-            }
+    for (key, value) in app.webview_windows() {
+        if key != "main" && key != label {
+            value.hide().unwrap();
         }
-
-        let size = LogicalSize::new(64, window_size.height);
-        app.get_webview("main").unwrap().set_size(size).unwrap();
-
-        let webview = app.get_webview(label).unwrap();
-        webview.show().unwrap();
-    } else {
-        for (key, value) in app.webview_windows() {
-            if key != "main" && key != label {
-                value.hide().unwrap();
-            }
-        }
-
-        let webview_window = app.get_webview_window(label).unwrap();
-        webview_window.show().unwrap();
-
-        let window_pos = window.inner_position().unwrap();
-        let pos = LogicalPosition::new(window_pos.x + 64, window_pos.y);
-        webview_window.set_position(pos).unwrap();
-
-        let window_size = window.inner_size().unwrap();
-        let size = LogicalSize::new(window_size.width - 64, window_size.height);
-        webview_window.set_size(size).unwrap();
     }
+
+    let webview_window = app.get_webview_window(label).unwrap();
+    webview_window.show().unwrap();
 }
 
 #[tauri::command]
 pub fn hide_webviews(app: tauri::AppHandle) {
-    if std::env::consts::OS != "linux" {
-        let window = app.get_window("main").unwrap();
-        let window_size = window.inner_size().unwrap();
-
-        for (key, value) in app.webviews() {
-            if key != "main" {
-                value.hide().unwrap();
-            }
-        }
-
-        let webview = app.get_webview("main").unwrap();
-        webview.set_size(window_size).unwrap();
-    } else {
-        for (key, value) in app.webview_windows() {
-            if key != "main" {
-                value.hide().unwrap();
-            }
+    for (key, value) in app.webview_windows() {
+        if key != "main" {
+            value.hide().unwrap();
         }
     }
 }
 
 #[tauri::command]
 pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &str, url: &str) -> Result<(), String> {
-    let webview = app.get_webview(label).unwrap();
+    let window = app.get_webview_window(label).unwrap();
 
-    webview.navigate(tauri::Url::from_str(url).unwrap()).unwrap();
+    window.eval(format!("window.location.href = '{}'", url)).unwrap();
     sleep(std::time::Duration::from_secs(2));
     if label == "youtube-chat" && url != "about:blank" {
-        webview.eval(youtube::SCRAPPING_JS).unwrap();
+        window.eval(youtube::SCRAPPING_JS).unwrap();
     }
 
     return Ok(());

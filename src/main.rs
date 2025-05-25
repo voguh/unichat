@@ -3,12 +3,11 @@
 
 use std::fs;
 
-use tauri::{LogicalPosition, LogicalSize, Manager};
+use tauri::Manager;
 
 mod actix;
 mod commands;
 mod events;
-mod render;
 mod store;
 mod youtube;
 
@@ -32,12 +31,7 @@ fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::
     let http_server = actix::new(app, overlays_dir);
     app.manage(actix::ActixState{ handle: http_server });
 
-    /* ========================================================================================== */
-
-    let window = app.get_window("main").unwrap();
-    render::create_render(app, &window, "youtube-chat", String::from("https://youtube.com"));
-
-    Ok(())
+    return Ok(());
 }
 
 fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
@@ -45,37 +39,24 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
 
     if window.label() == "main" {
         match event {
-            tauri::WindowEvent::Moved(window_pos) => {
-                if std::env::consts::OS == "linux" {
-                    let pos = LogicalPosition::new(window_pos.x + 64, window_pos.y);
-                    for (key, window) in app.windows() {
-                        if key != "main" {
-                            window.set_position(pos).unwrap();
-                        }
-                    }
-                }
-            }
-
-            tauri::WindowEvent::Resized(window_size) => {
-                if std::env::consts::OS == "linux" {
-                    let size = LogicalSize::new(window_size.width - 64, window_size.height);
-                    for (key, window) in app.windows() {
-                        if key != "main" {
-                            window.set_size(size).unwrap()
-                        }
-                    }
-                }
-            }
-
             tauri::WindowEvent::Destroyed => {
                 let actix = app.state::<actix::ActixState>();
                 actix.handle.abort();
 
-                for (key, window) in app.windows() {
+                for (key, window) in app.webview_windows() {
                     if key != "main" {
                         window.destroy().unwrap();
                     }
                 }
+            }
+
+            _ => {}
+        }
+    } else {
+        match event {
+            tauri::WindowEvent::CloseRequested { api, .. } => {
+                api.prevent_close();
+                window.hide().unwrap();
             }
 
             _ => {}
@@ -95,6 +76,8 @@ fn main() {
             commands::open_overlays_dir,
             store::store_get_item,
             store::store_set_item,
+            youtube::on_youtube_ready,
+            youtube::on_youtube_ping,
             youtube::on_youtube_message
         ])
         .on_window_event(on_window_event)

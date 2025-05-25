@@ -2,7 +2,7 @@ use std::fs;
 use std::io::Write;
 
 use serde_json::Value;
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 
 use crate::events;
 
@@ -31,11 +31,32 @@ pub const SCRAPPING_JS: &str = r#"
             writable: true
         })
 
+        setInterval(() => {
+            if (window.fetch.__WRAPPED__) {
+                window.__TAURI__.core.invoke('on_youtube_ping').then(() => console.log("YouTube ping event emitted!"))
+            }
+        }, 5000)
+
+        window.__TAURI__.core.invoke('on_youtube_ready', { url: window.location.href }).then(() => console.log("YouTube ready event emitted!"))
         Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true })
     } else {
         console.log("Fetch already was wrapped!")
     }
 "#;
+
+#[tauri::command]
+pub async fn on_youtube_ready<R: tauri::Runtime>(app: tauri::AppHandle<R>, url: &str) -> Result<(), String> {
+    let payload = serde_json::json!({ "status": "ready", "url": url });
+    app.emit("youtube::ready", payload).unwrap();
+    return Ok(());
+}
+
+#[tauri::command]
+pub async fn on_youtube_ping<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result<(), String> {
+    let payload: Value = serde_json::json!({ "status": "ping" });
+    app.emit("youtube::ping", payload).unwrap();
+    return Ok(());
+}
 
 #[tauri::command]
 pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, actions: Vec<Value>) -> Result<(), String> {
@@ -62,5 +83,5 @@ pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, act
         }
     }
 
-    Ok(())
+    return Ok(());
 }

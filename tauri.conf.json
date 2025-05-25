@@ -11,11 +11,22 @@
         "withGlobalTauri": true,
         "windows": [
             {
+                "label": "main",
                 "title": "Voguh's UniChat",
                 "width": 1280,
                 "height": 720,
                 "minWidth": 800,
                 "minHeight": 600
+            },
+            {
+                "label": "youtube-chat",
+                "title": "Voguh's UniChat - YouTube chat",
+                "url": "about:blank",
+                "width": 800,
+                "height": 600,
+                "visible": false,
+                "resizable": false,
+                "maximizable": false
             }
         ],
         "security": {

@@ -15,6 +15,7 @@ import { storageService } from "unichat/services/storageService";
 import { YOUTUBE_CHAT_URL_KEY } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
 
+import { ScrapperStatus } from "./ScrapperStatus";
 import { DashboardHomeStyledContainer } from "./styled";
 
 interface FormData {
@@ -94,6 +95,10 @@ export function DashboardHome(): React.ReactNode {
           >
             {savingStatus === "saving" ? "Saving..." : savingStatus === "error" ? "Error" : "Save"}
           </Button>
+
+          <div className="status">
+            <ScrapperStatus />
+          </div>
         </Paper>
 
         <Paper className="fields-values">

@@ -31,6 +31,9 @@ export const DashboardHomeStyledContainer = styled.div`
           align-items: center;
           gap: 8px;
         }
+
+        > div.status {
+        }
       }
 
       &.fields-values {
