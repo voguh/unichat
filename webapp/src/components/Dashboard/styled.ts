@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled from "styled-components";
 
 export const DashboardStyledContainer = styled.div`
   position: absolute;
@@ -6,7 +6,7 @@ export const DashboardStyledContainer = styled.div`
   padding: 8px;
 
   display: grid;
-  grid-template-areas: 'SID CTT' 'SID CTT';
+  grid-template-areas: "SID CTT" "SID CTT";
   grid-template-columns: 48px 1fr;
   grid-template-rows: 46px 1fr;
   gap: 8px;
@@ -43,4 +43,4 @@ export const DashboardStyledContainer = styled.div`
   > .content {
     grid-area: CTT;
   }
-`
+`;

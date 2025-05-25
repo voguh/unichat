@@ -1,35 +1,35 @@
-import React from 'react'
+import React from "react";
 
-import Button from '@mui/material/Button'
-import Paper from '@mui/material/Paper'
-import { invoke } from '@tauri-apps/api/core'
+import Button from "@mui/material/Button";
+import Paper from "@mui/material/Paper";
+import { invoke } from "@tauri-apps/api/core";
 
-import { DashboardHome } from './DashboardHome'
-import { DashboardStyledContainer } from './styled'
+import { DashboardHome } from "./DashboardHome";
+import { DashboardStyledContainer } from "./styled";
 
 const TABS = {
-  home: { icon: 'fas fa-home fa-xl' },
-  youtube: { icon: 'fab fa-youtube fa-xl' }
-}
+  home: { icon: "fas fa-home fa-xl" },
+  youtube: { icon: "fab fa-youtube fa-xl" }
+};
 
 interface Props {
-  children?: React.ReactNode
+  children?: React.ReactNode;
 }
 
 export function Dashboard(_props: Props): React.ReactNode {
-  const [selectedTab, setSelectedTab] = React.useState<keyof typeof TABS>('home')
+  const [selectedTab, setSelectedTab] = React.useState<keyof typeof TABS>("home");
 
   React.useEffect(() => {
     async function init(): Promise<void> {
-      await invoke('hide_webviews')
+      await invoke("hide_webviews");
 
-      if (['home'].every((noWebviewTab) => noWebviewTab !== selectedTab)) {
-        await invoke('show_webview', { label: `${selectedTab}-chat` })
+      if (["home"].every((noWebviewTab) => noWebviewTab !== selectedTab)) {
+        await invoke("show_webview", { label: `${selectedTab}-chat` });
       }
     }
 
-    init()
-  }, [selectedTab])
+    init();
+  }, [selectedTab]);
 
   return (
     <DashboardStyledContainer>
@@ -39,17 +39,17 @@ export function Dashboard(_props: Props): React.ReactNode {
             <Button
               key={id}
               size="small"
-              variant={id === selectedTab ? 'contained' : 'text'}
+              variant={id === selectedTab ? "contained" : "text"}
               onClick={() => setSelectedTab(id as keyof typeof TABS)}
             >
               <i className={icon} />
             </Button>
-          )
+          );
         })}
       </Paper>
-      <div className="content" style={{ display: selectedTab === 'home' ? 'unset' : 'none' }}>
+      <div className="content">
         <DashboardHome />
       </div>
     </DashboardStyledContainer>
-  )
+  );
 }

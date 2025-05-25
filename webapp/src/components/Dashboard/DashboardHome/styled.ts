@@ -1,10 +1,10 @@
-import styled from 'styled-components'
+import styled from "styled-components";
 
 export const DashboardHomeStyledContainer = styled.div`
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-areas: 'FDS PRV';
+  grid-template-areas: "FDS PRV";
   grid-template-columns: 1fr 500px;
   grid-template-rows: 1fr;
   gap: 8px;
@@ -13,7 +13,7 @@ export const DashboardHomeStyledContainer = styled.div`
     grid-area: FDS;
 
     display: grid;
-    grid-template-areas: 'ACT' 'FDS';
+    grid-template-areas: "ACT" "FDS";
     grid-template-rows: min-content 1fr;
     gap: 8px;
 
@@ -70,4 +70,4 @@ export const DashboardHomeStyledContainer = styled.div`
       border: none;
     }
   }
-`
+`;

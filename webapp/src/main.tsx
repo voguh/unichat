@@ -1,6 +1,6 @@
 import "normalize.css";
-import 'react-toastify/dist/ReactToastify.css'
-import '@fortawesome/fontawesome-free/css/all.css'
+import "react-toastify/dist/ReactToastify.css";
+import "@fortawesome/fontawesome-free/css/all.css";
 import "@fontsource/nunito-sans/300"; // Regular
 import "@fontsource/nunito-sans/300-italic"; // Regular
 import "@fontsource/nunito-sans/400"; // Regular

@@ -1,127 +1,127 @@
 export interface UniChatEmote {
-  type: string
-  tooltip: string
-  url: string
+  type: string;
+  tooltip: string;
+  url: string;
 }
 
 export interface UniChatBadge {
-  type: string
-  tooltip: string
-  url: string
+  type: string;
+  tooltip: string;
+  url: string;
 }
 
 export interface UniChatEventMessage {
-  type: 'unichat:message'
+  type: "unichat:message";
   detail: {
-    channelId: string | null
-    channelName: string | null
-    platform: 'youtube' | 'twitch'
+    channelId: string | null;
+    channelName: string | null;
+    platform: "youtube" | "twitch";
 
-    authorId: string
-    authorUserName: string | null
-    authorDisplayName: string
-    authorProfilePictureUrl: string
-    authorBadges: UniChatBadge[]
-    authorType: 'VIEWER' | 'SPONSOR' | 'MODERATOR' | 'BROADCASTER'
+    authorId: string;
+    authorUserName: string | null;
+    authorDisplayName: string;
+    authorProfilePictureUrl: string;
+    authorBadges: UniChatBadge[];
+    authorType: "VIEWER" | "SPONSOR" | "MODERATOR" | "BROADCASTER";
 
-    messageId: string
-    messageText: string
-    emotes: UniChatEmote[]
-  }
+    messageId: string;
+    messageText: string;
+    emotes: UniChatEmote[];
+  };
 }
 
 export interface UniChatEventRemoveMessage {
-  type: 'unichat:remove_message'
+  type: "unichat:remove_message";
   detail: {
-    channelId: string | null
-    channelName: string | null
-    platform: 'youtube' | 'twitch'
+    channelId: string | null;
+    channelName: string | null;
+    platform: "youtube" | "twitch";
 
-    messageId: string
-  }
+    messageId: string;
+  };
 }
 
 export interface UniChatEventRemoveAuthor {
-  type: 'unichat:remove_author'
+  type: "unichat:remove_author";
   detail: {
-    channelId: string | null
-    channelName: string | null
-    platform: 'youtube' | 'twitch'
+    channelId: string | null;
+    channelName: string | null;
+    platform: "youtube" | "twitch";
 
-    authorId: string
-  }
+    authorId: string;
+  };
 }
 
 export interface UniChatEventRaid {
-  type: 'unichat:raid'
+  type: "unichat:raid";
   detail: {
-    channelId: string | null
-    channelName: string | null
-    platform: 'youtube' | 'twitch'
+    channelId: string | null;
+    channelName: string | null;
+    platform: "youtube" | "twitch";
 
-    authorId: string
-    authorUserName: string | null
-    authorDisplayName: string
-    authorProfilePictureUrl: string
+    authorId: string;
+    authorUserName: string | null;
+    authorDisplayName: string;
+    authorProfilePictureUrl: string;
 
-    viewerCount: number | null
-  }
+    viewerCount: number | null;
+  };
 }
 
 export interface UniChatEventSponsor {
-  type: 'unichat:sponsor'
+  type: "unichat:sponsor";
   detail: {
-    channelId: string | null
-    channelName: string | null
-    platform: 'youtube' | 'twitch'
+    channelId: string | null;
+    channelName: string | null;
+    platform: "youtube" | "twitch";
 
-    authorId: string
-    authorUserName: string | null
-    authorDisplayName: string
-    authorProfilePictureUrl: string
+    authorId: string;
+    authorUserName: string | null;
+    authorDisplayName: string;
+    authorProfilePictureUrl: string;
 
-    tier: string
-    months: number
-    message: string | null
-  }
+    tier: string;
+    months: number;
+    message: string | null;
+  };
 }
 
 export interface UniChatSponsorGiftEvent {
-  type: 'unichat:sponsor_gift'
+  type: "unichat:sponsor_gift";
   detail: {
-    channelId: string | null
-    channelName: string | null
-    platform: 'youtube' | 'twitch'
+    channelId: string | null;
+    channelName: string | null;
+    platform: "youtube" | "twitch";
 
-    authorId: string
-    authorUserName: string | null
-    authorDisplayName: string
-    authorProfilePictureUrl: string
+    authorId: string;
+    authorUserName: string | null;
+    authorDisplayName: string;
+    authorProfilePictureUrl: string;
 
-    tier: string
-    count: number
-  }
+    tier: string;
+    count: number;
+  };
 }
 
 export interface UniChatDonateEvent {
-  type: 'unichat:donate'
+  type: "unichat:donate";
   detail: {
-    channelId: string | null
-    channelName: string | null
-    platform: 'youtube' | 'twitch'
+    channelId: string | null;
+    channelName: string | null;
+    platform: "youtube" | "twitch";
 
-    authorId: string
-    authorUserName: string | null
-    authorDisplayName: string
-    authorProfilePictureUrl: string
-    authorBadges: UniChatBadge[]
-    authorType: 'VIEWER' | 'SPONSOR' | 'MODERATOR' | 'BROADCASTER'
+    authorId: string;
+    authorUserName: string | null;
+    authorDisplayName: string;
+    authorProfilePictureUrl: string;
+    authorBadges: UniChatBadge[];
+    authorType: "VIEWER" | "SPONSOR" | "MODERATOR" | "BROADCASTER";
 
-    value: number
-    currency: string
+    value: number;
+    currency: string;
 
-    messageId: string
-    messageText: string
-    emotes: UniChatEmote[]
-  }
+    messageId: string;
+    messageText: string;
+    emotes: UniChatEmote[];
+  };
 }

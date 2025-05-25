@@ -1,88 +1,88 @@
-import React from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { toast } from 'react-toastify'
+import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
-import Button from '@mui/material/Button'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import Paper from '@mui/material/Paper'
-import Select, { SelectChangeEvent } from '@mui/material/Select'
-import TextField from '@mui/material/TextField'
-import { invoke } from '@tauri-apps/api/core'
+import Button from "@mui/material/Button";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Paper from "@mui/material/Paper";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import TextField from "@mui/material/TextField";
+import { invoke } from "@tauri-apps/api/core";
 
-import { storageService } from 'unichat/services/storageService'
-import { YOUTUBE_CHAT_URL_KEY } from 'unichat/utils/constants'
-import { Strings } from 'unichat/utils/Strings'
+import { storageService } from "unichat/services/storageService";
+import { YOUTUBE_CHAT_URL_KEY } from "unichat/utils/constants";
+import { Strings } from "unichat/utils/Strings";
 
-import { DashboardHomeStyledContainer } from './styled'
+import { DashboardHomeStyledContainer } from "./styled";
 
 interface FormData {
-  youtubeChatUrl: string
+  youtubeChatUrl: string;
 }
 
 const defaultValues: FormData = {
-  youtubeChatUrl: ''
-}
+  youtubeChatUrl: ""
+};
 
 export function DashboardHome(): React.ReactNode {
-  const [selectedOverlay, setSelectedOverlay] = React.useState('default')
-  const [overlays, setOverlays] = React.useState<string[]>([])
+  const [selectedOverlay, setSelectedOverlay] = React.useState("default");
+  const [overlays, setOverlays] = React.useState<string[]>([]);
 
-  const [savingStatus, setSavingStatus] = React.useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [savingStatus, setSavingStatus] = React.useState<"idle" | "saving" | "saved" | "error">("idle");
 
-  const { control, handleSubmit, reset } = useForm({ defaultValues, mode: 'all' })
+  const { control, handleSubmit, reset } = useForm({ defaultValues, mode: "all" });
 
-  const iframeRef = React.useRef<HTMLIFrameElement>(null)
+  const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
   function onChangeOverlay(evt: SelectChangeEvent<string>): void {
-    setSelectedOverlay(evt.target.value)
+    setSelectedOverlay(evt.target.value);
   }
 
   async function openOverlaysDir(): Promise<void> {
-    invoke('open_overlays_dir')
+    invoke("open_overlays_dir");
   }
 
   async function reloadIframe(): Promise<void> {
-    const overlays = await invoke<string[]>('list_overlays')
-    setOverlays(overlays)
+    const overlays = await invoke<string[]>("list_overlays");
+    setOverlays(overlays);
 
-    iframeRef.current?.contentWindow.location.reload()
+    iframeRef.current?.contentWindow.location.reload();
   }
 
   async function onSubmit(formData: FormData): Promise<void> {
     try {
-      setSavingStatus('saving')
+      setSavingStatus("saving");
 
-      await storageService.setItem(YOUTUBE_CHAT_URL_KEY, formData.youtubeChatUrl)
+      await storageService.setItem(YOUTUBE_CHAT_URL_KEY, formData.youtubeChatUrl);
 
       if (Strings.isValidYouTubeChatUrl(formData.youtubeChatUrl)) {
-        await invoke('update_webview_url', { label: `youtube-chat`, url: formData.youtubeChatUrl })
+        await invoke("update_webview_url", { label: "youtube-chat", url: formData.youtubeChatUrl });
       } else {
-        await invoke('update_webview_url', { label: `youtube-chat`, url: 'about:blank' })
+        await invoke("update_webview_url", { label: "youtube-chat", url: "about:blank" });
       }
 
-      setSavingStatus('saved')
-      toast.success('Successfully saved')
+      setSavingStatus("saved");
+      toast.success("Successfully saved");
     } catch (err) {
-      console.error(err)
-      setSavingStatus('error')
-      toast.error('An error occurred on save')
+      console.error(err);
+      setSavingStatus("error");
+      toast.error("An error occurred on save");
     }
   }
 
   React.useEffect(() => {
     async function init(): Promise<void> {
-      const youtubeChatUrl = await storageService.getItem<string>(YOUTUBE_CHAT_URL_KEY)
+      const youtubeChatUrl = await storageService.getItem<string>(YOUTUBE_CHAT_URL_KEY);
 
-      const overlays = await invoke<string[]>('list_overlays')
-      setOverlays(overlays)
+      const overlays = await invoke<string[]>("list_overlays");
+      setOverlays(overlays);
 
-      reset({ youtubeChatUrl })
+      reset({ youtubeChatUrl });
     }
 
-    init()
-  }, [])
+    init();
+  }, []);
 
   return (
     <DashboardHomeStyledContainer>
@@ -90,9 +90,9 @@ export function DashboardHome(): React.ReactNode {
         <Paper className="fields-actions">
           <Button
             type="submit"
-            color={savingStatus === 'saving' ? 'warning' : savingStatus === 'error' ? 'error' : 'primary'}
+            color={savingStatus === "saving" ? "warning" : savingStatus === "error" ? "error" : "primary"}
           >
-            {savingStatus === 'saving' ? 'Saving...' : savingStatus === 'error' ? 'Error' : 'Save'}
+            {savingStatus === "saving" ? "Saving..." : savingStatus === "error" ? "Error" : "Save"}
           </Button>
         </Paper>
 
@@ -111,7 +111,7 @@ export function DashboardHome(): React.ReactNode {
                   label="YouTube chat url"
                   placeholder="https://www.youtube.com/live_chat?v={VIDEO_ID}"
                 />
-              )
+              );
             }}
           />
         </Paper>
@@ -144,5 +144,5 @@ export function DashboardHome(): React.ReactNode {
         <iframe ref={iframeRef} src={`http://localhost:9527/overlays/${selectedOverlay}`} sandbox="allow-scripts" />
       </Paper>
     </DashboardHomeStyledContainer>
-  )
+  );
 }
