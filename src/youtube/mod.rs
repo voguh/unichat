@@ -4,6 +4,7 @@ use std::time::UNIX_EPOCH;
 use std::io::Write;
 
 use serde_json::Value;
+use tauri::is_dev;
 use tauri::{Emitter, Manager};
 
 use crate::events;
@@ -84,9 +85,19 @@ pub async fn on_youtube_error<R: tauri::Runtime>(app: tauri::AppHandle<R>, error
 #[tauri::command]
 pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, actions: Vec<Value>) -> Result<(), String> {
     let unknown_action_path = app.path().app_data_dir().unwrap().join("unknown_actions.txt");
+    let mut unknown_file = fs::OpenOptions::new().append(true).create(true).open(&unknown_action_path).unwrap();
+
     let parse_errors_path = app.path().app_data_dir().unwrap().join("parse_errors.txt");
+    let mut errors_file = fs::OpenOptions::new().append(true).create(true).open(&parse_errors_path).unwrap();
+
+    let debug_events_path = app.path().app_data_dir().unwrap().join("debug_events_log.txt");
+    let mut debug_file = fs::OpenOptions::new().append(true).create(true).open(&debug_events_path).unwrap();
 
     for action in actions.clone() {
+        if is_dev() {
+            writeln!(debug_file, "{}", serde_json::to_string(&action).unwrap()).unwrap();
+        }
+
         match mapper::parse(&action) {
             Ok(Some(parsed)) => {
                 if let Err(err) = events::event_emitter().emit(parsed) {
@@ -95,13 +106,11 @@ pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, act
             }
 
             Ok(None) => {
-                let mut file = fs::OpenOptions::new().append(true).create(true).open(&unknown_action_path).unwrap();
-                writeln!(file, "{}", serde_json::to_string(&action).unwrap()).unwrap();
+                writeln!(unknown_file, "{}", serde_json::to_string(&action).unwrap()).unwrap();
             }
 
             Err(err) => {
-                let mut file = fs::OpenOptions::new().append(true).create(true).open(&parse_errors_path).unwrap();
-                writeln!(file, "{}:{}:{} -- {}", err, err.line(), err.column(), serde_json::to_string(&action).unwrap()).unwrap();
+                writeln!(errors_file, "{}:{}:{} -- {}", err, err.line(), err.column(), serde_json::to_string(&action).unwrap()).unwrap();
             }
         }
     }
