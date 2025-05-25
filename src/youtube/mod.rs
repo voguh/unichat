@@ -44,6 +44,19 @@ pub const SCRAPPING_JS: &str = r#"
 
         window.__TAURI__.core.invoke('on_youtube_ready', { url: window.location.href }).then(() => console.log("YouTube ready event emitted!"))
         Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true })
+        console.log("Fetch wrapped!")
+
+        const unichatWarn = document.createElement("div");
+        unichatWarn.style.position = "absolute";
+        unichatWarn.style.top = "8px";
+        unichatWarn.style.right = "8px";
+        unichatWarn.style.zIndex = "9999";
+        unichatWarn.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+        unichatWarn.style.color = "white";
+        unichatWarn.style.padding = "10px";
+        unichatWarn.style.borderRadius = "4px";
+        unichatWarn.innerHTML = "UniChat installed! You can close this window.";
+        document.body.appendChild(unichatWarn);
     } else {
         console.log("Fetch already was wrapped!")
     }
@@ -76,7 +89,7 @@ pub async fn on_youtube_ping<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Res
 #[tauri::command]
 pub async fn on_youtube_error<R: tauri::Runtime>(app: tauri::AppHandle<R>, error: &str) -> Result<(), String> {
     let payload = serde_json::json!({ "status": "error", "error": error });
-    log::error!("youtube-chat: {}", error);
+    log::error!(target: "youtube-chat", "js-error:{}", error);
 
     return dispatch_event(app, "unichat://youtube:error", payload);
 }
@@ -102,7 +115,7 @@ pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, act
         match mapper::parse(&action) {
             Ok(Some(parsed)) => {
                 if let Err(err) = events::event_emitter().emit(parsed) {
-                    println!("An error occurred on send unichat event: {err}");
+                    log::error!(target: "youtube-chat","An error occurred on send unichat event: {}", err);
                 }
             }
 
