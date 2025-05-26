@@ -11,13 +11,15 @@ static TWITCH_CHANNEL_NAME_KEY: &str = "twitch-channel-name";
 #[tauri::command]
 pub async fn store_get_item<R: tauri::Runtime>(app: AppHandle<R>, key: String) -> Result<Option<Value>, String> {
     let store = app.state::<Arc<Store<R>>>();
-    Ok(store.get(key))
+
+    return Ok(store.get(key));
 }
 
 #[tauri::command]
 pub async fn store_set_item<R: tauri::Runtime>(app: AppHandle<R>, key: String, value: Value) -> Result<(), String> {
     let store = app.state::<Arc<Store<R>>>();
-    Ok(store.set(key, value))
+
+    return Ok(store.set(key, value));
 }
 
 pub fn new<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Arc<Store<R>> {
