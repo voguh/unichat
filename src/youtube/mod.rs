@@ -55,7 +55,7 @@ pub const SCRAPPING_JS: &str = r#"
         unichatWarn.style.color = "white";
         unichatWarn.style.padding = "10px";
         unichatWarn.style.borderRadius = "4px";
-        unichatWarn.innerHTML = "UniChat installed! You can close this window.";
+        unichatWarn.innerText = "UniChat installed! You can close this window.";
         document.body.appendChild(unichatWarn);
     } else {
         console.log("Fetch already was wrapped!");
