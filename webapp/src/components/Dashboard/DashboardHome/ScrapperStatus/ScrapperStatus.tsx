@@ -23,13 +23,13 @@ export function ScrapperStatus({ statusEvent }: Props): React.ReactNode {
         <ScrapperStatusStyledContainer
             style={
                 {
-                    "--border-color": colorsMap[statusEvent.status],
-                    "--background-color": transparentize(0.9, colorsMap[statusEvent.status]),
-                    "--font-color": colorsMap[statusEvent.status]
+                    "--border-color": colorsMap[statusEvent.type],
+                    "--background-color": transparentize(0.9, colorsMap[statusEvent.type]),
+                    "--font-color": colorsMap[statusEvent.type]
                 } as React.CSSProperties
             }
         >
-            {statusEvent.status}
+            {statusEvent.type}
             <i className="fas fa-circle" />
         </ScrapperStatusStyledContainer>
     );

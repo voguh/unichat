@@ -75,6 +75,7 @@ fn main() {
             commands::open_overlays_dir,
             store::store_get_item,
             store::store_set_item,
+            youtube::on_youtube_idle,
             youtube::on_youtube_ready,
             youtube::on_youtube_ping,
             youtube::on_youtube_error,

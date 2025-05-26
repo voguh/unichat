@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+        <title>Voguh's UniChat - YouTube Chat</title>
+
+        <style>
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: absolute;
+                inset: 0;
+                background: #0f0f0f;
+                color: #ffffff;
+                font-size: 12px;
+                padding: 16px;
+            }
+
+            body > span {
+                text-align: center;
+            }
+
+            body > span > span {
+                color: #4dabf7;
+                font-weight: bold;
+            }
+        </style>
+
+        <script>
+            function forwardConsole(fnName, logger) {
+                const original = console[fnName];
+                console[fnName] = (message) => {
+                    original(message);
+                    logger(message);
+                };
+            }
+
+            forwardConsole("log", window.__TAURI_PLUGIN_LOG__.trace);
+            forwardConsole("debug", window.__TAURI_PLUGIN_LOG__.debug);
+            forwardConsole("info", window.__TAURI_PLUGIN_LOG__.info);
+            forwardConsole("warn", window.__TAURI_PLUGIN_LOG__.warn);
+            forwardConsole("error", window.__TAURI_PLUGIN_LOG__.error);
+
+            window.__TAURI__.core.invoke("on_youtube_idle").then(() => console.log("YouTube idle event emitted!"));
+        </script>
+    </head>
+    <body>
+        <span>
+            YouTube Chat is not available yet. Click on <span>SAVE</span> button to reload YouTube integration.
+        </span>
+    </body>
+</html>

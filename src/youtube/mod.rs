@@ -66,33 +66,40 @@ pub const SCRAPPING_JS: &str = r#"
 
 fn dispatch_event<R: tauri::Runtime>(app: tauri::AppHandle<R>, event_type: &str, mut payload: Value) -> Result<(), String> {
     let now = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| format!("Failed to get current time: {}", e))?;
-    payload["type"] = serde_json::json!(event_type);
     payload["timestamp"] = serde_json::json!(now.as_millis());
 
     return app.emit(event_type, payload).map_err(|e| format!("Failed to emit event: {}", e));
 }
 
 #[tauri::command]
+pub async fn on_youtube_idle<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result<(), String> {
+    log::info!("YouTube scrapper js registered!");
+    let payload = serde_json::json!({ "type": "idle" });
+
+    return dispatch_event(app, "unichat://youtube:event", payload);
+}
+
+#[tauri::command]
 pub async fn on_youtube_ready<R: tauri::Runtime>(app: tauri::AppHandle<R>, url: &str) -> Result<(), String> {
     log::info!("YouTube scrapper js registered!");
-    let payload = serde_json::json!({ "status": "ready", "url": url });
+    let payload = serde_json::json!({ "type": "ready", "url": url });
 
-    return dispatch_event(app, "unichat://youtube:ready", payload);
+    return dispatch_event(app, "unichat://youtube:event", payload);
 }
 
 #[tauri::command]
 pub async fn on_youtube_ping<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result<(), String> {
-    let payload = serde_json::json!({ "status": "working" });
+    let payload = serde_json::json!({ "type": "working" });
 
-    return dispatch_event(app, "unichat://youtube:ping", payload);
+    return dispatch_event(app, "unichat://youtube:event", payload);
 }
 
 #[tauri::command]
 pub async fn on_youtube_error<R: tauri::Runtime>(app: tauri::AppHandle<R>, error: &str) -> Result<(), String> {
-    let payload = serde_json::json!({ "status": "error", "error": error });
+    let payload = serde_json::json!({ "type": "error", "error": error });
     log::error!("js-error:{}", error);
 
-    return dispatch_event(app, "unichat://youtube:error", payload);
+    return dispatch_event(app, "unichat://youtube:event", payload);
 }
 
 /* ================================================================================================================== */

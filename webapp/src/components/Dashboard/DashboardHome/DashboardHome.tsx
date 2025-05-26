@@ -29,8 +29,7 @@ const defaultValues: FormData = {
 };
 
 const DEFAULT_STATUS_EVENT: IPCYouTubeStatusEvent = {
-    type: IPCYoutubeEvents.YOUTUBE_IDLE,
-    status: "idle",
+    type: "idle",
     timestamp: Date.now()
 };
 
@@ -96,11 +95,8 @@ export function DashboardHome(): React.ReactNode {
 
     function handleStatus(): void {
         setStatusEvent((statusEvent) => {
-            if (
-                [IPCYoutubeEvents.YOUTUBE_PING].includes(statusEvent.type) &&
-                Date.now() - statusEvent.timestamp > 5000
-            ) {
-                return { type: IPCYoutubeEvents.YOUTUBE_ERROR, status: "error", error: null, timestamp: Date.now() };
+            if (statusEvent.type === "working" && Date.now() - statusEvent.timestamp > 5000) {
+                return { type: "error", error: null, timestamp: Date.now() };
             }
 
             return statusEvent;
@@ -109,13 +105,13 @@ export function DashboardHome(): React.ReactNode {
 
     React.useEffect(() => {
         const interval = setInterval(handleStatus, 5000);
-        const unlisten = event.listen<IPCYouTubeStatusPingEvent>(IPCYoutubeEvents.YOUTUBE_PING, ({ payload }) => {
+        const unlistenPing = event.listen<IPCYouTubeStatusPingEvent>(IPCYoutubeEvents.YOUTUBE_EVENT, ({ payload }) => {
             setStatusEvent(payload);
         });
 
         return () => {
             clearInterval(interval);
-            unlisten.then(() => console.log(`Unsubscribed from ${IPCYoutubeEvents.YOUTUBE_PING} event`));
+            unlistenPing.then(() => console.log(`Unsubscribed from '${IPCYoutubeEvents.YOUTUBE_EVENT}' event`));
         };
     }, []);
 

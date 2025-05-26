@@ -1,7 +1,7 @@
 use std::str::FromStr;
 use std::thread::sleep;
 
-use tauri::{Manager, Runtime};
+use tauri::{is_dev, Manager, Runtime};
 
 use crate::youtube;
 
@@ -12,7 +12,6 @@ pub fn toggle_webview<R: Runtime>(app: tauri::AppHandle<R>, label: &str) -> Resu
         webview_window.hide().map_err(|e| format!("{:?}", e))?;
     } else {
         webview_window.show().map_err(|e| format!("{:?}", e))?;
-
     }
 
     return Ok(());
@@ -22,7 +21,18 @@ pub fn toggle_webview<R: Runtime>(app: tauri::AppHandle<R>, label: &str) -> Resu
 pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &str, url: &str) -> Result<(), String> {
     let window = app.get_webview_window(label).unwrap();
 
-    window.eval(format!("window.location.href = '{}'", url)).unwrap();
+    let tauri_url: tauri::Url;
+    if url == "about:blank" {
+        if is_dev() {
+            tauri_url = tauri::Url::parse("http://localhost:1421/youtube-await.html").map_err(|e| format!("{:?}", e))?;
+        } else {
+            tauri_url = tauri::Url::parse("tauri://localhost/youtube-await.html").map_err(|e| format!("{:?}", e))?;
+        }
+    } else {
+        tauri_url = tauri::Url::parse(url).map_err(|e| format!("{:?}", e))?;
+    }
+
+    window.navigate(tauri_url).map_err(|e| format!("{:?}", e))?;
     sleep(std::time::Duration::from_secs(2));
     if label == "youtube-chat" && url != "about:blank" {
         window.eval(youtube::SCRAPPING_JS).unwrap();
@@ -36,7 +46,6 @@ pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &st
 #[tauri::command]
 pub async fn list_overlays<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
     let overlays_dir = app.path().app_data_dir().unwrap().join("overlays");
-
 
     if overlays_dir.is_dir() {
         let mut folders: Vec<String> = Vec::new();
@@ -55,7 +64,6 @@ pub async fn list_overlays<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Vec<S
     } else {
         Err(String::from_str("An error occurred on iterate over overlays dir").unwrap())
     }
-
 }
 
 /* ================================================================================================================== */

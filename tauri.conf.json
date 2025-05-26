@@ -13,6 +13,7 @@
             {
                 "label": "main",
                 "title": "Voguh's UniChat",
+                "url": "index.html",
                 "width": 1024,
                 "height": 576,
                 "maxWidth": 1280,
@@ -24,7 +25,7 @@
             {
                 "label": "youtube-chat",
                 "title": "YouTube chat",
-                "url": "about:blank",
+                "url": "youtube-await.html",
                 "width": 400,
                 "height": 576,
                 "visible": false,

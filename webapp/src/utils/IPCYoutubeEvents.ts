@@ -1,33 +1,26 @@
 export enum IPCYoutubeEvents {
-    YOUTUBE_IDLE = "unichat://youtube:idle",
-    YOUTUBE_ERROR = "unichat://youtube:error",
-    YOUTUBE_READY = "unichat://youtube:ready",
-    YOUTUBE_PING = "unichat://youtube:ping"
+    YOUTUBE_EVENT = "unichat://youtube:event"
 }
 
 export interface IPCYouTubeStatusIdleEvent {
-    type: IPCYoutubeEvents.YOUTUBE_IDLE;
-    status: "idle";
+    type: "idle";
     timestamp: number;
 }
 
 export interface IPCYouTubeStatusErrorEvent {
-    type: IPCYoutubeEvents.YOUTUBE_ERROR;
-    status: "error";
+    type: "error";
     error: string;
     timestamp: number;
 }
 
 export interface IPCYouTubeStatusReadyEvent {
-    type: IPCYoutubeEvents.YOUTUBE_READY;
-    status: "ready";
+    type: "ready";
     url: string;
     timestamp: number;
 }
 
 export interface IPCYouTubeStatusPingEvent {
-    type: IPCYoutubeEvents.YOUTUBE_PING;
-    status: "working";
+    type: "working";
     timestamp: number;
 }
 
