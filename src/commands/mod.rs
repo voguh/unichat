@@ -5,6 +5,7 @@ use serde_json::Value;
 use tauri::{is_dev, Manager, Runtime};
 
 use crate::store;
+use crate::utils::constants;
 use crate::youtube;
 
 #[tauri::command]
@@ -48,7 +49,7 @@ pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &st
 
     window.navigate(tauri_url).map_err(|e| format!("{:?}", e))?;
     sleep(std::time::Duration::from_secs(2));
-    if label == "youtube-chat" && url != "about:blank" {
+    if label == constants::YOUTUBE_CHAT_WINDOW && url != "about:blank" {
         window.eval(youtube::SCRAPPING_JS).unwrap();
     }
 

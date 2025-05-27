@@ -5,12 +5,12 @@ use std::time::UNIX_EPOCH;
 use std::io::Write;
 
 use serde_json::Value;
-use tauri::is_dev;
 use tauri::{Emitter, Manager};
 use tauri_plugin_store::Store;
 
 use crate::events;
-use crate::store;
+use crate::utils;
+use crate::utils::constants;
 
 mod mapper;
 
@@ -110,7 +110,7 @@ fn dispatch_event<R: tauri::Runtime>(app: tauri::AppHandle<R>, event_type: &str,
 pub async fn on_youtube_channel_id<R: tauri::Runtime>(app: tauri::AppHandle<R>, channel_id: &str) -> Result<(), String> {
     let store = app.state::<Arc<Store<R>>>();
 
-    return Ok(store.set(store::YOUTUBE_CHANNEL_ID_KEY, channel_id));
+    return Ok(store.set(constants::YOUTUBE_CHANNEL_ID_KEY, channel_id));
 }
 
 #[tauri::command]
@@ -161,13 +161,13 @@ pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, act
     let mut debug_parsed_file = fs::OpenOptions::new().append(true).create(true).open(&debug_parsed_events_path).unwrap();
 
     for action in actions.clone() {
-        if is_dev() {
+        if utils::is_dev() {
             writeln!(debug_raw_file, "{}", serde_json::to_string(&action).unwrap()).unwrap();
         }
 
         match mapper::parse(&action) {
             Ok(Some(parsed)) => {
-                if is_dev() {
+                if utils::is_dev() {
                     writeln!(debug_parsed_file, "{}", serde_json::to_string(&parsed).unwrap()).unwrap();
                 }
 
