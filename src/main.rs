@@ -9,6 +9,7 @@ mod actix;
 mod commands;
 mod events;
 mod store;
+mod utils;
 mod youtube;
 
 fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::error::Error>> {
@@ -65,9 +66,15 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
 }
 
 fn main() {
+    let log_level = if utils::is_dev() {
+        log::LevelFilter::Trace
+    } else {
+        log::LevelFilter::Warn
+    };
+
     tauri::Builder::default().setup(setup)
         .plugin(tauri_plugin_store::Builder::default().build())
-        .plugin(tauri_plugin_log::Builder::new().level(log::LevelFilter::Info).build())
+        .plugin(tauri_plugin_log::Builder::new().level(log_level).build())
         .invoke_handler(tauri::generate_handler![
             commands::store_get_item,
             commands::store_set_item,
