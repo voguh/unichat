@@ -62,15 +62,12 @@ export function DashboardHome(): React.ReactNode {
     async function onSubmit(formData: FormData): Promise<void> {
         try {
             setSavingStatus("saving");
-
-            await storageService.setItem(YOUTUBE_CHAT_URL_KEY, formData.youtubeChatUrl);
-
-            if (Strings.isValidYouTubeChatUrl(formData.youtubeChatUrl)) {
-                await invoke("update_webview_url", { label: "youtube-chat", url: formData.youtubeChatUrl });
-            } else {
-                await invoke("update_webview_url", { label: "youtube-chat", url: "about:blank" });
+            if (!Strings.isValidYouTubeChatUrl(formData.youtubeChatUrl)) {
+                formData.youtubeChatUrl = "about:blank";
             }
 
+            await storageService.setItem(YOUTUBE_CHAT_URL_KEY, formData.youtubeChatUrl);
+            await invoke("update_webview_url", { label: "youtube-chat", url: formData.youtubeChatUrl });
             setSavingStatus("saved");
             toast.success("Successfully saved");
         } catch (err) {
