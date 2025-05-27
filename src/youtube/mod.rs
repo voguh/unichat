@@ -13,20 +13,25 @@ mod mapper;
 
 pub const SCRAPPING_JS: &str = r#"
     if (window.fetch.__WRAPPED__ == null) {
+        // Select live chat instead top chat
+        document.querySelector('#live-chat-view-selector-sub-menu #trigger')?.click();
+        document.querySelector('#live-chat-view-selector-sub-menu #dropdown a:nth-child(2)')?.click()
+
+        // Wrap fetch to intercept YouTube live chat messages
         const originalFetch = window.fetch;
-        Object.defineProperty(window, "fetch", {
+        Object.defineProperty(window, 'fetch', {
             value: async (...args) => {
                 const res = await originalFetch(...args);
 
-                if (res.url.startsWith("https://www.youtube.com/youtubei/v1/live_chat/get_live_chat") && res.ok) {
+                if (res.url.startsWith('https://www.youtube.com/youtubei/v1/live_chat/get_live_chat') && res.ok) {
                     res.clone().json().then(async (parsed) => {
                         const actions = parsed?.continuationContents?.liveChatContinuation?.actions;
 
                         if (actions != null && actions.length > 0) {
-                            await window.__TAURI__.core.invoke("on_youtube_message", { actions });
+                            await window.__TAURI__.core.invoke('on_youtube_message', { actions });
                         }
                     }).catch((err) => {
-                        window.__TAURI__.core.invoke("on_youtube_error", { error: JSON.stringify(err.stack) }).then(() => console.log("YouTube error event emitted!"));
+                        window.__TAURI__.core.invoke('on_youtube_error', { error: JSON.stringify(err.stack) }).then(() => console.log('YouTube error event emitted!'));
                     });
                 }
 
@@ -35,30 +40,32 @@ pub const SCRAPPING_JS: &str = r#"
             configurable: true,
             writable: true
         });
+        Object.defineProperty(window.fetch, '__WRAPPED__', { value: true, configurable: true, writable: true });
 
+        // Attach status ping event
         setInterval(() => {
             if (window.fetch.__WRAPPED__) {
-                window.__TAURI__.core.invoke("on_youtube_ping").then(() => console.log("YouTube ping event emitted!"));
+                window.__TAURI__.core.invoke('on_youtube_ping').then(() => console.log('YouTube ping event emitted!'));
             }
         }, 5000);
 
-        window.__TAURI__.core.invoke("on_youtube_ready", { url: window.location.href }).then(() => console.log("YouTube ready event emitted!"));
-        Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
-        console.log("Fetch wrapped!");
-
-        const unichatWarn = document.createElement("div");
-        unichatWarn.style.position = "absolute";
-        unichatWarn.style.top = "8px";
-        unichatWarn.style.right = "8px";
-        unichatWarn.style.zIndex = "9999";
-        unichatWarn.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
-        unichatWarn.style.color = "white";
-        unichatWarn.style.padding = "10px";
-        unichatWarn.style.borderRadius = "4px";
-        unichatWarn.innerText = "UniChat installed! You can close this window.";
+        // Add a warning message to the page
+        const unichatWarn = document.createElement('div');
+        unichatWarn.style.position = 'absolute';
+        unichatWarn.style.top = '8px';
+        unichatWarn.style.right = '8px';
+        unichatWarn.style.zIndex = '9999';
+        unichatWarn.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        unichatWarn.style.color = 'white';
+        unichatWarn.style.padding = '10px';
+        unichatWarn.style.borderRadius = '4px';
+        unichatWarn.innerText = 'UniChat installed! You can close this window.';
         document.body.appendChild(unichatWarn);
+
+        window.__TAURI__.core.invoke('on_youtube_ready', { url: window.location.href }).then(() => console.log('YouTube ready event emitted!'));
+        console.log('Fetch wrapped!');
     } else {
-        console.log("Fetch already was wrapped!");
+        console.log('Fetch already was wrapped!');
     }
 "#;
 
