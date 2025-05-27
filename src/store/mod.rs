@@ -25,7 +25,7 @@ pub fn new<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Arc<Store<R>> {
     defaults.insert(String::from(YOUTUBE_CHANNEL_ID_KEY), Value::Null);
     defaults.insert(String::from(TWITCH_CHANNEL_NAME_KEY), Value::from("about:blank"));
 
-    let store_path = app.path().app_data_dir().unwrap().join("unichat.db");
+    let store_path = app.path().app_config_dir().unwrap().join("unichat.db");
     let store = StoreBuilder::new(app.handle(), store_path).defaults(defaults).build().unwrap();
 
     return store;
