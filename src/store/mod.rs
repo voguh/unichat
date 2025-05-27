@@ -5,8 +5,9 @@ use serde_json::Value;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_store::{Store, StoreBuilder};
 
-static YOUTUBE_CHAT_URL_KEY: &str = "youtube-chat-url";
-static TWITCH_CHANNEL_NAME_KEY: &str = "twitch-channel-name";
+pub static YOUTUBE_CHAT_URL_KEY: &str = "youtube-chat-url";
+pub static YOUTUBE_CHANNEL_ID_KEY: &str = "youtube-channel-id";
+pub static TWITCH_CHANNEL_NAME_KEY: &str = "twitch-channel-name";
 
 #[tauri::command]
 pub async fn store_get_item<R: tauri::Runtime>(app: AppHandle<R>, key: String) -> Result<Option<Value>, String> {
@@ -25,6 +26,7 @@ pub async fn store_set_item<R: tauri::Runtime>(app: AppHandle<R>, key: String, v
 pub fn new<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Arc<Store<R>> {
     let mut defaults = HashMap::new();
     defaults.insert(String::from(YOUTUBE_CHAT_URL_KEY), Value::from("about:blank"));
+    defaults.insert(String::from(YOUTUBE_CHANNEL_ID_KEY), Value::Null);
     defaults.insert(String::from(TWITCH_CHANNEL_NAME_KEY), Value::from("about:blank"));
 
     let store_path = app.path().app_data_dir().unwrap().join("unichat.db");

@@ -1,4 +1,5 @@
 use std::fs;
+use std::sync::Arc;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 use std::io::Write;
@@ -6,8 +7,10 @@ use std::io::Write;
 use serde_json::Value;
 use tauri::is_dev;
 use tauri::{Emitter, Manager};
+use tauri_plugin_store::Store;
 
 use crate::events;
+use crate::store;
 
 mod mapper;
 
@@ -41,6 +44,31 @@ pub const SCRAPPING_JS: &str = r#"
             writable: true
         });
         Object.defineProperty(window.fetch, '__WRAPPED__', { value: true, configurable: true, writable: true });
+
+        // Retrieve channel id
+        function processMessageNode(node) {
+        let newNode = node.closest('yt-live-chat-text-message-renderer');
+            if (newNode == null) {
+                newNode = node.closest('ytd-comment-renderer');
+            }
+
+            const data = newNode?.__data?.data ?? newNode?.data ?? newNode?.__data;
+            const liveChatItemContextMenuEndpointParams = data?.contextMenuEndpoint?.liveChatItemContextMenuEndpoint?.params;
+            const sendLiveChatMessageEndpointParams = data?.actionPanel?.liveChatMessageInputRenderer?.sendButton?.buttonRenderer?.serviceEndpoint?.sendLiveChatMessageEndpoint?.params;
+
+            return liveChatItemContextMenuEndpointParams || sendLiveChatMessageEndpointParams;
+        }
+
+        for (const node of document.querySelectorAll('span#message')) {
+            const data = processMessageNode(node);
+            if (data != null) {
+                const protoChannelId = atob(decodeURIComponent(atob(data)));
+                const channelId = protoChannelId.split("*'\n\u0018")[1].split('\u0012\u000b')[0];
+
+                window.__TAURI__.core.invoke('on_youtube_channel_id', { channelId }).then(() => console.log('YouTube channelId event emitted!'));
+                break;
+            }
+        }
 
         // Attach status ping event
         setInterval(() => {
@@ -76,6 +104,13 @@ fn dispatch_event<R: tauri::Runtime>(app: tauri::AppHandle<R>, event_type: &str,
     payload["timestamp"] = serde_json::json!(now.as_millis());
 
     return app.emit(event_type, payload).map_err(|e| format!("Failed to emit event: {}", e));
+}
+
+#[tauri::command]
+pub async fn on_youtube_channel_id<R: tauri::Runtime>(app: tauri::AppHandle<R>, channel_id: &str) -> Result<(), String> {
+    let store = app.state::<Arc<Store<R>>>();
+
+    return Ok(store.set(store::YOUTUBE_CHANNEL_ID_KEY, channel_id));
 }
 
 #[tauri::command]
