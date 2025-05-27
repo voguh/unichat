@@ -1,9 +1,23 @@
 use std::str::FromStr;
 use std::thread::sleep;
 
+use serde_json::Value;
 use tauri::{is_dev, Manager, Runtime};
 
+use crate::store;
 use crate::youtube;
+
+#[tauri::command]
+pub async fn store_get_item<R: tauri::Runtime>(app: tauri::AppHandle<R>, key: &str) -> Result<Value, String> {
+    return store::get_item(&app, key);
+}
+
+#[tauri::command]
+pub async fn store_set_item<R: tauri::Runtime>(app: tauri::AppHandle<R>, key: &str, value: Value) -> Result<(), String> {
+    return store::set_item(&app, key, value);
+}
+
+/* ================================================================================================================== */
 
 #[tauri::command]
 pub fn toggle_webview<R: Runtime>(app: tauri::AppHandle<R>, label: &str) -> Result<(), String> {

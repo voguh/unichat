@@ -69,12 +69,12 @@ fn main() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_log::Builder::new().level(log::LevelFilter::Info).build())
         .invoke_handler(tauri::generate_handler![
+            commands::store_get_item,
+            commands::store_set_item,
             commands::toggle_webview,
             commands::update_webview_url,
             commands::list_overlays,
             commands::open_overlays_dir,
-            store::store_get_item,
-            store::store_set_item,
             youtube::on_youtube_channel_id,
             youtube::on_youtube_idle,
             youtube::on_youtube_ready,

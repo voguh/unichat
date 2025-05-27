@@ -9,17 +9,13 @@ pub static YOUTUBE_CHAT_URL_KEY: &str = "youtube-chat-url";
 pub static YOUTUBE_CHANNEL_ID_KEY: &str = "youtube-channel-id";
 pub static TWITCH_CHANNEL_NAME_KEY: &str = "twitch-channel-name";
 
-#[tauri::command]
-pub async fn store_get_item<R: tauri::Runtime>(app: AppHandle<R>, key: String) -> Result<Option<Value>, String> {
+pub fn get_item<R: tauri::Runtime>(app: &AppHandle<R>, key: &str) -> Result<Value, String> {
     let store = app.state::<Arc<Store<R>>>();
-
-    return Ok(store.get(key));
+    return store.get(key).ok_or(format!("Key '{}' not found in store", key));
 }
 
-#[tauri::command]
-pub async fn store_set_item<R: tauri::Runtime>(app: AppHandle<R>, key: String, value: Value) -> Result<(), String> {
+pub fn set_item<R: tauri::Runtime>(app: &AppHandle<R>, key: &str, value: Value) -> Result<(), String> {
     let store = app.state::<Arc<Store<R>>>();
-
     return Ok(store.set(key, value));
 }
 
