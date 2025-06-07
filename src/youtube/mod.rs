@@ -1,15 +1,12 @@
-use std::fs;
 use std::sync::Arc;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
-use std::io::Write;
 
 use serde_json::Value;
 use tauri::{Emitter, Manager};
 use tauri_plugin_store::Store;
 
 use crate::events;
-use crate::utils;
 use crate::utils::constants;
 
 mod mapper;
@@ -147,41 +144,21 @@ pub async fn on_youtube_error<R: tauri::Runtime>(app: tauri::AppHandle<R>, error
 /* ================================================================================================================== */
 
 #[tauri::command]
-pub async fn on_youtube_message<R: tauri::Runtime>(app: tauri::AppHandle<R>, actions: Vec<Value>) -> Result<(), String> {
-    let unknown_action_path = app.path().app_data_dir().unwrap().join("unknown_actions.txt");
-    let mut unknown_file = fs::OpenOptions::new().append(true).create(true).open(&unknown_action_path).unwrap();
-
-    let parse_errors_path = app.path().app_data_dir().unwrap().join("parse_errors.txt");
-    let mut errors_file = fs::OpenOptions::new().append(true).create(true).open(&parse_errors_path).unwrap();
-
-    let debug_raw_events_path = app.path().app_data_dir().unwrap().join("debug_raw_events_log.txt");
-    let mut debug_raw_file = fs::OpenOptions::new().append(true).create(true).open(&debug_raw_events_path).unwrap();
-
-    let debug_parsed_events_path = app.path().app_data_dir().unwrap().join("debug_parsed_events_log.txt");
-    let mut debug_parsed_file = fs::OpenOptions::new().append(true).create(true).open(&debug_parsed_events_path).unwrap();
-
+pub async fn on_youtube_message<R: tauri::Runtime>(_app: tauri::AppHandle<R>, actions: Vec<Value>) -> Result<(), String> {
     for action in actions.clone() {
-        if utils::is_dev() {
-            writeln!(debug_raw_file, "{}", serde_json::to_string(&action).unwrap()).unwrap();
-        }
-
         match mapper::parse(&action) {
             Ok(Some(parsed)) => {
-                if utils::is_dev() {
-                    writeln!(debug_parsed_file, "{}", serde_json::to_string(&parsed).unwrap()).unwrap();
-                }
-
                 if let Err(err) = events::event_emitter().emit(parsed) {
                     log::error!("An error occurred on send unichat event: {}", err);
                 }
             }
 
             Ok(None) => {
-                writeln!(unknown_file, "{}", serde_json::to_string(&action).unwrap()).unwrap();
+                log::debug!("Unknown YouTube action: {}", action);
             }
 
             Err(err) => {
-                writeln!(errors_file, "{}:{}:{} -- {}", err, err.line(), err.column(), serde_json::to_string(&action).unwrap()).unwrap();
+                log::error!("An error occurred while parsing YouTube action: {}", err);
             }
         }
     }
