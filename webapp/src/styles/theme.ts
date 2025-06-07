@@ -331,7 +331,7 @@ export const openColor = {
 
 export const theme = { ...openColor };
 
-export const themeDark = createTheme({
+export const muiTheme = createTheme({
     cssVariables: true,
     defaultColorScheme: "dark",
     palette: { mode: "dark" }
