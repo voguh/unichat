@@ -7,7 +7,7 @@ export const DashboardStyledContainer = styled.div`
 
     display: grid;
     grid-template-areas: "SID CTT" "SID CTT";
-    grid-template-columns: 48px 1fr;
+    grid-template-columns: 50px 1fr;
     grid-template-rows: 46px 1fr;
     gap: 8px;
 
@@ -19,24 +19,14 @@ export const DashboardStyledContainer = styled.div`
         gap: 8px;
 
         > button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             width: 32px;
             height: 32px;
             min-width: 32px;
             min-height: 32px;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-
-            > .active {
-                width: 8px;
-                height: 8px;
-                border-radius: 8px;
-                position: absolute;
-                right: 0;
-                bottom: 0;
-            }
         }
     }
 
