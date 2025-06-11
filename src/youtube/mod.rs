@@ -165,11 +165,15 @@ pub async fn on_youtube_message<R: tauri::Runtime>(_app: tauri::AppHandle<R>, ac
 
     for action in actions.clone() {
         if is_dev() || log_events == Value::from("ALL") {
-            log_action("event.log", &action);
+            log_action("events-raw.log", &action);
         }
 
         match mapper::parse(&action) {
             Ok(Some(parsed)) => {
+                if is_dev() || log_events == Value::from("ALL") {
+                    log_action("events-parsed.log", &format!("{}", serde_json::to_string(&parsed).unwrap()));
+                }
+
                 if let Err(err) = events::event_emitter().emit(parsed) {
                     log::error!("An error occurred on send unichat event: {}", err);
                 }
@@ -177,12 +181,12 @@ pub async fn on_youtube_message<R: tauri::Runtime>(_app: tauri::AppHandle<R>, ac
 
             Ok(None) => {
                 if is_dev() || log_events == Value::from("UNKNOWN") {
-                    log_action("unknowns.log", &action);
+                    log_action("events-unknown.log", &action);
                 }
             }
 
             Err(err) => {
-                log_action("errors.log", &format!("{err} -- {action}"));
+                log_action("events-error.log", &format!("{err} -- {action}"));
             }
         }
     }
