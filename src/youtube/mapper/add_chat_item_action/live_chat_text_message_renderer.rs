@@ -24,7 +24,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_jso
         Ok(parsed) => {
             Ok(Some(UniChatEvent::Message {
                 event_type: String::from("unichat:message"),
-                detail: UniChatMessageEventPayload {
+                data: UniChatMessageEventPayload {
                     channel_id: None,
                     channel_name: None,
                     platform: String::from("youtube"),

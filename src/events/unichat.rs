@@ -6,37 +6,37 @@ pub enum UniChatEvent {
     Message {
         #[serde(rename = "type")]
         event_type: String,
-        detail: UniChatMessageEventPayload
+        data: UniChatMessageEventPayload
     },
     RemoveMessage {
         #[serde(rename = "type")]
         event_type: String,
-        detail: UniChatRemoveMessageEventPayload
+        data: UniChatRemoveMessageEventPayload
     },
     RemoveAuthor {
         #[serde(rename = "type")]
         event_type: String,
-        detail: UniChatRemoveAuthorEventPayload
+        data: UniChatRemoveAuthorEventPayload
     },
     Raid {
         #[serde(rename = "type")]
         event_type: String,
-        detail: UniChatRaidEventPayload
+        data: UniChatRaidEventPayload
     },
     Sponsor {
         #[serde(rename = "type")]
         event_type: String,
-        detail: UniChatSponsorEventPayload
+        data: UniChatSponsorEventPayload
     },
     SponsorGift {
         #[serde(rename = "type")]
         event_type: String,
-        detail: UniChatSponsorGiftEventPayload
+        data: UniChatSponsorGiftEventPayload
     },
     Donate {
         #[serde(rename = "type")]
         event_type: String,
-        detail: UniChatDonateEventPayload
+        data: UniChatDonateEventPayload
     }
 }
 

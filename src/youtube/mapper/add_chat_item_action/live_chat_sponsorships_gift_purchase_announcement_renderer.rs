@@ -56,7 +56,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_jso
 
             Ok(Some(UniChatEvent::SponsorGift {
                 event_type: String::from("unichat:sponsor_gift"),
-                detail: UniChatSponsorGiftEventPayload {
+                data: UniChatSponsorGiftEventPayload {
                     channel_id: None,
                     channel_name: None,
                     platform: String::from("youtube"),

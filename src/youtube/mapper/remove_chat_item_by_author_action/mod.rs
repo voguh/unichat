@@ -13,7 +13,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_jso
         Ok(parsed) => {
             Ok(Some(UniChatEvent::RemoveAuthor {
                 event_type: String::from("unichat:remove_author"),
-                detail: UniChatRemoveAuthorEventPayload {
+                data: UniChatRemoveAuthorEventPayload {
                     channel_id: None,
                     channel_name: None,
                     platform: String::from("youtube"),

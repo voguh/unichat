@@ -54,7 +54,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_jso
                     if first_run.bold.is_some() {
                         event = Some(UniChatEvent::Raid {
                             event_type: String::from("unichat:raid"),
-                            detail: UniChatRaidEventPayload {
+                            data: UniChatRaidEventPayload {
                                 channel_id: None,
                                 channel_name: None,
                                 platform: String::from("youtube"),
