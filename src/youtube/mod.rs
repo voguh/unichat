@@ -5,6 +5,7 @@ use serde_json::Value;
 use tauri::Emitter;
 
 use crate::events;
+use crate::utils::is_dev;
 use crate::utils::settings;
 use crate::utils::settings::SettingsKeys;
 
@@ -160,9 +161,12 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
 
 #[tauri::command]
 pub async fn on_youtube_message<R: tauri::Runtime>(_app: tauri::AppHandle<R>, actions: Vec<Value>) -> Result<(), String> {
+    let log_events = settings::get_item(SettingsKeys::LogYoutubeEvents).unwrap_or(Value::from("ONLY_ERRORS"));
+
     for action in actions.clone() {
-        #[cfg(debug_assertions)]
-        log_action("event.log", &action);
+        if is_dev() || log_events == Value::from("ALL") {
+            log_action("event.log", &action);
+        }
 
         match mapper::parse(&action) {
             Ok(Some(parsed)) => {
@@ -172,8 +176,9 @@ pub async fn on_youtube_message<R: tauri::Runtime>(_app: tauri::AppHandle<R>, ac
             }
 
             Ok(None) => {
-                #[cfg(debug_assertions)]
-                log_action("unknowns.log", &action);
+                if is_dev() || log_events == Value::from("UNKNOWN") {
+                    log_action("unknowns.log", &action);
+                }
             }
 
             Err(err) => {
