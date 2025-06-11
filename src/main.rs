@@ -11,12 +11,13 @@ use crate::utils::properties::AppPaths;
 mod actix;
 mod commands;
 mod events;
-mod store;
 mod utils;
 mod youtube;
 
-fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::error::Error>> {
+fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
+    events::init(app);
     utils::properties::init(app);
+    utils::settings::init(app);
 
     /* ========================================================================================== */
 
@@ -24,15 +25,6 @@ fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::
     if !&widgets_dir.exists() {
         fs::create_dir_all(&widgets_dir).unwrap();
     }
-
-    /* ========================================================================================== */
-
-    events::init(app);
-
-    /* ========================================================================================== */
-
-    let store = store::new(app);
-    app.manage(store);
 
     /* ========================================================================================== */
 

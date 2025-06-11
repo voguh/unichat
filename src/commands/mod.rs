@@ -6,20 +6,23 @@ use tauri::is_dev;
 use tauri::Manager;
 use tauri::Runtime;
 
-use crate::store;
 use crate::utils::constants;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
+use crate::utils::settings;
+use crate::utils::settings::SettingsKeys;
 use crate::youtube;
 
 #[tauri::command]
-pub async fn store_get_item<R: tauri::Runtime>(app: tauri::AppHandle<R>, key: &str) -> Result<Value, String> {
-    return store::get_item(&app, key);
+pub async fn store_get_item<R: tauri::Runtime>(_app: tauri::AppHandle<R>, key: &str) -> Result<Value, String> {
+    let p_key = SettingsKeys::from_str(key).map_err(|e| e.to_string())?;
+    return settings::get_item(p_key);
 }
 
 #[tauri::command]
-pub async fn store_set_item<R: tauri::Runtime>(app: tauri::AppHandle<R>, key: &str, value: Value) -> Result<(), String> {
-    return store::set_item(&app, key, value);
+pub async fn store_set_item<R: tauri::Runtime>(_app: tauri::AppHandle<R>, key: &str, value: Value) -> Result<(), String> {
+    let p_key = SettingsKeys::from_str(key).map_err(|e| e.to_string())?;
+    return settings::set_item(p_key, value);
 }
 
 /* ================================================================================================================== */

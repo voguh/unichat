@@ -1,14 +1,12 @@
-use std::sync::Arc;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
 use serde_json::Value;
 use tauri::Emitter;
-use tauri::Manager;
-use tauri_plugin_store::Store;
 
 use crate::events;
-use crate::utils::constants;
+use crate::utils::settings;
+use crate::utils::settings::SettingsKeys;
 
 mod mapper;
 
@@ -105,10 +103,8 @@ fn dispatch_event<R: tauri::Runtime>(app: tauri::AppHandle<R>, event_type: &str,
 }
 
 #[tauri::command]
-pub async fn on_youtube_channel_id<R: tauri::Runtime>(app: tauri::AppHandle<R>, channel_id: &str) -> Result<(), String> {
-    let store = app.state::<Arc<Store<R>>>();
-
-    return Ok(store.set(constants::YOUTUBE_CHANNEL_ID_KEY, channel_id));
+pub async fn on_youtube_channel_id<R: tauri::Runtime>(_app: tauri::AppHandle<R>, channel_id: &str) -> Result<(), String> {
+    return settings::set_item(SettingsKeys::YouTubeChannelId, serde_json::json!(channel_id));
 }
 
 #[tauri::command]
