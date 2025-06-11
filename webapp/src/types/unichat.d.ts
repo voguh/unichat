@@ -12,7 +12,7 @@ export interface UniChatBadge {
 
 export interface UniChatEventMessage {
     type: "unichat:message";
-    detail: {
+    data: {
         channelId: string | null;
         channelName: string | null;
         platform: "youtube" | "twitch";
@@ -32,7 +32,7 @@ export interface UniChatEventMessage {
 
 export interface UniChatEventRemoveMessage {
     type: "unichat:remove_message";
-    detail: {
+    data: {
         channelId: string | null;
         channelName: string | null;
         platform: "youtube" | "twitch";
@@ -43,7 +43,7 @@ export interface UniChatEventRemoveMessage {
 
 export interface UniChatEventRemoveAuthor {
     type: "unichat:remove_author";
-    detail: {
+    data: {
         channelId: string | null;
         channelName: string | null;
         platform: "youtube" | "twitch";
@@ -54,7 +54,7 @@ export interface UniChatEventRemoveAuthor {
 
 export interface UniChatEventRaid {
     type: "unichat:raid";
-    detail: {
+    data: {
         channelId: string | null;
         channelName: string | null;
         platform: "youtube" | "twitch";
@@ -70,7 +70,7 @@ export interface UniChatEventRaid {
 
 export interface UniChatEventSponsor {
     type: "unichat:sponsor";
-    detail: {
+    data: {
         channelId: string | null;
         channelName: string | null;
         platform: "youtube" | "twitch";
@@ -88,7 +88,7 @@ export interface UniChatEventSponsor {
 
 export interface UniChatSponsorGiftEvent {
     type: "unichat:sponsor_gift";
-    detail: {
+    data: {
         channelId: string | null;
         channelName: string | null;
         platform: "youtube" | "twitch";
@@ -105,7 +105,7 @@ export interface UniChatSponsorGiftEvent {
 
 export interface UniChatDonateEvent {
     type: "unichat:donate";
-    detail: {
+    data: {
         channelId: string | null;
         channelName: string | null;
         platform: "youtube" | "twitch";
