@@ -1,7 +1,7 @@
 [package]
 name = "unichat"
 version = "0.1.0"
-description = "Yet another implementation of YouTube chat overlay"
+description = "Yet another implementation of YouTube chat widget"
 authors = ["Voguh <voguhofc@protonmail.com>"]
 license = "LGPL-3.0-only"
 edition = "2021"
@@ -16,7 +16,6 @@ custom-protocol = ["tauri/custom-protocol"]
 tauri-build = { version = "2.0.2", features = [] }
 
 [dependencies]
-actix-files = "0.6.6"
 actix-web = "4.11.0"
 actix-ws = "0.3.0"
 log = "0.4.27"
