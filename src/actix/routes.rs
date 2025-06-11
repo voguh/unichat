@@ -49,17 +49,33 @@ async fn ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, acti
     actix_web::rt::spawn(async move {
         let mut rx = events::event_emitter().subscribe();
 
-        while let Ok(received) = rx.recv().await {
-            let parsed = serde_json::to_string(&received).unwrap();
-            if let Err(err) = session.text(parsed).await {
-                println!("An error occurred on send message to client, exiting loop: {err}");
-                break;
+        loop {
+            let received = rx.recv().await;
+
+            match received {
+                Ok(event) => {
+                    if let Ok(parsed) = serde_json::to_string(&event) {
+                        if let Err(err) = session.text(parsed).await {
+                            log::error!("Failed to send event to WebSocket: {}", err);
+                            break;
+                        }
+                    } else {
+                        log::error!("Failed to serialize event");
+                    }
+                }
+                Err(tokio::sync::broadcast::error::RecvError::Lagged(skipped)) => {
+                    log::warn!("WebSocket receiver lagged, skipped {} messages", skipped);
+                }
+                Err(tokio::sync::broadcast::error::RecvError::Closed) => {
+                    log::info!("WebSocket receiver closed, exiting loop");
+                    break;
+                }
             }
         }
 
         let _ = session.close(None).await;
         drop(rx);
-        println!("Client disconnected");
+        log::info!("WebSocket session closed");
     });
 
     return Ok(res);
