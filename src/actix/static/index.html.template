@@ -9,18 +9,21 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+        <style>
+            {{WIDGET_STYLE}}
+        </style>
         <script defer>
-            $(document).ready(function() {
+            document.addEventListener("DOMContentLoaded", () => {
                 const socket = new WebSocket('ws://localhost:9527/ws')
                 socket.addEventListener("message", function (event) {
                     window.dispatchEvent(new CustomEvent("unichat:event", { detail: JSON.parse(event.data) }));
                 });
+
+                {{WIDGET_SCRIPT}}
             });
         </script>
-        <!-- __INCLUDE_WIDGET_SCRIPT__ -->
-        <!-- __INCLUDE_WIDGET_CSS__ -->
     </head>
     <body>
-        <!-- __INCLUDE_WIDGET_HTML__ -->
+        {{WIDGET_HTML}}
     </body>
 </html>

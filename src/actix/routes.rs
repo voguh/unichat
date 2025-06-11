@@ -18,7 +18,7 @@ struct WidgetsPathParams {
     name: String
 }
 
-static WIDGET_TEMPLATE: &str = include_str!("./static/index.html");
+static WIDGET_TEMPLATE: &str = include_str!("./static/index.html.template");
 
 #[get("/widget/{name}")]
 pub async fn widget(info: web::Path<WidgetsPathParams>) -> impl Responder {
@@ -30,16 +30,14 @@ pub async fn widget(info: web::Path<WidgetsPathParams>) -> impl Responder {
             .body(format!("Widget '{}' not found", info.name));
     }
 
-    let js = fs::read_to_string(widget.join("script.js")).unwrap_or(String::new());
     let css = fs::read_to_string(widget.join("style.css")).unwrap_or(String::new());
+    let js = fs::read_to_string(widget.join("script.js")).unwrap_or(String::new());
     let html = fs::read_to_string(widget.join("main.html")).unwrap_or(String::new());
 
-    let js = r#"document.addEventListener("DOMContentLoaded", () => {{js}});"#.replace("{js}", &js);
-
     let content = WIDGET_TEMPLATE
-        .replace("<!-- __INCLUDE_WIDGET_SCRIPT__ -->", format!("<script defer>{}</script>", js).as_str())
-        .replace("<!-- __INCLUDE_WIDGET_CSS__ -->", format!("<style>{}</style>", css).as_str())
-        .replace("<!-- __INCLUDE_WIDGET_HTML__ -->", &html);
+        .replace("{{WIDGET_STYLE}}", &css)
+        .replace("{{WIDGET_SCRIPT}}", &js)
+        .replace("{{WIDGET_HTML}}", &html);
 
     return HttpResponse::build(StatusCode::OK).insert_header((header::CONTENT_TYPE, "text/html")).body(content);
 }
