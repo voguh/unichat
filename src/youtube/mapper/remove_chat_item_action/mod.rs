@@ -1,6 +1,8 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
-use crate::events::unichat::{UniChatEvent, UniChatRemoveMessageEventPayload};
+use crate::events::unichat::UniChatEvent;
+use crate::events::unichat::UniChatRemoveMessageEventPayload;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]

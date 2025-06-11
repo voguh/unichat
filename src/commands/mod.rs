@@ -2,7 +2,9 @@ use std::str::FromStr;
 use std::thread::sleep;
 
 use serde_json::Value;
-use tauri::{is_dev, Manager, Runtime};
+use tauri::is_dev;
+use tauri::Manager;
+use tauri::Runtime;
 
 use crate::store;
 use crate::utils::constants;

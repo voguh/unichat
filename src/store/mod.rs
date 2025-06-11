@@ -2,8 +2,10 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use serde_json::Value;
-use tauri::{AppHandle, Manager};
-use tauri_plugin_store::{Store, StoreBuilder};
+use tauri::AppHandle;
+use tauri::Manager;
+use tauri_plugin_store::Store;
+use tauri_plugin_store::StoreBuilder;
 
 use crate::utils::constants;
 

@@ -1,9 +1,14 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
-use crate::events::unichat::{UniChatEvent, UniChatSponsorEventPayload};
-use crate::youtube::mapper::{AuthorName, ThumbnailsWrapper};
-
-use super::{build_message, LiveChatAuthorBadgeRenderer, Message, MessageRun};
+use crate::events::unichat::UniChatEvent;
+use crate::events::unichat::UniChatSponsorEventPayload;
+use crate::youtube::mapper::add_chat_item_action::build_message;
+use crate::youtube::mapper::add_chat_item_action::LiveChatAuthorBadgeRenderer;
+use crate::youtube::mapper::add_chat_item_action::Message;
+use crate::youtube::mapper::add_chat_item_action::MessageRun;
+use crate::youtube::mapper::AuthorName;
+use crate::youtube::mapper::ThumbnailsWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]

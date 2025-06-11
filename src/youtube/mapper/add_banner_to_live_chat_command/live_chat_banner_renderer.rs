@@ -1,6 +1,8 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
-use crate::events::unichat::{UniChatEvent, UniChatRaidEventPayload};
+use crate::events::unichat::UniChatEvent;
+use crate::events::unichat::UniChatRaidEventPayload;
 use crate::youtube::mapper::ThumbnailsWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]

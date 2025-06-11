@@ -3,7 +3,8 @@ use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
 use serde_json::Value;
-use tauri::{Emitter, Manager};
+use tauri::Emitter;
+use tauri::Manager;
 use tauri_plugin_store::Store;
 
 use crate::events;

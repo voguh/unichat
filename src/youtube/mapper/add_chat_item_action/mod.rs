@@ -1,8 +1,11 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
-use crate::events::unichat::{UniChatBadge, UniChatEmote, UniChatEvent};
-
-use super::{AuthorBadge, ThumbnailsWrapper};
+use crate::events::unichat::UniChatBadge;
+use crate::events::unichat::UniChatEmote;
+use crate::events::unichat::UniChatEvent;
+use crate::youtube::mapper::AuthorBadge;
+use crate::youtube::mapper::ThumbnailsWrapper;
 
 mod live_chat_membership_item_renderer;
 mod live_chat_paid_message_renderer;
