@@ -3,6 +3,8 @@ if (window.fetch.__WRAPPED__ == null) {
     document.querySelector('#live-chat-view-selector-sub-menu #trigger')?.click();
     document.querySelector('#live-chat-view-selector-sub-menu #dropdown a:nth-child(2)')?.click()
 
+    /* ============================================================================================================== */
+
     // Wrap fetch to intercept YouTube live chat messages
     const originalFetch = window.fetch;
     Object.defineProperty(window, 'fetch', {
@@ -28,9 +30,11 @@ if (window.fetch.__WRAPPED__ == null) {
     });
     Object.defineProperty(window.fetch, '__WRAPPED__', { value: true, configurable: true, writable: true });
 
+    /* ============================================================================================================== */
+
     // Retrieve channel id
     function processMessageNode(node) {
-    let newNode = node.closest('yt-live-chat-text-message-renderer');
+        let newNode = node.closest('yt-live-chat-text-message-renderer');
         if (newNode == null) {
             newNode = node.closest('ytd-comment-renderer');
         }
@@ -48,10 +52,14 @@ if (window.fetch.__WRAPPED__ == null) {
             const protoChannelId = atob(decodeURIComponent(atob(data)));
             const channelId = protoChannelId.split("*'\n\u0018")[1].split('\u0012\u000b')[0];
 
-            window.__TAURI__.core.invoke('on_youtube_channel_id', { channelId }).then(() => console.log('YouTube channelId event emitted!'));
-            break;
+            if (channelId != null && channelId.trim().length > 0) {
+                window.__TAURI__.core.invoke('on_youtube_channel_id', { channelId }).then(() => console.log('YouTube channelId event emitted!'));
+                break;
+            }
         }
     }
+
+    /* ============================================================================================================== */
 
     // Attach status ping event
     setInterval(() => {
@@ -59,6 +67,8 @@ if (window.fetch.__WRAPPED__ == null) {
             window.__TAURI__.core.invoke('on_youtube_ping').then(() => console.log('YouTube ping event emitted!'));
         }
     }, 5000);
+
+    /* ============================================================================================================== */
 
     // Add a warning message to the page
     const unichatWarn = document.createElement('div');
@@ -72,6 +82,8 @@ if (window.fetch.__WRAPPED__ == null) {
     unichatWarn.style.borderRadius = '4px';
     unichatWarn.innerText = 'UniChat installed! You can close this window.';
     document.body.appendChild(unichatWarn);
+
+    /* ============================================================================================================== */
 
     window.__TAURI__.core.invoke('on_youtube_ready', { url: window.location.href }).then(() => console.log('YouTube ready event emitted!'));
     console.log('Fetch wrapped!');
