@@ -25,4 +25,4 @@ showfile = "0.1.1"
 tauri = { version = "2.5.1", features = [] }
 tauri-plugin-log = "2.4.0"
 tauri-plugin-store = "2.2.0"
-tokio = "1.45.0"
+tokio = "1.45.1"
