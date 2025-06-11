@@ -3,7 +3,7 @@
 /docs
 /examples
 /node_modules
-/overlays
+/widgets
 /webapp
 /.editorconfig
 /.gitignore

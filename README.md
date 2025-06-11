@@ -1,7 +1,7 @@
 # Voguh's UniChat
 
 UniChat is a companion tool for streamers who broadcast on YouTube. The goal is
-to provide an overlay with the chat with support for BTTV emotes and
+to provide an widget with the chat with support for BTTV emotes and
 customization using HTML/CSS/JS.
 
 
@@ -18,7 +18,7 @@ and image tag like `<img src="https://cdn.betterttv.net/emote/<EMOTE_ID>/3x.<IMA
 - [x] Implement `SponsorGift` event;
 - [x] Implement `Donate` event;
 - [x] Implement an way to get youtube channel id or store in `unichat.db`
-- [ ] Implement overlay with bttv support;
+- [ ] Implement widget with bttv support;
 
 
 ## Build
