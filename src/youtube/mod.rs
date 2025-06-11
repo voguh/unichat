@@ -143,9 +143,30 @@ pub async fn on_youtube_error<R: tauri::Runtime>(app: tauri::AppHandle<R>, error
 
 /* ================================================================================================================== */
 
+fn log_action(file_name: &str, content: &impl std::fmt::Display) {
+    use std::fs;
+    use std::io::Write;
+
+    use crate::utils::properties;
+    use crate::utils::properties::AppPaths;
+
+    let app_log_dir = properties::get_app_path(AppPaths::AppLogDir);
+    let youtube_log_dir = app_log_dir.join("youtube");
+    if !youtube_log_dir.exists() {
+        fs::create_dir_all(&youtube_log_dir).unwrap();
+    }
+
+    let log_file = youtube_log_dir.join(file_name);
+    let mut file = fs::OpenOptions::new().create(true).append(true).open(log_file).unwrap();
+    writeln!(file, "{content}").unwrap();
+}
+
 #[tauri::command]
 pub async fn on_youtube_message<R: tauri::Runtime>(_app: tauri::AppHandle<R>, actions: Vec<Value>) -> Result<(), String> {
     for action in actions.clone() {
+        #[cfg(debug_assertions)]
+        log_action("event.log", &action);
+
         match mapper::parse(&action) {
             Ok(Some(parsed)) => {
                 if let Err(err) = events::event_emitter().emit(parsed) {
@@ -154,11 +175,12 @@ pub async fn on_youtube_message<R: tauri::Runtime>(_app: tauri::AppHandle<R>, ac
             }
 
             Ok(None) => {
-                log::debug!("Unknown YouTube action: {}", action);
+                #[cfg(debug_assertions)]
+                log_action("unknowns.log", &action);
             }
 
             Err(err) => {
-                log::error!("An error occurred while parsing YouTube action: {}", err);
+                log_action("errors.log", &format!("{err} -- {action}"));
             }
         }
     }
