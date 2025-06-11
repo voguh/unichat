@@ -6,6 +6,8 @@ use tauri::{is_dev, Manager, Runtime};
 
 use crate::store;
 use crate::utils::constants;
+use crate::utils::properties;
+use crate::utils::properties::AppPaths;
 use crate::youtube;
 
 #[tauri::command]
@@ -59,13 +61,12 @@ pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &st
 /* ================================================================================================================== */
 
 #[tauri::command]
-pub async fn list_overlays<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
-    let overlays_dir = app.path().app_data_dir().unwrap().join("overlays");
-
-    if overlays_dir.is_dir() {
+pub async fn list_widgets<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
+    let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgetsDir);
+    if widgets_dir.is_dir() {
         let mut folders: Vec<String> = Vec::new();
 
-        let entries = std::fs::read_dir(&overlays_dir).unwrap();
+        let entries = std::fs::read_dir(&widgets_dir).unwrap();
         for entry in entries {
             let path = entry.unwrap().path();
             if path.is_dir() {
@@ -77,16 +78,16 @@ pub async fn list_overlays<R: Runtime>(app: tauri::AppHandle<R>) -> Result<Vec<S
 
         return Ok(folders);
     } else {
-        Err(String::from_str("An error occurred on iterate over overlays dir").unwrap())
+        Err(String::from_str("An error occurred on iterate over widgets dir").unwrap())
     }
 }
 
 /* ================================================================================================================== */
 
 #[tauri::command]
-pub async fn open_overlays_dir<R: Runtime>(app: tauri::AppHandle<R>) -> Result<(), String> {
-    let overlays_dir = app.path().app_data_dir().unwrap().join("overlays");
-    showfile::show_path_in_file_manager(overlays_dir);
+pub async fn open_widgets_dir<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<(), String> {
+    let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgetsDir);
+    showfile::show_path_in_file_manager(widgets_dir);
 
     return Ok(());
 }

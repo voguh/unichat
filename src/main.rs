@@ -5,6 +5,9 @@ use std::fs;
 
 use tauri::Manager;
 
+use crate::utils::properties;
+use crate::utils::properties::AppPaths;
+
 mod actix;
 mod commands;
 mod events;
@@ -13,9 +16,13 @@ mod utils;
 mod youtube;
 
 fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::error::Error>> {
-    let overlays_dir = app.path().app_data_dir().unwrap().join("overlays");
-    if !&overlays_dir.exists() {
-        fs::create_dir_all(&overlays_dir).unwrap();
+    utils::properties::init(app);
+
+    /* ========================================================================================== */
+
+    let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgetsDir);
+    if !&widgets_dir.exists() {
+        fs::create_dir_all(&widgets_dir).unwrap();
     }
 
     /* ========================================================================================== */
@@ -29,7 +36,7 @@ fn setup<R: tauri::Runtime>(app: &mut tauri::App<R>) -> Result<(), Box<dyn std::
 
     /* ========================================================================================== */
 
-    let http_server = actix::new(app, overlays_dir);
+    let http_server = actix::new(app);
     app.manage(actix::ActixState{ handle: http_server });
 
     return Ok(());
@@ -80,8 +87,8 @@ fn main() {
             commands::store_set_item,
             commands::toggle_webview,
             commands::update_webview_url,
-            commands::list_overlays,
-            commands::open_overlays_dir,
+            commands::list_widgets,
+            commands::open_widgets_dir,
             youtube::on_youtube_channel_id,
             youtube::on_youtube_idle,
             youtube::on_youtube_ready,

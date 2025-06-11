@@ -35,8 +35,8 @@ const DEFAULT_STATUS_EVENT: IPCYouTubeStatusEvent = {
 
 export function DashboardHome(): React.ReactNode {
     const [statusEvent, setStatusEvent] = React.useState<IPCYouTubeStatusEvent>(DEFAULT_STATUS_EVENT);
-    const [selectedOverlay, setSelectedOverlay] = React.useState("default");
-    const [overlays, setOverlays] = React.useState<string[]>([]);
+    const [selectedWidget, setSelectedWidget] = React.useState("default");
+    const [widgets, setWidgets] = React.useState<string[]>([]);
 
     const [savingStatus, setSavingStatus] = React.useState<"idle" | "saving" | "saved" | "error">("idle");
 
@@ -44,17 +44,17 @@ export function DashboardHome(): React.ReactNode {
 
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
-    function onChangeOverlay(evt: SelectChangeEvent<string>): void {
-        setSelectedOverlay(evt.target.value);
+    function onChangeWidget(evt: SelectChangeEvent<string>): void {
+        setSelectedWidget(evt.target.value);
     }
 
-    async function openOverlaysDir(): Promise<void> {
-        invoke("open_overlays_dir");
+    async function openWidgetsDir(): Promise<void> {
+        invoke("open_widgets_dir");
     }
 
     async function reloadIframe(): Promise<void> {
-        const overlays = await invoke<string[]>("list_overlays");
-        setOverlays(overlays);
+        const widgets = await invoke<string[]>("list_widgets");
+        setWidgets(widgets);
 
         iframeRef.current?.contentWindow.location.reload();
     }
@@ -81,8 +81,8 @@ export function DashboardHome(): React.ReactNode {
         async function init(): Promise<void> {
             const youtubeChatUrl = await storageService.getItem<string>(YOUTUBE_CHAT_URL_KEY);
 
-            const overlays = await invoke<string[]>("list_overlays");
-            setOverlays(overlays);
+            const widgets = await invoke<string[]>("list_widgets");
+            setWidgets(widgets);
 
             reset({ youtubeChatUrl });
         }
@@ -153,22 +153,22 @@ export function DashboardHome(): React.ReactNode {
             <Paper className="preview">
                 <Paper className="preview-header">
                     <FormControl fullWidth size="small" variant="outlined">
-                        <InputLabel id="unichat-overlay">Overlay</InputLabel>
+                        <InputLabel id="unichat-widget">Widget</InputLabel>
                         <Select
-                            labelId="unichat-overlay"
-                            label="Overlay"
-                            value={selectedOverlay}
-                            onChange={onChangeOverlay}
+                            labelId="unichat-widget"
+                            label="Widget"
+                            value={selectedWidget}
+                            onChange={onChangeWidget}
                         >
-                            {overlays.map((overlay) => (
-                                <MenuItem key={overlay} value={overlay}>
-                                    {overlay}
+                            {widgets.map((widget) => (
+                                <MenuItem key={widget} value={widget}>
+                                    {widget}
                                 </MenuItem>
                             ))}
                         </Select>
                     </FormControl>
 
-                    <Button onClick={openOverlaysDir}>
+                    <Button onClick={openWidgetsDir}>
                         <i className="fas fa-folder" />
                     </Button>
 
@@ -177,16 +177,14 @@ export function DashboardHome(): React.ReactNode {
                     </Button>
 
                     <Button
-                        onClick={() =>
-                            navigator.clipboard.writeText(`http://localhost:9527/overlays/${selectedOverlay}`)
-                        }
+                        onClick={() => navigator.clipboard.writeText(`http://localhost:9527/widget/${selectedWidget}`)}
                     >
                         <i className="fas fa-globe" />
                     </Button>
                 </Paper>
                 <iframe
                     ref={iframeRef}
-                    src={`http://localhost:9527/overlays/${selectedOverlay}`}
+                    src={`http://localhost:9527/widget/${selectedWidget}`}
                     sandbox="allow-scripts"
                 />
             </Paper>
