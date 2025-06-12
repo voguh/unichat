@@ -33,7 +33,7 @@ impl fmt::Display for AppPaths {
 
 static PROPERTIES: OnceLock<HashMap<String, String>> = OnceLock::new();
 
-pub fn init<R: tauri::Runtime>(app: &mut tauri::App<R>) {
+pub fn init(app: &mut tauri::App<tauri::Wry>) {
     let app_cache_dir = app.path().app_cache_dir().unwrap().to_string_lossy().to_string();
     let app_config_dir = app.path().app_config_dir().unwrap().to_string_lossy().to_string();
     let app_data_dir = app.path().app_data_dir().unwrap().to_string_lossy().to_string();

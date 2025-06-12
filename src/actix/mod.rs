@@ -4,7 +4,7 @@ pub struct ActixState {
     pub handle: tauri::async_runtime::JoinHandle<()>
 }
 
-pub fn new<R: tauri::Runtime>(_app: &tauri::App<R>) -> tauri::async_runtime::JoinHandle<()> {
+pub fn new(_app: &tauri::App<tauri::Wry>) -> tauri::async_runtime::JoinHandle<()> {
     let handler = tauri::async_runtime::spawn(async move {
         let http_server = actix_web::HttpServer::new(move || {
             return actix_web::App::new().wrap(actix_web::middleware::Logger::default())

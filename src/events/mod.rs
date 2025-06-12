@@ -34,7 +34,7 @@ impl EventEmitter {
 
 static INSTANCE: OnceLock<EventEmitter> = OnceLock::new();
 
-pub fn init<R: tauri::Runtime>(_app: &mut tauri::App<R>) {
+pub fn init(_app: &mut tauri::App<tauri::Wry>) {
     INSTANCE.get_or_init(|| EventEmitter::new());
 }
 
