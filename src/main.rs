@@ -18,6 +18,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     events::init(app);
     utils::properties::init(app);
     utils::settings::init(app);
+    youtube::init(app);
 
     /* ========================================================================================== */
 
@@ -80,13 +81,7 @@ fn main() {
             commands::toggle_webview,
             commands::update_webview_url,
             commands::list_widgets,
-            commands::open_widgets_dir,
-            youtube::on_youtube_channel_id,
-            youtube::on_youtube_idle,
-            youtube::on_youtube_ready,
-            youtube::on_youtube_ping,
-            youtube::on_youtube_error,
-            youtube::on_youtube_message
+            commands::open_widgets_dir
         ])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())

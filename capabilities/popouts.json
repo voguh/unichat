@@ -2,8 +2,8 @@
     "$schema": "../gen/schemas/desktop-schema.json",
     "identifier": "popouts-capability",
     "windows": ["youtube-chat", "twitch-chat"],
-    "permissions": ["log:default"],
+    "permissions": ["log:default", "core:event:allow-emit"],
     "remote": {
-        "urls": ["https://youtube.com/live_chat", "https://www.twitch.tv/popout/*/chat"]
+        "urls": ["https://www.youtube.com/*", "https://twitch.tv/*"]
     }
 }

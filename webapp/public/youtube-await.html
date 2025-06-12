@@ -30,21 +30,7 @@
         </style>
 
         <script>
-            function forwardConsole(fnName, logger) {
-                const original = console[fnName];
-                console[fnName] = (message) => {
-                    original(message);
-                    logger(message);
-                };
-            }
-
-            forwardConsole("log", window.__TAURI_PLUGIN_LOG__.trace);
-            forwardConsole("debug", window.__TAURI_PLUGIN_LOG__.debug);
-            forwardConsole("info", window.__TAURI_PLUGIN_LOG__.info);
-            forwardConsole("warn", window.__TAURI_PLUGIN_LOG__.warn);
-            forwardConsole("error", window.__TAURI_PLUGIN_LOG__.error);
-
-            window.__TAURI__.core.invoke("on_youtube_idle").then(() => console.log("YouTube idle event emitted!"));
+            window.__TAURI__.event.emit("youtube_raw::event", { type: "idle" }).then(() => console.log("YouTube idle event emitted!"));
         </script>
     </head>
     <body>
