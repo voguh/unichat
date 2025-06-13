@@ -1,14 +1,14 @@
 import React from "react";
 
-import Button from "@mui/material/Button";
-import Paper from "@mui/material/Paper";
+import { Button, Card } from "@mantine/core";
+import { IconLayoutDashboardFilled } from "@tabler/icons-react";
 import { invoke } from "@tauri-apps/api/core";
 
 import { DashboardHome } from "./DashboardHome";
 import { DashboardStyledContainer } from "./styled";
 
 const TABS = {
-    youtube: { icon: "fab fa-youtube fa-xl" }
+    youtube: { icon: IconLayoutDashboardFilled }
 };
 
 interface Props {
@@ -22,15 +22,15 @@ export function Dashboard(_props: Props): React.ReactNode {
 
     return (
         <DashboardStyledContainer>
-            <Paper className="sidebar">
-                {Object.entries(TABS).map(([id, { icon }]) => {
+            <Card className="sidebar" withBorder shadow="xs">
+                {Object.entries(TABS).map(([id, { icon: Icon }]) => {
                     return (
-                        <Button key={id} size="small" onClick={() => toggleWebview(id)}>
-                            <i className={icon} />
+                        <Button key={id} onClick={() => toggleWebview(id)}>
+                            <Icon size="20" />
                         </Button>
                     );
                 })}
-            </Paper>
+            </Card>
             <div className="content">
                 <DashboardHome />
             </div>

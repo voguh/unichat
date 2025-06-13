@@ -17,35 +17,26 @@ export const DashboardHomeStyledContainer = styled.div`
         grid-template-rows: min-content 1fr;
         gap: 8px;
 
-        > div {
+        > .fields-actions {
+            grid-area: ACT;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             padding: 8px;
 
-            &.fields-actions {
-                grid-area: ACT;
-                display: flex;
-                justify-content: space-between;
-                gap: 8px;
-
-                > button {
-                    justify-content: center;
-                    align-items: center;
-                    gap: 8px;
-                }
-
-                > div.status {
-                }
+            > button {
+                min-width: 34px;
+                padding: 0;
             }
+        }
 
-            &.fields-values {
-                grid-area: FDS;
-                width: 100%;
-                height: 100%;
-                padding: 16px 8px 8px 8px;
-
-                > *:not(:first-child) {
-                    margin-top: 16px;
-                }
-            }
+        > .fields-values {
+            grid-area: FDS;
+            width: 100%;
+            height: 100%;
+            padding: 8px;
         }
     }
 
@@ -56,21 +47,36 @@ export const DashboardHomeStyledContainer = styled.div`
 
         > .preview-header {
             display: flex;
+            flex-direction: row;
             gap: 4px;
-            padding: 16px 8px 8px 8px;
+            padding: 8px;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+
+            > .preview-header-widget-selector {
+                width: 100%;
+            }
 
             > button {
-                width: 40px;
-                height: 40px;
-                min-width: 40px;
-                min-height: 40px;
+                flex-shrink: 0;
+                width: 36px;
+                height: 36px;
+                padding: 0;
             }
         }
 
-        > iframe {
+        > .iframe-wrapper {
             width: 100%;
-            height: calc(100% - 64px);
-            border: none;
+            height: calc(100% - (36px + 16px + 2px)); // 36px for content, 16px for padding, 2px for border
+            border-bottom-left-radius: var(--mantine-radius-default);
+            border-bottom-right-radius: var(--mantine-radius-default);
+            overflow: hidden;
+
+            > iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+            }
         }
     }
 `;

@@ -1,6 +1,6 @@
-import "normalize.css";
-import "react-toastify/dist/ReactToastify.css";
-import "@fortawesome/fontawesome-free/css/all.css";
+import "@mantine/core/styles.css";
+import "@mantine/code-highlight/styles.css";
+import "@mantine/notifications/styles.css";
 import "@fontsource/roboto/400";
 import "@fontsource/roboto/400-italic";
 import "@fontsource/roboto/600";

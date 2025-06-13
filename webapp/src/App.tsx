@@ -1,24 +1,23 @@
 import React from "react";
-import { ToastContainer } from "react-toastify";
 
-import CssBaseline from "@mui/material/CssBaseline";
-import { ThemeProvider as MUIThemeProvider } from "@mui/material/styles";
-import { ThemeProvider } from "styled-components";
+import { createTheme, MantineProvider } from "@mantine/core";
+import { ModalsProvider } from "@mantine/modals";
+import { Notifications } from "@mantine/notifications";
 
 import { Dashboard } from "./components/Dashboard";
-import { GlobalStyle } from "./styles/GlobalStyle";
-import { theme, muiTheme } from "./styles/theme";
+
+const theme = createTheme({
+    fontFamily: "Roboto, sans-serif",
+    fontFamilyMonospace: "Roboto Mono, monospace"
+});
 
 export default function App(): JSX.Element {
     return (
-        <ThemeProvider theme={theme}>
-            <GlobalStyle />
-
-            <MUIThemeProvider theme={muiTheme}>
-                <CssBaseline />
+        <MantineProvider defaultColorScheme="dark" theme={theme}>
+            <ModalsProvider>
+                <Notifications />
                 <Dashboard />
-                <ToastContainer position="bottom-center" theme="dark" />
-            </MUIThemeProvider>
-        </ThemeProvider>
+            </ModalsProvider>
+        </MantineProvider>
     );
 }

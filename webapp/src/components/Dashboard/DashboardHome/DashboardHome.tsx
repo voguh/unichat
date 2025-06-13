@@ -1,14 +1,9 @@
 import React from "react";
-import { Controller, useForm } from "react-hook-form";
-import { toast } from "react-toastify";
 
-import Button from "@mui/material/Button";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Paper from "@mui/material/Paper";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
-import TextField from "@mui/material/TextField";
+import { Button, Card, Select, Text, TextInput } from "@mantine/core";
+import { FormValidateInput, useForm } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
+import { IconFolderFilled, IconReload, IconWorld } from "@tabler/icons-react";
 import { invoke } from "@tauri-apps/api/core";
 import * as event from "@tauri-apps/api/event";
 
@@ -24,8 +19,18 @@ interface FormData {
     youtubeChatUrl: string;
 }
 
-const defaultValues: FormData = {
+const initialValues: FormData = {
     youtubeChatUrl: ""
+};
+
+const validate: FormValidateInput<FormData> = {
+    youtubeChatUrl(value, _values, _path) {
+        if (!Strings.isValidYouTubeChatUrl(value)) {
+            return "Invalid YouTube chat URL";
+        }
+
+        return null;
+    }
 };
 
 const DEFAULT_STATUS_EVENT: IPCYouTubeStatusEvent = {
@@ -40,12 +45,12 @@ export function DashboardHome(): React.ReactNode {
 
     const [savingStatus, setSavingStatus] = React.useState<"idle" | "saving" | "saved" | "error">("idle");
 
-    const { control, handleSubmit, reset } = useForm({ defaultValues, mode: "all" });
+    const { getInputProps, key, onSubmit, setFieldValue } = useForm({ initialValues, validate });
 
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
-    function onChangeWidget(evt: SelectChangeEvent<string>): void {
-        setSelectedWidget(evt.target.value);
+    function onChangeWidget(widgetName: string): void {
+        setSelectedWidget(widgetName);
     }
 
     async function openWidgetsDir(): Promise<void> {
@@ -59,7 +64,7 @@ export function DashboardHome(): React.ReactNode {
         iframeRef.current?.contentWindow.location.reload();
     }
 
-    async function onSubmit(formData: FormData): Promise<void> {
+    async function handleSubmit(formData: FormData): Promise<void> {
         try {
             setSavingStatus("saving");
             if (!Strings.isValidYouTubeChatUrl(formData.youtubeChatUrl)) {
@@ -69,11 +74,11 @@ export function DashboardHome(): React.ReactNode {
             await storageService.setItem(YOUTUBE_CHAT_URL_KEY, formData.youtubeChatUrl);
             await invoke("update_webview_url", { label: "youtube-chat", url: formData.youtubeChatUrl });
             setSavingStatus("saved");
-            toast.success("Successfully saved");
+            notifications.show({ message: "Successfully saved" });
         } catch (err) {
             console.error(err);
             setSavingStatus("error");
-            toast.error("An error occurred on save");
+            notifications.show({ message: "Error saving YouTube chat URL", color: "red" });
         }
     }
 
@@ -84,7 +89,7 @@ export function DashboardHome(): React.ReactNode {
             const widgets = await invoke<string[]>("list_widgets");
             setWidgets(widgets);
 
-            reset({ youtubeChatUrl });
+            setFieldValue("youtubeChatUrl", youtubeChatUrl || "about:blank");
         }
 
         init();
@@ -114,80 +119,63 @@ export function DashboardHome(): React.ReactNode {
 
     return (
         <DashboardHomeStyledContainer>
-            <form className="fields" onSubmit={handleSubmit(onSubmit)}>
-                <Paper className="fields-actions">
-                    <div>
+            <form className="fields" onSubmit={onSubmit(handleSubmit)}>
+                <Card className="fields-actions" withBorder shadow="xs">
+                    <div style={{ width: "100%" }}>
                         <Button
                             type="submit"
                             color={
                                 savingStatus === "saving" ? "warning" : savingStatus === "error" ? "error" : "primary"
                             }
                         >
-                            {savingStatus === "saving" ? "Saving..." : savingStatus === "error" ? "Error" : "Save"}
+                            <Text>
+                                {savingStatus === "saving" ? "Saving..." : savingStatus === "error" ? "Error" : "Save"}
+                            </Text>
                         </Button>
                     </div>
 
                     <ScrapperStatus statusEvent={statusEvent} />
-                </Paper>
+                </Card>
 
-                <Paper className="fields-values">
-                    <Controller
-                        control={control}
-                        name="youtubeChatUrl"
-                        render={function ControllerRender({ field, fieldState }): JSX.Element {
-                            return (
-                                <TextField
-                                    {...field}
-                                    error={!!fieldState.error}
-                                    size="small"
-                                    variant="outlined"
-                                    fullWidth
-                                    label="YouTube chat url"
-                                    placeholder="https://www.youtube.com/live_chat?v={VIDEO_ID}"
-                                />
-                            );
-                        }}
+                <Card className="fields-values" withBorder shadow="xs">
+                    <TextInput
+                        key={key("youtubeChatUrl")}
+                        {...getInputProps("youtubeChatUrl")}
+                        withAsterisk
+                        label="YouTube chat url"
+                        placeholder="https://www.youtube.com/live_chat?v={VIDEO_ID}"
                     />
-                </Paper>
+                </Card>
             </form>
-            <Paper className="preview">
-                <Paper className="preview-header">
-                    <FormControl fullWidth size="small" variant="outlined">
-                        <InputLabel id="unichat-widget">Widget</InputLabel>
-                        <Select
-                            labelId="unichat-widget"
-                            label="Widget"
-                            value={selectedWidget}
-                            onChange={onChangeWidget}
-                        >
-                            {widgets.map((widget) => (
-                                <MenuItem key={widget} value={widget}>
-                                    {widget}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+            <div className="preview">
+                <Card className="preview-header" withBorder shadow="xs">
+                    <div className="preview-header-widget-selector">
+                        <Select value={selectedWidget} data={widgets} onChange={onChangeWidget} />
+                    </div>
 
                     <Button onClick={openWidgetsDir}>
-                        <i className="fas fa-folder" />
+                        <IconFolderFilled size="20" />
                     </Button>
 
                     <Button onClick={reloadIframe}>
                         <i className="fas fa-sync" />
+                        <IconReload size="20" />
                     </Button>
 
                     <Button
                         onClick={() => navigator.clipboard.writeText(`http://localhost:9527/widget/${selectedWidget}`)}
                     >
-                        <i className="fas fa-globe" />
+                        <IconWorld size="20" />
                     </Button>
-                </Paper>
-                <iframe
-                    ref={iframeRef}
-                    src={`http://localhost:9527/widget/${selectedWidget}`}
-                    sandbox="allow-scripts"
-                />
-            </Paper>
+                </Card>
+                <div className="iframe-wrapper">
+                    <iframe
+                        ref={iframeRef}
+                        src={`http://localhost:9527/widget/${selectedWidget}`}
+                        sandbox="allow-scripts"
+                    />
+                </div>
+            </div>
         </DashboardHomeStyledContainer>
     );
 }

@@ -1,5 +1,7 @@
 import React from "react";
 
+import { Text } from "@mantine/core";
+import { IconCircleFilled } from "@tabler/icons-react";
 import { transparentize } from "polished";
 
 import { IPCYouTubeStatusEvent } from "unichat/utils/IPCYoutubeEvents";
@@ -29,8 +31,8 @@ export function ScrapperStatus({ statusEvent }: Props): React.ReactNode {
                 } as React.CSSProperties
             }
         >
-            {statusEvent.type}
-            <i className="fas fa-circle" />
+            <Text>{statusEvent.type}</Text>
+            <IconCircleFilled />
         </ScrapperStatusStyledContainer>
     );
 }
