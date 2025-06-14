@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const DashboardStyledContainer = styled.div`
-    position: absolute;
+    position: fixed;
     inset: 0;
     padding: 8px;
 
@@ -17,8 +17,15 @@ export const DashboardStyledContainer = styled.div`
         display: flex;
         flex-direction: column;
         gap: 8px;
+        height: 100%;
 
-        > button {
+        > div {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        button {
             display: flex;
             justify-content: center;
             align-items: center;

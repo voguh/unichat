@@ -14,8 +14,8 @@ const theme = createTheme({
 export default function App(): JSX.Element {
     return (
         <MantineProvider defaultColorScheme="dark" theme={theme}>
-            <ModalsProvider>
-                <Notifications />
+            <ModalsProvider modalProps={{ centered: true }}>
+                <Notifications position="top-center" />
                 <Dashboard />
             </ModalsProvider>
         </MantineProvider>
