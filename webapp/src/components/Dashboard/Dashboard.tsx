@@ -1,14 +1,14 @@
 import React from "react";
 
 import { Button, Card } from "@mantine/core";
-import { IconAdjustments, IconLayoutDashboardFilled } from "@tabler/icons-react";
+import { IconAdjustments, IconBrandYoutubeFilled } from "@tabler/icons-react";
 import { invoke } from "@tauri-apps/api/core";
 
 import { DashboardHome } from "./DashboardHome";
 import { DashboardStyledContainer } from "./styled";
 
 const TABS = {
-    youtube: { icon: IconLayoutDashboardFilled }
+    youtube: { icon: IconBrandYoutubeFilled }
 };
 
 interface Props {
