@@ -44,7 +44,9 @@ export default defineConfig({
 
     resolve: {
         alias: {
-            "@mui/styled-engine": "@mui/styled-engine-sc",
+            // Fix slowdown with @tabler/icons-react
+            // See: https://github.com/tabler/tabler-icons/issues/1233#issuecomment-2428245119
+            "@tabler/icons-react": "@tabler/icons-react/dist/esm/icons/index.mjs",
             unichat: path.resolve(__dirname, "src")
         }
     },
