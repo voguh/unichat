@@ -15,7 +15,7 @@ export default function App(): JSX.Element {
     return (
         <MantineProvider defaultColorScheme="dark" theme={theme}>
             <ModalsProvider modalProps={{ centered: true }}>
-                <Notifications position="top-center" />
+                <Notifications position="bottom-center" />
                 <Dashboard />
             </ModalsProvider>
         </MantineProvider>
