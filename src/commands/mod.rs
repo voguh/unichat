@@ -15,13 +15,47 @@ use crate::youtube;
 
 #[tauri::command]
 pub async fn store_get_item<R: tauri::Runtime>(_app: tauri::AppHandle<R>, key: &str) -> Result<Value, String> {
+    if key.starts_with("settings") {
+        return Err(String::from("Use `settings_get_item` for settings keys"));
+    }
+
     let p_key = SettingsKeys::from_str(key).map_err(|e| e.to_string())?;
     return settings::get_item(p_key);
 }
 
 #[tauri::command]
 pub async fn store_set_item<R: tauri::Runtime>(_app: tauri::AppHandle<R>, key: &str, value: Value) -> Result<(), String> {
+    if key.starts_with("settings") {
+        return Err(String::from("Use `settings_set_item` for settings keys"));
+    }
+
     let p_key = SettingsKeys::from_str(key).map_err(|e| e.to_string())?;
+    return settings::set_item(p_key, value);
+}
+
+#[tauri::command]
+pub async fn settings_list_all<R: tauri::Runtime>(_app: tauri::AppHandle<R>) -> Result<Value, String> {
+    let keys = SettingsKeys::list_all_with_prefix("settings.");
+    let mut value_map = serde_json::Map::new();
+    for key in keys {
+        let value = settings::get_item(key)?;
+        value_map.insert(key.to_string().replace("string.", ""), value);
+    }
+
+    return Ok(Value::Object(value_map));
+}
+
+#[tauri::command]
+pub async fn settings_get_item<R: tauri::Runtime>(_app: tauri::AppHandle<R>, key: &str) -> Result<Value, String> {
+    let settings_key = format!("settings.{}", key);
+    let p_key = SettingsKeys::from_str(&settings_key).map_err(|e| e.to_string())?;
+    return settings::get_item(p_key);
+}
+
+#[tauri::command]
+pub async fn settings_set_item<R: tauri::Runtime>(_app: tauri::AppHandle<R>, key: &str, value: Value) -> Result<(), String> {
+    let skey = format!("settings.{}", key);
+    let p_key = SettingsKeys::from_str(&skey).map_err(|e| e.to_string())?;
     return settings::set_item(p_key, value);
 }
 

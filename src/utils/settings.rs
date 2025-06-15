@@ -37,6 +37,12 @@ macro_rules! settings_keys {
             pub fn to_string(&self) -> String {
                 return String::from(self.as_str());
             }
+
+            pub fn list_all_with_prefix(prefix: &str) -> Vec<SettingsKeys> {
+                let keys = vec![$(SettingsKeys::$variant),*];
+
+                return keys.into_iter().filter(|key| key.as_str().starts_with(prefix)).collect();
+            }
         }
     };
 }
@@ -46,7 +52,7 @@ settings_keys! {
     YouTubeChannelId => "youtube-channel-id",
     TwitchChannelName => "twitch-channel-name",
 
-    LogYoutubeEvents => "log-youtube-events",
+    LogYoutubeEvents => "settings.log-youtube-events",
 }
 
 static INSTANCE: OnceLock<Arc<Store<tauri::Wry>>> = OnceLock::new();
@@ -58,7 +64,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) {
 
     defaults.insert(SettingsKeys::LogYoutubeEvents.to_string(), Value::from("ONLY_ERRORS"));
 
-    let store_path = properties::get_app_path(AppPaths::AppConfigDir).join("unichat.db");
+    let store_path = properties::get_app_path(AppPaths::AppConfigDir).join("settings.json");
     INSTANCE.get_or_init(|| StoreBuilder::new(app, store_path).defaults(defaults).build().unwrap());
 }
 
