@@ -78,7 +78,7 @@ export function DashboardHome(): React.ReactNode {
         } catch (err) {
             console.error(err);
             setSavingStatus("error");
-            notifications.show({ message: "Error saving YouTube chat URL", color: "red" });
+            notifications.show({ message: "An error occurred on save", color: "red" });
         }
     }
 
