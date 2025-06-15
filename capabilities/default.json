@@ -1,9 +1,6 @@
 {
     "$schema": "../gen/schemas/desktop-schema.json",
     "identifier": "default-capability",
-    "windows": ["main", "youtube-chat"],
-    "permissions": ["core:default", "store:default", "log:default"],
-    "remote": {
-        "urls": ["https://youtube.com/live_chat", "https://www.twitch.tv/popout/*/chat"]
-    }
+    "windows": ["main"],
+    "permissions": ["core:default", "store:default", "log:default"]
 }
