@@ -2,10 +2,10 @@ use std::str::FromStr;
 use std::thread::sleep;
 
 use serde_json::Value;
-use tauri::is_dev;
 use tauri::Manager;
 use tauri::Runtime;
 
+use crate::utils;
 use crate::utils::constants;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -45,7 +45,7 @@ pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &st
 
     let tauri_url: tauri::Url;
     if url == "about:blank" {
-        if is_dev() {
+        if utils::is_dev() {
             tauri_url = tauri::Url::parse("http://localhost:1421/youtube-await.html").map_err(|e| format!("{:?}", e))?;
         } else {
             tauri_url = tauri::Url::parse("tauri://localhost/youtube-await.html").map_err(|e| format!("{:?}", e))?;
