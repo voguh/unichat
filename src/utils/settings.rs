@@ -12,7 +12,6 @@ use crate::utils::properties::AppPaths;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SettingsKeys {
     YouTubeChatUrl,
-    YouTubeChannelId,
     TwitchChannelName,
 
     LogYoutubeEvents,
@@ -49,7 +48,6 @@ macro_rules! settings_keys {
 
 settings_keys! {
     YouTubeChatUrl => "youtube-chat-url",
-    YouTubeChannelId => "youtube-channel-id",
     TwitchChannelName => "twitch-channel-name",
 
     LogYoutubeEvents => "settings.log-youtube-events",
@@ -59,8 +57,7 @@ static INSTANCE: OnceLock<Arc<Store<tauri::Wry>>> = OnceLock::new();
 pub fn init(app: &mut tauri::App<tauri::Wry>) {
     let mut defaults = HashMap::new();
     defaults.insert(SettingsKeys::YouTubeChatUrl.to_string(), Value::from("about:blank"));
-    defaults.insert(SettingsKeys::YouTubeChannelId.to_string(), Value::Null);
-    defaults.insert(SettingsKeys::TwitchChannelName.to_string(), Value::from("about:blank"));
+    defaults.insert(SettingsKeys::TwitchChannelName.to_string(), Value::from(""));
 
     defaults.insert(SettingsKeys::LogYoutubeEvents.to_string(), Value::from("ONLY_ERRORS"));
 
