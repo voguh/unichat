@@ -19,7 +19,7 @@ pub async fn store_get_item<R: tauri::Runtime>(_app: tauri::AppHandle<R>, key: &
         return Err(String::from("Use `settings_get_item` for settings keys"));
     }
 
-    let p_key = SettingsKeys::from_str(key).map_err(|e| e.to_string())?;
+    let p_key = SettingsKeys::from_str(key)?;
     return settings::get_item(p_key);
 }
 
@@ -29,7 +29,7 @@ pub async fn store_set_item<R: tauri::Runtime>(_app: tauri::AppHandle<R>, key: &
         return Err(String::from("Use `settings_set_item` for settings keys"));
     }
 
-    let p_key = SettingsKeys::from_str(key).map_err(|e| e.to_string())?;
+    let p_key = SettingsKeys::from_str(key)?;
     return settings::set_item(p_key, value);
 }
 
@@ -48,14 +48,14 @@ pub async fn settings_list_all<R: tauri::Runtime>(_app: tauri::AppHandle<R>) -> 
 #[tauri::command]
 pub async fn settings_get_item<R: tauri::Runtime>(_app: tauri::AppHandle<R>, key: &str) -> Result<Value, String> {
     let settings_key = format!("settings.{}", key);
-    let p_key = SettingsKeys::from_str(&settings_key).map_err(|e| e.to_string())?;
+    let p_key = SettingsKeys::from_str(&settings_key)?;
     return settings::get_item(p_key);
 }
 
 #[tauri::command]
 pub async fn settings_set_item<R: tauri::Runtime>(_app: tauri::AppHandle<R>, key: &str, value: Value) -> Result<(), String> {
     let skey = format!("settings.{}", key);
-    let p_key = SettingsKeys::from_str(&skey).map_err(|e| e.to_string())?;
+    let p_key = SettingsKeys::from_str(&skey)?;
     return settings::set_item(p_key, value);
 }
 
