@@ -11,6 +11,7 @@ use crate::youtube::mapper::add_chat_item_action::get_author_color;
 use crate::youtube::mapper::add_chat_item_action::get_author_type;
 use crate::youtube::mapper::add_chat_item_action::LiveChatAuthorBadgeRenderer;
 use crate::youtube::mapper::add_chat_item_action::Message;
+use crate::youtube::mapper::serde_error_parse;
 use crate::youtube::mapper::AuthorName;
 use crate::youtube::mapper::ThumbnailsWrapper;
 
@@ -37,7 +38,7 @@ struct PurchaseAmountText {
 
 /* <============================================================================================> */
 
-fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> (String, f32) {
+fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(String, f32), Box<dyn std::error::Error>> {
     let mut raw_value = String::from("");
     let mut currency = String::from("");
 
@@ -51,57 +52,58 @@ fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> (String, 
         }
     }
 
-    (currency, raw_value.parse().unwrap_or(0.0))
+    let value: f32 = raw_value.parse()?;
+
+    return Ok((currency, value));
 }
 
-fn build_option_message(message: &Option<Message>) -> String {
+fn build_option_message(message: &Option<Message>) -> Result<String, Box<dyn std::error::Error>> {
     if let Some(message) = message {
-        build_message(&message.runs)
-    } else {
-        String::from("")
+        return build_message(&message.runs);
     }
+
+    return Ok(String::from(""));
 }
 
-fn build_option_emotes(message: &Option<Message>) -> Vec<UniChatEmote> {
+fn build_option_emotes(message: &Option<Message>) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
     if let Some(message) = message {
-        build_emotes(&message.runs)
-    } else {
-        Vec::new()
+        return build_emotes(&message.runs);
     }
+
+    return Ok(Vec::new());
 }
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_json::Error> {
-    match serde_json::from_value::<LiveChatPaidMessageRenderer>(value) {
-        Ok(parsed) => {
-            let (purchase_currency, purchase_value) = parse_purchase_amount(&parsed.purchase_amount_text);
+pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+    let parsed: LiveChatPaidMessageRenderer = serde_json::from_value(value).map_err(serde_error_parse)?;
+    let badges = build_author_badges(&parsed.author_badges)?;
+    let author_photo = parsed.author_photo.thumbnails.last().ok_or("No thumbnails found in author photo")?;
+    let (purchase_currency, purchase_value) = parse_purchase_amount(&parsed.purchase_amount_text)?;
+    let message = build_option_message(&parsed.message)?;
+    let emotes = build_option_emotes(&parsed.message)?;
 
-            Ok(Some(UniChatEvent::Donate {
-                event_type: String::from("unichat:donate"),
-                data: UniChatDonateEventPayload {
-                    channel_id: None,
-                    channel_name: None,
-                    platform: String::from("youtube"),
+    let event = UniChatEvent::Donate {
+        event_type: String::from("unichat:donate"),
+        data: UniChatDonateEventPayload {
+            channel_id: None,
+            channel_name: None,
+            platform: String::from("youtube"),
 
-                    author_id: parsed.author_external_channel_id,
-                    author_username: None,
-                    author_display_name: parsed.author_name.simple_text,
-                    author_display_color: get_author_color(&parsed.author_badges),
-                    author_badges: build_author_badges(&parsed.author_badges),
-                    author_profile_picture_url: parsed.author_photo.thumbnails.last().unwrap().url.clone(),
-                    author_type: get_author_type(&parsed.author_badges),
+            author_id: parsed.author_external_channel_id,
+            author_username: None,
+            author_display_name: parsed.author_name.simple_text,
+            author_display_color: get_author_color(&parsed.author_badges),
+            author_badges: badges,
+            author_profile_picture_url: author_photo.url.clone(),
+            author_type: get_author_type(&parsed.author_badges),
 
-                    value: purchase_value,
-                    currency: purchase_currency,
+            value: purchase_value,
+            currency: purchase_currency,
 
-                    message_id: parsed.id,
-                    message: build_option_message(&parsed.message),
-                    emotes: build_option_emotes(&parsed.message)
-                }
-            }))
+            message_id: parsed.id,
+            message: message,
+            emotes: emotes
         }
+    };
 
-        Err(err) => {
-            Err(err)
-        }
-    }
+    return Ok(Some(event));
 }

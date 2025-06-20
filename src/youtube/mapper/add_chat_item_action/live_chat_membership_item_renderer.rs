@@ -7,6 +7,7 @@ use crate::youtube::mapper::add_chat_item_action::build_message;
 use crate::youtube::mapper::add_chat_item_action::LiveChatAuthorBadgeRenderer;
 use crate::youtube::mapper::add_chat_item_action::Message;
 use crate::youtube::mapper::add_chat_item_action::MessageRun;
+use crate::youtube::mapper::serde_error_parse;
 use crate::youtube::mapper::AuthorName;
 use crate::youtube::mapper::ThumbnailsWrapper;
 
@@ -41,7 +42,7 @@ struct HeaderSubtext {
 
 /* <============================================================================================> */
 
-fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> String {
+fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> Result<String, Box<dyn std::error::Error>> {
     let mut tier = String::from("");
 
     if let Some(_header_primary_text) = &parsed.header_primary_text {
@@ -49,12 +50,13 @@ fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> String {
             tier =  simple_text.trim().to_string();
         }
     } else if let Some(runs) = &parsed.header_subtext.runs {
-        if let Some(text) = &runs.get(1).unwrap().text {
+        let run = runs.get(1).ok_or("No second run found in header subtext")?;
+        if let Some(text) = &run.text {
             tier = text.trim().to_string();
         }
     }
 
-    tier
+    return Ok(tier);
 }
 
 
@@ -62,52 +64,54 @@ fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> String {
 // The event without a message and with 'runs' in the headerSubtext I am assuming is the first month
 // of membership. On the other hand, the event where the 'runs' is in the headerPrimaryText contains
 // information that allows detecting the number of months of the membership.
-fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> u16 {
+fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> Result<u16, Box<dyn std::error::Error>> {
     let mut months: u16 = 0;
 
     if let Some(header_primary_text) = &parsed.header_primary_text {
-        if let Some(text) = &header_primary_text.runs.get(1).unwrap().text {
-            months =  text.trim().to_string().parse().unwrap();
+        let run = header_primary_text.runs.get(1).ok_or("No second run found in header primary text")?;
+        if let Some(text) = &run.text {
+            months =  text.trim().to_string().parse()?;
         }
     } else if let Some(_runs) = &parsed.header_subtext.runs {
         months = 1
     }
 
-    months
+    return Ok(months);
 }
 
-fn optional_build_message(message: &Option<Message>) -> Option<String> {
-    if let Some(message) = message {
-        Some(build_message(&message.runs))
-    } else {
-        None
+fn optional_build_message(message: &Option<Message>) -> Result<Option<String>, Box<dyn std::error::Error>> {
+    if let Some(message_runs) = message {
+        let message = build_message(&message_runs.runs)?;
+        return Ok(Some(message));
     }
+
+    return Ok(None);
 }
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_json::Error> {
-    match serde_json::from_value::<LiveChatMembershipItemRenderer>(value) {
-        Ok(parsed) => {
-            Ok(Some(UniChatEvent::Sponsor {
-                event_type: String::from("unichat:sponsor"),
-                data: UniChatSponsorEventPayload {
-                    channel_id: None,
-                    channel_name: None,
-                    platform: String::from("youtube"),
+pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+    let parsed: LiveChatMembershipItemRenderer = serde_json::from_value(value).map_err(serde_error_parse)?;
+    let author_photo = parsed.author_photo.thumbnails.last().ok_or("No thumbnails found in author photo")?;
+    let tier = parse_tier(&parsed)?;
+    let months = parse_months(&parsed)?;
+    let message = optional_build_message(&parsed.message)?;
 
-                    author_id: parsed.author_external_channel_id.clone(),
-                    author_username: None,
-                    author_display_name: parsed.author_name.simple_text.clone(),
-                    author_profile_picture_url: parsed.author_photo.thumbnails.last().unwrap().url.clone(),
+    let event = UniChatEvent::Sponsor {
+        event_type: String::from("unichat:sponsor"),
+        data: UniChatSponsorEventPayload {
+            channel_id: None,
+            channel_name: None,
+            platform: String::from("youtube"),
 
-                    tier: parse_tier(&parsed),
-                    months: parse_months(&parsed),
-                    message: optional_build_message(&parsed.message)
-                }
-            }))
+            author_id: parsed.author_external_channel_id.clone(),
+            author_username: None,
+            author_display_name: parsed.author_name.simple_text.clone(),
+            author_profile_picture_url: author_photo.url.clone(),
+
+            tier: tier,
+            months: months,
+            message: message
         }
+    };
 
-        Err(err) => {
-            Err(err)
-        }
-    }
+    return Ok(Some(event));
 }

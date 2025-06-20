@@ -10,6 +10,7 @@ use crate::youtube::mapper::add_chat_item_action::get_author_color;
 use crate::youtube::mapper::add_chat_item_action::get_author_type;
 use crate::youtube::mapper::add_chat_item_action::LiveChatAuthorBadgeRenderer;
 use crate::youtube::mapper::add_chat_item_action::Message;
+use crate::youtube::mapper::serde_error_parse;
 use crate::youtube::mapper::AuthorName;
 use crate::youtube::mapper::ThumbnailsWrapper;
 
@@ -27,33 +28,33 @@ struct LiveChatTextMessageRenderer {
 
 /* <============================================================================================> */
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_json::Error> {
-    match serde_json::from_value::<LiveChatTextMessageRenderer>(value) {
-        Ok(parsed) => {
-            Ok(Some(UniChatEvent::Message {
-                event_type: String::from("unichat:message"),
-                data: UniChatMessageEventPayload {
-                    channel_id: None,
-                    channel_name: None,
-                    platform: String::from("youtube"),
+pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+    let parsed: LiveChatTextMessageRenderer = serde_json::from_value(value).map_err(serde_error_parse)?;
+    let author_badges = build_author_badges(&parsed.author_badges)?;
+    let author_photo = parsed.author_photo.thumbnails.last().ok_or("No thumbnails found in author photo")?;
+    let message = build_message(&parsed.message.runs)?;
+    let emotes = build_emotes(&parsed.message.runs)?;
 
-                    author_id: parsed.author_external_channel_id,
-                    author_username: None,
-                    author_display_name: parsed.author_name.simple_text,
-                    author_display_color: get_author_color(&parsed.author_badges),
-                    author_badges: build_author_badges(&parsed.author_badges),
-                    author_profile_picture_url: parsed.author_photo.thumbnails.last().unwrap().url.clone(),
-                    author_type: get_author_type(&parsed.author_badges),
+    let event = UniChatEvent::Message {
+        event_type: String::from("unichat:message"),
+        data: UniChatMessageEventPayload {
+            channel_id: None,
+            channel_name: None,
+            platform: String::from("youtube"),
 
-                    message_id: parsed.id,
-                    message_text: build_message(&parsed.message.runs),
-                    emotes: build_emotes(&parsed.message.runs)
-                }
-            }))
+            author_id: parsed.author_external_channel_id,
+            author_username: None,
+            author_display_name: parsed.author_name.simple_text,
+            author_display_color: get_author_color(&parsed.author_badges),
+            author_badges: author_badges,
+            author_profile_picture_url: author_photo.url.clone(),
+            author_type: get_author_type(&parsed.author_badges),
+
+            message_id: parsed.id,
+            message_text: message,
+            emotes: emotes
         }
+    };
 
-        Err(err) => {
-            Err(err)
-        }
-    }
+    return Ok(Some(event));
 }

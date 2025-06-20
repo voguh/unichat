@@ -43,54 +43,59 @@ struct MessageRunEmoji {
 
 /* <============================================================================================> */
 
-fn get_emoji_type(emoji: &MessageRunEmoji) -> String {
+fn get_emoji_type(emoji: &MessageRunEmoji) -> Result<String, Box<dyn std::error::Error>> {
     if let Some(search_terms) = &emoji.search_terms {
-        search_terms.first().unwrap().clone()
-    } else {
-        emoji.emoji_id.clone()
+        let search_term = search_terms.first().ok_or("No search terms found")?;
+        return Ok(search_term.clone());
     }
+
+    return Ok(emoji.emoji_id.clone());
 }
 
-fn build_message(runs: &Vec<MessageRun>) -> String {
+fn build_message(runs: &Vec<MessageRun>) -> Result<String, Box<dyn std::error::Error>> {
     let mut str_message = Vec::new();
 
     for run in runs {
         if let Some(text) = &run.text {
             str_message.push(text.clone());
         } else if let Some(emoji) = &run.emoji {
-            str_message.push(get_emoji_type(emoji))
+            let emoji_type = get_emoji_type(emoji)?;
+            str_message.push(emoji_type);
         }
     }
 
-    str_message.join(" ")
+    return Ok(str_message.join(" "));
 }
 
-fn build_emotes(runs: &Vec<MessageRun>) -> Vec<UniChatEmote> {
+fn build_emotes(runs: &Vec<MessageRun>) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
     let mut emotes = Vec::new();
 
     for run in runs {
         if let Some(emoji) = &run.emoji {
+            let emoji_type = get_emoji_type(emoji)?;
+            let thumbnail = emoji.image.thumbnails.last().ok_or("No thumbnails found for emoji")?;
             emotes.push(UniChatEmote {
-                emote_type: get_emoji_type(emoji),
-                tooltip: get_emoji_type(emoji),
-                url: emoji.image.thumbnails.last().unwrap().url.clone()
+                emote_type: emoji_type.clone(),
+                tooltip: emoji_type.clone(),
+                url: thumbnail.url.clone()
             });
         }
     }
 
-    emotes
+    return Ok(emotes);
 }
 
 
 fn get_badge_icon_type(badge: &LiveChatAuthorBadgeRenderer) -> String {
     let renderer = &badge.live_chat_author_badge_renderer;
+
     if let Some(icon) = &renderer.icon {
-        icon.icon_type.clone()
+        return icon.icon_type.clone();
     } else if badge.live_chat_author_badge_renderer.custom_thumbnail.is_some() {
-        String::from("CUSTOM")
-    } else {
-        String::from("")
+        return String::from("CUSTOM");
     }
+
+    return String::from("");
 }
 
 fn get_author_color(badges: &Option<Vec<LiveChatAuthorBadgeRenderer>>) -> String {
@@ -106,10 +111,10 @@ fn get_author_color(badges: &Option<Vec<LiveChatAuthorBadgeRenderer>>) -> String
         }
     }
 
-    String::from(author_color)
+    return String::from(author_color);
 }
 
-fn build_author_badges(badges: &Option<Vec<LiveChatAuthorBadgeRenderer>>) -> Vec<UniChatBadge> {
+fn build_author_badges(badges: &Option<Vec<LiveChatAuthorBadgeRenderer>>) -> Result<Vec<UniChatBadge>, Box<dyn std::error::Error>> {
     let mut pbadges = Vec::new();
 
     if let Some(badges) = badges {
@@ -135,17 +140,17 @@ fn build_author_badges(badges: &Option<Vec<LiveChatAuthorBadgeRenderer>>) -> Vec
                     _ => {}
                 };
             } else if let Some(custom_thumbnail) = &renderer.custom_thumbnail {
+                let thumbnail = custom_thumbnail.thumbnails.last().ok_or("No thumbnails found in custom thumbnail")?;
                 pbadges.push(UniChatBadge {
                     badge_type: String::from("sponsor"),
                     tooltip: String::from("Sponsor"),
-                    url: custom_thumbnail.thumbnails.last().unwrap().url.clone()
+                    url: thumbnail.url.clone()
                 })
             }
         }
     }
 
-
-    pbadges
+    return Ok(pbadges);
 }
 
 fn get_author_type(badges: &Option<Vec<LiveChatAuthorBadgeRenderer>>) -> String {
@@ -161,21 +166,21 @@ fn get_author_type(badges: &Option<Vec<LiveChatAuthorBadgeRenderer>>) -> String 
         }
     }
 
-    String::from(author_type)
+    return String::from(author_type);
 }
 
-pub fn parse(value: &serde_json::Value) -> Result<Option<UniChatEvent>, serde_json::Error> {
-    let item = value.get("item").unwrap();
+pub fn parse(value: &serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+    let item = value.get("item").ok_or("No item found in value")?;
 
     if let Some(value) = item.get("liveChatMembershipItemRenderer") {
-        live_chat_membership_item_renderer::parse(value.clone())
+        return live_chat_membership_item_renderer::parse(value.clone());
     } else if let Some(value) = item.get("liveChatPaidMessageRenderer") {
-        live_chat_paid_message_renderer::parse(value.clone())
+        return live_chat_paid_message_renderer::parse(value.clone());
     } else if let Some(value) = item.get("liveChatSponsorshipsGiftPurchaseAnnouncementRenderer") {
-        live_chat_sponsorships_gift_purchase_announcement_renderer::parse(value.clone())
+        return live_chat_sponsorships_gift_purchase_announcement_renderer::parse(value.clone());
     } else if let Some(value) = item.get("liveChatTextMessageRenderer") {
-        live_chat_text_message_renderer::parse(value.clone())
-    } else {
-        Ok(None)
+        return live_chat_text_message_renderer::parse(value.clone());
     }
+
+    return Ok(None);
 }
