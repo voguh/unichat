@@ -1,69 +1,325 @@
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:600,700);
-
-:root {
-    --background-color: #FFFFFF00;
-    --text-color: #FFFFFF;
-    --hide-interval: 15s;
-}
-
-body {
-    background: var(--background-color);
-    color: var(--text-color);
-    text-shadow: 0 0 1px rgba(0, 0, 0, 0.6), 0 0 2px rgba(0, 0, 0, 0.6);
-}
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 
 html, body {
-    height: 100%;
-    overflow: hidden;
+    font-family: "Nunito", sans-serif;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
 }
 
 #main-container {
-    font: 600 16px "Open Sans";
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
-    padding: 10px 15px;
-    padding-top: 100px;
+    width: calc(100% - 32px);
+    padding: 16px;
 }
 
 #main-container > div {
-    margin-bottom: 5px;
-    background: linear-gradient(rgba(70, 70, 70, 0.6), rgba(50, 50, 50, 0.7));
-    padding: 5px 10px 10px;
-    animation: flipInX 500ms ease; /* , fadeOutUp 1s ease var(--hide-interval) forwards; */
-    -webkit-animation: flipInX 500ms ease; /* , fadeOutUp 1s ease var(--hide-interval) forwards; */
-    border-radius: 3px;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+    position: relative;
 }
 
-#main-container > div > .meta {
-    display: block;
-    line-height: 1em;
+/* <============================================[ SIMPLE MESSAGE STYLE ]============================================> */
+#main-container > .message-item {
+    margin-top: calc((26px / 2) + 8px); /* 8px top margin + 26px for the meta section height divided by 2 */
+    position: relative;
 }
 
-#main-container > div > .meta > .name {
-    font-size: 0.6em;
-    text-transform: uppercase;
-    font-weight: 700;
+#main-container > .message-item > .meta {
+    --badge-size: 18px;
+
+    width: fit-content;
+    height: var(--badge-size);
+    position: absolute;
+    top: 0;
+    left: 8px;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap:8px;
+    white-space: nowrap;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #343a40;
 }
 
-#main-container > div > .meta > .badges > .badge {
-    float: right;
-    padding-left: 5px;
-    height: 0.8em;
+#main-container > .message-item > .meta > .badges {
+    width: fit-content;
+    height: var(--badge-size);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
 }
 
-#main-container > div > .message {
-    word-wrap: break-word;
-    line-height: 1.5em;
+#main-container > .message-item > .meta > .badges > img {
+    width: var(--badge-size);
+    height: var(--badge-size);
 }
 
-#main-container > div > .message > img {
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 16px;
+#main-container > .message-item > .meta > .name {
+    width: fit-content;
+    height: var(--badge-size);
+    white-space: nowrap;
+    font-weight: bold;
 }
 
+#main-container > .message-item > .message {
+    padding: calc(8px + (26px / 2)) 8px 8px 8px; /* 8px top padding + 26px for the meta section height divided by 2 */
+    border-radius: 4px;
+    background: #FFFFFF;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+}
+
+#main-container > .message-item > .message > img {
+    width: 18px;
+    height: 18px;
+}
+/* <==========================================[ END SIMPLE MESSAGE STYLE ]==========================================> */
+
+/* <============================================[ DONATE MESSAGE STYLE ]============================================> */
+#main-container > .donate-item {
+    margin-top: calc((26px / 2) + 8px); /* 8px top margin + 26px for the meta section height divided by 2 */
+    position: relative;
+}
+
+#main-container > .donate-item > .meta {
+    --badge-size: 18px;
+
+    width: fit-content;
+    height: var(--badge-size);
+    position: absolute;
+    top: 0;
+    left: 8px;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #343a40;
+}
+
+#main-container > .donate-item > .meta > .badges {
+    width: fit-content;
+    height: var(--badge-size);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+#main-container > .donate-item > .meta > .badges > img {
+    width: var(--badge-size);
+    height: var(--badge-size);
+}
+
+#main-container > .donate-item > .meta > .name {
+    width: fit-content;
+    height: var(--badge-size);
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+#main-container > .donate-item > .donate-meta {
+    width: fit-content;
+    height: 18px;
+    position: absolute;
+    top: 0;
+    right: 8px;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #fcc419;
+    color: #000000;
+    font-weight: bold;
+}
+
+#main-container > .donate-item > .donate-meta > .value > span {
+    font-size: 10px;;
+}
+
+#main-container > .donate-item > .message {
+    padding: calc(8px + (26px / 2)) 8px 8px 8px; /* 8px top padding + 26px for the meta section height divided by 2 */
+    border-radius: 4px;
+    background: #495057;
+    color: #FFFFFF;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+    animation: rainbowBoxShadow 5s alternate infinite;
+}
+
+#main-container > .donate-item > .message > img {
+    width: 18px;
+    height: 18px;
+}
+
+@keyframes rainbowBoxShadow {
+    0% {
+        box-shadow: 0 0 16px #ff6b6b;
+    }
+    16% {
+        box-shadow: 0 0 16px #ff922b;
+    }
+    33% {
+        box-shadow: 0 0 16px #fcc419;
+    }
+    50% {
+        box-shadow: 0 0 16px #51cf66;
+    }
+    66% {
+        box-shadow: 0 0 16px #339af0;
+    }
+    83% {
+        box-shadow: 0 0 16px #5c7cfa;
+    }
+    100% {
+        box-shadow: 0 0 16px #845ef7;
+    }
+}
+
+/* <==========================================[ END DONATE MESSAGE STYLE ]==========================================> */
+
+/* <============================================[ SPONSOR MESSAGE STYLE ]============================================> */
+#main-container > .sponsor-item {
+    margin-top: calc((26px / 2) + 8px); /* 8px top margin + 26px for the meta section height divided by 2 */
+    position: relative;
+}
+
+#main-container > .sponsor-item > .meta {
+    --badge-size: 18px;
+
+    width: fit-content;
+    height: var(--badge-size);
+    position: absolute;
+    top: 0;
+    left: 8px;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap:8px;
+    white-space: nowrap;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #343a40;
+}
+
+#main-container > .sponsor-item > .meta > .badges {
+    width: fit-content;
+    height: var(--badge-size);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+#main-container > .sponsor-item > .meta > .badges > img {
+    width: var(--badge-size);
+    height: var(--badge-size);
+}
+
+#main-container > .sponsor-item > .meta > .name {
+    width: fit-content;
+    height: var(--badge-size);
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+#main-container > .sponsor-item > .sponsor-meta {
+    width: fit-content;
+    height: 18px;
+    position: absolute;
+    top: 0;
+    right: 8px;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+}
+
+#main-container > .sponsor-item > .sponsor-meta > span {
+    white-space: nowrap;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #fcc419;
+    color: #000000;
+    font-weight: bold;
+}
+
+#main-container > .sponsor-item > .sponsor-meta > span:empty {
+    display: none; /* Hide if no sponsor meta */
+}
+
+#main-container > .sponsor-item > .message {
+    padding: calc(8px + (26px / 2)) 8px 8px 8px; /* 8px top padding + 26px for the meta section height divided by 2 */
+    border-radius: 4px;
+    background: #495057;
+    color: #FFFFFF;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+}
+
+#main-container > .sponsor-item > .message > img {
+    width: 18px;
+    height: 18px;
+}
+/* <==========================================[ END SPONSOR MESSAGE STYLE ]==========================================> */
+
+/* <=============================================[ RAID MESSAGE STYLE ]=============================================> */
+#main-container > .raid-item {
+    margin-top: 8px;
+    position: relative;
+}
+
+#main-container > .raid-item > .message {
+    padding: 8px;
+    text-align: center;
+    border-radius: 4px;
+    background: #495057;
+    color: #FFFFFF;
+    font-weight: bold;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+    animation: raidBoxShadow 5s alternate infinite;
+}
+
+#main-container > .raid-item > .message > img {
+    width: 18px;
+    height: 18px;
+}
+
+@keyframes raidBoxShadow {
+    0% {
+        box-shadow: 0 0 16px #ff6b6b;
+    }
+    16% {
+        box-shadow: 0 0 16px #ff922b;
+    }
+    33% {
+        box-shadow: 0 0 16px #fcc419;
+    }
+    50% {
+        box-shadow: 0 0 16px #51cf66;
+    }
+    66% {
+        box-shadow: 0 0 16px #339af0;
+    }
+    83% {
+        box-shadow: 0 0 16px #5c7cfa;
+    }
+    100% {
+        box-shadow: 0 0 16px #845ef7;
+    }
+}
+
+/* <===========================================[ END RAID MESSAGE STYLE ]===========================================> */
