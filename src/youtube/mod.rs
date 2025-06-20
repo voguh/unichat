@@ -106,7 +106,7 @@ fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, pa
         match mapper::parse(&action) {
             Ok(Some(parsed)) => {
                 if is_dev() || log_events == Value::from("ALL") {
-                    log_action("events-parsed.log", &format!("{}", serde_json::to_string(&parsed).unwrap()));
+                    log_action("events-parsed.log", &serde_json::to_string(&parsed).unwrap());
                 }
 
                 if let Err(err) = events::event_emitter().emit(parsed) {
@@ -121,7 +121,7 @@ fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, pa
             }
 
             Err(err) => {
-                log_action("events-error.log", &format!("{err} -- {action}"));
+                log_action("events-error.log", &format!("{} -- {}", err, action));
             }
         }
     }
