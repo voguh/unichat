@@ -1,5 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+// #![deny(clippy::implicit_return)]
+// #![allow(clippy::needless_return)]
 
 use std::fs;
 
@@ -39,28 +41,21 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     let app = window.app_handle();
 
     if window.label() == "main" {
-        match event {
-            tauri::WindowEvent::Destroyed => {
-                let actix = app.state::<actix::ActixState>();
-                actix.handle.abort();
+        if let tauri::WindowEvent::Destroyed = event {
+            let actix = app.state::<actix::ActixState>();
+            actix.handle.abort();
 
-                for (key, window) in app.webview_windows() {
-                    if key != "main" {
-                        window.destroy().unwrap();
-                    }
+            for (key, window) in app.webview_windows() {
+                if key != "main" {
+                    window.destroy().unwrap();
                 }
             }
 
-            _ => {}
         }
     } else {
-        match event {
-            tauri::WindowEvent::CloseRequested { api, .. } => {
-                api.prevent_close();
-                window.hide().unwrap();
-            }
-
-            _ => {}
+        if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+            api.prevent_close();
+            window.hide().unwrap();
         }
     }
 }
