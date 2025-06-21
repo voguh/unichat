@@ -3,6 +3,7 @@ name = "unichat"
 version = "0.1.0"
 description = "Yet another implementation of YouTube chat widget"
 authors = ["Voguh <voguhofc@protonmail.com>"]
+homepage = "https://github.com/voguh/unichat"
 license = "LGPL-3.0-only"
 edition = "2021"
 
