@@ -26,29 +26,66 @@ and image tag like `<img src="https://cdn.betterttv.net/emote/<EMOTE_ID>/3x.<IMA
 Install all dependencies before following [oficial tutorial](https://v2.tauri.app/start/prerequisites/)
 then just run `pnpm build`.
 
-Following an example using ubuntu 24.04 docker image.
+Following an example using ubuntu 24.04 docker image (catthehacker/ubuntu).
 
 ```bash
-docker run -v .:/home/ubuntu/unichat --rm -it ubuntu:24.04 bash
+docker run --workdir="/home/ubuntu/unichat" --volume=".:/home/ubuntu/unichat" --env="DEBIAN_FRONTEND=noninteractive" --rm -it ghcr.io/catthehacker/ubuntu:act-24.04 bash
 
-export DEBIAN_FRONTEND=noninteractive
-apt update && apt upgrade -y
-apt install -y git curl wget build-essential ca-certificates file libwebkit2gtk-4.1-dev libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+### Remove ubuntu user password
+passwd -d ubuntu
 
+### Checkout to ubuntu user
 su - ubuntu
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+cd ~/unichat
+
+### Update packages
+sudo apt update
+sudo apt upgrade -y
+
+### Install dependencies
+sudo apt install --no-install-recommends -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+
+### Install cargo
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.87.0
+. "$HOME/.cargo/env"
+
+### Install nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+### Install node and pnpm
 nvm i 22.14.0
 corepack enable pnpm
 corepack prepare pnpm@10.7.1 --activate
 pnpm config set store-dir ~/.pnpm-store
-pnpm install
+
+### Build
+pnpm install --frozen-lockfile
 pnpm build
+
+
+
+# Build for windows
+### Install dependencies
+sudo apt install --no-install-recommends -y  nsis lld llvm clang
+
+### Install rustup target
+rustup target add x86_64-pc-windows-msvc
+
+### Install cargo-xwin
+cargo install --locked cargo-xwin
+
+### Build
+pnpm install --frozen-lockfile
+pnpm build --runner cargo-xwin --target x86_64-pc-windows-msvc
 ```
 
 > [!TIP]
 > If the build fails on macOS and Linux, adding the environment variable `NO_STRIP=true` before the build command may help.
 > Example: `NO_STRIP=true pnpm build`
+
 
 ### App directories
 
@@ -59,6 +96,23 @@ pnpm build
 | app_data_dir       | ~/.local/share/unichat      | ~\AppData\Roaming\unichat    | ~/Library/Application\ Support/unichat |
 | app_local_data_dir | ~/.local/share/unichat      | ~\AppData\Local\unichat      | ~/Library/Application\ Support/unichat |
 | app_log_dir        | ~/.local/share/unichat/logs | ~\AppData\Local\unichat\logs | ~/Library/Logs/unichat                 |
+
+
+### Dev notes
+
+Some node packages will not be updated.
+
+| Package                                | Reason                                                              |
+|----------------------------------------|---------------------------------------------------------------------|
+| `react@18.3.1`                         | No need to update to version 19.x.x                                 |
+| `react-dom@18.3.1`                     | No need to update to version 19.x.x and keep the same version react |
+| `@types/node22.x.x`                    | Must stay on the same major version as current node                 |
+| `@types/react@18.3.1`                  | Must stay on the same version as react                              |
+| `@types/react-dom@18.3.1`              | Must stay on the same version as react-dom                          |
+| `eslint@8.57.1`                        | API breaking changes in version >= 9.x.x                            |
+| `eslint-plugin-import-helpers@1.3.1`   | Maintains compatibility with eslint@8.57.1                          |
+| `eslint-plugin-n@16.6.2`               | Maintains compatibility with eslint@8.57.1                          |
+| `eslint-plugin-promise@6.6.0`          | Maintains compatibility with eslint@8.57.1                          |
 
 
 ### Known issues
