@@ -1,0 +1,41 @@
+name: "Setup Node.JS"
+description: "Setup Node.JS and PNPM environment for GitHub Actions"
+inputs:
+  node-version:
+    description: "Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0."
+    default: "22.14.0"
+  pnpm-version:
+    description: "PNPM version to use. Examples: 10.x, 10.7.1, >=10.7.0."
+    default: "10.7.1"
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.JS
+      shell: bash
+      run: |
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+        nvm install ${{ inputs.node-version }}
+        nvm use ${{ inputs.node-version }}
+        nvm alias default ${{ inputs.node-version }}
+        echo "$HOME/.nvm/versions/node/$(nvm version)/bin" >> $GITHUB_PATH
+        corepack enable pnpm
+        corepack prepare pnpm@${{ inputs.pnpm-version }} --activate
+
+    - name: Check Node.JS version
+      shell: bash
+      run: node --version
+
+    - name: Check PNPM version
+      shell: bash
+      run: pnpm --version
+
+    - name: Cache pnpm store
+      uses: actions/cache@v4.2.3
+      with:
+        path: ~/.local/share/pnpm/store/v10
+        key: ${{ runner.os }}-pnpm-store-${{ inputs.pnpm-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
