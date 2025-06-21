@@ -172,9 +172,9 @@ jobs:
 
       - name: Move build artifacts
         run: |
-          mkdir -p dist/windows
-          cp target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe dist/windows/unichat-${{ needs.setup-version.outputs.revision }}.exe
-          for file in dist/windows/*; do sha256sum "$file" > "${file}.sha256"; done
+          mkdir -p dist
+          cp target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe dist/unichat-${{ needs.setup-version.outputs.revision }}.exe
+          for file in dist/*; do sha256sum "$file" > "${file}.sha256"; done
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4.6.2
