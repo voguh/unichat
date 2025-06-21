@@ -44,6 +44,7 @@ pub enum UniChatEvent {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatEmote {
+    pub id: String,
     #[serde(rename = "type")]
     pub emote_type: String,
     pub tooltip: String,
