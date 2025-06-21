@@ -37,8 +37,6 @@ pub enum Emoji {
     #[serde(rename_all = "camelCase")]
     FontBased {
         emoji_id: String,
-        search_terms: Vec<String>,
-        shortcuts: Vec<String>,
         image: FontBaseEmojiThumbnailsWrapper
     },
 
@@ -69,13 +67,12 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
                             url: last_image.url.clone()
                         });
                     },
-                    Emoji::FontBased { emoji_id, image, shortcuts, .. } => {
-                        let shortcut = shortcuts.first().ok_or("No shortcuts found for custom emoji")?;
+                    Emoji::FontBased { emoji_id, image, .. } => {
                         let last_image = image.thumbnails.last().ok_or("No thumbnails found for font-based emoji")?;
                         emotes.push(UniChatEmote {
                             id: emoji_id.clone(),
-                            emote_type: shortcut.clone(),
-                            tooltip: shortcut.clone(),
+                            emote_type: emoji_id.clone(),
+                            tooltip: emoji_id.clone(),
                             url: last_image.url.clone()
                         });
                     }
