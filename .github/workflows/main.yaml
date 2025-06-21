@@ -89,6 +89,8 @@ jobs:
     if: (github.event_name == 'release' && github.event.action == 'published') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     needs: [rust-test, webapp-test]
+    outputs:
+      revision: ${{ steps.setup-version.outputs.revision }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
@@ -102,6 +104,9 @@ jobs:
             export CARGO_PACKAGE_VERSION="$(cargo pkgid | cut -d# -f2 | cut -d '-' -f1)"
             echo "revision=${CARGO_PACKAGE_VERSION}+${GITHUB_SHA}" >> $GITHUB_OUTPUT
           fi
+
+      - name: Print revision
+        run: echo "Revision is ${{ steps.setup-version.outputs.revision }}"
 
   build-linux:
     if: (github.event_name == 'release' && github.event.action == 'published') || github.event_name == 'workflow_dispatch'
@@ -127,9 +132,9 @@ jobs:
       - name: Move build artifacts
         run: |
           mkdir -p dist
-          cp target/release/bundle/appimage/*.AppImage dist/unichat-${{ steps.vars.outputs.revision }}.AppImage
-          cp target/release/bundle/deb/*.deb dist/unichat-${{ steps.vars.outputs.revision }}.deb
-          cp target/release/bundle/rpm/*.rpm dist/unichat-${{ steps.vars.outputs.revision }}.rpm
+          cp target/release/bundle/appimage/*.AppImage dist/unichat-${{ needs.setup-version.outputs.revision }}.AppImage
+          cp target/release/bundle/deb/*.deb dist/unichat-${{ needs.setup-version.outputs.revision }}.deb
+          cp target/release/bundle/rpm/*.rpm dist/unichat-${{ needs.setup-version.outputs.revision }}.rpm
           for file in dist/*; do sha256sum "$file" > "${file}.sha256"; done
 
       - name: Upload build artifacts
@@ -168,7 +173,7 @@ jobs:
       - name: Move build artifacts
         run: |
           mkdir -p dist/windows
-          cp target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe dist/windows/unichat-${{ steps.vars.outputs.revision }}.exe
+          cp target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe dist/windows/unichat-${{ needs.setup-version.outputs.revision }}.exe
           for file in dist/windows/*; do sha256sum "$file" > "${file}.sha256"; done
 
       - name: Upload build artifacts
