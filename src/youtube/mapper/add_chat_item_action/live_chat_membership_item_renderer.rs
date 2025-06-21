@@ -3,45 +3,47 @@ use serde::Serialize;
 
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatSponsorEventPayload;
-use crate::youtube::mapper::add_chat_item_action::build_message;
-use crate::youtube::mapper::add_chat_item_action::LiveChatAuthorBadgeRenderer;
-use crate::youtube::mapper::add_chat_item_action::Message;
-use crate::youtube::mapper::add_chat_item_action::MessageRun;
-use crate::youtube::mapper::AuthorName;
-use crate::youtube::mapper::ThumbnailsWrapper;
+use crate::events::unichat::UNICHAT_EVENT_SPONSOR_TYPE;
+use crate::utils::parse_serde_error;
+use crate::youtube::mapper::structs::author::parse_author_badges;
+use crate::youtube::mapper::structs::author::parse_author_color;
+use crate::youtube::mapper::structs::author::parse_author_name;
+use crate::youtube::mapper::structs::author::parse_author_photo;
+use crate::youtube::mapper::structs::author::parse_author_type;
+use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
+use crate::youtube::mapper::structs::author::AuthorNameWrapper;
+use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
+use crate::youtube::mapper::structs::message::parse_message_string;
+use crate::youtube::mapper::structs::message::MessageRun;
+use crate::youtube::mapper::structs::message::MessageRunsWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct LiveChatMembershipItemRenderer {
-    pub id: String,
+    id: String,
 
-    pub header_primary_text: Option<HeaderPrimaryText>,
-    pub header_subtext: HeaderSubtext,
-    pub message: Option<Message>,
+    header_primary_text: Option<MessageRunsWrapper>,
+    header_subtext: HeaderSubtext,
+    message: Option<MessageRunsWrapper>,
 
-    pub author_external_channel_id: String,
-    pub author_name: AuthorName,
-    pub author_badges: Option<Vec<LiveChatAuthorBadgeRenderer>>,
-    pub author_photo: ThumbnailsWrapper,
+    author_external_channel_id: String,
+    author_name: AuthorNameWrapper,
+    author_photo: AuthorPhotoThumbnailsWrapper,
+    author_badges: Option<Vec<AuthorBadgeWrapper>>,
 
-    pub timestamp_usec: String
-}
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-struct HeaderPrimaryText {
-    pub runs: Vec<MessageRun>
+    timestamp_usec: String
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct HeaderSubtext {
-    pub simple_text: Option<String>,
-    pub runs: Option<Vec<MessageRun>>
+    simple_text: Option<String>,
+    runs: Option<Vec<MessageRun>>
 }
 
 /* <============================================================================================> */
 
-fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> String {
+fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> Result<String, Box<dyn std::error::Error>> {
     let mut tier = String::from("");
 
     if let Some(_header_primary_text) = &parsed.header_primary_text {
@@ -49,12 +51,16 @@ fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> String {
             tier =  simple_text.trim().to_string();
         }
     } else if let Some(runs) = &parsed.header_subtext.runs {
-        if let Some(text) = &runs.get(1).unwrap().text {
-            tier = text.trim().to_string();
+        let run = runs.get(1).ok_or("No second run found in header subtext")?;
+        match run {
+            MessageRun::Text { text } => {
+                tier = text.trim().to_string();
+            },
+            MessageRun::Emoji { .. } => return Err("Unexpected emoji in header subtext".into())
         }
     }
 
-    tier
+    return Ok(tier);
 }
 
 
@@ -62,52 +68,64 @@ fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> String {
 // The event without a message and with 'runs' in the headerSubtext I am assuming is the first month
 // of membership. On the other hand, the event where the 'runs' is in the headerPrimaryText contains
 // information that allows detecting the number of months of the membership.
-fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> u16 {
+fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> Result<u16, Box<dyn std::error::Error>> {
     let mut months: u16 = 0;
 
     if let Some(header_primary_text) = &parsed.header_primary_text {
-        if let Some(text) = &header_primary_text.runs.get(1).unwrap().text {
-            months =  text.trim().to_string().parse().unwrap();
+        let run = header_primary_text.runs.get(1).ok_or("No second run found in header primary text")?;
+        match run {
+            MessageRun::Text { text } => {
+                months =  text.trim().to_string().parse()?;
+            },
+            MessageRun::Emoji { .. } => return Err("Unexpected emoji in header subtext".into())
         }
     } else if let Some(_runs) = &parsed.header_subtext.runs {
         months = 1
     }
 
-    months
+    return Ok(months);
 }
 
-fn optional_build_message(message: &Option<Message>) -> Option<String> {
-    if let Some(message) = message {
-        Some(build_message(&message.runs))
-    } else {
-        None
+fn optional_build_message(message: &Option<MessageRunsWrapper>) -> Result<Option<String>, Box<dyn std::error::Error>> {
+    if let Some(message_runs) = message {
+        let message = parse_message_string(message_runs)?;
+        return Ok(Some(message));
     }
+
+    return Ok(None);
 }
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, serde_json::Error> {
-    match serde_json::from_value::<LiveChatMembershipItemRenderer>(value) {
-        Ok(parsed) => {
-            Ok(Some(UniChatEvent::Sponsor {
-                event_type: String::from("unichat:sponsor"),
-                data: UniChatSponsorEventPayload {
-                    channel_id: None,
-                    channel_name: None,
-                    platform: String::from("youtube"),
+pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+    let parsed: LiveChatMembershipItemRenderer = serde_json::from_value(value).map_err(parse_serde_error)?;
+    let author_name = parse_author_name(&parsed.author_name)?;
+    let author_color = parse_author_color(&author_name)?;
+    let author_badges = parse_author_badges(&parsed.author_badges)?;
+    let author_photo = parse_author_photo(&parsed.author_photo)?;
+    let author_type = parse_author_type(&parsed.author_badges)?;
+    let tier = parse_tier(&parsed)?;
+    let months = parse_months(&parsed)?;
+    let message = optional_build_message(&parsed.message)?;
 
-                    author_id: parsed.author_external_channel_id.clone(),
-                    author_username: None,
-                    author_display_name: parsed.author_name.simple_text.clone(),
-                    author_profile_picture_url: parsed.author_photo.thumbnails.last().unwrap().url.clone(),
+    let event = UniChatEvent::Sponsor {
+        event_type: String::from(UNICHAT_EVENT_SPONSOR_TYPE),
+        data: UniChatSponsorEventPayload {
+            channel_id: None,
+            channel_name: None,
+            platform: String::from("youtube"),
 
-                    tier: parse_tier(&parsed),
-                    months: parse_months(&parsed),
-                    message: optional_build_message(&parsed.message)
-                }
-            }))
+            author_id: parsed.author_external_channel_id,
+            author_username: None,
+            author_display_name: author_name,
+            author_display_color: author_color,
+            author_badges: author_badges,
+            author_profile_picture_url: author_photo,
+            author_type: author_type,
+
+            tier: tier,
+            months: months,
+            message: message
         }
+    };
 
-        Err(err) => {
-            Err(err)
-        }
-    }
+    return Ok(Some(event));
 }

@@ -2,7 +2,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase", untagged)]
+#[serde(untagged)]
 pub enum UniChatEvent {
     Message {
         #[serde(rename = "type")]
@@ -44,6 +44,7 @@ pub enum UniChatEvent {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatEmote {
+    pub id: String,
     #[serde(rename = "type")]
     pub emote_type: String,
     pub tooltip: String,
@@ -60,6 +61,8 @@ pub struct UniChatBadge {
 }
 
 /* <============================================================================================> */
+
+pub const UNICHAT_EVENT_MESSAGE_TYPE: &str = "unichat:message";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -84,6 +87,8 @@ pub struct UniChatMessageEventPayload {
 
 /* <============================================================================================> */
 
+pub const UNICHAT_EVENT_REMOVE_MESSAGE_TYPE: &str = "unichat:remove_message";
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatRemoveMessageEventPayload {
@@ -96,6 +101,8 @@ pub struct UniChatRemoveMessageEventPayload {
 
 /* <============================================================================================> */
 
+pub const UNICHAT_EVENT_REMOVE_AUTHOR_TYPE: &str = "unichat:remove_author";
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatRemoveAuthorEventPayload {
@@ -107,6 +114,8 @@ pub struct UniChatRemoveAuthorEventPayload {
 }
 
 /* <============================================================================================> */
+
+pub const UNICHAT_EVENT_RAID_TYPE: &str = "unichat:raid";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -125,6 +134,8 @@ pub struct UniChatRaidEventPayload {
 
 /* <============================================================================================> */
 
+pub const UNICHAT_EVENT_SPONSOR_TYPE: &str = "unichat:sponsor";
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatSponsorEventPayload {
@@ -135,7 +146,10 @@ pub struct UniChatSponsorEventPayload {
     pub author_id: String,
     pub author_username: Option<String>,
     pub author_display_name: String,
+    pub author_display_color: String,
     pub author_profile_picture_url: String,
+    pub author_badges: Vec<UniChatBadge>,
+    pub author_type: String,
 
     pub tier: String,
     pub months: u16,
@@ -143,6 +157,8 @@ pub struct UniChatSponsorEventPayload {
 }
 
 /* <============================================================================================> */
+
+pub const UNICHAT_EVENT_SPONSOR_GIFT_TYPE: &str = "unichat:sponsor_gift";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -154,13 +170,18 @@ pub struct UniChatSponsorGiftEventPayload {
     pub author_id: String,
     pub author_username: Option<String>,
     pub author_display_name: String,
+    pub author_display_color: String,
     pub author_profile_picture_url: String,
+    pub author_badges: Vec<UniChatBadge>,
+    pub author_type: String,
 
     pub tier: String,
     pub count: u16
 }
 
 /* <============================================================================================> */
+
+pub const UNICHAT_EVENT_DONATE_TYPE: &str = "unichat:donate";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -181,6 +202,6 @@ pub struct UniChatDonateEventPayload {
     pub currency: String,
 
     pub message_id: String,
-    pub message: String,
-    pub emotes: Vec<UniChatEmote>,
+    pub message: Option<String>,
+    pub emotes: Option<Vec<UniChatEmote>>,
 }
