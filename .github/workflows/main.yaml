@@ -62,6 +62,7 @@ jobs:
 
       - name: Run cargo tests
         run: |
+          pnpm install --frozen-lockfile
           pnpm build:ui
           cargo test --all-targets --all-features
 
@@ -83,7 +84,7 @@ jobs:
         run: pnpm install --frozen-lockfile && pnpm test run --passWithNoTests
 
   build-linux:
-    if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'release' && github.event.action == 'published') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     needs: [rust-test, webapp-test]
     steps:
@@ -109,6 +110,7 @@ jobs:
           cp target/release/bundle/appimage/*.AppImage dist/
           cp target/release/bundle/deb/*.deb dist/
           cp target/release/bundle/rpm/*.rpm dist/
+          for file in dist/*; do sha256sum "$file" > "${file}.sha256"; done
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4.6.2
@@ -116,7 +118,7 @@ jobs:
           path: dist/
 
   build-windows:
-    if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'release' && github.event.action == 'published') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     needs: [rust-test, webapp-test]
     steps:
@@ -146,6 +148,7 @@ jobs:
         run: |
           mkdir -p dist
           cp target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe dist/
+          for file in dist/*; do sha256sum "$file" > "${file}.sha256"; done
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4.6.2
