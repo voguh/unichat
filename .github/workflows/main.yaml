@@ -14,24 +14,7 @@ env:
   RUST_VERSION: '1.87.0'
 
 jobs:
-  rust-lint:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.2.2
-
-      - name: Setup Tauri
-        uses: ./.github/actions/setup-tauri
-        with:
-          rust-version: ${{ env.RUST_VERSION }}
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-
-      - name: Run Clippy
-        continue-on-error: true
-        run: cargo clippy --all-targets --all-features
-
-  webapp-lint:
+  lint:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
@@ -46,31 +29,19 @@ jobs:
 
       - name: Run ESLint
         continue-on-error: true
-        run: pnpm install --frozen-lockfile && pnpm lint
-
-  rust-test:
-    runs-on: ubuntu-24.04
-    needs: [rust-lint]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.2.2
-
-      - name: Setup Tauri
-        uses: ./.github/actions/setup-tauri
-        with:
-          rust-version: ${{ env.RUST_VERSION }}
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-
-      - name: Run cargo tests
         run: |
           pnpm install --frozen-lockfile
-          pnpm build:ui
-          cargo test --all-targets --all-features
+          pnpm lint
 
-  webapp-test:
+      - name: Run Clippy
+        continue-on-error: true
+        run: |
+          pnpm build:ui
+          cargo clippy --all-targets --all-features
+
+  test:
     runs-on: ubuntu-24.04
-    needs: [webapp-lint]
+    needs: [lint]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
@@ -83,12 +54,19 @@ jobs:
           pnpm-version: ${{ env.PNPM_VERSION }}
 
       - name: Run vitest
-        run: pnpm install --frozen-lockfile && pnpm test run --passWithNoTests
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm test run --passWithNoTests
+
+      - name: Run cargo tests
+        run: |
+          pnpm build:ui
+          cargo test --all-targets --all-features
 
   setup-version:
     if: (github.event_name == 'release' && github.event.action == 'published') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
-    needs: [rust-test, webapp-test]
+    needs: [test]
     outputs:
       revision: ${{ steps.setup-version.outputs.revision }}
     steps:
