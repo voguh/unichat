@@ -2,6 +2,8 @@ name: main.yaml
 
 on:
   push:
+    tags:
+      - '*'
     branches:
       - '**'
   workflow_dispatch:
@@ -83,10 +85,28 @@ jobs:
       - name: Run vitest
         run: pnpm install --frozen-lockfile && pnpm test run --passWithNoTests
 
-  build-linux:
+  setup-version:
     if: (github.event_name == 'release' && github.event.action == 'published') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     needs: [rust-test, webapp-test]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup version
+        id: setup-version
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            echo "revision=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          else
+            export CARGO_PACKAGE_VERSION="$(cargo pkgid | cut -d# -f2 | cut -d '-' -f1)"
+            echo "revision=${CARGO_PACKAGE_VERSION}+${GITHUB_SHA}" >> $GITHUB_OUTPUT
+          fi
+
+  build-linux:
+    if: (github.event_name == 'release' && github.event.action == 'published') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    needs: [setup-version]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
@@ -107,20 +127,21 @@ jobs:
       - name: Move build artifacts
         run: |
           mkdir -p dist
-          cp target/release/bundle/appimage/*.AppImage dist/
-          cp target/release/bundle/deb/*.deb dist/
-          cp target/release/bundle/rpm/*.rpm dist/
+          cp target/release/bundle/appimage/*.AppImage dist/unichat-${{ steps.vars.outputs.revision }}.AppImage
+          cp target/release/bundle/deb/*.deb dist/unichat-${{ steps.vars.outputs.revision }}.deb
+          cp target/release/bundle/rpm/*.rpm dist/unichat-${{ steps.vars.outputs.revision }}.rpm
           for file in dist/*; do sha256sum "$file" > "${file}.sha256"; done
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
+          name: linux-build-artifacts
           path: dist/
 
   build-windows:
     if: (github.event_name == 'release' && github.event.action == 'published') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
-    needs: [rust-test, webapp-test]
+    needs: [setup-version]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
@@ -146,11 +167,12 @@ jobs:
 
       - name: Move build artifacts
         run: |
-          mkdir -p dist
-          cp target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe dist/
-          for file in dist/*; do sha256sum "$file" > "${file}.sha256"; done
+          mkdir -p dist/windows
+          cp target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe dist/windows/unichat-${{ steps.vars.outputs.revision }}.exe
+          for file in dist/windows/*; do sha256sum "$file" > "${file}.sha256"; done
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
+          name: windows-build-artifacts
           path: dist/
