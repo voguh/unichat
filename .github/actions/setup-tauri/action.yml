@@ -1,0 +1,31 @@
+name: "Setup Tauri"
+description: "Setup Tauri environment for GitHub Actions"
+inputs:
+  rust-version:
+    description: "Rust version to use. Examples: stable, nightly, 1.86.0."
+    default: "stable"
+  node-version:
+    description: "Node.JS version to use. Examples: 22.x, 20.15.1, >=20.15.0."
+    default: "22.14.0"
+  pnpm-version:
+    description: "PNPM version to use. Examples: 10.x, 10.7.1, >=10.7.0."
+    default: "10.7.1"
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Rust
+      uses: ./.github/actions/setup-rust
+      with:
+        rust-version: ${{ inputs.rust-version }}
+
+    - name: Setup Node.JS
+      uses: ./.github/actions/setup-node
+      with:
+        node-version: ${{ inputs.node-version }}
+        pnpm-version: ${{ inputs.pnpm-version }}
+
+    - name: Setup Tauri
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt install --no-install-recommends -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev

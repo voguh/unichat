@@ -1,0 +1,151 @@
+name: main.yaml
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '22.14.0'
+  PNPM_VERSION: '10.7.1'
+  RUST_VERSION: '1.87.0'
+
+jobs:
+  rust-lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup Tauri
+        uses: ./.github/actions/setup-tauri
+        with:
+          rust-version: ${{ env.RUST_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      - name: Run Clippy
+        continue-on-error: true
+        run: cargo clippy --all-targets --all-features
+
+  webapp-lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup Tauri
+        uses: ./.github/actions/setup-tauri
+        with:
+          rust-version: ${{ env.RUST_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      - name: Run ESLint
+        continue-on-error: true
+        run: pnpm install --frozen-lockfile && pnpm lint
+
+  rust-test:
+    runs-on: ubuntu-24.04
+    needs: [rust-lint]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup Tauri
+        uses: ./.github/actions/setup-tauri
+        with:
+          rust-version: ${{ env.RUST_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      - name: Run cargo tests
+        run: cargo test --all-targets --all-features
+
+  webapp-test:
+    runs-on: ubuntu-24.04
+    needs: [webapp-lint]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup Tauri
+        uses: ./.github/actions/setup-tauri
+        with:
+          rust-version: ${{ env.RUST_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      - name: Run vitest
+        run: pnpm install --frozen-lockfile && pnpm test run --passWithNoTests
+
+  build-linux:
+    if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    needs: [rust-test, webapp-test]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup Tauri
+        uses: ./.github/actions/setup-tauri
+        with:
+          rust-version: ${{ env.RUST_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      - name: Run build
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build:ui
+          pnpm build
+
+      - name: Move build artifacts
+        run: |
+          mkdir -p dist
+          cp target/release/bundle/appimage/*.AppImage dist/
+          cp target/release/bundle/deb/*.deb dist/
+          cp target/release/bundle/rpm/*.rpm dist/
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          path: dist/
+
+  build-windows:
+    if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    needs: [rust-test, webapp-test]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup Tauri
+        uses: ./.github/actions/setup-tauri
+        with:
+          rust-version: ${{ env.RUST_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      - name: Prepare windows environment
+        run: |
+          sudo apt install --no-install-recommends -y  nsis lld llvm clang
+          rustup target add x86_64-pc-windows-msvc
+          cargo install --locked cargo-xwin
+
+      - name: Run build
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build:ui
+          pnpm build --runner cargo-xwin --target x86_64-pc-windows-msvc
+
+      - name: Move build artifacts
+        run: |
+          mkdir -p dist
+          cp target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe dist/
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          path: dist/
