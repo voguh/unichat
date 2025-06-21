@@ -4,16 +4,19 @@ use serde::Serialize;
 use crate::events::unichat::UniChatDonateEventPayload;
 use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
-use crate::youtube::mapper::add_chat_item_action::build_author_badges;
-use crate::youtube::mapper::add_chat_item_action::build_emotes;
-use crate::youtube::mapper::add_chat_item_action::build_message;
-use crate::youtube::mapper::add_chat_item_action::get_author_color;
-use crate::youtube::mapper::add_chat_item_action::get_author_type;
-use crate::youtube::mapper::add_chat_item_action::LiveChatAuthorBadgeRenderer;
-use crate::youtube::mapper::add_chat_item_action::Message;
-use crate::youtube::mapper::serde_error_parse;
-use crate::youtube::mapper::AuthorName;
-use crate::youtube::mapper::ThumbnailsWrapper;
+use crate::events::unichat::UNICHAT_EVENT_DONATE_TYPE;
+use crate::utils::parse_serde_error;
+use crate::youtube::mapper::structs::author::parse_author_badges;
+use crate::youtube::mapper::structs::author::parse_author_color;
+use crate::youtube::mapper::structs::author::parse_author_name;
+use crate::youtube::mapper::structs::author::parse_author_photo;
+use crate::youtube::mapper::structs::author::parse_author_type;
+use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
+use crate::youtube::mapper::structs::author::AuthorNameWrapper;
+use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
+use crate::youtube::mapper::structs::message::parse_message_emojis;
+use crate::youtube::mapper::structs::message::parse_message_string;
+use crate::youtube::mapper::structs::message::MessageRunsWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -21,12 +24,13 @@ struct LiveChatPaidMessageRenderer {
     id: String,
 
     purchase_amount_text: PurchaseAmountText,
-    message: Option<Message>,
+    message: Option<MessageRunsWrapper>,
 
     author_external_channel_id: String,
-    author_name: AuthorName,
-    author_badges: Option<Vec<LiveChatAuthorBadgeRenderer>>,
-    author_photo: ThumbnailsWrapper,
+    author_name: AuthorNameWrapper,
+    author_photo: AuthorPhotoThumbnailsWrapper,
+    author_badges: Option<Vec<AuthorBadgeWrapper>>,
+
     timestamp_usec: String
 }
 
@@ -57,32 +61,38 @@ fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(S
     return Ok((currency, value));
 }
 
-fn build_option_message(message: &Option<Message>) -> Result<String, Box<dyn std::error::Error>> {
+fn build_option_message(message: &Option<MessageRunsWrapper>) -> Result<Option<String>, Box<dyn std::error::Error>> {
     if let Some(message) = message {
-        return build_message(&message.runs);
+        let message_text = parse_message_string(message)?;
+        return Ok(Some(message_text));
     }
 
-    return Ok(String::from(""));
+    return Ok(None);
 }
 
-fn build_option_emotes(message: &Option<Message>) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
+fn build_option_emotes(message: &Option<MessageRunsWrapper>) -> Result<Option<Vec<UniChatEmote>>, Box<dyn std::error::Error>> {
     if let Some(message) = message {
-        return build_emotes(&message.runs);
+        let emotes = parse_message_emojis(message)?;
+        return Ok(Some(emotes));
     }
 
-    return Ok(Vec::new());
+    return Ok(None);
 }
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
-    let parsed: LiveChatPaidMessageRenderer = serde_json::from_value(value).map_err(serde_error_parse)?;
-    let badges = build_author_badges(&parsed.author_badges)?;
-    let author_photo = parsed.author_photo.thumbnails.last().ok_or("No thumbnails found in author photo")?;
+    let parsed: LiveChatPaidMessageRenderer = serde_json::from_value(value).map_err(parse_serde_error)?;
+    let author_name = parse_author_name(&parsed.author_name)?;
+    let author_color = parse_author_color(&author_name)?;
+    let author_badges = parse_author_badges(&parsed.author_badges)?;
+    let author_photo = parse_author_photo(&parsed.author_photo)?;
+    let author_type = parse_author_type(&parsed.author_badges)?;
+
     let (purchase_currency, purchase_value) = parse_purchase_amount(&parsed.purchase_amount_text)?;
     let message = build_option_message(&parsed.message)?;
     let emotes = build_option_emotes(&parsed.message)?;
 
     let event = UniChatEvent::Donate {
-        event_type: String::from("unichat:donate"),
+        event_type: String::from(UNICHAT_EVENT_DONATE_TYPE),
         data: UniChatDonateEventPayload {
             channel_id: None,
             channel_name: None,
@@ -90,11 +100,11 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
 
             author_id: parsed.author_external_channel_id,
             author_username: None,
-            author_display_name: parsed.author_name.simple_text,
-            author_display_color: get_author_color(&parsed.author_badges),
-            author_badges: badges,
-            author_profile_picture_url: author_photo.url.clone(),
-            author_type: get_author_type(&parsed.author_badges),
+            author_display_name: author_name,
+            author_display_color: author_color,
+            author_badges: author_badges,
+            author_profile_picture_url: author_photo,
+            author_type: author_type,
 
             value: purchase_value,
             currency: purchase_currency,

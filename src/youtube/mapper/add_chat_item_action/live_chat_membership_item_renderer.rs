@@ -3,41 +3,42 @@ use serde::Serialize;
 
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatSponsorEventPayload;
-use crate::youtube::mapper::add_chat_item_action::build_message;
-use crate::youtube::mapper::add_chat_item_action::LiveChatAuthorBadgeRenderer;
-use crate::youtube::mapper::add_chat_item_action::Message;
-use crate::youtube::mapper::add_chat_item_action::MessageRun;
-use crate::youtube::mapper::serde_error_parse;
-use crate::youtube::mapper::AuthorName;
-use crate::youtube::mapper::ThumbnailsWrapper;
+use crate::events::unichat::UNICHAT_EVENT_SPONSOR_TYPE;
+use crate::utils::parse_serde_error;
+use crate::youtube::mapper::structs::author::parse_author_badges;
+use crate::youtube::mapper::structs::author::parse_author_color;
+use crate::youtube::mapper::structs::author::parse_author_name;
+use crate::youtube::mapper::structs::author::parse_author_photo;
+use crate::youtube::mapper::structs::author::parse_author_type;
+use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
+use crate::youtube::mapper::structs::author::AuthorNameWrapper;
+use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
+use crate::youtube::mapper::structs::message::parse_message_string;
+use crate::youtube::mapper::structs::message::MessageRun;
+use crate::youtube::mapper::structs::message::MessageRunsWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct LiveChatMembershipItemRenderer {
-    pub id: String,
+    id: String,
 
-    pub header_primary_text: Option<HeaderPrimaryText>,
-    pub header_subtext: HeaderSubtext,
-    pub message: Option<Message>,
+    header_primary_text: Option<MessageRunsWrapper>,
+    header_subtext: HeaderSubtext,
+    message: Option<MessageRunsWrapper>,
 
-    pub author_external_channel_id: String,
-    pub author_name: AuthorName,
-    pub author_badges: Option<Vec<LiveChatAuthorBadgeRenderer>>,
-    pub author_photo: ThumbnailsWrapper,
+    author_external_channel_id: String,
+    author_name: AuthorNameWrapper,
+    author_photo: AuthorPhotoThumbnailsWrapper,
+    author_badges: Option<Vec<AuthorBadgeWrapper>>,
 
-    pub timestamp_usec: String
-}
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-struct HeaderPrimaryText {
-    pub runs: Vec<MessageRun>
+    timestamp_usec: String
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct HeaderSubtext {
-    pub simple_text: Option<String>,
-    pub runs: Option<Vec<MessageRun>>
+    simple_text: Option<String>,
+    runs: Option<Vec<MessageRun>>
 }
 
 /* <============================================================================================> */
@@ -51,8 +52,11 @@ fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> Result<String, Box<dyn
         }
     } else if let Some(runs) = &parsed.header_subtext.runs {
         let run = runs.get(1).ok_or("No second run found in header subtext")?;
-        if let Some(text) = &run.text {
-            tier = text.trim().to_string();
+        match run {
+            MessageRun::Text { text } => {
+                tier = text.trim().to_string();
+            },
+            MessageRun::Emoji { .. } => return Err("Unexpected emoji in header subtext".into())
         }
     }
 
@@ -69,8 +73,11 @@ fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> Result<u16, Box<dyn 
 
     if let Some(header_primary_text) = &parsed.header_primary_text {
         let run = header_primary_text.runs.get(1).ok_or("No second run found in header primary text")?;
-        if let Some(text) = &run.text {
-            months =  text.trim().to_string().parse()?;
+        match run {
+            MessageRun::Text { text } => {
+                months =  text.trim().to_string().parse()?;
+            },
+            MessageRun::Emoji { .. } => return Err("Unexpected emoji in header subtext".into())
         }
     } else if let Some(_runs) = &parsed.header_subtext.runs {
         months = 1
@@ -79,9 +86,9 @@ fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> Result<u16, Box<dyn 
     return Ok(months);
 }
 
-fn optional_build_message(message: &Option<Message>) -> Result<Option<String>, Box<dyn std::error::Error>> {
+fn optional_build_message(message: &Option<MessageRunsWrapper>) -> Result<Option<String>, Box<dyn std::error::Error>> {
     if let Some(message_runs) = message {
-        let message = build_message(&message_runs.runs)?;
+        let message = parse_message_string(message_runs)?;
         return Ok(Some(message));
     }
 
@@ -89,23 +96,30 @@ fn optional_build_message(message: &Option<Message>) -> Result<Option<String>, B
 }
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
-    let parsed: LiveChatMembershipItemRenderer = serde_json::from_value(value).map_err(serde_error_parse)?;
-    let author_photo = parsed.author_photo.thumbnails.last().ok_or("No thumbnails found in author photo")?;
+    let parsed: LiveChatMembershipItemRenderer = serde_json::from_value(value).map_err(parse_serde_error)?;
+    let author_name = parse_author_name(&parsed.author_name)?;
+    let author_color = parse_author_color(&author_name)?;
+    let author_badges = parse_author_badges(&parsed.author_badges)?;
+    let author_photo = parse_author_photo(&parsed.author_photo)?;
+    let author_type = parse_author_type(&parsed.author_badges)?;
     let tier = parse_tier(&parsed)?;
     let months = parse_months(&parsed)?;
     let message = optional_build_message(&parsed.message)?;
 
     let event = UniChatEvent::Sponsor {
-        event_type: String::from("unichat:sponsor"),
+        event_type: String::from(UNICHAT_EVENT_SPONSOR_TYPE),
         data: UniChatSponsorEventPayload {
             channel_id: None,
             channel_name: None,
             platform: String::from("youtube"),
 
-            author_id: parsed.author_external_channel_id.clone(),
+            author_id: parsed.author_external_channel_id,
             author_username: None,
-            author_display_name: parsed.author_name.simple_text.clone(),
-            author_profile_picture_url: author_photo.url.clone(),
+            author_display_name: author_name,
+            author_display_color: author_color,
+            author_badges: author_badges,
+            author_profile_picture_url: author_photo,
+            author_type: author_type,
 
             tier: tier,
             months: months,

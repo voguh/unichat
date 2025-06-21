@@ -3,21 +3,30 @@ use serde::Serialize;
 
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatSponsorGiftEventPayload;
-use crate::youtube::mapper::add_chat_item_action::LiveChatAuthorBadgeRenderer;
-use crate::youtube::mapper::serde_error_parse;
-use crate::youtube::mapper::AuthorName;
-use crate::youtube::mapper::ThumbnailsWrapper;
+use crate::events::unichat::UNICHAT_EVENT_SPONSOR_GIFT_TYPE;
+use crate::utils::parse_serde_error;
+use crate::youtube::mapper::structs::author::parse_author_badges;
+use crate::youtube::mapper::structs::author::parse_author_color;
+use crate::youtube::mapper::structs::author::parse_author_name;
+use crate::youtube::mapper::structs::author::parse_author_photo;
+use crate::youtube::mapper::structs::author::parse_author_type;
+use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
+use crate::youtube::mapper::structs::author::AuthorNameWrapper;
+use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
+use crate::youtube::mapper::structs::message::MessageRun;
+use crate::youtube::mapper::structs::message::MessageRunsWrapper;
+use crate::youtube::mapper::structs::ThumbnailsWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct LiveChatSponsorshipsGiftPurchaseAnnouncementRenderer {
-    pub id: String,
+    id: String,
 
-    pub author_external_channel_id: String,
+    author_external_channel_id: String,
 
-    pub header: Header,
+    header: Header,
 
-    pub timestamp_usec: String
+    timestamp_usec: String
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -29,13 +38,13 @@ struct Header {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct LiveChatSponsorshipsHeaderRenderer {
-    pub primary_text: RunsWrapper,
+    primary_text: MessageRunsWrapper,
 
-    pub image: ThumbnailsWrapper,
+    image: ThumbnailsWrapper,
 
-    pub author_name: AuthorName,
-    pub author_photo: ThumbnailsWrapper,
-    pub author_badges: Option<Vec<LiveChatAuthorBadgeRenderer>>
+    author_name: AuthorNameWrapper,
+    author_photo: AuthorPhotoThumbnailsWrapper,
+    author_badges: Option<Vec<AuthorBadgeWrapper>>
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -53,12 +62,21 @@ struct Run {
 fn parse_tier(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<String, Box<dyn std::error::Error>> {
     let run = render.primary_text.runs.get(3).ok_or("No tier run found")?;
 
-    return Ok(run.text.trim().to_string())
+    let tier = match run {
+        MessageRun::Text { text } => text,
+        MessageRun::Emoji { .. } => return Err("Unexpected emoji in tier run".into()),
+    };
+
+    return Ok(tier.clone());
 }
 
 fn parse_count(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<u16, Box<dyn std::error::Error>> {
     let run = render.primary_text.runs.get(1).ok_or("No count run found")?;
-    let raw_count = run.text.trim();
+    let raw_count = match run {
+        MessageRun::Text { text } => text,
+        MessageRun::Emoji { .. } => return Err("Unexpected emoji in count run".into()),
+    };
+
     let count: u16 = raw_count.parse()?;
 
     return Ok(count);
@@ -67,23 +85,31 @@ fn parse_count(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<u16, Box<d
 /* <============================================================================================> */
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
-    let parsed: LiveChatSponsorshipsGiftPurchaseAnnouncementRenderer = serde_json::from_value(value).map_err(serde_error_parse)?;
+    let parsed: LiveChatSponsorshipsGiftPurchaseAnnouncementRenderer = serde_json::from_value(value).map_err(parse_serde_error)?;
     let render = parsed.header.live_chat_sponsorships_header_renderer;
-    let author_photo  = render.author_photo.thumbnails.last().ok_or("No author photo found")?;
+    let author_name = parse_author_name(&render.author_name)?;
+    let author_color = parse_author_color(&author_name)?;
+    let author_badges = parse_author_badges(&render.author_badges)?;
+    let author_photo = parse_author_photo(&render.author_photo)?;
+    let author_type = parse_author_type(&render.author_badges)?;
+
     let tier = parse_tier(&render)?;
     let count = parse_count(&render)?;
 
     let event = UniChatEvent::SponsorGift {
-        event_type: String::from("unichat:sponsor_gift"),
+        event_type: String::from(UNICHAT_EVENT_SPONSOR_GIFT_TYPE),
         data: UniChatSponsorGiftEventPayload {
             channel_id: None,
             channel_name: None,
             platform: String::from("youtube"),
 
-            author_id: parsed.author_external_channel_id.clone(),
+            author_id: parsed.author_external_channel_id,
             author_username: None,
-            author_display_name: render.author_name.simple_text.clone(),
-            author_profile_picture_url: author_photo.url.clone(),
+            author_display_name: author_name,
+            author_display_color: author_color,
+            author_badges: author_badges,
+            author_profile_picture_url: author_photo,
+            author_type: author_type,
 
             tier: tier,
             count: count,

@@ -3,7 +3,8 @@ use serde::Serialize;
 
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatRemoveMessageEventPayload;
-use crate::youtube::mapper::serde_error_parse;
+use crate::events::unichat::UNICHAT_EVENT_REMOVE_MESSAGE_TYPE;
+use crate::utils::parse_serde_error;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -12,10 +13,10 @@ struct RemoveChatItemAction {
 }
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
-    let parsed: RemoveChatItemAction = serde_json::from_value(value).map_err(serde_error_parse)?;
+    let parsed: RemoveChatItemAction = serde_json::from_value(value).map_err(parse_serde_error)?;
 
     let event = UniChatEvent::RemoveMessage {
-        event_type: String::from("unichat:remove_message"),
+        event_type: String::from(UNICHAT_EVENT_REMOVE_MESSAGE_TYPE),
         data: UniChatRemoveMessageEventPayload {
             channel_id: None,
             channel_name: None,

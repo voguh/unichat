@@ -3,40 +3,49 @@ use serde::Serialize;
 
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatMessageEventPayload;
-use crate::youtube::mapper::add_chat_item_action::build_author_badges;
-use crate::youtube::mapper::add_chat_item_action::build_emotes;
-use crate::youtube::mapper::add_chat_item_action::build_message;
-use crate::youtube::mapper::add_chat_item_action::get_author_color;
-use crate::youtube::mapper::add_chat_item_action::get_author_type;
-use crate::youtube::mapper::add_chat_item_action::LiveChatAuthorBadgeRenderer;
-use crate::youtube::mapper::add_chat_item_action::Message;
-use crate::youtube::mapper::serde_error_parse;
-use crate::youtube::mapper::AuthorName;
-use crate::youtube::mapper::ThumbnailsWrapper;
+use crate::events::unichat::UNICHAT_EVENT_MESSAGE_TYPE;
+use crate::utils::parse_serde_error;
+use crate::youtube::mapper::structs::author::parse_author_badges;
+use crate::youtube::mapper::structs::author::parse_author_color;
+use crate::youtube::mapper::structs::author::parse_author_name;
+use crate::youtube::mapper::structs::author::parse_author_photo;
+use crate::youtube::mapper::structs::author::parse_author_type;
+use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
+use crate::youtube::mapper::structs::author::AuthorNameWrapper;
+use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
+use crate::youtube::mapper::structs::message::parse_message_emojis;
+use crate::youtube::mapper::structs::message::parse_message_string;
+use crate::youtube::mapper::structs::message::MessageRunsWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct LiveChatTextMessageRenderer {
     id: String,
-    message: Message,
+
     author_external_channel_id: String,
-    author_name: AuthorName,
-    author_badges: Option<Vec<LiveChatAuthorBadgeRenderer>>,
-    author_photo: ThumbnailsWrapper,
+    author_name: AuthorNameWrapper,
+    author_photo: AuthorPhotoThumbnailsWrapper,
+    author_badges: Option<Vec<AuthorBadgeWrapper>>,
+
+    message: MessageRunsWrapper,
+
     timestamp_usec: String
 }
 
 /* <============================================================================================> */
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
-    let parsed: LiveChatTextMessageRenderer = serde_json::from_value(value).map_err(serde_error_parse)?;
-    let author_badges = build_author_badges(&parsed.author_badges)?;
-    let author_photo = parsed.author_photo.thumbnails.last().ok_or("No thumbnails found in author photo")?;
-    let message = build_message(&parsed.message.runs)?;
-    let emotes = build_emotes(&parsed.message.runs)?;
+    let parsed: LiveChatTextMessageRenderer = serde_json::from_value(value).map_err(parse_serde_error)?;
+    let author_name = parse_author_name(&parsed.author_name)?;
+    let author_color = parse_author_color(&author_name)?;
+    let author_badges = parse_author_badges(&parsed.author_badges)?;
+    let author_photo = parse_author_photo(&parsed.author_photo)?;
+    let author_type = parse_author_type(&parsed.author_badges)?;
+    let message = parse_message_string(&parsed.message)?;
+    let emotes = parse_message_emojis(&parsed.message)?;
 
     let event = UniChatEvent::Message {
-        event_type: String::from("unichat:message"),
+        event_type: String::from(UNICHAT_EVENT_MESSAGE_TYPE),
         data: UniChatMessageEventPayload {
             channel_id: None,
             channel_name: None,
@@ -44,11 +53,11 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
 
             author_id: parsed.author_external_channel_id,
             author_username: None,
-            author_display_name: parsed.author_name.simple_text,
-            author_display_color: get_author_color(&parsed.author_badges),
+            author_display_name: author_name,
+            author_display_color: author_color,
             author_badges: author_badges,
-            author_profile_picture_url: author_photo.url.clone(),
-            author_type: get_author_type(&parsed.author_badges),
+            author_profile_picture_url: author_photo,
+            author_type: author_type,
 
             message_id: parsed.id,
             message_text: message,

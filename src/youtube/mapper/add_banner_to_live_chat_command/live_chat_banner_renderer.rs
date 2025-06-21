@@ -3,8 +3,9 @@ use serde::Serialize;
 
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatRaidEventPayload;
-use crate::youtube::mapper::serde_error_parse;
-use crate::youtube::mapper::ThumbnailsWrapper;
+use crate::events::unichat::UNICHAT_EVENT_RAID_TYPE;
+use crate::utils::parse_serde_error;
+use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -25,7 +26,7 @@ struct LiveChatBannerRedirectRendererWrapper {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct LiveChatBannerRedirectRenderer {
-    author_photo: ThumbnailsWrapper,
+    author_photo: AuthorPhotoThumbnailsWrapper,
     banner_message: BannerMessage
 }
 
@@ -45,7 +46,7 @@ struct BannerMessageRuns {
 }
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
-    let parsed: LiveChatBannerRenderer = serde_json::from_value(value).map_err(serde_error_parse)?;
+    let parsed: LiveChatBannerRenderer = serde_json::from_value(value).map_err(parse_serde_error)?;
     let mut event: Option<UniChatEvent> = None;
 
     if parsed.banner_type == "LIVE_CHAT_BANNER_TYPE_CROSS_CHANNEL_REDIRECT" {
@@ -55,7 +56,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
 
             if first_run.bold.is_some() {
                 event = Some(UniChatEvent::Raid {
-                    event_type: String::from("unichat:raid"),
+                    event_type: String::from(UNICHAT_EVENT_RAID_TYPE),
                     data: UniChatRaidEventPayload {
                         channel_id: None,
                         channel_name: None,
