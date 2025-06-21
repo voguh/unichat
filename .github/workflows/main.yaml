@@ -61,7 +61,9 @@ jobs:
           pnpm-version: ${{ env.PNPM_VERSION }}
 
       - name: Run cargo tests
-        run: cargo test --all-targets --all-features
+        run: |
+          pnpm build:ui
+          cargo test --all-targets --all-features
 
   webapp-test:
     runs-on: ubuntu-24.04
