@@ -29,7 +29,7 @@ runs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-          target
+          **/target
         key: ${{ runner.os }}-cargo-${{ inputs.rust-version }}-${{ hashFiles(inputs.cache-dependency-path) }}
         restore-keys: |
           ${{ runner.os }}-cargo-
