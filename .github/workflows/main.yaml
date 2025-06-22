@@ -2,11 +2,17 @@ name: main.yaml
 
 on:
   push:
-    tags:
-      - '*'
     branches:
       - '**'
+  release:
+    types:
+      - published
   workflow_dispatch:
+    inputs:
+      build:
+        description: 'Build binaries for release. Defaults to false.'
+        required: false
+        type: boolean
 
 env:
   NODE_VERSION: '22.14.0'
@@ -63,15 +69,20 @@ jobs:
           pnpm build:ui
           cargo test --all-targets --all-features
 
-  setup-version:
-    if: (github.event_name == 'release' && github.event.action == 'published') || github.event_name == 'workflow_dispatch'
+  build:
+    if: github.event_name == 'release' || github.event.inputs.build == 'true'
     runs-on: ubuntu-24.04
     needs: [test]
-    outputs:
-      revision: ${{ steps.setup-version.outputs.revision }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
+
+      - name: Setup Tauri
+        uses: ./.github/actions/setup-tauri
+        with:
+          rust-version: ${{ env.RUST_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
 
       - name: Setup version
         id: setup-version
@@ -86,55 +97,11 @@ jobs:
       - name: Print revision
         run: echo "Revision is ${{ steps.setup-version.outputs.revision }}"
 
-  build-linux:
-    if: (github.event_name == 'release' && github.event.action == 'published') || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-24.04
-    needs: [setup-version]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.2.2
-
-      - name: Setup Tauri
-        uses: ./.github/actions/setup-tauri
-        with:
-          rust-version: ${{ env.RUST_VERSION }}
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-
-      - name: Run build
+      - name: Run build for linux
         run: |
           pnpm install --frozen-lockfile
           pnpm build:ui
           pnpm build
-
-      - name: Move build artifacts
-        run: |
-          mkdir -p dist
-          cp target/release/bundle/appimage/*.AppImage dist/unichat-${{ needs.setup-version.outputs.revision }}.AppImage
-          cp target/release/bundle/deb/*.deb dist/unichat-${{ needs.setup-version.outputs.revision }}.deb
-          cp target/release/bundle/rpm/*.rpm dist/unichat-${{ needs.setup-version.outputs.revision }}.rpm
-          for file in dist/*; do sha256sum "$file" > "${file}.sha256"; done
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: linux-build-artifacts
-          path: dist/
-
-  build-windows:
-    if: (github.event_name == 'release' && github.event.action == 'published') || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-24.04
-    needs: [setup-version]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.2.2
-
-      - name: Setup Tauri
-        uses: ./.github/actions/setup-tauri
-        with:
-          rust-version: ${{ env.RUST_VERSION }}
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
 
       - name: Prepare windows environment
         run: |
@@ -142,20 +109,21 @@ jobs:
           rustup target add x86_64-pc-windows-msvc
           cargo install --locked cargo-xwin
 
-      - name: Run build
+      - name: Run build for windows
         run: |
-          pnpm install --frozen-lockfile
-          pnpm build:ui
           pnpm build --runner cargo-xwin --target x86_64-pc-windows-msvc
 
       - name: Move build artifacts
         run: |
           mkdir -p dist
-          cp target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe dist/unichat-${{ needs.setup-version.outputs.revision }}.exe
+          cp target/release/bundle/appimage/*.AppImage dist/unichat-${{ steps.setup-version.outputs.revision }}.AppImage
+          cp target/release/bundle/deb/*.deb dist/unichat-${{ steps.setup-version.outputs.revision }}.deb
+          cp target/release/bundle/rpm/*.rpm dist/unichat-${{ steps.setup-version.outputs.revision }}.rpm
+          cp target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe dist/unichat-${{ steps.setup-version.outputs.revision }}.exe
           for file in dist/*; do sha256sum "$file" > "${file}.sha256"; done
 
-      - name: Upload build artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: windows-build-artifacts
+          name: binaries
           path: dist/
