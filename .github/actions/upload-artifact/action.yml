@@ -65,7 +65,12 @@ runs:
           for folder in ${{ inputs.base-folder }}/*; do
             if [ -d "$folder" ] && [ "$(ls -A "$folder")" ]; then
               echo "Uploading files from: $folder"
-              gh release upload $GITHUB_REF_NAME "$folder"/* || echo "Failed to upload files from $folder to GitHub Release"
+              for file in $folder/*; do
+                if [ -f "$file" ]; then
+                  echo "Uploading file: $file"
+                  gh release upload $GITHUB_REF_NAME "$file" || echo "Failed to upload $file to GitHub Release"
+                fi
+              done
             fi
           done
           echo "All files uploaded to GitHub Release successfully."
