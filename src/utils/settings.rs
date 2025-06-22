@@ -2,12 +2,22 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::OnceLock;
 
+use serde::Deserialize;
+use serde::Serialize;
 use serde_json::Value;
 use tauri_plugin_store::Store;
 use tauri_plugin_store::StoreBuilder;
 
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum YouTubeSettingLogLevel {
+    OnlyErrors,
+    UnknownEvents,
+    AllEvents
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SettingsKeys {
@@ -59,7 +69,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) {
     defaults.insert(SettingsKeys::YouTubeChatUrl.to_string(), Value::from("about:blank"));
     defaults.insert(SettingsKeys::TwitchChannelName.to_string(), Value::from(""));
 
-    defaults.insert(SettingsKeys::LogYoutubeEvents.to_string(), Value::from("ONLY_ERRORS"));
+    defaults.insert(SettingsKeys::LogYoutubeEvents.to_string(), serde_json::to_value(YouTubeSettingLogLevel::OnlyErrors).unwrap());
 
     let store_path = properties::get_app_path(AppPaths::AppConfigDir).join("settings.json");
     INSTANCE.get_or_init(|| StoreBuilder::new(app, store_path).defaults(defaults).build().unwrap());
