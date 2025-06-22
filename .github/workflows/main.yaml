@@ -115,15 +115,20 @@ jobs:
 
       - name: Move build artifacts
         run: |
-          mkdir -p dist
-          cp target/release/bundle/appimage/*.AppImage dist/unichat-${{ steps.setup-version.outputs.revision }}.AppImage
-          cp target/release/bundle/deb/*.deb dist/unichat-${{ steps.setup-version.outputs.revision }}.deb
-          cp target/release/bundle/rpm/*.rpm dist/unichat-${{ steps.setup-version.outputs.revision }}.rpm
-          cp target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe dist/unichat-${{ steps.setup-version.outputs.revision }}.exe
-          for file in dist/*; do sha256sum "$file" > "${file}.sha256"; done
+          export VERSION="${{ steps.setup-version.outputs.revision }}"
+          mkdir -p dist/appimage dist/deb dist/rpm dist/windows
+          cp target/release/bundle/appimage/*.AppImage dist/appimage/unichat-$VERSION.AppImage
+          cp target/release/bundle/deb/*.deb dist/deb/unichat-$VERSION.deb
+          cp target/release/bundle/rpm/*.rpm dist/rpm/unichat-$VERSION.rpm
+          cp target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe dist/windows/unichat-$VERSION.exe
+          for folder in dist/*; do
+            if [ -d "$folder" ]; then
+              (cd "$folder" && for file in ./*; do sha256sum "$file" > "${file}.sha256"; done)
+            fi
+          done
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4.6.2
+        uses: ./.github/actions/upload-artifact
         with:
-          name: binaries
-          path: dist/
+          base-folder: dist
+          prefix: unichat-${{ steps.setup-version.outputs.revision }}

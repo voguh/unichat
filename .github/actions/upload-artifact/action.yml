@@ -1,0 +1,75 @@
+name: "Upload Artifact"
+description: "Upload build artifacts to GitHub Actions and optionally release if exists."
+inputs:
+  prefix:
+    description: "Prefix for the artifact names."
+    required: true
+  base-folder:
+    description: "Folder root that contains the folders which will be uploaded as artifacts."
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Check folders
+      id: check_folders
+      shell: bash
+      run: |
+        if [ -d "${{ inputs.base-folder }}/appimage" ]; then
+          echo "appimage=true" >> $GITHUB_ENV
+        fi
+        if [ -d "${{ inputs.base-folder }}/deb" ]; then
+          echo "deb=true" >> $GITHUB_ENV
+        fi
+        if [ -d "${{ inputs.base-folder }}/rpm" ]; then
+          echo "rpm=true" >> $GITHUB_ENV
+        fi
+        if [ -d "${{ inputs.base-folder }}/windows" ]; then
+          echo "windows=true" >> $GITHUB_ENV
+        fi
+
+    - name: Upload to GitHub Actions - AppImage artifacts
+      if: ${{ env.appimage == 'true' }}
+      uses: actions/upload-artifact@v4.6.2
+      with:
+        name: ${{ inputs.prefix }}-appimage
+        path: ${{ inputs.base-folder }}/appimage
+
+    - name: Upload to GitHub Actions - DEB artifacts
+      if: ${{ env.deb == 'true' }}
+      uses: actions/upload-artifact@v4.6.2
+      with:
+        name: ${{ inputs.prefix }}-deb
+        path: ${{ inputs.base-folder }}/deb
+
+    - name: Upload to GitHub Actions - RPM artifacts
+      if: ${{ env.rpm == 'true' }}
+      uses: actions/upload-artifact@v4.6.2
+      with:
+        name: ${{ inputs.prefix }}-rpm
+        path: ${{ inputs.base-folder }}/rpm
+
+    - name: Upload to GitHub Actions - Windows artifacts
+      if: ${{ env.windows == 'true' }}
+      uses: actions/upload-artifact@v4.6.2
+      with:
+        name: ${{ inputs.prefix }}-windows
+        path: ${{ inputs.base-folder }}/windows
+
+    - name: Upload to GitHub Release
+      if: github.event_name == 'release'
+      shell: bash
+      run: |
+        if command -v gh >/dev/null 2>&1; then
+          echo "GitHub CLI is installed. Proceeding with upload to GitHub Release."
+          echo "${{ github.token }}" | gh auth login --with-token
+          for folder in ${{ inputs.base-folder }}/*; do
+            if [ -d "$folder" ] && [ "$(ls -A "$folder")" ]; then
+              echo "Uploading files from: $folder"
+              gh release upload $GITHUB_REF_NAME "$folder"/* || echo "Failed to upload files from $folder to GitHub Release"
+            fi
+          done
+          echo "All files uploaded to GitHub Release successfully."
+        else
+          echo "GitHub CLI is not installed. Skipping upload to GitHub Release."
+          exit 0
+        fi
