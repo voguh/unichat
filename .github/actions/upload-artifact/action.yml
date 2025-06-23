@@ -18,41 +18,41 @@ runs:
       shell: bash
       run: |
         if [ -d "${{ inputs.base-folder }}/appimage" ]; then
-          echo "appimage=true" >> $GITHUB_ENV
+          echo "appimage=true" >> $GITHUB_OUTPUT
         fi
         if [ -d "${{ inputs.base-folder }}/deb" ]; then
-          echo "deb=true" >> $GITHUB_ENV
+          echo "deb=true" >> $GITHUB_OUTPUT
         fi
         if [ -d "${{ inputs.base-folder }}/rpm" ]; then
-          echo "rpm=true" >> $GITHUB_ENV
+          echo "rpm=true" >> $GITHUB_OUTPUT
         fi
         if [ -d "${{ inputs.base-folder }}/windows" ]; then
-          echo "windows=true" >> $GITHUB_ENV
+          echo "windows=true" >> $GITHUB_OUTPUT
         fi
 
     - name: Upload to GitHub Actions - AppImage artifacts
-      if: ${{ env.appimage == 'true' }}
+      if: ${{ steps.check_folders.outputs.appimage == 'true' }}
       uses: actions/upload-artifact@v4.6.2
       with:
         name: ${{ inputs.prefix }}-appimage
         path: ${{ inputs.base-folder }}/appimage
 
     - name: Upload to GitHub Actions - DEB artifacts
-      if: ${{ env.deb == 'true' }}
+      if: ${{ steps.check_folders.outputs.deb == 'true' }}
       uses: actions/upload-artifact@v4.6.2
       with:
         name: ${{ inputs.prefix }}-deb
         path: ${{ inputs.base-folder }}/deb
 
     - name: Upload to GitHub Actions - RPM artifacts
-      if: ${{ env.rpm == 'true' }}
+      if: ${{ steps.check_folders.outputs.rpm == 'true' }}
       uses: actions/upload-artifact@v4.6.2
       with:
         name: ${{ inputs.prefix }}-rpm
         path: ${{ inputs.base-folder }}/rpm
 
     - name: Upload to GitHub Actions - Windows artifacts
-      if: ${{ env.windows == 'true' }}
+      if: ${{ steps.check_folders.outputs.windows == 'true' }}
       uses: actions/upload-artifact@v4.6.2
       with:
         name: ${{ inputs.prefix }}-windows
