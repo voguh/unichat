@@ -47,7 +47,6 @@
             "icons/icon.icns",
             "icons/icon.ico"
         ],
-        "license": "LGPL-3.0-only",
         "licenseFile": "./LICENSE",
         "windows": {
             "nsis": {
