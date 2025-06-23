@@ -7,6 +7,9 @@ inputs:
   base-folder:
     description: "Folder root that contains the folders which will be uploaded as artifacts."
     required: true
+  GITHUB_TOKEN:
+    description: "GitHub token to authenticate with GitHub CLI for creating releases."
+    required: true
 runs:
   using: "composite"
   steps:
@@ -55,14 +58,13 @@ runs:
         name: ${{ inputs.prefix }}-windows
         path: ${{ inputs.base-folder }}/windows
 
-    - name: Create a GitHub Release
-      if: startsWith(github.ref, 'refs/tags/')
+    - name: Upload to GitHub Release
+      if: github.event_name == 'release' && github.event.action == 'published'
       shell: bash
       run: |
-        if command -v gh >/dev/null 2>&1; then
+        if [ -n "$(command -v gh)" ]; then
           echo "GitHub CLI is installed. Proceeding with to create a GitHub Release."
-          echo "$GITHUB_TOKEN" | gh auth login --with-token
-          gh release create $GITHUB_REF_NAME --title "$GITHUB_REF_NAME" --notes "Release created from GitHub Actions"
+          echo "${{ inputs.GITHUB_TOKEN }}" | gh auth login --with-token
           for folder in ${{ inputs.base-folder }}/*; do
             if [ -d "$folder" ] && [ "$(ls -A "$folder")" ]; then
               echo "Uploading files from: $folder"
