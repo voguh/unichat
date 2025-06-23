@@ -109,7 +109,7 @@ pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>) -> Result<V
     return Ok(parsed_badges);
 }
 
-fn expect_badge_type(badges: &Vec<AuthorBadgeWrapper>, badge_type: &str) -> bool {
+fn expect_badge_type(badges: &[AuthorBadgeWrapper], badge_type: &str) -> bool {
     if badge_type == "MEMBER" {
         return badges.iter().any(|badge| matches!(
             badge.live_chat_author_badge_renderer,
