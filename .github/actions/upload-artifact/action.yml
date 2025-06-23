@@ -59,7 +59,7 @@ runs:
         path: ${{ inputs.base-folder }}/windows
 
     - name: Upload to GitHub Release
-      if: github.event_name == 'release' && github.event.action == 'published'
+      if: github.event_name == 'release'
       shell: bash
       run: |
         if [ -n "$(command -v gh)" ]; then
