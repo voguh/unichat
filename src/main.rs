@@ -4,7 +4,9 @@
 #![allow(clippy::needless_return)]
 
 use std::fs;
+use std::path::PathBuf;
 
+use tauri::path::BaseDirectory;
 use tauri::Manager;
 
 use crate::utils::properties;
@@ -15,6 +17,27 @@ mod commands;
 mod events;
 mod utils;
 mod youtube;
+
+fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+    if !dest.exists() {
+        fs::create_dir(dest)?;
+    }
+
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        let file_type = entry.file_type()?;
+        let src_path = entry.path();
+        let dest_path = dest.join(entry.file_name());
+
+        if file_type.is_dir() {
+            copy_folder(&src_path, &dest_path)?;
+        } else if file_type.is_file() {
+            fs::copy(&src_path, &dest_path)?;
+        }
+    }
+
+    return Ok(());
+}
 
 fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
     events::init(app)?;
@@ -27,6 +50,12 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgetsDir);
     if !&widgets_dir.exists() {
         fs::create_dir_all(&widgets_dir)?;
+    }
+
+    if fs::read_dir(&widgets_dir)?.next().is_none() {
+        let template_widgets_dir = app.path().resolve("widgets", BaseDirectory::Resource)?;
+        copy_folder(&template_widgets_dir, &widgets_dir)?;
+        log::info!("Copied template widgets to: {}", widgets_dir.display());
     }
 
     /* ========================================================================================== */
