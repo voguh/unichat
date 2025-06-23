@@ -23,25 +23,25 @@ impl fmt::Display for PropertiesKey {
 
 #[derive(PartialEq, Eq)]
 pub enum AppPaths {
-    AppCacheDir,
-    AppConfigDir,
-    AppDataDir,
-    AppLocalDataDir,
-    AppLogDir,
+    AppCache,
+    AppConfig,
+    AppData,
+    AppLocalData,
+    AppLog,
 
-    UniChatWidgetsDir,
+    UniChatWidgets,
 }
 
 impl fmt::Display for AppPaths {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s = match self {
-            AppPaths::AppCacheDir => "app_cache_dir",
-            AppPaths::AppConfigDir => "app_config_dir",
-            AppPaths::AppDataDir => "app_data_dir",
-            AppPaths::AppLocalDataDir => "app_local_data_dir",
-            AppPaths::AppLogDir => "app_log_dir",
+            AppPaths::AppCache => "app_cache_dir",
+            AppPaths::AppConfig => "app_config_dir",
+            AppPaths::AppData => "app_data_dir",
+            AppPaths::AppLocalData => "app_local_data_dir",
+            AppPaths::AppLog => "app_log_dir",
 
-            AppPaths::UniChatWidgetsDir => "unichat_widgets_dir"
+            AppPaths::UniChatWidgets => "unichat_widgets_dir"
         };
 
         return write!(f, "{}", s);
@@ -65,12 +65,12 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     let widgets_path = app_data_dir.join("widgets").to_string_lossy().to_string();
 
     let mut properties = HashMap::new();
-    properties.insert(AppPaths::AppCacheDir.to_string(), app_cache_path);
-    properties.insert(AppPaths::AppConfigDir.to_string(), app_config_path);
-    properties.insert(AppPaths::AppDataDir.to_string(), app_data_path);
-    properties.insert(AppPaths::AppLocalDataDir.to_string(), app_local_data_path);
-    properties.insert(AppPaths::AppLogDir.to_string(), app_log_path);
-    properties.insert(AppPaths::UniChatWidgetsDir.to_string(), widgets_path);
+    properties.insert(AppPaths::AppCache.to_string(), app_cache_path);
+    properties.insert(AppPaths::AppConfig.to_string(), app_config_path);
+    properties.insert(AppPaths::AppData.to_string(), app_data_path);
+    properties.insert(AppPaths::AppLocalData.to_string(), app_local_data_path);
+    properties.insert(AppPaths::AppLog.to_string(), app_log_path);
+    properties.insert(AppPaths::UniChatWidgets.to_string(), widgets_path);
 
     let result = PROPERTIES.set(RwLock::new(properties));
     if result.is_err() {

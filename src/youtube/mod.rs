@@ -82,7 +82,7 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     use crate::utils::properties;
     use crate::utils::properties::AppPaths;
 
-    let app_log_dir = properties::get_app_path(AppPaths::AppLogDir);
+    let app_log_dir = properties::get_app_path(AppPaths::AppLog);
     let youtube_log_dir = app_log_dir.join("youtube");
     if !youtube_log_dir.exists() {
         fs::create_dir_all(&youtube_log_dir).unwrap();

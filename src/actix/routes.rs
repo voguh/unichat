@@ -22,7 +22,7 @@ static WIDGET_TEMPLATE: &str = include_str!("./static/index.html.template");
 
 #[get("/widget/{name}")]
 pub async fn widget(info: web::Path<WidgetsPathParams>) -> impl Responder {
-    let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgetsDir);
+    let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgets);
     let widget = widgets_dir.join(&info.name);
     if !widget.exists() || !widget.is_dir() {
         return HttpResponse::build(StatusCode::NOT_FOUND)

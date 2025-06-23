@@ -101,7 +101,7 @@ pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &st
 
 #[tauri::command]
 pub async fn list_widgets<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
-    let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgetsDir);
+    let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgets);
     if widgets_dir.is_dir() {
         let mut folders: Vec<String> = Vec::new();
 
@@ -125,7 +125,7 @@ pub async fn list_widgets<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<S
 
 #[tauri::command]
 pub async fn open_widgets_dir<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<(), String> {
-    let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgetsDir);
+    let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgets);
     showfile::show_path_in_file_manager(widgets_dir);
 
     return Ok(());

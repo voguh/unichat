@@ -72,7 +72,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
 
     defaults.insert(SettingsKeys::LogYoutubeEvents.to_string(), serde_json::to_value(YouTubeSettingLogLevel::OnlyErrors).unwrap());
 
-    let store_path = properties::get_app_path(AppPaths::AppConfigDir).join("settings.json");
+    let store_path = properties::get_app_path(AppPaths::AppConfig).join("settings.json");
 
     let result = INSTANCE.set(StoreBuilder::new(app, store_path).defaults(defaults).build().unwrap());
     if result.is_err() {
