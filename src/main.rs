@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #![warn(clippy::implicit_return)]
 #![allow(clippy::needless_return)]
+#![allow(clippy::redundant_field_names)]
 
 use std::fs;
 use std::path::PathBuf;
