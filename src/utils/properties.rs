@@ -65,12 +65,12 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     let widgets_path = app_data_dir.join("widgets").to_string_lossy().to_string();
 
     let mut properties = HashMap::new();
-    properties.insert(AppPaths::AppCacheDir.to_string(), app_cache_path.to_string());
-    properties.insert(AppPaths::AppConfigDir.to_string(), app_config_path.to_string());
-    properties.insert(AppPaths::AppDataDir.to_string(), app_data_path.to_string());
-    properties.insert(AppPaths::AppLocalDataDir.to_string(), app_local_data_path.to_string());
-    properties.insert(AppPaths::AppLogDir.to_string(), app_log_path.to_string());
-    properties.insert(AppPaths::UniChatWidgetsDir.to_string(), widgets_path.to_string());
+    properties.insert(AppPaths::AppCacheDir.to_string(), app_cache_path);
+    properties.insert(AppPaths::AppConfigDir.to_string(), app_config_path);
+    properties.insert(AppPaths::AppDataDir.to_string(), app_data_path);
+    properties.insert(AppPaths::AppLocalDataDir.to_string(), app_local_data_path);
+    properties.insert(AppPaths::AppLogDir.to_string(), app_log_path);
+    properties.insert(AppPaths::UniChatWidgetsDir.to_string(), widgets_path);
 
     let result = PROPERTIES.set(RwLock::new(properties));
     if result.is_err() {
