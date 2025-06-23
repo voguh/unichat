@@ -2,6 +2,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::events::unichat::UniChatEvent;
+use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatSponsorEventPayload;
 use crate::events::unichat::UNICHAT_EVENT_SPONSOR_TYPE;
 use crate::utils::parse_serde_error;
@@ -111,7 +112,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
         data: UniChatSponsorEventPayload {
             channel_id: None,
             channel_name: None,
-            platform: String::from("youtube"),
+            platform: UniChatPlatform::YouTube,
 
             author_id: parsed.author_external_channel_id,
             author_username: None,
@@ -123,7 +124,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
 
             tier: tier,
             months: months,
-            message: message
+            message_text: message
         }
     };
 

@@ -4,6 +4,7 @@ use serde::Serialize;
 use crate::events::unichat::UniChatDonateEventPayload;
 use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
+use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UNICHAT_EVENT_DONATE_TYPE;
 use crate::utils::parse_serde_error;
 use crate::youtube::mapper::structs::author::parse_author_badges;
@@ -96,7 +97,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
         data: UniChatDonateEventPayload {
             channel_id: None,
             channel_name: None,
-            platform: String::from("youtube"),
+            platform: UniChatPlatform::YouTube,
 
             author_id: parsed.author_external_channel_id,
             author_username: None,
@@ -110,7 +111,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             currency: purchase_currency,
 
             message_id: parsed.id,
-            message: message,
+            message_text: message,
             emotes: emotes
         }
     };

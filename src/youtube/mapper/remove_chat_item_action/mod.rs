@@ -2,6 +2,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::events::unichat::UniChatEvent;
+use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRemoveMessageEventPayload;
 use crate::events::unichat::UNICHAT_EVENT_REMOVE_MESSAGE_TYPE;
 use crate::utils::parse_serde_error;
@@ -20,7 +21,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
         data: UniChatRemoveMessageEventPayload {
             channel_id: None,
             channel_name: None,
-            platform: String::from("youtube"),
+            platform: UniChatPlatform::YouTube,
 
             message_id: parsed.target_item_id.clone()
         }

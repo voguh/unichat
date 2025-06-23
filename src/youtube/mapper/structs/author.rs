@@ -1,6 +1,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatBadge;
 use crate::youtube::mapper::structs::ThumbnailsWrapper;
 
@@ -122,18 +123,18 @@ fn expect_badge_type(badges: &Vec<AuthorBadgeWrapper>, badge_type: &str) -> bool
     ));
 }
 
-pub fn parse_author_type(badges: &Option<Vec<AuthorBadgeWrapper>>) -> Result<String, Box<dyn std::error::Error>> {
-    let mut author_type = "VIEWER";
+pub fn parse_author_type(badges: &Option<Vec<AuthorBadgeWrapper>>) -> Result<UniChatAuthorType, Box<dyn std::error::Error>> {
+    let mut author_type = UniChatAuthorType::Viewer;
 
     if let Some(badges) = badges {
         if expect_badge_type(badges, "OWNER") {
-            author_type = "BROADCASTER"
+            author_type = UniChatAuthorType::Broadcaster;
         } else if expect_badge_type(badges, "MODERATOR") {
-            author_type = "MODERATOR"
+            author_type = UniChatAuthorType::Moderator;
         } else if expect_badge_type(badges, "MEMBER") {
-            author_type = "SPONSOR"
+            author_type = UniChatAuthorType::Sponsor;
         }
     }
 
-    return Ok(String::from(author_type));
+    return Ok(author_type);
 }

@@ -42,6 +42,22 @@ pub enum UniChatEvent {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum UniChatPlatform {
+    YouTube,
+    Twitch
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum UniChatAuthorType {
+    Viewer,
+    Sponsor,
+    Moderator,
+    Broadcaster
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatEmote {
     pub id: String,
@@ -69,7 +85,7 @@ pub const UNICHAT_EVENT_MESSAGE_TYPE: &str = "unichat:message";
 pub struct UniChatMessageEventPayload {
     pub channel_id: Option<String>,
     pub channel_name: Option<String>,
-    pub platform: String,
+    pub platform: UniChatPlatform,
 
     pub author_id: String,
     pub author_username: Option<String>,
@@ -77,7 +93,7 @@ pub struct UniChatMessageEventPayload {
     pub author_display_color: String,
     pub author_profile_picture_url: String,
     pub author_badges: Vec<UniChatBadge>,
-    pub author_type: String,
+    pub author_type: UniChatAuthorType,
 
     pub message_id: String,
     pub message_text: String,
@@ -94,7 +110,7 @@ pub const UNICHAT_EVENT_REMOVE_MESSAGE_TYPE: &str = "unichat:remove_message";
 pub struct UniChatRemoveMessageEventPayload {
     pub channel_id: Option<String>,
     pub channel_name: Option<String>,
-    pub platform: String,
+    pub platform: UniChatPlatform,
 
     pub message_id: String
 }
@@ -108,7 +124,7 @@ pub const UNICHAT_EVENT_REMOVE_AUTHOR_TYPE: &str = "unichat:remove_author";
 pub struct UniChatRemoveAuthorEventPayload {
     pub channel_id: Option<String>,
     pub channel_name: Option<String>,
-    pub platform: String,
+    pub platform: UniChatPlatform,
 
     pub author_id: String
 }
@@ -122,7 +138,7 @@ pub const UNICHAT_EVENT_RAID_TYPE: &str = "unichat:raid";
 pub struct UniChatRaidEventPayload {
     pub channel_id: Option<String>,
     pub channel_name: Option<String>,
-    pub platform: String,
+    pub platform: UniChatPlatform,
 
     pub author_id: Option<String>,
     pub author_username: Option<String>,
@@ -141,7 +157,7 @@ pub const UNICHAT_EVENT_SPONSOR_TYPE: &str = "unichat:sponsor";
 pub struct UniChatSponsorEventPayload {
     pub channel_id: Option<String>,
     pub channel_name: Option<String>,
-    pub platform: String,
+    pub platform: UniChatPlatform,
 
     pub author_id: String,
     pub author_username: Option<String>,
@@ -149,11 +165,11 @@ pub struct UniChatSponsorEventPayload {
     pub author_display_color: String,
     pub author_profile_picture_url: String,
     pub author_badges: Vec<UniChatBadge>,
-    pub author_type: String,
+    pub author_type: UniChatAuthorType,
 
     pub tier: String,
     pub months: u16,
-    pub message: Option<String>
+    pub message_text: Option<String>
 }
 
 /* <============================================================================================> */
@@ -165,7 +181,7 @@ pub const UNICHAT_EVENT_SPONSOR_GIFT_TYPE: &str = "unichat:sponsor_gift";
 pub struct UniChatSponsorGiftEventPayload {
     pub channel_id: Option<String>,
     pub channel_name: Option<String>,
-    pub platform: String,
+    pub platform: UniChatPlatform,
 
     pub author_id: String,
     pub author_username: Option<String>,
@@ -173,7 +189,7 @@ pub struct UniChatSponsorGiftEventPayload {
     pub author_display_color: String,
     pub author_profile_picture_url: String,
     pub author_badges: Vec<UniChatBadge>,
-    pub author_type: String,
+    pub author_type: UniChatAuthorType,
 
     pub tier: String,
     pub count: u16
@@ -188,7 +204,7 @@ pub const UNICHAT_EVENT_DONATE_TYPE: &str = "unichat:donate";
 pub struct UniChatDonateEventPayload {
     pub channel_id: Option<String>,
     pub channel_name: Option<String>,
-    pub platform: String,
+    pub platform: UniChatPlatform,
 
     pub author_id: String,
     pub author_username: Option<String>,
@@ -196,12 +212,12 @@ pub struct UniChatDonateEventPayload {
     pub author_display_color: String,
     pub author_profile_picture_url: String,
     pub author_badges: Vec<UniChatBadge>,
-    pub author_type: String,
+    pub author_type: UniChatAuthorType,
 
     pub value: f32,
     pub currency: String,
 
     pub message_id: String,
-    pub message: Option<String>,
+    pub message_text: Option<String>,
     pub emotes: Option<Vec<UniChatEmote>>,
 }

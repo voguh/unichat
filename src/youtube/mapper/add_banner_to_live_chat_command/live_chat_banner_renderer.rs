@@ -2,6 +2,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::events::unichat::UniChatEvent;
+use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRaidEventPayload;
 use crate::events::unichat::UNICHAT_EVENT_RAID_TYPE;
 use crate::utils::parse_serde_error;
@@ -60,7 +61,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
                     data: UniChatRaidEventPayload {
                         channel_id: None,
                         channel_name: None,
-                        platform: String::from("youtube"),
+                        platform: UniChatPlatform::YouTube,
 
                         author_id: None,
                         author_username: None,
