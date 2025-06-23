@@ -105,7 +105,7 @@ fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, pa
             log_action("events-raw.log", &action);
         }
 
-        match mapper::parse(&action) {
+        match mapper::parse(action) {
             Ok(Some(parsed)) => {
                 if is_dev() || log_events == YouTubeSettingLogLevel::AllEvents {
                     log_action("events-parsed.log", &serde_json::to_string(&parsed).unwrap());
