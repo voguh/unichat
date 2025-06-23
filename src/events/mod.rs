@@ -23,9 +23,9 @@ impl EventEmitter {
         return self.tx.subscribe();
     }
 
-    pub fn emit(&self, event: UniChatEvent) -> Result<(), Error> {
+    pub fn emit(&self, event: UniChatEvent) -> Result<(), Box<dyn std::error::Error>> {
         if let Err(err) = self.tx.send(event.clone()) {
-            return Err(Error::new(ErrorKind::Other, format!("Failed to send event: {}", err)));
+            return Err(Box::new(err));
         }
 
         return Ok(());
