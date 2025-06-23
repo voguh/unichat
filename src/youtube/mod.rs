@@ -97,9 +97,8 @@ fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, pa
     let actions = payload.get("actions").and_then(|v| v.as_array())
         .ok_or(format!("Missing or invalid 'actions' field in '{event_type}' event payload"))?;
 
-    let log_events = settings::get_item(SettingsKeys::LogYoutubeEvents)
-        .map_or(Ok(YouTubeSettingLogLevel::OnlyErrors), |v| serde_json::from_value(v))
-        .map_err(|e| format!("Failed to parse log level: {}", e))?;
+    let log_events = settings::get_item(SettingsKeys::LogYoutubeEvents)?;
+    let log_events: YouTubeSettingLogLevel = serde_json::from_value(log_events).map_err(|e| format!("{:?}", e))?;
 
     for action in actions {
         if is_dev() || log_events == YouTubeSettingLogLevel::AllEvents{
