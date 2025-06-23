@@ -149,13 +149,17 @@ fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: tauri::Event) -> Resul
     };
 }
 
-pub fn init(app: &mut tauri::App<tauri::Wry>) {
+pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
     let app_handle = app.handle().clone();
 
-    let window = app.get_webview_window(YOUTUBE_CHAT_WINDOW).expect("YouTube chat window not found");
+    let window = app.get_webview_window(YOUTUBE_CHAT_WINDOW)
+        .ok_or("YouTube chat window not found")?;
+
     window.listen(YOUTUBE_RAW_EVENT, move |event| {
         if let Err(err) = handle_event(app_handle.clone(), event) {
             log::error!("Failed to handle YouTube raw event: {}", err);
         }
     });
+
+    return Ok(());
 }

@@ -50,26 +50,34 @@ impl fmt::Display for AppPaths {
 
 static PROPERTIES: OnceLock<RwLock<HashMap<String, String>>> = OnceLock::new();
 
-pub fn init(app: &mut tauri::App<tauri::Wry>) {
-    let app_cache_dir = app.path().app_cache_dir().unwrap().to_string_lossy().to_string();
-    let app_config_dir = app.path().app_config_dir().unwrap().to_string_lossy().to_string();
-    let app_data_dir = app.path().app_data_dir().unwrap().to_string_lossy().to_string();
-    let app_local_data_dir = app.path().app_local_data_dir().unwrap().to_string_lossy().to_string();
-    let app_log_dir = app.path().app_log_dir().unwrap().to_string_lossy().to_string();
-    let widgets_dir = PathBuf::from(&app_data_dir).join("widgets").to_string_lossy().to_string();
+pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
+    let app_cache_dir = app.path().app_cache_dir()?;
+    let app_config_dir = app.path().app_config_dir()?;
+    let app_data_dir = app.path().app_data_dir()?;
+    let app_local_data_dir = app.path().app_local_data_dir()?;
+    let app_log_dir = app.path().app_log_dir()?;
 
-    PROPERTIES.get_or_init(move || {
-        let mut properties = HashMap::new();
+    let app_cache_path = app_cache_dir.to_string_lossy().to_string();
+    let app_config_path = app_config_dir.to_string_lossy().to_string();
+    let app_data_path = app_data_dir.to_string_lossy().to_string();
+    let app_local_data_path = app_local_data_dir.to_string_lossy().to_string();
+    let app_log_path = app_log_dir.to_string_lossy().to_string();
+    let widgets_path = app_data_dir.join("widgets").to_string_lossy().to_string();
 
-        properties.insert(AppPaths::AppCacheDir.to_string(), app_cache_dir);
-        properties.insert(AppPaths::AppConfigDir.to_string(), app_config_dir);
-        properties.insert(AppPaths::AppDataDir.to_string(), app_data_dir);
-        properties.insert(AppPaths::AppLocalDataDir.to_string(), app_local_data_dir);
-        properties.insert(AppPaths::AppLogDir.to_string(), app_log_dir);
-        properties.insert(AppPaths::UniChatWidgetsDir.to_string(), widgets_dir);
+    let mut properties = HashMap::new();
+    properties.insert(AppPaths::AppCacheDir.to_string(), app_cache_path.to_string());
+    properties.insert(AppPaths::AppConfigDir.to_string(), app_config_path.to_string());
+    properties.insert(AppPaths::AppDataDir.to_string(), app_data_path.to_string());
+    properties.insert(AppPaths::AppLocalDataDir.to_string(), app_local_data_path.to_string());
+    properties.insert(AppPaths::AppLogDir.to_string(), app_log_path.to_string());
+    properties.insert(AppPaths::UniChatWidgetsDir.to_string(), widgets_path.to_string());
 
-        return RwLock::new(properties);
-    });
+    let result = PROPERTIES.set(RwLock::new(properties));
+    if result.is_err() {
+        return Err("Failed to initialize properties".into());
+    }
+
+    return Ok(());
 }
 
 fn get_item_raw(key: String) -> Result<String, String> {

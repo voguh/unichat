@@ -34,8 +34,13 @@ impl EventEmitter {
 
 static INSTANCE: OnceLock<EventEmitter> = OnceLock::new();
 
-pub fn init(_app: &mut tauri::App<tauri::Wry>) {
-    INSTANCE.get_or_init(|| EventEmitter::new());
+pub fn init(_app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
+    let result = INSTANCE.set(EventEmitter::new());
+    if result.is_err() {
+        return Err("Failed to initialize event emitter".into());
+    }
+
+    return Ok(());
 }
 
 pub fn event_emitter() -> &'static EventEmitter {

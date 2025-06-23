@@ -64,7 +64,8 @@ settings_keys! {
 }
 
 static INSTANCE: OnceLock<Arc<Store<tauri::Wry>>> = OnceLock::new();
-pub fn init(app: &mut tauri::App<tauri::Wry>) {
+
+pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
     let mut defaults = HashMap::new();
     defaults.insert(SettingsKeys::YouTubeChatUrl.to_string(), Value::from("about:blank"));
     defaults.insert(SettingsKeys::TwitchChannelName.to_string(), Value::from(""));
@@ -72,7 +73,13 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) {
     defaults.insert(SettingsKeys::LogYoutubeEvents.to_string(), serde_json::to_value(YouTubeSettingLogLevel::OnlyErrors).unwrap());
 
     let store_path = properties::get_app_path(AppPaths::AppConfigDir).join("settings.json");
-    INSTANCE.get_or_init(|| StoreBuilder::new(app, store_path).defaults(defaults).build().unwrap());
+
+    let result = INSTANCE.set(StoreBuilder::new(app, store_path).defaults(defaults).build().unwrap());
+    if result.is_err() {
+        return Err("Failed to initialize settings store".into());
+    }
+
+    return Ok(());
 }
 
 pub fn get_item(key: SettingsKeys) -> Result<Value, String> {

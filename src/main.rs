@@ -17,16 +17,16 @@ mod utils;
 mod youtube;
 
 fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
-    events::init(app);
-    utils::properties::init(app);
-    utils::settings::init(app);
-    youtube::init(app);
+    events::init(app)?;
+    utils::properties::init(app)?;
+    utils::settings::init(app)?;
+    youtube::init(app)?;
 
     /* ========================================================================================== */
 
     let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgetsDir);
     if !&widgets_dir.exists() {
-        fs::create_dir_all(&widgets_dir).unwrap();
+        fs::create_dir_all(&widgets_dir)?;
     }
 
     /* ========================================================================================== */
