@@ -29,7 +29,7 @@ then just run `pnpm build`.
 Following an example using ubuntu 24.04 docker image (catthehacker/ubuntu).
 
 ```bash
-docker run --workdir="/home/ubuntu/unichat" --volume=".:/home/ubuntu/unichat" --env="DEBIAN_FRONTEND=noninteractive" --rm -it ghcr.io/catthehacker/ubuntu:act-24.04 bash
+docker run --volume=".:/home/ubuntu/unichat" --env="DEBIAN_FRONTEND=noninteractive" --rm -it ghcr.io/catthehacker/ubuntu:act-24.04 bash
 
 ### Remove ubuntu user password
 passwd -d ubuntu
