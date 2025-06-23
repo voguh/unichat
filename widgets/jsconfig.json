@@ -1,5 +1,5 @@
 {
-    "include": ["./**/*.js", "../webapp/src/types/unichat.d.ts"],
+    "include": ["./**/*.js", "./unichat.d.ts"],
     "typeAcquisition": {
         "enable": true,
         "include": ["jquery"]

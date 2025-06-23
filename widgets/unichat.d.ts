@@ -1,3 +1,6 @@
+export type UniChatPlatform = "youtube" | "twitch";
+export type UniChatAuthorType = "VIEWER" | "SPONSOR" | "MODERATOR" | "BROADCASTER";
+
 export interface UniChatEmote {
     type: string;
     tooltip: string;
@@ -15,14 +18,14 @@ export interface UniChatEventMessage {
     data: {
         channelId: string | null;
         channelName: string | null;
-        platform: "youtube" | "twitch";
+        platform: UniChatPlatform;
 
         authorId: string;
-        authorUserName: string | null;
+        authorUsername: string | null;
         authorDisplayName: string;
         authorProfilePictureUrl: string;
         authorBadges: UniChatBadge[];
-        authorType: "VIEWER" | "SPONSOR" | "MODERATOR" | "BROADCASTER";
+        authorType: UniChatAuthorType;
 
         messageId: string;
         messageText: string;
@@ -35,7 +38,7 @@ export interface UniChatEventRemoveMessage {
     data: {
         channelId: string | null;
         channelName: string | null;
-        platform: "youtube" | "twitch";
+        platform: UniChatPlatform;
 
         messageId: string;
     };
@@ -46,7 +49,7 @@ export interface UniChatEventRemoveAuthor {
     data: {
         channelId: string | null;
         channelName: string | null;
-        platform: "youtube" | "twitch";
+        platform: UniChatPlatform;
 
         authorId: string;
     };
@@ -57,10 +60,10 @@ export interface UniChatEventRaid {
     data: {
         channelId: string | null;
         channelName: string | null;
-        platform: "youtube" | "twitch";
+        platform: UniChatPlatform;
 
         authorId: string;
-        authorUserName: string | null;
+        authorUsername: string | null;
         authorDisplayName: string;
         authorProfilePictureUrl: string;
 
@@ -73,16 +76,18 @@ export interface UniChatEventSponsor {
     data: {
         channelId: string | null;
         channelName: string | null;
-        platform: "youtube" | "twitch";
+        platform: UniChatPlatform;
 
         authorId: string;
-        authorUserName: string | null;
+        authorUsername: string | null;
         authorDisplayName: string;
         authorProfilePictureUrl: string;
+        authorBadges: UniChatBadge[];
+        authorType: UniChatAuthorType;
 
         tier: string;
         months: number;
-        message: string | null;
+        messageText: string | null;
     };
 }
 
@@ -91,12 +96,14 @@ export interface UniChatSponsorGiftEvent {
     data: {
         channelId: string | null;
         channelName: string | null;
-        platform: "youtube" | "twitch";
+        platform: UniChatPlatform;
 
         authorId: string;
-        authorUserName: string | null;
+        authorUsername: string | null;
         authorDisplayName: string;
         authorProfilePictureUrl: string;
+        authorBadges: UniChatBadge[];
+        authorType: UniChatAuthorType;
 
         tier: string;
         count: number;
@@ -108,14 +115,14 @@ export interface UniChatDonateEvent {
     data: {
         channelId: string | null;
         channelName: string | null;
-        platform: "youtube" | "twitch";
+        platform: UniChatPlatform;
 
         authorId: string;
-        authorUserName: string | null;
+        authorUsername: string | null;
         authorDisplayName: string;
         authorProfilePictureUrl: string;
         authorBadges: UniChatBadge[];
-        authorType: "VIEWER" | "SPONSOR" | "MODERATOR" | "BROADCASTER";
+        authorType: UniChatAuthorType;
 
         value: number;
         currency: string;
