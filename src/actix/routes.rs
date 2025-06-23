@@ -30,9 +30,9 @@ pub async fn widget(info: web::Path<WidgetsPathParams>) -> impl Responder {
             .body(format!("Widget '{}' not found", info.name));
     }
 
-    let css = fs::read_to_string(widget.join("style.css")).unwrap_or(String::new());
-    let js = fs::read_to_string(widget.join("script.js")).unwrap_or(String::new());
-    let html = fs::read_to_string(widget.join("main.html")).unwrap_or(String::new());
+    let css = fs::read_to_string(widget.join("style.css")).unwrap_or_default();
+    let js = fs::read_to_string(widget.join("script.js")).unwrap_or_default();
+    let html = fs::read_to_string(widget.join("main.html")).unwrap_or_default();
 
     let content = WIDGET_TEMPLATE
         .replace("{{WIDGET_STYLE}}", &css)
