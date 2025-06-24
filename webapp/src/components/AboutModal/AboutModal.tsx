@@ -37,7 +37,7 @@ export function AboutModal(_props: Props): React.ReactNode {
             <div className="app-name">{metadata.displayName}</div>
             <div className="app-version">{metadata.version}</div>
             <div className="app-homepage">
-                <span onClick={() => openUrl(metadata.homepage)}>Homepage</span>
+                <span onClick={() => openUrl(metadata.homepage)}>Website</span>
             </div>
             <div className="app-description">
                 This program comes with absolutely no warranty.
@@ -55,19 +55,16 @@ export function AboutModal(_props: Props): React.ReactNode {
             </div>
             <div className={clsx("app-credits", { isCreditsOpen })}>
                 <div className="credits-data">
-                    <span>Developed by</span>
-                    <ul>
-                        {metadata.authors.split(";").map((author, index) => {
-                            let [name, email] = author.split("<");
-                            email = email ? email.replace(">", "").trim() : "";
+                    <div>
+                        <div className="label">Developed by</div>
+                        <div className="values">
+                            {metadata.authors.split(";").map((author, index) => {
+                                const [name, _email] = author.split("<");
 
-                            return (
-                                <li key={index}>
-                                    <span onClick={() => openUrl(`mailto:${email}`)}>{name.trim()}</span>
-                                </li>
-                            );
-                        })}
-                    </ul>
+                                return <p key={index}>{name.trim()}</p>;
+                            })}
+                        </div>
+                    </div>
                 </div>
                 <div className="credits-footer">
                     <Button variant="default" onClick={() => setIsCreditsOpen(false)}>

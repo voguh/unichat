@@ -51,10 +51,16 @@ export const AboutModalStyledContainer = styled.div`
 
     > .app-credits {
         position: absolute;
-        inset: 0;
+        bottom: 0;
+        left: 0;
+        height: 50%;
+        width: 100%;
         background: var(--mantine-color-body);
         transform: translateY(100%);
         transition: transform 200ms ease;
+        border: 1px solid var(--mantine-color-default-border);
+        border-radius: var(--mantine-radius-xs);
+        padding: 16px;
 
         &.isCreditsOpen {
             transform: translateY(0);
@@ -62,16 +68,27 @@ export const AboutModalStyledContainer = styled.div`
 
         > .credits-data {
             height: calc(100% - (36px + 32px));
+            font-size: 12px;
 
-            > span {
-            }
+            > div {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-template-areas: "LT RT";
+                gap: 8px;
 
-            > ul {
-                > li {
-                    > span {
-                        text-decoration: underline;
-                        cursor: pointer;
-                        color: var(--mantine-color-anchor);
+                > div.label {
+                    grid-area: LT;
+                    text-align: right;
+                    font-weight: bold;
+                }
+
+                > div.values {
+                    grid-area: RT;
+                    text-align: left;
+                    color: var(--mantine-color-dimmed);
+
+                    > p {
+                        margin: 0;
                     }
                 }
             }
