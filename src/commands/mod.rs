@@ -32,7 +32,8 @@ pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
         "homepage": CARGO_PKG_HOMEPAGE,
         "icon": fs::read(properties::get_app_path(AppPaths::UniChatLogoIcon)).map_err(|e| format!("{:?}", e))?,
         "license": CARGO_PKG_LICENSE,
-        "licenseFile": properties::get_app_path(AppPaths::UniChatLicense).to_string_lossy().to_string()
+        "licenseFile": properties::get_app_path(AppPaths::UniChatLicense).to_string_lossy().to_string(),
+        "widgetsDir": properties::get_app_path(AppPaths::UniChatWidgets).to_string_lossy().to_string(),
     });
 
     return Ok(metadata);
