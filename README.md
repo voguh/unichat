@@ -132,4 +132,4 @@ run it with `GDK_BACKEND="x11" pnpm dev`.
 
 ## License
 
-This project is under [GNU LESSER GENERAL PUBLIC LICENSE, Version 3](./LICENSE).
+This project is under [GNU LESSER GENERAL PUBLIC LICENSE, Version 3](./LICENSE), except example widgets under `widgets/default` folder, that are under MIT license.
