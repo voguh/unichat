@@ -13,6 +13,8 @@ use tauri::Manager;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
+include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
+
 mod actix;
 mod commands;
 mod events;
@@ -100,7 +102,9 @@ fn main() {
     tauri::Builder::default().setup(setup)
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_log::Builder::new().level(log_level).build())
+        .plugin(tauri_plugin_opener::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
+            commands::get_app_info,
             commands::store_get_item,
             commands::store_set_item,
             commands::settings_list_all,

@@ -1,6 +1,8 @@
+use std::fs;
 use std::str::FromStr;
 use std::thread::sleep;
 
+use serde_json::json;
 use serde_json::Value;
 use tauri::Manager;
 use tauri::Runtime;
@@ -12,6 +14,31 @@ use crate::utils::properties::AppPaths;
 use crate::utils::settings;
 use crate::utils::settings::SettingsKeys;
 use crate::youtube;
+use crate::CARGO_PKG_AUTHORS;
+use crate::CARGO_PKG_DESCRIPTION;
+use crate::CARGO_PKG_HOMEPAGE;
+use crate::CARGO_PKG_LICENSE;
+use crate::CARGO_PKG_NAME;
+use crate::CARGO_PKG_VERSION;
+
+#[tauri::command]
+pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value, String> {
+    let metadata = json!({
+        "displayName": "UniChat",
+        "identifier": CARGO_PKG_NAME,
+        "version": CARGO_PKG_VERSION,
+        "description": CARGO_PKG_DESCRIPTION,
+        "authors": CARGO_PKG_AUTHORS,
+        "homepage": CARGO_PKG_HOMEPAGE,
+        "icon": fs::read(properties::get_app_path(AppPaths::UniChatLogoIcon)).map_err(|e| format!("{:?}", e))?,
+        "license": CARGO_PKG_LICENSE,
+        "licenseFile": properties::get_app_path(AppPaths::UniChatLicense).to_string_lossy().to_string()
+    });
+
+    return Ok(metadata);
+}
+
+/* ================================================================================================================== */
 
 #[tauri::command]
 pub async fn store_get_item<R: tauri::Runtime>(_app: tauri::AppHandle<R>, key: &str) -> Result<Value, String> {
