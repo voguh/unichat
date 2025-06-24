@@ -35,6 +35,7 @@ fn get_license_info(license: &str) -> Result<(String, String), Box<dyn std::erro
 fn generate_resources(root_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     let target_gen_dir = root_dir.join("target").join("gen");
 
+    let display_name = "UniChat";
     let name = env!("CARGO_PKG_NAME");
     let version = env!("CARGO_PKG_VERSION");
     let description = env!("CARGO_PKG_DESCRIPTION");
@@ -48,6 +49,7 @@ fn generate_resources(root_dir: &PathBuf) -> Result<(), Box<dyn std::error::Erro
     }
 
     let metadata = format!(r#"
+        pub const CARGO_PKG_DISPLAY_NAME: &'static str = "{display_name}";
         pub const CARGO_PKG_NAME: &'static str = "{name}";
         pub const CARGO_PKG_VERSION: &'static str = "{version}";
         pub const CARGO_PKG_DESCRIPTION: &'static str = "{description}";

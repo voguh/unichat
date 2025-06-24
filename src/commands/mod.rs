@@ -32,6 +32,7 @@ use crate::utils::settings::SettingsKeys;
 use crate::youtube;
 use crate::CARGO_PKG_AUTHORS;
 use crate::CARGO_PKG_DESCRIPTION;
+use crate::CARGO_PKG_DISPLAY_NAME;
 use crate::CARGO_PKG_HOMEPAGE;
 use crate::CARGO_PKG_LICENSE_CODE;
 use crate::CARGO_PKG_LICENSE_NAME;
@@ -43,7 +44,7 @@ use crate::STATIC_APP_ICON;
 #[tauri::command]
 pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value, String> {
     let metadata = json!({
-        "displayName": "UniChat",
+        "displayName": CARGO_PKG_DISPLAY_NAME,
         "identifier": CARGO_PKG_NAME,
         "version": CARGO_PKG_VERSION,
         "description": CARGO_PKG_DESCRIPTION,

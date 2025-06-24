@@ -135,5 +135,5 @@ fn main() {
         ])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())
-        .expect("Error while running UniChat application");
+        .expect(format!("Failed to run {} v{}!", CARGO_PKG_DISPLAY_NAME, CARGO_PKG_VERSION).as_str());
 }
