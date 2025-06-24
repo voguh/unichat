@@ -136,4 +136,4 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ github.token }}
           base-folder: dist
-          prefix: unichat-${{ steps.setup-version.outputs.revision }}
+          prefix: unichat-${{ steps.setup_version.outputs.revision }}
