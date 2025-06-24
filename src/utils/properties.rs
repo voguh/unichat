@@ -61,7 +61,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     let app_data_dir = app.path().app_data_dir()?;
     let app_local_data_dir = app.path().app_local_data_dir()?;
     let app_log_dir = app.path().app_log_dir()?;
-    let widgets_dir = app.path().resolve("widgets", BaseDirectory::Resource)?;
+    let widgets_dir = app.path().resolve("widgets", BaseDirectory::AppData)?;
     let logo_icon_file = app.path().resolve("icons/icon.png", BaseDirectory::Resource)?;
     let license_file = app.path().resolve("LICENSE", BaseDirectory::Resource)?;
 
