@@ -15,8 +15,22 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
+
+// I will not implement any api to get license information.
+// This is a "safe guard" to remember me to change license info if I change the license.
+fn get_license_info(license: &str) -> Result<(String, String), Box<dyn std::error::Error>> {
+    let mut licenses: HashMap<&str, (&str, &str)> = HashMap::new();
+    licenses.insert("LGPL-3.0-only", ("GNU Lesser General Public License, Version 3", "https://www.gnu.org/licenses/lgpl-3.0.html"));
+
+    if let Some((name, url)) = licenses.get(license) {
+        return Ok((name.to_string(), url.to_string()));
+    } else {
+        return Err(format!("Unknown license: {}", license).into());
+    }
+}
 
 fn generate_resources(root_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     let target_gen_dir = root_dir.join("target").join("gen");
@@ -26,7 +40,8 @@ fn generate_resources(root_dir: &PathBuf) -> Result<(), Box<dyn std::error::Erro
     let description = env!("CARGO_PKG_DESCRIPTION");
     let authors = env!("CARGO_PKG_AUTHORS");
     let homepage = env!("CARGO_PKG_HOMEPAGE");
-    let license = env!("CARGO_PKG_LICENSE");
+    let license_code = env!("CARGO_PKG_LICENSE");
+    let (license_name, license_url) = get_license_info(&license_code)?;
 
     if !target_gen_dir.exists() {
         fs::create_dir_all(&target_gen_dir)?;
@@ -38,7 +53,9 @@ fn generate_resources(root_dir: &PathBuf) -> Result<(), Box<dyn std::error::Erro
         pub const CARGO_PKG_DESCRIPTION: &'static str = "{description}";
         pub const CARGO_PKG_AUTHORS: &'static str = "{authors}";
         pub const CARGO_PKG_HOMEPAGE: &'static str = "{homepage}";
-        pub const CARGO_PKG_LICENSE: &'static str = "{license}";
+        pub const CARGO_PKG_LICENSE_CODE: &'static str = "{license_code}";
+        pub const CARGO_PKG_LICENSE_NAME: &'static str = "{license_name}";
+        pub const CARGO_PKG_LICENSE_URL: &'static str = "{license_url}";
     "#);
 
     let metadata_file_path = target_gen_dir.join("metadata.rs");

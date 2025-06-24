@@ -11,7 +11,9 @@ export interface AppMetadata {
     authors: string;
     homepage: string;
     icon: number[];
-    license: string;
+    licenseCode: string;
+    licenseName: string;
+    licenseUrl: string;
     licenseFile: string;
 
     widgetsDir: string;

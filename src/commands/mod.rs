@@ -17,7 +17,9 @@ use crate::youtube;
 use crate::CARGO_PKG_AUTHORS;
 use crate::CARGO_PKG_DESCRIPTION;
 use crate::CARGO_PKG_HOMEPAGE;
-use crate::CARGO_PKG_LICENSE;
+use crate::CARGO_PKG_LICENSE_CODE;
+use crate::CARGO_PKG_LICENSE_NAME;
+use crate::CARGO_PKG_LICENSE_URL;
 use crate::CARGO_PKG_NAME;
 use crate::CARGO_PKG_VERSION;
 
@@ -31,7 +33,9 @@ pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
         "authors": CARGO_PKG_AUTHORS,
         "homepage": CARGO_PKG_HOMEPAGE,
         "icon": fs::read(properties::get_app_path(AppPaths::UniChatLogoIcon)).map_err(|e| format!("{:?}", e))?,
-        "license": CARGO_PKG_LICENSE,
+        "licenseCode": CARGO_PKG_LICENSE_CODE,
+        "licenseName": CARGO_PKG_LICENSE_NAME,
+        "licenseUrl": CARGO_PKG_LICENSE_URL,
         "licenseFile": properties::get_app_path(AppPaths::UniChatLicense).to_string_lossy().to_string(),
         "widgetsDir": properties::get_app_path(AppPaths::UniChatWidgets).to_string_lossy().to_string(),
     });
