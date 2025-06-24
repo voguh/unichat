@@ -6,7 +6,9 @@ import { notifications } from "@mantine/notifications";
 import { IconFolderFilled, IconReload, IconWorld } from "@tabler/icons-react";
 import { invoke } from "@tauri-apps/api/core";
 import * as event from "@tauri-apps/api/event";
+import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 
+import { AppContext } from "unichat/contexts/AppContext";
 import { storageService } from "unichat/services/storageService";
 import { YOUTUBE_CHAT_URL_KEY } from "unichat/utils/constants";
 import { IPCYoutubeEvents, IPCYouTubeStatusEvent, IPCYouTubeStatusPingEvent } from "unichat/utils/IPCYoutubeEvents";
@@ -47,14 +49,11 @@ export function DashboardHome(): React.ReactNode {
 
     const { getInputProps, key, onSubmit, setFieldValue } = useForm({ initialValues, validate });
 
+    const { metadata } = React.useContext(AppContext);
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
     function onChangeWidget(widgetName: string): void {
         setSelectedWidget(widgetName);
-    }
-
-    async function openWidgetsDir(): Promise<void> {
-        invoke("open_widgets_dir");
     }
 
     async function reloadIframe(): Promise<void> {
@@ -153,7 +152,7 @@ export function DashboardHome(): React.ReactNode {
                         <Select value={selectedWidget} data={widgets} onChange={onChangeWidget} />
                     </div>
 
-                    <Button onClick={openWidgetsDir}>
+                    <Button onClick={() => revealItemInDir(metadata.widgetsDir)}>
                         <IconFolderFilled size="20" />
                     </Button>
 
@@ -162,9 +161,7 @@ export function DashboardHome(): React.ReactNode {
                         <IconReload size="20" />
                     </Button>
 
-                    <Button
-                        onClick={() => navigator.clipboard.writeText(`http://localhost:9527/widget/${selectedWidget}`)}
-                    >
+                    <Button onClick={() => openUrl(`http://localhost:9527/widget/${selectedWidget}`)}>
                         <IconWorld size="20" />
                     </Button>
                 </Card>

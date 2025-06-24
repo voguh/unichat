@@ -148,13 +148,3 @@ pub async fn list_widgets<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<S
         Err(String::from_str("An error occurred on iterate over widgets dir").unwrap())
     }
 }
-
-/* ================================================================================================================== */
-
-#[tauri::command]
-pub async fn open_widgets_dir<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<(), String> {
-    let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgets);
-    showfile::show_path_in_file_manager(widgets_dir);
-
-    return Ok(());
-}

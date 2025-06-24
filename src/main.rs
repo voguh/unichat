@@ -112,8 +112,7 @@ fn main() {
             commands::settings_set_item,
             commands::toggle_webview,
             commands::update_webview_url,
-            commands::list_widgets,
-            commands::open_widgets_dir
+            commands::list_widgets
         ])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())
