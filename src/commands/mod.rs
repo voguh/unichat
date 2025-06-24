@@ -1,4 +1,3 @@
-use std::fs;
 use std::str::FromStr;
 use std::thread::sleep;
 
@@ -22,6 +21,7 @@ use crate::CARGO_PKG_LICENSE_NAME;
 use crate::CARGO_PKG_LICENSE_URL;
 use crate::CARGO_PKG_NAME;
 use crate::CARGO_PKG_VERSION;
+use crate::STATIC_APP_ICON;
 
 #[tauri::command]
 pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value, String> {
@@ -32,7 +32,7 @@ pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
         "description": CARGO_PKG_DESCRIPTION,
         "authors": CARGO_PKG_AUTHORS,
         "homepage": CARGO_PKG_HOMEPAGE,
-        "icon": fs::read(properties::get_app_path(AppPaths::UniChatLogoIcon)).map_err(|e| format!("{:?}", e))?,
+        "icon": STATIC_APP_ICON,
         "licenseCode": CARGO_PKG_LICENSE_CODE,
         "licenseName": CARGO_PKG_LICENSE_NAME,
         "licenseUrl": CARGO_PKG_LICENSE_URL,

@@ -21,6 +21,8 @@ mod events;
 mod utils;
 mod youtube;
 
+pub static STATIC_APP_ICON: &[u8] = include_bytes!("../icons/icon.png");
+
 fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     if !dest.exists() {
         fs::create_dir(dest)?;
