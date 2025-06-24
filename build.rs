@@ -15,6 +15,42 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+use std::fs;
+use std::path::PathBuf;
+
+fn generate_resources(root_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+    let target_gen_dir = root_dir.join("target").join("gen");
+
+    let name = env!("CARGO_PKG_NAME");
+    let version = env!("CARGO_PKG_VERSION");
+    let description = env!("CARGO_PKG_DESCRIPTION");
+    let authors = env!("CARGO_PKG_AUTHORS");
+    let homepage = env!("CARGO_PKG_HOMEPAGE");
+    let license = env!("CARGO_PKG_LICENSE");
+
+    if !target_gen_dir.exists() {
+        fs::create_dir_all(&target_gen_dir)?;
+    }
+
+    let metadata = format!(r#"
+        pub const CARGO_PKG_NAME: &'static str = "{name}";
+        pub const CARGO_PKG_VERSION: &'static str = "{version}";
+        pub const CARGO_PKG_DESCRIPTION: &'static str = "{description}";
+        pub const CARGO_PKG_AUTHORS: &'static str = "{authors}";
+        pub const CARGO_PKG_HOMEPAGE: &'static str = "{homepage}";
+        pub const CARGO_PKG_LICENSE: &'static str = "{license}";
+    "#);
+
+    let metadata_file_path = target_gen_dir.join("metadata.rs");
+    fs::write(metadata_file_path, metadata).expect("Failed to write metadata file");
+
+    return Ok(());
+}
+
 fn main() {
-    tauri_build::build()
+    let root_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+
+    generate_resources(&root_dir).expect("Failed to generate resources");
+
+    tauri_build::build();
 }
