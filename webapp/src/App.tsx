@@ -5,6 +5,7 @@ import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 
 import { Dashboard } from "./components/Dashboard";
+import { AppContextProvider } from "./contexts/AppContext";
 
 const theme = createTheme({
     fontFamily: "Roboto, sans-serif",
@@ -13,11 +14,13 @@ const theme = createTheme({
 
 export default function App(): JSX.Element {
     return (
-        <MantineProvider defaultColorScheme="dark" theme={theme}>
-            <ModalsProvider modalProps={{ centered: true }}>
-                <Notifications position="bottom-center" />
-                <Dashboard />
-            </ModalsProvider>
-        </MantineProvider>
+        <AppContextProvider>
+            <MantineProvider defaultColorScheme="dark" theme={theme}>
+                <ModalsProvider modalProps={{ centered: true }}>
+                    <Notifications position="bottom-center" />
+                    <Dashboard />
+                </ModalsProvider>
+            </MantineProvider>
+        </AppContextProvider>
     );
 }
