@@ -93,7 +93,9 @@ jobs:
             echo "revision=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
           else
             export SHORT_CARGO_VERSION="$(echo $CARGO_PACKAGE_VERSION | cut -d '-' -f1)"
-            echo "revision=$SHORT_CARGO_VERSION+$GITHUB_SHA" >> $GITHUB_OUTPUT
+            export NEW_VERSION="$SHORT_CARGO_VERSION+$GITHUB_SHA"
+            sed -i "s/^version = \"$CARGO_PACKAGE_VERSION\"/version = \"$NEW_VERSION\"/" "Cargo.toml"
+            echo "revision=$NEW_VERSION" >> $GITHUB_OUTPUT
           fi
 
       - name: Print revision
