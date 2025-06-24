@@ -82,12 +82,15 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     return Ok(());
 }
 
-pub fn get_item(key: SettingsKeys) -> Result<Value, String> {
+pub fn get_item<T: serde::de::DeserializeOwned>(key: SettingsKeys) -> Result<T, String> {
     let storage = INSTANCE.get().ok_or("Settings not initialized".to_string())?;
-    return storage.get(key.as_str()).ok_or(format!("Key '{}' not found in store", key.as_str()));
+    let value_raw = storage.get(key.as_str()).ok_or(format!("Key '{}' not found in store", key.as_str()))?;
+    return serde_json::from_value(value_raw).map_err(|e| format!("{:?}", e));
 }
 
-pub fn set_item(key: SettingsKeys, value: Value) -> Result<(), String> {
+pub fn set_item<T: serde::ser::Serialize>(key: SettingsKeys, value: T) -> Result<(), String> {
     let storage = INSTANCE.get().ok_or("Settings not initialized".to_string())?;
-    return Ok(storage.set(key.as_str(), value));
+    let value_raw = serde_json::to_value(value).map_err(|e| format!("{:?}", e))?;
+    storage.set(key.as_str(), value_raw);
+    return Ok(());
 }
