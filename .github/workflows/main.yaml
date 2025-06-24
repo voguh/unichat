@@ -119,7 +119,7 @@ jobs:
 
       - name: Move build artifacts
         run: |
-          export VERSION="${{ steps.setup-version.outputs.revision }}"
+          export VERSION="${{ steps.setup_version.outputs.revision }}"
           mkdir -p dist/appimage dist/deb dist/rpm dist/windows
           cp target/release/bundle/appimage/*.AppImage dist/appimage/unichat-$VERSION.AppImage
           cp target/release/bundle/deb/*.deb dist/deb/unichat-$VERSION.deb
