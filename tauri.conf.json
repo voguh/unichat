@@ -39,7 +39,7 @@
     },
     "bundle": {
         "active": true,
-        "resources": ["icons/icon.png", "widgets/**/*", "LICENSE"],
+        "resources": ["icons/icon.png", "widgets/", "LICENSE"],
         "targets": ["deb", "rpm", "appimage", "dmg", "nsis"],
         "icon": [
             "icons/32x32.png",
