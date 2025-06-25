@@ -111,9 +111,12 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
+    tauri::async_runtime::set(tokio::runtime::Handle::current());
+
     let log_level = if utils::is_dev() {
-        log::LevelFilter::Trace
+        log::LevelFilter::Debug
     } else {
         log::LevelFilter::Warn
     };
