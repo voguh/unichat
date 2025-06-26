@@ -29,21 +29,16 @@ then just run `pnpm build`.
 Following an example using ubuntu 24.04 docker image (catthehacker/ubuntu).
 
 ```bash
-docker run --volume=".:/home/ubuntu/unichat" --env="DEBIAN_FRONTEND=noninteractive" --rm -it ghcr.io/catthehacker/ubuntu:act-24.04 bash
+docker run --volume=".:/home/ubuntu/unichat" --env="DEBIAN_FRONTEND=noninteractive" --rm -it ubuntu:24.04 bash
 
-### Remove ubuntu user password
+### Prepare environment
+apt update && apt upgrade -y && apt install sudo
 passwd -d ubuntu
-
-### Checkout to ubuntu user
 su - ubuntu
 cd ~/unichat
 
-### Update packages
-sudo apt update
-sudo apt upgrade -y
-
 ### Install dependencies
-sudo apt install --no-install-recommends -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+sudo apt install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
 
 ### Install cargo
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.87.0
@@ -69,7 +64,7 @@ pnpm build
 
 # Build for windows
 ### Install dependencies
-sudo apt install --no-install-recommends -y  nsis lld llvm clang
+sudo apt install -y  nsis lld llvm clang
 
 ### Install rustup target
 rustup target add x86_64-pc-windows-msvc
@@ -89,13 +84,13 @@ pnpm build --runner cargo-xwin --target x86_64-pc-windows-msvc
 
 ### App directories
 
-| DIR TYPE           | LOCATION ON LINUX           | LOCATION ON WINDOWS          | LOCATION ON MAC                        |
-|--------------------|-----------------------------|------------------------------|----------------------------------------|
-| app_cache_dir      | ~/.cache/unichat            | ~\AppData\Local\unichat      | ~/Library/Caches/unichat               |
-| app_config_dir     | ~/.config/unichat           | ~\AppData\Roaming\unichat    | ~/Library/Application\ Support/unichat |
-| app_data_dir       | ~/.local/share/unichat      | ~\AppData\Roaming\unichat    | ~/Library/Application\ Support/unichat |
-| app_local_data_dir | ~/.local/share/unichat      | ~\AppData\Local\unichat      | ~/Library/Application\ Support/unichat |
-| app_log_dir        | ~/.local/share/unichat/logs | ~\AppData\Local\unichat\logs | ~/Library/Logs/unichat                 |
+| DIR TYPE           | LOCATION ON LINUX           | LOCATION ON WINDOWS          |
+|--------------------|-----------------------------|------------------------------|
+| app_cache_dir      | ~/.cache/unichat            | ~\AppData\Local\unichat      |
+| app_config_dir     | ~/.config/unichat           | ~\AppData\Roaming\unichat    |
+| app_data_dir       | ~/.local/share/unichat      | ~\AppData\Roaming\unichat    |
+| app_local_data_dir | ~/.local/share/unichat      | ~\AppData\Local\unichat      |
+| app_log_dir        | ~/.local/share/unichat/logs | ~\AppData\Local\unichat\logs |
 
 
 ### Dev notes
@@ -113,6 +108,7 @@ Some node packages will not be updated.
 | `eslint-plugin-import-helpers@1.3.1`   | Maintains compatibility with eslint@8.57.1                          |
 | `eslint-plugin-n@16.6.2`               | Maintains compatibility with eslint@8.57.1                          |
 | `eslint-plugin-promise@6.6.0`          | Maintains compatibility with eslint@8.57.1                          |
+| `vite@6.3.5`                           | Future understanding about what was changed                         |
 
 
 ### Known issues
