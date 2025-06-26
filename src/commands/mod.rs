@@ -22,9 +22,11 @@ use serde_json::json;
 use serde_json::Value;
 use tauri::Manager;
 use tauri::Runtime;
+use tauri::Url;
 
 use crate::utils;
 use crate::utils::constants;
+use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::settings;
@@ -127,23 +129,31 @@ pub fn toggle_webview<R: Runtime>(app: tauri::AppHandle<R>, label: &str) -> Resu
     return Ok(());
 }
 
+fn decode_url(label: &str, url: &str) -> Result<Url, Box<dyn std::error::Error>> {
+    let mut url = url.to_string();
+    let fallback_page = match label {
+        YOUTUBE_CHAT_WINDOW => "youtube-await.html",
+        _ => "about:blank"
+    };
+
+    if url.is_empty() || url == "about:blank" || !url.starts_with("https://") {
+        if utils::is_dev() {
+            url = format!("http://localhost:1421/{}", fallback_page);
+        } else {
+            url = format!("tauri://localhost/{}", fallback_page);
+        }
+    }
+
+    return Url::parse(url.as_str()).map_err(|e| Box::new(e) as Box<dyn std::error::Error>);
+}
+
 #[tauri::command]
 pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &str, url: &str) -> Result<(), String> {
     let window = app.get_webview_window(label).unwrap();
-
-    let tauri_url: tauri::Url;
-    if url == "about:blank" {
-        if utils::is_dev() {
-            tauri_url = tauri::Url::parse("http://localhost:1421/youtube-await.html").map_err(|e| format!("{:?}", e))?;
-        } else {
-            tauri_url = tauri::Url::parse("tauri://localhost/youtube-await.html").map_err(|e| format!("{:?}", e))?;
-        }
-    } else {
-        tauri_url = tauri::Url::parse(url).map_err(|e| format!("{:?}", e))?;
-    }
+    let tauri_url = decode_url(label, url).map_err(|e| format!("{:?}", e))?;
 
     window.navigate(tauri_url).map_err(|e| format!("{:?}", e))?;
-    sleep(std::time::Duration::from_secs(2));
+    sleep(std::time::Duration::from_millis(1000));
     if label == constants::YOUTUBE_CHAT_WINDOW && url != "about:blank" {
         window.eval(youtube::SCRAPPING_JS).unwrap();
     }
