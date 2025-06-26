@@ -15,34 +15,30 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-export interface Dimensions {
-    width: number;
-    height: number;
-}
+import { alpha } from "@mantine/core";
+import styled from "styled-components";
 
-export interface ThirdPartyLicenseInfo {
-    source: string;
-    name: string;
-    version: string;
-    authors?: string[];
-    repository?: string;
-    licenses: string[];
-}
+export const ThirdPartyLicensesStyledContainer = styled.div`
+    height: 100%;
+    overflow-y: scroll;
 
-export interface AppMetadata {
-    displayName: string;
-    identifier: string;
-    version: string;
-    description: string;
-    authors: string;
-    homepage: string;
-    icon: number[];
-    licenseCode: string;
-    licenseName: string;
-    licenseUrl: string;
+    > table {
+        > tbody {
+            > tr {
+                &:hover {
+                    background-color: ${alpha("var(--mantine-color-anchor)", 0.25)};
+                }
 
-    licenseFile: string;
-    widgetsDir: string;
+                > td {
+                    > .withLink {
+                        cursor: pointer;
+                    }
 
-    thirdPartyLicenses?: ThirdPartyLicenseInfo[];
-}
+                    > .mantine-Badge-root {
+                        cursor: pointer;
+                    }
+                }
+            }
+        }
+    }
+`;

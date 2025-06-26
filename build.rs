@@ -18,6 +18,7 @@
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
+use std::process::Command;
 
 // I will not implement any api to get license information.
 // This is a "safe guard" to remember me to change license info if I change the license.
@@ -67,7 +68,17 @@ fn generate_resources(root_dir: &PathBuf) -> Result<(), Box<dyn std::error::Erro
 }
 
 fn main() {
+    println!("cargo:rerun-if-changed=zztools/gen-licenses");
+    println!("cargo:rerun-if-changed=Cargo.toml");
+    println!("cargo:rerun-if-changed=package.json");
     let root_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+
+    let code = Command::new(root_dir.join("zztools").join("gen-licenses")).status();
+    if let Err(e) = code {
+        eprintln!("Failed to execute gen-licenses: {}", e);
+    } else {
+        println!("Successfully executed gen-licenses");
+    }
 
     generate_resources(&root_dir).expect("Failed to generate resources");
 

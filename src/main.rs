@@ -39,7 +39,8 @@ mod events;
 mod utils;
 mod youtube;
 
-pub static STATIC_APP_ICON: &[u8] = include_bytes!("../icons/icon.png");
+pub static STATIC_APP_ICON: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/icons/icon.png"));
+pub static THIRD_PARTY_LICENSES: &'static str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/third_party_licenses.json"));
 
 fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     if !dest.exists() {

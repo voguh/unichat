@@ -18,12 +18,14 @@
 import React from "react";
 
 import { Button } from "@mantine/core";
+import { modals } from "@mantine/modals";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import clsx from "clsx";
 
 import { AppContext } from "unichat/contexts/AppContext";
 
 import { AboutModalStyledContainer } from "./styled";
+import { ThirdPartyLicenses } from "./ThirdPartyLicenses";
 
 interface Props {
     children?: React.ReactNode;
@@ -34,6 +36,10 @@ export function AboutModal(_props: Props): React.ReactNode {
     const [url, setUrl] = React.useState<string>("");
 
     const { metadata } = React.useContext(AppContext);
+
+    function handleOpenThirdPartyLicenses(): void {
+        modals.open({ title: "Third Party Licenses", children: <ThirdPartyLicenses />, size: "xl" });
+    }
 
     React.useEffect(() => {
         const uint8Array = new Uint8Array(metadata.icon);
@@ -66,8 +72,8 @@ export function AboutModal(_props: Props): React.ReactNode {
                 <Button variant="default" onClick={() => setIsCreditsOpen(true)}>
                     Credits
                 </Button>
-                <Button variant="default" onClick={() => openUrl(metadata.licenseUrl)}>
-                    License
+                <Button variant="default" onClick={handleOpenThirdPartyLicenses}>
+                    Third Party Licenses
                 </Button>
             </div>
             <div className={clsx("app-credits", { isCreditsOpen })}>

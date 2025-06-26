@@ -40,6 +40,7 @@ use crate::CARGO_PKG_LICENSE_URL;
 use crate::CARGO_PKG_NAME;
 use crate::CARGO_PKG_VERSION;
 use crate::STATIC_APP_ICON;
+use crate::THIRD_PARTY_LICENSES;
 
 #[tauri::command]
 pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value, String> {
@@ -54,8 +55,11 @@ pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
         "licenseCode": CARGO_PKG_LICENSE_CODE,
         "licenseName": CARGO_PKG_LICENSE_NAME,
         "licenseUrl": CARGO_PKG_LICENSE_URL,
+
         "licenseFile": properties::get_app_path(AppPaths::UniChatLicense).to_string_lossy().to_string(),
         "widgetsDir": properties::get_app_path(AppPaths::UniChatWidgets).to_string_lossy().to_string(),
+
+        "thirdPartyLicenses": serde_json::from_str::<Value>(THIRD_PARTY_LICENSES).unwrap_or(Value::Array(vec![]))
     });
 
     return Ok(metadata);
