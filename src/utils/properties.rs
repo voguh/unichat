@@ -63,7 +63,7 @@ impl fmt::Display for AppPaths {
 
             AppPaths::UniChatWidgets => "unichat_widgets_dir",
             AppPaths::UniChatLogoIcon => "unichat_logo_icon",
-            AppPaths::UniChatLicense => "unichat_license",
+            AppPaths::UniChatLicense => "unichat_license"
         };
 
         return write!(f, "{}", s);
