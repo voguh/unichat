@@ -15,6 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+use regex::Regex;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -69,9 +70,27 @@ pub type FontBaseEmojiThumbnailsWrapper = ThumbnailsWrapper;
 pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
     let mut emotes = Vec::new();
 
+    let mut bttv_emotes_list = Vec::new();
+    if let Some(bttv_emotes) = BTTV_EMOTES_HASHSET.get() {
+        if let Ok(guard) = bttv_emotes.read() {
+            bttv_emotes_list.extend(guard.iter().cloned());
+        }
+    }
+
     for run in &message_runs.runs {
         match run {
-            MessageRun::Text { .. } => {},
+            MessageRun::Text { text } => {
+                if !text.is_empty() {
+                    for emote in &bttv_emotes_list {
+                        let pattern = format!(r"\b{}\b", regex::escape(&emote.emote_type));
+                        if let Ok(re) = Regex::new(&pattern) {
+                            if re.is_match(text) {
+                                emotes.push(emote.clone());
+                            }
+                        }
+                    }
+                }
+            },
             MessageRun::Emoji { emoji } => {
                 match emoji {
                     Emoji::Custom { emoji_id, image, shortcuts, .. } => {
@@ -96,12 +115,6 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
                     }
                 }
             }
-        }
-    }
-
-    if let Some(bttv_emotes) = BTTV_EMOTES_HASHSET.get() {
-        if let Ok(guard) = bttv_emotes.read() {
-            emotes.extend(guard.iter().cloned());
         }
     }
 
