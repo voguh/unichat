@@ -114,23 +114,22 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     return Ok(());
 }
 
-fn get_item_raw(key: String) -> Result<String, String> {
+fn get_item_raw(key: String) -> Result<String, Box<dyn std::error::Error>> {
     let props = PROPERTIES.get().ok_or("Properties not initialized")?;
-    let props_guard = props.read().map_err(|e| format!("{:?}", e))?;
-    return props_guard.get(&key).cloned().ok_or(format!("Key '{}' not found", key));
+    let props_guard = props.read()?;
+    return props_guard.get(&key).cloned().ok_or(format!("Key '{}' not found", key).into());
 }
 
-pub fn get_item(key: PropertiesKey) -> Result<String, String> {
+pub fn get_item(key: PropertiesKey) -> Result<String, Box<dyn std::error::Error>> {
     return get_item_raw(key.to_string());
 }
 
-pub fn set_item(key: PropertiesKey, value: String) -> Result<(), String> {
+pub fn set_item(key: PropertiesKey, value: String) -> Result<(), Box<dyn std::error::Error>> {
     let props = PROPERTIES.get().ok_or("Properties not initialized")?;
-    let mut props_guard = props.write().map_err(|e| format!("{:?}", e))?;
+    let mut props_guard = props.write()?;
     props_guard.insert(key.to_string(), value);
 
     return Ok(());
-
 }
 
 pub fn get_app_path(key: AppPaths) -> PathBuf {
