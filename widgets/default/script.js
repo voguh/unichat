@@ -13,6 +13,7 @@ function buildBadges(badges) {
 }
 
 function buildMessage(message, emotes) {
+    emotes = emotes.sort((a, b) => b.type.length - a.type.length); // Sort by emote type length to replace longer emotes first
     return emotes.reduce((message, emote) => {
         return message.replaceAll(emote.type, `<img src="${emote.url}" />`);
     }, message.replace(/\</g, '&lt;').replace(/\>/g, '&gt;'));
