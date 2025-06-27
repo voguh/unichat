@@ -54,6 +54,10 @@ html, body {
     white-space: nowrap;
 }
 
+#main-container > .message-item > .meta > .badges:empty {
+    display: none;
+}
+
 #main-container > .message-item > .meta > .badges > img {
     width: var(--badge-size);
     height: var(--badge-size);
