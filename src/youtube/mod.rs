@@ -26,8 +26,6 @@ use tauri::Manager;
 use crate::events;
 use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
 use crate::utils::is_dev;
-use crate::utils::properties;
-use crate::utils::properties::PropertiesKey;
 use crate::utils::settings;
 use crate::utils::settings::SettingsKeys;
 use crate::utils::settings::YouTubeSettingLogLevel;
@@ -51,13 +49,10 @@ fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, mut paylo
 /* ================================================================================================================== */
 
 fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
-    let channel_id = payload.get("channelId").and_then(|v| v.as_str())
-        .ok_or(format!("Missing or invalid 'channelId' field in YouTube {event_type} payload"))?;
     let url = payload.get("url").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'url' field in YouTube {event_type} payload"))?;
 
-    properties::set_item(PropertiesKey::YouTubeChannelId, channel_id.to_string())?;
-    let evt_payload = serde_json::json!({ "type": "ready", "channelId": channel_id, "url": url });
+    let evt_payload = serde_json::json!({ "type": "ready", "url": url });
 
     return dispatch_event(app, "unichat://youtube:event", evt_payload);
 }
