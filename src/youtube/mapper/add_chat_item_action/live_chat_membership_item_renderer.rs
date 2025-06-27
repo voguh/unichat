@@ -28,6 +28,7 @@ use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::parse_author_badges;
 use crate::youtube::mapper::structs::author::parse_author_color;
 use crate::youtube::mapper::structs::author::parse_author_name;
+use crate::youtube::mapper::structs::author::parse_author_username;
 use crate::youtube::mapper::structs::author::parse_author_photo;
 use crate::youtube::mapper::structs::author::parse_author_type;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
@@ -117,8 +118,9 @@ fn optional_build_message(message: &Option<MessageRunsWrapper>) -> Result<Option
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
     let parsed: LiveChatMembershipItemRenderer = serde_json::from_value(value).map_err(parse_serde_error)?;
+    let author_username = parse_author_username(&parsed.author_name)?;
     let author_name = parse_author_name(&parsed.author_name)?;
-    let author_color = parse_author_color(&author_name)?;
+    let author_color = parse_author_color(&author_username)?;
     let author_badges = parse_author_badges(&parsed.author_badges)?;
     let author_photo = parse_author_photo(&parsed.author_photo)?;
     let author_type = parse_author_type(&parsed.author_badges)?;
@@ -134,8 +136,8 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             platform: UniChatPlatform::YouTube,
 
             author_id: parsed.author_external_channel_id,
-            author_username: author_name.clone(),
-            author_display_name: author_name.clone().replacen("@", "", 1),
+            author_username: author_username,
+            author_display_name: author_name,
             author_display_color: author_color,
             author_badges: author_badges,
             author_profile_picture_url: author_photo,

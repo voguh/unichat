@@ -61,7 +61,15 @@ pub struct AuthorBadgeIconWrapper {
 
 /* <================================================================================================================> */
 
+pub fn parse_author_username(name: &AuthorNameWrapper) -> Result<String, Box<dyn std::error::Error>> {
+    return Ok(name.simple_text.clone());
+}
+
 pub fn parse_author_name(name: &AuthorNameWrapper) -> Result<String, Box<dyn std::error::Error>> {
+    if name.simple_text.clone().starts_with("@") {
+        return Ok(name.simple_text.clone().replacen("@", "", 1));
+    }
+
     return Ok(name.simple_text.clone());
 }
 
