@@ -23,7 +23,12 @@ use tauri::Emitter;
 use tauri::Listener;
 use tauri::Manager;
 
+use crate::bttv::fetch_emotes;
 use crate::events;
+use crate::events::unichat::UniChatEvent;
+use crate::events::unichat::UniChatInitEventPayload;
+use crate::events::unichat::UniChatPlatform;
+use crate::events::unichat::UNICHAT_EVENT_INIT_TYPE;
 use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
 use crate::utils::is_dev;
 use crate::utils::properties;
@@ -64,6 +69,20 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
 
     properties::set_item(PropertiesKey::YouTubeChannelId, channel_id.to_string())?;
     let evt_payload = serde_json::json!({ "type": "ready", "channelId": channel_id, "url": url });
+
+    let emotes = fetch_emotes(channel_id).map_err(|e| format!("{:?}", e))?;
+    let init_event = UniChatEvent::Init {
+        event_type: String::from(UNICHAT_EVENT_INIT_TYPE),
+        data: UniChatInitEventPayload {
+            channel_id: channel_id.to_string(),
+            channel_name: None,
+            platform: UniChatPlatform::YouTube,
+            bttv_emotes: emotes
+        }
+    };
+    if let Err(err) = events::event_emitter().emit(init_event) {
+        log::error!("An error occurred on send unichat event: {}", err);
+    }
 
     return dispatch_event(app, "unichat://youtube:event", evt_payload);
 }
