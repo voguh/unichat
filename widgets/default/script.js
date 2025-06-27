@@ -1,3 +1,4 @@
+let INITIAL_DATA = {};
 const MAIN_CONTAINER = document.querySelector("#main-container");
 const MESSAGE_TEMPLATE = document.querySelector("#chatlist_item").innerHTML;
 
@@ -20,16 +21,15 @@ function buildMessage(message, emotes) {
 function removeChildren() {
   if(MAIN_CONTAINER.children > 50) {
     MAIN_CONTAINER.firstChild.remove();
-  }
-
-
-  if(MAIN_CONTAINER.children > 50) {
     requestAnimationFrame(removeChildren);
   }
 }
 
 window.addEventListener("unichat:event", function ({ detail: event }) {
-    if (event.type === "unichat:message") {
+    if (event.type === "unichat:init") {
+        const data = event.data
+        INITIAL_DATA = data;
+    } else if (event.type === "unichat:message") {
         const data = event.data
         let message = MESSAGE_TEMPLATE.replaceAll("{author_id}", data.authorId);
         message = message.replaceAll("{message_id}", data.messageId);
