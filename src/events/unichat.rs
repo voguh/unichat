@@ -24,6 +24,7 @@ use crate::bttv::BTTVEmote;
 #[serde(untagged)]
 pub enum UniChatEvent {
     Init {
+        #[serde(rename = "type")]
         event_type: String,
         data: UniChatInitEventPayload
     },
