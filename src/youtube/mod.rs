@@ -81,11 +81,12 @@ fn handle_ping_event(app: tauri::AppHandle<tauri::Wry>, _event_type: &str, _payl
 }
 
 fn handle_error_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
+    let message = payload.get("message").and_then(|v| v.as_str())
+        .ok_or(format!("Missing or invalid 'message' field in '{event_type}' event payload"))?;
     let stack = payload.get("stack").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'stack' field in '{event_type}' event payload"))?;
 
-    log::error!("js-error:{}", stack);
-    let evt_payload = serde_json::json!({ "type": "error", "error": stack });
+    let evt_payload = serde_json::json!({ "type": "error", "message": message, "stack": stack });
 
     return dispatch_event(app, "unichat://youtube:event", evt_payload);
 }

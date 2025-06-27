@@ -45,7 +45,8 @@ export interface IPCYouTubeStatusPingEvent {
 
 export interface IPCYouTubeStatusErrorEvent {
     type: "error";
-    error: string;
+    message: string;
+    stack: string;
     timestamp: number;
 }
 

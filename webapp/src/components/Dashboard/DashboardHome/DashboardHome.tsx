@@ -118,7 +118,7 @@ export function DashboardHome(): React.ReactNode {
     function handleStatus(): void {
         setStatusEvent((statusEvent) => {
             if (statusEvent.type === "ping" && Date.now() - statusEvent.timestamp > 5000) {
-                return { type: "error", error: null, timestamp: Date.now() };
+                return { type: "error", message: "Scrapper did not respond", stack: null, timestamp: Date.now() };
             }
 
             return statusEvent;
@@ -142,7 +142,7 @@ export function DashboardHome(): React.ReactNode {
         const interval = setInterval(handleStatus, 5000);
         const unlisten = event.listen<IPCYouTubeStatusEvent>(IPCYoutubeEvents.YOUTUBE_EVENT, ({ payload }) => {
             if (payload.type === "error") {
-                console.error(JSON.parse(payload.error));
+                notifications.show({ color: "red", title: "YouTube chat scrapper error", message: payload.message });
             } else {
                 setStatusEvent(payload);
             }
