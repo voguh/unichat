@@ -18,8 +18,6 @@
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::bttv::BTTVEmote;
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum UniChatEvent {
@@ -111,7 +109,7 @@ pub struct UniChatInitEventPayload {
     pub channel_name: Option<String>,
     pub platform: UniChatPlatform,
 
-    pub bttv_emotes: Vec<BTTVEmote>
+    pub bttv_emotes: Vec<UniChatEmote>
 }
 
 /* <============================================================================================> */
