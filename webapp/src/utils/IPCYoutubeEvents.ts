@@ -21,7 +21,6 @@ export enum IPCYoutubeEvents {
 
 export const YOUTUBE_EVENT_DESCRIPTION: Record<IPCYouTubeStatusEvent["type"], string> = {
     idle: "The YouTube chat scrapper is idle.",
-    installed: "The YouTube chat scrapper has been installed, but not ready to use.",
     ready: "The YouTube chat scrapper is ready to use.",
     ping: "The YouTube chat scrapper is working.",
     error: "The YouTube chat scrapper is not responding or has encountered an error."
@@ -29,11 +28,6 @@ export const YOUTUBE_EVENT_DESCRIPTION: Record<IPCYouTubeStatusEvent["type"], st
 
 export interface IPCYouTubeStatusIdleEvent {
     type: "idle";
-    timestamp: number;
-}
-
-export interface IPCYouTubeStatusInstalledEvent {
-    type: "installed";
     timestamp: number;
 }
 
@@ -57,7 +51,6 @@ export interface IPCYouTubeStatusErrorEvent {
 
 export type IPCYouTubeStatusEvent =
     | IPCYouTubeStatusIdleEvent
-    | IPCYouTubeStatusInstalledEvent
     | IPCYouTubeStatusReadyEvent
     | IPCYouTubeStatusPingEvent
     | IPCYouTubeStatusErrorEvent;

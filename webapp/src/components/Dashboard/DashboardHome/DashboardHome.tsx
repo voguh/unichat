@@ -130,8 +130,6 @@ export function DashboardHome(): React.ReactNode {
             case "ping":
                 return "green";
             case "ready":
-                return "orange";
-            case "installed":
                 return "yellow";
             case "error":
                 return "red";

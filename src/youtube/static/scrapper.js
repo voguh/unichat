@@ -15,31 +15,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-function processInitializingProtoPuf(encodedProtoPuf) {
-    if (encodedProtoPuf == null || encodedProtoPuf.length === 0) {
-        return null;
-    }
-
-    const normalizedData = normalizeBase64(decodeURIComponent(encodedProtoPuf));
-    const protoPufBytes = atob(normalizedData);
-
-    // Extract second ProtoPuf
-    let subProtoPuf = `${protoPufBytes.split("%3D")[0]}%3D`;
-    subProtoPuf = subProtoPuf.substring(10, subProtoPuf.length);
-
-    // Decode second ProtoPuf
-    const decodedSubProtoPuf = normalizeBase64(decodeURIComponent(subProtoPuf));
-    const subProtoPufBytes = atob(decodedSubProtoPuf);
-
-    // Extract channel ID from second ProtoPuf
-    const lines = subProtoPufBytes.split("\n");
-    const channelIdLine = lines[2];
-    const channelId = channelIdLine.replace("\x18", "").split("\x12")[0];
-
-    return channelId;
+async function dispatchPing() {
+    await window.__TAURI__.event.emit("youtube_raw::event", { type: "ping" });
+    setTimeout(dispatchPing, 5000);
 }
 
 function normalizeBase64(data) {
+    data = decodeURIComponent(data);
     data = data.replace(/-/g, "+").replace(/_/g, "/");
 
     const padLength = 4 - (data.length % 4);
@@ -53,47 +35,10 @@ function normalizeBase64(data) {
 async function handleScrapEvent(response) {
     try {
         const parsed = await response.json();
+        const actions = parsed?.continuationContents?.liveChatContinuation?.actions;
 
-        if (window.unichat.status == "READY") {
-            const actions = parsed?.continuationContents?.liveChatContinuation?.actions;
-
-            if (actions != null && actions.length > 0) {
-                await window.__TAURI__.event.emit("youtube_raw::event", { type: "message", actions });
-            }
-        } else if (window.unichat.status == null) {
-            window.unichat.status = "INITIALIZING";
-
-            let continuation = parsed?.continuationContents?.liveChatContinuation?.continuations[0]?.timedContinuationData?.continuation;
-            if( continuation == null) {
-                continuation = parsed?.continuationContents?.liveChatContinuation?.continuations[0]?.invalidationContinuationData?.continuation;
-            }
-
-            const channelId = processInitializingProtoPuf(continuation);
-            if (channelId == null) {
-                console.error("YouTube channel ID could not be retrieved from the ProtoPuf data.");
-                window.unichat.status = null;
-                return;
-            }
-
-            /* ============================================================================================================== */
-
-            // Select live chat instead top chat
-            document.querySelector("#live-chat-view-selector-sub-menu #trigger")?.click();
-            document.querySelector("#live-chat-view-selector-sub-menu #dropdown a:nth-child(2)")?.click()
-
-            /* ============================================================================================================== */
-
-            // Attach status ping event
-            setInterval(() => {
-                if (window.fetch.__WRAPPED__) {
-                    window.__TAURI__.event.emit("youtube_raw::event", { type: "ping" }).then(() => console.log("YouTube ping event emitted!"));
-                }
-            }, 5000);
-
-            /* ============================================================================================================== */
-
-            window.unichat.status = "READY";
-            await window.__TAURI__.event.emit("youtube_raw::event", { type: "ready", channelId, url: window.location.href });
+        if (actions != null && actions.length > 0) {
+            await window.__TAURI__.event.emit("youtube_raw::event", { type: "message", actions });
         }
     } catch (err) {
         console.error(err)
@@ -102,7 +47,25 @@ async function handleScrapEvent(response) {
 }
 
 if (window.fetch.__WRAPPED__ == null) {
-    window.unichat = window.unichat || {};
+    // Retrieve channel ID from YouTube initial data
+    const ytInitialData = window.ytInitialData;
+    const timedContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.timedContinuationData?.continuation;
+    const invalidationContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.invalidationContinuationData?.continuation;
+    const encodedProtoPuf = timedContinuationData || invalidationContinuationData;
+    const normalizedData = normalizeBase64(encodedProtoPuf);
+    const protoPufBytes = atob(normalizedData);
+
+    let subProtoPuf = `${protoPufBytes.split("%3D")[0]}%3D`;
+    subProtoPuf = subProtoPuf.substring(10, subProtoPuf.length);
+
+    const decodedSubProtoPuf = normalizeBase64(subProtoPuf);
+    const subProtoPufBytes = atob(decodedSubProtoPuf);
+
+    const lines = subProtoPufBytes.split("\n");
+    const channelIdLine = lines[2];
+    const channelId = channelIdLine.replace("\x18", "").split("\x12")[0];
+
+    window.__TAURI__.event.emit("youtube_raw::event", { type: "ready", channelId, url: window.location.href }).then(() => console.log("YouTube ready event emitted!"));
 
     /* ============================================================================================================== */
 
@@ -122,6 +85,7 @@ if (window.fetch.__WRAPPED__ == null) {
         writable: true
     });
     Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
+    window.__TAURI_PLUGIN_LOG__.info("Fetch wrapped!");
 
     /* ============================================================================================================== */
 
@@ -144,8 +108,14 @@ if (window.fetch.__WRAPPED__ == null) {
 
     /* ============================================================================================================== */
 
-    window.__TAURI__.event.emit("youtube_raw::event", { type: "installed" }).then(() => console.log("YouTube scrapper initialized!"));
-    window.__TAURI_PLUGIN_LOG__.info("Fetch wrapped!");
+    // Attach status ping event
+    dispatchPing();
+
+    /* ============================================================================================================== */
+
+    // Select live chat instead top chat
+    document.querySelector("#live-chat-view-selector-sub-menu #trigger")?.click();
+    document.querySelector("#live-chat-view-selector-sub-menu #dropdown a:nth-child(2)")?.click()
 } else {
     window.__TAURI_PLUGIN_LOG__.warn("Fetch already was wrapped!");
 }
