@@ -21,6 +21,10 @@ use serde::Serialize;
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum UniChatEvent {
+    Init {
+        event_type: String,
+        data: UniChatInitEventPayload
+    },
     Message {
         #[serde(rename = "type")]
         event_type: String,
@@ -95,12 +99,25 @@ pub struct UniChatBadge {
 
 /* <============================================================================================> */
 
+pub const UNICHAT_EVENT_INIT_TYPE: &str = "unichat:init";
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UniChatInitEventPayload {
+    pub channel_id: String,
+    pub channel_name: Option<String>,
+    pub platform: UniChatPlatform
+
+}
+
+/* <============================================================================================> */
+
 pub const UNICHAT_EVENT_MESSAGE_TYPE: &str = "unichat:message";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatMessageEventPayload {
-    pub channel_id: Option<String>,
+    pub channel_id: String,
     pub channel_name: Option<String>,
     pub platform: UniChatPlatform,
 
@@ -125,7 +142,7 @@ pub const UNICHAT_EVENT_REMOVE_MESSAGE_TYPE: &str = "unichat:remove_message";
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatRemoveMessageEventPayload {
-    pub channel_id: Option<String>,
+    pub channel_id: String,
     pub channel_name: Option<String>,
     pub platform: UniChatPlatform,
 
@@ -139,7 +156,7 @@ pub const UNICHAT_EVENT_REMOVE_AUTHOR_TYPE: &str = "unichat:remove_author";
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatRemoveAuthorEventPayload {
-    pub channel_id: Option<String>,
+    pub channel_id: String,
     pub channel_name: Option<String>,
     pub platform: UniChatPlatform,
 
@@ -153,7 +170,7 @@ pub const UNICHAT_EVENT_RAID_TYPE: &str = "unichat:raid";
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatRaidEventPayload {
-    pub channel_id: Option<String>,
+    pub channel_id: String,
     pub channel_name: Option<String>,
     pub platform: UniChatPlatform,
 
@@ -172,7 +189,7 @@ pub const UNICHAT_EVENT_SPONSOR_TYPE: &str = "unichat:sponsor";
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatSponsorEventPayload {
-    pub channel_id: Option<String>,
+    pub channel_id: String,
     pub channel_name: Option<String>,
     pub platform: UniChatPlatform,
 
@@ -196,7 +213,7 @@ pub const UNICHAT_EVENT_SPONSOR_GIFT_TYPE: &str = "unichat:sponsor_gift";
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatSponsorGiftEventPayload {
-    pub channel_id: Option<String>,
+    pub channel_id: String,
     pub channel_name: Option<String>,
     pub platform: UniChatPlatform,
 
@@ -219,7 +236,7 @@ pub const UNICHAT_EVENT_DONATE_TYPE: &str = "unichat:donate";
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatDonateEventPayload {
-    pub channel_id: Option<String>,
+    pub channel_id: String,
     pub channel_name: Option<String>,
     pub platform: UniChatPlatform,
 

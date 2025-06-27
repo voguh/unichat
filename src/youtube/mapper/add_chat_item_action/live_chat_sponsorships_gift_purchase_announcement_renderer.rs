@@ -23,6 +23,8 @@ use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatSponsorGiftEventPayload;
 use crate::events::unichat::UNICHAT_EVENT_SPONSOR_GIFT_TYPE;
 use crate::utils::parse_serde_error;
+use crate::utils::properties;
+use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::parse_author_badges;
 use crate::youtube::mapper::structs::author::parse_author_color;
 use crate::youtube::mapper::structs::author::parse_author_name;
@@ -117,7 +119,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let event = UniChatEvent::SponsorGift {
         event_type: String::from(UNICHAT_EVENT_SPONSOR_GIFT_TYPE),
         data: UniChatSponsorGiftEventPayload {
-            channel_id: None,
+            channel_id: properties::get_item(PropertiesKey::YouTubeChannelId)?,
             channel_name: None,
             platform: UniChatPlatform::YouTube,
 

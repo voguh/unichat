@@ -23,6 +23,8 @@ use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRaidEventPayload;
 use crate::events::unichat::UNICHAT_EVENT_RAID_TYPE;
 use crate::utils::parse_serde_error;
+use crate::utils::properties;
+use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -76,7 +78,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
                 event = Some(UniChatEvent::Raid {
                     event_type: String::from(UNICHAT_EVENT_RAID_TYPE),
                     data: UniChatRaidEventPayload {
-                        channel_id: None,
+                        channel_id: properties::get_item(PropertiesKey::YouTubeChannelId)?,
                         channel_name: None,
                         platform: UniChatPlatform::YouTube,
 

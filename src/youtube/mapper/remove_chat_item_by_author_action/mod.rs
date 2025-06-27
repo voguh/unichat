@@ -23,6 +23,8 @@ use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRemoveAuthorEventPayload;
 use crate::events::unichat::UNICHAT_EVENT_REMOVE_AUTHOR_TYPE;
 use crate::utils::parse_serde_error;
+use crate::utils::properties;
+use crate::utils::properties::PropertiesKey;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -36,7 +38,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let event = UniChatEvent::RemoveAuthor {
         event_type: String::from(UNICHAT_EVENT_REMOVE_AUTHOR_TYPE),
         data: UniChatRemoveAuthorEventPayload {
-            channel_id: None,
+            channel_id: properties::get_item(PropertiesKey::YouTubeChannelId)?,
             channel_name: None,
             platform: UniChatPlatform::YouTube,
 
