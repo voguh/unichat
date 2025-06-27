@@ -19,8 +19,33 @@ export enum IPCYoutubeEvents {
     YOUTUBE_EVENT = "unichat://youtube:event"
 }
 
+export const YOUTUBE_EVENT_DESCRIPTION: Record<IPCYouTubeStatusEvent["type"], string> = {
+    idle: "The YouTube chat scrapper is idle.",
+    installed: "The YouTube chat scrapper has been installed, but not ready to use.",
+    ready: "The YouTube chat scrapper is ready to use.",
+    ping: "The YouTube chat scrapper is working.",
+    error: "The YouTube chat scrapper is not responding or has encountered an error."
+};
+
 export interface IPCYouTubeStatusIdleEvent {
     type: "idle";
+    timestamp: number;
+}
+
+export interface IPCYouTubeStatusInstalledEvent {
+    type: "installed";
+    timestamp: number;
+}
+
+export interface IPCYouTubeStatusReadyEvent {
+    type: "ready";
+    url: string;
+    clientId: string;
+    timestamp: number;
+}
+
+export interface IPCYouTubeStatusPingEvent {
+    type: "ping";
     timestamp: number;
 }
 
@@ -30,19 +55,9 @@ export interface IPCYouTubeStatusErrorEvent {
     timestamp: number;
 }
 
-export interface IPCYouTubeStatusReadyEvent {
-    type: "ready";
-    url: string;
-    timestamp: number;
-}
-
-export interface IPCYouTubeStatusPingEvent {
-    type: "working";
-    timestamp: number;
-}
-
 export type IPCYouTubeStatusEvent =
     | IPCYouTubeStatusIdleEvent
-    | IPCYouTubeStatusErrorEvent
+    | IPCYouTubeStatusInstalledEvent
     | IPCYouTubeStatusReadyEvent
-    | IPCYouTubeStatusPingEvent;
+    | IPCYouTubeStatusPingEvent
+    | IPCYouTubeStatusErrorEvent;

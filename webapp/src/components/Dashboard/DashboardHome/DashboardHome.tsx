@@ -17,7 +17,7 @@
 
 import React from "react";
 
-import { Button, Card, Select, Text, TextInput } from "@mantine/core";
+import { Badge, Button, Card, DefaultMantineColor, Select, Text, TextInput, Tooltip } from "@mantine/core";
 import { FormValidateInput, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconFolderFilled, IconReload, IconWorld } from "@tabler/icons-react";
@@ -28,10 +28,14 @@ import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 import { AppContext } from "unichat/contexts/AppContext";
 import { storageService } from "unichat/services/storageService";
 import { YOUTUBE_CHAT_URL_KEY } from "unichat/utils/constants";
-import { IPCYoutubeEvents, IPCYouTubeStatusEvent, IPCYouTubeStatusPingEvent } from "unichat/utils/IPCYoutubeEvents";
+import {
+    IPCYoutubeEvents,
+    IPCYouTubeStatusEvent,
+    IPCYouTubeStatusPingEvent,
+    YOUTUBE_EVENT_DESCRIPTION
+} from "unichat/utils/IPCYoutubeEvents";
 import { Strings } from "unichat/utils/Strings";
 
-import { ScrapperStatus } from "./ScrapperStatus";
 import { DashboardHomeStyledContainer } from "./styled";
 
 interface FormData {
@@ -113,7 +117,7 @@ export function DashboardHome(): React.ReactNode {
 
     function handleStatus(): void {
         setStatusEvent((statusEvent) => {
-            if (statusEvent.type === "working" && Date.now() - statusEvent.timestamp > 5000) {
+            if (statusEvent.type === "ping" && Date.now() - statusEvent.timestamp > 5000) {
                 return { type: "error", error: null, timestamp: Date.now() };
             }
 
@@ -121,15 +125,34 @@ export function DashboardHome(): React.ReactNode {
         });
     }
 
+    function handleStatusColor(eventType: IPCYouTubeStatusEvent["type"]): DefaultMantineColor {
+        switch (eventType) {
+            case "ping":
+                return "green";
+            case "ready":
+                return "orange";
+            case "installed":
+                return "yellow";
+            case "error":
+                return "red";
+            default:
+                return "gray";
+        }
+    }
+
     React.useEffect(() => {
         const interval = setInterval(handleStatus, 5000);
-        const unlistenPing = event.listen<IPCYouTubeStatusPingEvent>(IPCYoutubeEvents.YOUTUBE_EVENT, ({ payload }) => {
-            setStatusEvent(payload);
+        const unlisten = event.listen<IPCYouTubeStatusEvent>(IPCYoutubeEvents.YOUTUBE_EVENT, ({ payload }) => {
+            if (payload.type === "error") {
+                console.error(JSON.parse(payload.error));
+            } else {
+                setStatusEvent(payload);
+            }
         });
 
         return () => {
             clearInterval(interval);
-            unlistenPing.then(() => console.log(`Unsubscribed from '${IPCYoutubeEvents.YOUTUBE_EVENT}' event`));
+            unlisten.then(() => console.log(`Unsubscribed from '${IPCYoutubeEvents.YOUTUBE_EVENT}' event`));
         };
     }, []);
 
@@ -137,7 +160,7 @@ export function DashboardHome(): React.ReactNode {
         <DashboardHomeStyledContainer>
             <form className="fields" onSubmit={onSubmit(handleSubmit)}>
                 <Card className="fields-actions" withBorder shadow="xs">
-                    <div style={{ width: "100%" }}>
+                    <div style={{ flex: 1 }}>
                         <Button
                             type="submit"
                             color={
@@ -150,7 +173,13 @@ export function DashboardHome(): React.ReactNode {
                         </Button>
                     </div>
 
-                    <ScrapperStatus statusEvent={statusEvent} />
+                    <div>
+                        <Tooltip label={YOUTUBE_EVENT_DESCRIPTION[statusEvent.type]} position="left">
+                            <Badge radius="xs" color={handleStatusColor(statusEvent.type)}>
+                                {statusEvent.type === "ping" ? "working" : statusEvent.type}
+                            </Badge>
+                        </Tooltip>
+                    </div>
                 </Card>
 
                 <Card className="fields-values" withBorder shadow="xs">
