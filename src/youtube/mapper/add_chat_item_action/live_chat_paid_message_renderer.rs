@@ -119,8 +119,8 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             platform: UniChatPlatform::YouTube,
 
             author_id: parsed.author_external_channel_id,
-            author_username: None,
-            author_display_name: author_name,
+            author_username: author_name.clone(),
+            author_display_name: author_name.clone().replacen("@", "", 1),
             author_display_color: author_color,
             author_badges: author_badges,
             author_profile_picture_url: author_photo,

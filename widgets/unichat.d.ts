@@ -34,12 +34,12 @@ export interface UniChatBadge {
 export interface UniChatEventMessage {
     type: "unichat:message";
     data: {
-        channelId: string | null;
+        channelId: string;
         channelName: string | null;
         platform: UniChatPlatform;
 
         authorId: string;
-        authorUsername: string | null;
+        authorUsername: string;
         authorDisplayName: string;
         authorProfilePictureUrl: string;
         authorBadges: UniChatBadge[];
@@ -54,7 +54,7 @@ export interface UniChatEventMessage {
 export interface UniChatEventRemoveMessage {
     type: "unichat:remove_message";
     data: {
-        channelId: string | null;
+        channelId: string;
         channelName: string | null;
         platform: UniChatPlatform;
 
@@ -65,7 +65,7 @@ export interface UniChatEventRemoveMessage {
 export interface UniChatEventRemoveAuthor {
     type: "unichat:remove_author";
     data: {
-        channelId: string | null;
+        channelId: string;
         channelName: string | null;
         platform: UniChatPlatform;
 
@@ -76,12 +76,12 @@ export interface UniChatEventRemoveAuthor {
 export interface UniChatEventRaid {
     type: "unichat:raid";
     data: {
-        channelId: string | null;
+        channelId: string;
         channelName: string | null;
         platform: UniChatPlatform;
 
         authorId: string;
-        authorUsername: string | null;
+        authorUsername: string;
         authorDisplayName: string;
         authorProfilePictureUrl: string;
 
@@ -92,12 +92,12 @@ export interface UniChatEventRaid {
 export interface UniChatEventSponsor {
     type: "unichat:sponsor";
     data: {
-        channelId: string | null;
+        channelId: string;
         channelName: string | null;
         platform: UniChatPlatform;
 
         authorId: string;
-        authorUsername: string | null;
+        authorUsername: string;
         authorDisplayName: string;
         authorProfilePictureUrl: string;
         authorBadges: UniChatBadge[];
@@ -112,12 +112,12 @@ export interface UniChatEventSponsor {
 export interface UniChatSponsorGiftEvent {
     type: "unichat:sponsor_gift";
     data: {
-        channelId: string | null;
+        channelId: string;
         channelName: string | null;
         platform: UniChatPlatform;
 
         authorId: string;
-        authorUsername: string | null;
+        authorUsername: string;
         authorDisplayName: string;
         authorProfilePictureUrl: string;
         authorBadges: UniChatBadge[];
@@ -131,12 +131,12 @@ export interface UniChatSponsorGiftEvent {
 export interface UniChatDonateEvent {
     type: "unichat:donate";
     data: {
-        channelId: string | null;
+        channelId: string;
         channelName: string | null;
         platform: UniChatPlatform;
 
         authorId: string;
-        authorUsername: string | null;
+        authorUsername: string;
         authorDisplayName: string;
         authorProfilePictureUrl: string;
         authorBadges: UniChatBadge[];
