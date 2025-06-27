@@ -82,7 +82,8 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
             MessageRun::Text { text } => {
                 if !text.is_empty() {
                     for emote in &bttv_emotes_list {
-                        let pattern = format!(r"\b{}\b", regex::escape(&emote.emote_type));
+                        let escaped_emote = regex::escape(&emote.emote_type);
+                        let pattern = format!(r"(^|\s){}(\s|$)", escaped_emote);
                         if let Ok(re) = Regex::new(&pattern) {
                             if re.is_match(text) {
                                 emotes.push(emote.clone());

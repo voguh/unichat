@@ -16,7 +16,9 @@ function buildMessage(message, emotes) {
     let safeMessage = message.replace(/\</g, '&lt;').replace(/\>/g, '&gt;');
 
     return emotes.reduce((msg, emote) => {
-        const regex = new RegExp(`\\b${emote.type}\\b`, 'g');
+        const escapedEmote = RegExp.escape ? RegExp.escape(emote.type) : emote.type.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const pattern = `(?<=^|\\s)(${escapedEmote})(?=\\s|$)`;
+        const regex = new RegExp(pattern, 'g');
         return msg.replace(regex, `<img src="${emote.url}" />`);
     }, safeMessage);
 }
