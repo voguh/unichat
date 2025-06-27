@@ -44,7 +44,7 @@ export function ThirdPartyLicenses(_props: Props): React.ReactNode {
                 </Table.Thead>
                 <Table.Tbody>
                     {metadata.thirdPartyLicenses
-                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .sort((a, b) => `${a.source}:${a.name}`.localeCompare(`${b.source}:${b.name}`))
                         .map((pkg) => (
                             <Table.Tr key={pkg.name}>
                                 <Table.Td>
@@ -53,7 +53,7 @@ export function ThirdPartyLicenses(_props: Props): React.ReactNode {
                                         onClick={() => pkg.repository && openUrl(pkg.repository)}
                                         style={{ display: "flex", alignItems: "center", gap: "4px" }}
                                     >
-                                        <Badge radius="xs" color={pkg.source === "cargo" ? "orange" : "blue"}>
+                                        <Badge radius="xs" color={pkg.source === "crate" ? "orange" : "blue"}>
                                             {pkg.source}
                                         </Badge>
                                         {pkg.name} v{pkg.version}

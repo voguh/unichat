@@ -29,7 +29,7 @@ async function main() {
 
     const licenses = [
         ...cargoLicenses.filter(pkg => pkg.name !== "unichat").map(pkg => ({
-            source: "cargo",
+            source: "crate",
             name: pkg.name,
             version: pkg.version,
             authors: (pkg.authors ?? "").split("|"),
