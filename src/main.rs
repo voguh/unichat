@@ -24,7 +24,6 @@
 use std::fs;
 use std::path::PathBuf;
 
-use tauri::path::BaseDirectory;
 use tauri::Manager;
 
 use crate::utils::properties;
@@ -77,9 +76,15 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     }
 
     if fs::read_dir(&widgets_dir)?.next().is_none() {
-        let template_widgets_dir = app.path().resolve("widgets", BaseDirectory::Resource)?;
-        copy_folder(&template_widgets_dir, &widgets_dir)?;
+        let widget_defaults_dir = properties::get_app_path(AppPaths::UniChatWidgetDefaults);
+        copy_folder(&widget_defaults_dir, &widgets_dir)?;
         log::info!("Copied template widgets to: {}", widgets_dir.display());
+    }
+
+    let readme_path = widgets_dir.join("README.md");
+    if !readme_path.exists() {
+        let readme_notice = "This directory contains user-created widgets for UniChat. You can add your own widgets here.";
+        fs::write(&widgets_dir.join("README.md"), readme_notice)?;
     }
 
     /* ========================================================================================== */
