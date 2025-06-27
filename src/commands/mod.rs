@@ -153,7 +153,7 @@ pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &st
     let tauri_url = decode_url(label, url).map_err(|e| format!("{:?}", e))?;
 
     window.navigate(tauri_url).map_err(|e| format!("{:?}", e))?;
-    sleep(std::time::Duration::from_millis(1000));
+    sleep(std::time::Duration::from_millis(2000));
     if label == constants::YOUTUBE_CHAT_WINDOW && url != "about:blank" {
         window.eval(youtube::SCRAPPING_JS).unwrap();
     }
