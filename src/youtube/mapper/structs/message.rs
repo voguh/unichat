@@ -18,6 +18,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::bttv::BTTV_EMOTES_HASHSET;
 use crate::events::unichat::UniChatEmote;
 use crate::youtube::mapper::structs::ThumbnailsWrapper;
 
@@ -95,6 +96,12 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
                     }
                 }
             }
+        }
+    }
+
+    if let Some(bttv_emotes) = BTTV_EMOTES_HASHSET.get() {
+        if let Ok(guard) = bttv_emotes.read() {
+            emotes.extend(guard.iter().cloned());
         }
     }
 

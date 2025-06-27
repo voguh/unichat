@@ -79,7 +79,7 @@ pub enum UniChatAuthorType {
     Broadcaster
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatEmote {
     pub id: String,
@@ -108,8 +108,6 @@ pub struct UniChatInitEventPayload {
     pub channel_id: String,
     pub channel_name: Option<String>,
     pub platform: UniChatPlatform,
-
-    pub bttv_emotes: Vec<UniChatEmote>
 }
 
 /* <============================================================================================> */

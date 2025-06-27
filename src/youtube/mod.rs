@@ -15,6 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+use std::sync::OnceLock;
+use std::sync::RwLock;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
@@ -24,6 +26,7 @@ use tauri::Listener;
 use tauri::Manager;
 
 use crate::bttv::fetch_emotes;
+use crate::bttv::BTTV_EMOTES_HASHSET;
 use crate::events;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatInitEventPayload;
@@ -40,7 +43,6 @@ use crate::utils::settings::YouTubeSettingLogLevel;
 mod mapper;
 
 pub static SCRAPPING_JS: &str = include_str!("./static/scrapper.js");
-
 pub static YOUTUBE_RAW_EVENT: &str = "youtube_raw::event";
 
 /* ================================================================================================================== */
@@ -67,22 +69,36 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
     let url = payload.get("url").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'url' field in YouTube {event_type} payload"))?;
 
-    properties::set_item(PropertiesKey::YouTubeChannelId, channel_id.to_string())?;
-    let evt_payload = serde_json::json!({ "type": "ready", "channelId": channel_id, "url": url });
+    properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))
+        .map_err(|e| format!("{:?}", e))?;
 
-    let emotes = fetch_emotes(channel_id).map_err(|e| format!("{:?}", e))?;
+    let emotes = fetch_emotes(channel_id);
+    if let Ok(emotes) = emotes {
+        if let None = BTTV_EMOTES_HASHSET.get() {
+            BTTV_EMOTES_HASHSET.set(RwLock::new(emotes)).map_err(|_| "Failed to set BTTV emotes")?;
+        } else {
+            let bttv_emotes = BTTV_EMOTES_HASHSET.get().ok_or("BTTV emotes not initialized")?;
+            let mut guard = bttv_emotes.write().map_err(|e| format!("{:?}", e))?;
+
+            for emote in emotes {
+                guard.insert(emote);
+            }
+        }
+    }
+
     let init_event = UniChatEvent::Init {
         event_type: String::from(UNICHAT_EVENT_INIT_TYPE),
         data: UniChatInitEventPayload {
-            channel_id: channel_id.to_string(),
+            channel_id: String::from(channel_id),
             channel_name: None,
-            platform: UniChatPlatform::YouTube,
-            bttv_emotes: emotes
+            platform: UniChatPlatform::YouTube
         }
     };
     if let Err(err) = events::event_emitter().emit(init_event) {
         log::error!("An error occurred on send unichat event: {}", err);
     }
+
+    let evt_payload = serde_json::json!({ "type": "ready", "channelId": channel_id, "url": url });
 
     return dispatch_event(app, "unichat://youtube:event", evt_payload);
 }

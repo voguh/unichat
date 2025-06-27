@@ -24,6 +24,7 @@ use tauri::Manager;
 use tauri::Runtime;
 use tauri::Url;
 
+use crate::bttv::BTTV_EMOTES_HASHSET;
 use crate::utils;
 use crate::utils::constants;
 use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
@@ -151,6 +152,12 @@ fn decode_url(label: &str, url: &str) -> Result<Url, Box<dyn std::error::Error>>
 pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &str, url: &str) -> Result<(), String> {
     let window = app.get_webview_window(label).unwrap();
     let tauri_url = decode_url(label, url).map_err(|e| format!("{:?}", e))?;
+
+    if let Some(bttv_emotes) = BTTV_EMOTES_HASHSET.get() {
+        if let Ok(mut guard) = bttv_emotes.write() {
+            guard.clear();
+        }
+    }
 
     window.navigate(tauri_url).map_err(|e| format!("{:?}", e))?;
     sleep(std::time::Duration::from_millis(2000));
