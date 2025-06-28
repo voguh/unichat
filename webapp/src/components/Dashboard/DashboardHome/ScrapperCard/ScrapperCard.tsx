@@ -51,7 +51,6 @@ export function ScrapperCard(_props: Props): React.ReactNode {
     async function handleStop(): Promise<void> {
         try {
             setLoading(true);
-            await storageService.setItem(YOUTUBE_CHAT_URL_KEY, "about:blank");
             await invoke("update_webview_url", { label: "youtube-chat", url: "about:blank" });
             setCurrentActiveUrl(null);
         } catch (err) {
