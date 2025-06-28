@@ -108,6 +108,8 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         for (const message of (messages ?? [])) {
             message.remove();
         }
+    } else if (event.type === 'unichat:clear') {
+        MAIN_CONTAINER.innerHTML = '';
     }
 
     requestAnimationFrame(removeChildren);

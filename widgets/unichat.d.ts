@@ -40,6 +40,15 @@ export interface UniChatEventInit {
     };
 }
 
+export interface UniChatEventClear {
+    type: "unichat:clear";
+    data: {
+        channelId: string;
+        channelName: string | null;
+        platform: UniChatPlatform;
+    };
+}
+
 export interface UniChatEventMessage {
     type: "unichat:message";
     data: {

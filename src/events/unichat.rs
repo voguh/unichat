@@ -26,6 +26,11 @@ pub enum UniChatEvent {
         event_type: String,
         data: UniChatInitEventPayload
     },
+    Clear {
+        #[serde(rename = "type")]
+        event_type: String,
+        data: UniChatClearEventPayload
+    },
     Message {
         #[serde(rename = "type")]
         event_type: String,
@@ -97,7 +102,6 @@ pub struct UniChatBadge {
     pub tooltip: String,
     pub url: String
 }
-
 /* <============================================================================================> */
 
 pub const UNICHAT_EVENT_INIT_TYPE: &str = "unichat:init";
@@ -105,6 +109,18 @@ pub const UNICHAT_EVENT_INIT_TYPE: &str = "unichat:init";
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatInitEventPayload {
+    pub channel_id: String,
+    pub channel_name: Option<String>,
+    pub platform: UniChatPlatform
+}
+
+/* <============================================================================================> */
+
+pub const UNICHAT_EVENT_CLEAR_TYPE: &str = "unichat:clear";
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UniChatClearEventPayload {
     pub channel_id: String,
     pub channel_name: Option<String>,
     pub platform: UniChatPlatform
