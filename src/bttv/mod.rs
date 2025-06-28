@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::sync::OnceLock;
 use std::sync::RwLock;
 
@@ -26,7 +26,7 @@ use serde_json::Value;
 use crate::events::unichat::UniChatEmote;
 use crate::utils::parse_serde_error;
 
-pub static BTTV_EMOTES_HASHSET: OnceLock<RwLock<HashSet<UniChatEmote>>> = OnceLock::new();
+pub static BTTV_EMOTES_HASHSET: OnceLock<RwLock<HashMap<String, UniChatEmote>>> = OnceLock::new();
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -67,7 +67,7 @@ fn fetch_channel_emotes(url: String) -> Result<Vec<BTTVEmote>, Box<dyn std::erro
     return serde_json::from_value(serde_json::Value::Array(emotes_list)).map_err(parse_serde_error);
 }
 
-pub fn fetch_emotes(channel_id: &str) -> Result<HashSet<UniChatEmote>, Box<dyn std::error::Error>> {
+pub fn fetch_emotes(channel_id: &str) -> Result<HashMap<String, UniChatEmote>, Box<dyn std::error::Error>> {
     let global_url = String::from("https://api.betterttv.net/3/cached/emotes/global");
     let youtube_url = format!("https://api.betterttv.net/3/cached/users/youtube/{}", channel_id);
     let twitch_url = format!("https://api.betterttv.net/3/cached/users/twitch/{}", channel_id);
@@ -81,9 +81,9 @@ pub fn fetch_emotes(channel_id: &str) -> Result<HashSet<UniChatEmote>, Box<dyn s
     all_emotes.extend(youtube_emotes);
     all_emotes.extend(twitch_emotes);
 
-    let mut parsed = HashSet::new();
+    let mut parsed = HashMap::new();
     for emote in all_emotes.iter() {
-        parsed.insert(UniChatEmote {
+        parsed.insert(emote.code.clone(), UniChatEmote {
             id: emote.id.clone(),
             emote_type: emote.code.clone(),
             tooltip: emote.code.clone(),

@@ -15,7 +15,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-use std::sync::OnceLock;
 use std::sync::RwLock;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
@@ -80,8 +79,8 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
             let bttv_emotes = BTTV_EMOTES_HASHSET.get().ok_or("BTTV emotes not initialized")?;
             let mut guard = bttv_emotes.write().map_err(|e| format!("{:?}", e))?;
 
-            for emote in emotes {
-                guard.insert(emote);
+            for (key, value) in emotes {
+                guard.insert(key, value);
             }
         }
     }

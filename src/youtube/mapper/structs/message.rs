@@ -15,7 +15,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-use regex::Regex;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -70,49 +69,42 @@ pub type FontBaseEmojiThumbnailsWrapper = ThumbnailsWrapper;
 pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
     let mut emotes = Vec::new();
 
-    let mut bttv_emotes_list = Vec::new();
-    if let Some(bttv_emotes) = BTTV_EMOTES_HASHSET.get() {
-        if let Ok(guard) = bttv_emotes.read() {
-            bttv_emotes_list.extend(guard.iter().cloned());
-        }
-    }
+    if let Some(bttv_emotes) = BTTV_EMOTES_HASHSET.get().and_then(|h| h.read().ok()) {
+        for run in &message_runs.runs {
+            match run {
+                MessageRun::Text { text } => {
+                    if text.is_empty() {
+                        continue;
+                    }
 
-    for run in &message_runs.runs {
-        match run {
-            MessageRun::Text { text } => {
-                if !text.is_empty() {
-                    for emote in &bttv_emotes_list {
-                        let escaped_emote = regex::escape(&emote.emote_type);
-                        let pattern = format!(r"(^|\s){}(\s|$)", escaped_emote);
-                        if let Ok(re) = Regex::new(&pattern) {
-                            if re.is_match(text) {
-                                emotes.push(emote.clone());
-                            }
+                    for word in text.split_whitespace() {
+                        if let Some(emote) = bttv_emotes.get(word) {
+                            emotes.push(emote.clone());
                         }
                     }
-                }
-            },
-            MessageRun::Emoji { emoji } => {
-                match emoji {
-                    Emoji::Custom { emoji_id, image, shortcuts, .. } => {
-                        let shortcut = shortcuts.first().ok_or("No shortcuts found for custom emoji")?;
-                        let last_image = image.thumbnails.last().ok_or("No thumbnails found for font-based emoji")?;
+                },
+                MessageRun::Emoji { emoji } => {
+                    match emoji {
+                        Emoji::Custom { emoji_id, image, shortcuts, .. } => {
+                            let shortcut = shortcuts.first().ok_or("No shortcuts found for custom emoji")?;
+                            let last_image = image.thumbnails.last().ok_or("No thumbnails found for font-based emoji")?;
 
-                        emotes.push(UniChatEmote {
-                            id: emoji_id.clone(),
-                            emote_type: shortcut.clone(),
-                            tooltip: shortcut.clone(),
-                            url: last_image.url.clone()
-                        });
-                    },
-                    Emoji::FontBased { emoji_id, image, .. } => {
-                        let last_image = image.thumbnails.last().ok_or("No thumbnails found for font-based emoji")?;
-                        emotes.push(UniChatEmote {
-                            id: emoji_id.clone(),
-                            emote_type: emoji_id.clone(),
-                            tooltip: emoji_id.clone(),
-                            url: last_image.url.clone()
-                        });
+                            emotes.push(UniChatEmote {
+                                id: emoji_id.clone(),
+                                emote_type: shortcut.clone(),
+                                tooltip: shortcut.clone(),
+                                url: last_image.url.clone()
+                            });
+                        },
+                        Emoji::FontBased { emoji_id, image, .. } => {
+                            let last_image = image.thumbnails.last().ok_or("No thumbnails found for font-based emoji")?;
+                            emotes.push(UniChatEmote {
+                                id: emoji_id.clone(),
+                                emote_type: emoji_id.clone(),
+                                tooltip: emoji_id.clone(),
+                                url: last_image.url.clone()
+                            });
+                        }
                     }
                 }
             }
