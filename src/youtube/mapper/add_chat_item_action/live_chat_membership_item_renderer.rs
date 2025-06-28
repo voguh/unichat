@@ -43,14 +43,14 @@ use crate::youtube::mapper::structs::message::MessageRunsWrapper;
 struct LiveChatMembershipItemRenderer {
     id: String,
 
-    header_primary_text: Option<MessageRunsWrapper>,
-    header_subtext: HeaderSubtext,
-    message: Option<MessageRunsWrapper>,
-
     author_external_channel_id: String,
     author_name: AuthorNameWrapper,
     author_photo: AuthorPhotoThumbnailsWrapper,
     author_badges: Option<Vec<AuthorBadgeWrapper>>,
+
+    header_primary_text: Option<MessageRunsWrapper>,
+    header_subtext: HeaderSubtext,
+    message: Option<MessageRunsWrapper>,
 
     timestamp_usec: String
 }
@@ -64,26 +64,25 @@ struct HeaderSubtext {
 
 /* <============================================================================================> */
 
-fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> Result<String, Box<dyn std::error::Error>> {
-    let mut tier = String::from("");
+// Following the examples 7 and 8, when headerSubtext contains a simpleText, it is the tier
+// of the membership.
+fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> Result<Option<String>, Box<dyn std::error::Error>> {
+    let mut tier = None;
 
-    if let Some(_header_primary_text) = &parsed.header_primary_text {
-        if let Some(simple_text) = &parsed.header_subtext.simple_text {
-            tier =  simple_text.trim().to_string();
-        }
+    if let Some(simple_text) = &parsed.header_subtext.simple_text {
+        tier = Some(simple_text.clone());
     } else if let Some(runs) = &parsed.header_subtext.runs {
-        let run = runs.get(1).ok_or("No second run found in header subtext")?;
+        let run = runs.get(1).ok_or("No second run found in header primary text")?;
         match run {
             MessageRun::Text { text } => {
-                tier = text.trim().to_string();
-            },
+                tier = Some(text.clone());
+            }
             MessageRun::Emoji { .. } => return Err("Unexpected emoji in header subtext".into())
         }
     }
 
     return Ok(tier);
 }
-
 
 // I was able to detect two types of membership events (examples 7 and 8).
 // The event without a message and with 'runs' in the headerSubtext I am assuming is the first month
