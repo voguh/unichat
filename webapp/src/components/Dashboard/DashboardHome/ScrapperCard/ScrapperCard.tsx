@@ -2,7 +2,7 @@ import React from "react";
 
 import { Button, Card, DefaultMantineColor, TextInput, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconBolt, IconBrandYoutubeFilled, IconCheck, IconPlayerPlay } from "@tabler/icons-react";
+import { IconBolt, IconCheck, IconLoader, IconPlayerPlay, IconPlayerStopFilled } from "@tabler/icons-react";
 import { invoke } from "@tauri-apps/api/core";
 import * as eventService from "@tauri-apps/api/event";
 
@@ -23,13 +23,15 @@ const DEFAULT_STATUS_EVENT: IPCYouTubeStatusEvent = {
 };
 
 export function ScrapperCard(_props: Props): React.ReactNode {
+    const [loading, setLoading] = React.useState<boolean>(true);
     const [event, setEvent] = React.useState<IPCYouTubeStatusEvent>(DEFAULT_STATUS_EVENT);
     const [currentActiveUrl, setCurrentActiveUrl] = React.useState<string>("");
 
     const inputRef = React.useRef<HTMLInputElement>(null);
 
-    async function handleSubmit(): Promise<void> {
+    async function handleStart(): Promise<void> {
         try {
+            setLoading(true);
             const value = inputRef.current?.value ?? "";
             if (!Strings.isValidYouTubeChatUrl(value)) {
                 throw new Error("Invalid YouTube chat URL");
@@ -37,11 +39,26 @@ export function ScrapperCard(_props: Props): React.ReactNode {
 
             await storageService.setItem(YOUTUBE_CHAT_URL_KEY, value);
             await invoke("update_webview_url", { label: "youtube-chat", url: value });
-            await setCurrentActiveUrl(value);
-            notifications.show({ message: "Successfully saved" });
+            setCurrentActiveUrl(value);
         } catch (err) {
             console.error(err);
             notifications.show({ message: "An error occurred on save", color: "red" });
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function handleStop(): Promise<void> {
+        try {
+            setLoading(true);
+            await storageService.setItem(YOUTUBE_CHAT_URL_KEY, "about:blank");
+            await invoke("update_webview_url", { label: "youtube-chat", url: "about:blank" });
+            setCurrentActiveUrl(null);
+        } catch (err) {
+            console.error(err);
+            notifications.show({ message: "An error occurred on save", color: "red" });
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -59,9 +76,15 @@ export function ScrapperCard(_props: Props): React.ReactNode {
     }
 
     function handleStatusLabel(): string {
+        if (loading) {
+            return "Starting";
+        }
+
+        if (inputRef.current?.value === currentActiveUrl) {
+            return "Running";
+        }
+
         switch (event.type) {
-            case "ping":
-                return "Running";
             case "idle":
                 return "Start";
             default:
@@ -70,9 +93,15 @@ export function ScrapperCard(_props: Props): React.ReactNode {
     }
 
     function handleStatusIcon(): React.ReactNode {
+        if (loading) {
+            return <IconLoader size="20" />;
+        }
+
+        if (inputRef.current?.value === currentActiveUrl) {
+            return <IconBolt size="20" />;
+        }
+
         switch (event.type) {
-            case "ping":
-                return <IconBolt size="20" />;
             case "ready":
                 return <IconCheck size="20" />;
             case "idle":
@@ -82,16 +111,15 @@ export function ScrapperCard(_props: Props): React.ReactNode {
         }
     }
 
-    async function toggleWebview(label: string): Promise<void> {
-        invoke("toggle_webview", { label });
-    }
-
     React.useEffect(() => {
         async function init(): Promise<void> {
             if (inputRef.current) {
                 const urlKey = await storageService.getItem<string>(YOUTUBE_CHAT_URL_KEY);
                 inputRef.current.value = (urlKey ?? "").replace("about:blank", "");
             }
+
+            await new Promise((resolve) => setTimeout(resolve, 4000)); // Delay to await some event
+            setLoading(false);
         }
 
         init();
@@ -121,10 +149,6 @@ export function ScrapperCard(_props: Props): React.ReactNode {
         };
     }, []);
 
-    React.useEffect(() => {
-        console.log(inputRef.current?.value, currentActiveUrl);
-    }, [inputRef.current?.value, currentActiveUrl]);
-
     return (
         <Card withBorder shadow="xs">
             <ScrapperCardStyledContainer>
@@ -133,19 +157,24 @@ export function ScrapperCard(_props: Props): React.ReactNode {
                     label="Scrapper: YouTube chat URL"
                     placeholder="https://www.youtube.com/live_chat?v={VIDEO_ID}"
                     ref={inputRef}
-                    disabled={inputRef.current?.value === currentActiveUrl && event.type !== "idle"}
+                    disabled={inputRef.current?.value === currentActiveUrl}
                 />
                 <Tooltip label={YOUTUBE_EVENT_DESCRIPTION[event.type]} position="left">
                     <Button
                         size="sm"
                         leftSection={handleStatusIcon()}
                         color={handleStatusColor()}
-                        onClick={handleSubmit}
-                        disabled={inputRef.current?.value === currentActiveUrl && event.type !== "idle"}
+                        onClick={handleStart}
+                        disabled={loading || inputRef.current?.value === currentActiveUrl}
                     >
                         {handleStatusLabel()}
                     </Button>
                 </Tooltip>
+                {inputRef.current?.value === currentActiveUrl && (
+                    <Button size="sm" color="red" onClick={handleStop}>
+                        <IconPlayerStopFilled size="20" />
+                    </Button>
+                )}
             </ScrapperCardStyledContainer>
         </Card>
     );

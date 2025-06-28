@@ -14,4 +14,9 @@ export const ScrapperCardStyledContainer = styled.div`
     > .mantine-TextInput-root {
         flex: 1;
     }
+
+    > button:nth-of-type(2) {
+        padding: 0;
+        width: 36px;
+    }
 `;
