@@ -50,7 +50,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         message = message.replaceAll("{author_display_name}", data.authorDisplayName);
         message = message.replaceAll("{message}", buildMessage(data.messageText, data.emotes));
 
-        if (MAIN_CONTAINER.querySelector(`div[data-id=${data.messageId}]`) == null) {
+        if (MAIN_CONTAINER.querySelector(`div[data-id="${data.messageId}"]`) == null) {
             $(MAIN_CONTAINER).append(message);
         }
     } else if (event.type === "unichat:donate") {
@@ -65,10 +65,10 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         message = message.replaceAll("{value}", data.value);
         message = message.replaceAll("{message}", buildMessage(data.messageText, data.emotes));
 
-        if (MAIN_CONTAINER.querySelector(`div[data-id=${data.messageId}]`) == null) {
+        if (MAIN_CONTAINER.querySelector(`div[data-id="${data.messageId}"]`) == null) {
             $(MAIN_CONTAINER).append(message);
         }
-    } else if (event.type === "unichat:donate") {
+    } else if (event.type === "unichat:sponsor") {
         const data = event.data
         let message = SPONSOR_TEMPLATE.replaceAll("{author_id}", data.authorId);
         message = message.replaceAll("{platform}", data.platform);
@@ -77,10 +77,10 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         message = message.replaceAll("{badges}", buildBadges(data.authorBadges));
         message = message.replaceAll("{author_display_name}", data.authorDisplayName);
         message = message.replaceAll("{tier}", data.tier ?? "membership");
-        message = message.replaceAll("{value}", data.months);
+        message = message.replaceAll("{months}", data.months);
         message = message.replaceAll("{message}", buildMessage(data.messageText, data.emotes));
 
-        if (MAIN_CONTAINER.querySelector(`div[data-id=${data.messageId}]`) == null) {
+        if (MAIN_CONTAINER.querySelector(`div[data-id="${data.messageId}"]`) == null) {
             $(MAIN_CONTAINER).append(message);
         }
     } else if (event.type === "unichat:raid") {
