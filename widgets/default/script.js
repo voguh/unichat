@@ -14,13 +14,17 @@ function buildBadges(badges) {
 
 function buildMessage(message, emotes) {
     let safeMessage = message.replace(/\</g, '&lt;').replace(/\>/g, '&gt;');
+    if (!emotes || emotes.length === 0) {
+        return safeMessage;
+    }
 
-    return emotes.reduce((msg, emote) => {
-        const escapedEmote = RegExp.escape ? RegExp.escape(emote.type) : emote.type.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-        const pattern = `(?<=^|\\s)(${escapedEmote})(?=\\s|$)`;
-        const regex = new RegExp(pattern, 'g');
-        return msg.replace(regex, `<img src="${emote.url}" />`);
-    }, safeMessage);
+    const emotesMap = new Map(emotes.map(emote => [emote.type, emote.url]));
+    const processedWords = safeMessage.split(' ').map(word => {
+        const emoteUrl = emotesMap.get(word);
+        return emoteUrl ? `<img src="${emoteUrl}" />` : word;
+    });
+
+    return processedWords.join(' ');
 }
 
 function removeChildren() {
