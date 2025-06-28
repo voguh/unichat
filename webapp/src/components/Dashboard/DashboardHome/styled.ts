@@ -28,33 +28,6 @@ export const DashboardHomeStyledContainer = styled.div`
 
     > .fields {
         grid-area: FDS;
-
-        display: grid;
-        grid-template-areas: "ACT" "FDS";
-        grid-template-rows: min-content 1fr;
-        gap: 8px;
-
-        > .fields-actions {
-            grid-area: ACT;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 8px;
-
-            > button {
-                min-width: 34px;
-                padding: 0;
-            }
-        }
-
-        > .fields-values {
-            grid-area: FDS;
-            width: 100%;
-            height: 100%;
-            padding: 8px;
-        }
     }
 
     > .preview {
