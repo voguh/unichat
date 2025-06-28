@@ -15,8 +15,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+async function dispatchEvent(payload) {
+    payload.timestamp = Date.now();
+    await window.__TAURI__.event.emit("youtube_raw::event", payload);
+}
+
 async function dispatchPing() {
-    await window.__TAURI__.event.emit("youtube_raw::event", { type: "ping" });
+    await dispatchEvent({ type: "ping" });
     setTimeout(dispatchPing, 5000);
 }
 
@@ -38,12 +43,12 @@ async function handleScrapEvent(response) {
         const actions = parsed?.continuationContents?.liveChatContinuation?.actions;
 
         if (actions != null && actions.length > 0) {
-            await window.__TAURI__.event.emit("youtube_raw::event", { type: "message", actions });
+            await dispatchEvent({ type: "message", actions });
         }
     } catch (err) {
         console.error(err);
-        window.__TAURI__.event.emit("youtube_raw::event", { type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
-        window.__TAURI_PLUGIN_LOG__.error(err);
+        await window.__TAURI_PLUGIN_LOG__.error(err);
+        await dispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
     }
 }
 
@@ -71,7 +76,7 @@ try {
             throw new Error("Channel ID not found in YouTube initial data.");
         }
 
-        window.__TAURI__.event.emit("youtube_raw::event", { type: "ready", channelId, url: window.location.href });
+        dispatchEvent({ type: "ready", channelId: channelId, url: window.location.href });
 
         /* ============================================================================================================== */
 
@@ -127,6 +132,6 @@ try {
     }
 } catch (err) {
     console.error(err);
-    window.__TAURI__.event.emit("youtube_raw::event", { type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
     window.__TAURI_PLUGIN_LOG__.error(err);
+    dispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
 }

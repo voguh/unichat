@@ -44,32 +44,30 @@ use crate::utils::settings::YouTubeSettingLogLevel;
 
 mod mapper;
 
-pub static SCRAPPING_JS: &str = include_str!("./static/scrapper.js");
+pub static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
 pub static YOUTUBE_RAW_EVENT: &str = "youtube_raw::event";
 
 /* ================================================================================================================== */
 
-fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, mut payload: Value) -> Result<(), String> {
-    let now = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| format!("{}", e))?;
-    payload["timestamp"] = serde_json::json!(now.as_millis());
+fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, mut payload: Value) -> Result<(), String> {
+    if payload.get("type").is_none() {
+        return Err("Missing 'type' field in YouTube raw event payload".to_string());
+    }
+
+    if payload.get("timestamp").is_none() {
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| format!("{:?}", e))?;
+        payload["timestamp"] = serde_json::json!(now.as_millis());
+    }
 
     let window = app.get_webview_window("main").ok_or("Main window not found")?;
-    return window.emit(event_type, payload).map_err(|e| format!("Failed to emit event: {}", e));
+    return window.emit("unichat://youtube:event", payload).map_err(|e| format!("{:?}", e));
 }
 
 /* ================================================================================================================== */
 
-fn handle_installed_event(app: tauri::AppHandle<tauri::Wry>, _event_type: &str, _payload: &Value) -> Result<(), String> {
-    let evt_payload = serde_json::json!({ "type": "installed" });
-
-    return dispatch_event(app, "unichat://youtube:event", evt_payload);
-}
-
 fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
     let channel_id = payload.get("channelId").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'channelId' field in YouTube {event_type} payload"))?;
-    let url = payload.get("url").and_then(|v| v.as_str())
-        .ok_or(format!("Missing or invalid 'url' field in YouTube {event_type} payload"))?;
 
     properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))
         .map_err(|e| format!("{:?}", e))?;
@@ -100,32 +98,7 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
         log::error!("An error occurred on send unichat event: {}", err);
     }
 
-    let evt_payload = serde_json::json!({ "type": "ready", "channelId": channel_id, "url": url });
-
-    return dispatch_event(app, "unichat://youtube:event", evt_payload);
-}
-
-fn handle_idle_event(app: tauri::AppHandle<tauri::Wry>, _event_type: &str, _payload: &Value) -> Result<(), String> {
-    let evt_payload = serde_json::json!({ "type": "idle" });
-
-    return dispatch_event(app, "unichat://youtube:event", evt_payload);
-}
-
-fn handle_ping_event(app: tauri::AppHandle<tauri::Wry>, _event_type: &str, _payload: &Value) -> Result<(), String> {
-    let evt_payload = serde_json::json!({ "type": "ping" });
-
-    return dispatch_event(app, "unichat://youtube:event", evt_payload);
-}
-
-fn handle_error_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
-    let message = payload.get("message").and_then(|v| v.as_str())
-        .ok_or(format!("Missing or invalid 'message' field in '{event_type}' event payload"))?;
-    let stack = payload.get("stack").and_then(|v| v.as_str())
-        .ok_or(format!("Missing or invalid 'stack' field in '{event_type}' event payload"))?;
-
-    let evt_payload = serde_json::json!({ "type": "error", "message": message, "stack": stack });
-
-    return dispatch_event(app, "unichat://youtube:event", evt_payload);
+    return dispatch_event(app, payload.clone());
 }
 
 /* ================================================================================================================== */
@@ -187,14 +160,9 @@ fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: tauri::Event) -> Resul
         .ok_or("Missing or invalid 'type' field in YouTube raw event payload")?;
 
     return match event_type {
-        "idle" => handle_idle_event(app, event_type, &payload),
-        "installed" => handle_installed_event(app, event_type, &payload),
         "ready" => handle_ready_event(app, event_type, &payload),
-        "ping" => handle_ping_event(app, event_type, &payload),
-        "error" => handle_error_event(app, event_type, &payload),
-
         "message" => handle_message_event(app, event_type, &payload),
-        _ => Err(format!("Unknown YouTube raw event type: {}", event_type))
+        _ => dispatch_event(app, payload.clone())
     };
 }
 
