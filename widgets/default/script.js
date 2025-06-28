@@ -1,3 +1,4 @@
+let INITIAL_DATA = {};
 const MAIN_CONTAINER = document.querySelector("#main-container");
 const MESSAGE_TEMPLATE = document.querySelector("#chatlist_item").innerHTML;
 const DONATE_TEMPLATE = document.querySelector("#donate_item").innerHTML;
@@ -37,7 +38,9 @@ function removeChildren() {
 }
 
 window.addEventListener("unichat:event", function ({ detail: event }) {
-    if (event.type === "unichat:message") {
+    if (event.type === "unichat:init") {
+        INITIAL_DATA = event.data;
+    } else if (event.type === "unichat:message") {
         const data = event.data
         let message = MESSAGE_TEMPLATE.replaceAll("{author_id}", data.authorId);
         message = message.replaceAll("{platform}", data.platform);

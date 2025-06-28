@@ -31,6 +31,15 @@ export interface UniChatBadge {
     url: string;
 }
 
+export interface UniChatEventInit {
+    type: "unichat:init";
+    data: {
+        channelId: string;
+        channelName: string | null;
+        platform: UniChatPlatform;
+    };
+}
+
 export interface UniChatEventMessage {
     type: "unichat:message";
     data: {

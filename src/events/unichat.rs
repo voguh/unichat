@@ -107,7 +107,7 @@ pub const UNICHAT_EVENT_INIT_TYPE: &str = "unichat:init";
 pub struct UniChatInitEventPayload {
     pub channel_id: String,
     pub channel_name: Option<String>,
-    pub platform: UniChatPlatform,
+    pub platform: UniChatPlatform
 }
 
 /* <============================================================================================> */
