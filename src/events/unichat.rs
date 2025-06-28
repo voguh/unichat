@@ -201,7 +201,7 @@ pub struct UniChatSponsorEventPayload {
     pub author_badges: Vec<UniChatBadge>,
     pub author_type: UniChatAuthorType,
 
-    pub tier: String,
+    pub tier: Option<String>,
     pub months: u16,
     pub message_text: Option<String>
 }
@@ -225,7 +225,7 @@ pub struct UniChatSponsorGiftEventPayload {
     pub author_badges: Vec<UniChatBadge>,
     pub author_type: UniChatAuthorType,
 
-    pub tier: String,
+    pub tier: Option<String>,
     pub count: u16
 }
 

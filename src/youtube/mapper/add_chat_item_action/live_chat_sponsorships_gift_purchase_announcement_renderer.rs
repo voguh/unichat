@@ -36,7 +36,6 @@ use crate::youtube::mapper::structs::author::AuthorNameWrapper;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
 use crate::youtube::mapper::structs::message::MessageRun;
 use crate::youtube::mapper::structs::message::MessageRunsWrapper;
-use crate::youtube::mapper::structs::ThumbnailsWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -59,13 +58,11 @@ struct Header {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct LiveChatSponsorshipsHeaderRenderer {
-    primary_text: MessageRunsWrapper,
-
-    image: ThumbnailsWrapper,
-
     author_name: AuthorNameWrapper,
     author_photo: AuthorPhotoThumbnailsWrapper,
-    author_badges: Option<Vec<AuthorBadgeWrapper>>
+    author_badges: Option<Vec<AuthorBadgeWrapper>>,
+
+    primary_text: MessageRunsWrapper
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -78,17 +75,6 @@ struct RunsWrapper {
 #[serde(rename_all = "camelCase")]
 struct Run {
     pub text: String
-}
-
-fn parse_tier(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<String, Box<dyn std::error::Error>> {
-    let run = render.primary_text.runs.get(3).ok_or("No tier run found")?;
-
-    let tier = match run {
-        MessageRun::Text { text } => text,
-        MessageRun::Emoji { .. } => return Err("Unexpected emoji in tier run".into()),
-    };
-
-    return Ok(tier.clone());
 }
 
 fn parse_count(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<u16, Box<dyn std::error::Error>> {
@@ -115,7 +101,6 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let author_photo = parse_author_photo(&render.author_photo)?;
     let author_type = parse_author_type(&render.author_badges)?;
 
-    let tier = parse_tier(&render)?;
     let count = parse_count(&render)?;
 
     let event = UniChatEvent::SponsorGift {
@@ -133,7 +118,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             author_profile_picture_url: author_photo,
             author_type: author_type,
 
-            tier: tier,
+            tier: None,
             count: count,
         }
     };
