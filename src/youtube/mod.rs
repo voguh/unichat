@@ -15,6 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+use std::fs;
+use std::io::Write;
 use std::sync::RwLock;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
@@ -34,6 +36,7 @@ use crate::events::unichat::UNICHAT_EVENT_INIT_TYPE;
 use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
 use crate::utils::is_dev;
 use crate::utils::properties;
+use crate::utils::properties::AppPaths;
 use crate::utils::properties::PropertiesKey;
 use crate::utils::settings;
 use crate::utils::settings::SettingsKeys;
@@ -128,12 +131,6 @@ fn handle_error_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
 /* ================================================================================================================== */
 
 fn log_action(file_name: &str, content: &impl std::fmt::Display) {
-    use std::fs;
-    use std::io::Write;
-
-    use crate::utils::properties;
-    use crate::utils::properties::AppPaths;
-
     let app_log_dir = properties::get_app_path(AppPaths::AppLog);
     let youtube_log_dir = app_log_dir.join("youtube");
     if !youtube_log_dir.exists() {
