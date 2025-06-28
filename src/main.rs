@@ -89,6 +89,13 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
     /* ========================================================================================== */
 
+    if utils::is_dev() {
+        let window = app.get_webview_window("main").ok_or("Failed to get main window")?;
+        window.open_devtools();
+    }
+
+    /* ========================================================================================== */
+
     let http_server = actix::new(app);
     app.manage(actix::ActixState{ handle: http_server });
 
