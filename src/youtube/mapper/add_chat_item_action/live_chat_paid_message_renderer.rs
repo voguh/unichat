@@ -88,10 +88,10 @@ fn build_option_message(message: &Option<MessageRunsWrapper>) -> Result<Option<S
 fn build_option_emotes(message: &Option<MessageRunsWrapper>) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
     if let Some(message) = message {
         let emotes = parse_message_emojis(message)?;
-        return emotes;
+        return Ok(emotes);
     }
 
-    return Vec::new();
+    return Ok(Vec::new());
 }
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
