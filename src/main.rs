@@ -136,9 +136,6 @@ async fn main() {
             commands::get_app_info,
             commands::store_get_item,
             commands::store_set_item,
-            commands::settings_list_all,
-            commands::settings_get_item,
-            commands::settings_set_item,
             commands::toggle_webview,
             commands::update_webview_url,
             commands::list_widgets
