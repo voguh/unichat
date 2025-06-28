@@ -31,7 +31,6 @@ interface Props {
 
 export function ThirdPartyLicenses(_props: Props): React.ReactNode {
     const { metadata } = React.useContext(AppContext);
-    console.log(typeof metadata.thirdPartyLicenses);
 
     return (
         <ThirdPartyLicensesStyledContainer>
