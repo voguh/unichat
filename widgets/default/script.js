@@ -88,7 +88,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         let message = RAID_ITEM.replaceAll("{author_id}", data.authorId);
         message = message.replaceAll("{platform}", data.platform);
         message = message.replaceAll("{message_id}", data.messageId);
-        message = message.replaceAll("{message}", `Just gifted ${data.count} ${data.platform === "youtube" ? "memberships": "subscriptions"} ${data.tier ? `with tier ${data.tier}`: ""}!`);
+        message = message.replaceAll("{message}", `${data.authorDisplayName}, just gifted ${data.count} ${data.platform === "youtube" ? "memberships": "subscriptions"} ${data.tier ? `with tier ${data.tier}`: ""}!`);
 
         if (MAIN_CONTAINER.querySelector(`div[data-id="${data.messageId}"]`) == null) {
             $(MAIN_CONTAINER).append(message);
