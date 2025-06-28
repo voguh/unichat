@@ -118,6 +118,10 @@ html, body {
     white-space: nowrap;
 }
 
+#main-container > .donate-item > .meta > .badges:empty {
+    display: none;
+}
+
 #main-container > .donate-item > .meta > .badges > img {
     width: var(--badge-size);
     height: var(--badge-size);
@@ -226,6 +230,10 @@ html, body {
     align-items: center;
     gap: 4px;
     white-space: nowrap;
+}
+
+#main-container > .sponsor-item > .meta > .badges:empty {
+    display: none;
 }
 
 #main-container > .sponsor-item > .meta > .badges > img {
