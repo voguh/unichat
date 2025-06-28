@@ -44,13 +44,13 @@ use crate::youtube::mapper::structs::message::MessageRunsWrapper;
 struct LiveChatPaidMessageRenderer {
     id: String,
 
-    purchase_amount_text: PurchaseAmountText,
-    message: Option<MessageRunsWrapper>,
-
     author_external_channel_id: String,
     author_name: AuthorNameWrapper,
     author_photo: AuthorPhotoThumbnailsWrapper,
     author_badges: Option<Vec<AuthorBadgeWrapper>>,
+
+    purchase_amount_text: PurchaseAmountText,
+    message: Option<MessageRunsWrapper>,
 
     timestamp_usec: String
 }
@@ -64,22 +64,16 @@ struct PurchaseAmountText {
 /* <============================================================================================> */
 
 fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(String, f32), Box<dyn std::error::Error>> {
-    let mut raw_value = String::from("");
-    let mut currency = String::from("");
+    let raw_text = &purchase_amount_text.simple_text;
 
-    for ch in purchase_amount_text.simple_text.chars().rev() {
-        if ch.is_numeric() || ch == '.' || ch == ',' {
-            if ch.is_numeric() || ch == '.' {
-                raw_value.insert(0, ch);
-            }
-        } else {
-            currency.insert(0, ch);
-        }
+    if let Some(index) = raw_text.find(|c: char| c.is_ascii_digit()) {
+        let (currency, value_raw) = raw_text.split_at(index);
+        let value: f32 = value_raw.parse()?;
+
+        return Ok((currency.to_string(), value));
     }
 
-    let value: f32 = raw_value.parse()?;
-
-    return Ok((currency, value));
+    return Err("Invalid purchase amount text format".into());
 }
 
 fn build_option_message(message: &Option<MessageRunsWrapper>) -> Result<Option<String>, Box<dyn std::error::Error>> {
