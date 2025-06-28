@@ -23,6 +23,7 @@ use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UNICHAT_EVENT_DONATE_TYPE;
+use crate::utils::normalize_value;
 use crate::utils::parse_serde_error;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
@@ -68,7 +69,7 @@ fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(S
 
     if let Some(index) = raw_text.find(|c: char| c.is_ascii_digit()) {
         let (currency, value_raw) = raw_text.split_at(index);
-        let value: f32 = value_raw.parse()?;
+        let value = normalize_value(value_raw)?;
 
         return Ok((currency.to_string(), value));
     }
