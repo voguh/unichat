@@ -80,7 +80,7 @@ export interface UniChatEventRaid {
         channelName: string | null;
         platform: UniChatPlatform;
 
-        authorId: string;
+        authorId: string | null;
         authorUsername: string;
         authorDisplayName: string;
         authorProfilePictureUrl: string;
@@ -123,7 +123,7 @@ export interface UniChatSponsorGiftEvent {
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
 
-        tier: string;
+        tier: string | null;
         count: number;
     };
 }
@@ -146,7 +146,7 @@ export interface UniChatDonateEvent {
         currency: string;
 
         messageId: string;
-        messageText: string;
+        messageText: string | null;
         emotes: UniChatEmote[];
     };
 }
