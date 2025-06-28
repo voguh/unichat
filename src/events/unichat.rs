@@ -179,6 +179,7 @@ pub struct UniChatRaidEventPayload {
     pub author_display_name: String,
     pub author_profile_picture_url: String,
 
+    pub message_id: String,
     pub viewer_count: Option<u16>
 }
 
@@ -201,6 +202,7 @@ pub struct UniChatSponsorEventPayload {
     pub author_badges: Vec<UniChatBadge>,
     pub author_type: UniChatAuthorType,
 
+    pub message_id: String,
     pub tier: Option<String>,
     pub months: u16,
     pub message_text: Option<String>
@@ -225,6 +227,7 @@ pub struct UniChatSponsorGiftEventPayload {
     pub author_badges: Vec<UniChatBadge>,
     pub author_type: UniChatAuthorType,
 
+    pub message_id: String,
     pub tier: Option<String>,
     pub count: u16
 }

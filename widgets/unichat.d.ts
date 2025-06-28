@@ -85,6 +85,7 @@ export interface UniChatEventRaid {
         authorDisplayName: string;
         authorProfilePictureUrl: string;
 
+        messageId: string;
         viewerCount: number | null;
     };
 }
@@ -103,6 +104,7 @@ export interface UniChatEventSponsor {
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
 
+        messageId: string;
         tier: string;
         months: number;
         messageText: string | null;
@@ -123,6 +125,7 @@ export interface UniChatSponsorGiftEvent {
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
 
+        messageId: string;
         tier: string | null;
         count: number;
     };

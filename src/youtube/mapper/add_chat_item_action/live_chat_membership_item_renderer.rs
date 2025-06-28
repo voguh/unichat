@@ -142,6 +142,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             author_profile_picture_url: author_photo,
             author_type: author_type,
 
+            message_id: parsed.id,
             tier: tier,
             months: months,
             message_text: message
