@@ -253,5 +253,5 @@ pub struct UniChatDonateEventPayload {
 
     pub message_id: String,
     pub message_text: Option<String>,
-    pub emotes: Option<Vec<UniChatEmote>>,
+    pub emotes: Vec<UniChatEmote>,
 }
