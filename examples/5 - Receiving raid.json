@@ -1,0 +1,64 @@
+{
+  "addBannerToLiveChatCommand": {
+    "bannerProperties": { "bannerTimeoutMs": "20000", "isEphemeral": true },
+    "bannerRenderer": {
+      "liveChatBannerRenderer": {
+        "actionId": "XXXXXXXXXXXXXXXXXXXX",
+        "bannerType": "LIVE_CHAT_BANNER_TYPE_CROSS_CHANNEL_REDIRECT",
+        "targetId": "live-chat-banner",
+        "isStackable": true,
+
+        "contents": {
+          "liveChatBannerRedirectRenderer": {
+            "authorPhoto": {
+              "thumbnails": [
+                { "width": 32, "height": 32, "url": "XXXXXXXXXXXXXXXXXXXX" },
+                { "width": 64, "height": 64, "url": "XXXXXXXXXXXXXXXXXXXX" }
+              ]
+            },
+
+            "bannerMessage": {
+              "runs": [
+                {
+                  "bold": true,
+                  "fontFace": "FONT_FACE_ROBOTO_REGULAR",
+                  "text": "XXXXXXXXXXXXXXXXXXXX",
+                  "textColor": 4294967295
+                },
+                {
+                  "fontFace": "FONT_FACE_ROBOTO_REGULAR",
+                  "text": " and their viewers just joined. Say hello!",
+                  "textColor": 4294967295
+                }
+              ]
+            },
+
+            "contextMenuButton": {
+              "buttonRenderer": {
+                "icon": { "iconType": "MORE_VERT" },
+                "accessibility": { "label": "Chat actions" },
+                "accessibilityData": { "accessibilityData": { "label": "Chat actions" } },
+                "command": {
+                  "commandMetadata": { "webCommandMetadata": { "ignoreNavigation": true } },
+                  "liveChatItemContextMenuEndpoint": { "params": "XXXXXXXXXXXXXXXXXXXX" }
+                }
+              }
+            },
+            "inlineActionButton": {
+              "buttonRenderer": {
+                "isDisabled": false,
+                "size": "SIZE_DEFAULT",
+                "style": "STYLE_DEFAULT",
+                "text": { "runs": [{ "text": "Learn more" }] },
+                "command": {
+                  "urlEndpoint": { "target": "TARGET_NEW_WINDOW", "url": "XXXXXXXXXXXXXXXXXXXX" },
+                  "commandMetadata": { "webCommandMetadata": { "rootVe": 83769, "url": "XXXXXXXXXXXXXXXXXXXX", "webPageType": "WEB_PAGE_TYPE_UNKNOWN" } }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
