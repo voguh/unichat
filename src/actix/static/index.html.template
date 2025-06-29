@@ -32,16 +32,30 @@
         </style>
         <script defer>
             document.addEventListener("DOMContentLoaded", () => {
-                const socket = new WebSocket('ws://localhost:9527/ws')
-                socket.addEventListener("message", function (message) {
-                    const event = JSON.parse(message.data);
+                function connect() {
+                    const socket = new WebSocket('ws://localhost:9527/ws')
+                    socket.addEventListener("message", function (message) {
+                        const event = JSON.parse(message.data);
 
-                    if (event.type === "unichat:load") {
-                        window.dispatchEvent(new CustomEvent("unichat:load", { detail: event.data }));
-                    } else {
-                        window.dispatchEvent(new CustomEvent("unichat:event", { detail: event }));
-                    }
-                });
+                        if (event.type === "unichat:load") {
+                            window.dispatchEvent(new CustomEvent("unichat:load", { detail: event.data }));
+                        } else {
+                            window.dispatchEvent(new CustomEvent("unichat:event", { detail: event }));
+                        }
+                    });
+
+                    socket.addEventListener("close", () => {
+                        console.log("Socket disconnected. Attempting to reconnect in 1 second...");
+                        setTimeout(connect, 1000);
+                    });
+
+                    socket.addEventListener("error", (err) => {
+                        console.error("Socket encountered error: ", err.message, "Closing socket");
+                        socket.close();
+                    });
+                }
+
+                connect();
 
                 {{WIDGET_SCRIPT}}
             });
