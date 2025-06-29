@@ -14,7 +14,7 @@ edition = "2021"
 custom-protocol = ["tauri/custom-protocol"]
 
 [build-dependencies]
-tauri-build = { version = "2.0.2", features = [] }
+tauri-build = { version = "2.3.0", features = [] }
 
 [dependencies]
 actix-web = "4.11.0"
@@ -23,7 +23,7 @@ log = "0.4.27"
 regex = "1.11.1"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
-tauri = { version = "2.6.1", features = [] }
+tauri = { version = "2.6.2", features = [] }
 tauri-plugin-log = "2.6.0"
 tauri-plugin-opener = "2.4.0"
 tauri-plugin-store = "2.3.0"

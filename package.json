@@ -38,12 +38,11 @@
         "postcss-simple-vars": "7.0.1",
         "react": "18.3.1",
         "react-dom": "18.3.1",
-        "react-hook-form": "7.58.1",
         "styled-components": "6.1.19"
     },
     "devDependencies": {
         "@swc/plugin-styled-components": "8.0.2",
-        "@tauri-apps/cli": "2.6.1",
+        "@tauri-apps/cli": "2.6.2",
         "@testing-library/jest-dom": "6.6.3",
         "@testing-library/react": "16.3.0",
         "@types/node": "22.15.21",
@@ -64,9 +63,9 @@
         "eslint-plugin-react-hooks": "5.2.0",
         "eslint-plugin-vitest": "0.5.4",
         "jsdom": "26.1.0",
-        "prettier": "3.6.1",
+        "prettier": "3.6.2",
         "typescript": "5.8.3",
-        "vite": "6.3.5",
+        "vite": "7.0.0",
         "vitest": "3.2.4"
     }
 }

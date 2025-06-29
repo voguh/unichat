@@ -1,5 +1,5 @@
 {
-    "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/refs/tags/tauri-v2.6.0/crates/tauri-cli/config.schema.json",
+    "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/refs/tags/tauri-v2.6.2/crates/tauri-cli/config.schema.json",
     "identifier": "unichat",
     "build": {
         "beforeDevCommand": "pnpm dev:ui",
