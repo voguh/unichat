@@ -138,7 +138,7 @@ pub struct UniChatMessageEventPayload {
     pub platform: UniChatPlatform,
 
     pub author_id: String,
-    pub author_username: String,
+    pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_display_color: String,
     pub author_profile_picture_url: String,
@@ -191,8 +191,9 @@ pub struct UniChatRaidEventPayload {
     pub platform: UniChatPlatform,
 
     pub author_id: Option<String>,
-    pub author_username: String,
+    pub author_username: Option<String>,
     pub author_display_name: String,
+    pub author_display_color: String,
     pub author_profile_picture_url: String,
 
     pub message_id: String,
@@ -211,7 +212,7 @@ pub struct UniChatSponsorEventPayload {
     pub platform: UniChatPlatform,
 
     pub author_id: String,
-    pub author_username: String,
+    pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_display_color: String,
     pub author_profile_picture_url: String,
@@ -236,7 +237,7 @@ pub struct UniChatSponsorGiftEventPayload {
     pub platform: UniChatPlatform,
 
     pub author_id: String,
-    pub author_username: String,
+    pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_display_color: String,
     pub author_profile_picture_url: String,
@@ -260,7 +261,7 @@ pub struct UniChatDonateEventPayload {
     pub platform: UniChatPlatform,
 
     pub author_id: String,
-    pub author_username: String,
+    pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_display_color: String,
     pub author_profile_picture_url: String,

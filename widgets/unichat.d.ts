@@ -57,8 +57,9 @@ export interface UniChatEventMessage {
         platform: UniChatPlatform;
 
         authorId: string;
-        authorUsername: string;
+        authorUsername: string | string;
         authorDisplayName: string;
+        authorDisplayColor: string;
         authorProfilePictureUrl: string;
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
@@ -98,9 +99,10 @@ export interface UniChatEventRaid {
         channelName: string | null;
         platform: UniChatPlatform;
 
-        authorId: string | null;
-        authorUsername: string;
+        authorId: string;
+        authorUsername: string | string;
         authorDisplayName: string;
+        authorDisplayColor: string;
         authorProfilePictureUrl: string;
 
         messageId: string;
@@ -116,8 +118,9 @@ export interface UniChatEventSponsor {
         platform: UniChatPlatform;
 
         authorId: string;
-        authorUsername: string;
+        authorUsername: string | string;
         authorDisplayName: string;
+        authorDisplayColor: string;
         authorProfilePictureUrl: string;
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
@@ -137,8 +140,9 @@ export interface UniChatSponsorGiftEvent {
         platform: UniChatPlatform;
 
         authorId: string;
-        authorUsername: string;
+        authorUsername: string | string;
         authorDisplayName: string;
+        authorDisplayColor: string;
         authorProfilePictureUrl: string;
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
@@ -157,8 +161,9 @@ export interface UniChatDonateEvent {
         platform: UniChatPlatform;
 
         authorId: string;
-        authorUsername: string;
+        authorUsername: string | string;
         authorDisplayName: string;
+        authorDisplayColor: string;
         authorProfilePictureUrl: string;
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;

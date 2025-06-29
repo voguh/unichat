@@ -15,6 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+use std::sync::LazyLock;
+
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -61,16 +63,36 @@ pub struct AuthorBadgeIconWrapper {
 
 /* <================================================================================================================> */
 
-pub fn parse_author_username(name: &AuthorNameWrapper) -> Result<String, Box<dyn std::error::Error>> {
-    return Ok(name.simple_text.clone());
+static USERNAME_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[\p{L}\p{N}_\.-]{3,30}$").unwrap());
+
+pub fn parse_author_username(name: &AuthorNameWrapper) -> Result<Option<String>, Box<dyn std::error::Error>> {
+    return parse_author_username_str(name.simple_text.clone());
+}
+
+pub fn parse_author_username_str(name: String) -> Result<Option<String>, Box<dyn std::error::Error>> {
+    let mut username = name.clone();
+    if username.starts_with("@") {
+        username = username.replacen("@", "", 1);
+    }
+
+    if !USERNAME_REGEX.is_match(&username) {
+        return Ok(None);
+    }
+
+    return Ok(Some(username));
 }
 
 pub fn parse_author_name(name: &AuthorNameWrapper) -> Result<String, Box<dyn std::error::Error>> {
-    if name.simple_text.clone().starts_with("@") {
-        return Ok(name.simple_text.clone().replacen("@", "", 1));
+    return parse_author_name_str(name.simple_text.clone());
+}
+
+pub fn parse_author_name_str(name: String) -> Result<String, Box<dyn std::error::Error>> {
+    let mut username = name.clone();
+    if username.starts_with("@") {
+        username = username.replacen("@", "", 1);
     }
 
-    return Ok(name.simple_text.clone());
+    return Ok(username);
 }
 
 pub fn parse_author_photo(photo: &AuthorPhotoThumbnailsWrapper) -> Result<String, Box<dyn std::error::Error>> {

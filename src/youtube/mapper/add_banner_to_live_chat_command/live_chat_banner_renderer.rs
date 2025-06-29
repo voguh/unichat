@@ -25,6 +25,9 @@ use crate::events::unichat::UNICHAT_EVENT_RAID_TYPE;
 use crate::utils::parse_serde_error;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
+use crate::youtube::mapper::structs::author::parse_author_color;
+use crate::youtube::mapper::structs::author::parse_author_name_str;
+use crate::youtube::mapper::structs::author::parse_author_username_str;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -72,6 +75,9 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     if parsed.banner_type == "LIVE_CHAT_BANNER_TYPE_CROSS_CHANNEL_REDIRECT" {
         if let Some(renderer) = parsed.contents.live_chat_banner_redirect_renderer {
             let first_run = renderer.banner_message.runs.first().ok_or("No runs found in banner message")?;
+            let author_username = parse_author_username_str(first_run.text.clone())?;
+            let author_name = parse_author_name_str(first_run.text.clone())?;
+            let author_color = parse_author_color(&author_name)?;
             let author_photo = renderer.author_photo.thumbnails.last().ok_or("No thumbnails found in author photo")?;
 
             if first_run.bold.is_some() {
@@ -83,8 +89,9 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
                         platform: UniChatPlatform::YouTube,
 
                         author_id: None,
-                        author_username: String::from(first_run.text.clone().trim()),
-                        author_display_name: String::from(first_run.text.trim()),
+                        author_username: author_username,
+                        author_display_name: author_name,
+                        author_display_color: author_color,
                         author_profile_picture_url: author_photo.url.clone(),
 
                         message_id: parsed.action_id,
