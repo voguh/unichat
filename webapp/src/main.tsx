@@ -34,10 +34,16 @@ import "@fontsource/roboto-mono/700-italic";
 import React from "react";
 import { createRoot } from "react-dom/client";
 
+import { invoke } from "@tauri-apps/api/core";
+
 import App from "./App";
 
-window.addEventListener("contextmenu", async (event) => {
-    event.preventDefault();
+invoke<boolean>("is_dev").then((isDev) => {
+    if (!isDev) {
+        window.addEventListener("contextmenu", async (event) => {
+            event.preventDefault();
+        });
+    }
 });
 
 const root = createRoot(document.querySelector("#root"));

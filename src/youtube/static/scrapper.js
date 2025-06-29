@@ -54,6 +54,15 @@ async function handleScrapEvent(response) {
 
 try {
     if (window.fetch.__WRAPPED__ == null) {
+        // Prevent right-click context menu in production
+        window.__TAURI__.core.invoke("is_dev").then((isDev) => {
+            if (!isDev) {
+                window.addEventListener("contextmenu", async (event) => {
+                    event.preventDefault();
+                });
+            }
+        });
+
         // Retrieve channel ID from YouTube initial data
         const ytInitialData = window.ytInitialData;
         const timedContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.timedContinuationData?.continuation;

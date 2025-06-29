@@ -70,6 +70,14 @@ pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
 
 /* ================================================================================================================== */
 
+
+#[tauri::command]
+pub async fn is_dev<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, String> {
+    return Ok(utils::is_dev())
+}
+
+/* ================================================================================================================== */
+
 #[tauri::command]
 pub async fn store_get_item<R: tauri::Runtime>(_app: tauri::AppHandle<R>, key: &str) -> Result<Value, String> {
     if key.starts_with("settings") {

@@ -89,13 +89,6 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
     /* ========================================================================================== */
 
-    if utils::is_dev() {
-        let window = app.get_webview_window("main").ok_or("Failed to get main window")?;
-        window.open_devtools();
-    }
-
-    /* ========================================================================================== */
-
     let http_server = actix::new(app);
     app.manage(actix::ActixState{ handle: http_server });
 
@@ -141,6 +134,7 @@ async fn main() {
         .plugin(tauri_plugin_opener::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             commands::get_app_info,
+            commands::is_dev,
             commands::store_get_item,
             commands::store_set_item,
             commands::toggle_webview,
