@@ -32,11 +32,13 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap:8px;
-    white-space: nowrap;
+    gap: 8px;
     padding: 4px 8px;
     border-radius: 4px;
     background: #343a40;
+
+    overflow: hidden;
+    max-width: calc(var(--maximum-width, 100%) - 64px);
 }
 
 #main-container > div > .author-meta > .badges {
@@ -46,7 +48,6 @@ html, body {
     justify-content: center;
     align-items: center;
     gap: 4px;
-    white-space: nowrap;
 }
 
 #main-container > div > .author-meta > .badges:empty {
@@ -59,11 +60,15 @@ html, body {
 }
 
 #main-container > div > .author-meta > .name {
-    width: fit-content;
+    flex: 1 1 auto;
     height: var(--badge-size);
     color: #FFFFFF;
-    white-space: nowrap;
     font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-clamp: 1;
+    white-space: nowrap;
+
 }
 /* <==============================================[ END SHARED STYLE ]==============================================> */
 

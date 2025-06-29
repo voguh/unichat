@@ -18,8 +18,12 @@ function buildBadges(badges) {
 }
 
 function buildMessage(message, emotes) {
+    if (message == null || typeof message !== "string" || message.trim().length === 0) {
+        return "";
+    }
+
     let safeMessage = (message ?? "").replace(/\</g, '&lt;').replace(/\>/g, '&gt;');
-    if (!emotes || emotes.length === 0) {
+    if (!emotes || !Array.isArray(emotes) || emotes.length === 0) {
         return safeMessage;
     }
 
