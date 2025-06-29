@@ -11,7 +11,7 @@ html, body {
     position: absolute;
     bottom: 0;
     left: 0;
-    width: calc(100% - 32px);
+    width: calc(var(--maximum-width, 100%) - 32px);
     padding: 16px;
 }
 
@@ -19,13 +19,8 @@ html, body {
     position: relative;
 }
 
-/* <============================================[ SIMPLE MESSAGE STYLE ]============================================> */
-#main-container > .message-item {
-    margin-top: calc((26px / 2) + 8px); /* 8px top margin + 26px for the meta section height divided by 2 */
-    position: relative;
-}
-
-#main-container > .message-item > .meta {
+/* <================================================[ SHARED STYLE ]================================================> */
+#main-container > div > .author-meta {
     --badge-size: 18px;
 
     width: fit-content;
@@ -44,7 +39,7 @@ html, body {
     background: #343a40;
 }
 
-#main-container > .message-item > .meta > .badges {
+#main-container > div > .author-meta > .badges {
     width: fit-content;
     height: var(--badge-size);
     display: flex;
@@ -54,20 +49,28 @@ html, body {
     white-space: nowrap;
 }
 
-#main-container > .message-item > .meta > .badges:empty {
+#main-container > div > .author-meta > .badges:empty {
     display: none;
 }
 
-#main-container > .message-item > .meta > .badges > img {
+#main-container > div > .author-meta > .badges > img {
     width: var(--badge-size);
     height: var(--badge-size);
 }
 
-#main-container > .message-item > .meta > .name {
+#main-container > div > .author-meta > .name {
     width: fit-content;
     height: var(--badge-size);
+    color: #FFFFFF;
     white-space: nowrap;
     font-weight: bold;
+}
+/* <==============================================[ END SHARED STYLE ]==============================================> */
+
+/* <============================================[ SIMPLE MESSAGE STYLE ]============================================> */
+#main-container > .message-item {
+    margin-top: calc((26px / 2) + 8px); /* 8px top margin + 26px for the meta section height divided by 2 */
+    position: relative;
 }
 
 #main-container > .message-item > .message {
@@ -89,112 +92,41 @@ html, body {
     position: relative;
 }
 
-#main-container > .donate-item > .meta {
-    --badge-size: 18px;
-
-    width: fit-content;
-    height: var(--badge-size);
-    position: absolute;
-    top: 0;
-    left: 8px;
-    transform: translateY(-50%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    padding: 4px 8px;
-    border-radius: 4px;
-    background: #343a40;
+#main-container > .donate-item > .author-meta {
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
-#main-container > .donate-item > .meta > .badges {
-    width: fit-content;
-    height: var(--badge-size);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    white-space: nowrap;
-}
-
-#main-container > .donate-item > .meta > .badges:empty {
-    display: none;
-}
-
-#main-container > .donate-item > .meta > .badges > img {
-    width: var(--badge-size);
-    height: var(--badge-size);
-}
-
-#main-container > .donate-item > .meta > .name {
-    width: fit-content;
-    height: var(--badge-size);
-    white-space: nowrap;
-    font-weight: bold;
-}
-
-#main-container > .donate-item > .donate-meta {
-    width: fit-content;
-    height: 18px;
-    position: absolute;
-    top: 0;
-    right: 8px;
-    transform: translateY(-50%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    white-space: nowrap;
-    padding: 4px 8px;
-    border-radius: 4px;
-    background: #fcc419;
-    color: #000000;
-    font-weight: bold;
-}
-
-#main-container > .donate-item > .donate-meta > .value > span {
-    font-size: 10px;;
-}
-
-#main-container > .donate-item > .message {
+#main-container > .donate-item > .message-wrapper {
     padding: calc(8px + (26px / 2)) 8px 8px 8px; /* 8px top padding + 26px for the meta section height divided by 2 */
     border-radius: 4px;
-    background: #495057;
+    background: #1971c2;
     color: #FFFFFF;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
-    animation: rainbowBoxShadow 5s alternate infinite;
 }
 
-#main-container > .donate-item > .message > img {
+#main-container > .donate-item > .message-wrapper > .donate-meta {
+    font-weight: bold;
+    text-align: center;
+}
+
+#main-container > .donate-item > .message-wrapper > .donate-meta > .value {
+    font-weight: bolder;
+    color: #fcc419; /* Highlight the value in a different color */
+}
+
+#main-container > .donate-item > .message-wrapper > .message {
+    margin-top: 8px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 4px;
+    padding: 8px;
+    text-align: center;
+}
+
+#main-container > .donate-item > .message-wrapper > .message > img {
     width: 18px;
     height: 18px;
 }
-
-@keyframes rainbowBoxShadow {
-    0% {
-        box-shadow: 0 0 16px #ff6b6b;
-    }
-    16% {
-        box-shadow: 0 0 16px #ff922b;
-    }
-    33% {
-        box-shadow: 0 0 16px #fcc419;
-    }
-    50% {
-        box-shadow: 0 0 16px #51cf66;
-    }
-    66% {
-        box-shadow: 0 0 16px #339af0;
-    }
-    83% {
-        box-shadow: 0 0 16px #5c7cfa;
-    }
-    100% {
-        box-shadow: 0 0 16px #845ef7;
-    }
-}
-
 /* <==========================================[ END DONATE MESSAGE STYLE ]==========================================> */
 
 /* <============================================[ SPONSOR MESSAGE STYLE ]============================================> */
@@ -203,78 +135,12 @@ html, body {
     position: relative;
 }
 
-#main-container > .sponsor-item > .meta {
-    --badge-size: 18px;
-
-    width: fit-content;
-    height: var(--badge-size);
-    position: absolute;
-    top: 0;
-    left: 8px;
-    transform: translateY(-50%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap:8px;
-    white-space: nowrap;
-    padding: 4px 8px;
-    border-radius: 4px;
-    background: #343a40;
+#main-container > .sponsor-item > .author-meta {
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
-#main-container > .sponsor-item > .meta > .badges {
-    width: fit-content;
-    height: var(--badge-size);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    white-space: nowrap;
-}
-
-#main-container > .sponsor-item > .meta > .badges:empty {
-    display: none;
-}
-
-#main-container > .sponsor-item > .meta > .badges > img {
-    width: var(--badge-size);
-    height: var(--badge-size);
-}
-
-#main-container > .sponsor-item > .meta > .name {
-    width: fit-content;
-    height: var(--badge-size);
-    white-space: nowrap;
-    font-weight: bold;
-}
-
-#main-container > .sponsor-item > .sponsor-meta {
-    width: fit-content;
-    height: 18px;
-    position: absolute;
-    top: 0;
-    right: 8px;
-    transform: translateY(-50%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 2px;
-}
-
-#main-container > .sponsor-item > .sponsor-meta > span {
-    white-space: nowrap;
-    padding: 4px 8px;
-    border-radius: 4px;
-    background: #fcc419;
-    color: #000000;
-    font-weight: bold;
-}
-
-#main-container > .sponsor-item > .sponsor-meta > span:empty {
-    display: none; /* Hide if no sponsor meta */
-}
-
-#main-container > .sponsor-item > .message {
+#main-container > .sponsor-item > .message-wrapper {
     padding: calc(8px + (26px / 2)) 8px 8px 8px; /* 8px top padding + 26px for the meta section height divided by 2 */
     border-radius: 4px;
     background: #495057;
@@ -282,11 +148,77 @@ html, body {
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
 }
 
-#main-container > .sponsor-item > .message > img {
+#main-container > .sponsor-item > .message-wrapper > .sponsor-meta {
+    font-weight: bold;
+    text-align: center;
+}
+
+#main-container > .sponsor-item > .message-wrapper > .sponsor-meta > span {
+    font-weight: bolder;
+    color: #fcc419; /* Highlight the value in a different color */
+}
+
+#main-container > .sponsor-item > .message-wrapper > .message {
+    margin-top: 8px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 4px;
+    padding: 8px;
+    text-align: center;
+}
+
+#main-container > .sponsor-item > .message-wrapper > .message:empty {
+    display: none; /* Hide the message if it's empty */
+}
+
+#main-container > .sponsor-item > .message-wrapper > .message > img {
     width: 18px;
     height: 18px;
 }
 /* <==========================================[ END SPONSOR MESSAGE STYLE ]==========================================> */
+
+/* <=========================================[ SPONSOR GIFT MESSAGE STYLE ]=========================================> */
+#main-container > .spogift-item {
+    margin-top: 8px;
+    position: relative;
+}
+
+#main-container > .spogift-item > .message {
+    position: relative;
+    padding: 8px;
+    text-align: center;
+    border-radius: 4px;
+    background: #f08c00;
+    color: #212529;
+    font-weight: bold;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+    height: 64px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#main-container > .spogift-item > .message:before {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    content: "\f06b";
+    font-size: calc(64px + 16px);
+    position: absolute;
+    bottom: -8px;
+    right: -8px;
+    transform: rotate(-45deg);
+    color: rgba(255, 255, 255, 0.25);
+    z-index: 0;
+}
+
+#main-container > .spogift-item > .message > span {
+    z-index: 1;
+}
+
+#main-container > .spogift-item > .message > span > span {
+    font-weight: bolder;
+}
+/* <=======================================[ END SPONSOR GIFT MESSAGE STYLE ]=======================================> */
 
 /* <=============================================[ RAID MESSAGE STYLE ]=============================================> */
 #main-container > .raid-item {
@@ -298,40 +230,18 @@ html, body {
     padding: 8px;
     text-align: center;
     border-radius: 4px;
-    background: #495057;
+    background: #66a80f;
     color: #FFFFFF;
     font-weight: bold;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
-    animation: raidBoxShadow 5s alternate infinite;
+    height: 64px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #main-container > .raid-item > .message > img {
     width: 18px;
     height: 18px;
 }
-
-@keyframes raidBoxShadow {
-    0% {
-        box-shadow: 0 0 16px #ff6b6b;
-    }
-    16% {
-        box-shadow: 0 0 16px #ff922b;
-    }
-    33% {
-        box-shadow: 0 0 16px #fcc419;
-    }
-    50% {
-        box-shadow: 0 0 16px #51cf66;
-    }
-    66% {
-        box-shadow: 0 0 16px #339af0;
-    }
-    83% {
-        box-shadow: 0 0 16px #5c7cfa;
-    }
-    100% {
-        box-shadow: 0 0 16px #845ef7;
-    }
-}
-
 /* <===========================================[ END RAID MESSAGE STYLE ]===========================================> */

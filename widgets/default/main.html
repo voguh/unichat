@@ -1,8 +1,9 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <div id="main-container"></div>
 
 <script type="text/template" id="chatlist_item">
     <div class="message-item" data-from="{author_id}" data-platform="{platform}" data-id="{message_id}">
-        <div class="meta" style="color: {author_color}">
+        <div class="author-meta" style="color: {author_color}">
             <span class="badges">{badges}</span>
             <span class="name">{author_display_name}</span>
         </div>
@@ -13,33 +14,37 @@
 
 <script type="text/template" id="donate_item">
     <div class="donate-item" data-from="{author_id}" data-platform="{platform}" data-id="{message_id}">
-        <div class="meta" style="color: {author_color}">
+        <div class="author-meta" style="color: {author_color}">
             <span class="badges">{badges}</span>
             <span class="name">{author_display_name}</span>
         </div>
 
-        <div class="donate-meta">
-            <span class="currency">{currency}</span>
-            <span class="value">{value}</span>
+        <div class="message-wrapper">
+            <div class="donate-meta">{donate_meta}</div>
+            <div class="message">{message}</div>
         </div>
-
-        <div class="message">{message}</div>
     </div>
 </script>
 
 <script type="text/template" id="sponsor_item">
     <div class="sponsor-item" data-from="{author_id}" data-platform="{platform}" data-id="{message_id}">
-        <div class="meta" style="color: {author_color}">
+        <div class="author-meta" style="color: {author_color}">
             <span class="badges">{badges}</span>
             <span class="name">{author_display_name}</span>
         </div>
 
-        <div class="sponsor-meta">
-            <span class="tier">{tier}</span>
-            <span class="months">{months}</span>
+        <div class="message-wrapper">
+            <div class="sponsor-meta">{sponsor_meta}</div>
+            <div class="message">{message}</div>
         </div>
+    </div>
+</script>
 
-        <div class="message">{message}</div>
+<script type="text/template" id="sponsor-gift_item">
+    <div class="spogift-item" data-from="{author_id}" data-platform="{platform}" data-id="{message_id}">
+        <div class="message">
+            <span>{message}</span>
+        </div>
     </div>
 </script>
 
