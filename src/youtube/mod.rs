@@ -31,10 +31,10 @@ use crate::bttv::BTTV_EMOTES_HASHSET;
 use crate::events;
 use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatInitEventPayload;
+use crate::events::unichat::UniChatLoadEventPayload;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UNICHAT_EVENT_CLEAR_TYPE;
-use crate::events::unichat::UNICHAT_EVENT_INIT_TYPE;
+use crate::events::unichat::UNICHAT_EVENT_LOAD_TYPE;
 use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
 use crate::utils::is_dev;
 use crate::utils::properties;
@@ -88,16 +88,16 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
         }
     }
 
-    let init_event = UniChatEvent::Init {
-        event_type: String::from(UNICHAT_EVENT_INIT_TYPE),
-        data: UniChatInitEventPayload {
+    let init_event = UniChatEvent::Load {
+        event_type: String::from(UNICHAT_EVENT_LOAD_TYPE),
+        data: UniChatLoadEventPayload {
             channel_id: String::from(channel_id),
             channel_name: None,
             platform: UniChatPlatform::YouTube
         }
     };
     if let Err(err) = events::event_emitter().emit(init_event) {
-        log::error!("An error occurred on send unichat event: {}", err);
+        log::error!("An error occurred on send 'unichat:load' unichat event: {}", err);
     }
 
     return dispatch_event(app, payload.clone());
@@ -118,7 +118,7 @@ fn handle_idle_event(app: tauri::AppHandle<tauri::Wry>, _event_type: &str, paylo
     };
 
     if let Err(err) = events::event_emitter().emit(parsed) {
-        log::error!("An error occurred on send unichat event: {}", err);
+        log::error!("An error occurred on send 'unichat:clear' unichat event: {}", err);
     }
 
     return dispatch_event(app, payload.clone());

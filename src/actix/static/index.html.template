@@ -33,8 +33,14 @@
         <script defer>
             document.addEventListener("DOMContentLoaded", () => {
                 const socket = new WebSocket('ws://localhost:9527/ws')
-                socket.addEventListener("message", function (event) {
-                    window.dispatchEvent(new CustomEvent("unichat:event", { detail: JSON.parse(event.data) }));
+                socket.addEventListener("message", function (message) {
+                    const event = JSON.parse(message.data);
+
+                    if (event.type === "unichat:load") {
+                        window.dispatchEvent(new CustomEvent("unichat:load", { detail: event.data }));
+                    } else {
+                        window.dispatchEvent(new CustomEvent("unichat:event", { detail: event }));
+                    }
                 });
 
                 {{WIDGET_SCRIPT}}

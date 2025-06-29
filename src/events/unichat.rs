@@ -21,10 +21,10 @@ use serde::Serialize;
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum UniChatEvent {
-    Init {
+    Load {
         #[serde(rename = "type")]
         event_type: String,
-        data: UniChatInitEventPayload
+        data: UniChatLoadEventPayload
     },
     Clear {
         #[serde(rename = "type")]
@@ -104,11 +104,11 @@ pub struct UniChatBadge {
 }
 /* <============================================================================================> */
 
-pub const UNICHAT_EVENT_INIT_TYPE: &str = "unichat:init";
+pub const UNICHAT_EVENT_LOAD_TYPE: &str = "unichat:load";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct UniChatInitEventPayload {
+pub struct UniChatLoadEventPayload {
     pub channel_id: String,
     pub channel_name: Option<String>,
     pub platform: UniChatPlatform
