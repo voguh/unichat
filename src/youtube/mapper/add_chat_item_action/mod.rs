@@ -19,6 +19,7 @@ use crate::events::unichat::UniChatEvent;
 
 mod live_chat_membership_item_renderer;
 mod live_chat_paid_message_renderer;
+mod live_chat_paid_sticker_renderer;
 mod live_chat_sponsorships_gift_purchase_announcement_renderer;
 mod live_chat_text_message_renderer;
 
@@ -29,6 +30,8 @@ pub fn parse(value: &serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn 
         return live_chat_membership_item_renderer::parse(value.clone());
     } else if let Some(value) = item.get("liveChatPaidMessageRenderer") {
         return live_chat_paid_message_renderer::parse(value.clone());
+    } else if let Some(value) = item.get("liveChatPaidStickerRenderer") {
+        return live_chat_paid_sticker_renderer::parse(value.clone());
     } else if let Some(value) = item.get("liveChatSponsorshipsGiftPurchaseAnnouncementRenderer") {
         return live_chat_sponsorships_gift_purchase_announcement_renderer::parse(value.clone());
     } else if let Some(value) = item.get("liveChatTextMessageRenderer") {
