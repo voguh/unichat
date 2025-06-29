@@ -17,8 +17,12 @@ and image tag like `<img src="https://cdn.betterttv.net/emote/<EMOTE_ID>/3x.<IMA
 - [x] Implement `Sponsor` event;
 - [x] Implement `SponsorGift` event;
 - [x] Implement `Donate` event;
-- [x] Implement an way to get youtube channel id or store in `unichat.db`
-- [ ] Implement widget with bttv support;
+- [x] Implement an way to get youtube channel id;
+- [x] Implement BTTV support;
+- [ ] Implement FFZ support;
+- [ ] Implement 7TV support;
+- [ ] Implement a second youtube scrapper to allow two chats (to merge chats between normal video and shorts for example);
+- [ ] Implement twitch chat integration;
 
 
 ## Build
@@ -108,7 +112,6 @@ Some node packages will not be updated.
 | `eslint-plugin-import-helpers@1.3.1`   | Maintains compatibility with eslint@8.57.1                          |
 | `eslint-plugin-n@16.6.2`               | Maintains compatibility with eslint@8.57.1                          |
 | `eslint-plugin-promise@6.6.0`          | Maintains compatibility with eslint@8.57.1                          |
-| `vite@6.3.5`                           | Future understanding about what was changed                         |
 
 
 ### Known issues
