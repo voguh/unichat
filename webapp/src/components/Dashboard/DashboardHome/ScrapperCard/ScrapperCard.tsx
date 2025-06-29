@@ -32,7 +32,7 @@ export function ScrapperCard(_props: Props): React.ReactNode {
     async function handleStart(): Promise<void> {
         try {
             setLoading(true);
-            const value = inputRef.current?.value ?? "";
+            const value = inputRef.current?.value ?? "about:blank";
             if (!Strings.isValidYouTubeChatUrl(value)) {
                 throw new Error("Invalid YouTube chat URL");
             }
@@ -52,7 +52,7 @@ export function ScrapperCard(_props: Props): React.ReactNode {
         try {
             setLoading(true);
             await invoke("update_webview_url", { label: "youtube-chat", url: "about:blank" });
-            setCurrentActiveUrl(null);
+            setCurrentActiveUrl("about:blank");
         } catch (err) {
             console.error(err);
             notifications.show({ message: "An error occurred on save", color: "red" });
@@ -132,7 +132,7 @@ export function ScrapperCard(_props: Props): React.ReactNode {
                 setEvent((old) => {
                     if (old.timestamp < payload.timestamp) {
                         if (payload.type === "ping") {
-                            setCurrentActiveUrl(inputRef.current?.value ?? "");
+                            setCurrentActiveUrl(inputRef.current?.value ?? "about:blank");
                         }
 
                         return payload;
