@@ -15,6 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+use std::sync::LazyLock;
+
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -86,18 +88,30 @@ fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> Result<Option<String>,
     return Ok(tier);
 }
 
+static MONTHS_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"\d+").unwrap());
+
 // I was able to detect two types of membership events (examples 7 and 8).
 // The event without a message and with 'runs' in the headerSubtext I am assuming is the first month
 // of membership. On the other hand, the event where the 'runs' is in the headerPrimaryText contains
 // information that allows detecting the number of months of the membership.
+//
+// Some times the headerPrimaryText contains only one run with all text, so I'm try to get the second run
+// if it exists, otherwise I will try to get the first run.
+// Also to extract the number of months, I am using a regex to find the first number in the text.
 fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> Result<u16, Box<dyn std::error::Error>> {
     let mut months: u16 = 0;
 
     if let Some(header_primary_text) = &parsed.header_primary_text {
-        let run = header_primary_text.runs.get(1).ok_or("No second run found in header primary text")?;
+        let run = header_primary_text.runs.get(1)
+            .or_else(|| header_primary_text.runs.get(0))
+            .ok_or("No valid run found in header primary text")?;
+
         match run {
             MessageRun::Text { text } => {
-                months =  text.trim().to_string().parse()?;
+                let value_raw = MONTHS_REGEX.find(text.trim())
+                    .ok_or("Failed to find months in header primary text")?;
+
+                months = value_raw.as_str().parse()?;
             },
             MessageRun::Emoji { .. } => return Err("Unexpected emoji in header subtext".into())
         }
