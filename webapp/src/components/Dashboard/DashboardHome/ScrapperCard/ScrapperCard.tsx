@@ -25,14 +25,14 @@ const DEFAULT_STATUS_EVENT: IPCYouTubeStatusEvent = {
 export function ScrapperCard(_props: Props): React.ReactNode {
     const [loading, setLoading] = React.useState<boolean>(true);
     const [event, setEvent] = React.useState<IPCYouTubeStatusEvent>(DEFAULT_STATUS_EVENT);
-    const [currentActiveUrl, setCurrentActiveUrl] = React.useState<string>("");
+    const [currentActiveUrl, setCurrentActiveUrl] = React.useState("about:blank");
 
     const inputRef = React.useRef<HTMLInputElement>(null);
 
     async function handleStart(): Promise<void> {
         try {
             setLoading(true);
-            const value = inputRef.current?.value ?? "about:blank";
+            const value = inputRef.current?.value ?? "";
             if (!Strings.isValidYouTubeChatUrl(value)) {
                 throw new Error("Invalid YouTube chat URL");
             }
@@ -131,15 +131,15 @@ export function ScrapperCard(_props: Props): React.ReactNode {
             } else {
                 setEvent((old) => {
                     if (old.timestamp < payload.timestamp) {
-                        if (payload.type === "ping") {
-                            setCurrentActiveUrl(inputRef.current?.value ?? "about:blank");
-                        }
-
                         return payload;
                     }
 
                     return old;
                 });
+
+                if (payload.type === "ping") {
+                    setCurrentActiveUrl(inputRef.current?.value ?? "about:blank");
+                }
             }
         });
 
