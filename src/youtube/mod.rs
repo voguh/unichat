@@ -161,7 +161,7 @@ fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, pa
             }
 
             Ok(None) => {
-                if is_dev() || log_events == YouTubeSettingLogLevel::UnknownEvents {
+                if is_dev() || vec![YouTubeSettingLogLevel::AllEvents, YouTubeSettingLogLevel::UnknownEvents].contains(&log_events) {
                     log_action("events-unknown.log", &action);
                 }
             }
