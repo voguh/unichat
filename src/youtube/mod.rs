@@ -76,7 +76,7 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
 
     let emotes = fetch_emotes(channel_id);
     if let Ok(emotes) = emotes {
-        if let None = BTTV_EMOTES_HASHSET.get() {
+        if BTTV_EMOTES_HASHSET.get().is_none() {
             BTTV_EMOTES_HASHSET.set(RwLock::new(emotes)).map_err(|_| "Failed to set BTTV emotes")?;
         } else {
             let bttv_emotes = BTTV_EMOTES_HASHSET.get().ok_or("BTTV emotes not initialized")?;
@@ -161,7 +161,7 @@ fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, pa
             }
 
             Ok(None) => {
-                if is_dev() || vec![YouTubeSettingLogLevel::AllEvents, YouTubeSettingLogLevel::UnknownEvents].contains(&log_events) {
+                if is_dev() || [YouTubeSettingLogLevel::AllEvents, YouTubeSettingLogLevel::UnknownEvents].contains(&log_events) {
                     log_action("events-unknown.log", &action);
                 }
             }

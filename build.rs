@@ -15,8 +15,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+#![warn(clippy::implicit_return)]
+#![allow(clippy::needless_return)]
+#![allow(clippy::redundant_field_names)]
+
 use std::collections::HashMap;
 use std::fs;
+use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -33,7 +38,7 @@ fn get_license_info(license: &str) -> Result<(String, String), Box<dyn std::erro
     }
 }
 
-fn generate_resources(root_dir: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+fn generate_resources(root_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     let target_gen_dir = root_dir.join("target").join("gen");
 
     let display_name = "UniChat";
@@ -43,22 +48,22 @@ fn generate_resources(root_dir: &PathBuf) -> Result<(), Box<dyn std::error::Erro
     let authors = env!("CARGO_PKG_AUTHORS");
     let homepage = env!("CARGO_PKG_HOMEPAGE");
     let license_code = env!("CARGO_PKG_LICENSE");
-    let (license_name, license_url) = get_license_info(&license_code)?;
+    let (license_name, license_url) = get_license_info(license_code)?;
 
     if !target_gen_dir.exists() {
         fs::create_dir_all(&target_gen_dir)?;
     }
 
     let metadata = format!(r#"
-        pub const CARGO_PKG_DISPLAY_NAME: &'static str = "{display_name}";
-        pub const CARGO_PKG_NAME: &'static str = "{name}";
-        pub const CARGO_PKG_VERSION: &'static str = "{version}";
-        pub const CARGO_PKG_DESCRIPTION: &'static str = "{description}";
-        pub const CARGO_PKG_AUTHORS: &'static str = "{authors}";
-        pub const CARGO_PKG_HOMEPAGE: &'static str = "{homepage}";
-        pub const CARGO_PKG_LICENSE_CODE: &'static str = "{license_code}";
-        pub const CARGO_PKG_LICENSE_NAME: &'static str = "{license_name}";
-        pub const CARGO_PKG_LICENSE_URL: &'static str = "{license_url}";
+        pub const CARGO_PKG_DISPLAY_NAME: &str = "{display_name}";
+        pub const CARGO_PKG_NAME: &str = "{name}";
+        pub const CARGO_PKG_VERSION: &str = "{version}";
+        pub const CARGO_PKG_DESCRIPTION: &str = "{description}";
+        pub const CARGO_PKG_AUTHORS: &str = "{authors}";
+        pub const CARGO_PKG_HOMEPAGE: &str = "{homepage}";
+        pub const CARGO_PKG_LICENSE_CODE: &str = "{license_code}";
+        pub const CARGO_PKG_LICENSE_NAME: &str = "{license_name}";
+        pub const CARGO_PKG_LICENSE_URL: &str = "{license_url}";
     "#);
 
     let metadata_file_path = target_gen_dir.join("metadata.rs");

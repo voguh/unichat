@@ -39,7 +39,7 @@ mod utils;
 mod youtube;
 
 pub static STATIC_APP_ICON: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/icons/icon.png"));
-pub static THIRD_PARTY_LICENSES: &'static str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/third_party_licenses.json"));
+pub static THIRD_PARTY_LICENSES: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/third_party_licenses.json"));
 
 fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     if !dest.exists() {
@@ -84,7 +84,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     let readme_path = widgets_dir.join("README.md");
     if !readme_path.exists() {
         let readme_notice = "This directory contains user-created widgets for UniChat. You can add your own widgets here.";
-        fs::write(&widgets_dir.join("README.md"), readme_notice)?;
+        fs::write(widgets_dir.join("README.md"), readme_notice)?;
     }
 
     /* ========================================================================================== */
@@ -143,5 +143,5 @@ async fn main() {
         ])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())
-        .expect(format!("Failed to run {} v{}!", CARGO_PKG_DISPLAY_NAME, CARGO_PKG_VERSION).as_str());
+        .unwrap_or_else(|e| panic!("Failed to run {} v{}!\n{:?}", CARGO_PKG_DISPLAY_NAME, CARGO_PKG_VERSION, e));
 }
