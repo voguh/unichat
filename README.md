@@ -30,7 +30,7 @@ and image tag like `<img src="https://cdn.betterttv.net/emote/<EMOTE_ID>/3x.<IMA
 Install all dependencies before following [oficial tutorial](https://v2.tauri.app/start/prerequisites/)
 then just run `pnpm build`.
 
-Following an example using ubuntu 24.04 docker image (catthehacker/ubuntu).
+Following an example using ubuntu 24.04 docker image.
 
 ```bash
 docker run --volume=".:/home/ubuntu/unichat" --env="DEBIAN_FRONTEND=noninteractive" --rm -it ubuntu:24.04 bash
@@ -68,7 +68,7 @@ pnpm build
 
 # Build for windows
 ### Install dependencies
-sudo apt install -y  nsis lld llvm clang
+sudo apt install -y nsis lld llvm clang
 
 ### Install rustup target
 rustup target add x86_64-pc-windows-msvc
