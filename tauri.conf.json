@@ -20,7 +20,8 @@
                 "maxHeight": 720,
                 "minWidth": 1024,
                 "minHeight": 576,
-                "maximizable": false
+                "maximizable": false,
+                "center": true
             },
             {
                 "label": "youtube-chat",
