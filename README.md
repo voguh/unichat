@@ -7,23 +7,29 @@ customization using HTML/CSS/JS.
 
 ## TODO
 
-Implement support for BTTV, by calling api `https://api.betterttv.net/3/cached/users/youtube/<CHANNEL_ID>`
-and image tag like `<img src="https://cdn.betterttv.net/emote/<EMOTE_ID>/3x.<IMAGE_TYPE>" />`
-
 - [x] Implement `Message` event;
 - [x] Implement `RemoveMessage` event;
 - [x] Implement `RemoveAuthor` event;
 - [x] Implement `Raid` event;
 - [x] Implement `Sponsor` event;
 - [x] Implement `SponsorGift` event;
-- [x] Implement `Donate` event;
+- [x] Implement `Donate` event (Sicker and Super Chat);
 - [x] Implement an way to get youtube channel id;
-- [x] Implement BTTV support;
-- [ ] Implement FFZ support;
-- [ ] Implement 7TV support;
-- [ ] Implement a second youtube scrapper to allow two chats (to merge chats between normal video and shorts for example);
+- [x] Implement BTTV support <sup>1</sup>;
+- [ ] Implement FFZ support <sup>2</sup>;
+- [ ] Implement 7TV support <sup>3</sup>;
 - [ ] Implement twitch chat integration;
+- [ ] Implement a second youtube scrapper to allow two chats (to merge chats between normal video and shorts for example);
 
+1. BetterTTV endpoints:
+    - `https://api.betterttv.net/3/cached/emotes/global`
+    - `https://api.betterttv.net/3/cached/users/{youtube|twitch}/{CHANNEL_ID}`
+2. FrankerFaceZ endpoints:
+    - `https://api.betterttv.net/3/cached/frankerfacez/emotes/global`
+    - `https://api.betterttv.net/3/cached/frankerfacez/users/{youtube|twitch}/{CHANNEL_ID}`
+3. SevenTV endpoints:
+    - `https://7tv.io/v3/emote-sets/global`
+    - `https://7tv.io/v3/users/{youtube|twitch}/{CHANNEL_ID}`
 
 ## Build
 
