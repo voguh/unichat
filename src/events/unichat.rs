@@ -222,7 +222,8 @@ pub struct UniChatSponsorEventPayload {
     pub message_id: String,
     pub tier: Option<String>,
     pub months: u16,
-    pub message_text: Option<String>
+    pub message_text: Option<String>,
+    pub emotes: Vec<UniChatEmote>
 }
 
 /* <============================================================================================> */
@@ -273,5 +274,5 @@ pub struct UniChatDonateEventPayload {
 
     pub message_id: String,
     pub message_text: Option<String>,
-    pub emotes: Vec<UniChatEmote>,
+    pub emotes: Vec<UniChatEmote>
 }

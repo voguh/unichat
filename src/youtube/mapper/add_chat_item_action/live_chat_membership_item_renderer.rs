@@ -18,6 +18,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatSponsorEventPayload;
@@ -34,6 +35,7 @@ use crate::youtube::mapper::structs::author::parse_author_type;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
 use crate::youtube::mapper::structs::author::AuthorNameWrapper;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
+use crate::youtube::mapper::structs::message::parse_message_emojis;
 use crate::youtube::mapper::structs::message::parse_message_string;
 use crate::youtube::mapper::structs::message::MessageRun;
 use crate::youtube::mapper::structs::message::MessageRunsWrapper;
@@ -115,6 +117,15 @@ fn optional_build_message(message: &Option<MessageRunsWrapper>) -> Result<Option
     return Ok(None);
 }
 
+fn optional_build_emotes(message: &Option<MessageRunsWrapper>) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
+    if let Some(message_runs) = message {
+        let emotes = parse_message_emojis(message_runs)?;
+        return Ok(emotes);
+    }
+
+    return Ok(Vec::new());
+}
+
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
     let parsed: LiveChatMembershipItemRenderer = serde_json::from_value(value).map_err(parse_serde_error)?;
     let author_username = parse_author_username(&parsed.author_name)?;
@@ -126,6 +137,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let tier = parse_tier(&parsed)?;
     let months = parse_months(&parsed)?;
     let message = optional_build_message(&parsed.message)?;
+    let emotes = optional_build_emotes(&parsed.message)?;
 
     let event = UniChatEvent::Sponsor {
         event_type: String::from(UNICHAT_EVENT_SPONSOR_TYPE),
@@ -145,7 +157,8 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             message_id: parsed.id,
             tier: tier,
             months: months,
-            message_text: message
+            message_text: message,
+            emotes: emotes
         }
     };
 

@@ -129,6 +129,7 @@ export interface UniChatEventSponsor {
         tier: string;
         months: number;
         messageText: string | null;
+        emotes: UniChatEmote[];
     };
 }
 
