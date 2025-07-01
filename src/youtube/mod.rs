@@ -15,6 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
 use std::sync::RwLock;
@@ -26,10 +27,12 @@ use tauri::Emitter;
 use tauri::Listener;
 use tauri::Manager;
 
-use crate::bttv::fetch_emotes;
-use crate::bttv::BTTV_EMOTES_HASHSET;
+use crate::custom_emotes;
+use crate::custom_emotes::betterttv;
+use crate::custom_emotes::seventv;
 use crate::events;
 use crate::events::unichat::UniChatClearEventPayload;
+use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatLoadEventPayload;
 use crate::events::unichat::UniChatPlatform;
@@ -67,6 +70,22 @@ fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, mut payload: Value) -> Resu
 
 /* ================================================================================================================== */
 
+fn set_emotes_hashmap(emotes: HashMap<String, UniChatEmote>) -> Result<(), Box<dyn std::error::Error>> {
+    let custom_emotes = custom_emotes::EMOTES_HASHSET.get();
+
+    if let Some(custom_emotes) = custom_emotes {
+        let mut guard = custom_emotes.write().map_err(|e| format!("{:?}", e))?;
+
+        for (key, value) in emotes {
+            guard.insert(key, value);
+        }
+    } else {
+        custom_emotes::EMOTES_HASHSET.set(RwLock::new(emotes)).map_err(|_| "Failed to set custom emotes hashmap")?;
+    }
+
+    return Ok(());
+}
+
 fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
     let channel_id = payload.get("channelId").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'channelId' field in YouTube {event_type} payload"))?;
@@ -74,19 +93,9 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
     properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))
         .map_err(|e| format!("{:?}", e))?;
 
-    let emotes = fetch_emotes(channel_id);
-    if let Ok(emotes) = emotes {
-        if BTTV_EMOTES_HASHSET.get().is_none() {
-            BTTV_EMOTES_HASHSET.set(RwLock::new(emotes)).map_err(|_| "Failed to set BTTV emotes")?;
-        } else {
-            let bttv_emotes = BTTV_EMOTES_HASHSET.get().ok_or("BTTV emotes not initialized")?;
-            let mut guard = bttv_emotes.write().map_err(|e| format!("{:?}", e))?;
-
-            for (key, value) in emotes {
-                guard.insert(key, value);
-            }
-        }
-    }
+    let mut custom_emotes = betterttv::fetch_emotes(channel_id);
+    custom_emotes.extend(seventv::fetch_emotes(channel_id));
+    set_emotes_hashmap(custom_emotes).map_err(|err| format!("Failed to set custom emotes: {}", err))?;
 
     let init_event = UniChatEvent::Load {
         event_type: String::from(UNICHAT_EVENT_LOAD_TYPE),

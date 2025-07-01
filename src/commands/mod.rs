@@ -24,7 +24,7 @@ use tauri::Manager;
 use tauri::Runtime;
 use tauri::Url;
 
-use crate::bttv::BTTV_EMOTES_HASHSET;
+use crate::custom_emotes;
 use crate::utils;
 use crate::utils::constants;
 use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
@@ -135,7 +135,7 @@ pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &st
     let window = app.get_webview_window(label).unwrap();
     let tauri_url = decode_url(label, url).map_err(|e| format!("{:?}", e))?;
 
-    if let Some(bttv_emotes) = BTTV_EMOTES_HASHSET.get() {
+    if let Some(bttv_emotes) = custom_emotes::EMOTES_HASHSET.get() {
         if let Ok(mut guard) = bttv_emotes.write() {
             guard.clear();
         }

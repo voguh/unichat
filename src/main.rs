@@ -32,8 +32,8 @@ use crate::utils::properties::AppPaths;
 include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 
 mod actix;
-mod bttv;
 mod commands;
+mod custom_emotes;
 mod events;
 mod utils;
 mod youtube;

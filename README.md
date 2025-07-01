@@ -24,12 +24,16 @@ customization using HTML/CSS/JS.
 1. BetterTTV endpoints:
     - `https://api.betterttv.net/3/cached/emotes/global`
     - `https://api.betterttv.net/3/cached/users/{youtube|twitch}/{CHANNEL_ID}`
+    - `https://cdn.betterttv.net/emote/{EMOTE_ID}/{EMOTE_SIZE:3x}.{IMAGE_TYPE:webp}`
 2. FrankerFaceZ endpoints:
-    - `https://api.betterttv.net/3/cached/frankerfacez/emotes/global`
-    - `https://api.betterttv.net/3/cached/frankerfacez/users/{youtube|twitch}/{CHANNEL_ID}`
+    - `https://api.frankerfacez.com/v1/set/global`
+    - `https://api.frankerfacez.com/v1/user/id/{TWITCH_CHANNEL_ID}`
+    - `https://api.frankerfacez.com/v1/user/yt/{YOUTUBE_CHANNEL_ID}`
+    - `https://cdn.frankerfacez.com/emote/{EMOTE_ID}/{EMOTE_SIZE:4}`
 3. SevenTV endpoints:
     - `https://7tv.io/v3/emote-sets/global`
     - `https://7tv.io/v3/users/{youtube|twitch}/{CHANNEL_ID}`
+    - `https://cdn.7tv.app/emote/{EMOTE_ID}/{EMOTE_SIZE:4x}.{IMAGE_TYPE:webp}`
 
 ## Build
 

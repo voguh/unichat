@@ -18,7 +18,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::bttv::BTTV_EMOTES_HASHSET;
+use crate::custom_emotes;
 use crate::events::unichat::UniChatEmote;
 use crate::youtube::mapper::structs::ThumbnailsWrapper;
 
@@ -69,7 +69,7 @@ pub type FontBaseEmojiThumbnailsWrapper = ThumbnailsWrapper;
 pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
     let mut emotes = Vec::new();
 
-    if let Some(bttv_emotes) = BTTV_EMOTES_HASHSET.get().and_then(|h| h.read().ok()) {
+    if let Some(bttv_emotes) = custom_emotes::EMOTES_HASHSET.get().and_then(|h| h.read().ok()) {
         for run in &message_runs.runs {
             match run {
                 MessageRun::Text { text } => {
