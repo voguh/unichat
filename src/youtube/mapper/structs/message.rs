@@ -69,7 +69,7 @@ pub type FontBaseEmojiThumbnailsWrapper = ThumbnailsWrapper;
 pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
     let mut emotes = Vec::new();
 
-    if let Some(bttv_emotes) = custom_emotes::EMOTES_HASHSET.get().and_then(|h| h.read().ok()) {
+    if let Ok(custom_emotes) = custom_emotes::EMOTES_HASHSET.read() {
         for run in &message_runs.runs {
             match run {
                 MessageRun::Text { text } => {
@@ -78,7 +78,7 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
                     }
 
                     for word in text.split_whitespace() {
-                        if let Some(emote) = bttv_emotes.get(word) {
+                        if let Some(emote) = custom_emotes.get(word) {
                             emotes.push(emote.clone());
                         }
                     }

@@ -51,12 +51,12 @@ fn fetch_channel_emotes(url: String) -> Result<Vec<BTTVEmote>, Box<dyn std::erro
     let mut emotes_list: Vec<Value> = Vec::new();
 
     if let Some(emotes) = data.get("channelEmotes") {
-        let emotes = emotes.as_array().cloned().unwrap_or_else(|| Vec::new());
+        let emotes = emotes.as_array().cloned().unwrap_or_default();
         emotes_list.extend(emotes);
     }
 
     if let Some(emotes) = data.get("sharedEmotes") {
-        let emotes = emotes.as_array().cloned().unwrap_or_else(|| Vec::new());
+        let emotes = emotes.as_array().cloned().unwrap_or_default();
         emotes_list.extend(emotes);
     }
 

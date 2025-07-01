@@ -42,8 +42,8 @@ fn log_err(err: Box<dyn std::error::Error>) -> Vec<SevenTVEmote>{
 fn fetch_global_emotes(url: String) -> Result<Vec<SevenTVEmote>, Box<dyn std::error::Error>> {
     let mut response = ureq::get(&url).call()?;
     let data: Value = response.body_mut().read_json()?;
-    let emotes: Vec<Value> = data.get("emotes").and_then(|v| v.as_array())
-        .cloned().unwrap_or_else(|| Vec::new());
+    let emotes = data.get("emotes").and_then(|v| v.as_array())
+        .cloned().unwrap_or_default();
 
     return serde_json::from_value(Value::Array(emotes)).map_err(parse_serde_error);
 }
@@ -52,8 +52,8 @@ fn fetch_channel_emotes(url: String) -> Result<Vec<SevenTVEmote>, Box<dyn std::e
     let mut response = ureq::get(&url).call()?;
     let data: Value = response.body_mut().read_json()?;
     let emote_set = data.get("emote_set").ok_or("Emote set not found")?;
-    let emotes: Vec<Value> = emote_set.get("emotes").and_then(|v| v.as_array())
-        .cloned().unwrap_or_else(|| Vec::new());
+    let emotes = emote_set.get("emotes").and_then(|v| v.as_array())
+        .cloned().unwrap_or_default();
 
     return serde_json::from_value(Value::Array(emotes)).map_err(parse_serde_error);
 }
