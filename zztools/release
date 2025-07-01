@@ -94,13 +94,13 @@ function main() {
     log_info "Building the project..."
     pnpm build
 
-    # log_info "Committing changes to Git..."
-    # git add "$cargo_toml"
-    # git commit -m "chore: release version $new_version"
-    # git tag -a "$new_version" -m "$new_version"
-    # log_info "Changes committed and tagged with '$new_version'."
-    # log_info "Pushing changes to remote repository..."
-    # git push origin main --tags
+    log_info "Committing changes to Git..."
+    git add "$cargo_toml"
+    git commit -m "chore: release version $new_version"
+    git tag -a "$new_version" -m "$new_version"
+    log_info "Changes committed and tagged with '$new_version'."
+    log_info "Pushing changes to remote repository..."
+    git push origin main --tags
 }
 
 main "$@"
