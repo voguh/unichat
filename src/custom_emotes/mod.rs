@@ -16,7 +16,7 @@
  ******************************************************************************/
 
 use std::collections::HashMap;
-use std::sync::OnceLock;
+use std::sync::LazyLock;
 use std::sync::RwLock;
 
 use crate::events::unichat::UniChatEmote;
@@ -24,4 +24,4 @@ use crate::events::unichat::UniChatEmote;
 pub mod betterttv;
 pub mod seventv;
 
-pub static EMOTES_HASHSET: OnceLock<RwLock<HashMap<String, UniChatEmote>>> = OnceLock::new();
+pub static EMOTES_HASHSET: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));

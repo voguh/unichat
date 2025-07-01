@@ -71,16 +71,10 @@ fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, mut payload: Value) -> Resu
 /* ================================================================================================================== */
 
 fn set_emotes_hashmap(emotes: HashMap<String, UniChatEmote>) -> Result<(), Box<dyn std::error::Error>> {
-    let custom_emotes = custom_emotes::EMOTES_HASHSET.get();
+    let mut guard = custom_emotes::EMOTES_HASHSET.write()?;
 
-    if let Some(custom_emotes) = custom_emotes {
-        let mut guard = custom_emotes.write().map_err(|e| format!("{:?}", e))?;
-
-        for (key, value) in emotes {
-            guard.insert(key, value);
-        }
-    } else {
-        custom_emotes::EMOTES_HASHSET.set(RwLock::new(emotes)).map_err(|_| "Failed to set custom emotes hashmap")?;
+    for (key, value) in emotes {
+        guard.insert(key, value);
     }
 
     return Ok(());

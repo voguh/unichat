@@ -135,10 +135,8 @@ pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &st
     let window = app.get_webview_window(label).unwrap();
     let tauri_url = decode_url(label, url).map_err(|e| format!("{:?}", e))?;
 
-    if let Some(bttv_emotes) = custom_emotes::EMOTES_HASHSET.get() {
-        if let Ok(mut guard) = bttv_emotes.write() {
-            guard.clear();
-        }
+    if let Ok(mut guard) = custom_emotes::EMOTES_HASHSET.write() {
+        guard.clear();
     }
 
     window.navigate(tauri_url).map_err(|e| format!("{:?}", e))?;
