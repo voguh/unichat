@@ -16,7 +16,9 @@
  ******************************************************************************/
 
 use std::sync::LazyLock;
+use std::time::Duration;
 
+use moka::sync::Cache;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -64,21 +66,32 @@ pub struct AuthorBadgeIconWrapper {
 /* <================================================================================================================> */
 
 static USERNAME_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[\p{L}\p{N}_\.-]{3,30}$").unwrap());
+static USERNAME_CACHE: LazyLock<Cache<String, Option<String>>> = LazyLock::new(|| Cache::builder().time_to_idle(Duration::from_secs(60 * 10)).build());
 
 pub fn parse_author_username(name: &AuthorNameWrapper) -> Result<Option<String>, Box<dyn std::error::Error>> {
     return parse_author_username_str(name.simple_text.clone());
 }
 
 pub fn parse_author_username_str(name: String) -> Result<Option<String>, Box<dyn std::error::Error>> {
-    let mut username = name.clone();
-    if username.starts_with("@") {
-        username = username.replacen("@", "", 1);
+    if let Some(cached_username) = USERNAME_CACHE.get(&name) {
+        return Ok(cached_username.clone());
+    } else {
+
+    }
+
+    let username: String;
+    if name.starts_with("@") {
+        username = name.replacen("@", "", 1);
+    } else {
+        username = name.clone();
     }
 
     if !USERNAME_REGEX.is_match(&username) {
+        USERNAME_CACHE.insert(name, None);
         return Ok(None);
     }
 
+    USERNAME_CACHE.insert(name, Some(username.clone()));
     return Ok(Some(username));
 }
 
@@ -87,9 +100,11 @@ pub fn parse_author_name(name: &AuthorNameWrapper) -> Result<String, Box<dyn std
 }
 
 pub fn parse_author_name_str(name: String) -> Result<String, Box<dyn std::error::Error>> {
-    let mut username = name.clone();
-    if username.starts_with("@") {
-        username = username.replacen("@", "", 1);
+    let username: String;
+    if name.starts_with("@") {
+        username = name.replacen("@", "", 1);
+    } else {
+        username = name;
     }
 
     return Ok(username);
