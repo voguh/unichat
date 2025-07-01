@@ -132,6 +132,10 @@ html, body {
     word-break: break-word;
 }
 
+#main-container > .donate-item > .message-wrapper > .message:empty {
+    display: none; /* Hide the message if it's empty */
+}
+
 #main-container > .donate-item > .message-wrapper > .message > img {
     width: 18px;
     height: 18px;
@@ -241,7 +245,6 @@ html, body {
 
 #main-container > .raid-item > .message {
     padding: 8px;
-    text-align: center;
     border-radius: 4px;
     background: #66a80f;
     color: #FFFFFF;
@@ -255,8 +258,7 @@ html, body {
     word-break: break-word;
 }
 
-#main-container > .raid-item > .message > img {
-    width: 18px;
-    height: 18px;
+#main-container > .raid-item > .message > span {
+    font-weight: bolder;
 }
 /* <===========================================[ END RAID MESSAGE STYLE ]===========================================> */

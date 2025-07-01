@@ -123,7 +123,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         let htmlTemplate = RAID_TEMPLATE.replaceAll("{author_id}", data.authorId);
         htmlTemplate = htmlTemplate.replaceAll("{platform}", data.platform);
         htmlTemplate = htmlTemplate.replaceAll("{message_id}", data.messageId);
-        htmlTemplate = htmlTemplate.replaceAll("{message}", `${data.authorDisplayName} is raiding with ${data.viewerCount ?? 'their'} viewers!`);
+        htmlTemplate = htmlTemplate.replaceAll("{message}", `<span>${data.authorDisplayName}</span>&nbsp;is raiding with ${data.viewerCount ?? 'their'} viewers!`);
 
         $(MAIN_CONTAINER).append(htmlTemplate);
     } else if (event.type === 'unichat:remove_message') {
