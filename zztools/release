@@ -71,6 +71,12 @@ function main() {
     echo "Current version: ${current_version}"
     echo "New version....: ${new_version}"
 
+    log_info "Running tests..."
+    pnpm install --frozen-lockfile
+    pnpm test run --passWithNoTests
+    pnpm build:ui
+    cargo test --all-targets --all-features
+
     local current_version_number="$(version_to_number "$current_version")"
     local new_version_number="$(version_to_number "$new_version")"
     if [ "$current_version_number" -ge "$new_version_number" ]; then
@@ -85,13 +91,16 @@ function main() {
     sed -i "s/^version = \"$current_version\"/version = \"$new_version\"/" "$cargo_toml"
     log_info "Version updated successfully."
 
-    log_info "Committing changes to Git..."
-    git add "$cargo_toml"
-    git commit -m "chore: release version $new_version"
-    git tag -a "$new_version" -m "$new_version"
-    log_info "Changes committed and tagged with '$new_version'."
-    log_info "Pushing changes to remote repository..."
-    git push origin main --tags
+    log_info "Building the project..."
+    pnpm build
+
+    # log_info "Committing changes to Git..."
+    # git add "$cargo_toml"
+    # git commit -m "chore: release version $new_version"
+    # git tag -a "$new_version" -m "$new_version"
+    # log_info "Changes committed and tagged with '$new_version'."
+    # log_info "Pushing changes to remote repository..."
+    # git push origin main --tags
 }
 
 main "$@"
