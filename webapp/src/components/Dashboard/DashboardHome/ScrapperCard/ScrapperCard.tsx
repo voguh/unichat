@@ -178,7 +178,7 @@ export function ScrapperCard(_props: Props): React.ReactNode {
                     error={error}
                     placeholder="https://www.youtube.com/live_chat?v={VIDEO_ID}"
                     ref={inputRef}
-                    disabled={inputRef.current?.value === currentActiveUrl}
+                    disabled={loading || inputRef.current?.value === currentActiveUrl}
                 />
                 <Tooltip label={YOUTUBE_EVENT_DESCRIPTION[event.type]} position="left">
                     <Button
