@@ -19,6 +19,7 @@ import React from "react";
 
 import { invoke } from "@tauri-apps/api/core";
 
+import { loggerService } from "unichat/services/loggerService";
 import { AppMetadata } from "unichat/types";
 
 export interface AppContextProps {
@@ -34,13 +35,15 @@ interface Props {
 export function AppContextProvider({ children }: Props): React.ReactNode {
     const [loading, setLoading] = React.useState(true);
     const [metadata, setMetadata] = React.useState<AppMetadata>(null);
+    const [error, setError] = React.useState(false);
 
     async function init(): Promise<void> {
         try {
             const appMetadata = await invoke<AppMetadata>("get_app_info");
             setMetadata(appMetadata);
         } catch (error) {
-            console.error("Failed to fetch app metadata:", error);
+            loggerService.error("An error occurred while fetching app metadata: {}", error);
+            setError(true);
         } finally {
             setLoading(false);
         }
@@ -52,6 +55,8 @@ export function AppContextProvider({ children }: Props): React.ReactNode {
 
     if (loading) {
         return <div>Loading...</div>;
+    } else if (error) {
+        return <div>Error loading app metadata, please restart the app and try again!</div>;
     }
 
     return <AppContext.Provider value={{ metadata }}>{children}</AppContext.Provider>;

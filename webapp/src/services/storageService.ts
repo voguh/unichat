@@ -17,6 +17,8 @@
 
 import { invoke } from "@tauri-apps/api/core";
 
+import { loggerService } from "./loggerService";
+
 export class StorageService {
     private readonly _listeners: Map<string, ((key: string, value: any) => void)[]>;
 
@@ -28,7 +30,7 @@ export class StorageService {
         try {
             return invoke<T>("store_get_item", { key });
         } catch (err) {
-            console.error(err);
+            loggerService.error("An error occurred while getting item from storage: {}", err);
 
             return null;
         }
@@ -43,7 +45,7 @@ export class StorageService {
 
             return invoke<void>("store_set_item", { key, value });
         } catch (err) {
-            console.error(err);
+            loggerService.error("An error occurred while setting item in storage: {}", err);
         }
     }
 
