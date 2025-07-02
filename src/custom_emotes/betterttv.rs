@@ -60,7 +60,7 @@ fn fetch_channel_emotes(url: String) -> Result<Vec<BTTVEmote>, Box<dyn std::erro
         emotes_list.extend(emotes);
     }
 
-    return serde_json::from_value(serde_json::Value::Array(emotes_list)).map_err(parse_serde_error);
+    return serde_json::from_value(Value::Array(emotes_list)).map_err(parse_serde_error);
 }
 
 pub fn fetch_emotes(channel_id: &str) -> HashMap<String, UniChatEmote> {
