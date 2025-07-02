@@ -17,12 +17,15 @@
 
 import React from "react";
 
-import { Button, Card, Menu } from "@mantine/core";
+import { Button, Card, Menu, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { IconAdjustments, IconBrandYoutubeFilled, IconInfoCircle } from "@tabler/icons-react";
+import { IconAdjustments, IconBrandYoutubeFilled, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
 import { invoke } from "@tauri-apps/api/core";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import semver from "semver";
 
 import { AppContext } from "unichat/contexts/AppContext";
+import { loggerService } from "unichat/services/loggerService";
 
 import { AboutModal } from "../AboutModal";
 import { DashboardHome } from "./DashboardHome";
@@ -37,15 +40,53 @@ interface Props {
 }
 
 export function Dashboard(_props: Props): React.ReactNode {
-    const appContext = React.useContext(AppContext);
+    const [hasUpdate, setHasUpdate] = React.useState(false);
+    const { metadata } = React.useContext(AppContext);
 
     async function toggleWebview(id: string): Promise<void> {
         invoke("toggle_webview", { label: `${id}-chat` });
     }
 
     async function toggleAboutModal(): Promise<void> {
-        modals.open({ title: `About ${appContext.metadata.displayName}`, children: <AboutModal />, centered: true });
+        modals.open({ title: `About ${metadata.displayName}`, children: <AboutModal />, centered: true });
     }
+
+    async function checkForUpdates(): Promise<void> {
+        const latestRelease = `${metadata.homepage.replace("https://github.com", "https://api.github.com/repos")}/releases/latest`;
+        const response = await fetch(latestRelease, { method: "GET", cache: "no-cache" });
+        if (!response.ok) {
+            console.error("Failed to fetch latest release information.");
+
+            return;
+        }
+
+        const data = await response.json();
+        const latestVersion = data.tag_name;
+        if (semver.gt(latestVersion, metadata.version)) {
+            setHasUpdate(true);
+            modals.open({
+                title: `A new version of ${metadata.displayName} is available!`,
+                children: (
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            flexDirection: "column"
+                        }}
+                    >
+                        <Text>Current version: {metadata.version}</Text>
+                        <Text>Latest version: {latestVersion}</Text>
+                        <Button onClick={() => openUrl(data.html_url)}>Download Update</Button>
+                    </div>
+                )
+            });
+        }
+    }
+
+    React.useEffect(() => {
+        checkForUpdates().catch((err) => loggerService.error("Failed to check for updates: {}", err));
+    }, []);
 
     return (
         <DashboardStyledContainer>
@@ -67,6 +108,14 @@ export function Dashboard(_props: Props): React.ReactNode {
                         </Button>
                     </Menu.Target>
                     <Menu.Dropdown>
+                        <Menu.Item
+                            leftSection={<IconRefresh size="14" />}
+                            color={hasUpdate ? "green" : null}
+                            onClick={checkForUpdates}
+                        >
+                            {hasUpdate ? "A new version is available!" : "Check for updates"}
+                        </Menu.Item>
+                        <Menu.Divider />
                         <Menu.Item leftSection={<IconInfoCircle size="14" />} onClick={toggleAboutModal}>
                             About
                         </Menu.Item>

@@ -38,6 +38,7 @@
         "postcss-simple-vars": "7.0.1",
         "react": "18.3.1",
         "react-dom": "18.3.1",
+        "semver": "7.7.2",
         "styled-components": "6.1.19"
     },
     "devDependencies": {
@@ -48,6 +49,7 @@
         "@types/node": "22.15.21",
         "@types/react": "18.3.18",
         "@types/react-dom": "18.3.5",
+        "@types/semver": "7.7.0",
         "@typescript-eslint/eslint-plugin": "8.35.1",
         "@typescript-eslint/parser": "8.35.1",
         "@vitejs/plugin-react-swc": "3.10.2",
