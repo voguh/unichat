@@ -95,7 +95,7 @@ function main() {
     pnpm build
 
     log_info "Committing changes to Git..."
-    git add "$cargo_toml"
+    git add "$cargo_toml" "${ROOT_DIR}/Cargo.lock"
     git commit -m "chore: release version $new_version"
     git tag -a "$new_version" -m "$new_version"
     log_info "Changes committed and tagged with '$new_version'."
