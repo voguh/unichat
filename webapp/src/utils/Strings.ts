@@ -21,11 +21,14 @@ export class Strings {
     }
 
     public static isValidYouTubeChatUrl(s: string): boolean {
-        if (this.isNullOrEmpty(s)) {
+        if (this.isNullOrEmpty(s) || !s.startsWith("https://www.youtube.com/live_chat")) {
             return false;
         }
 
-        return /^https:\/\/(www\.)?youtube\.com\/live_chat\?v=(.*)$/.test(s);
+        const params = new URLSearchParams(s.split("?")[1]);
+        const videoId = params.get("v");
+
+        return this.isValidYouTubeVideoId(videoId);
     }
 
     public static isValidTwitchChatUrl(s: string): boolean {
@@ -44,5 +47,11 @@ export class Strings {
         } else {
             return false;
         }
+    }
+
+    // Thanks to Glenn Slayden which explained the YouTube video ID format
+    // on https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video/101153#101153
+    public static isValidYouTubeVideoId(videoId: string): boolean {
+        return /^[0-9A-Za-z_-]{10}[048AEIMQUYcgkosw]$/.test(videoId);
     }
 }

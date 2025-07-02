@@ -6,6 +6,7 @@ import { IconBolt, IconCheck, IconLoader, IconPlayerPlay, IconPlayerStopFilled }
 import { invoke } from "@tauri-apps/api/core";
 import * as eventService from "@tauri-apps/api/event";
 
+import { loggerService } from "unichat/services/loggerService";
 import { storageService } from "unichat/services/storageService";
 import { YOUTUBE_CHAT_URL_KEY } from "unichat/utils/constants";
 import { IPCYoutubeEvents, IPCYouTubeStatusEvent, YOUTUBE_EVENT_DESCRIPTION } from "unichat/utils/IPCYoutubeEvents";
@@ -26,22 +27,40 @@ export function ScrapperCard(_props: Props): React.ReactNode {
     const [loading, setLoading] = React.useState<boolean>(true);
     const [event, setEvent] = React.useState<IPCYouTubeStatusEvent>(DEFAULT_STATUS_EVENT);
     const [currentActiveUrl, setCurrentActiveUrl] = React.useState("about:blank");
+    const [error, setError] = React.useState<string>(null);
 
     const inputRef = React.useRef<HTMLInputElement>(null);
 
     async function handleStart(): Promise<void> {
         try {
             setLoading(true);
-            const value = inputRef.current?.value ?? "";
+            let value = inputRef.current?.value ?? "";
+
+            if (value.startsWith("https://www.youtube.com/watch")) {
+                const params = new URLSearchParams(value.split("?")[1]);
+                const videoId = params.get("v") || value.trim();
+                value = `https://www.youtube.com/live_chat?v=${videoId}`;
+            } else if (Strings.isValidYouTubeVideoId(value)) {
+                value = `https://www.youtube.com/live_chat?v=${value}`;
+            }
+
             if (!Strings.isValidYouTubeChatUrl(value)) {
                 throw new Error("Invalid YouTube chat URL");
+            } else {
+                inputRef.current.value = value;
             }
 
             await storageService.setItem(YOUTUBE_CHAT_URL_KEY, value);
             await invoke("update_webview_url", { label: "youtube-chat", url: value });
             setCurrentActiveUrl(value);
         } catch (err) {
-            console.error(err);
+            if (err instanceof Error) {
+                setError(err.message);
+            } else if (typeof err === "string") {
+                setError(err);
+            }
+
+            loggerService.error("An error occurred while starting the YouTube chat scrapper: {}", err);
             notifications.show({ message: "An error occurred on save", color: "red" });
         } finally {
             setLoading(false);
@@ -54,7 +73,7 @@ export function ScrapperCard(_props: Props): React.ReactNode {
             await invoke("update_webview_url", { label: "youtube-chat", url: "about:blank" });
             setCurrentActiveUrl("about:blank");
         } catch (err) {
-            console.error(err);
+            loggerService.error("An error occurred while stopping the YouTube chat scrapper: {}", err);
             notifications.show({ message: "An error occurred on save", color: "red" });
         } finally {
             setLoading(false);
@@ -138,6 +157,7 @@ export function ScrapperCard(_props: Props): React.ReactNode {
                 });
 
                 if (payload.type === "ping") {
+                    setLoading(false);
                     setCurrentActiveUrl(inputRef.current?.value ?? "about:blank");
                 }
             }
@@ -154,6 +174,8 @@ export function ScrapperCard(_props: Props): React.ReactNode {
                 <TextInput
                     size="sm"
                     label="Scrapper: YouTube chat URL"
+                    description="Enter the YouTube chat/video URL or video ID to start the scrapper."
+                    error={error}
                     placeholder="https://www.youtube.com/live_chat?v={VIDEO_ID}"
                     ref={inputRef}
                     disabled={inputRef.current?.value === currentActiveUrl}
