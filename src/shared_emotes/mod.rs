@@ -25,3 +25,18 @@ pub mod betterttv;
 pub mod seventv;
 
 pub static EMOTES_HASHSET: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+
+pub fn fetch_shared_emotes(channel_id: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let mut shared_emotes = HashMap::new();
+
+    shared_emotes.extend(betterttv::fetch_emotes(channel_id));
+    shared_emotes.extend(seventv::fetch_emotes(channel_id));
+
+    let mut guard = EMOTES_HASHSET.write()?;
+
+    for (key, value) in shared_emotes {
+        guard.insert(key, value);
+    }
+
+    return Ok(());
+}
