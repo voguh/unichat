@@ -35,6 +35,7 @@ mod actix;
 mod commands;
 mod events;
 mod shared_emotes;
+mod twitch;
 mod utils;
 mod youtube;
 
@@ -64,6 +65,7 @@ fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error::
 
 fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
     events::init(app)?;
+    twitch::init(app)?;
     utils::properties::init(app)?;
     utils::settings::init(app)?;
     youtube::init(app)?;
@@ -136,6 +138,8 @@ async fn main() {
             commands::store_set_item,
             commands::toggle_webview,
             commands::list_widgets,
+            twitch::get_twitch_scrapper_url,
+            twitch::set_twitch_scrapper_url,
             youtube::get_youtube_scrapper_url,
             youtube::set_youtube_scrapper_url
         ])

@@ -26,6 +26,7 @@ import { commandService } from "unichat/services/commandService";
 
 import { ScrapperCard } from "./ScrapperCard/ScrapperCard";
 import { DashboardHomeStyledContainer } from "./styled";
+import { TwitchCard } from "./TwitchCard";
 
 export function DashboardHome(): React.ReactNode {
     const [selectedWidget, setSelectedWidget] = React.useState("default");
@@ -58,6 +59,7 @@ export function DashboardHome(): React.ReactNode {
         <DashboardHomeStyledContainer>
             <div className="fields">
                 <ScrapperCard />
+                <TwitchCard />
             </div>
             <div className="preview">
                 <Card className="preview-header" withBorder shadow="xs">

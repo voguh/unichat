@@ -29,9 +29,23 @@ export class YouTubeCommandService {
     }
 }
 
+export class TwitchCommandService {
+    public async getScrapperUrl(): Promise<string> {
+        return invoke("get_twitch_scrapper_url");
+    }
+
+    public async setScrapperUrl(url: string): Promise<void> {
+        await invoke("set_twitch_scrapper_url", { url });
+    }
+}
+
 export class CommandService {
     public get youTube(): YouTubeCommandService {
         return new YouTubeCommandService();
+    }
+
+    public get twitch(): TwitchCommandService {
+        return new TwitchCommandService();
     }
 
     public async getAppInfo(): Promise<AppMetadata> {

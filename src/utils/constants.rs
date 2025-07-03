@@ -16,3 +16,4 @@
  ******************************************************************************/
 
 pub const YOUTUBE_CHAT_WINDOW: &str = "youtube-chat";
+pub const TWITCH_CHAT_WINDOW: &str = "twitch-chat";

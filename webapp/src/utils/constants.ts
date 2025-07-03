@@ -16,3 +16,4 @@
  ******************************************************************************/
 
 export const YOUTUBE_CHAT_URL_KEY = "youtube-chat-url";
+export const TWITCH_CHANNEL_NAME = "twitch-channel-name";

@@ -19,7 +19,7 @@ import React from "react";
 
 import { Button, Card, Menu, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { IconAdjustments, IconBrandYoutubeFilled, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
+import { IconAdjustments, IconBrandTwitch, IconBrandYoutube, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import semver from "semver";
 
@@ -32,7 +32,8 @@ import { DashboardHome } from "./DashboardHome";
 import { DashboardStyledContainer } from "./styled";
 
 const TABS = {
-    youtube: { icon: IconBrandYoutubeFilled }
+    youtube: { icon: IconBrandYoutube },
+    twitch: { icon: IconBrandTwitch }
 };
 
 interface Props {

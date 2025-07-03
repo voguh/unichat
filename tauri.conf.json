@@ -32,6 +32,16 @@
                 "visible": false,
                 "resizable": false,
                 "maximizable": false
+            },
+            {
+                "label": "twitch-chat",
+                "title": "Twitch chat",
+                "url": "twitch-await.html",
+                "width": 400,
+                "height": 576,
+                "visible": false,
+                "resizable": false,
+                "maximizable": false
             }
         ],
         "security": {
