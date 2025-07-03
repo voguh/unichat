@@ -22,6 +22,7 @@ use std::sync::RwLock;
 use crate::events::unichat::UniChatEmote;
 
 pub mod betterttv;
+pub mod frankerfacez;
 pub mod seventv;
 
 pub static EMOTES_HASHSET: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
