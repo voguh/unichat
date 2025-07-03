@@ -33,8 +33,9 @@ include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 
 mod actix;
 mod commands;
-mod custom_emotes;
+mod shared_emotes;
 mod events;
+mod twitch;
 mod utils;
 mod youtube;
 

@@ -24,7 +24,7 @@ use tauri::Manager;
 use tauri::Runtime;
 use tauri::Url;
 
-use crate::custom_emotes;
+use crate::shared_emotes;
 use crate::utils;
 use crate::utils::constants;
 use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
@@ -135,7 +135,7 @@ pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &st
     let window = app.get_webview_window(label).unwrap();
     let tauri_url = decode_url(label, url).map_err(|e| format!("{:?}", e))?;
 
-    if let Ok(mut guard) = custom_emotes::EMOTES_HASHSET.write() {
+    if let Ok(mut guard) = shared_emotes::EMOTES_HASHSET.write() {
         guard.clear();
     }
 

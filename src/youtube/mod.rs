@@ -26,9 +26,9 @@ use tauri::Emitter;
 use tauri::Listener;
 use tauri::Manager;
 
-use crate::custom_emotes;
-use crate::custom_emotes::betterttv;
-use crate::custom_emotes::seventv;
+use crate::shared_emotes;
+use crate::shared_emotes::betterttv;
+use crate::shared_emotes::seventv;
 use crate::events;
 use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEmote;
@@ -70,7 +70,7 @@ fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, mut payload: Value) -> Resu
 /* ================================================================================================================== */
 
 fn set_emotes_hashmap(emotes: HashMap<String, UniChatEmote>) -> Result<(), Box<dyn std::error::Error>> {
-    let mut guard = custom_emotes::EMOTES_HASHSET.write()?;
+    let mut guard = shared_emotes::EMOTES_HASHSET.write()?;
 
     for (key, value) in emotes {
         guard.insert(key, value);
