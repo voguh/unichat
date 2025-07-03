@@ -15,7 +15,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
 use std::thread::sleep;
@@ -30,11 +29,8 @@ use tauri::Manager;
 use tauri::Url;
 
 use crate::shared_emotes;
-use crate::shared_emotes::betterttv;
-use crate::shared_emotes::seventv;
 use crate::events;
 use crate::events::unichat::UniChatClearEventPayload;
-use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatLoadEventPayload;
 use crate::events::unichat::UniChatPlatform;
@@ -73,16 +69,6 @@ fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, mut payload: Value) -> Resu
 
 /* ================================================================================================================== */
 
-fn set_emotes_hashmap(emotes: HashMap<String, UniChatEmote>) -> Result<(), Box<dyn std::error::Error>> {
-    let mut guard = shared_emotes::EMOTES_HASHSET.write()?;
-
-    for (key, value) in emotes {
-        guard.insert(key, value);
-    }
-
-    return Ok(());
-}
-
 fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
     let channel_id = payload.get("channelId").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'channelId' field in YouTube {event_type} payload"))?;
@@ -90,9 +76,7 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
     properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))
         .map_err(|e| format!("{:?}", e))?;
 
-    let mut custom_emotes = betterttv::fetch_emotes(channel_id);
-    custom_emotes.extend(seventv::fetch_emotes(channel_id));
-    set_emotes_hashmap(custom_emotes).map_err(|err| format!("Failed to set custom emotes: {}", err))?;
+    shared_emotes::fetch_shared_emotes(channel_id).map_err(|e| format!("{:?}", e))?;
 
     let init_event = UniChatEvent::Load {
         event_type: String::from(UNICHAT_EVENT_LOAD_TYPE),
@@ -209,10 +193,6 @@ pub async fn get_youtube_scrapper_url(app: tauri::AppHandle<tauri::Wry>) -> Resu
 pub async fn set_youtube_scrapper_url(app: tauri::AppHandle<tauri::Wry>, url: &str) -> Result<(), String> {
     let window = app.get_webview_window(YOUTUBE_CHAT_WINDOW).ok_or("YouTube chat window not found")?;
     let tauri_url = decode_url(url).map_err(|e| format!("{:?}", e))?;
-
-    if let Ok(mut guard) = shared_emotes::EMOTES_HASHSET.write() {
-        guard.clear();
-    }
 
     window.navigate(tauri_url).map_err(|e| format!("{:?}", e))?;
     sleep(Duration::from_millis(500));
