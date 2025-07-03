@@ -57,7 +57,7 @@ async function handleScrapEvent(response) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function init() {
     try {
         if (window.fetch.__WRAPPED__ == null) {
             // Prevent right-click context menu in production
@@ -150,4 +150,10 @@ document.addEventListener("DOMContentLoaded", () => {
         window.__TAURI_PLUGIN_LOG__.error(err);
         dispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
     }
-});
+}
+
+if (document.readyState === "interactive" || document.readyState === "complete") {
+    init();
+} else {
+    document.addEventListener("DOMContentLoaded", init);
+}
