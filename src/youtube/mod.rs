@@ -18,6 +18,8 @@
 use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
+use std::thread::sleep;
+use std::time::Duration;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
@@ -25,6 +27,7 @@ use serde_json::Value;
 use tauri::Emitter;
 use tauri::Listener;
 use tauri::Manager;
+use tauri::Url;
 
 use crate::shared_emotes;
 use crate::shared_emotes::betterttv;
@@ -37,6 +40,7 @@ use crate::events::unichat::UniChatLoadEventPayload;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UNICHAT_EVENT_CLEAR_TYPE;
 use crate::events::unichat::UNICHAT_EVENT_LOAD_TYPE;
+use crate::utils;
 use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
 use crate::utils::is_dev;
 use crate::utils::properties;
@@ -48,8 +52,8 @@ use crate::utils::settings::YouTubeSettingLogLevel;
 
 mod mapper;
 
-pub static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
-pub static YOUTUBE_RAW_EVENT: &str = "youtube_raw::event";
+static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
+static YOUTUBE_RAW_EVENT: &str = "youtube_raw::event";
 
 /* ================================================================================================================== */
 
@@ -179,6 +183,46 @@ fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, pa
 
 /* ================================================================================================================== */
 
+fn decode_url(url: &str) -> Result<Url, Box<dyn std::error::Error>> {
+    let mut url = url.to_string();
+
+    if url.is_empty() || url == "about:blank" || !url.starts_with("https://") {
+        if utils::is_dev() {
+            url = String::from("http://localhost:1421/youtube-await.html");
+        } else {
+            url = String::from("tauri://localhost/youtube-await.html");
+        }
+    }
+
+    return Url::parse(url.as_str()).map_err(|e| Box::new(e) as Box<dyn std::error::Error>);
+}
+
+#[tauri::command]
+pub async fn get_youtube_scrapper_url(app: tauri::AppHandle<tauri::Wry>) -> Result<String, String> {
+    let window = app.get_webview_window(YOUTUBE_CHAT_WINDOW).ok_or("YouTube chat window not found")?;
+    let url = window.url().map_err(|e| format!("{:?}", e))?;
+
+    return Ok(url.as_str().to_string());
+}
+
+#[tauri::command]
+pub async fn set_youtube_scrapper_url(app: tauri::AppHandle<tauri::Wry>, url: &str) -> Result<(), String> {
+    let window = app.get_webview_window(YOUTUBE_CHAT_WINDOW).ok_or("YouTube chat window not found")?;
+    let tauri_url = decode_url(url).map_err(|e| format!("{:?}", e))?;
+
+    if let Ok(mut guard) = shared_emotes::EMOTES_HASHSET.write() {
+        guard.clear();
+    }
+
+    window.navigate(tauri_url).map_err(|e| format!("{:?}", e))?;
+    sleep(Duration::from_millis(500));
+    window.eval(SCRAPPER_JS).map_err(|e| format!("{:?}", e))?;
+
+    return Ok(());
+}
+
+/* ================================================================================================================== */
+
 fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: tauri::Event) -> Result<(), String> {
     let payload: Value = serde_json::from_str(event.payload()).map_err(|e| format!("{}", e))?;
     let event_type = payload.get("type").and_then(|v| v.as_str())
@@ -200,7 +244,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
 
     window.listen(YOUTUBE_RAW_EVENT, move |event| {
         if let Err(err) = handle_event(app_handle.clone(), event) {
-            log::error!("Failed to handle YouTube raw event: {}", err);
+            log::error!("Failed to handle YouTube raw event: {:?}", err);
         }
     });
 

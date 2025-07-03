@@ -20,14 +20,14 @@ import React from "react";
 import { Button, Card, Menu, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { IconAdjustments, IconBrandYoutubeFilled, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
-import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import semver from "semver";
 
+import { AboutModal } from "unichat/components/AboutModal";
 import { AppContext } from "unichat/contexts/AppContext";
+import { commandService } from "unichat/services/commandService";
 import { loggerService } from "unichat/services/loggerService";
 
-import { AboutModal } from "../AboutModal";
 import { DashboardHome } from "./DashboardHome";
 import { DashboardStyledContainer } from "./styled";
 
@@ -44,7 +44,7 @@ export function Dashboard(_props: Props): React.ReactNode {
     const { metadata } = React.useContext(AppContext);
 
     async function toggleWebview(id: string): Promise<void> {
-        invoke("toggle_webview", { label: `${id}-chat` });
+        commandService.toggleWebview(`${id}-chat`);
     }
 
     async function toggleAboutModal(): Promise<void> {

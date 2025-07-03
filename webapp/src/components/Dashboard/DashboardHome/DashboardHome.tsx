@@ -19,10 +19,10 @@ import React from "react";
 
 import { Button, Card, Select } from "@mantine/core";
 import { IconFolderFilled, IconReload, IconWorld } from "@tabler/icons-react";
-import { invoke } from "@tauri-apps/api/core";
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { AppContext } from "unichat/contexts/AppContext";
+import { commandService } from "unichat/services/commandService";
 
 import { ScrapperCard } from "./ScrapperCard/ScrapperCard";
 import { DashboardHomeStyledContainer } from "./styled";
@@ -39,7 +39,7 @@ export function DashboardHome(): React.ReactNode {
     }
 
     async function reloadIframe(): Promise<void> {
-        const widgets = await invoke<string[]>("list_widgets");
+        const widgets = await commandService.listWidgets();
         setWidgets(widgets);
 
         iframeRef.current?.contentWindow.location.reload();
@@ -47,7 +47,7 @@ export function DashboardHome(): React.ReactNode {
 
     React.useEffect(() => {
         async function init(): Promise<void> {
-            const widgets = await invoke<string[]>("list_widgets");
+            const widgets = await commandService.listWidgets();
             setWidgets(widgets);
         }
 

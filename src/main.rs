@@ -33,8 +33,8 @@ include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 
 mod actix;
 mod commands;
-mod shared_emotes;
 mod events;
+mod shared_emotes;
 mod twitch;
 mod utils;
 mod youtube;
@@ -139,8 +139,9 @@ async fn main() {
             commands::store_get_item,
             commands::store_set_item,
             commands::toggle_webview,
-            commands::update_webview_url,
-            commands::list_widgets
+            commands::list_widgets,
+            youtube::get_youtube_scrapper_url,
+            youtube::set_youtube_scrapper_url
         ])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())
