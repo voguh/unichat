@@ -71,7 +71,7 @@ fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, mut payload: Value) -> Resu
 
 fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
     let channel_id = payload.get("channelId").and_then(|v| v.as_str())
-        .ok_or(format!("Missing or invalid 'channelId' field in YouTube {event_type} payload"))?;
+        .ok_or(format!("Missing or invalid 'channelId' field in YouTube '{event_type}' payload"))?;
 
     properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))
         .map_err(|e| format!("{:?}", e))?;
