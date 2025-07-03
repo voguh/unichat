@@ -1,6 +1,6 @@
 {
     "$schema": "../gen/schemas/desktop-schema.json",
-    "identifier": "popouts-capability",
+    "identifier": "youtube-chat__capability",
     "windows": ["youtube-chat"],
     "permissions": ["log:default", "core:event:allow-emit"],
     "remote": {
