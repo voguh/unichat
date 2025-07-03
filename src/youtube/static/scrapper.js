@@ -121,13 +121,16 @@ function init() {
                 html::before {
                     content: "UniChat installed! You can close this window.";
                     position: fixed;
-                    top: 8px;
-                    right: 8px;
+                    top: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
                     z-index: 9999;
                     background-color: rgba(0, 0, 0, 0.8);
                     color: white;
                     padding: 10px;
-                    border-radius: 4px;
+                    white-space: nowrap;
+                    border-bottom-left-radius: 4px;
+                    border-bottom-right-radius: 4px;
                 }
             `;
             document.head.appendChild(style);
