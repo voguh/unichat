@@ -28,7 +28,6 @@ use tauri::Listener;
 use tauri::Manager;
 use tauri::Url;
 
-use crate::shared_emotes;
 use crate::events;
 use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
@@ -36,6 +35,7 @@ use crate::events::unichat::UniChatLoadEventPayload;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UNICHAT_EVENT_CLEAR_TYPE;
 use crate::events::unichat::UNICHAT_EVENT_LOAD_TYPE;
+use crate::shared_emotes;
 use crate::utils;
 use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
 use crate::utils::is_dev;

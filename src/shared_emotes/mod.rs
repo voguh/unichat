@@ -22,6 +22,7 @@ use std::sync::RwLock;
 use crate::events::unichat::UniChatEmote;
 
 pub mod betterttv;
+pub mod frankerfacez;
 pub mod seventv;
 
 pub static EMOTES_HASHSET: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
@@ -30,6 +31,7 @@ pub fn fetch_shared_emotes(channel_id: &str) -> Result<(), Box<dyn std::error::E
     let mut shared_emotes = HashMap::new();
 
     shared_emotes.extend(betterttv::fetch_emotes(channel_id));
+    shared_emotes.extend(frankerfacez::fetch_emotes(channel_id));
     shared_emotes.extend(seventv::fetch_emotes(channel_id));
 
     let mut guard = EMOTES_HASHSET.write()?;
