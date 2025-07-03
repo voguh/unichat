@@ -108,13 +108,10 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
                     window.destroy().unwrap();
                 }
             }
-
         }
-    } else {
-        if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-            api.prevent_close();
-            window.hide().unwrap();
-        }
+    } else if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+        api.prevent_close();
+        window.hide().unwrap();
     }
 }
 
