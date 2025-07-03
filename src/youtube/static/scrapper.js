@@ -69,6 +69,8 @@ function init() {
                 }
             });
 
+            /* ====================================================================================================== */
+
             // Retrieve channel ID from YouTube initial data
             const ytInitialData = window.ytInitialData;
             const timedContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.timedContinuationData?.continuation;
