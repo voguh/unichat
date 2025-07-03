@@ -28,6 +28,7 @@ use tauri::Manager;
 
 use crate::custom_emotes;
 use crate::custom_emotes::betterttv;
+use crate::custom_emotes::frankerfacez;
 use crate::custom_emotes::seventv;
 use crate::events;
 use crate::events::unichat::UniChatClearEventPayload;
@@ -87,6 +88,7 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
         .map_err(|e| format!("{:?}", e))?;
 
     let mut custom_emotes = betterttv::fetch_emotes(channel_id);
+    custom_emotes.extend(frankerfacez::fetch_emotes(channel_id));
     custom_emotes.extend(seventv::fetch_emotes(channel_id));
     set_emotes_hashmap(custom_emotes).map_err(|err| format!("Failed to set custom emotes: {}", err))?;
 

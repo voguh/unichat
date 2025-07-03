@@ -26,10 +26,9 @@ customization using HTML/CSS/JS.
     - `https://api.betterttv.net/3/cached/users/{youtube|twitch}/{CHANNEL_ID}`
     - `https://cdn.betterttv.net/emote/{EMOTE_ID}/{EMOTE_SIZE:3x}.{IMAGE_TYPE:webp}`
 2. FrankerFaceZ endpoints:
-    - `https://api.frankerfacez.com/v1/set/global`
-    - `https://api.frankerfacez.com/v1/user/id/{TWITCH_CHANNEL_ID}`
-    - `https://api.frankerfacez.com/v1/user/yt/{YOUTUBE_CHANNEL_ID}`
-    - `https://cdn.frankerfacez.com/emote/{EMOTE_ID}/{EMOTE_SIZE:4}`
+    - `https://api.betterttv.net/3/cached/frankerfacez/emotes/global`
+    - `https://api.betterttv.net/3/cached/frankerfacez/users/twitch/{CHANNEL_ID}`
+    - `https://cdn.betterttv.net/frankerfacez_emote/{EMOTE_ID}/{EMOTE_SIZE:4}`
 3. SevenTV endpoints:
     - `https://7tv.io/v3/emote-sets/global`
     - `https://7tv.io/v3/users/{youtube|twitch}/{CHANNEL_ID}`
