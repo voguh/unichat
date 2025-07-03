@@ -35,7 +35,6 @@ mod actix;
 mod commands;
 mod events;
 mod shared_emotes;
-mod twitch;
 mod utils;
 mod youtube;
 
