@@ -17,7 +17,12 @@
 
 async function dispatchEvent(payload) {
     payload.timestamp = Date.now();
-    await window.__TAURI__.event.emit("youtube_raw::event", payload);
+    await window.__TAURI__.event.emit("youtube_raw::event", payload)
+        .then(() => console.log(`Event with type '${payload.type}' dispatched successfully!`))
+        .catch((err) => {
+            console.error(`Failed to dispatch event with type '${payload.type}':`, err);
+            window.__TAURI_PLUGIN_LOG__.error(err);
+        });
 }
 
 async function dispatchPing() {
