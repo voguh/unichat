@@ -11,7 +11,7 @@ function buildBadges(badges) {
   let badgeJoin = ''
 
   for (const badge of badges) {
-    badgeJoin+=`\n<img src="${badge.url}" class="badge" type="${badge.type}" />`
+    badgeJoin+=`\n<img src="${badge.url}" class="badge" />`
   }
 
   return badgeJoin;

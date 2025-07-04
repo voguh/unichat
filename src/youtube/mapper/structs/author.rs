@@ -130,27 +130,23 @@ pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>) -> Result<V
                 AuthorBadgeRenderer::Custom { custom_thumbnail, .. } => {
                     let thumbnail = custom_thumbnail.thumbnails.last().ok_or("No thumbnails found in custom thumbnail")?;
                     parsed_badges.push(UniChatBadge {
-                        badge_type: String::from("sponsor"),
-                        tooltip: String::from("Sponsor"),
+                        code: String::from("sponsor"),
                         url: thumbnail.url.clone()
                     });
                 },
                 AuthorBadgeRenderer::Internal { icon, .. } => {
                     match icon.icon_type.as_str() {
                         "OWNER" => parsed_badges.push(UniChatBadge {
-                            badge_type: String::from("broadcaster"),
-                            tooltip: String::from("Broadcaster"),
-                            url: String::from("https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/1")
+                            code: String::from("broadcaster"),
+                            url: String::from("https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/3")
                         }),
                         "MODERATOR" => parsed_badges.push(UniChatBadge {
-                            badge_type: String::from("moderator"),
-                            tooltip: String::from("Moderator"),
-                            url: String::from("https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/1")
+                            code: String::from("moderator"),
+                            url: String::from("https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3")
                         }),
                         "VERIFIED" => parsed_badges.push(UniChatBadge {
-                            badge_type: String::from("verified"),
-                            tooltip: String::from("Verified"),
-                            url: String::from("https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/1")
+                            code: String::from("verified"),
+                            url: String::from("https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/3")
                         }),
                         _ => {}
                     };

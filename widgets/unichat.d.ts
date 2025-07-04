@@ -25,8 +25,7 @@ export interface UniChatEmote {
 }
 
 export interface UniChatBadge {
-    type: string;
-    tooltip: string;
+    code: string;
     url: string;
 }
 

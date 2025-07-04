@@ -96,9 +96,7 @@ pub struct UniChatEmote {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatBadge {
-    #[serde(rename = "type")]
-    pub badge_type: String,
-    pub tooltip: String,
+    pub code: String,
     pub url: String
 }
 /* <============================================================================================> */
