@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-use std::sync::OnceLock;
+use std::sync::LazyLock;
 
 use tokio::sync::broadcast;
 use unichat::UniChatEvent;
@@ -47,17 +47,8 @@ impl EventEmitter {
     }
 }
 
-static INSTANCE: OnceLock<EventEmitter> = OnceLock::new();
-
-pub fn init(_app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
-    let result = INSTANCE.set(EventEmitter::new());
-    if result.is_err() {
-        return Err("Failed to initialize event emitter".into());
-    }
-
-    return Ok(());
-}
+static INSTANCE: LazyLock<EventEmitter> = LazyLock::new(|| EventEmitter::new());
 
 pub fn event_emitter() -> &'static EventEmitter {
-    return INSTANCE.get().unwrap();
+    return &INSTANCE;
 }

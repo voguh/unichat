@@ -64,7 +64,6 @@ fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error::
 }
 
 fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
-    events::init(app)?;
     twitch::init(app)?;
     utils::properties::init(app)?;
     utils::settings::init(app)?;
