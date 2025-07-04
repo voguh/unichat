@@ -22,6 +22,7 @@ use serde::Serialize;
 use serde_json::Value;
 
 use crate::events::unichat::UniChatEmote;
+use crate::utils::is_valid_youtube_channel_id;
 use crate::utils::parse_serde_error;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -31,50 +32,47 @@ pub struct FrankerFaceZEmote {
     pub code: String
 }
 
-fn log_err(err: Box<dyn std::error::Error>) -> Vec<FrankerFaceZEmote>{
-    log::error!("Error fetching emotes: {}", err);
-
-    return Vec::new();
+fn parse_emote(emote: &FrankerFaceZEmote) -> UniChatEmote {
+    return UniChatEmote {
+        id: emote.id.to_string(),
+        emote_type: emote.code.clone(),
+        tooltip: emote.code.clone(),
+        // Image size `4` are used by default, so it's possible to use `1`, `2`, `4` images.
+        url: format!("https://cdn.betterttv.net/frankerfacez_emote/{}/4", emote.id)
+    };
 }
 
-fn fetch_global_emotes(url: String) -> Result<Vec<FrankerFaceZEmote>, Box<dyn std::error::Error>> {
-    let mut response = ureq::get(&url).call()?;
+pub fn fetch_global_emotes() -> Result<HashMap<String, UniChatEmote>, Box<dyn std::error::Error>> {
+    let url = "https://api.betterttv.net/3/cached/frankerfacez/emotes/global";
+    let mut response = ureq::get(url).call()?;
     let data: Vec<Value> = response.body_mut().read_json()?;
-
-    return serde_json::from_value(Value::Array(data)).map_err(parse_serde_error);
-}
-
-fn fetch_channel_emotes(url: String) -> Result<Vec<FrankerFaceZEmote>, Box<dyn std::error::Error>> {
-    let mut response = ureq::get(&url).call()?;
-    let data: Vec<Value> = response.body_mut().read_json()?;
-
-    return serde_json::from_value(Value::Array(data)).map_err(parse_serde_error);
-}
-
-pub fn fetch_emotes(channel_id: &str) -> HashMap<String, UniChatEmote> {
-    let global_url = String::from("https://api.betterttv.net/3/cached/frankerfacez/emotes/global");
-    let youtube_url = format!("https://api.betterttv.net/3/cached/frankerfacez/users/youtube/{}", channel_id);
-    let twitch_url = format!("https://api.betterttv.net/3/cached/frankerfacez/users/twitch/{}", channel_id);
-
-    let global_emotes = fetch_global_emotes(global_url).unwrap_or_else(log_err);
-    let youtube_emotes = fetch_channel_emotes(youtube_url).unwrap_or_else(log_err);
-    let twitch_emotes = fetch_channel_emotes(twitch_url).unwrap_or_else(log_err);
-
-    let mut all_emotes = Vec::new();
-    all_emotes.extend(global_emotes);
-    all_emotes.extend(youtube_emotes);
-    all_emotes.extend(twitch_emotes);
+    let emotes: Vec<FrankerFaceZEmote> = serde_json::from_value(Value::Array(data)).map_err(parse_serde_error)?;
 
     let mut parsed = HashMap::new();
-    for emote in all_emotes.iter() {
-        parsed.insert(emote.code.clone(), UniChatEmote {
-            id: emote.id.to_string(),
-            emote_type: emote.code.clone(),
-            tooltip: emote.code.clone(),
-            // Image size `4` are used by default, so it's possible to use `1`, `2`, `4` images.
-            url: format!("https://cdn.betterttv.net/frankerfacez_emote/{}/4", emote.id)
-        });
+    for emote in emotes.iter() {
+        parsed.insert(emote.code.clone(), parse_emote(emote));
     }
 
-    return parsed;
+    return Ok(parsed);
+}
+
+pub fn fetch_channel_emotes(channel_id: &str) -> Result<HashMap<String, UniChatEmote>, Box<dyn std::error::Error>> {
+    let url: String;
+    if is_valid_youtube_channel_id(&channel_id) {
+        url = format!("https://api.betterttv.net/3/cached/frankerfacez/users/youtube/{}", channel_id);
+    } else {
+        url = format!("https://api.betterttv.net/3/cached/frankerfacez/users/twitch/{}", channel_id);
+    }
+
+    let mut response = ureq::get(&url).call()?;
+    let data: Vec<Value> = response.body_mut().read_json()?;
+    let emotes: Vec<FrankerFaceZEmote> = serde_json::from_value(Value::Array(data)).map_err(parse_serde_error)?;
+
+
+    let mut parsed = HashMap::new();
+    for emote in emotes.iter() {
+        parsed.insert(emote.code.clone(), parse_emote(emote));
+    }
+
+    return Ok(parsed);
 }

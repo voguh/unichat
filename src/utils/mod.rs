@@ -15,6 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+use std::sync::LazyLock;
+
 pub mod constants;
 pub mod properties;
 pub mod settings;
@@ -72,4 +74,15 @@ pub fn random_color_by_seed(seed: &str) -> Result<String, Box<dyn std::error::Er
     let b = (hash & 0xFF) as u8;
 
     return Ok(format!("#{:02X}{:02X}{:02X}", r, g, b));
+}
+
+// Thanks to Glenn Slayden which explained the YouTube video ID format
+// on https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video/101153#101153
+static YOUTUBE_CHANNEL_ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^UC[0-9A-Za-z_-]{21}[AQgw]$").unwrap());
+pub fn is_valid_youtube_channel_id(channel_id: &str) -> bool {
+    if channel_id.is_empty() {
+        return false;
+    }
+
+    return YOUTUBE_CHANNEL_ID_REGEX.is_match(channel_id);
 }
