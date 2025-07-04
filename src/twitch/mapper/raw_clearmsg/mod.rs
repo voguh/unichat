@@ -23,7 +23,7 @@ use crate::events::unichat::UniChatRemoveMessageEventPayload;
 use crate::events::unichat::UNICHAT_EVENT_REMOVE_MESSAGE_TYPE;
 use crate::twitch::mapper::structs::parse_tags;
 
-pub fn parse(channel_name: String, message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+pub fn parse(channel: String, message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
     let tags = parse_tags(&message.tags);
 
     let room_id = tags.get("room-id").ok_or("Missing room-id tag")?;
@@ -33,7 +33,7 @@ pub fn parse(channel_name: String, message: &Message) -> Result<Option<UniChatEv
         event_type: String::from(UNICHAT_EVENT_REMOVE_MESSAGE_TYPE),
         data: UniChatRemoveMessageEventPayload {
             channel_id: room_id.to_owned(),
-            channel_name: Some(channel_name),
+            channel_name: Some(channel),
             platform: UniChatPlatform::Twitch,
 
             message_id: target_msg_id.to_owned(),

@@ -25,7 +25,7 @@ use crate::events::unichat::UNICHAT_EVENT_CLEAR_TYPE;
 use crate::events::unichat::UNICHAT_EVENT_REMOVE_AUTHOR_TYPE;
 use crate::twitch::mapper::structs::parse_tags;
 
-pub fn parse(channel_name: String, message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+pub fn parse(channel: String, message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
     let event: UniChatEvent;
     let tags = parse_tags(&message.tags);
 
@@ -36,7 +36,7 @@ pub fn parse(channel_name: String, message: &Message) -> Result<Option<UniChatEv
             event_type: String::from(UNICHAT_EVENT_REMOVE_AUTHOR_TYPE),
             data: UniChatRemoveAuthorEventPayload {
                 channel_id: room_id.to_owned(),
-                channel_name: Some(channel_name),
+                channel_name: Some(channel),
                 platform: UniChatPlatform::Twitch,
 
                 author_id: target_user_id.to_owned()
@@ -47,7 +47,7 @@ pub fn parse(channel_name: String, message: &Message) -> Result<Option<UniChatEv
             event_type: String::from(UNICHAT_EVENT_CLEAR_TYPE),
             data: UniChatClearEventPayload {
                 channel_id: room_id.to_owned(),
-                channel_name: Some(channel_name),
+                channel_name: Some(channel),
                 platform: UniChatPlatform::Twitch
             }
         };
