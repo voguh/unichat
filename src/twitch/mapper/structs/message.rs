@@ -31,6 +31,10 @@ pub fn parse_message_emotes(raw_emotes: Option<&String>, message_text: &str) -> 
 
     if let Some(raw_emotes) = raw_emotes {
         for raw_emote in raw_emotes.split("/") {
+            if raw_emote.trim().is_empty() {
+                continue;
+            }
+
             let (emote_id, positions_raw) = raw_emote.split_once(":").ok_or("Invalid emote format")?;
             let (start, end) = positions_raw.split_once("-")
                 .and_then(|(start, end)| {
