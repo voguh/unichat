@@ -37,14 +37,17 @@ export function TwitchCard(_props: Props): React.ReactNode {
             let value = inputRef.current?.value ?? "";
             let channelName = inputRef.current?.value ?? "";
 
+            // Normalize the URL to ensure it starts with a valid protocol
+            if (value.startsWith("twitch.tv")) {
+                value = `https://www.${value}`;
+            } else if (value.startsWith("www.twitch.tv")) {
+                value = `https://${value}`;
+            }
+
             if (value.startsWith("https://www.twitch.tv/")) {
                 const parts = value.replace("https://www.twitch.tv/", "").split("/");
 
-                if (parts.length !== 1 && parts.length !== 3) {
-                    throw new Error("Invalid Twitch chat URL");
-                }
-
-                if (parts[0] === "popout") {
+                if (parts[0] === "popout" && parts[2] === "chat") {
                     channelName = parts[1];
                 } else {
                     channelName = parts[0];
