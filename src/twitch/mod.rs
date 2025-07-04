@@ -97,24 +97,6 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
 
         let mut stream = client.stream().unwrap();
         while let Some(message) = stream.next().await.transpose().unwrap() {
-            println!("{:?}", &message);
-
-            if let Command::Raw(cmd, _args) = &message.command {
-                if cmd == "ROOMSTATE" {
-                    if let Some(tags) = &message.tags {
-                        for Tag(name, value) in tags {
-                            if name == "room-id" {
-                                let channel_id = value.as_ref().unwrap();
-                                shared_emotes::fetch_shared_emotes(&channel_id).unwrap();
-                                break;
-                            }
-                        }
-                    }
-
-                    continue;
-                }
-            }
-
             if let Err(err) = handle_message_event(&message) {
                 log::error!("Failed to handle Twitch message event: {:?}", err);
             }
@@ -145,6 +127,22 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
 
 fn handle_message_event(message: &Message) -> Result<(), Box<dyn std::error::Error>> {
     let log_events: SettingLogEventLevel = settings::get_item(SettingsKeys::LogYouTubeEvents)?;
+
+    if let Command::Raw(cmd, _args) = &message.command {
+        if cmd == "ROOMSTATE" {
+            if let Some(tags) = &message.tags {
+                for Tag(name, value) in tags {
+                    if name == "room-id" {
+                        let channel_id = value.as_ref().unwrap();
+                        shared_emotes::fetch_shared_emotes(&channel_id).unwrap();
+                        break;
+                    }
+                }
+            }
+
+            return Ok(());
+        }
+    }
 
     match mapper::parse(message) {
         Ok(Some(parsed)) => {
