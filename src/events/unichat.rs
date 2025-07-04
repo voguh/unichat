@@ -80,6 +80,7 @@ pub enum UniChatPlatform {
 pub enum UniChatAuthorType {
     Viewer,
     Sponsor,
+    Vip,
     Moderator,
     Broadcaster
 }

@@ -16,7 +16,7 @@
  ******************************************************************************/
 
 export type UniChatPlatform = "youtube" | "twitch";
-export type UniChatAuthorType = "VIEWER" | "SPONSOR" | "MODERATOR" | "BROADCASTER";
+export type UniChatAuthorType = "VIEWER" | "SPONSOR" | "VIP" | "MODERATOR" | "BROADCASTER";
 
 export interface UniChatEmote {
     id: string;
