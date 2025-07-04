@@ -59,97 +59,93 @@ async function handleScrapEvent(response) {
 
 function init() {
     try {
-        if (window.fetch.__WRAPPED__ == null) {
-            // Prevent right-click context menu in production
-            window.__TAURI__.core.invoke("is_dev").then((isDev) => {
-                if (!isDev) {
-                    window.addEventListener("contextmenu", async (event) => {
-                        event.preventDefault();
-                    });
-                }
-            });
-
-            /* ====================================================================================================== */
-
-            // Retrieve channel ID from YouTube initial data
-            const ytInitialData = window.ytInitialData;
-            const timedContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.timedContinuationData?.continuation;
-            const invalidationContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.invalidationContinuationData?.continuation;
-            const encodedProtoPuf = timedContinuationData || invalidationContinuationData;
-            const normalizedData = normalizeBase64(encodedProtoPuf);
-            const protoPufBytes = atob(normalizedData);
-
-            let subProtoPuf = `${protoPufBytes.split("%3D")[0]}%3D`;
-            subProtoPuf = subProtoPuf.substring(10, subProtoPuf.length);
-
-            const decodedSubProtoPuf = normalizeBase64(subProtoPuf);
-            const subProtoPufBytes = atob(decodedSubProtoPuf);
-
-            const lines = subProtoPufBytes.split("\n");
-            const channelIdLine = lines[2];
-            const channelId = channelIdLine.replace("\x18", "").split("\x12")[0];
-
-            if (!channelId) {
-                throw new Error("Channel ID not found in YouTube initial data.");
+        // Prevent right-click context menu in production
+        window.__TAURI__.core.invoke("is_dev").then((isDev) => {
+            if (!isDev) {
+                window.addEventListener("contextmenu", async (event) => {
+                    event.preventDefault();
+                });
             }
+        });
 
-            dispatchEvent({ type: "ready", channelId: channelId, url: window.location.href });
+        /* ====================================================================================================== */
 
-            /* ====================================================================================================== */
+        // Retrieve channel ID from YouTube initial data
+        const ytInitialData = window.ytInitialData;
+        const timedContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.timedContinuationData?.continuation;
+        const invalidationContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.invalidationContinuationData?.continuation;
+        const encodedProtoPuf = timedContinuationData || invalidationContinuationData;
+        const normalizedData = normalizeBase64(encodedProtoPuf);
+        const protoPufBytes = atob(normalizedData);
 
-            // Wrap fetch to intercept YouTube live chat messages
-            const originalFetch = window.fetch;
-            Object.defineProperty(window, "fetch", {
-                value: async (...args) => {
-                    const res = await originalFetch(...args);
+        let subProtoPuf = `${protoPufBytes.split("%3D")[0]}%3D`;
+        subProtoPuf = subProtoPuf.substring(10, subProtoPuf.length);
 
-                    if (res.url.startsWith("https://www.youtube.com/youtubei/v1/live_chat/get_live_chat") && res.ok) {
-                        handleScrapEvent(res.clone());
-                    }
+        const decodedSubProtoPuf = normalizeBase64(subProtoPuf);
+        const subProtoPufBytes = atob(decodedSubProtoPuf);
 
-                    return res;
-                },
-                configurable: true,
-                writable: true
-            });
-            Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
-            window.__TAURI_PLUGIN_LOG__.info("Fetch wrapped!");
+        const lines = subProtoPufBytes.split("\n");
+        const channelIdLine = lines[2];
+        const channelId = channelIdLine.replace("\x18", "").split("\x12")[0];
 
-            /* ====================================================================================================== */
-
-            // Add a warning message to the page
-            const style = document.createElement("style");
-            style.textContent = `
-                html::before {
-                    content: "UniChat installed! You can close this window.";
-                    position: fixed;
-                    top: 0;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    z-index: 9999;
-                    background-color: rgba(0, 0, 0, 0.8);
-                    color: white;
-                    padding: 10px;
-                    white-space: nowrap;
-                    border-bottom-left-radius: 4px;
-                    border-bottom-right-radius: 4px;
-                }
-            `;
-            document.head.appendChild(style);
-
-            /* ====================================================================================================== */
-
-            // Attach status ping event
-            dispatchPing();
-
-            /* ====================================================================================================== */
-
-            // Select live chat instead top chat
-            document.querySelector("#live-chat-view-selector-sub-menu #trigger")?.click();
-            document.querySelector("#live-chat-view-selector-sub-menu #dropdown a:nth-child(2)")?.click()
-        } else {
-            window.__TAURI_PLUGIN_LOG__.warn("Fetch already was wrapped!");
+        if (!channelId) {
+            throw new Error("Channel ID not found in YouTube initial data.");
         }
+
+        dispatchEvent({ type: "ready", channelId: channelId, url: window.location.href });
+
+        /* ====================================================================================================== */
+
+        // Wrap fetch to intercept YouTube live chat messages
+        const originalFetch = window.fetch;
+        Object.defineProperty(window, "fetch", {
+            value: async (...args) => {
+                const res = await originalFetch(...args);
+
+                if (res.url.startsWith("https://www.youtube.com/youtubei/v1/live_chat/get_live_chat") && res.ok) {
+                    handleScrapEvent(res.clone());
+                }
+
+                return res;
+            },
+            configurable: true,
+            writable: true
+        });
+        Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
+        window.__TAURI_PLUGIN_LOG__.info("Fetch wrapped!");
+
+        /* ====================================================================================================== */
+
+        // Add a warning message to the page
+        const style = document.createElement("style");
+        style.textContent = `
+            html::before {
+                content: "UniChat installed! You can close this window.";
+                position: fixed;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 9999;
+                background-color: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 10px;
+                white-space: nowrap;
+                border-bottom-left-radius: 4px;
+                border-bottom-right-radius: 4px;
+            }
+        `;
+        document.head.appendChild(style);
+
+        /* ====================================================================================================== */
+
+        // Attach status ping event
+        dispatchPing();
+
+        /* ====================================================================================================== */
+
+        // Select live chat instead top chat
+        document.querySelector("#live-chat-view-selector-sub-menu #trigger")?.click();
+        document.querySelector("#live-chat-view-selector-sub-menu #dropdown a:nth-child(2)")?.click()
     } catch (err) {
         console.error(err);
         window.__TAURI_PLUGIN_LOG__.error(err);
