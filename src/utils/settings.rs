@@ -30,7 +30,7 @@ use crate::utils::properties::AppPaths;
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum YouTubeSettingLogLevel {
+pub enum SettingLogEventLevel {
     OnlyErrors,
     UnknownEvents,
     AllEvents
@@ -40,7 +40,8 @@ pub enum SettingsKeys {
     YouTubeChatUrl,
     TwitchChannelName,
 
-    LogYouTubeEvents
+    LogYouTubeEvents,
+    LogTwitchEvents,
 }
 
 macro_rules! settings_keys {
@@ -70,7 +71,8 @@ settings_keys! {
     YouTubeChatUrl => "youtube-chat-url",
     TwitchChannelName => "twitch-channel-name",
 
-    LogYouTubeEvents => "settings.log-youtube-events"
+    LogYouTubeEvents => "settings.log-youtube-events",
+    LogTwitchEvents => "settings.log-twitch-events"
 }
 
 static INSTANCE: OnceLock<Arc<Store<tauri::Wry>>> = OnceLock::new();
@@ -80,7 +82,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     defaults.insert(SettingsKeys::YouTubeChatUrl.to_string(), Value::from("about:blank"));
     defaults.insert(SettingsKeys::TwitchChannelName.to_string(), Value::from(""));
 
-    defaults.insert(SettingsKeys::LogYouTubeEvents.to_string(), serde_json::to_value(YouTubeSettingLogLevel::OnlyErrors).unwrap());
+    defaults.insert(SettingsKeys::LogYouTubeEvents.to_string(), serde_json::to_value(SettingLogEventLevel::OnlyErrors).unwrap());
 
     let store_path = properties::get_app_path(AppPaths::AppConfig).join("settings.json");
 

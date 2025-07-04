@@ -44,7 +44,7 @@ use crate::utils::properties::AppPaths;
 use crate::utils::properties::PropertiesKey;
 use crate::utils::settings;
 use crate::utils::settings::SettingsKeys;
-use crate::utils::settings::YouTubeSettingLogLevel;
+use crate::utils::settings::SettingLogEventLevel;
 
 mod mapper;
 
@@ -132,16 +132,16 @@ fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, pa
     let actions = payload.get("actions").and_then(|v| v.as_array())
         .ok_or(format!("Missing or invalid 'actions' field in '{event_type}' event payload"))?;
 
-    let log_events: YouTubeSettingLogLevel = settings::get_item(SettingsKeys::LogYouTubeEvents)?;
+    let log_events: SettingLogEventLevel = settings::get_item(SettingsKeys::LogYouTubeEvents)?;
 
     for action in actions {
-        if is_dev() || log_events == YouTubeSettingLogLevel::AllEvents {
+        if is_dev() || log_events == SettingLogEventLevel::AllEvents {
             log_action("events-raw.log", &action);
         }
 
         match mapper::parse(action) {
             Ok(Some(parsed)) => {
-                if is_dev() || log_events == YouTubeSettingLogLevel::AllEvents {
+                if is_dev() || log_events == SettingLogEventLevel::AllEvents {
                     log_action("events-parsed.log", &serde_json::to_string(&parsed).unwrap());
                 }
 
@@ -151,7 +151,7 @@ fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, pa
             }
 
             Ok(None) => {
-                if is_dev() || [YouTubeSettingLogLevel::AllEvents, YouTubeSettingLogLevel::UnknownEvents].contains(&log_events) {
+                if is_dev() || [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
                     log_action("events-unknown.log", &action);
                 }
             }
