@@ -144,6 +144,10 @@ fn handle_message_event(message: &Message) -> Result<(), Box<dyn std::error::Err
         }
     }
 
+    if is_dev() || log_events == SettingLogEventLevel::AllEvents {
+        log_action("events-raw.log", &format!("{:?}", message));
+    }
+
     match mapper::parse(message) {
         Ok(Some(parsed)) => {
             if is_dev() || log_events == SettingLogEventLevel::AllEvents {
