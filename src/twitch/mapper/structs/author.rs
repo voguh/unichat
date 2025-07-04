@@ -56,6 +56,11 @@ pub fn parse_author_username(prefix: &Option<Prefix>) -> Result<Option<String>, 
     return Ok(None);
 }
 
+// Just a wrapper function to handle Option<&String> to Option<String>
+pub fn parse_author_username_str(login: Option<&String>) -> Result<Option<String>, Box<dyn std::error::Error>> {
+    return Ok(login.cloned());
+}
+
 pub fn parse_author_name(display_name: Option<&String>) -> Result<String, Box<dyn std::error::Error>> {
     let author_name = display_name.ok_or("Missing display-name tag")?;
     return Ok(author_name.to_owned());

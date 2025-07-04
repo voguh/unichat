@@ -22,6 +22,7 @@ use crate::events::unichat::UniChatEvent;
 mod privmsg;
 mod raw_clearchat;
 mod raw_clearmsg;
+mod raw_usernotice;
 pub mod structs;
 
 fn parse_channel_name(channel: &String) -> String {
@@ -40,6 +41,8 @@ pub fn parse(message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::err
             return raw_clearchat::parse(channel_name, message);
         } else if cmd == "CLEARMSG" {
             return raw_clearmsg::parse(channel_name, message);
+        } else if cmd == "USERNOTICE" {
+            return raw_usernotice::parse(channel_name, message);
         }
     }
 
