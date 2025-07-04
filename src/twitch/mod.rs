@@ -15,6 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+use std::fs;
+use std::io::Write;
 use std::thread::sleep;
 use std::time::Duration;
 use std::time::SystemTime;
@@ -22,6 +24,7 @@ use std::time::UNIX_EPOCH;
 
 use futures::prelude::*;
 use irc::client::prelude::*;
+use irc::proto::message::Tag;
 use rand::Rng;
 use serde_json::Value;
 use tauri::Emitter;
@@ -29,8 +32,18 @@ use tauri::Listener;
 use tauri::Manager;
 use tauri::Url;
 
+use crate::events;
+use crate::shared_emotes;
 use crate::utils;
 use crate::utils::constants::TWITCH_CHAT_WINDOW;
+use crate::utils::is_dev;
+use crate::utils::properties;
+use crate::utils::properties::AppPaths;
+use crate::utils::settings;
+use crate::utils::settings::SettingLogEventLevel;
+use crate::utils::settings::SettingsKeys;
+
+mod mapper;
 
 static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
 static RAW_EVENT: &str = "twitch_raw::event";
@@ -61,24 +74,50 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
         .ok_or("Failed to extract channel name from URL")?
         .to_lowercase();
 
-    // shared_emotes::fetch_shared_emotes(channel_id).map_err(|e| format!("{:?}", e))?;
+    //
 
     tauri::async_runtime::spawn(async move {
         let mills = rand::rng().random_range(10000..=99999);
+        let nickname = format!("justinfan{}", mills);
         let config = Config {
-            nickname: Some(format!("justinfan{}", mills)),
             server: Some("irc.chat.twitch.tv".to_string()),
             port: Some(6667),
-            channels: vec![format!("#{}", channel_name)],
             ..Config::default()
         };
 
         let mut client = Client::from_config(config).await.unwrap();
-        client.identify().unwrap();
+
+        let capabilities = vec!["twitch.tv/commands", "twitch.tv/membership", "twitch.tv/tags"];
+        let capabilities= capabilities.iter().map(|cap| Capability::Custom(cap.to_owned())).collect::<Vec<_>>();
+        client.send_cap_req(&capabilities).unwrap();
+        client.send(Command::PASS(String::from("SCHMOOPIIE"))).unwrap();
+        client.send(Command::NICK(nickname.clone())).unwrap();
+        client.send(Command::USER(nickname.clone(), "8".to_string(), nickname.clone())).unwrap();
+        client.send(Command::JOIN(format!("#{}", channel_name), None, None)).unwrap();
 
         let mut stream = client.stream().unwrap();
         while let Some(message) = stream.next().await.transpose().unwrap() {
-            println!("{:?}", message);
+            println!("{:?}", &message);
+
+            if let Command::Raw(cmd, _args) = &message.command {
+                if cmd == "ROOMSTATE" {
+                    if let Some(tags) = &message.tags {
+                        for Tag(name, value) in tags {
+                            if name == "room-id" {
+                                let channel_id = value.as_ref().unwrap();
+                                shared_emotes::fetch_shared_emotes(&channel_id).unwrap();
+                                break;
+                            }
+                        }
+                    }
+
+                    continue;
+                }
+            }
+
+            if let Err(err) = handle_message_event(&message) {
+                log::error!("Failed to handle Twitch message event: {:?}", err);
+            }
         }
     });
 
@@ -91,7 +130,44 @@ fn handle_idle_event(app: tauri::AppHandle<tauri::Wry>, _event_type: &str, paylo
 
 /* ================================================================================================================== */
 
-fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, _event_type: &str, _payload: &Value) -> Result<(), String> {
+fn log_action(file_name: &str, content: &impl std::fmt::Display) {
+    let app_log_dir = properties::get_app_path(AppPaths::AppLog);
+    let twitch_log_dir = app_log_dir.join("twitch");
+    if !twitch_log_dir.exists() {
+        fs::create_dir_all(&twitch_log_dir).unwrap();
+    }
+
+    let log_file = twitch_log_dir.join(file_name);
+    let mut file = fs::OpenOptions::new().create(true).append(true).open(log_file).unwrap();
+    writeln!(file, "{content}").unwrap();
+}
+
+
+fn handle_message_event(message: &Message) -> Result<(), Box<dyn std::error::Error>> {
+    let log_events: SettingLogEventLevel = settings::get_item(SettingsKeys::LogYouTubeEvents)?;
+
+    match mapper::parse(message) {
+        Ok(Some(parsed)) => {
+            if is_dev() || log_events == SettingLogEventLevel::AllEvents {
+                log_action("events-parsed.log", &serde_json::to_string(&parsed).unwrap());
+            }
+
+            if let Err(err) = events::event_emitter().emit(parsed) {
+                log::error!("An error occurred on send unichat event: {}", err);
+            }
+        }
+
+        Ok(None) => {
+            if is_dev() || [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
+                log_action("events-unknown.log", &format!("{:?}", message));
+            }
+        }
+
+        Err(err) => {
+            log_action("events-error.log", &format!("{} -- {:?}", err, message));
+        }
+    }
+
     return Ok(());
 }
 
@@ -125,8 +201,11 @@ pub async fn set_twitch_scrapper_url(app: tauri::AppHandle<tauri::Wry>, url: &st
     let tauri_url = decode_url(url).map_err(|e| format!("{:?}", e))?;
 
     window.navigate(tauri_url).map_err(|e| format!("{:?}", e))?;
-    sleep(Duration::from_millis(500));
-    window.eval(SCRAPPER_JS).map_err(|e| format!("{:?}", e))?;
+
+    if url != "about:blank" {
+        sleep(Duration::from_millis(500));
+        window.eval(SCRAPPER_JS).map_err(|e| format!("{:?}", e))?;
+    }
 
     return Ok(());
 }
@@ -141,7 +220,7 @@ fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: tauri::Event) -> Resul
     return match event_type {
         "ready" => handle_ready_event(app, event_type, &payload),
         "idle" => handle_idle_event(app, event_type, &payload),
-        "message" => handle_message_event(app, event_type, &payload),
+        "message" => Ok(()),
         _ => dispatch_event(app, payload.clone())
     };
 }
