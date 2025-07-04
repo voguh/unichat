@@ -26,26 +26,26 @@ use crate::utils::parse_serde_error;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct BTTVEmote {
+pub struct BetterTTVEmote {
     pub id: String,
     pub code: String,
     pub image_type: String
 }
 
-fn log_err(err: Box<dyn std::error::Error>) -> Vec<BTTVEmote>{
+fn log_err(err: Box<dyn std::error::Error>) -> Vec<BetterTTVEmote>{
     log::error!("Error fetching emotes: {}", err);
 
     return Vec::new();
 }
 
-fn fetch_global_emotes(url: String) -> Result<Vec<BTTVEmote>, Box<dyn std::error::Error>> {
+fn fetch_global_emotes(url: String) -> Result<Vec<BetterTTVEmote>, Box<dyn std::error::Error>> {
     let mut response = ureq::get(&url).call()?;
     let data: Vec<Value> = response.body_mut().read_json()?;
 
     return serde_json::from_value(Value::Array(data)).map_err(parse_serde_error);
 }
 
-fn fetch_channel_emotes(url: String) -> Result<Vec<BTTVEmote>, Box<dyn std::error::Error>> {
+fn fetch_channel_emotes(url: String) -> Result<Vec<BetterTTVEmote>, Box<dyn std::error::Error>> {
     let mut response = ureq::get(&url).call()?;
     let data: Value = response.body_mut().read_json()?;
     let mut emotes_list: Vec<Value> = Vec::new();
