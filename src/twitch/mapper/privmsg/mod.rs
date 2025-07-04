@@ -15,10 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-use std::collections::HashMap;
-
 use irc::client::prelude::*;
-use irc::proto::message::Tag;
 
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatMessageEventPayload;
@@ -30,23 +27,10 @@ use crate::twitch::mapper::structs::author::parse_author_name;
 use crate::twitch::mapper::structs::author::parse_author_type;
 use crate::twitch::mapper::structs::author::parse_author_username;
 use crate::twitch::mapper::structs::message::parse_message_emotes;
-
-fn parse_tags(tags: &Option<Vec<Tag>>) -> HashMap<String, String> {
-    let mut tags_map = HashMap::new();
-
-    if let Some(tags) = tags {
-        for Tag(name, value) in tags {
-            if let Some(value) = value {
-                tags_map.insert(name.clone(), value.clone());
-            }
-        }
-    }
-
-    return tags_map;
-}
+use crate::twitch::mapper::structs::parse_tags;
 
 pub fn parse(channel: String, text: String, message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
-    let tags: HashMap<String, String> = parse_tags(&message.tags);
+    let tags = parse_tags(&message.tags);
 
     let room_id = tags.get("room-id").ok_or("Missing room-id tag")?;
     let author_id = tags.get("user-id").ok_or("Missing user-id tag")?;

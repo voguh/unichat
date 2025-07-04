@@ -15,5 +15,23 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+use std::collections::HashMap;
+
+use irc::proto::message::Tag;
+
 pub mod author;
 pub mod message;
+
+pub fn parse_tags(tags: &Option<Vec<Tag>>) -> HashMap<String, String> {
+    let mut tags_map = HashMap::new();
+
+    if let Some(tags) = tags {
+        for Tag(name, value) in tags {
+            if let Some(value) = value {
+                tags_map.insert(name.clone(), value.clone());
+            }
+        }
+    }
+
+    return tags_map;
+}

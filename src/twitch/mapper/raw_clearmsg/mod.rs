@@ -18,30 +18,27 @@
 use irc::client::prelude::*;
 
 use crate::events::unichat::UniChatEvent;
+use crate::events::unichat::UniChatPlatform;
+use crate::events::unichat::UniChatRemoveMessageEventPayload;
+use crate::events::unichat::UNICHAT_EVENT_REMOVE_MESSAGE_TYPE;
+use crate::twitch::mapper::structs::parse_tags;
 
-mod privmsg;
-mod raw_clearchat;
-mod raw_clearmsg;
-pub mod structs;
+pub fn parse(channel_name: String, message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+    let tags = parse_tags(&message.tags);
 
-fn parse_channel_name(channel: &String) -> String {
-    return channel.replace("#", "");
-}
+    let room_id = tags.get("room-id").ok_or("Missing room-id tag")?;
+    let target_msg_id = tags.get("target-msg-id").ok_or("Missing target-msg-id tag")?;
 
-pub fn parse(message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
-    if let Command::PRIVMSG(channel, text) = &message.command {
-        let channel_name = parse_channel_name(channel);
-        return privmsg::parse(channel_name, text.to_owned(), message);
-    } else if let Command::Raw(cmd, payload) = &message.command {
-        let channel = payload.get(0).ok_or("Missing channel name")?;
-        let channel_name = parse_channel_name(channel);
+    let event = UniChatEvent::RemoveMessage {
+        event_type: String::from(UNICHAT_EVENT_REMOVE_MESSAGE_TYPE),
+        data: UniChatRemoveMessageEventPayload {
+            channel_id: room_id.to_owned(),
+            channel_name: Some(channel_name),
+            platform: UniChatPlatform::Twitch,
 
-        if cmd == "CLEARCHAT" {
-            return raw_clearchat::parse(channel_name, message);
-        } else if cmd == "CLEARMSG" {
-            return raw_clearmsg::parse(channel_name, message);
+            message_id: target_msg_id.to_owned(),
         }
-    }
+    };
 
-    return Ok(None);
+    return Ok(Some(event));
 }
