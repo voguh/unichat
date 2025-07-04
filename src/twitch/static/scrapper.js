@@ -30,56 +30,85 @@ async function dispatchPing() {
     setTimeout(dispatchPing, 5000);
 }
 
+async function handleScrapBadges(response) {
+    try {
+        const parsed = await response.json();
+        if (Array.isArray(parsed)) {
+            for (const item of parsed) {
+                const data = item.data;
+
+                if ("badges" in data && Array.isArray(data.badges)) {
+                    await dispatchEvent({ type: "badges", badges: data.badges })
+                }
+            }
+        }
+    } catch (err) {
+        console.error(err);
+        await window.__TAURI_PLUGIN_LOG__.error(err);
+        await dispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
+    }
+}
+
+if (window.fetch.__WRAPPED__ == null) {
+    const originalFetch = window.fetch;
+    Object.defineProperty(window, "fetch", {
+        value: async (...args) => {
+            const res = await originalFetch(...args);
+
+            if (res.url.startsWith("https://gql.twitch.tv/gq") && res.ok) {
+                handleScrapBadges(res.clone());
+            }
+
+            return res;
+        },
+        configurable: true,
+        writable: true
+    });
+    Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
+    window.__TAURI_PLUGIN_LOG__.info("Fetch wrapped!");
+}
+
 function init() {
     try {
-        if (window.fetch.__WRAPPED__ == null) {
-            // Prevent right-click context menu in production
-            window.__TAURI__.core.invoke("is_dev").then((isDev) => {
-                if (!isDev) {
-                    window.addEventListener("contextmenu", async (event) => {
-                        event.preventDefault();
-                    });
-                }
-            });
+        // Prevent right-click context menu in production
+        window.__TAURI__.core.invoke("is_dev").then((isDev) => {
+            if (!isDev) {
+                window.addEventListener("contextmenu", async (event) => {
+                    event.preventDefault();
+                });
+            }
+        });
 
-            /* ====================================================================================================== */
+        /* ====================================================================================================== */
 
-            dispatchEvent({ type: "ready", url: window.location.href });
+        dispatchEvent({ type: "ready", url: window.location.href });
 
-            /* ====================================================================================================== */
+        /* ====================================================================================================== */
 
-            Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
-            window.__TAURI_PLUGIN_LOG__.info("Fetch wrapped!");
+        // Add a warning message to the page
+        const style = document.createElement("style");
+        style.textContent = `
+            html::before {
+                content: "UniChat installed! You can close this window.";
+                position: fixed;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 9999;
+                background-color: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 10px;
+                white-space: nowrap;
+                border-bottom-left-radius: 4px;
+                border-bottom-right-radius: 4px;
+            }
+        `;
+        document.head.appendChild(style);
 
-            /* ====================================================================================================== */
+        /* ====================================================================================================== */
 
-            // Add a warning message to the page
-            const style = document.createElement("style");
-            style.textContent = `
-                html::before {
-                    content: "UniChat installed! You can close this window.";
-                    position: fixed;
-                    top: 0;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    z-index: 9999;
-                    background-color: rgba(0, 0, 0, 0.8);
-                    color: white;
-                    padding: 10px;
-                    white-space: nowrap;
-                    border-bottom-left-radius: 4px;
-                    border-bottom-right-radius: 4px;
-                }
-            `;
-            document.head.appendChild(style);
-
-            /* ====================================================================================================== */
-
-            // Attach status ping event
-            dispatchPing();
-        } else {
-            window.__TAURI_PLUGIN_LOG__.warn("Fetch already was wrapped!");
-        }
+        // Attach status ping event
+        dispatchPing();
     } catch (err) {
         console.error(err);
         window.__TAURI_PLUGIN_LOG__.error(err);
