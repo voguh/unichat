@@ -27,7 +27,7 @@ function buildMessage(message, emotes) {
         return safeMessage;
     }
 
-    const emotesMap = new Map(emotes.map(emote => [emote.type, emote.url]));
+    const emotesMap = new Map(emotes.map(emote => [emote.code, emote.url]));
     const processedWords = safeMessage.split(' ').map(word => {
         const emoteUrl = emotesMap.get(word);
         return emoteUrl ? `<img src="${emoteUrl}" />` : word;

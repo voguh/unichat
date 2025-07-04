@@ -35,8 +35,7 @@ pub struct FrankerFaceZEmote {
 fn parse_emote(emote: &FrankerFaceZEmote) -> UniChatEmote {
     return UniChatEmote {
         id: emote.id.to_string(),
-        emote_type: emote.code.clone(),
-        tooltip: emote.code.clone(),
+        code: emote.code.clone(),
         // Image size `4` are used by default, so it's possible to use `1`, `2`, `4` images.
         url: format!("https://cdn.betterttv.net/frankerfacez_emote/{}/4", emote.id)
     };

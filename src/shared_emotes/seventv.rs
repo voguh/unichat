@@ -36,8 +36,7 @@ pub struct SevenTVEmote {
 fn parse_emote(emote: &SevenTVEmote) -> UniChatEmote {
     return UniChatEmote {
         id: emote.id.clone(),
-        emote_type: emote.name.clone(),
-        tooltip: emote.name.clone(),
+        code: emote.name.clone(),
         // Image size `4x` are used by default, so it's possible to use `1x`, `2x`, `3x`, `4x` images.
         // By default `webp` is used for better compatibility.
         url: format!("https://cdn.7tv.app/emote/{}/4x.webp", emote.id)

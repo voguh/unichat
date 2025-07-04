@@ -36,8 +36,7 @@ pub struct BetterTTVEmote {
 fn parse_emote(emote: &BetterTTVEmote) -> UniChatEmote {
     return UniChatEmote {
         id: emote.id.clone(),
-        emote_type: emote.code.clone(),
-        tooltip: emote.code.clone(),
+        code: emote.code.clone(),
         // Image size `3x` are used by default, so it's possible to use `1x`, `2x`, `3x` images.
         // By default `webp` is used for better compatibility.
         url: format!("https://cdn.betterttv.net/emote/{}/3x.webp", emote.id)

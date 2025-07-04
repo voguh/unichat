@@ -90,8 +90,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let emotes = vec![
         UniChatEmote {
             id: String::from("sticker"),
-            emote_type: String::from("sticker"),
-            tooltip: String::from("Paid Sticker"),
+            code: String::from("sticker"),
             url: sticker.url.clone()
         }
     ];

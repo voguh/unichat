@@ -20,8 +20,7 @@ export type UniChatAuthorType = "VIEWER" | "SPONSOR" | "VIP" | "MODERATOR" | "BR
 
 export interface UniChatEmote {
     id: string;
-    type: string;
-    tooltip: string;
+    code: string;
     url: string;
 }
 

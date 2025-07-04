@@ -40,13 +40,11 @@ pub fn parse_message_emotes(raw_emotes: Option<&String>, message_text: &str) -> 
                 })
                 .ok_or("Invalid emote positions format")?;
 
-            let emote_name = &message_text[start..end + 1].to_string();
+            let emote_code = &message_text[start..end + 1].to_string();
 
-            println!("Emote found: {} (ID: {})", &emote_name, &emote_id);
             let emote = UniChatEmote {
                 id: emote_id.to_string(),
-                emote_type: emote_name.clone(),
-                tooltip: emote_name.clone(),
+                code: emote_code.clone(),
                 url: format!("https://static-cdn.jtvnw.net/emoticons/v2/{}/default/dark/3.0", emote_id)
             };
 

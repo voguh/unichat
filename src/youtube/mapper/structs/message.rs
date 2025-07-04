@@ -91,8 +91,7 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
 
                             emotes.push(UniChatEmote {
                                 id: emoji_id.clone(),
-                                emote_type: shortcut.clone(),
-                                tooltip: shortcut.clone(),
+                                code: shortcut.clone(),
                                 url: last_image.url.clone()
                             });
                         },
@@ -100,8 +99,7 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
                             let last_image = image.thumbnails.last().ok_or("No thumbnails found for font-based emoji")?;
                             emotes.push(UniChatEmote {
                                 id: emoji_id.clone(),
-                                emote_type: emoji_id.clone(),
-                                tooltip: emoji_id.clone(),
+                                code: emoji_id.clone(),
                                 url: last_image.url.clone()
                             });
                         }
