@@ -16,9 +16,43 @@
  ******************************************************************************/
 
 use crate::events::unichat::UniChatEmote;
+use crate::shared_emotes;
 
-pub fn parse_message_emotes(emotes: Option<&String>, message_text: &str) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
+pub fn parse_message_emotes(raw_emotes: Option<&String>, message_text: &str) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
     let mut emotes = Vec::new();
+
+    if let Ok(custom_emotes) = shared_emotes::EMOTES_HASHSET.read() {
+        for word in message_text.split_whitespace() {
+            if let Some(emote) = custom_emotes.get(word) {
+                emotes.push(emote.clone());
+            }
+        }
+    }
+
+    if let Some(raw_emotes) = raw_emotes {
+        for raw_emote in raw_emotes.split("/") {
+            let (emote_id, positions_raw) = raw_emote.split_once(":").ok_or("Invalid emote format")?;
+            let (start, end) = positions_raw.split_once("-")
+                .and_then(|(start, end)| {
+                    let start = start.parse::<usize>().ok()?;
+                    let end = end.parse::<usize>().ok()?;
+                    return Some((start, end))
+                })
+                .ok_or("Invalid emote positions format")?;
+
+            let emote_name = &message_text[start..end + 1].to_string();
+
+            println!("Emote found: {} (ID: {})", &emote_name, &emote_id);
+            let emote = UniChatEmote {
+                id: emote_id.to_string(),
+                emote_type: emote_name.clone(),
+                tooltip: emote_name.clone(),
+                url: format!("https://static-cdn.jtvnw.net/emoticons/v2/{}/default/dark/3.0", emote_id)
+            };
+
+            emotes.push(emote);
+        }
+    }
 
     return Ok(emotes);
 }
