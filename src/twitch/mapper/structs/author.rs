@@ -18,10 +18,33 @@
 use std::collections::HashMap;
 
 use irc::client::prelude::Prefix;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatBadge;
+use crate::twitch::TWITCH_BADGES;
 use crate::utils::random_color_by_seed;
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct TwitchRawBadge {
+    pub id: String,
+    #[serde(rename = "setID")]
+    pub set_id: String,
+    pub version: String,
+    pub title: String,
+    pub image_1x: String,
+    pub image_2x: String,
+    pub image_4x: String,
+    pub click_action: Option<String>,
+    #[serde(rename = "clickURL")]
+    pub click_url: Option<String>,
+    #[serde(rename = "__typename")]
+    pub typename: String
+}
+
+/* <================================================================================================================> */
 
 pub fn parse_author_username(prefix: &Option<Prefix>) -> Result<Option<String>, Box<dyn std::error::Error>> {
     if let Some(prefix) = prefix {
@@ -58,8 +81,12 @@ pub fn parse_author_badges(badges: Option<&String>) -> Result<Vec<UniChatBadge>,
     let mut parsed_badges = Vec::new();
 
     if let Some(badge_str) = badges {
-        for badge in badge_str.split(',') {
-
+        if let Ok(twitch_badges) = TWITCH_BADGES.read() {
+            for badge in badge_str.split(',') {
+                if let Some(twitch_badge) = twitch_badges.get(badge) {
+                    parsed_badges.push(twitch_badge.to_owned());
+                }
+            }
         }
     }
 

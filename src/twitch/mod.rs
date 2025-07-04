@@ -15,8 +15,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
+use std::sync::LazyLock;
+use std::sync::RwLock;
 use std::thread::sleep;
 use std::time::Duration;
 use std::time::SystemTime;
@@ -33,7 +36,9 @@ use tauri::Manager;
 use tauri::Url;
 
 use crate::events;
+use crate::events::unichat::UniChatBadge;
 use crate::shared_emotes;
+use crate::twitch::mapper::structs::author::TwitchRawBadge;
 use crate::utils;
 use crate::utils::constants::TWITCH_CHAT_WINDOW;
 use crate::utils::is_dev;
@@ -47,6 +52,8 @@ mod mapper;
 
 static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
 static RAW_EVENT: &str = "twitch_raw::event";
+
+pub static TWITCH_BADGES: LazyLock<RwLock<HashMap<String, UniChatBadge>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
 /* ================================================================================================================== */
 
@@ -110,6 +117,24 @@ fn handle_idle_event(app: tauri::AppHandle<tauri::Wry>, _event_type: &str, paylo
     return dispatch_event(app, payload.clone());
 }
 
+fn handle_badges_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
+    let badges = payload.get("badges").and_then(|v| v.as_array()).cloned()
+        .ok_or(format!("Missing or invalid 'badges' field in Twitch '{event_type}' payload"))?;
+
+    let twitch_badges: Vec<TwitchRawBadge> = serde_json::from_value(serde_json::Value::Array(badges))
+        .map_err(|e| format!("{:?}", e))?;
+
+    if let Ok(mut badges) = TWITCH_BADGES.write() {
+        for twitch_badge in twitch_badges {
+            let code = format!("{}/{}", twitch_badge.set_id, twitch_badge.version);
+            let url = twitch_badge.image_4x;
+            badges.insert(code.clone(), UniChatBadge { code: code.clone(), url: url.clone() });
+        }
+    }
+
+    return Ok(());
+}
+
 /* ================================================================================================================== */
 
 fn log_action(file_name: &str, content: &impl std::fmt::Display) {
@@ -123,7 +148,6 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     let mut file = fs::OpenOptions::new().create(true).append(true).open(log_file).unwrap();
     writeln!(file, "{content}").unwrap();
 }
-
 
 fn handle_message_event(message: &Message) -> Result<(), Box<dyn std::error::Error>> {
     let log_events: SettingLogEventLevel = settings::get_item(SettingsKeys::LogYouTubeEvents)?;
@@ -222,6 +246,7 @@ fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: tauri::Event) -> Resul
     return match event_type {
         "ready" => handle_ready_event(app, event_type, &payload),
         "idle" => handle_idle_event(app, event_type, &payload),
+        "badges" => handle_badges_event(app, event_type, &payload),
         "message" => Ok(()),
         _ => dispatch_event(app, payload.clone())
     };
