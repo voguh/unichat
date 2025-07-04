@@ -27,7 +27,6 @@ use std::time::UNIX_EPOCH;
 
 use futures::prelude::*;
 use irc::client::prelude::*;
-use irc::proto::message::Tag;
 use rand::Rng;
 use serde_json::Value;
 use tauri::Emitter;
@@ -39,11 +38,13 @@ use crate::events;
 use crate::events::unichat::UniChatBadge;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
+use crate::twitch::mapper::structs::parse_tags;
 use crate::utils;
 use crate::utils::constants::TWITCH_CHAT_WINDOW;
 use crate::utils::is_dev;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
+use crate::utils::properties::PropertiesKey;
 use crate::utils::settings;
 use crate::utils::settings::SettingLogEventLevel;
 use crate::utils::settings::SettingsKeys;
@@ -152,24 +153,20 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
 fn handle_message_event(message: &Message) -> Result<(), Box<dyn std::error::Error>> {
     let log_events: SettingLogEventLevel = settings::get_item(SettingsKeys::LogYouTubeEvents)?;
 
+    if is_dev() || log_events == SettingLogEventLevel::AllEvents {
+        log_action("events-raw.log", &format!("{:?}", message));
+    }
+
     if let Command::Raw(cmd, _args) = &message.command {
         if cmd == "ROOMSTATE" {
-            if let Some(tags) = &message.tags {
-                for Tag(name, value) in tags {
-                    if name == "room-id" {
-                        let channel_id = value.as_ref().unwrap();
-                        shared_emotes::fetch_shared_emotes(&channel_id).unwrap();
-                        break;
-                    }
-                }
+            let tags = parse_tags(&message.tags);
+            if let Some(channel_id) = tags.get("room-id") {
+                shared_emotes::fetch_shared_emotes(&channel_id)?;
+                properties::set_item(PropertiesKey::TwitchChannelId, channel_id.clone())?;
             }
 
             return Ok(());
         }
-    }
-
-    if is_dev() || log_events == SettingLogEventLevel::AllEvents {
-        log_action("events-raw.log", &format!("{:?}", message));
     }
 
     match mapper::parse(message) {
