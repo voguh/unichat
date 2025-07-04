@@ -53,12 +53,34 @@ export function ScrapperCard(_props: Props): React.ReactNode {
             setLoading(true);
             let value = inputRef.current?.value ?? "";
 
-            if (value.startsWith("https://www.youtube.com/watch")) {
+            // Normalize the URL to ensure it starts with a valid protocol
+            if (value.startsWith("youtube.com")) {
+                value = `https://www.${value}`;
+            } else if (value.startsWith("www.youtube.com")) {
+                value = `https://${value}`;
+            } else if (value.startsWith("youtu.be")) {
+                value = `https://${value}`;
+                console.log(value, value.startsWith("https://youtu.be"));
+            }
+
+            if (Strings.isValidYouTubeVideoId(value)) {
+                value = `https://www.youtube.com/live_chat?v=${value}`;
+            } else if (value.startsWith("https://www.youtube.com/watch")) {
                 const params = new URLSearchParams(value.split("?")[1]);
                 const videoId = params.get("v") || value.trim();
+                if (!Strings.isValidYouTubeVideoId(videoId)) {
+                    throw new Error("Invalid YouTube video ID");
+                }
+
                 value = `https://www.youtube.com/live_chat?v=${videoId}`;
-            } else if (Strings.isValidYouTubeVideoId(value)) {
-                value = `https://www.youtube.com/live_chat?v=${value}`;
+            } else if (value.startsWith("https://youtu.be")) {
+                const parts = value.split("/");
+                const videoId = parts.at(-1);
+                if (!Strings.isValidYouTubeVideoId(videoId)) {
+                    throw new Error("Invalid YouTube video ID");
+                }
+
+                value = `https://www.youtube.com/live_chat?v=${videoId}`;
             }
 
             if (!Strings.isValidYouTubeChatUrl(value)) {
