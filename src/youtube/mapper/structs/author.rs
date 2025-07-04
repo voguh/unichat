@@ -24,6 +24,7 @@ use serde::Serialize;
 
 use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatBadge;
+use crate::utils::random_color_by_seed;
 use crate::youtube::mapper::structs::ThumbnailsWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -117,17 +118,7 @@ pub fn parse_author_photo(photo: &AuthorPhotoThumbnailsWrapper) -> Result<String
 }
 
 pub fn parse_author_color(author_name: &str) -> Result<String, Box<dyn std::error::Error>> {
-    let mut hash: u32 = 2166136261;
-    for byte in author_name.as_bytes() {
-        hash ^= *byte as u32;
-        hash = hash.wrapping_mul(16777619);
-    }
-
-    let r = ((hash >> 16) & 0xFF) as u8;
-    let g = ((hash >> 8) & 0xFF) as u8;
-    let b = (hash & 0xFF) as u8;
-
-    return Ok(format!("#{:02X}{:02X}{:02X}", r, g, b));
+    return random_color_by_seed(author_name)
 }
 
 pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>) -> Result<Vec<UniChatBadge>, Box<dyn std::error::Error>> {

@@ -59,3 +59,17 @@ pub fn normalize_value(value_raw: &str) -> Result<f32, Box<dyn std::error::Error
 
     return normalized.parse().map_err(|e| Box::new(e) as Box<dyn std::error::Error>);
 }
+
+pub fn random_color_by_seed(seed: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let mut hash: u32 = 2166136261;
+    for byte in seed.as_bytes() {
+        hash ^= *byte as u32;
+        hash = hash.wrapping_mul(16777619);
+    }
+
+    let r = ((hash >> 16) & 0xFF) as u8;
+    let g = ((hash >> 8) & 0xFF) as u8;
+    let b = (hash & 0xFF) as u8;
+
+    return Ok(format!("#{:02X}{:02X}{:02X}", r, g, b));
+}
