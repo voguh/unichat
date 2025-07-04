@@ -61,6 +61,7 @@ export function TwitchCard(_props: Props): React.ReactNode {
             await storageService.setItem(TWITCH_CHANNEL_NAME, channelName);
             await commandService.twitch.setScrapperUrl(value);
             setCurrentActiveUrl(value);
+            setError(null);
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);

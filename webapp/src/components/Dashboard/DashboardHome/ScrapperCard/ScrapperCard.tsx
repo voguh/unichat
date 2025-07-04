@@ -70,6 +70,7 @@ export function ScrapperCard(_props: Props): React.ReactNode {
             await storageService.setItem(YOUTUBE_CHAT_URL_KEY, value);
             await commandService.youTube.setScrapperUrl(value);
             setCurrentActiveUrl(value);
+            setError(null);
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
