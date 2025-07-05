@@ -1,6 +1,6 @@
 [package]
 name = "unichat"
-version = "0.1.0-beta.1"
+version = "0.2.0-alpha.0"
 description = "Yet another implementation of YouTube chat widget"
 authors = ["Voguh <voguhofc@protonmail.com>"]
 homepage = "https://github.com/voguh/unichat"
