@@ -29,6 +29,7 @@ use futures::prelude::*;
 use irc::client::prelude::*;
 use rand::Rng;
 use serde_json::Value;
+use tauri::async_runtime::JoinHandle;
 use tauri::Emitter;
 use tauri::Listener;
 use tauri::Manager;
@@ -53,6 +54,7 @@ mod mapper;
 
 static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
 static RAW_EVENT: &str = "twitch_raw::event";
+static ASYNC_HANDLE: LazyLock<RwLock<Option<JoinHandle<()>>>> = LazyLock::new(|| RwLock::new(None));
 
 pub static TWITCH_BADGES: LazyLock<RwLock<HashMap<String, UniChatBadge>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
@@ -82,39 +84,70 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
         .ok_or("Failed to extract channel name from URL")?
         .to_lowercase();
 
-    //
-
-    tauri::async_runtime::spawn(async move {
-        let mills = rand::rng().random_range(10000..=99999);
-        let nickname = format!("justinfan{}", mills);
-        let config = Config {
-            server: Some("irc.chat.twitch.tv".to_string()),
-            port: Some(6667),
-            ..Config::default()
-        };
-
-        let mut client = Client::from_config(config).await.unwrap();
-
-        let capabilities = vec!["twitch.tv/commands", "twitch.tv/membership", "twitch.tv/tags"];
-        let capabilities= capabilities.iter().map(|cap| Capability::Custom(cap.to_owned())).collect::<Vec<_>>();
-        client.send_cap_req(&capabilities).unwrap();
-        client.send(Command::PASS(String::from("SCHMOOPIIE"))).unwrap();
-        client.send(Command::NICK(nickname.clone())).unwrap();
-        client.send(Command::USER(nickname.clone(), "8".to_string(), nickname.clone())).unwrap();
-        client.send(Command::JOIN(format!("#{}", channel_name), None, None)).unwrap();
-
-        let mut stream = client.stream().unwrap();
-        while let Some(message) = stream.next().await.transpose().unwrap() {
-            if let Err(err) = handle_message_event(&message) {
-                log::error!("Failed to handle Twitch message event: {:?}", err);
-            }
+    if let Ok(mut handle) = ASYNC_HANDLE.write() {
+        if let Some(join_handle) = handle.take() {
+            join_handle.abort();
         }
-    });
+
+        *handle = Some(tauri::async_runtime::spawn(async move {
+            let channel_name = channel_name.clone();
+            let mills = rand::rng().random_range(10000..=99999);
+            let nickname = format!("justinfan{}", mills);
+            let config = Config {
+                server: Some(String::from("irc.chat.twitch.tv")),
+                port: Some(6667),
+                ..Config::default()
+            };
+
+            let mut client = Client::from_config(config).await.unwrap();
+
+            let capabilities = vec!["twitch.tv/commands", "twitch.tv/membership", "twitch.tv/tags"];
+            let capabilities = capabilities.into_iter().map(|cap| Capability::Custom(cap)).collect::<Vec<_>>();
+            client.send_cap_req(&capabilities).unwrap();
+            client.send(Command::PASS(String::from("SCHMOOPIIE"))).unwrap();
+            client.send(Command::NICK(nickname.clone())).unwrap();
+            client.send(Command::USER(nickname.clone(), String::from("8"), nickname.clone())).unwrap();
+            client.send(Command::JOIN(format!("#{}", channel_name), None, None)).unwrap();
+
+            let mut stream = client.stream().unwrap();
+            loop {
+                match stream.next().await.transpose() {
+                    Ok(Some(message)) => {
+                        if let Err(err) = handle_message_event(&message) {
+                            log::error!("Failed to handle Twitch message event: {:?}", err);
+                        }
+                    }
+                    Ok(None) => {},
+                    Err(_cancelled) => {
+                        log::info!("Twitch IRC task cancelled. Parting from channel: {}", channel_name);
+                        if let Err(e) = client.send(Command::PART(format!("#{}", channel_name), None)) {
+                            log::error!("Failed to send PART command: {:?}", e);
+                        }
+
+                        log::info!("Quitting from Twitch IRC server.");
+                        if let Err(e) = client.send(Command::QUIT(None)) {
+                            log::error!("Failed to send QUIT command: {:?}", e);
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }));
+    }
 
     return dispatch_event(app, payload.clone());
 }
 
 fn handle_idle_event(app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payload: &Value) -> Result<(), String> {
+    if let Ok(mut handle) = ASYNC_HANDLE.write() {
+        if let Some(join_handle) = handle.take() {
+            join_handle.abort();
+        }
+
+        *handle = None;
+    }
+
     return dispatch_event(app, payload.clone());
 }
 
