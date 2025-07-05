@@ -58,13 +58,17 @@ fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, mut payload: Value) -> Resu
         return Err("Missing 'type' field in YouTube raw event payload".to_string());
     }
 
+    if payload.get("platform").is_none() {
+        payload["platform"] = serde_json::json!(UniChatPlatform::YouTube);
+    }
+
     if payload.get("timestamp").is_none() {
         let now = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| format!("{:?}", e))?;
         payload["timestamp"] = serde_json::json!(now.as_millis());
     }
 
     let window = app.get_webview_window("main").ok_or("Main window not found")?;
-    return window.emit("unichat://youtube:event", payload).map_err(|e| format!("{:?}", e));
+    return window.emit("unichat://status:event", payload).map_err(|e| format!("{:?}", e));
 }
 
 /* ================================================================================================================== */

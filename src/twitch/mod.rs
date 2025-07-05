@@ -38,6 +38,7 @@ use tauri::Url;
 
 use crate::events;
 use crate::events::unichat::UniChatBadge;
+use crate::events::unichat::UniChatPlatform;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
 use crate::twitch::mapper::structs::parse_tags;
@@ -64,7 +65,11 @@ pub static TWITCH_BADGES: LazyLock<RwLock<HashMap<String, UniChatBadge>>> = Lazy
 
 fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, mut payload: Value) -> Result<(), String> {
     if payload.get("type").is_none() {
-        return Err("Missing 'type' field in Twitch raw event payload".to_string());
+        return Err("Missing 'type' field in YouTube raw event payload".to_string());
+    }
+
+    if payload.get("platform").is_none() {
+        payload["platform"] = serde_json::json!(UniChatPlatform::Twitch);
     }
 
     if payload.get("timestamp").is_none() {
@@ -73,7 +78,7 @@ fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, mut payload: Value) -> Resu
     }
 
     let window = app.get_webview_window("main").ok_or("Main window not found")?;
-    return window.emit("unichat://twitch:event", payload).map_err(|e| format!("{:?}", e));
+    return window.emit("unichat://status:event", payload).map_err(|e| format!("{:?}", e));
 }
 
 /* ================================================================================================================== */

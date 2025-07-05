@@ -15,43 +15,43 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-export enum IPCTwitchEvents {
-    TWITCH_EVENT = "unichat://twitch:event"
+export enum IPCEvents {
+    STATUS_EVENT = "unichat://status:event"
 }
 
-export const TWITCH_EVENT_DESCRIPTION: Record<IPCTwitchStatusEvent["type"], string> = {
-    idle: "The Twitch chat scrapper is idle.",
-    ready: "The Twitch chat scrapper is ready to use.",
-    ping: "The Twitch chat scrapper is working.",
-    error: "The Twitch chat scrapper is not responding or has encountered an error."
+export const EVENT_DESCRIPTION: Record<IPCStatusEvent["type"], string> = {
+    idle: "The chat scrapper is idle.",
+    ready: "The chat scrapper is ready to use.",
+    ping: "The chat scrapper is working.",
+    error: "The chat scrapper is not responding or has encountered an error."
 };
 
-export interface IPCTwitchStatusIdleEvent {
+export interface IPCStatusIdleEvent {
     type: "idle";
+    platform: "youtube" | "twitch";
     timestamp: number;
 }
 
-export interface IPCTwitchStatusReadyEvent {
+export interface IPCStatusReadyEvent {
     type: "ready";
+    platform: "youtube" | "twitch";
     url: string;
     clientId: string;
     timestamp: number;
 }
 
-export interface IPCTwitchStatusPingEvent {
+export interface IPCStatusPingEvent {
     type: "ping";
+    platform: "youtube" | "twitch";
     timestamp: number;
 }
 
-export interface IPCTwitchStatusErrorEvent {
+export interface IPCStatusErrorEvent {
     type: "error";
+    platform: "youtube" | "twitch";
     message: string;
     stack: string;
     timestamp: number;
 }
 
-export type IPCTwitchStatusEvent =
-    | IPCTwitchStatusIdleEvent
-    | IPCTwitchStatusReadyEvent
-    | IPCTwitchStatusPingEvent
-    | IPCTwitchStatusErrorEvent;
+export type IPCStatusEvent = IPCStatusIdleEvent | IPCStatusReadyEvent | IPCStatusPingEvent | IPCStatusErrorEvent;

@@ -23,10 +23,10 @@ import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { AppContext } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
+import { Strings } from "unichat/utils/Strings";
 
 import { ScrapperCard } from "./ScrapperCard/ScrapperCard";
 import { DashboardHomeStyledContainer } from "./styled";
-import { TwitchCard } from "./TwitchCard";
 
 export function DashboardHome(): React.ReactNode {
     const [selectedWidget, setSelectedWidget] = React.useState("default");
@@ -34,6 +34,77 @@ export function DashboardHome(): React.ReactNode {
 
     const { metadata } = React.useContext(AppContext);
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
+
+    /* ====================================================================== */
+
+    function validateYouTubeChatUrl(value: string): [string, string] {
+        // Normalize the URL to ensure it starts with a valid protocol
+        if (value.startsWith("youtube.com")) {
+            value = `https://www.${value}`;
+        } else if (value.startsWith("www.youtube.com")) {
+            value = `https://${value}`;
+        } else if (value.startsWith("youtu.be")) {
+            value = `https://${value}`;
+            console.log(value, value.startsWith("https://youtu.be"));
+        }
+
+        //
+        if (Strings.isValidYouTubeVideoId(value)) {
+            value = `https://www.youtube.com/live_chat?v=${value}`;
+        } else if (value.startsWith("https://www.youtube.com/watch")) {
+            const params = new URLSearchParams(value.split("?")[1]);
+            const videoId = params.get("v") || value.trim();
+            if (!Strings.isValidYouTubeVideoId(videoId)) {
+                throw new Error("Invalid YouTube video ID");
+            }
+
+            value = `https://www.youtube.com/live_chat?v=${videoId}`;
+        } else if (value.startsWith("https://youtu.be")) {
+            const parts = value.split("/");
+            const videoId = parts.at(-1);
+            if (!Strings.isValidYouTubeVideoId(videoId)) {
+                throw new Error("Invalid YouTube video ID");
+            }
+
+            value = `https://www.youtube.com/live_chat?v=${videoId}`;
+        }
+
+        if (!Strings.isValidYouTubeChatUrl(value)) {
+            throw new Error("Invalid YouTube chat URL");
+        }
+
+        return [value, value];
+    }
+
+    /* ====================================================================== */
+
+    function validateTwitchChatUrl(value: string): [string, string] {
+        // Normalize the URL to ensure it starts with a valid protocol
+        if (value.startsWith("twitch.tv")) {
+            value = `https://www.${value}`;
+        } else if (value.startsWith("www.twitch.tv")) {
+            value = `https://${value}`;
+        }
+
+        let channelName = value;
+        if (value.startsWith("https://www.twitch.tv/")) {
+            const parts = value.replace("https://www.twitch.tv/", "").split("/");
+
+            if (parts[0] === "popout" && parts[2] === "chat") {
+                channelName = parts[1];
+            } else {
+                channelName = parts[0];
+            }
+        }
+
+        if (!Strings.isValidTwitchChannelName(channelName)) {
+            throw new Error("Invalid Twitch chat URL");
+        }
+
+        return [`https://www.twitch.tv/popout/${channelName}/chat`, channelName];
+    }
+
+    /* ====================================================================== */
 
     function onChangeWidget(widgetName: string): void {
         setSelectedWidget(widgetName);
@@ -58,8 +129,8 @@ export function DashboardHome(): React.ReactNode {
     return (
         <DashboardHomeStyledContainer>
             <div className="fields">
-                <ScrapperCard />
-                <TwitchCard />
+                <ScrapperCard type="youtube" validateUrl={validateYouTubeChatUrl} />
+                <ScrapperCard type="twitch" validateUrl={validateTwitchChatUrl} />
             </div>
             <div className="preview">
                 <Card className="preview-header" withBorder shadow="xs">

@@ -19,30 +19,39 @@ import React from "react";
 
 import { Button, Card, DefaultMantineColor, TextInput, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconBolt, IconCheck, IconLoader, IconPlayerPlay, IconPlayerStopFilled } from "@tabler/icons-react";
+import {
+    IconBrandTwitch,
+    IconBrandYoutube,
+    IconLoader,
+    IconPlayerPlayFilled,
+    IconPlayerStopFilled
+} from "@tabler/icons-react";
 import * as eventService from "@tauri-apps/api/event";
 
 import { commandService } from "unichat/services/commandService";
 import { loggerService } from "unichat/services/loggerService";
 import { storageService } from "unichat/services/storageService";
-import { YOUTUBE_CHAT_URL_KEY } from "unichat/utils/constants";
-import { IPCYoutubeEvents, IPCYouTubeStatusEvent, YOUTUBE_EVENT_DESCRIPTION } from "unichat/utils/IPCYoutubeEvents";
+import { TWITCH_CHANNEL_NAME, YOUTUBE_CHAT_URL_KEY } from "unichat/utils/constants";
+import { EVENT_DESCRIPTION as STATUS_EVENT_DESCRIPTION, IPCEvents, IPCStatusEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
 
 import { ScrapperCardStyledContainer } from "./styled";
 
 interface Props {
-    children?: React.ReactNode;
+    type: "youtube" | "twitch";
+    validateUrl(url: string): [string, string];
 }
 
-const DEFAULT_STATUS_EVENT: IPCYouTubeStatusEvent = {
+const DEFAULT_STATUS_EVENT: IPCStatusEvent = {
     type: "idle",
+    platform: "youtube",
     timestamp: Date.now()
 };
 
-export function ScrapperCard(_props: Props): React.ReactNode {
+export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
+    const displayName = type === "youtube" ? "YouTube" : "Twitch";
     const [loading, setLoading] = React.useState(true);
-    const [event, setEvent] = React.useState<IPCYouTubeStatusEvent>(DEFAULT_STATUS_EVENT);
+    const [event, setEvent] = React.useState<IPCStatusEvent>({ ...DEFAULT_STATUS_EVENT, platform: type });
     const [currentActiveUrl, setCurrentActiveUrl] = React.useState("about:blank");
     const [error, setError] = React.useState<string>(null);
 
@@ -51,47 +60,18 @@ export function ScrapperCard(_props: Props): React.ReactNode {
     async function handleStart(): Promise<void> {
         try {
             setLoading(true);
-            let value = inputRef.current?.value ?? "";
+            const [inputValue, storeValue] = validateUrl(inputRef.current?.value ?? "");
+            inputRef.current.value = inputValue;
 
-            // Normalize the URL to ensure it starts with a valid protocol
-            if (value.startsWith("youtube.com")) {
-                value = `https://www.${value}`;
-            } else if (value.startsWith("www.youtube.com")) {
-                value = `https://${value}`;
-            } else if (value.startsWith("youtu.be")) {
-                value = `https://${value}`;
-                console.log(value, value.startsWith("https://youtu.be"));
+            if (type === "youtube") {
+                await storageService.setItem(YOUTUBE_CHAT_URL_KEY, storeValue);
+                await commandService.youTube.setScrapperUrl(inputValue);
+            } else if (type === "twitch") {
+                await storageService.setItem(TWITCH_CHANNEL_NAME, storeValue);
+                await commandService.twitch.setScrapperUrl(inputValue);
             }
 
-            if (Strings.isValidYouTubeVideoId(value)) {
-                value = `https://www.youtube.com/live_chat?v=${value}`;
-            } else if (value.startsWith("https://www.youtube.com/watch")) {
-                const params = new URLSearchParams(value.split("?")[1]);
-                const videoId = params.get("v") || value.trim();
-                if (!Strings.isValidYouTubeVideoId(videoId)) {
-                    throw new Error("Invalid YouTube video ID");
-                }
-
-                value = `https://www.youtube.com/live_chat?v=${videoId}`;
-            } else if (value.startsWith("https://youtu.be")) {
-                const parts = value.split("/");
-                const videoId = parts.at(-1);
-                if (!Strings.isValidYouTubeVideoId(videoId)) {
-                    throw new Error("Invalid YouTube video ID");
-                }
-
-                value = `https://www.youtube.com/live_chat?v=${videoId}`;
-            }
-
-            if (!Strings.isValidYouTubeChatUrl(value)) {
-                throw new Error("Invalid YouTube chat URL");
-            } else {
-                inputRef.current.value = value;
-            }
-
-            await storageService.setItem(YOUTUBE_CHAT_URL_KEY, value);
-            await commandService.youTube.setScrapperUrl(value);
-            setCurrentActiveUrl(value);
+            setCurrentActiveUrl(inputValue);
             setError(null);
         } catch (err) {
             if (err instanceof Error) {
@@ -100,7 +80,7 @@ export function ScrapperCard(_props: Props): React.ReactNode {
                 setError(err);
             }
 
-            loggerService.error("An error occurred while starting the YouTube chat scrapper: {}", err);
+            loggerService.error(`An error occurred while starting the ${displayName} chat scrapper: {}`, err);
             notifications.show({ message: "An error occurred on save", color: "red" });
         } finally {
             setLoading(false);
@@ -110,77 +90,108 @@ export function ScrapperCard(_props: Props): React.ReactNode {
     async function handleStop(): Promise<void> {
         try {
             setLoading(true);
-            await commandService.youTube.setScrapperUrl("about:blank");
+
+            if (type === "youtube") {
+                await commandService.youTube.setScrapperUrl("about:blank");
+            } else if (type === "twitch") {
+                await commandService.twitch.setScrapperUrl("about:blank");
+            }
+
             setCurrentActiveUrl("about:blank");
         } catch (err) {
-            loggerService.error("An error occurred while stopping the YouTube chat scrapper: {}", err);
+            loggerService.error(`An error occurred while stopping the ${displayName} chat scrapper: {}`, err);
             notifications.show({ message: "An error occurred on save", color: "red" });
         } finally {
             setLoading(false);
         }
     }
 
-    function handleStatusColor(): DefaultMantineColor {
-        switch (event.type) {
-            case "ping":
-                return "green";
-            case "ready":
-                return "yellow";
-            case "error":
-                return "red";
-            default:
-                return "gray";
+    /* ============================================================================================================== */
+
+    function handlePlaceholderMessage(): string {
+        if (type === "youtube") {
+            return "https://www.youtube.com/live_chat?v={VIDEO_ID}";
+        } else if (type === "twitch") {
+            return "https://www.twitch.tv/popout/{CHANNEL_NAME}/chat";
         }
+
+        return "";
+    }
+
+    function handleOpenChatPopoutIcon(): React.ReactNode {
+        if (type === "youtube") {
+            return <IconBrandYoutube size="20" />;
+        } else if (type === "twitch") {
+            return <IconBrandTwitch size="20" />;
+        }
+
+        return null;
+    }
+
+    function handleStatusColor(): DefaultMantineColor {
+        if (loading) {
+            return "blue";
+        } else if (inputRef.current?.value === currentActiveUrl && event.type === "ping") {
+            return "red.8";
+        }
+
+        return "gray";
     }
 
     function handleStatusLabel(): string {
         if (loading) {
             return "Starting";
+        } else if (inputRef.current?.value === currentActiveUrl && event.type === "ping") {
+            return "Stop";
+        } else if (event.type === "idle") {
+            return "Start";
         }
 
-        if (inputRef.current?.value === currentActiveUrl) {
-            return "Running";
-        }
-
-        switch (event.type) {
-            case "idle":
-                return "Start";
-            default:
-                return event.type.charAt(0).toUpperCase() + event.type.slice(1);
-        }
+        return event.type.charAt(0).toUpperCase() + event.type.slice(1);
     }
 
     function handleStatusIcon(): React.ReactNode {
         if (loading) {
             return <IconLoader size="20" />;
+        } else if (inputRef.current?.value === currentActiveUrl && event.type === "ping") {
+            return <IconPlayerStopFilled size="20" />;
+        } else if (event.type === "idle") {
+            return <IconPlayerPlayFilled size="20" />;
         }
 
-        if (inputRef.current?.value === currentActiveUrl) {
-            return <IconBolt size="20" />;
-        }
-
-        switch (event.type) {
-            case "ready":
-                return <IconCheck size="20" />;
-            case "idle":
-                return <IconPlayerPlay size="20" />;
-            default:
-                return null;
-        }
+        return null;
     }
 
     React.useEffect(() => {
         async function init(): Promise<void> {
-            if (inputRef.current) {
-                const urlKey = await storageService.getItem<string>(YOUTUBE_CHAT_URL_KEY);
-                inputRef.current.value = (urlKey ?? "").replace("about:blank", "");
-            }
+            if (type === "youtube") {
+                if (inputRef.current) {
+                    const url = await storageService.getItem<string>(YOUTUBE_CHAT_URL_KEY);
+                    if (!Strings.isNullOrEmpty(url)) {
+                        inputRef.current.value = url;
+                    }
+                }
 
-            const url = await commandService.youTube.getScrapperUrl();
-            if (url == null || !url.startsWith("https://www.youtube.com/live_chat")) {
-                setCurrentActiveUrl("about:blank");
-            } else {
-                setCurrentActiveUrl(url);
+                const url = await commandService.youTube.getScrapperUrl();
+                if (url == null || !url.startsWith("https://www.youtube.com/live_chat")) {
+                    setCurrentActiveUrl("about:blank");
+                } else {
+                    setCurrentActiveUrl(url);
+                }
+            } else if (type === "twitch") {
+                if (inputRef.current) {
+                    const channelName = await storageService.getItem<string>(TWITCH_CHANNEL_NAME);
+                    if (!Strings.isNullOrEmpty(channelName)) {
+                        inputRef.current.value = "https://www.twitch.tv/popout/" + channelName + "/chat";
+                    }
+                }
+
+                const url = await commandService.twitch.getScrapperUrl();
+                if (url == null || !url.startsWith("https://www.twitch.tv/popout/")) {
+                    setCurrentActiveUrl("about:blank");
+                } else {
+                    setCurrentActiveUrl(url);
+                }
             }
 
             setLoading(false);
@@ -190,9 +201,14 @@ export function ScrapperCard(_props: Props): React.ReactNode {
     }, []);
 
     React.useEffect(() => {
-        const unlisten = eventService.listen<IPCYouTubeStatusEvent>(IPCYoutubeEvents.YOUTUBE_EVENT, ({ payload }) => {
+        const unListen = eventService.listen<IPCStatusEvent>(IPCEvents.STATUS_EVENT, ({ payload }) => {
+            if (payload.platform !== type) {
+                return;
+            }
+
             if (payload.type === "error") {
-                notifications.show({ color: "red", title: "YouTube chat scrapper error", message: payload.message });
+                const title = `${displayName} chat scrapper error`;
+                notifications.show({ color: "red", title, message: payload.message });
             } else {
                 setEvent((old) => {
                     if (old.timestamp < payload.timestamp) {
@@ -205,7 +221,7 @@ export function ScrapperCard(_props: Props): React.ReactNode {
         });
 
         return () => {
-            unlisten.then(() => console.log(`Unsubscribed from '${IPCYoutubeEvents.YOUTUBE_EVENT}' event`));
+            unListen.then((unListener) => unListener());
         };
     }, []);
 
@@ -214,28 +230,29 @@ export function ScrapperCard(_props: Props): React.ReactNode {
             <ScrapperCardStyledContainer>
                 <TextInput
                     size="sm"
-                    label="Scrapper: YouTube chat URL"
-                    description="Enter the YouTube chat/video URL or video ID to start the scrapper."
+                    label={`Scrapper: ${displayName} chat URL`}
                     error={error}
-                    placeholder="https://www.youtube.com/live_chat?v={VIDEO_ID}"
+                    placeholder={handlePlaceholderMessage()}
                     ref={inputRef}
                     disabled={loading || inputRef.current?.value === currentActiveUrl}
                 />
-                <Tooltip label={YOUTUBE_EVENT_DESCRIPTION[event.type]} position="left">
+                <Tooltip position="left" label={STATUS_EVENT_DESCRIPTION[event.type]}>
                     <Button
                         size="sm"
                         leftSection={handleStatusIcon()}
                         color={handleStatusColor()}
-                        onClick={handleStart}
-                        disabled={loading || inputRef.current?.value === currentActiveUrl}
+                        onClick={inputRef.current?.value === currentActiveUrl ? handleStop : handleStart}
+                        disabled={
+                            loading ||
+                            error != null ||
+                            (inputRef.current?.value === currentActiveUrl && event.type !== "ping")
+                        }
                     >
                         {handleStatusLabel()}
                     </Button>
                 </Tooltip>
-                {inputRef.current?.value === currentActiveUrl && (
-                    <Button size="sm" color="red" onClick={handleStop}>
-                        <IconPlayerStopFilled size="20" />
-                    </Button>
+                {inputRef.current?.value === currentActiveUrl && event.type === "ping" && (
+                    <Button size="sm">{handleOpenChatPopoutIcon()}</Button>
                 )}
             </ScrapperCardStyledContainer>
         </Card>
