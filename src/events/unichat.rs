@@ -200,9 +200,10 @@ pub struct UniChatSponsorEventPayload {
     pub author_badges: Vec<UniChatBadge>,
     pub author_type: UniChatAuthorType,
 
-    pub message_id: String,
     pub tier: Option<String>,
     pub months: u16,
+
+    pub message_id: String,
     pub message_text: Option<String>,
     pub emotes: Vec<UniChatEmote>
 }

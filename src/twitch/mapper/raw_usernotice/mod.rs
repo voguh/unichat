@@ -24,6 +24,7 @@ mod announcement;
 mod community_gift;
 mod raid;
 mod subgift;
+mod subscription;
 
 pub fn parse(channel_name: String, message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
     let tags = parse_tags(&message.tags);
@@ -38,6 +39,8 @@ pub fn parse(channel_name: String, message: &Message) -> Result<Option<UniChatEv
         return raid::parse(channel_name, &tags);
     } else if msg_id == "subgift" && tags.get("msg-param-community-gift-id").is_none() {
         return subgift::parse(channel_name, &tags);
+    } else if msg_id == "sub" || msg_id == "resub" {
+        return subscription::parse(message, &tags);
     }
 
     return Ok(None);
