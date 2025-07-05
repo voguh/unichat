@@ -239,6 +239,7 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
                 <Tooltip position="left" label={STATUS_EVENT_DESCRIPTION[event.type]}>
                     <Button
                         size="sm"
+                        color="gray"
                         leftSection={handleStatusIcon()}
                         onClick={inputRef.current?.value === currentActiveUrl ? handleStop : handleStart}
                         disabled={
