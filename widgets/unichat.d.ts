@@ -122,7 +122,7 @@ export interface UniChatEventSponsor {
     };
 }
 
-export interface UniChatSponsorGiftEvent {
+export interface UniChatEventSponsorGift {
     type: "unichat:sponsor_gift";
     data: {
         channelId: string;
@@ -143,7 +143,7 @@ export interface UniChatSponsorGiftEvent {
     };
 }
 
-export interface UniChatDonateEvent {
+export interface UniChatEventDonate {
     type: "unichat:donate";
     data: {
         channelId: string;
