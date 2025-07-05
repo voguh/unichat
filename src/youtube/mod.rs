@@ -29,11 +29,9 @@ use tauri::Manager;
 use tauri::Url;
 
 use crate::events;
-use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatLoadEventPayload;
 use crate::events::unichat::UniChatPlatform;
-use crate::events::unichat::UNICHAT_EVENT_CLEAR_TYPE;
 use crate::events::unichat::UNICHAT_EVENT_LOAD_TYPE;
 use crate::shared_emotes;
 use crate::utils;
@@ -99,22 +97,6 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
 
 
 fn handle_idle_event(app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payload: &Value) -> Result<(), String> {
-    let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)
-        .map_err(|e| format!("{:?}", e))?;
-
-    let parsed = UniChatEvent::Clear {
-        event_type: String::from(UNICHAT_EVENT_CLEAR_TYPE),
-        data: UniChatClearEventPayload {
-            channel_id: channel_id.clone(),
-            channel_name: None,
-            platform: UniChatPlatform::YouTube
-        }
-    };
-
-    if let Err(err) = events::event_emitter().emit(parsed) {
-        log::error!("An error occurred on send 'unichat:clear' unichat event: {}", err);
-    }
-
     return dispatch_event(app, payload.clone());
 }
 
