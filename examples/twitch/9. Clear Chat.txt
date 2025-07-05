@@ -1,9 +1,7 @@
 // Rust IRC representation
 Message {
   tags: Some([
-    Tag("login", Some("<AUTHOR_USERNAME>")),
     Tag("room-id", Some("<BROADCASTER_ID>")),
-    Tag("target-msg-id", Some("<TARGET_MESSAGE_GUID>")),
     Tag("tmi-sent-ts", Some("<UNIX_TIMESTAMP>"))
   ]),
   prefix: Some(ServerName("tmi.twitch.tv")),
