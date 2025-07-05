@@ -15,11 +15,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-use std::collections::HashSet;
-use std::sync::LazyLock;
-
 use crate::events::unichat::UniChatEmote;
 use crate::shared_emotes;
+use crate::twitch::TWITCH_CHEERMOTES;
 
 fn parse_delimiter(start: &str, end: &str) -> Result<(usize, usize), Box<dyn std::error::Error>> {
     let start = start.parse::<usize>()?;
@@ -67,22 +65,19 @@ pub fn parse_message_emotes(raw_emotes: Option<&String>, message_text: &str) -> 
     return Ok(emotes);
 }
 
-static CHEER_VARIANTS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| HashSet::from([
-    "cheer", "cheerwhal", "Corgo", "uni", "ShowLove", "Party", "SeemsGood", "Pride", "Kappa", "FrankerZ", "HeyGuys",
-    "DansGame", "TriHard", "Kreygasm", "4Head", "SwiftRage", "NotLikeThis", "FailFish", "VoHiYo", "PJSalt",
-    "MrDestructoid", "bday", "RIPCheer", "Shamrock"
-]));
-
 pub fn parse_message_string(message_raw: &String) -> Result<String, Box<dyn std::error::Error>> {
     let mut str_message = Vec::new();
 
-    for word in message_raw.split_whitespace() {
-        let prefix_end = word.find(|c: char| c.is_digit(10)).unwrap_or(word.len());
-        let prefix = &word[..prefix_end];
-        let suffix = &word[prefix_end..];
+    if let Ok(cheermotes) = TWITCH_CHEERMOTES.read() {
+        for word in message_raw.split_whitespace() {
+            let prefix_end = word.find(|c: char| c.is_digit(10)).unwrap_or(word.len());
+            let prefix = &word[..prefix_end];
+            let suffix = &word[prefix_end..];
+            let amount: u32 = suffix.parse().unwrap_or(0);
 
-        if !CHEER_VARIANTS.contains(prefix) || suffix.parse::<u32>().is_ok() {
-            str_message.push(word);
+            if !cheermotes.contains(prefix) || (amount < 1 || amount > 100000) {
+                str_message.push(word);
+            }
         }
     }
 

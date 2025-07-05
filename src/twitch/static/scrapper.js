@@ -35,10 +35,27 @@ async function handleScrapBadges(response) {
         const parsed = await response.json();
         if (Array.isArray(parsed)) {
             for (const item of parsed) {
+                const extensions = item.extensions;
                 const data = item.data;
 
-                if ("badges" in data && Array.isArray(data.badges)) {
-                    await dispatchEvent({ type: "badges", badges: data.badges })
+                if (extensions.operationName === "GlobalBadges") {
+                    await dispatchEvent({ type: "badges", badgesType: "global", badges: data.badges })
+                } else if (extensions.operationName === "ChatList_Badges") {
+                    await dispatchEvent({ type: "badges", badgesType: "user", badges: data.user.broadcastBadges });
+                } else if (extensions.operationName === "BitsConfigContext_Global") {
+                    const cheermotes = new Set();
+
+                    for (const group of data.cheerConfig.groups) {
+                        if (group["__typename"] === "CheermoteGroup") {
+                            for (const node of group.nodes) {
+                                if (node["__typename"] === "Cheermote") {
+                                    cheermotes.add(node.prefix);
+                                }
+                            }
+                        }
+                    }
+
+                    await dispatchEvent({ type: "cheermotes", cheermotes: Array.from(cheermotes) });
                 }
             }
         }

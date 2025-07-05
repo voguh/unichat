@@ -16,6 +16,7 @@
  ******************************************************************************/
 
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fs;
 use std::io::Write;
 use std::sync::LazyLock;
@@ -56,6 +57,7 @@ static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
 static RAW_EVENT: &str = "twitch_raw::event";
 static ASYNC_HANDLE: LazyLock<RwLock<Option<JoinHandle<()>>>> = LazyLock::new(|| RwLock::new(None));
 
+pub static TWITCH_CHEERMOTES: LazyLock<RwLock<HashSet<String>>> = LazyLock::new(|| RwLock::new(HashSet::new()));
 pub static TWITCH_BADGES: LazyLock<RwLock<HashMap<String, UniChatBadge>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
 /* ================================================================================================================== */
@@ -152,17 +154,40 @@ fn handle_idle_event(app: tauri::AppHandle<tauri::Wry>, _event_type: &str, paylo
 }
 
 fn handle_badges_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
+    let badges_type = payload.get("badgesType").and_then(|v| v.as_str())
+        .ok_or(format!("Missing or invalid 'badgesType' field in Twitch '{}' payload", event_type))?;
     let badges = payload.get("badges").and_then(|v| v.as_array()).cloned()
-        .ok_or(format!("Missing or invalid 'badges' field in Twitch '{event_type}' payload"))?;
+        .ok_or(format!("Missing or invalid 'badges' field in Twitch '{}' payload", event_type))?;
 
     let twitch_badges: Vec<TwitchRawBadge> = serde_json::from_value(serde_json::Value::Array(badges))
         .map_err(|e| format!("{:?}", e))?;
 
     if let Ok(mut badges) = TWITCH_BADGES.write() {
         for twitch_badge in twitch_badges {
-            let code = format!("{}/{}", twitch_badge.set_id, twitch_badge.version);
+            let mut code = format!("{}/{}", twitch_badge.set_id, twitch_badge.version);
+            if badges_type == "global" && ["bits", "subscriber"].contains(&twitch_badge.set_id.as_str()) {
+                // For global badges, we need to prepend "global/" to the code as a fallback
+                code = format!("global/{}", code);
+            }
+
             let url = twitch_badge.image_4x;
             badges.insert(code.clone(), UniChatBadge { code: code.clone(), url: url.clone() });
+        }
+    }
+
+    return Ok(());
+}
+
+fn handle_cheermotes_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
+    let cheermotes = payload.get("cheermotes").and_then(|v| v.as_array()).cloned()
+        .ok_or(format!("Missing or invalid 'cheermotes' field in Twitch '{}' payload", event_type))?;
+
+
+    if let Ok(mut cheermotes_set) = TWITCH_CHEERMOTES.write() {
+        for cheer in cheermotes {
+            if let Ok(cheer_str) = serde_json::from_value::<String>(cheer) {
+                cheermotes_set.insert(cheer_str);
+            }
         }
     }
 
@@ -277,6 +302,7 @@ fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: tauri::Event) -> Resul
         "ready" => handle_ready_event(app, event_type, &payload),
         "idle" => handle_idle_event(app, event_type, &payload),
         "badges" => handle_badges_event(app, event_type, &payload),
+        "cheermotes" => handle_cheermotes_event(app, event_type, &payload),
         "message" => Ok(()),
         _ => dispatch_event(app, payload.clone())
     };

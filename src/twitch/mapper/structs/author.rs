@@ -88,7 +88,7 @@ pub fn parse_author_badges(badges: Option<&String>) -> Result<Vec<UniChatBadge>,
     if let Some(badge_str) = badges {
         if let Ok(twitch_badges) = TWITCH_BADGES.read() {
             for badge in badge_str.split(',') {
-                if let Some(twitch_badge) = twitch_badges.get(badge) {
+                if let Some(twitch_badge) = twitch_badges.get(badge).or_else(|| twitch_badges.get(&format!("global/{}", badge))) {
                     parsed_badges.push(twitch_badge.to_owned());
                 }
             }
