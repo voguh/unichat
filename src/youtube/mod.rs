@@ -170,6 +170,8 @@ pub async fn set_youtube_scrapper_url(app: tauri::AppHandle<tauri::Wry>, url: &s
     if url != "about:blank" {
         sleep(Duration::from_millis(500));
         window.eval(SCRAPPER_JS).map_err(|e| format!("{:?}", e))?;
+    } else {
+        window.hide().map_err(|e| format!("{:?}", e))?;
     }
 
     return Ok(());

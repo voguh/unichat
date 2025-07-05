@@ -291,6 +291,8 @@ pub async fn set_twitch_scrapper_url(app: tauri::AppHandle<tauri::Wry>, url: &st
     if url != "about:blank" {
         sleep(Duration::from_millis(500));
         window.eval(SCRAPPER_JS).map_err(|e| format!("{:?}", e))?;
+    } else {
+        window.hide().map_err(|e| format!("{:?}", e))?;
     }
 
     return Ok(());
