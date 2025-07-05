@@ -1,0 +1,28 @@
+Message {
+  tags: Some([
+    Tag("badge-info", Some("<BADGES_WITH_VERSION_SPLITED_BY_COMMA_OR_EMPTY>")),
+    Tag("badges", Some("<BADGES_WITH_VERSION_SPLITED_BY_COMMA_OR_EMPTY>")),
+    Tag("color", Some("<AUTHOR_COLOR_IN_HEX>")),
+    Tag("display-name", Some("<AUTHOR_DISPLAY_NAME>")),
+    Tag("emotes", Some("<EMOTES_WITH_POSTION_SPLITED_BY_COMMA_OR_EMPTY>")),
+    Tag("flags", Some("")),
+    Tag("id", Some("<SOME_GUID>")),
+    Tag("login", Some("<AUTHOR_USERNAME>")),
+    Tag("mod", Some("<ZERO_OR_ONE>")),
+    Tag("msg-id", Some("submysterygift")),
+    Tag("msg-param-community-gift-id", Some("<COMMUNITY_GIFT_ID>")),
+    Tag("msg-param-mass-gift-count", Some("<COMMUNITY_GIFT_COUNT>")),
+    Tag("msg-param-origin-id", Some("<COMMUNITY_GIFT_ID>")),
+    Tag("msg-param-sender-count", Some("<AUTHOR_GIFTS_TOTAL_COUNT>")),
+    Tag("msg-param-sub-plan", Some("<SUBSCRIPTION_PLAN_COULD_BE_1000_2000_3000>")),
+    Tag("room-id", Some("<BROADCASTER_ID>")),
+    Tag("subscriber", Some("<ZERO_OR_ONE>")),
+    Tag("system-msg", Some("<GENERATED_SUBSCRIPTION_GIFT_MESSAGE>")),
+    Tag("tmi-sent-ts", Some("<UNIX_TIMESTAMP>")),
+    Tag("user-id", Some("<AUTHOR_ID>")),
+    Tag("user-type", Some("<MOD_OR_MAYBE_VIP_OR_EMPTY>")),
+    Tag("vip", Some("<ZERO_OR_ONE>"))
+  ]),
+  prefix: Some(ServerName("tmi.twitch.tv")),
+  command: Raw("USERNOTICE", ["#<BROADCASTER_USERNAME>"])
+}
