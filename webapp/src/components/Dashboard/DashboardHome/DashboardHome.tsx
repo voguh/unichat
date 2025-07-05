@@ -48,7 +48,7 @@ export function DashboardHome(): React.ReactNode {
         }
 
         let videoId = value;
-        if (value.startsWith("https://www.youtube.com/live") || value.startsWith("https://youtu.be")) {
+        if (value.startsWith("https://www.youtube.com/live/") || value.startsWith("https://youtu.be")) {
             const parts = value.split("?")[0].split("/");
             videoId = parts.at(-1);
         } else if (value.startsWith("https://www.youtube.com")) {
