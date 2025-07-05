@@ -31,7 +31,7 @@ import * as eventService from "@tauri-apps/api/event";
 import { commandService } from "unichat/services/commandService";
 import { loggerService } from "unichat/services/loggerService";
 import { storageService } from "unichat/services/storageService";
-import { TWITCH_CHANNEL_NAME, YOUTUBE_CHAT_URL_KEY } from "unichat/utils/constants";
+import { TWITCH_CHANNEL_NAME_KEY, YOUTUBE_VIDEO_ID_KEY } from "unichat/utils/constants";
 import { EVENT_DESCRIPTION as STATUS_EVENT_DESCRIPTION, IPCEvents, IPCStatusEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
 
@@ -64,10 +64,10 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
             inputRef.current.value = inputValue;
 
             if (type === "youtube") {
-                await storageService.setItem(YOUTUBE_CHAT_URL_KEY, storeValue);
+                await storageService.setItem(YOUTUBE_VIDEO_ID_KEY, storeValue);
                 await commandService.youTube.setScrapperUrl(inputValue);
             } else if (type === "twitch") {
-                await storageService.setItem(TWITCH_CHANNEL_NAME, storeValue);
+                await storageService.setItem(TWITCH_CHANNEL_NAME_KEY, storeValue);
                 await commandService.twitch.setScrapperUrl(inputValue);
             }
 
@@ -104,6 +104,10 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
         } finally {
             setLoading(false);
         }
+    }
+
+    async function handleOpenPopout(): Promise<void> {
+        await commandService.toggleWebview(`${type}-chat`);
     }
 
     /* ============================================================================================================== */
@@ -166,9 +170,9 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
         async function init(): Promise<void> {
             if (type === "youtube") {
                 if (inputRef.current) {
-                    const url = await storageService.getItem<string>(YOUTUBE_CHAT_URL_KEY);
-                    if (!Strings.isNullOrEmpty(url)) {
-                        inputRef.current.value = url;
+                    const videoId = await storageService.getItem<string>(YOUTUBE_VIDEO_ID_KEY);
+                    if (!Strings.isNullOrEmpty(videoId)) {
+                        inputRef.current.value = `https://www.youtube.com/live_chat?v=${videoId}`;
                     }
                 }
 
@@ -180,9 +184,9 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
                 }
             } else if (type === "twitch") {
                 if (inputRef.current) {
-                    const channelName = await storageService.getItem<string>(TWITCH_CHANNEL_NAME);
+                    const channelName = await storageService.getItem<string>(TWITCH_CHANNEL_NAME_KEY);
                     if (!Strings.isNullOrEmpty(channelName)) {
-                        inputRef.current.value = "https://www.twitch.tv/popout/" + channelName + "/chat";
+                        inputRef.current.value = `https://www.twitch.tv/popout/${channelName}/chat`;
                     }
                 }
 
@@ -252,7 +256,9 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
                     </Button>
                 </Tooltip>
                 {inputRef.current?.value === currentActiveUrl && event.type === "ping" && (
-                    <Button size="sm">{handleOpenChatPopoutIcon()}</Button>
+                    <Button size="sm" onClick={handleOpenPopout}>
+                        {handleOpenChatPopoutIcon()}
+                    </Button>
                 )}
             </ScrapperCardStyledContainer>
         </Card>

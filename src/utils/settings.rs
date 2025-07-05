@@ -37,7 +37,7 @@ pub enum SettingLogEventLevel {
 }
 
 pub enum SettingsKeys {
-    YouTubeChatUrl,
+    YouTubeVideoId,
     TwitchChannelName,
 
     LogYouTubeEvents,
@@ -68,7 +68,7 @@ macro_rules! settings_keys {
 }
 
 settings_keys! {
-    YouTubeChatUrl => "youtube-chat-url",
+    YouTubeVideoId => "youtube-video-id",
     TwitchChannelName => "twitch-channel-name",
 
     LogYouTubeEvents => "settings.log-youtube-events",
@@ -79,7 +79,7 @@ static INSTANCE: OnceLock<Arc<Store<tauri::Wry>>> = OnceLock::new();
 
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
     let mut defaults = HashMap::new();
-    defaults.insert(SettingsKeys::YouTubeChatUrl.to_string(), Value::from("about:blank"));
+    defaults.insert(SettingsKeys::YouTubeVideoId.to_string(), Value::from(""));
     defaults.insert(SettingsKeys::TwitchChannelName.to_string(), Value::from(""));
 
     defaults.insert(SettingsKeys::LogYouTubeEvents.to_string(), serde_json::to_value(SettingLogEventLevel::OnlyErrors).unwrap());

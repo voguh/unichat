@@ -48,32 +48,20 @@ export function DashboardHome(): React.ReactNode {
             console.log(value, value.startsWith("https://youtu.be"));
         }
 
-        //
-        if (Strings.isValidYouTubeVideoId(value)) {
-            value = `https://www.youtube.com/live_chat?v=${value}`;
-        } else if (value.startsWith("https://www.youtube.com/watch")) {
+        let videoId = value;
+        if (value.startsWith("https://www.youtube.com/watch")) {
             const params = new URLSearchParams(value.split("?")[1]);
-            const videoId = params.get("v") || value.trim();
-            if (!Strings.isValidYouTubeVideoId(videoId)) {
-                throw new Error("Invalid YouTube video ID");
-            }
-
-            value = `https://www.youtube.com/live_chat?v=${videoId}`;
+            videoId = params.get("v") || value.trim();
         } else if (value.startsWith("https://youtu.be")) {
             const parts = value.split("/");
-            const videoId = parts.at(-1);
-            if (!Strings.isValidYouTubeVideoId(videoId)) {
-                throw new Error("Invalid YouTube video ID");
-            }
-
-            value = `https://www.youtube.com/live_chat?v=${videoId}`;
+            videoId = parts.at(-1);
         }
 
-        if (!Strings.isValidYouTubeChatUrl(value)) {
+        if (!Strings.isValidYouTubeVideoId(videoId)) {
             throw new Error("Invalid YouTube chat URL");
         }
 
-        return [value, value];
+        return [`https://www.youtube.com/live_chat?v=${videoId}`, videoId];
     }
 
     /* ====================================================================== */

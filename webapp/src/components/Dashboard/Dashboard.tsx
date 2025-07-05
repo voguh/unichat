@@ -19,22 +19,16 @@ import React from "react";
 
 import { Button, Card, Menu, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { IconAdjustments, IconBrandTwitch, IconBrandYoutube, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
+import { IconAdjustments, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import semver from "semver";
 
 import { AboutModal } from "unichat/components/AboutModal";
 import { AppContext } from "unichat/contexts/AppContext";
-import { commandService } from "unichat/services/commandService";
 import { loggerService } from "unichat/services/loggerService";
 
 import { DashboardHome } from "./DashboardHome";
 import { DashboardStyledContainer } from "./styled";
-
-const TABS = {
-    youtube: { icon: IconBrandYoutube },
-    twitch: { icon: IconBrandTwitch }
-};
 
 interface Props {
     children?: React.ReactNode;
@@ -43,10 +37,6 @@ interface Props {
 export function Dashboard(_props: Props): React.ReactNode {
     const [hasUpdate, setHasUpdate] = React.useState(false);
     const { metadata } = React.useContext(AppContext);
-
-    async function toggleWebview(id: string): Promise<void> {
-        commandService.toggleWebview(`${id}-chat`);
-    }
 
     async function toggleAboutModal(): Promise<void> {
         modals.open({ title: `About ${metadata.displayName}`, children: <AboutModal />, centered: true });
@@ -92,15 +82,7 @@ export function Dashboard(_props: Props): React.ReactNode {
     return (
         <DashboardStyledContainer>
             <Card className="sidebar" withBorder shadow="xs">
-                <div>
-                    {Object.entries(TABS).map(([id, { icon: Icon }]) => {
-                        return (
-                            <Button key={id} onClick={() => toggleWebview(id)}>
-                                <Icon size="20" />
-                            </Button>
-                        );
-                    })}
-                </div>
+                <div></div>
 
                 <Menu position="right">
                     <Menu.Target>

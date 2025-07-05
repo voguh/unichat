@@ -15,5 +15,5 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-export const YOUTUBE_CHAT_URL_KEY = "youtube-chat-url";
-export const TWITCH_CHANNEL_NAME = "twitch-channel-name";
+export const YOUTUBE_VIDEO_ID_KEY = "youtube-video-id";
+export const TWITCH_CHANNEL_NAME_KEY = "twitch-channel-name";
