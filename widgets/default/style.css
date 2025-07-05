@@ -57,6 +57,7 @@ html, body {
 #main-container > div > .author-meta > .badges > img {
     width: var(--badge-size);
     height: var(--badge-size);
+    border-radius: 2px;
 }
 
 #main-container > div > .author-meta > .name {
