@@ -45,7 +45,9 @@ pub fn parse(channel: String, message: &Message) -> Result<Option<UniChatEvent>,
     } else {
         event = UniChatEvent::Clear {
             event_type: String::from(UNICHAT_EVENT_CLEAR_TYPE),
-            data: UniChatClearEventPayload {}
+            data: UniChatClearEventPayload {
+                platform: Some(UniChatPlatform::Twitch)
+            }
         };
     }
 

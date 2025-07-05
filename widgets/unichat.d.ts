@@ -31,7 +31,9 @@ export interface UniChatBadge {
 
 export interface UniChatEventClear {
     type: "unichat:clear";
-    data: {};
+    data: {
+        platform: UniChatPlatform | null;
+    };
 }
 
 export interface UniChatEventMessage {
@@ -42,10 +44,10 @@ export interface UniChatEventMessage {
         platform: UniChatPlatform;
 
         authorId: string;
-        authorUsername: string | string;
+        authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
-        authorProfilePictureUrl: string;
+        authorProfilePictureUrl: string | null;
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
 
@@ -85,10 +87,10 @@ export interface UniChatEventRaid {
         platform: UniChatPlatform;
 
         authorId: string;
-        authorUsername: string | string;
+        authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
-        authorProfilePictureUrl: string;
+        authorProfilePictureUrl: string | null;
 
         messageId: string;
         viewerCount: number | null;
@@ -103,10 +105,10 @@ export interface UniChatEventSponsor {
         platform: UniChatPlatform;
 
         authorId: string;
-        authorUsername: string | string;
+        authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
-        authorProfilePictureUrl: string;
+        authorProfilePictureUrl: string | null;
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
 
@@ -126,10 +128,10 @@ export interface UniChatSponsorGiftEvent {
         platform: UniChatPlatform;
 
         authorId: string;
-        authorUsername: string | string;
+        authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
-        authorProfilePictureUrl: string;
+        authorProfilePictureUrl: string | null;
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
 
@@ -147,10 +149,10 @@ export interface UniChatDonateEvent {
         platform: UniChatPlatform;
 
         authorId: string;
-        authorUsername: string | string;
+        authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
-        authorProfilePictureUrl: string;
+        authorProfilePictureUrl: string | null;
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
 

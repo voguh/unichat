@@ -54,7 +54,7 @@ pub fn parse(channel: String, text: String, message: &Message, tags: HashMap<Str
             author_username: author_username,
             author_display_name: author_name,
             author_display_color: author_color,
-            author_profile_picture_url: String::from(""),
+            author_profile_picture_url: None,
             author_badges: author_badges,
             author_type: author_type,
 

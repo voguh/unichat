@@ -92,7 +92,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
                         author_username: author_username,
                         author_display_name: author_name,
                         author_display_color: author_color,
-                        author_profile_picture_url: author_photo.url.clone(),
+                        author_profile_picture_url: Some(author_photo.url.clone()),
 
                         message_id: parsed.action_id,
                         viewer_count: None

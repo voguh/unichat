@@ -115,7 +115,9 @@ pub fn toggle_webview<R: Runtime>(app: tauri::AppHandle<R>, label: &str) -> Resu
 pub async fn dispatch_clear_chat<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, String> {
     let event = UniChatEvent::Clear {
         event_type: String::from(UNICHAT_EVENT_CLEAR_TYPE),
-        data: UniChatClearEventPayload {}
+        data: UniChatClearEventPayload {
+            platform: None
+        }
     };
 
     if let Err(err) = events::event_emitter().emit(event) {
