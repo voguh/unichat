@@ -88,7 +88,6 @@ html, body {
 }
 
 #main-container > .message-item > .message > img {
-    width: 18px;
     height: 18px;
 }
 /* <==========================================[ END SIMPLE MESSAGE STYLE ]==========================================> */
@@ -137,7 +136,6 @@ html, body {
 }
 
 #main-container > .donate-item > .message-wrapper > .message > img {
-    width: 18px;
     height: 18px;
 }
 /* <==========================================[ END DONATE MESSAGE STYLE ]==========================================> */
@@ -186,7 +184,6 @@ html, body {
 }
 
 #main-container > .sponsor-item > .message-wrapper > .message > img {
-    width: 18px;
     height: 18px;
 }
 /* <==========================================[ END SPONSOR MESSAGE STYLE ]==========================================> */
