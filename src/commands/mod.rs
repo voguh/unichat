@@ -16,23 +16,21 @@
  ******************************************************************************/
 
 use std::str::FromStr;
-use std::thread::sleep;
 
 use serde_json::json;
 use serde_json::Value;
 use tauri::Manager;
 use tauri::Runtime;
-use tauri::Url;
 
-use crate::custom_emotes;
+use crate::events;
+use crate::events::unichat::UniChatClearEventPayload;
+use crate::events::unichat::UniChatEvent;
+use crate::events::unichat::UNICHAT_EVENT_CLEAR_TYPE;
 use crate::utils;
-use crate::utils::constants;
-use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::settings;
 use crate::utils::settings::SettingsKeys;
-use crate::youtube;
 use crate::CARGO_PKG_AUTHORS;
 use crate::CARGO_PKG_DESCRIPTION;
 use crate::CARGO_PKG_DISPLAY_NAME;
@@ -69,7 +67,6 @@ pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
 }
 
 /* ================================================================================================================== */
-
 
 #[tauri::command]
 pub async fn is_dev<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, String> {
@@ -112,40 +109,22 @@ pub fn toggle_webview<R: Runtime>(app: tauri::AppHandle<R>, label: &str) -> Resu
     return Ok(());
 }
 
-fn decode_url(label: &str, url: &str) -> Result<Url, Box<dyn std::error::Error>> {
-    let mut url = url.to_string();
-    let fallback_page = match label {
-        YOUTUBE_CHAT_WINDOW => "youtube-await.html",
-        _ => "about:blank"
-    };
-
-    if url.is_empty() || url == "about:blank" || !url.starts_with("https://") {
-        if utils::is_dev() {
-            url = format!("http://localhost:1421/{}", fallback_page);
-        } else {
-            url = format!("tauri://localhost/{}", fallback_page);
-        }
-    }
-
-    return Url::parse(url.as_str()).map_err(|e| Box::new(e) as Box<dyn std::error::Error>);
-}
+/* ================================================================================================================== */
 
 #[tauri::command]
-pub async fn update_webview_url<R: Runtime>(app: tauri::AppHandle<R>, label: &str, url: &str) -> Result<(), String> {
-    let window = app.get_webview_window(label).unwrap();
-    let tauri_url = decode_url(label, url).map_err(|e| format!("{:?}", e))?;
+pub async fn dispatch_clear_chat<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, String> {
+    let event = UniChatEvent::Clear {
+        event_type: String::from(UNICHAT_EVENT_CLEAR_TYPE),
+        data: UniChatClearEventPayload {
+            platform: None
+        }
+    };
 
-    if let Ok(mut guard) = custom_emotes::EMOTES_HASHSET.write() {
-        guard.clear();
+    if let Err(err) = events::event_emitter().emit(event) {
+        log::error!("An error occurred on send 'unichat:clear' unichat event: {}", err);
     }
 
-    window.navigate(tauri_url).map_err(|e| format!("{:?}", e))?;
-    sleep(std::time::Duration::from_millis(5000));
-    if label == constants::YOUTUBE_CHAT_WINDOW && url != "about:blank" {
-        window.eval(youtube::SCRAPPER_JS).unwrap();
-    }
-
-    return Ok(());
+    return Ok(utils::is_dev())
 }
 
 /* ================================================================================================================== */

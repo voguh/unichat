@@ -17,8 +17,7 @@
 
 import React from "react";
 
-import { invoke } from "@tauri-apps/api/core";
-
+import { commandService } from "unichat/services/commandService";
 import { loggerService } from "unichat/services/loggerService";
 import { AppMetadata } from "unichat/types";
 
@@ -39,7 +38,7 @@ export function AppContextProvider({ children }: Props): React.ReactNode {
 
     async function init(): Promise<void> {
         try {
-            const appMetadata = await invoke<AppMetadata>("get_app_info");
+            const appMetadata = await commandService.getAppInfo();
             setMetadata(appMetadata);
         } catch (error) {
             loggerService.error("An error occurred while fetching app metadata: {}", error);

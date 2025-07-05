@@ -33,8 +33,9 @@ include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 
 mod actix;
 mod commands;
-mod custom_emotes;
 mod events;
+mod shared_emotes;
+mod twitch;
 mod utils;
 mod youtube;
 
@@ -63,7 +64,7 @@ fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error::
 }
 
 fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
-    events::init(app)?;
+    twitch::init(app)?;
     utils::properties::init(app)?;
     utils::settings::init(app)?;
     youtube::init(app)?;
@@ -108,13 +109,10 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
                     window.destroy().unwrap();
                 }
             }
-
         }
-    } else {
-        if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-            api.prevent_close();
-            window.hide().unwrap();
-        }
+    } else if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+        api.prevent_close();
+        window.hide().unwrap();
     }
 }
 
@@ -122,10 +120,11 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
 async fn main() {
     tauri::async_runtime::set(tokio::runtime::Handle::current());
 
-    let log_level = if utils::is_dev() {
-        log::LevelFilter::Debug
+    let log_level: log::LevelFilter;
+    if utils::is_dev() {
+        log_level = log::LevelFilter::Debug;
     } else {
-        log::LevelFilter::Warn
+        log_level = log::LevelFilter::Warn;
     };
 
     tauri::Builder::default().setup(setup)
@@ -138,8 +137,12 @@ async fn main() {
             commands::store_get_item,
             commands::store_set_item,
             commands::toggle_webview,
-            commands::update_webview_url,
-            commands::list_widgets
+            commands::dispatch_clear_chat,
+            commands::list_widgets,
+            twitch::get_twitch_scrapper_url,
+            twitch::set_twitch_scrapper_url,
+            youtube::get_youtube_scrapper_url,
+            youtube::set_youtube_scrapper_url
         ])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())

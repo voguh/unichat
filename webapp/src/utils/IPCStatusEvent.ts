@@ -15,43 +15,43 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-export enum IPCYoutubeEvents {
-    YOUTUBE_EVENT = "unichat://youtube:event"
+export enum IPCEvents {
+    STATUS_EVENT = "unichat://status:event"
 }
 
-export const YOUTUBE_EVENT_DESCRIPTION: Record<IPCYouTubeStatusEvent["type"], string> = {
-    idle: "The YouTube chat scrapper is idle.",
-    ready: "The YouTube chat scrapper is ready to use.",
-    ping: "The YouTube chat scrapper is working.",
-    error: "The YouTube chat scrapper is not responding or has encountered an error."
+export const EVENT_DESCRIPTION: Record<IPCStatusEvent["type"], string> = {
+    idle: "The chat scrapper is idle.",
+    ready: "The chat scrapper is ready to use.",
+    ping: "The chat scrapper is working.",
+    error: "The chat scrapper is not responding or has encountered an error."
 };
 
-export interface IPCYouTubeStatusIdleEvent {
+export interface IPCStatusIdleEvent {
     type: "idle";
+    platform: "youtube" | "twitch";
     timestamp: number;
 }
 
-export interface IPCYouTubeStatusReadyEvent {
+export interface IPCStatusReadyEvent {
     type: "ready";
+    platform: "youtube" | "twitch";
     url: string;
     clientId: string;
     timestamp: number;
 }
 
-export interface IPCYouTubeStatusPingEvent {
+export interface IPCStatusPingEvent {
     type: "ping";
+    platform: "youtube" | "twitch";
     timestamp: number;
 }
 
-export interface IPCYouTubeStatusErrorEvent {
+export interface IPCStatusErrorEvent {
     type: "error";
+    platform: "youtube" | "twitch";
     message: string;
     stack: string;
     timestamp: number;
 }
 
-export type IPCYouTubeStatusEvent =
-    | IPCYouTubeStatusIdleEvent
-    | IPCYouTubeStatusReadyEvent
-    | IPCYouTubeStatusPingEvent
-    | IPCYouTubeStatusErrorEvent;
+export type IPCStatusEvent = IPCStatusIdleEvent | IPCStatusReadyEvent | IPCStatusPingEvent | IPCStatusErrorEvent;

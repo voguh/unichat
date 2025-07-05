@@ -17,23 +17,19 @@
 
 import React from "react";
 
-import { Button, Card, Menu, Text } from "@mantine/core";
+import { Button, Card, Menu, Text, Tooltip } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { IconAdjustments, IconBrandYoutubeFilled, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
-import { invoke } from "@tauri-apps/api/core";
+import { IconAdjustments, IconEraser, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import semver from "semver";
 
+import { AboutModal } from "unichat/components/AboutModal";
 import { AppContext } from "unichat/contexts/AppContext";
+import { commandService } from "unichat/services/commandService";
 import { loggerService } from "unichat/services/loggerService";
 
-import { AboutModal } from "../AboutModal";
 import { DashboardHome } from "./DashboardHome";
 import { DashboardStyledContainer } from "./styled";
-
-const TABS = {
-    youtube: { icon: IconBrandYoutubeFilled }
-};
 
 interface Props {
     children?: React.ReactNode;
@@ -43,8 +39,8 @@ export function Dashboard(_props: Props): React.ReactNode {
     const [hasUpdate, setHasUpdate] = React.useState(false);
     const { metadata } = React.useContext(AppContext);
 
-    async function toggleWebview(id: string): Promise<void> {
-        invoke("toggle_webview", { label: `${id}-chat` });
+    async function handleClearChat(): Promise<void> {
+        await commandService.dispatchClearChat();
     }
 
     async function toggleAboutModal(): Promise<void> {
@@ -92,13 +88,11 @@ export function Dashboard(_props: Props): React.ReactNode {
         <DashboardStyledContainer>
             <Card className="sidebar" withBorder shadow="xs">
                 <div>
-                    {Object.entries(TABS).map(([id, { icon: Icon }]) => {
-                        return (
-                            <Button key={id} onClick={() => toggleWebview(id)}>
-                                <Icon size="20" />
-                            </Button>
-                        );
-                    })}
+                    <Tooltip label="Clear chat history" position="right" withArrow>
+                        <Button size="sm" onClick={handleClearChat}>
+                            <IconEraser size="20" />
+                        </Button>
+                    </Tooltip>
                 </div>
 
                 <Menu position="right">

@@ -18,7 +18,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::custom_emotes;
+use crate::shared_emotes;
 use crate::events::unichat::UniChatEmote;
 use crate::youtube::mapper::structs::ThumbnailsWrapper;
 
@@ -69,7 +69,7 @@ pub type FontBaseEmojiThumbnailsWrapper = ThumbnailsWrapper;
 pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
     let mut emotes = Vec::new();
 
-    if let Ok(custom_emotes) = custom_emotes::EMOTES_HASHSET.read() {
+    if let Ok(custom_emotes) = shared_emotes::EMOTES_HASHSET.read() {
         for run in &message_runs.runs {
             match run {
                 MessageRun::Text { text } => {
@@ -91,8 +91,7 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
 
                             emotes.push(UniChatEmote {
                                 id: emoji_id.clone(),
-                                emote_type: shortcut.clone(),
-                                tooltip: shortcut.clone(),
+                                code: shortcut.clone(),
                                 url: last_image.url.clone()
                             });
                         },
@@ -100,8 +99,7 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
                             let last_image = image.thumbnails.last().ok_or("No thumbnails found for font-based emoji")?;
                             emotes.push(UniChatEmote {
                                 id: emoji_id.clone(),
-                                emote_type: emoji_id.clone(),
-                                tooltip: emoji_id.clone(),
+                                code: emoji_id.clone(),
                                 url: last_image.url.clone()
                             });
                         }

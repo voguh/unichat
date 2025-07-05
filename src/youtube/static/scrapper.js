@@ -17,7 +17,12 @@
 
 async function dispatchEvent(payload) {
     payload.timestamp = Date.now();
-    await window.__TAURI__.event.emit("youtube_raw::event", payload);
+    await window.__TAURI__.event.emit("youtube_raw::event", payload)
+        .then(() => console.log(`Event with type '${payload.type}' dispatched successfully!`))
+        .catch((err) => {
+            console.error(`Failed to dispatch event with type '${payload.type}':`, err);
+            window.__TAURI_PLUGIN_LOG__.error(err);
+        });
 }
 
 async function dispatchPing() {
@@ -52,8 +57,8 @@ async function handleScrapEvent(response) {
     }
 }
 
-try {
-    if (window.fetch.__WRAPPED__ == null) {
+function init() {
+    try {
         // Prevent right-click context menu in production
         window.__TAURI__.core.invoke("is_dev").then((isDev) => {
             if (!isDev) {
@@ -62,6 +67,8 @@ try {
                 });
             }
         });
+
+        /* ====================================================================================================== */
 
         // Retrieve channel ID from YouTube initial data
         const ytInitialData = window.ytInitialData;
@@ -87,7 +94,7 @@ try {
 
         dispatchEvent({ type: "ready", channelId: channelId, url: window.location.href });
 
-        /* ============================================================================================================== */
+        /* ====================================================================================================== */
 
         // Wrap fetch to intercept YouTube live chat messages
         const originalFetch = window.fetch;
@@ -107,7 +114,7 @@ try {
         Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
         window.__TAURI_PLUGIN_LOG__.info("Fetch wrapped!");
 
-        /* ============================================================================================================== */
+        /* ====================================================================================================== */
 
         // Add a warning message to the page
         const style = document.createElement("style");
@@ -115,32 +122,39 @@ try {
             html::before {
                 content: "UniChat installed! You can close this window.";
                 position: fixed;
-                top: 8px;
-                right: 8px;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
                 z-index: 9999;
                 background-color: rgba(0, 0, 0, 0.8);
                 color: white;
                 padding: 10px;
-                border-radius: 4px;
+                white-space: nowrap;
+                border-bottom-left-radius: 4px;
+                border-bottom-right-radius: 4px;
             }
         `;
         document.head.appendChild(style);
 
-        /* ============================================================================================================== */
+        /* ====================================================================================================== */
 
         // Attach status ping event
         dispatchPing();
 
-        /* ============================================================================================================== */
+        /* ====================================================================================================== */
 
         // Select live chat instead top chat
         document.querySelector("#live-chat-view-selector-sub-menu #trigger")?.click();
         document.querySelector("#live-chat-view-selector-sub-menu #dropdown a:nth-child(2)")?.click()
-    } else {
-        window.__TAURI_PLUGIN_LOG__.warn("Fetch already was wrapped!");
+    } catch (err) {
+        console.error(err);
+        window.__TAURI_PLUGIN_LOG__.error(err);
+        dispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
     }
-} catch (err) {
-    console.error(err);
-    window.__TAURI_PLUGIN_LOG__.error(err);
-    dispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
+}
+
+if (document.readyState === "interactive" || document.readyState === "complete") {
+    init();
+} else {
+    document.addEventListener("DOMContentLoaded", init);
 }

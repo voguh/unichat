@@ -90,8 +90,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let emotes = vec![
         UniChatEmote {
             id: String::from("sticker"),
-            emote_type: String::from("sticker"),
-            tooltip: String::from("Paid Sticker"),
+            code: String::from("sticker"),
             url: sticker.url.clone()
         }
     ];
@@ -108,7 +107,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             author_display_name: author_name,
             author_display_color: author_color,
             author_badges: author_badges,
-            author_profile_picture_url: author_photo,
+            author_profile_picture_url: Some(author_photo),
             author_type: author_type,
 
             value: purchase_value,

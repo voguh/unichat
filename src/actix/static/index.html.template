@@ -34,11 +34,18 @@
             document.addEventListener("DOMContentLoaded", () => {
                 function connect() {
                     const socket = new WebSocket('ws://localhost:9527/ws')
-                    socket.addEventListener("message", function (message) {
+
+                    socket.addEventListener("open", () => {
+                        window.dispatchEvent(new CustomEvent("unichat:connected"));
+                    })
+
+                    socket.addEventListener("message", (message) => {
                         const event = JSON.parse(message.data);
 
-                        if (event.type === "unichat:load") {
-                            window.dispatchEvent(new CustomEvent("unichat:load", { detail: event.data }));
+                        if (event.type === "unichat:history") {
+                            for (const cachedEvent of event.data) {
+                                window.dispatchEvent(new CustomEvent("unichat:event", { detail: cachedEvent }));
+                            }
                         } else {
                             window.dispatchEvent(new CustomEvent("unichat:event", { detail: event }));
                         }
@@ -56,7 +63,10 @@
                 }
 
                 connect();
-
+            });
+        </script>
+        <script defer>
+            document.addEventListener("DOMContentLoaded", () => {
                 {{WIDGET_SCRIPT}}
             });
         </script>

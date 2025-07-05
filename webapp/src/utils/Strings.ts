@@ -32,11 +32,16 @@ export class Strings {
     }
 
     public static isValidTwitchChatUrl(s: string): boolean {
-        if (this.isNullOrEmpty(s)) {
+        s = s.split("?")[0];
+
+        if (this.isNullOrEmpty(s) || !s.startsWith("https://www.twitch.tv/popout/") || !s.endsWith("/chat")) {
             return false;
         }
 
-        return /^https:\/\/(www\.)?twitch\.tv\/popout\/(.*)\/chat$/.test(s);
+        let username = s.replace("https://www.twitch.tv/popout/", "");
+        username = username.split("/")[0];
+
+        return this.isValidTwitchChannelName(username);
     }
 
     public static isValidChatUrl(type: string, s: string): boolean {
@@ -47,6 +52,10 @@ export class Strings {
         } else {
             return false;
         }
+    }
+
+    public static isValidTwitchChannelName(channelName: string): boolean {
+        return /^[0-9A-Za-z_]{4,25}$/i.test(channelName);
     }
 
     // Thanks to Glenn Slayden which explained the YouTube video ID format

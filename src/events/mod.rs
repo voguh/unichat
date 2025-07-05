@@ -15,23 +15,65 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-use std::sync::OnceLock;
+use std::collections::VecDeque;
+use std::sync::LazyLock;
+use std::sync::RwLock;
 
 use tokio::sync::broadcast;
 use unichat::UniChatEvent;
 
 pub mod unichat;
 
+const MAX_CAPACITY: usize = 50;
+static INSTANCE: LazyLock<EventEmitter> = LazyLock::new(|| EventEmitter::new());
+
 pub struct EventEmitter {
-    tx: broadcast::Sender<UniChatEvent>
+    tx: broadcast::Sender<UniChatEvent>,
+    latest_events_cache: RwLock<VecDeque<UniChatEvent>>
 }
 
 impl EventEmitter {
     fn new() -> Self {
-        let (tx, rx) = broadcast::channel::<UniChatEvent>(1000);
-        drop(rx);
+        let (tx, _rx) = broadcast::channel::<UniChatEvent>(1000);
+        drop(_rx); // Drop the receiver to avoid holding onto it unnecessarily
 
-        return Self { tx };
+        tauri::async_runtime::spawn(async move {
+            let event_emitter:&'static EventEmitter = &INSTANCE;
+            let mut rx = event_emitter.subscribe();
+
+            loop {
+                let received = rx.recv().await;
+
+                match received {
+                    Ok(event) => {
+                        if let Ok(mut cache) = event_emitter.latest_events_cache.write() {
+                            if cache.len() == MAX_CAPACITY {
+                                cache.pop_front();
+                            }
+
+                            cache.push_back(event);
+                        }
+                    }
+                    Err(tokio::sync::broadcast::error::RecvError::Lagged(skipped)) => {
+                        log::warn!("EventEmitter lagged, skipped {} events", skipped);
+                    }
+                    Err(tokio::sync::broadcast::error::RecvError::Closed) => {
+                        log::warn!("EventEmitter channel closed, exiting event loop");
+                        break; // Exit the loop if the channel is closed
+                    }
+                }
+            }
+        });
+
+        return Self { tx, latest_events_cache: RwLock::new(VecDeque::with_capacity(MAX_CAPACITY)) };
+    }
+
+    pub fn latest_events(&self) -> Vec<UniChatEvent> {
+        if let Ok(cache) = self.latest_events_cache.read() {
+            return cache.iter().cloned().collect();
+        }
+
+        return Vec::new();
     }
 
     pub fn subscribe(&self) -> broadcast::Receiver<UniChatEvent> {
@@ -47,17 +89,6 @@ impl EventEmitter {
     }
 }
 
-static INSTANCE: OnceLock<EventEmitter> = OnceLock::new();
-
-pub fn init(_app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
-    let result = INSTANCE.set(EventEmitter::new());
-    if result.is_err() {
-        return Err("Failed to initialize event emitter".into());
-    }
-
-    return Ok(());
-}
-
 pub fn event_emitter() -> &'static EventEmitter {
-    return INSTANCE.get().unwrap();
+    return &INSTANCE;
 }

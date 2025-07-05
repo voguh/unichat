@@ -26,13 +26,15 @@ use tauri::Manager;
 
 #[derive(PartialEq, Eq)]
 pub enum PropertiesKey {
-    YouTubeChannelId
+    YouTubeChannelId,
+    TwitchChannelId
 }
 
 impl fmt::Display for PropertiesKey {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s = match self {
-            PropertiesKey::YouTubeChannelId => "youtube_channel_id"
+            PropertiesKey::YouTubeChannelId => "youtube_channel_id",
+            PropertiesKey::TwitchChannelId => "twitch_channel_id",
         };
 
         return write!(f, "{}", s);

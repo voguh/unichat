@@ -1,0 +1,10 @@
+// Rust IRC representation
+Message {
+  tags: Some([
+    Tag("room-id", Some("<BROADCASTER_ID>")),
+    Tag("target-user-id", Some("<TARGET_USER_ID>")),
+    Tag("tmi-sent-ts", Some("<UNIX_TIMESTAMP>"))
+  ]),
+  prefix: Some(ServerName("tmi.twitch.tv")),
+  command: Raw("CLEARCHAT", ["#<BROADCASTER_USERNAME>"])
+}

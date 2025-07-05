@@ -21,11 +21,6 @@ use serde::Serialize;
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum UniChatEvent {
-    Load {
-        #[serde(rename = "type")]
-        event_type: String,
-        data: UniChatLoadEventPayload
-    },
     Clear {
         #[serde(rename = "type")]
         event_type: String,
@@ -80,6 +75,7 @@ pub enum UniChatPlatform {
 pub enum UniChatAuthorType {
     Viewer,
     Sponsor,
+    Vip,
     Moderator,
     Broadcaster
 }
@@ -88,30 +84,15 @@ pub enum UniChatAuthorType {
 #[serde(rename_all = "camelCase")]
 pub struct UniChatEmote {
     pub id: String,
-    #[serde(rename = "type")]
-    pub emote_type: String,
-    pub tooltip: String,
+    pub code: String,
     pub url: String
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatBadge {
-    #[serde(rename = "type")]
-    pub badge_type: String,
-    pub tooltip: String,
+    pub code: String,
     pub url: String
-}
-/* <============================================================================================> */
-
-pub const UNICHAT_EVENT_LOAD_TYPE: &str = "unichat:load";
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct UniChatLoadEventPayload {
-    pub channel_id: String,
-    pub channel_name: Option<String>,
-    pub platform: UniChatPlatform
 }
 
 /* <============================================================================================> */
@@ -121,9 +102,7 @@ pub const UNICHAT_EVENT_CLEAR_TYPE: &str = "unichat:clear";
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatClearEventPayload {
-    pub channel_id: String,
-    pub channel_name: Option<String>,
-    pub platform: UniChatPlatform
+    pub platform: Option<UniChatPlatform>
 }
 
 /* <============================================================================================> */
@@ -141,7 +120,7 @@ pub struct UniChatMessageEventPayload {
     pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_display_color: String,
-    pub author_profile_picture_url: String,
+    pub author_profile_picture_url: Option<String>,
     pub author_badges: Vec<UniChatBadge>,
     pub author_type: UniChatAuthorType,
 
@@ -194,7 +173,9 @@ pub struct UniChatRaidEventPayload {
     pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_display_color: String,
-    pub author_profile_picture_url: String,
+    pub author_profile_picture_url: Option<String>,
+    pub author_badges: Vec<UniChatBadge>,
+    pub author_type: Option<UniChatAuthorType>,
 
     pub message_id: String,
     pub viewer_count: Option<u16>
@@ -215,13 +196,14 @@ pub struct UniChatSponsorEventPayload {
     pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_display_color: String,
-    pub author_profile_picture_url: String,
+    pub author_profile_picture_url: Option<String>,
     pub author_badges: Vec<UniChatBadge>,
     pub author_type: UniChatAuthorType,
 
-    pub message_id: String,
     pub tier: Option<String>,
     pub months: u16,
+
+    pub message_id: String,
     pub message_text: Option<String>,
     pub emotes: Vec<UniChatEmote>
 }
@@ -241,7 +223,7 @@ pub struct UniChatSponsorGiftEventPayload {
     pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_display_color: String,
-    pub author_profile_picture_url: String,
+    pub author_profile_picture_url: Option<String>,
     pub author_badges: Vec<UniChatBadge>,
     pub author_type: UniChatAuthorType,
 
@@ -265,7 +247,7 @@ pub struct UniChatDonateEventPayload {
     pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_display_color: String,
-    pub author_profile_picture_url: String,
+    pub author_profile_picture_url: Option<String>,
     pub author_badges: Vec<UniChatBadge>,
     pub author_type: UniChatAuthorType,
 

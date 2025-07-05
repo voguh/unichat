@@ -1,0 +1,26 @@
+// Rust IRC representation
+Message {
+  tags: Some([
+    Tag("animation-id", Some("rainbow-eclipse")),
+    Tag("badge-info", Some("<BADGES_WITH_VERSION_SPLITED_BY_COMMA_OR_EMPTY>")),
+    Tag("badges", Some("<BADGES_WITH_VERSION_SPLITED_BY_COMMA_OR_EMPTY>")),
+    Tag("color", Some("<AUTHOR_COLOR_IN_HEX>")),
+    Tag("display-name", Some("<AUTHOR_DISPLAY_NAME>")),
+    Tag("emotes", Some("<EMOTES_WITH_POSTION_SPLITED_BY_COMMA_OR_EMPTY>")),
+    Tag("first-msg", Some("<ZERO_OR_ONE>")),
+    Tag("flags", Some("")),
+    Tag("id", Some("<SOME_GUID>")),
+    Tag("mod", Some("<ZERO_OR_ONE>")),
+    Tag("msg-id", Some("animated-message")),
+    Tag("returning-chatter", Some("<ZERO_OR_ONE>")),
+    Tag("room-id", Some("<BROADCASTER_ID>")),
+    Tag("subscriber", Some("<ZERO_OR_ONE>")),
+    Tag("tmi-sent-ts", Some("<UNIX_TIMESTAMP>")),
+    Tag("turbo", Some("<ZERO_OR_ONE>")),
+    Tag("user-id", Some("<AUTHOR_ID>")),
+    Tag("user-type", Some("<MOD_OR_MAYBE_VIP_OR_EMPTY>")),
+    Tag("vip", Some("<ZERO_OR_ONE>"))
+  ]),
+  prefix: Some(Nickname("<AUTHOR_USERNAME>", "<AUTHOR_USERNAME>", "<AUTHOR_USERNAME>.tmi.twitch.tv")),
+  command: PRIVMSG("#<BROADCASTER_USERNAME>", "<MESSAGE>")
+}

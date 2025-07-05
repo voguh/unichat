@@ -27,13 +27,9 @@ use actix_web::Responder;
 use serde::Deserialize;
 
 use crate::events;
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatLoadEventPayload;
-use crate::events::unichat::UniChatPlatform;
-use crate::events::unichat::UNICHAT_EVENT_LOAD_TYPE;
+use crate::events::event_emitter;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
-use crate::utils::properties::PropertiesKey;
 
 #[derive(Deserialize)]
 struct WidgetsPathParams {
@@ -79,25 +75,16 @@ async fn ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, acti
             return;
         }
 
-        if let Ok(channel_id) = properties::get_item(PropertiesKey::YouTubeChannelId) {
-            let load_event = UniChatEvent::Load {
-                event_type: String::from(UNICHAT_EVENT_LOAD_TYPE),
-                data: UniChatLoadEventPayload {
-                    channel_id: channel_id.clone(),
-                    channel_name: None,
-                    platform: UniChatPlatform::YouTube
-                }
-            };
+        /* ====================================================================================== */
 
-            if let Ok(parsed) = serde_json::to_string(&load_event) {
-                if let Err(err) = session.text(parsed).await {
-                    log::error!("Failed to send load event to WebSocket: {}", err);
-                }
-            } else {
-                log::error!("Failed to serialize load event");
+        let history = event_emitter().latest_events();
+        let event = serde_json::json!({ "type": "unichat:history", "data": serde_json::to_value(history).unwrap_or_default() });
+        if let Ok(parsed) = serde_json::to_string(&event) {
+            if let Err(err) = session.text(parsed).await {
+                log::error!("Failed to send load event to WebSocket: {}", err);
             }
         } else {
-            log::warn!("YouTube channel ID not set, skipping initial load event");
+            log::error!("Failed to serialize load event");
         }
 
         /* ====================================================================================== */

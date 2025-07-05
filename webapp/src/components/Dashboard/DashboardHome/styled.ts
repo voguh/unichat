@@ -28,6 +28,9 @@ export const DashboardHomeStyledContainer = styled.div`
 
     > .fields {
         grid-area: FDS;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
     }
 
     > .preview {
