@@ -17,14 +17,15 @@
 
 import React from "react";
 
-import { Button, Card, DefaultMantineColor, TextInput, Tooltip } from "@mantine/core";
+import { Button, Card, TextInput, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
     IconBrandTwitch,
     IconBrandYoutube,
     IconLoader,
-    IconPlayerPlayFilled,
-    IconPlayerStopFilled
+    IconPlayerPlay,
+    IconPlayerStop,
+    IconX
 } from "@tabler/icons-react";
 import * as eventService from "@tauri-apps/api/event";
 
@@ -76,12 +77,13 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
+                notifications.show({ message: err.message, color: "red" });
             } else if (typeof err === "string") {
                 setError(err);
+                notifications.show({ message: err, color: "red" });
             }
 
             loggerService.error(`An error occurred while starting the ${displayName} chat scrapper: {}`, err);
-            notifications.show({ message: "An error occurred on save", color: "red" });
         } finally {
             setLoading(false);
         }
@@ -132,16 +134,10 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
         return null;
     }
 
-    function handleStatusColor(): DefaultMantineColor {
-        if (inputRef.current?.value === currentActiveUrl && event.type === "ping") {
-            return "red.8";
-        }
-
-        return "gray";
-    }
-
     function handleStatusLabel(): string {
-        if (loading || (inputRef.current?.value === currentActiveUrl && event.type !== "ping")) {
+        if (error != null) {
+            return "Error";
+        } else if (loading || (inputRef.current?.value === currentActiveUrl && event.type !== "ping")) {
             return "Starting";
         } else if (inputRef.current?.value === currentActiveUrl && event.type === "ping") {
             return "Stop";
@@ -153,12 +149,14 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
     }
 
     function handleStatusIcon(): React.ReactNode {
-        if (loading || (inputRef.current?.value === currentActiveUrl && event.type !== "ping")) {
+        if (error != null) {
+            return <IconX size="20" />;
+        } else if (loading || (inputRef.current?.value === currentActiveUrl && event.type !== "ping")) {
             return <IconLoader size="20" />;
         } else if (inputRef.current?.value === currentActiveUrl && event.type === "ping") {
-            return <IconPlayerStopFilled size="20" />;
+            return <IconPlayerStop size="20" />;
         } else if (event.type === "idle") {
-            return <IconPlayerPlayFilled size="20" />;
+            return <IconPlayerPlay size="20" />;
         }
 
         return null;
@@ -233,16 +231,15 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
                 <TextInput
                     size="sm"
                     label={`Scrapper: ${displayName} chat URL`}
-                    error={error}
                     placeholder={handlePlaceholderMessage()}
                     ref={inputRef}
                     disabled={loading || inputRef.current?.value === currentActiveUrl}
+                    onChange={() => error != null && setError(null)}
                 />
                 <Tooltip position="left" label={STATUS_EVENT_DESCRIPTION[event.type]}>
                     <Button
                         size="sm"
                         leftSection={handleStatusIcon()}
-                        color={handleStatusColor()}
                         onClick={inputRef.current?.value === currentActiveUrl ? handleStop : handleStart}
                         disabled={
                             loading ||
