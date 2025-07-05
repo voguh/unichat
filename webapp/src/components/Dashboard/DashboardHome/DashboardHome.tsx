@@ -45,16 +45,15 @@ export function DashboardHome(): React.ReactNode {
             value = `https://${value}`;
         } else if (value.startsWith("youtu.be")) {
             value = `https://${value}`;
-            console.log(value, value.startsWith("https://youtu.be"));
         }
 
         let videoId = value;
-        if (value.startsWith("https://www.youtube.com")) {
+        if (value.startsWith("https://www.youtube.com/live") || value.startsWith("https://youtu.be")) {
+            const parts = value.split("?")[0].split("/");
+            videoId = parts.at(-1);
+        } else if (value.startsWith("https://www.youtube.com")) {
             const params = new URLSearchParams(value.split("?")[1]);
             videoId = params.get("v");
-        } else if (value.startsWith("https://youtu.be")) {
-            const parts = value.split("/");
-            videoId = parts.at(-1);
         }
 
         if (!Strings.isValidYouTubeVideoId(videoId)) {
