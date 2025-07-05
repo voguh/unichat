@@ -29,22 +29,9 @@ export interface UniChatBadge {
     url: string;
 }
 
-export interface UniChatEventLoad {
-    type: "unichat:load";
-    data: {
-        channelId: string;
-        channelName: string | null;
-        platform: UniChatPlatform;
-    };
-}
-
 export interface UniChatEventClear {
     type: "unichat:clear";
-    data: {
-        channelId: string;
-        channelName: string | null;
-        platform: UniChatPlatform;
-    };
+    data: {};
 }
 
 export interface UniChatEventMessage {

@@ -29,10 +29,7 @@ use tauri::Manager;
 use tauri::Url;
 
 use crate::events;
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatLoadEventPayload;
 use crate::events::unichat::UniChatPlatform;
-use crate::events::unichat::UNICHAT_EVENT_LOAD_TYPE;
 use crate::shared_emotes;
 use crate::utils;
 use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
@@ -79,18 +76,6 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
         .map_err(|e| format!("{:?}", e))?;
 
     shared_emotes::fetch_shared_emotes(channel_id).map_err(|e| format!("{:?}", e))?;
-
-    let init_event = UniChatEvent::Load {
-        event_type: String::from(UNICHAT_EVENT_LOAD_TYPE),
-        data: UniChatLoadEventPayload {
-            channel_id: String::from(channel_id),
-            channel_name: None,
-            platform: UniChatPlatform::YouTube
-        }
-    };
-    if let Err(err) = events::event_emitter().emit(init_event) {
-        log::error!("An error occurred on send 'unichat:load' unichat event: {}", err);
-    }
 
     return dispatch_event(app, payload.clone());
 }

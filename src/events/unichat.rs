@@ -21,11 +21,6 @@ use serde::Serialize;
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum UniChatEvent {
-    Load {
-        #[serde(rename = "type")]
-        event_type: String,
-        data: UniChatLoadEventPayload
-    },
     Clear {
         #[serde(rename = "type")]
         event_type: String,
@@ -99,17 +94,6 @@ pub struct UniChatBadge {
     pub code: String,
     pub url: String
 }
-/* <============================================================================================> */
-
-pub const UNICHAT_EVENT_LOAD_TYPE: &str = "unichat:load";
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct UniChatLoadEventPayload {
-    pub channel_id: String,
-    pub channel_name: Option<String>,
-    pub platform: UniChatPlatform
-}
 
 /* <============================================================================================> */
 
@@ -118,9 +102,6 @@ pub const UNICHAT_EVENT_CLEAR_TYPE: &str = "unichat:clear";
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatClearEventPayload {
-    pub channel_id: String,
-    pub channel_name: Option<String>,
-    pub platform: UniChatPlatform
 }
 
 /* <============================================================================================> */

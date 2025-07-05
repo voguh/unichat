@@ -27,13 +27,8 @@ use actix_web::Responder;
 use serde::Deserialize;
 
 use crate::events;
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatLoadEventPayload;
-use crate::events::unichat::UniChatPlatform;
-use crate::events::unichat::UNICHAT_EVENT_LOAD_TYPE;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
-use crate::utils::properties::PropertiesKey;
 
 #[derive(Deserialize)]
 struct WidgetsPathParams {
@@ -74,34 +69,6 @@ async fn ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, acti
     let (res, mut session, _stream) = actix_ws::handle(&req, stream)?;
 
     actix_web::rt::spawn(async move {
-        if let Err(err) = session.ping(b"ping").await {
-            log::error!("Failed to send ping to WebSocket: {}", err);
-            return;
-        }
-
-        if let Ok(channel_id) = properties::get_item(PropertiesKey::YouTubeChannelId) {
-            let load_event = UniChatEvent::Load {
-                event_type: String::from(UNICHAT_EVENT_LOAD_TYPE),
-                data: UniChatLoadEventPayload {
-                    channel_id: channel_id.clone(),
-                    channel_name: None,
-                    platform: UniChatPlatform::YouTube
-                }
-            };
-
-            if let Ok(parsed) = serde_json::to_string(&load_event) {
-                if let Err(err) = session.text(parsed).await {
-                    log::error!("Failed to send load event to WebSocket: {}", err);
-                }
-            } else {
-                log::error!("Failed to serialize load event");
-            }
-        } else {
-            log::warn!("YouTube channel ID not set, skipping initial load event");
-        }
-
-        /* ====================================================================================== */
-
         let mut rx = events::event_emitter().subscribe();
 
         loop {

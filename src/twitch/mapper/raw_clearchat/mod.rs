@@ -45,11 +45,7 @@ pub fn parse(channel: String, message: &Message) -> Result<Option<UniChatEvent>,
     } else {
         event = UniChatEvent::Clear {
             event_type: String::from(UNICHAT_EVENT_CLEAR_TYPE),
-            data: UniChatClearEventPayload {
-                channel_id: room_id.to_owned(),
-                channel_name: Some(channel),
-                platform: UniChatPlatform::Twitch
-            }
+            data: UniChatClearEventPayload {}
         };
     }
 
