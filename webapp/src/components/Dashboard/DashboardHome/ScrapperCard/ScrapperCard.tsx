@@ -133,9 +133,7 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
     }
 
     function handleStatusColor(): DefaultMantineColor {
-        if (loading) {
-            return "blue";
-        } else if (inputRef.current?.value === currentActiveUrl && event.type === "ping") {
+        if (inputRef.current?.value === currentActiveUrl && event.type === "ping") {
             return "red.8";
         }
 
@@ -143,7 +141,7 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
     }
 
     function handleStatusLabel(): string {
-        if (loading) {
+        if (loading || (inputRef.current?.value === currentActiveUrl && event.type !== "ping")) {
             return "Starting";
         } else if (inputRef.current?.value === currentActiveUrl && event.type === "ping") {
             return "Stop";
@@ -155,7 +153,7 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
     }
 
     function handleStatusIcon(): React.ReactNode {
-        if (loading) {
+        if (loading || (inputRef.current?.value === currentActiveUrl && event.type !== "ping")) {
             return <IconLoader size="20" />;
         } else if (inputRef.current?.value === currentActiveUrl && event.type === "ping") {
             return <IconPlayerStopFilled size="20" />;
