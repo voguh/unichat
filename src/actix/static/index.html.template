@@ -42,7 +42,13 @@
                     socket.addEventListener("message", (message) => {
                         const event = JSON.parse(message.data);
 
-                        window.dispatchEvent(new CustomEvent("unichat:event", { detail: event }));
+                        if (event.type === "unichat:history") {
+                            for (const cachedEvent of event.data) {
+                                window.dispatchEvent(new CustomEvent("unichat:event", { detail: cachedEvent }));
+                            }
+                        } else {
+                            window.dispatchEvent(new CustomEvent("unichat:event", { detail: event }));
+                        }
                     });
 
                     socket.addEventListener("close", () => {
