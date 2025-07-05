@@ -1,3 +1,4 @@
+// Rust IRC representation
 Message {
   tags: Some([
     Tag("badge-info", Some("<BADGES_WITH_VERSION_SPLITED_BY_COMMA_OR_EMPTY>")),
