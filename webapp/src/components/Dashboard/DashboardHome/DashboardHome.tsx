@@ -49,9 +49,9 @@ export function DashboardHome(): React.ReactNode {
         }
 
         let videoId = value;
-        if (value.startsWith("https://www.youtube.com/watch")) {
+        if (value.startsWith("https://www.youtube.com")) {
             const params = new URLSearchParams(value.split("?")[1]);
-            videoId = params.get("v") || value.trim();
+            videoId = params.get("v");
         } else if (value.startsWith("https://youtu.be")) {
             const parts = value.split("/");
             videoId = parts.at(-1);
