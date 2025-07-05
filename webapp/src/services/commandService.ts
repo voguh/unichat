@@ -60,6 +60,10 @@ export class CommandService {
         return invoke("toggle_webview", { label });
     }
 
+    public async dispatchClearChat(): Promise<void> {
+        await invoke("dispatch_clear_chat");
+    }
+
     public async listWidgets(): Promise<string[]> {
         return invoke("list_widgets");
     }

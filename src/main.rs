@@ -137,6 +137,7 @@ async fn main() {
             commands::store_get_item,
             commands::store_set_item,
             commands::toggle_webview,
+            commands::dispatch_clear_chat,
             commands::list_widgets,
             twitch::get_twitch_scrapper_url,
             twitch::set_twitch_scrapper_url,

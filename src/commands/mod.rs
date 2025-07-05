@@ -22,6 +22,10 @@ use serde_json::Value;
 use tauri::Manager;
 use tauri::Runtime;
 
+use crate::events;
+use crate::events::unichat::UniChatClearEventPayload;
+use crate::events::unichat::UniChatEvent;
+use crate::events::unichat::UNICHAT_EVENT_CLEAR_TYPE;
 use crate::utils;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -64,7 +68,6 @@ pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
 
 /* ================================================================================================================== */
 
-
 #[tauri::command]
 pub async fn is_dev<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, String> {
     return Ok(utils::is_dev())
@@ -104,6 +107,22 @@ pub fn toggle_webview<R: Runtime>(app: tauri::AppHandle<R>, label: &str) -> Resu
     }
 
     return Ok(());
+}
+
+/* ================================================================================================================== */
+
+#[tauri::command]
+pub async fn dispatch_clear_chat<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, String> {
+    let event = UniChatEvent::Clear {
+        event_type: String::from(UNICHAT_EVENT_CLEAR_TYPE),
+        data: UniChatClearEventPayload {}
+    };
+
+    if let Err(err) = events::event_emitter().emit(event) {
+        log::error!("An error occurred on send 'unichat:clear' unichat event: {}", err);
+    }
+
+    return Ok(utils::is_dev())
 }
 
 /* ================================================================================================================== */

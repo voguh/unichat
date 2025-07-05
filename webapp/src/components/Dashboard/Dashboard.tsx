@@ -17,14 +17,15 @@
 
 import React from "react";
 
-import { Button, Card, Menu, Text } from "@mantine/core";
+import { Button, Card, Menu, Text, Tooltip } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { IconAdjustments, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
+import { IconAdjustments, IconEraser, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import semver from "semver";
 
 import { AboutModal } from "unichat/components/AboutModal";
 import { AppContext } from "unichat/contexts/AppContext";
+import { commandService } from "unichat/services/commandService";
 import { loggerService } from "unichat/services/loggerService";
 
 import { DashboardHome } from "./DashboardHome";
@@ -37,6 +38,10 @@ interface Props {
 export function Dashboard(_props: Props): React.ReactNode {
     const [hasUpdate, setHasUpdate] = React.useState(false);
     const { metadata } = React.useContext(AppContext);
+
+    async function handleClearChat(): Promise<void> {
+        await commandService.dispatchClearChat();
+    }
 
     async function toggleAboutModal(): Promise<void> {
         modals.open({ title: `About ${metadata.displayName}`, children: <AboutModal />, centered: true });
@@ -82,7 +87,13 @@ export function Dashboard(_props: Props): React.ReactNode {
     return (
         <DashboardStyledContainer>
             <Card className="sidebar" withBorder shadow="xs">
-                <div></div>
+                <div>
+                    <Tooltip label="Clear chat history" position="right" withArrow>
+                        <Button size="sm" onClick={handleClearChat}>
+                            <IconEraser size="20" />
+                        </Button>
+                    </Tooltip>
+                </div>
 
                 <Menu position="right">
                     <Menu.Target>
