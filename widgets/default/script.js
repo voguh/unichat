@@ -1,4 +1,3 @@
-let INITIAL_DATA = {};
 let FIRST_LOAD = false;
 const MAIN_CONTAINER = document.querySelector("#main-container");
 const MESSAGE_TEMPLATE = document.querySelector("#chatlist_item").innerHTML;
@@ -43,9 +42,8 @@ function removeChildren() {
   }
 }
 
-window.addEventListener("unichat:load", function ({ detail: data }) {
-    INITIAL_DATA = data;
-
+// Dispatch every time when websocket is connected (or reconnected)
+window.addEventListener("unichat:connected", function () {
     if (FIRST_LOAD === false) {
         FIRST_LOAD = true;
         MAIN_CONTAINER.style.setProperty("--maximum-width", window.innerWidth + "px");
