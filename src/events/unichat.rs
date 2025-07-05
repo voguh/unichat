@@ -174,6 +174,8 @@ pub struct UniChatRaidEventPayload {
     pub author_display_name: String,
     pub author_display_color: String,
     pub author_profile_picture_url: Option<String>,
+    pub author_badges: Vec<UniChatBadge>,
+    pub author_type: Option<UniChatAuthorType>,
 
     pub message_id: String,
     pub viewer_count: Option<u16>

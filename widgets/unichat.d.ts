@@ -91,6 +91,8 @@ export interface UniChatEventRaid {
         authorDisplayName: string;
         authorDisplayColor: string;
         authorProfilePictureUrl: string | null;
+        authorBadges: UniChatBadge[];
+        authorType: UniChatAuthorType | null;
 
         messageId: string;
         viewerCount: number | null;

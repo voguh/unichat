@@ -21,6 +21,7 @@ use crate::events::unichat::UniChatEvent;
 use crate::twitch::mapper::structs::parse_tags;
 
 mod community_gift;
+mod raid;
 mod subgift;
 
 pub fn parse(channel_name: String, message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
@@ -30,6 +31,8 @@ pub fn parse(channel_name: String, message: &Message) -> Result<Option<UniChatEv
 
     if msg_id == "submysterygift" {
         return community_gift::parse(channel_name, &tags);
+    } else if msg_id == "raid" {
+        return raid::parse(channel_name, &tags);
     } else if msg_id == "subgift" && tags.get("msg-param-community-gift-id").is_none() {
         return subgift::parse(channel_name, &tags);
     }
