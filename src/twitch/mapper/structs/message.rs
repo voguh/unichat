@@ -66,6 +66,11 @@ pub fn parse_message_emotes(raw_emotes: Option<&String>, message_text: &str) -> 
 }
 
 pub fn parse_message_string(message_raw: &String) -> Result<String, Box<dyn std::error::Error>> {
+    let mut message_raw = message_raw.trim().to_string();
+    if message_raw.starts_with("\u{1}ACTION ") && message_raw.ends_with("\u{1}") {
+        message_raw = message_raw.replace("\u{1}ACTION ", "").replace("\u{1}", "");
+    }
+
     let mut str_message = Vec::new();
 
     if let Ok(cheermotes) = TWITCH_CHEERMOTES.read() {
