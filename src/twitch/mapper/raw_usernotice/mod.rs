@@ -20,6 +20,7 @@ use irc::client::prelude::*;
 use crate::events::unichat::UniChatEvent;
 use crate::twitch::mapper::structs::parse_tags;
 
+mod announcement;
 mod community_gift;
 mod raid;
 mod subgift;
@@ -29,7 +30,9 @@ pub fn parse(channel_name: String, message: &Message) -> Result<Option<UniChatEv
 
     let msg_id = tags.get("msg-id").ok_or("Missing msg-id tag")?;
 
-    if msg_id == "submysterygift" {
+    if msg_id == "announcement" {
+        return announcement::parse(message, &tags);
+    } else if msg_id == "submysterygift" {
         return community_gift::parse(channel_name, &tags);
     } else if msg_id == "raid" {
         return raid::parse(channel_name, &tags);
