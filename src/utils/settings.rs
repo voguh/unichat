@@ -83,6 +83,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     defaults.insert(SettingsKeys::TwitchChannelName.to_string(), Value::from(""));
 
     defaults.insert(SettingsKeys::LogYouTubeEvents.to_string(), serde_json::to_value(SettingLogEventLevel::OnlyErrors).unwrap());
+    defaults.insert(SettingsKeys::LogTwitchEvents.to_string(), serde_json::to_value(SettingLogEventLevel::OnlyErrors).unwrap());
 
     let store_path = properties::get_app_path(AppPaths::AppConfig).join("settings.json");
 

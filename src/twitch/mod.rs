@@ -214,7 +214,7 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
 }
 
 fn handle_message_event(message: &Message) -> Result<(), Box<dyn std::error::Error>> {
-    let log_events: SettingLogEventLevel = settings::get_item(SettingsKeys::LogYouTubeEvents)?;
+    let log_events: SettingLogEventLevel = settings::get_item(SettingsKeys::LogTwitchEvents)?;
 
     if is_dev() || log_events == SettingLogEventLevel::AllEvents {
         log_action("events-raw.log", &format!("{:?}", message));
