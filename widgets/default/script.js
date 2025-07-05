@@ -99,11 +99,12 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         htmlTemplate = htmlTemplate.replace("{author_display_name}", data.authorDisplayName);
         htmlTemplate = htmlTemplate.replace("{tier}", data.tier);
         const msgBegin = data.platform === "youtube" ? "Become a member" : "Become a subscriber";
+        const tier = data.platform === "twitch" && data.tier.toLowerCase() !== "prime" ? parseInt(data.tier) / 1000 : data.tier;
         if (data.months != null) {
-            const message = `${msgBegin} for <span>${data.months}</span> months<br/>with tier <span>${data.tier}</span>!`;
+            const message = `${msgBegin} for <span>${data.months}</span> months<br/>with tier <span>${tier}</span>!`;
             htmlTemplate = htmlTemplate.replace("{sponsor_meta}", message);
         } else {
-            const message = `${msgBegin} with tier <span>${data.tier}</span>!`;
+            const message = `${msgBegin} with tier <span>${tier}</span>!`;
             htmlTemplate = htmlTemplate.replace("{sponsor_meta}", message);
         }
         htmlTemplate = htmlTemplate.replace("{message}", buildMessage(data.messageText, data.emotes));
@@ -118,14 +119,18 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         htmlTemplate = htmlTemplate.replaceAll("{message_id}", data.messageId);
         let message = `<span>${data.authorDisplayName}</span>, just gifted `;
         if (data.count > 1) {
-            message += `<span>${data.count} ${data.platform === "youtube" ? "memberships": "subscriptions"}</span>`;
+            message += `<span>${data.count} ${data.platform === "youtube" ? "memberships": "subscriptions"}</span> `;
         } else {
-            message += `<span>${data.count} ${data.platform === "youtube" ? "membership": "subscription"}</span>`;
+            message += `<span>${data.count} ${data.platform === "youtube" ? "membership": "subscription"}</span> `;
         }
         if (data.tier) {
-            message += `with tier ${data.tier}`;
+            if (data.platform === "twitch" && data.tier.toLowerCase() !== "prime") {
+                message += `with tier ${parseInt(data.tier) / 1000}`;
+            } else {
+                message += `with tier ${data.tier}`;
+            }
         }
-        htmlTemplate = htmlTemplate.replaceAll("{message}", `${message}!`);
+        htmlTemplate = htmlTemplate.replaceAll("{message}", `${message.trim()}!`);
 
         if (MAIN_CONTAINER.querySelector(`div[data-id="${data.messageId}"]`) == null) {
             $(MAIN_CONTAINER).append(htmlTemplate);
