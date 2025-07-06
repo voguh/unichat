@@ -100,6 +100,7 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
             }
 
             setCurrentActiveUrl("about:blank");
+            setTimeout(() => setEvent({ ...DEFAULT_STATUS_EVENT, platform: type }), 500);
         } catch (err) {
             loggerService.error(`An error occurred while stopping the ${displayName} chat scrapper: {}`, err);
             notifications.show({ message: "An error occurred on save", color: "red" });
