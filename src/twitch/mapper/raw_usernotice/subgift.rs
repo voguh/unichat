@@ -37,6 +37,8 @@ pub fn parse(channel: String, tags: &HashMap<String, String>) -> Result<Option<U
     let author_type = parse_author_type(&tags)?;
     let message_id = tags.get("id").ok_or("Missing id tag")?;
     let tier = tags.get("msg-param-sub-plan").ok_or("Missing msg-param-sub-plan tag")?;
+    let timestamp_usec = tags.get("tmi-sent-ts").ok_or("Missing or invalid tmi-sent-ts tag")?;
+    let timestamp_usec: i64 = timestamp_usec.parse()?;
 
     let event = UniChatEvent::SponsorGift {
         event_type: String::from(UNICHAT_EVENT_SPONSOR_GIFT_TYPE),
@@ -56,6 +58,8 @@ pub fn parse(channel: String, tags: &HashMap<String, String>) -> Result<Option<U
             message_id: message_id.to_owned(),
             tier: Some(tier.to_owned()),
             count: 1,
+
+            timestamp: timestamp_usec
         }
     };
 

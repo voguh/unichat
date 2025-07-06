@@ -65,6 +65,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let author_type = parse_author_type(&parsed.author_badges)?;
     let message = parse_message_string(&parsed.message)?;
     let emotes = parse_message_emojis(&parsed.message)?;
+    let timestamp_usec = parsed.timestamp_usec.parse::<i64>()?;
 
     let event = UniChatEvent::Message {
         event_type: String::from(UNICHAT_EVENT_MESSAGE_TYPE),
@@ -83,7 +84,9 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
 
             message_id: parsed.id,
             message_text: message,
-            emotes: emotes
+            emotes: emotes,
+
+            timestamp: timestamp_usec
         }
     };
 

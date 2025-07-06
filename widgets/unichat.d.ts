@@ -33,6 +33,8 @@ export interface UniChatEventClear {
     type: "unichat:clear";
     data: {
         platform: UniChatPlatform | null;
+
+        timestamp: number;
     };
 }
 
@@ -54,6 +56,8 @@ export interface UniChatEventMessage {
         messageId: string;
         messageText: string;
         emotes: UniChatEmote[];
+
+        timestamp: number;
     };
 }
 
@@ -65,6 +69,8 @@ export interface UniChatEventRemoveMessage {
         platform: UniChatPlatform;
 
         messageId: string;
+
+        timestamp: number;
     };
 }
 
@@ -76,6 +82,8 @@ export interface UniChatEventRemoveAuthor {
         platform: UniChatPlatform;
 
         authorId: string;
+
+        timestamp: number;
     };
 }
 
@@ -96,6 +104,8 @@ export interface UniChatEventRaid {
 
         messageId: string;
         viewerCount: number | null;
+
+        timestamp: number;
     };
 }
 
@@ -114,11 +124,14 @@ export interface UniChatEventSponsor {
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
 
-        messageId: string;
         tier: string;
         months: number;
+
+        messageId: string;
         messageText: string | null;
         emotes: UniChatEmote[];
+
+        timestamp: number;
     };
 }
 
@@ -140,6 +153,8 @@ export interface UniChatEventSponsorGift {
         messageId: string;
         tier: string | null;
         count: number;
+
+        timestamp: number;
     };
 }
 
@@ -164,5 +179,7 @@ export interface UniChatEventDonate {
         messageId: string;
         messageText: string | null;
         emotes: UniChatEmote[];
+
+        timestamp: number;
     };
 }

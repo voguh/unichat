@@ -16,6 +16,8 @@
  ******************************************************************************/
 
 use std::fs;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
 
 use serde_json::json;
 use serde_json::Value;
@@ -113,10 +115,14 @@ pub fn toggle_webview<R: Runtime>(app: tauri::AppHandle<R>, label: &str) -> Resu
 
 #[tauri::command]
 pub async fn dispatch_clear_chat<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, String> {
+    let timestamp_usec = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| format!("{:?}", e))?;
+
     let event = UniChatEvent::Clear {
         event_type: String::from(UNICHAT_EVENT_CLEAR_TYPE),
         data: UniChatClearEventPayload {
-            platform: None
+            platform: None,
+
+            timestamp: timestamp_usec.as_secs() as i64
         }
     };
 

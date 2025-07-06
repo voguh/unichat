@@ -152,6 +152,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let months = parse_months(&parsed)?;
     let message = optional_build_message(&parsed.message)?;
     let emotes = optional_build_emotes(&parsed.message)?;
+    let timestamp_usec = parsed.timestamp_usec.parse::<i64>()?;
 
     let event = UniChatEvent::Sponsor {
         event_type: String::from(UNICHAT_EVENT_SPONSOR_TYPE),
@@ -168,11 +169,14 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             author_profile_picture_url: Some(author_photo),
             author_type: author_type,
 
-            message_id: parsed.id,
             tier: tier,
             months: months,
+
+            message_id: parsed.id,
             message_text: message,
-            emotes: emotes
+            emotes: emotes,
+
+            timestamp: timestamp_usec
         }
     };
 

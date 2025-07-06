@@ -84,7 +84,6 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let author_badges = parse_author_badges(&parsed.author_badges)?;
     let author_photo = parse_author_photo(&parsed.author_photo)?;
     let author_type = parse_author_type(&parsed.author_badges)?;
-
     let (purchase_currency, purchase_value) = parse_purchase_amount(&parsed.purchase_amount_text)?;
     let sticker = parsed.sticker.thumbnails.last().ok_or("No thumbnails found in author photo")?;
     let emotes = vec![
@@ -94,6 +93,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             url: sticker.url.clone()
         }
     ];
+    let timestamp_usec = parsed.timestamp_usec.parse::<i64>()?;
 
     let event = UniChatEvent::Donate {
         event_type: String::from(UNICHAT_EVENT_DONATE_TYPE),
@@ -114,8 +114,10 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             currency: purchase_currency,
 
             message_id: parsed.id,
-            message_text: None,
-            emotes: emotes
+            message_text: Some(String::from("sticker")),
+            emotes: emotes,
+
+            timestamp: timestamp_usec
         }
     };
 

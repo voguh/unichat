@@ -47,6 +47,8 @@ pub fn parse(message: &Message, tags: &HashMap<String, String>) -> Result<Option
     let message_id = tags.get("id").ok_or("Missing id tag")?;
     let message = parse_message_string(&message_text)?;
     let emotes = parse_message_emotes(tags.get("emotes"), &message_text)?;
+    let timestamp_usec = tags.get("tmi-sent-ts").ok_or("Missing or invalid tmi-sent-ts tag")?;
+    let timestamp_usec: i64 = timestamp_usec.parse()?;
 
     let event = UniChatEvent::Message {
         event_type: String::from(UNICHAT_EVENT_MESSAGE_TYPE),
@@ -65,7 +67,9 @@ pub fn parse(message: &Message, tags: &HashMap<String, String>) -> Result<Option
 
             message_id: message_id.to_owned(),
             message_text: message,
-            emotes: emotes
+            emotes: emotes,
+
+            timestamp: timestamp_usec
         }
     };
 

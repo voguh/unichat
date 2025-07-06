@@ -100,8 +100,8 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let author_badges = parse_author_badges(&render.author_badges)?;
     let author_photo = parse_author_photo(&render.author_photo)?;
     let author_type = parse_author_type(&render.author_badges)?;
-
     let count = parse_count(&render)?;
+    let timestamp_usec = parsed.timestamp_usec.parse::<i64>()?;
 
     let event = UniChatEvent::SponsorGift {
         event_type: String::from(UNICHAT_EVENT_SPONSOR_GIFT_TYPE),
@@ -121,6 +121,8 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             message_id: parsed.id,
             tier: None,
             count: count,
+
+            timestamp: timestamp_usec
         }
     };
 

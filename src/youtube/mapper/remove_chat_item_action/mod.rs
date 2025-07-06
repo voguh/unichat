@@ -15,6 +15,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
+
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -35,6 +38,8 @@ struct RemoveChatItemAction {
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
     let parsed: RemoveChatItemAction = serde_json::from_value(value).map_err(parse_serde_error)?;
 
+    let timestamp_usec = SystemTime::now().duration_since(UNIX_EPOCH)?;
+
     let event = UniChatEvent::RemoveMessage {
         event_type: String::from(UNICHAT_EVENT_REMOVE_MESSAGE_TYPE),
         data: UniChatRemoveMessageEventPayload {
@@ -42,7 +47,9 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             channel_name: None,
             platform: UniChatPlatform::YouTube,
 
-            message_id: parsed.target_item_id.clone()
+            message_id: parsed.target_item_id.clone(),
+
+            timestamp: timestamp_usec.as_secs() as i64
         }
     };
 

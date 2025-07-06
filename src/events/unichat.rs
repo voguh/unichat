@@ -102,7 +102,9 @@ pub const UNICHAT_EVENT_CLEAR_TYPE: &str = "unichat:clear";
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatClearEventPayload {
-    pub platform: Option<UniChatPlatform>
+    pub platform: Option<UniChatPlatform>,
+
+    pub timestamp: i64
 }
 
 /* <============================================================================================> */
@@ -126,7 +128,9 @@ pub struct UniChatMessageEventPayload {
 
     pub message_id: String,
     pub message_text: String,
-    pub emotes: Vec<UniChatEmote>
+    pub emotes: Vec<UniChatEmote>,
+
+    pub timestamp: i64
 }
 
 
@@ -141,7 +145,9 @@ pub struct UniChatRemoveMessageEventPayload {
     pub channel_name: Option<String>,
     pub platform: UniChatPlatform,
 
-    pub message_id: String
+    pub message_id: String,
+
+    pub timestamp: i64
 }
 
 /* <============================================================================================> */
@@ -155,7 +161,9 @@ pub struct UniChatRemoveAuthorEventPayload {
     pub channel_name: Option<String>,
     pub platform: UniChatPlatform,
 
-    pub author_id: String
+    pub author_id: String,
+
+    pub timestamp: i64
 }
 
 /* <============================================================================================> */
@@ -178,7 +186,9 @@ pub struct UniChatRaidEventPayload {
     pub author_type: Option<UniChatAuthorType>,
 
     pub message_id: String,
-    pub viewer_count: Option<u16>
+    pub viewer_count: Option<u16>,
+
+    pub timestamp: i64
 }
 
 /* <============================================================================================> */
@@ -205,7 +215,9 @@ pub struct UniChatSponsorEventPayload {
 
     pub message_id: String,
     pub message_text: Option<String>,
-    pub emotes: Vec<UniChatEmote>
+    pub emotes: Vec<UniChatEmote>,
+
+    pub timestamp: i64
 }
 
 /* <============================================================================================> */
@@ -229,7 +241,9 @@ pub struct UniChatSponsorGiftEventPayload {
 
     pub message_id: String,
     pub tier: Option<String>,
-    pub count: u16
+    pub count: u16,
+
+    pub timestamp: i64
 }
 
 /* <============================================================================================> */
@@ -256,5 +270,7 @@ pub struct UniChatDonateEventPayload {
 
     pub message_id: String,
     pub message_text: Option<String>,
-    pub emotes: Vec<UniChatEmote>
+    pub emotes: Vec<UniChatEmote>,
+
+    pub timestamp: i64
 }

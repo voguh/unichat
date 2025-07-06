@@ -39,6 +39,8 @@ pub fn parse(channel: String, tags: &HashMap<String, String>) -> Result<Option<U
     let message_id = tags.get("id").ok_or("Missing id tag")?;
     let count_str = tags.get("msg-param-viewerCount").ok_or("Missing msg-param-viewerCount tag")?;
     let count: u16 = count_str.parse()?;
+    let timestamp_usec = tags.get("tmi-sent-ts").ok_or("Missing or invalid tmi-sent-ts tag")?;
+    let timestamp_usec: i64 = timestamp_usec.parse()?;
 
     let event = UniChatEvent::Raid {
         event_type: String::from(UNICHAT_EVENT_RAID_TYPE),
@@ -56,7 +58,9 @@ pub fn parse(channel: String, tags: &HashMap<String, String>) -> Result<Option<U
             author_type: Some(author_type),
 
             message_id: message_id.to_owned(),
-            viewer_count: Some(count)
+            viewer_count: Some(count),
+
+            timestamp: timestamp_usec
         }
     };
 

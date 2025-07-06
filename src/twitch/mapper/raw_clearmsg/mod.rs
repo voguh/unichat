@@ -28,6 +28,8 @@ pub fn parse(channel: String, message: &Message) -> Result<Option<UniChatEvent>,
 
     let room_id = tags.get("room-id").ok_or("Missing room-id tag")?;
     let target_msg_id = tags.get("target-msg-id").ok_or("Missing target-msg-id tag")?;
+    let timestamp_usec = tags.get("tmi-sent-ts").ok_or("Missing or invalid tmi-sent-ts tag")?;
+    let timestamp_usec: i64 = timestamp_usec.parse()?;
 
     let event = UniChatEvent::RemoveMessage {
         event_type: String::from(UNICHAT_EVENT_REMOVE_MESSAGE_TYPE),
@@ -37,6 +39,8 @@ pub fn parse(channel: String, message: &Message) -> Result<Option<UniChatEvent>,
             platform: UniChatPlatform::Twitch,
 
             message_id: target_msg_id.to_owned(),
+
+            timestamp: timestamp_usec
         }
     };
 

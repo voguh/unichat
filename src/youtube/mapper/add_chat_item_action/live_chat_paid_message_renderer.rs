@@ -103,10 +103,10 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let author_badges = parse_author_badges(&parsed.author_badges)?;
     let author_photo = parse_author_photo(&parsed.author_photo)?;
     let author_type = parse_author_type(&parsed.author_badges)?;
-
     let (purchase_currency, purchase_value) = parse_purchase_amount(&parsed.purchase_amount_text)?;
     let message = build_option_message(&parsed.message)?;
     let emotes = build_option_emotes(&parsed.message)?;
+    let timestamp_usec = parsed.timestamp_usec.parse::<i64>()?;
 
     let event = UniChatEvent::Donate {
         event_type: String::from(UNICHAT_EVENT_DONATE_TYPE),
@@ -128,7 +128,9 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
 
             message_id: parsed.id,
             message_text: message,
-            emotes: emotes
+            emotes: emotes,
+
+            timestamp: timestamp_usec
         }
     };
 

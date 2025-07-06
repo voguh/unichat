@@ -30,6 +30,8 @@ pub fn parse(channel: String, message: &Message) -> Result<Option<UniChatEvent>,
     let tags = parse_tags(&message.tags);
 
     let room_id = tags.get("room-id").ok_or("Missing room-id tag")?;
+    let timestamp_usec = tags.get("tmi-sent-ts").ok_or("Missing or invalid tmi-sent-ts tag")?;
+    let timestamp_usec: i64 = timestamp_usec.parse()?;
 
     if let Some(target_user_id) = tags.get("target-user-id") {
         event = UniChatEvent::RemoveAuthor {
@@ -39,14 +41,18 @@ pub fn parse(channel: String, message: &Message) -> Result<Option<UniChatEvent>,
                 channel_name: Some(channel),
                 platform: UniChatPlatform::Twitch,
 
-                author_id: target_user_id.to_owned()
+                author_id: target_user_id.to_owned(),
+
+                timestamp: timestamp_usec
             }
         };
     } else {
         event = UniChatEvent::Clear {
             event_type: String::from(UNICHAT_EVENT_CLEAR_TYPE),
             data: UniChatClearEventPayload {
-                platform: Some(UniChatPlatform::Twitch)
+                platform: Some(UniChatPlatform::Twitch),
+
+                timestamp: timestamp_usec
             }
         };
     }

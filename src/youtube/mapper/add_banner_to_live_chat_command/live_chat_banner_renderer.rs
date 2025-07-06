@@ -15,6 +15,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
+
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -79,6 +82,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             let author_name = parse_author_name_str(first_run.text.clone())?;
             let author_color = parse_author_color(&author_name)?;
             let author_photo = renderer.author_photo.thumbnails.last().ok_or("No thumbnails found in author photo")?;
+            let timestamp_usec = SystemTime::now().duration_since(UNIX_EPOCH)?;
 
             if first_run.bold.is_some() {
                 event = Some(UniChatEvent::Raid {
@@ -97,7 +101,9 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
                         author_type: None,
 
                         message_id: parsed.action_id,
-                        viewer_count: None
+                        viewer_count: None,
+
+                        timestamp: timestamp_usec.as_secs() as i64
                     }
                 })
             }
