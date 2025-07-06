@@ -79,7 +79,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     }
 
     let example_widget_path_source = system_widgets_dir.join("default");
-    let example_widget_path_dest = user_widgets_dir.join(".example");
+    let example_widget_path_dest = user_widgets_dir.join("example");
     if !example_widget_path_dest.exists() {
         copy_folder(&example_widget_path_source, &example_widget_path_dest)?;
     }
