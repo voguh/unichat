@@ -34,7 +34,10 @@ customization using HTML/CSS/JS.
     - `https://7tv.io/v3/users/{youtube|twitch}/{CHANNEL_ID}`
     - `https://cdn.7tv.app/emote/{EMOTE_ID}/{EMOTE_SIZE:4x}.{IMAGE_TYPE:webp}`
 
-## Build
+
+## Dev notes
+
+### Build
 
 Install all dependencies before following [oficial tutorial](https://v2.tauri.app/start/prerequisites/)
 then just run `pnpm build`.
@@ -106,7 +109,7 @@ pnpm build --runner cargo-xwin --target x86_64-pc-windows-msvc
 | app_log_dir        | ~/.local/share/unichat/logs | ~\AppData\Local\unichat\logs |
 
 
-### Dev notes
+### Package versions
 
 Some node packages will not be updated.
 
