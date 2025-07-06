@@ -16,9 +16,9 @@ customization using HTML/CSS/JS.
 - [x] Implement `Donate` event (Sicker and Super Chat);
 - [x] Implement an way to get youtube channel id;
 - [x] Implement BTTV support <sup>1</sup>;
-- [ ] Implement FFZ support <sup>2</sup>;
+- [x] Implement FFZ support <sup>2</sup>;
 - [x] Implement 7TV support <sup>3</sup>;
-- [ ] Implement twitch chat integration;
+- [x] Implement twitch chat integration;
 - [ ] Implement a second youtube scrapper to allow two chats (to merge chats between normal video and shorts for example);
 
 1. BetterTTV endpoints:
