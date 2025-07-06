@@ -20,6 +20,7 @@ tauri-build = { version = "2.3.0", features = [] }
 actix-web = "4.11.0"
 actix-ws = "0.3.0"
 futures = "0.3.31"
+infer = "0.19.0"
 irc = { version = "1.1.0", default-features = false, features = ["encoding", "serde", "rustls-native-certs", "tokio-rustls"] }
 log = "0.4.27"
 moka = { version = "0.12.10", features = ["sync"] }

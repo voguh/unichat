@@ -16,53 +16,105 @@
  ******************************************************************************/
 
 use std::fs;
+use std::path::PathBuf;
 
+use actix_web::error::ErrorBadRequest;
+use actix_web::error::ErrorNotFound;
 use actix_web::get;
-use actix_web::http::header;
 use actix_web::http::StatusCode;
 use actix_web::web;
 use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::Responder;
-use serde::Deserialize;
 
 use crate::events;
 use crate::events::event_emitter;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
-#[derive(Deserialize)]
-struct WidgetsPathParams {
-    name: String
-}
-
 static WIDGET_TEMPLATE: &str = include_str!("./static/index.html.template");
 
+fn safe_guard_path(base_path: &PathBuf, concat_str: &str) -> Result<PathBuf, actix_web::Error> {
+    let concatenated_path = base_path.join(concat_str);
+    let resolved_path = fs::canonicalize(concatenated_path).map_err(|_| ErrorNotFound("Path not found"))?;
+    if !resolved_path.starts_with(base_path) {
+        return Err(ErrorBadRequest(format!("Access to path '{}' is not allowed", resolved_path.display())));
+    }
+
+    return Ok(resolved_path);
+}
+
+fn get_widget_dir(widget_name: &str) -> Option<PathBuf> {
+    let widget_name = widget_name.trim();
+    // Return none if widget name is empty or starts with a dot
+    if widget_name.is_empty() || widget_name.starts_with(".") {
+        return None;
+    }
+
+    let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidget);
+    let system_widget_path = system_widgets_dir.join(widget_name);
+    if system_widget_path.exists() {
+        return Some(system_widget_path);
+    }
+
+    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
+    let user_widget_path = user_widgets_dir.join(widget_name);
+    if user_widget_path.exists() {
+        return Some(user_widget_path);
+    }
+
+    return None;
+}
+
+#[get("/widget/{name}/assets/{path:.*}")]
+pub async fn get_widget_assets(req: HttpRequest) -> Result<impl Responder, actix_web::Error> {
+    let widget_name: String = req.match_info().query("name").parse()?;
+
+    let asset_path: String = req.match_info().query("path").parse()?;
+    if asset_path.trim().is_empty() {
+        return Err(ErrorBadRequest("Asset path cannot be empty"));
+    }
+
+    if let Some(widget_path) = get_widget_dir(&widget_name) {
+        let assets_path = safe_guard_path(&widget_path, "assets")?;
+        let asset_full_path = safe_guard_path(&assets_path, &asset_path)?;
+
+        if !asset_full_path.exists() {
+            return Err(ErrorNotFound(format!("Asset '{}' not found in widget '{}'", asset_path, widget_name)));
+        } else if asset_full_path.is_dir() {
+            return Err(ErrorBadRequest(format!("Asset '{}' is a directory, not a file", asset_path)));
+        }
+
+        let content = fs::read(&asset_full_path).map_err(|_| ErrorNotFound(format!("Failed to read asset '{}'", asset_path)))?;
+
+        if let Some(kind) = infer::get(&content) {
+            return Ok(HttpResponse::build(StatusCode::OK).content_type(kind.mime_type()).body(content));
+        } else {
+            return Err(ErrorBadRequest(format!("Could not infer MIME type for asset '{}'", asset_path)));
+        }
+    } else {
+        return Err(ErrorNotFound(format!("Widget '{}' not found", widget_name)));
+    }
+}
+
 #[get("/widget/{name}")]
-pub async fn widget(info: web::Path<WidgetsPathParams>) -> impl Responder {
-    let widget_defaults_dir = properties::get_app_path(AppPaths::UniChatSystemWidget);
-    let widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
-    let mut  widget = widget_defaults_dir.join(&info.name);
-    if !widget.exists() || !widget.is_dir() {
-        widget = widgets_dir.join(&info.name);
+pub async fn get_widget(req: HttpRequest) -> Result<impl Responder, actix_web::Error> {
+    let widget_name: String = req.match_info().query("name").parse()?;
+
+    if let Some(widget_path) = get_widget_dir(&widget_name) {
+        let css = fs::read_to_string(widget_path.join("style.css")).unwrap_or_default();
+        let js = fs::read_to_string(widget_path.join("script.js")).unwrap_or_default();
+        let html = fs::read_to_string(widget_path.join("main.html")).unwrap_or_default();
+
+        let content = WIDGET_TEMPLATE
+            .replace("{{WIDGET_STYLE}}", &css)
+            .replace("{{WIDGET_SCRIPT}}", &js)
+            .replace("{{WIDGET_HTML}}", &html);
+
+        return Ok(HttpResponse::build(StatusCode::OK).content_type("text/html; charset=utf-8").body(content));
+    } else {
+        return Err(actix_web::error::ErrorNotFound(format!("Widget '{}' not found", widget_name)));
     }
-
-    if !widget.exists() || !widget.is_dir() {
-        return HttpResponse::build(StatusCode::NOT_FOUND)
-            .insert_header((header::CONTENT_TYPE, "text/plain"))
-            .body(format!("Widget '{}' not found", info.name));
-    }
-
-    let css = fs::read_to_string(widget.join("style.css")).unwrap_or_default();
-    let js = fs::read_to_string(widget.join("script.js")).unwrap_or_default();
-    let html = fs::read_to_string(widget.join("main.html")).unwrap_or_default();
-
-    let content = WIDGET_TEMPLATE
-        .replace("{{WIDGET_STYLE}}", &css)
-        .replace("{{WIDGET_SCRIPT}}", &js)
-        .replace("{{WIDGET_HTML}}", &html);
-
-    return HttpResponse::build(StatusCode::OK).insert_header((header::CONTENT_TYPE, "text/html")).body(content);
 }
 
 #[get("/ws")]

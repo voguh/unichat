@@ -4,7 +4,6 @@
 /examples
 /node_modules
 /webapp
-/widgets
 /.editorconfig
 /.gitignore
 /LICENSE
