@@ -17,7 +17,7 @@
 
 import React from "react";
 
-import { Button, Card, Select } from "@mantine/core";
+import { Button, Card, ComboboxItemGroup, Select, Tooltip } from "@mantine/core";
 import { IconFolderFilled, IconReload, IconWorld } from "@tabler/icons-react";
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 
@@ -30,7 +30,7 @@ import { DashboardHomeStyledContainer } from "./styled";
 
 export function DashboardHome(): React.ReactNode {
     const [selectedWidget, setSelectedWidget] = React.useState("default");
-    const [widgets, setWidgets] = React.useState<string[]>([]);
+    const [widgets, setWidgets] = React.useState<ComboboxItemGroup<string>[]>([]);
 
     const { metadata } = React.useContext(AppContext);
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
@@ -122,21 +122,29 @@ export function DashboardHome(): React.ReactNode {
             <div className="preview">
                 <Card className="preview-header" withBorder shadow="xs">
                     <div className="preview-header-widget-selector">
-                        <Select value={selectedWidget} data={widgets} onChange={onChangeWidget} />
+                        <Tooltip label="Widgets" position="bottom" withArrow>
+                            <Select value={selectedWidget} data={widgets} onChange={onChangeWidget} />
+                        </Tooltip>
                     </div>
 
-                    <Button onClick={() => revealItemInDir(metadata.widgetsDir)}>
-                        <IconFolderFilled size="20" />
-                    </Button>
+                    <Tooltip label="Open user widgets folder" position="bottom" withArrow>
+                        <Button onClick={() => revealItemInDir(metadata.widgetsDir)}>
+                            <IconFolderFilled size="20" />
+                        </Button>
+                    </Tooltip>
 
-                    <Button onClick={reloadIframe}>
-                        <i className="fas fa-sync" />
-                        <IconReload size="20" />
-                    </Button>
+                    <Tooltip label="Reload Widget view" position="bottom" withArrow>
+                        <Button onClick={reloadIframe}>
+                            <i className="fas fa-sync" />
+                            <IconReload size="20" />
+                        </Button>
+                    </Tooltip>
 
-                    <Button onClick={() => openUrl(`http://localhost:9527/widget/${selectedWidget}`)}>
-                        <IconWorld size="20" />
-                    </Button>
+                    <Tooltip label="Open in browser" position="bottom" withArrow>
+                        <Button onClick={() => openUrl(`http://localhost:9527/widget/${selectedWidget}`)}>
+                            <IconWorld size="20" />
+                        </Button>
+                    </Tooltip>
                 </Card>
                 <div className="iframe-wrapper">
                     <iframe
