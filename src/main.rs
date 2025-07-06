@@ -22,6 +22,7 @@
 #![allow(clippy::redundant_field_names)]
 
 use std::fs;
+use std::io::Write;
 use std::path::PathBuf;
 
 use tauri::Manager;
@@ -71,21 +72,42 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
     /* ========================================================================================== */
 
-    let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgets);
-    if !&widgets_dir.exists() {
-        fs::create_dir_all(&widgets_dir)?;
+    let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidget);
+    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
+    if !&user_widgets_dir.exists() {
+        fs::create_dir_all(&user_widgets_dir)?;
     }
 
-    if fs::read_dir(&widgets_dir)?.next().is_none() {
-        let widget_defaults_dir = properties::get_app_path(AppPaths::UniChatWidgetDefaults);
-        copy_folder(&widget_defaults_dir, &widgets_dir)?;
-        log::info!("Copied template widgets to: {}", widgets_dir.display());
+    let example_widget_path_source = system_widgets_dir.join("default");
+    let example_widget_path_dest = user_widgets_dir.join(".example");
+    if !example_widget_path_dest.exists() {
+        copy_folder(&example_widget_path_source, &example_widget_path_dest)?;
     }
 
-    let readme_path = widgets_dir.join("README.md");
+    let unichat_d_ts_path_source = system_widgets_dir.join("unichat.d.ts");
+    let unichat_d_ts_path_dest = user_widgets_dir.join("unichat.d.ts");
+    if !unichat_d_ts_path_dest.exists() {
+        fs::copy(unichat_d_ts_path_source, unichat_d_ts_path_dest)?;
+    }
+
+    let jsconfig_json_path_source = system_widgets_dir.join("jsconfig.json");
+    let jsconfig_json_path_dest = user_widgets_dir.join("jsconfig.json");
+    if !jsconfig_json_path_dest.exists() {
+        fs::copy(jsconfig_json_path_source, jsconfig_json_path_dest)?;
+    }
+
+    let readme_path = user_widgets_dir.join("README.md");
     if !readme_path.exists() {
-        let readme_notice = "This directory contains user-created widgets for UniChat. You can add your own widgets here.";
-        fs::write(widgets_dir.join("README.md"), readme_notice)?;
+        let mut readme_file = fs::OpenOptions::new().create(true).append(true).open(readme_path)?;
+        let readme_notice = r#"
+            This directory contains user-created widgets for UniChat. You can add your own widgets here.
+
+            Node: folders starting with a dot (.) are hidden by default in the widget selector.
+        "#;
+
+        let formatted_readme_notice = readme_notice.lines().skip(1)
+            .map(|l| l.trim()).collect::<Vec<&str>>().join("\n");
+        writeln!(readme_file, "{formatted_readme_notice}")?;
     }
 
     /* ========================================================================================== */

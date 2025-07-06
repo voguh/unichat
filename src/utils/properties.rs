@@ -49,8 +49,8 @@ pub enum AppPaths {
     AppLocalData,
     AppLog,
 
-    UniChatWidgetDefaults,
-    UniChatWidgets,
+    UniChatSystemWidget,
+    UniChatUserWidgets,
     UniChatLogoIcon,
     UniChatLicense
 }
@@ -64,8 +64,8 @@ impl fmt::Display for AppPaths {
             AppPaths::AppLocalData => "app_local_data_dir",
             AppPaths::AppLog => "app_log_dir",
 
-            AppPaths::UniChatWidgetDefaults => "unichat_widget_defaults_dir",
-            AppPaths::UniChatWidgets => "unichat_widgets_dir",
+            AppPaths::UniChatSystemWidget => "unichat_system_widgets_dir",
+            AppPaths::UniChatUserWidgets => "unichat_user_widgets_dir",
             AppPaths::UniChatLogoIcon => "unichat_logo_icon",
             AppPaths::UniChatLicense => "unichat_license"
         };
@@ -103,8 +103,8 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     properties.insert(AppPaths::AppData.to_string(), app_data_path);
     properties.insert(AppPaths::AppLocalData.to_string(), app_local_data_path);
     properties.insert(AppPaths::AppLog.to_string(), app_log_path);
-    properties.insert(AppPaths::UniChatWidgetDefaults.to_string(), widget_defaults_path);
-    properties.insert(AppPaths::UniChatWidgets.to_string(), widgets_path);
+    properties.insert(AppPaths::UniChatSystemWidget.to_string(), widget_defaults_path);
+    properties.insert(AppPaths::UniChatUserWidgets.to_string(), widgets_path);
     properties.insert(AppPaths::UniChatLogoIcon.to_string(), logo_icon_path);
     properties.insert(AppPaths::UniChatLicense.to_string(), license_path);
 

@@ -15,6 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+import { ComboboxItemGroup } from "@mantine/core";
 import { invoke } from "@tauri-apps/api/core";
 
 import { AppMetadata } from "unichat/types";
@@ -64,7 +65,7 @@ export class CommandService {
         await invoke("dispatch_clear_chat");
     }
 
-    public async listWidgets(): Promise<string[]> {
+    public async listWidgets(): Promise<ComboboxItemGroup<string>[]> {
         return invoke("list_widgets");
     }
 }

@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-use std::str::FromStr;
+use std::fs;
 
 use serde_json::json;
 use serde_json::Value;
@@ -58,7 +58,7 @@ pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
         "licenseUrl": CARGO_PKG_LICENSE_URL,
 
         "licenseFile": properties::get_app_path(AppPaths::UniChatLicense).to_string_lossy().to_string(),
-        "widgetsDir": properties::get_app_path(AppPaths::UniChatWidgets).to_string_lossy().to_string(),
+        "widgetsDir": properties::get_app_path(AppPaths::UniChatUserWidgets).to_string_lossy().to_string(),
 
         "thirdPartyLicenses": serde_json::from_str::<Value>(THIRD_PARTY_LICENSES).unwrap_or(Value::Array(vec![]))
     });
@@ -130,23 +130,57 @@ pub async fn dispatch_clear_chat<R: Runtime>(_app: tauri::AppHandle<R>) -> Resul
 /* ================================================================================================================== */
 
 #[tauri::command]
-pub async fn list_widgets<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
-    let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgets);
-    if widgets_dir.is_dir() {
-        let mut folders: Vec<String> = Vec::new();
+pub async fn list_widgets<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value, String> {
+    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
+    if !user_widgets_dir.is_dir() {
+        return Err("An error occurred on iterate over user widgets dir".into());
+    }
 
-        let entries = std::fs::read_dir(&widgets_dir).unwrap();
-        for entry in entries {
-            let path = entry.unwrap().path();
+    let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidget);
+    if !system_widgets_dir.is_dir() {
+        return Err("An error occurred on iterate over system widgets dir".into());
+    }
+
+    let mut user_widgets: Vec<String> = Vec::new();
+    let user_widgets_read = fs::read_dir(&user_widgets_dir).map_err(|e| format!("{:?}", e))?;
+    for entry in user_widgets_read {
+        if let Ok(entry) = entry {
+            let path = entry.path();
             if path.is_dir() {
                 if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-                    folders.push(name.to_string());
+                    if name.starts_with(".") {
+                        continue; // Skip hidden folders
+                    }
+
+                    user_widgets.push(name.to_string());
                 }
             }
+        } else {
+            log::error!("An error occurred on read user widgets dir: {:?}", entry);
         }
-
-        return Ok(folders);
-    } else {
-        Err(String::from_str("An error occurred on iterate over widgets dir").unwrap())
     }
+
+    let mut system_widgets: Vec<String> = Vec::new();
+    let system_widgets_read = fs::read_dir(&system_widgets_dir).map_err(|e| format!("{:?}", e))?;
+    for entry in system_widgets_read {
+        if let Ok(entry) = entry {
+            let path = entry.path();
+            if path.is_dir() {
+                if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
+                    if name.starts_with(".") {
+                        continue; // Skip hidden folders
+                    }
+
+                    system_widgets.push(name.to_string());
+                }
+            }
+        } else {
+            log::error!("An error occurred on read user widgets dir: {:?}", entry);
+        }
+    }
+
+    return Ok(json!([
+        { "group": "System Widgets", "items": system_widgets },
+        { "group": "User Widgets", "items": user_widgets }
+    ]));
 }

@@ -40,8 +40,8 @@ static WIDGET_TEMPLATE: &str = include_str!("./static/index.html.template");
 
 #[get("/widget/{name}")]
 pub async fn widget(info: web::Path<WidgetsPathParams>) -> impl Responder {
-    let widget_defaults_dir = properties::get_app_path(AppPaths::UniChatWidgetDefaults);
-    let widgets_dir = properties::get_app_path(AppPaths::UniChatWidgets);
+    let widget_defaults_dir = properties::get_app_path(AppPaths::UniChatSystemWidget);
+    let widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     let mut  widget = widget_defaults_dir.join(&info.name);
     if !widget.exists() || !widget.is_dir() {
         widget = widgets_dir.join(&info.name);
