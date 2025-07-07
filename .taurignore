@@ -7,6 +7,4 @@
 /.editorconfig
 /.gitignore
 /LICENSE
-/package.json
-/pnpm-lock.yaml
 /README.md

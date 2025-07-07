@@ -31,13 +31,13 @@ jobs:
       - name: Run ESLint
         continue-on-error: true
         run: |
-          pnpm install --frozen-lockfile
-          pnpm lint
+          pnpm --dir="$GITHUB_WORKSPACE/webapp" install --frozen-lockfile
+          pnpm --dir="$GITHUB_WORKSPACE/webapp" lint
 
       - name: Run Clippy
         continue-on-error: true
         run: |
-          pnpm build:ui
+          pnpm --dir="$GITHUB_WORKSPACE/webapp" build:ui
           cargo clippy --all-targets --all-features
 
   test:
@@ -56,12 +56,12 @@ jobs:
 
       - name: Run vitest
         run: |
-          pnpm install --frozen-lockfile
-          pnpm test run --passWithNoTests
+          pnpm --dir="$GITHUB_WORKSPACE/webapp" install --frozen-lockfile
+          pnpm --dir="$GITHUB_WORKSPACE/webapp" test run --passWithNoTests
 
       - name: Run cargo tests
         run: |
-          pnpm build:ui
+          pnpm --dir="$GITHUB_WORKSPACE/webapp" build:ui
           cargo test --all-targets --all-features
 
   build:
@@ -103,9 +103,8 @@ jobs:
 
       - name: Run build for linux
         run: |
-          pnpm install --frozen-lockfile
-          pnpm build:ui
-          pnpm build
+          pnpm --dir="$GITHUB_WORKSPACE/webapp" install --frozen-lockfile
+          cargo tauri build
 
       - name: Prepare windows environment
         run: |

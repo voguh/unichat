@@ -72,9 +72,9 @@ function main() {
     echo "New version....: ${new_version}"
 
     log_info "Running tests..."
-    pnpm install --frozen-lockfile
-    pnpm test run --passWithNoTests
-    pnpm build:ui
+    pnpm --dir="$ROOT_DIR/webapp" install --frozen-lockfile
+    pnpm --dir="$ROOT_DIR/webapp" test run --passWithNoTests
+    pnpm --dir="$ROOT_DIR/webapp" build:ui
     cargo test --all-targets --all-features
 
     local current_version_number="$(version_to_number "$current_version")"
@@ -92,7 +92,7 @@ function main() {
     log_info "Version updated successfully."
 
     log_info "Building the project..."
-    pnpm build
+    cargo tauri build
 
     log_info "Committing changes to Git..."
     git add "$cargo_toml" "${ROOT_DIR}/Cargo.lock"
