@@ -1,7 +1,7 @@
 [package]
 name = "unichat"
 version = "0.2.0-beta.1"
-description = "Yet another implementation of YouTube chat widget"
+description = "A cross-platform desktop application for managing YouTube and Twitch chats."
 authors = ["Voguh <voguhofc@protonmail.com>"]
 homepage = "https://github.com/voguh/unichat"
 license = "LGPL-3.0-only"
