@@ -46,7 +46,7 @@ export class LoggerService {
     private _formatMessage(message: string, ...args: any[]): string {
         if (args.length > 0) {
             for (const arg of args) {
-                message.replace("{}", String(arg));
+                message = message.replace("{}", String(arg));
             }
         }
 
