@@ -36,6 +36,14 @@ function buildMessage(message, emotes) {
     return processedWords.join(' ');
 }
 
+function parseTierName(platform, tier) {
+    if (platform === "twitch" && tier.toLowerCase() !== "prime") {
+        return parseInt(tier, 10) / 1000
+    }
+
+    return tier;
+}
+
 function removeChildren() {
   if(MAIN_CONTAINER.children > 50) {
     MAIN_CONTAINER.firstChild.remove();
@@ -84,7 +92,11 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         htmlTemplate = htmlTemplate.replace("{message_id}", data.messageId);
         htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data.authorBadges));
         htmlTemplate = htmlTemplate.replace("{author_display_name}", data.authorDisplayName);
-        htmlTemplate = htmlTemplate.replace("{donate_meta}", `Just tipped <span class="value">${data.currency} ${data.value}</span>!`);
+        if (data.platform === "twitch") {
+            htmlTemplate = htmlTemplate.replace("{donate_meta}", `Just cheered <span class="value">${data.value} ${data.currency}</span>!`);
+        } else {
+            htmlTemplate = htmlTemplate.replace("{donate_meta}", `Just tipped <span class="value">${data.currency} ${data.value}</span>!`);
+        }
         htmlTemplate = htmlTemplate.replace("{message}", buildMessage(data.messageText, data.emotes));
 
         if (MAIN_CONTAINER.querySelector(`div[data-id="${data.messageId}"]`) == null) {
@@ -99,7 +111,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         htmlTemplate = htmlTemplate.replace("{author_display_name}", data.authorDisplayName);
         htmlTemplate = htmlTemplate.replace("{tier}", data.tier);
         const msgBegin = data.platform === "youtube" ? "Become a member" : "Become a subscriber";
-        const tier = data.platform === "twitch" && data.tier.toLowerCase() !== "prime" ? parseInt(data.tier) / 1000 : data.tier;
+        const tier = parseTierName(data.platform, data.tier);
         if (data.months != null) {
             const message = `${msgBegin} for <span>${data.months}</span> months<br/>with tier <span>${tier}</span>!`;
             htmlTemplate = htmlTemplate.replace("{sponsor_meta}", message);
@@ -124,11 +136,8 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
             message += `<span>${data.count} ${data.platform === "youtube" ? "membership": "subscription"}</span> `;
         }
         if (data.tier) {
-            if (data.platform === "twitch" && data.tier.toLowerCase() !== "prime") {
-                message += `with tier ${parseInt(data.tier) / 1000}`;
-            } else {
-                message += `with tier ${data.tier}`;
-            }
+            const tier = parseTierName(data.platform, data.tier);
+            message += `with tier ${tier}`;
         }
         htmlTemplate = htmlTemplate.replaceAll("{message}", `${message.trim()}!`);
 
