@@ -1,6 +1,9 @@
 name: "Setup Tauri"
 description: "Setup Tauri environment for GitHub Actions"
 inputs:
+  github-workspace:
+    description: "Path to the GitHub workspace. Defaults to the root of the repository."
+    default: "${{ github.workspace }}"
   rust-version:
     description: "Rust version to use. Examples: stable, nightly, 1.86.0."
     default: "stable"
@@ -29,3 +32,8 @@ runs:
       run: |
         sudo apt update
         sudo apt install --no-install-recommends -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+        if [[ -z "$(command -v tq 2>/dev/null)"  ]]; then
+          echo "Installing tq..."
+          cargo install tomlq --locked
+        fi
+        cargo install tauri-cli --locked --version "$(tq -f "${{ inputs.github-workspace }}/Cargo.toml" '.dependencies.tauri.version')"
