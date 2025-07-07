@@ -36,4 +36,4 @@ runs:
           echo "Installing tq..."
           cargo install tomlq --locked
         fi
-        cargo install tauri-cli --locked --version "$(tq -f "${{ inputs.github-workspace }}/Cargo.toml" '.dependencies.tauri.version')"
+        cargo install tauri-cli --locked --version "$(tq -r -f "${{ inputs.github-workspace }}/Cargo.toml" '.dependencies.tauri.version')"
