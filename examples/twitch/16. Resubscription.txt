@@ -10,9 +10,10 @@ Message {
     Tag("id", Some("<SOME_GUID>")),
     Tag("login", Some("<AUTHOR_USERNAME>")),
     Tag("mod", Some("<ZERO_OR_ONE>")),
-    Tag("msg-id", Some("sub")),
+    Tag("msg-id", Some("resub")),
     Tag("msg-param-cumulative-months", Some("<AUTHOR_TOTAL_SUBSCRIPTION_MONTHS>")),
     Tag("msg-param-months", Some("0")),
+    Tag("msg-param-streak-months", Some("<SUBSCRIPTION_STRIKE_MONTHS>")),
     Tag("msg-param-sub-plan-name", Some("<SUBSCRIPTION_TIER_NAME>")),
     Tag("msg-param-sub-plan", Some("<SUBSCRIPTION_TIER_PLAN_COULD_BE_1000_2000_3000_OR_PRIME>")),
     Tag("msg-param-was-gifted", Some("<TRUE_OR_FALSE>")),
@@ -25,5 +26,5 @@ Message {
     Tag("vip", Some("<ZERO_OR_ONE>"))
   ]),
   prefix: Some(ServerName("tmi.twitch.tv")),
-  command: Raw("USERNOTICE", ["#<BROADCASTER_USERNAME>"])
+  command: Raw("USERNOTICE", ["#<BROADCASTER_USERNAME>", "<MESSAGE>"])
 }

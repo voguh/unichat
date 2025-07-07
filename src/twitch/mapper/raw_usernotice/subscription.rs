@@ -45,7 +45,7 @@ pub fn parse(message: &Message, tags: &HashMap<String, String>) -> Result<Option
     let author_badges = parse_author_badges(tags.get("badges"))?;
     let author_type = parse_author_type(&tags)?;
     let tier = tags.get("msg-param-sub-plan").ok_or("Missing msg-param-sub-plan tag")?;
-    let months_str = tags.get("msg-param-months").ok_or("Missing msg-param-months tag")?;
+    let months_str = tags.get("msg-param-cumulative-months").ok_or("Missing msg-param-cumulative-months tag")?;
     let months: u16 = months_str.parse()?;
     let message_id = tags.get("id").ok_or("Missing id tag")?;
     let message = message_text.and_then(|text| parse_message_string(text).ok());
