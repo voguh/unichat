@@ -115,7 +115,7 @@ jobs:
 
       - name: Run build for windows
         run: |
-          pnpm build --runner cargo-xwin --target x86_64-pc-windows-msvc
+          cargo tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
 
       - name: Move build artifacts
         run: |
