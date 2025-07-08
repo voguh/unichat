@@ -1,73 +1,12 @@
 #!/usr/bin/env node
-
-import childProcess from 'child_process'
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { register } from "node:module";
+import path from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const ROOT_DIR = path.resolve(__dirname, "..");
+globalThis.__filename = __filename;
+globalThis.__dirname = __dirname;
 
-async function main() {
-    const cargoTomlPath = path.join(ROOT_DIR, 'Cargo.toml');
-    const pkgJsonPath = path.join(ROOT_DIR, 'package.json');
-
-    /** @type {import("child_process").ExecSyncOptions} */
-    const opts = { cwd: ROOT_DIR }
-
-    childProcess.execSync("cargo install cargo-license", opts);
-    const cargoOut = childProcess.execSync("cargo license --direct-deps-only --do-not-bundle --json", opts);
-    console.log("Generating Cargo licenses...");
-    const cargoLicenses = JSON.parse(cargoOut);
-    console.log(`Found ${cargoLicenses.length} Cargo licenses.`);
-
-    const pkgOut = childProcess.execSync("pnpx license-checker --production --json", opts);
-    console.log("Generating NPM licenses...");
-    const npmLicenses = JSON.parse(pkgOut);
-    console.log(`Found ${Object.keys(npmLicenses).length} NPM licenses.`);
-
-    const licenses = [
-        ...cargoLicenses.filter(pkg => pkg.name !== "unichat").map(pkg => ({
-            source: "crate",
-            name: pkg.name,
-            version: pkg.version,
-            authors: (pkg.authors ?? "").split("|"),
-            repository: `https://crates.io/crates/${pkg.name}/${pkg.version}`,
-            licenses: pkg.license.split(" OR ")
-        })),
-        ...Object.entries(npmLicenses).filter(([pkg]) => pkg !== "unichat").map(([pkg, data]) => {
-            const nameVersion = pkg.split("@");
-            const version = nameVersion.at(-1);
-            const name = pkg.replace(`@${version}`, '');
-
-            return ({
-                source: "npm",
-                name: name,
-                version: version,
-                authors: (data.publisher ?? "").split("|"),
-                repository: `https://npmjs.com/package/${name}/v/${version}`,
-                licenses: data.licenses.split(" OR ")
-            })
-        })
-    ];
-
-    licenses.sort((a, b) => a.name.localeCompare(b.name));
-
-    console.log(`Found ${licenses.length} total licenses.`);
-    const outDir = path.resolve(ROOT_DIR, 'target', 'gen');
-    if (!fs.existsSync(outDir)) {
-        fs.mkdirSync(outDir, { recursive: true });
-    }
-
-    const outputPath = path.resolve(outDir, 'third_party_licenses.json');
-    fs.writeFileSync(outputPath, JSON.stringify(licenses));
-    console.log(`Wrote licenses to ${outputPath}`);
-}
-
-main()
-    .then(() => process.exit(0))
-    .catch(err => {
-        console.error(err);
-        process.exit(1);
-    })
+register(pathToFileURL(path.resolve(__dirname, "scripts", "utils", "_hook.js")));
+import(path.resolve(__dirname, `scripts/${path.basename(__filename)}.js`))

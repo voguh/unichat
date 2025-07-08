@@ -1,106 +1,12 @@
-#!/bin/bash
-set -euo pipefail
+#!/usr/bin/env node
+import { register } from "node:module";
+import path from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
-ROOT_DIR="$(realpath "$(dirname "$0")/..")"
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+globalThis.__filename = __filename;
+globalThis.__dirname = __dirname;
 
-function decode_pre_release_type() {
-    local pre_release_type="$1"
-    case "$pre_release_type" in
-        alpha) echo "0" ;;
-        beta) echo "1" ;;
-        rc) echo "2" ;;
-        *) echo "3" ;;
-    esac
-}
-
-function version_to_number() {
-    local criteria="%-3s"
-    local version="$1"
-    local main_version="$(echo "$version" | cut -d'-' -f1)"
-    local pre_release_version="$(echo "$version" | cut -d'-' -f2-)"
-
-    local major="$(echo "$main_version" | tr '.' ' ' | awk '{print $1}')"
-    local minor="$(echo "$main_version" | tr '.' ' ' | awk '{print $2}')"
-    local patch="$(echo "$main_version" | tr '.' ' ' | awk '{print $3}')"
-
-    local major_as_number="$(printf "$criteria" "$major" | tr ' ' '0')"
-    local minor_as_number="$(printf "$criteria" "$minor" | tr ' ' '0')"
-    local patch_as_number="$(printf "$criteria" "$patch" | tr ' ' '0')"
-
-    local pre_release_version_type="$(echo "$pre_release_version" | cut -d'.' -f1 | tr '[:upper:]' '[:lower:]')"
-    local pre_release_version_number="$(echo "$pre_release_version" | cut -d'.' -f2-)"
-
-    local pre_release_version_type_as_number="$(printf "$criteria" "$(decode_pre_release_type "$pre_release_version_type")" | tr ' ' '0')"
-    local pre_release_version_number_as_number="$(printf "$criteria" "$pre_release_version_number" | tr ' ' '0')"
-
-    echo "${major_as_number}${minor_as_number}${patch_as_number}${pre_release_version_type_as_number}${pre_release_version_number_as_number}"
-}
-
-function log_error() {
-    echo -e "\033[31m\033[1merror:\033[0m $1"
-}
-
-function log_info() {
-    echo -e "\033[32m\033[1minfo:\033[0m $1"
-}
-
-function log_warn() {
-    echo -e "\033[33m\033[1mwarn:\033[0m $1"
-}
-
-function main() {
-    local new_version="${1:-""}"
-    if [ -z "${new_version}" ]; then
-        log_error "No new version provided. Usage: $0 <new_version>"
-        exit 1
-    fi
-
-    local cargo_toml="${ROOT_DIR}/Cargo.toml"
-    if ! [ -f "$cargo_toml" ]; then
-        log_error "Unable to find '\033[33mCargo.toml\033[0m' in the root directory."
-        exit 1
-    fi
-
-    local current_version="$(cargo pkgid | cut -d# -f2)"
-    if [ -z "${current_version}" ]; then
-        log_error "Failed to retrieve the current version from Cargo."
-        exit 1
-    fi
-
-    log_info "Updating version in '\033[33mCargo.toml\033[0m'..."
-    echo "Current version: ${current_version}"
-    echo "New version....: ${new_version}"
-
-    log_info "Running tests..."
-    pnpm --dir="$ROOT_DIR/webapp" install --frozen-lockfile
-    pnpm --dir="$ROOT_DIR/webapp" test run --passWithNoTests
-    pnpm --dir="$ROOT_DIR/webapp" build:ui
-    cargo test --all-targets --all-features
-
-    local current_version_number="$(version_to_number "$current_version")"
-    local new_version_number="$(version_to_number "$new_version")"
-    if [ "$current_version_number" -ge "$new_version_number" ]; then
-        log_error "The new version '$new_version' must be greater than the current version '$current_version'."
-        exit 1
-    elif [ "$current_version_number" -eq "$new_version_number" ]; then
-        log_warn "The new version '$new_version' is the same as the current version '$current_version'."
-        exit 1;
-    fi
-
-    log_info "Updating version from '$current_version' to '$new_version'."
-    sed -i "s/^version = \"$current_version\"/version = \"$new_version\"/" "$cargo_toml"
-    log_info "Version updated successfully."
-
-    log_info "Building the project..."
-    cargo tauri build
-
-    log_info "Committing changes to Git..."
-    git add "$cargo_toml" "${ROOT_DIR}/Cargo.lock"
-    git commit -m "chore: release version $new_version"
-    git tag -a "$new_version" -m "$new_version"
-    log_info "Changes committed and tagged with '$new_version'."
-    log_info "Pushing changes to remote repository..."
-    git push origin main --tags
-}
-
-main "$@"
+register(pathToFileURL(path.resolve(__dirname, "scripts", "utils", "_hook.js")));
+import(path.resolve(__dirname, `scripts/${path.basename(__filename)}.js`))
