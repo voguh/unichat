@@ -75,6 +75,10 @@ async function main(args) {
         process.exit(1);
     }
 
+    logger.info("Updating version from '{}' to '{}'.", currentVersion, newVersion);
+    const newCargoRaw = cargoRaw.replace(`version = "${currentVersion}"`, `version = "${newVersion}"`);
+    fs.writeFileSync(cargoTomlPath, newCargoRaw, "utf-8");
+
     logger.info("Running tests and building project...");
     execSync("pnpm install --frozen-lockfile", { cwd: WEBAPP_DIR });
     execSync("pnpm test run --passWithNoTests", { cwd: WEBAPP_DIR });
@@ -82,14 +86,10 @@ async function main(args) {
     execSync("cargo test --all-targets --all-features");
     execSync("cargo tauri build");
 
-    logger.info("Updating version from '{}' to '{}'.", currentVersion, newVersion);
-    const newCargoRaw = cargoRaw.replace(`version = "${currentVersion}"`, `version = "${newVersion}"`);
-    fs.writeFileSync(cargoTomlPath, newCargoRaw, "utf-8");
-
     logger.info("Committing changes...");
     execSync(`git add ${cargoTomlPath} ${path.resolve(ROOT_DIR, "Cargo.lock")}`);
-    execSync(`git commit -m "chore: release version ${newVersion}`);
-    execSync(`git tag -a "${newVersion}" -m "${newVersion}`);
+    execSync(`git commit -m "chore: release version ${newVersion}"`);
+    execSync(`git tag -a "${newVersion}" -m "${newVersion}"`);
     execSync("git push origin main --tags");
 }
 
