@@ -16,6 +16,7 @@
  ******************************************************************************/
 
 use std::fs;
+use std::path;
 use std::path::PathBuf;
 
 use actix_web::error::ErrorBadRequest;
@@ -36,7 +37,7 @@ static WIDGET_TEMPLATE: &str = include_str!("./static/index.html.template");
 
 fn safe_guard_path(base_path: &PathBuf, concat_str: &str) -> Result<PathBuf, actix_web::Error> {
     let concatenated_path = base_path.join(concat_str);
-    let resolved_path = fs::canonicalize(concatenated_path).map_err(|_| ErrorNotFound("Path not found"))?;
+    let resolved_path = path::absolute(concatenated_path).map_err(|_| ErrorNotFound("Path not found"))?;
     if !resolved_path.starts_with(base_path) {
         return Err(ErrorBadRequest(format!("Access to path '{}' is not allowed", resolved_path.display())));
     }
