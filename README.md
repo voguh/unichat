@@ -45,7 +45,7 @@ then just run `pnpm build`.
 Following an example using ubuntu 24.04 docker image.
 
 ```bash
-docker run --volume=".:/home/ubuntu/unichat" --env="DEBIAN_FRONTEND=noninteractive" --rm -it ubuntu:24.04 bash
+docker run --volume=".:/home/ubuntu/unichat" --env="TAURI_APP_PATH=/home/ubuntu/unichat" --env="TAURI_FRONTEND_PATH=/home/ubuntu/unichat/webapp" --env="DEBIAN_FRONTEND=noninteractive" --rm -it ubuntu:24.04 bash
 
 ### Prepare environment
 apt update && apt upgrade -y && apt install sudo
@@ -72,9 +72,13 @@ corepack enable pnpm
 corepack prepare pnpm@10.7.1 --activate
 pnpm config set store-dir ~/.pnpm-store
 
+### Install CLI
+cargo install tomlq --locked
+cargo install tauri-cli --locked --version "$(tq -r -f "Cargo.toml" '.dependencies.tauri.version')"
+
 ### Build
-pnpm install --frozen-lockfile
-pnpm build
+pnpm --dir="./webapp" install --frozen-lockfile
+cargo tauri build
 
 
 
@@ -89,8 +93,8 @@ rustup target add x86_64-pc-windows-msvc
 cargo install --locked cargo-xwin
 
 ### Build
-pnpm install --frozen-lockfile
-pnpm build --runner cargo-xwin --target x86_64-pc-windows-msvc
+pnpm --dir="./webapp" install --frozen-lockfile
+cargo tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
 ```
 
 > [!TIP]
