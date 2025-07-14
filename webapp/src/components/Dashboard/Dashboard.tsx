@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
-
 import React from "react";
 
-import { Button, Card, Menu, Text, Tooltip } from "@mantine/core";
+import { Badge, Button, Card, Divider, Menu, Text, Tooltip } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { IconAdjustments, IconEraser, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { marked } from "marked";
 import semver from "semver";
 
 import { AboutModal } from "unichat/components/AboutModal";
@@ -29,7 +29,7 @@ import { commandService } from "unichat/services/commandService";
 import { loggerService } from "unichat/services/loggerService";
 
 import { DashboardHome } from "./DashboardHome";
-import { DashboardStyledContainer } from "./styled";
+import { DashboardStyledContainer, ReleaseNotesWrapper } from "./styled";
 
 interface Props {
     children?: React.ReactNode;
@@ -57,25 +57,30 @@ export function Dashboard(_props: Props): React.ReactNode {
         }
 
         const data = await response.json();
+        const body = data.body ?? "";
         const latestVersion = data.tag_name;
         if (semver.gt(latestVersion, metadata.version)) {
+            const parsedBody = { __html: marked.parse(body) };
             setHasUpdate(true);
-            modals.open({
+            modals.openConfirmModal({
                 title: `A new version of ${metadata.displayName} is available!`,
+                size: "lg",
                 children: (
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            flexDirection: "column"
-                        }}
-                    >
-                        <Text>Current version: {metadata.version}</Text>
-                        <Text>Latest version: {latestVersion}</Text>
-                        <Button onClick={() => openUrl(data.html_url)}>Download Update</Button>
-                    </div>
-                )
+                    <ReleaseNotesWrapper>
+                        <h2>
+                            {latestVersion}
+                            <Badge variant="outline" size="xs" color="green">
+                                Latest
+                            </Badge>
+                        </h2>
+                        <Divider />
+                        <div className="release-notes" dangerouslySetInnerHTML={parsedBody} />
+                    </ReleaseNotesWrapper>
+                ),
+                labels: { confirm: "Download Update", cancel: "Close" },
+                groupProps: { justify: "center" },
+                cancelProps: { display: "none" },
+                onConfirm: () => openUrl(data.html_url)
             });
         }
     }

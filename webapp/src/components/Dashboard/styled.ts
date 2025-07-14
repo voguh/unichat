@@ -59,3 +59,31 @@ export const DashboardStyledContainer = styled.div`
         grid-area: CTT;
     }
 `;
+
+export const ReleaseNotesWrapper = styled.div`
+    > h2 {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        font-family: "Roboto Mono", monospace;
+    }
+
+    > .release-notes {
+        margin: 0;
+        font-size: 12px;
+        font-family: "Roboto Mono", monospace;
+        margin-bottom: var(--mantine-spacing-xl);
+
+        > h3 {
+            margin: 0;
+            padding: 0;
+        }
+
+        > ul {
+            margin: 0;
+            padding: 0 0 0 20px;
+        }
+    }
+`;
