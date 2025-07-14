@@ -1,0 +1,14 @@
+{
+    "terminal.integrated.env.linux": {
+        "TAURI_APP_PATH": "${workspaceFolder}",
+        "TAURI_FRONTEND_PATH": "${workspaceFolder}/webapp"
+    },
+    "terminal.integrated.env.windows": {
+        "TAURI_APP_PATH": "${workspaceFolder}",
+        "TAURI_FRONTEND_PATH": "${workspaceFolder}/webapp"
+    },
+    "terminal.integrated.env.osx": {
+        "TAURI_APP_PATH": "${workspaceFolder}",
+        "TAURI_FRONTEND_PATH": "${workspaceFolder}/webapp"
+    }
+}

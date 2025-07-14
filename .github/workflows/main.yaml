@@ -13,7 +13,8 @@ env:
   NODE_VERSION: '22.14.0'
   PNPM_VERSION: '10.7.1'
   RUST_VERSION: '1.87.0'
-  OLDPWD: ${{ github.workspace }}
+  TAURI_APP_PATH: ${{ github.workspace }}
+  TAURI_FRONTEND_PATH: ${{ github.workspace }}/webapp
 
 jobs:
   lint:

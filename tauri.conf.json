@@ -3,8 +3,8 @@
     "productName": "UniChat",
     "identifier": "unichat",
     "build": {
-        "beforeDevCommand": "pnpm --dir=\"$OLDPWD/webapp\" dev:ui",
-        "beforeBuildCommand": "pnpm --dir=\"$OLDPWD/webapp\" build:ui",
+        "beforeDevCommand": "pnpm dev:ui",
+        "beforeBuildCommand": "pnpm build:ui",
         "devUrl": "http://localhost:1421",
         "frontendDist": "./webapp/dist"
     },
