@@ -1,6 +1,6 @@
 # Voguh's UniChat
 
-[![Version](https://img.shields.io/badge/version-v0.2.0--beta.2-blue)](https://github.com/voguh/unichat/releases)
+[![Version](https://img.shields.io/badge/version-v0.2.0--beta.3-blue)](https://github.com/voguh/unichat/releases)
 [![License](https://img.shields.io/badge/license-LGPL--3.0--only-green)](./LICENSE)
 [![Platforms](https://img.shields.io/badge/platform-windows%20%7C%20linux-lightgrey)]()
 
