@@ -110,7 +110,7 @@ jobs:
 
       - name: Prepare windows environment
         run: |
-          sudo apt install --no-install-recommends -y  nsis lld llvm clang
+          sudo apt install -y  nsis lld llvm clang cmake ninja-build nasm
           rustup target add x86_64-pc-windows-msvc
           cargo install --locked cargo-xwin
 
