@@ -42,7 +42,7 @@ For users who wish to compile from the source code, instructions are available i
 
 Interested in contributing? Great! Here's the information you need to get started.
 
-### Estrutura de Diretórios do App
+### App Directories
 
 | Directory Type       | Location on Linux             | Location on Windows           |
 |----------------------|-------------------------------|-------------------------------|
