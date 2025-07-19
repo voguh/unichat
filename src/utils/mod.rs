@@ -19,6 +19,7 @@ use std::sync::LazyLock;
 
 pub mod constants;
 pub mod properties;
+pub mod render_emitter;
 pub mod settings;
 
 pub fn is_dev() -> bool {

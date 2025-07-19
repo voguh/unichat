@@ -23,7 +23,6 @@ use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
 use serde_json::Value;
-use tauri::Emitter;
 use tauri::Listener;
 use tauri::Manager;
 use tauri::Url;
@@ -37,6 +36,7 @@ use crate::utils::is_dev;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::properties::PropertiesKey;
+use crate::utils::render_emitter;
 use crate::utils::settings;
 use crate::utils::settings::SettingsKeys;
 use crate::utils::settings::SettingLogEventLevel;
@@ -48,7 +48,7 @@ static YOUTUBE_RAW_EVENT: &str = "youtube_raw::event";
 
 /* ================================================================================================================== */
 
-fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, mut payload: Value) -> Result<(), String> {
+fn dispatch_event(mut payload: Value) -> Result<(), String> {
     if payload.get("type").is_none() {
         return Err("Missing 'type' field in YouTube raw event payload".to_string());
     }
@@ -62,13 +62,12 @@ fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, mut payload: Value) -> Resu
         payload["timestamp"] = serde_json::json!(now.as_millis());
     }
 
-    let window = app.get_webview_window("main").ok_or("Main window not found")?;
-    return window.emit("unichat://status:event", payload).map_err(|e| format!("{:?}", e));
+    return render_emitter::emit(payload).map_err(|e| format!("{:?}", e));
 }
 
 /* ================================================================================================================== */
 
-fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
+fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
     let channel_id = payload.get("channelId").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'channelId' field in YouTube '{event_type}' payload"))?;
 
@@ -77,12 +76,12 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
 
     shared_emotes::fetch_shared_emotes(channel_id).map_err(|e| format!("{:?}", e))?;
 
-    return dispatch_event(app, payload.clone());
+    return dispatch_event(payload.clone());
 }
 
 
-fn handle_idle_event(app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payload: &Value) -> Result<(), String> {
-    return dispatch_event(app, payload.clone());
+fn handle_idle_event(_app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payload: &Value) -> Result<(), String> {
+    return dispatch_event(payload.clone());
 }
 
 /* ================================================================================================================== */
@@ -188,7 +187,7 @@ fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: tauri::Event) -> Resul
         "ready" => handle_ready_event(app, event_type, &payload),
         "idle" => handle_idle_event(app, event_type, &payload),
         "message" => handle_message_event(app, event_type, &payload),
-        _ => dispatch_event(app, payload.clone())
+        _ => dispatch_event(payload.clone())
     };
 }
 
