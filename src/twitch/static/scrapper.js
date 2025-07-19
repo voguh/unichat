@@ -25,13 +25,52 @@ async function dispatchEvent(payload) {
         });
 }
 
-async function dispatchPing() {
-    await dispatchEvent({ type: "ping" });
-    setTimeout(dispatchPing, 5000);
-}
-
-async function handleScrapBadges(response) {
+async function handleFetchBadgesAndCheermotes() {
     try {
+        const username = window.location.pathname.split("/")[2];
+        const response = await fetch("https://gql.twitch.tv/gql#origin=twilight", {
+            method: "POST",
+            headers: {
+                "Accept-Language": "eu-US",
+                "Client-Id": "kimne78kx3ncx6brgo4mv6wki5h1ko",
+                "Client-Session-Id": JSON.parse(localStorage.getItem("local_storage_app_session_id")),
+                "Client-Version": window.__twilightBuildID,
+                "X-Device-Id": JSON.parse(localStorage.getItem("local_copy_unique_id"))
+            },
+            body: JSON.stringify([
+                {
+                    "operationName": "GlobalBadges",
+                    "variables": {},
+                    "extensions": {
+                        "persistedQuery": {
+                            "version": 1,
+                            "sha256Hash": "9db27e18d61ee393ccfdec8c7d90f14f9a11266298c2e5eb808550b77d7bcdf6"
+                        }
+                    }
+                },
+                {
+                    "operationName": "ChatList_Badges",
+                    "variables": { "channelLogin": username },
+                    "extensions": {
+                        "persistedQuery": {
+                            "version": 1,
+                            "sha256Hash": "838a7e0b47c09cac05f93ff081a9ff4f876b68f7624f0fc465fe30031e372fc2"
+                        }
+                    }
+                },
+                {
+                    "operationName": "BitsConfigContext_Global",
+                    "variables": {},
+                    "extensions": {
+                        "persistedQuery": {
+                            "version": 1,
+                            "sha256Hash": "6a265b86f3be1c8d11bdcf32c183e106028c6171e985cc2584d15f7840f5fee6"
+                        }
+                    }
+                }
+            ])
+        });
+
         const parsed = await response.json();
         if (Array.isArray(parsed)) {
             for (const item of parsed) {
@@ -66,25 +105,6 @@ async function handleScrapBadges(response) {
     }
 }
 
-if (window.fetch.__WRAPPED__ == null) {
-    const originalFetch = window.fetch;
-    Object.defineProperty(window, "fetch", {
-        value: async (...args) => {
-            const res = await originalFetch(...args);
-
-            if (res.url.startsWith("https://gql.twitch.tv/gq") && res.ok) {
-                handleScrapBadges(res.clone());
-            }
-
-            return res;
-        },
-        configurable: true,
-        writable: true
-    });
-    Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
-    window.__TAURI_PLUGIN_LOG__.info("Fetch wrapped!");
-}
-
 function init() {
     try {
         // Prevent right-click context menu in production
@@ -99,6 +119,12 @@ function init() {
         /* ====================================================================================================== */
 
         dispatchEvent({ type: "ready", url: window.location.href });
+
+        /* ====================================================================================================== */
+
+        handleFetchBadgesAndCheermotes()
+        Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
+        window.__TAURI_PLUGIN_LOG__.info("Fetch wrapped!");
 
         /* ====================================================================================================== */
 
@@ -123,9 +149,6 @@ function init() {
         document.head.appendChild(style);
 
         /* ====================================================================================================== */
-
-        // Attach status ping event
-        dispatchPing();
     } catch (err) {
         console.error(err);
         window.__TAURI_PLUGIN_LOG__.error(err);
