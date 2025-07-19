@@ -29,9 +29,9 @@ use std::time::UNIX_EPOCH;
 use futures::prelude::*;
 use irc::client::prelude::*;
 use rand::Rng;
+use serde_json::json;
 use serde_json::Value;
 use tauri::async_runtime::JoinHandle;
-use tauri::Emitter;
 use tauri::Listener;
 use tauri::Manager;
 use tauri::Url;
@@ -48,6 +48,7 @@ use crate::utils::is_dev;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::properties::PropertiesKey;
+use crate::utils::render_emitter;
 use crate::utils::settings;
 use crate::utils::settings::SettingLogEventLevel;
 use crate::utils::settings::SettingsKeys;
@@ -63,7 +64,7 @@ pub static TWITCH_BADGES: LazyLock<RwLock<HashMap<String, UniChatBadge>>> = Lazy
 
 /* ================================================================================================================== */
 
-fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, mut payload: Value) -> Result<(), String> {
+fn dispatch_event(mut payload: Value) -> Result<(), String> {
     if payload.get("type").is_none() {
         return Err("Missing 'type' field in YouTube raw event payload".to_string());
     }
@@ -77,13 +78,12 @@ fn dispatch_event(app: tauri::AppHandle<tauri::Wry>, mut payload: Value) -> Resu
         payload["timestamp"] = serde_json::json!(now.as_millis());
     }
 
-    let window = app.get_webview_window("main").ok_or("Main window not found")?;
-    return window.emit("unichat://status:event", payload).map_err(|e| format!("{:?}", e));
+    return render_emitter::emit(payload).map_err(|e| format!("{:?}", e));
 }
 
 /* ================================================================================================================== */
 
-fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
+fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
     let url = payload.get("url").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'url' field in Twitch '{event_type}' payload"))?;
 
@@ -120,7 +120,17 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
             loop {
                 match stream.next().await.transpose() {
                     Ok(Some(message)) => {
-                        if let Err(err) = handle_message_event(&message) {
+                        if let Command::PING(_server1, _server2) = message.command {
+                            if let Err(e) = dispatch_event(json!({ "type": "ping" })) {
+                                log::error!("Failed to handle Twitch PING event: {:?}", e);
+                            }
+                        } else if let Command::Response(response, _args) = message.command {
+                            if response == Response::RPL_WELCOME {
+                                if let Err(e) = dispatch_event(json!({ "type": "ping" })) {
+                                    log::error!("Failed to handle Twitch PING event: {:?}", e);
+                                }
+                            }
+                        } else if let Err(err) = handle_message_event(&message) {
                             log::error!("Failed to handle Twitch message event: {:?}", err);
                         }
                     }
@@ -143,10 +153,10 @@ fn handle_ready_event(app: tauri::AppHandle<tauri::Wry>, event_type: &str, paylo
         }));
     }
 
-    return dispatch_event(app, payload.clone());
+    return dispatch_event(payload.clone());
 }
 
-fn handle_idle_event(app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payload: &Value) -> Result<(), String> {
+fn handle_idle_event(_app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payload: &Value) -> Result<(), String> {
     if let Ok(mut handle) = ASYNC_HANDLE.write() {
         if let Some(join_handle) = handle.take() {
             join_handle.abort();
@@ -155,7 +165,7 @@ fn handle_idle_event(app: tauri::AppHandle<tauri::Wry>, _event_type: &str, paylo
         *handle = None;
     }
 
-    return dispatch_event(app, payload.clone());
+    return dispatch_event(payload.clone());
 }
 
 fn handle_badges_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
@@ -311,7 +321,7 @@ fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: tauri::Event) -> Resul
         "badges" => handle_badges_event(app, event_type, &payload),
         "cheermotes" => handle_cheermotes_event(app, event_type, &payload),
         "message" => Ok(()),
-        _ => dispatch_event(app, payload.clone())
+        _ => dispatch_event(payload.clone())
     };
 }
 
