@@ -17,6 +17,7 @@ mod betterttv;
 mod frankerfacez;
 mod seventv;
 
+pub type EmotesParserResult = Result<HashMap<String, UniChatEmote>, Box<dyn std::error::Error>>;
 pub static EMOTES_HASHSET: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
 pub fn fetch_shared_emotes(channel_id: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -24,15 +25,15 @@ pub fn fetch_shared_emotes(channel_id: &str) -> Result<(), Box<dyn std::error::E
 
     if let Ok(guard) = EMOTES_HASHSET.read() {
         if guard.is_empty() {
-            shared_emotes.extend(betterttv::fetch_global_emotes().unwrap_or_default());
-            shared_emotes.extend(frankerfacez::fetch_global_emotes().unwrap_or_default());
-            shared_emotes.extend(seventv::fetch_global_emotes().unwrap_or_default());
+            shared_emotes.extend(betterttv::fetch_global_emotes());
+            shared_emotes.extend(frankerfacez::fetch_global_emotes());
+            shared_emotes.extend(seventv::fetch_global_emotes());
         }
     }
 
-    shared_emotes.extend(betterttv::fetch_channel_emotes(channel_id).unwrap_or_default());
-    shared_emotes.extend(frankerfacez::fetch_channel_emotes(channel_id).unwrap_or_default());
-    shared_emotes.extend(seventv::fetch_channel_emotes(channel_id).unwrap_or_default());
+    shared_emotes.extend(betterttv::fetch_channel_emotes(channel_id));
+    shared_emotes.extend(frankerfacez::fetch_channel_emotes(channel_id));
+    shared_emotes.extend(seventv::fetch_channel_emotes(channel_id));
 
     let mut guard = EMOTES_HASHSET.write()?;
 
