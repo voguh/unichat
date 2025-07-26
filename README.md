@@ -1,7 +1,7 @@
 # Voguh's UniChat
 
 [![Version](https://img.shields.io/badge/version-v0.2.0--beta.3-blue)](https://github.com/voguh/unichat/releases)
-[![License](https://img.shields.io/badge/license-LGPL--3.0--only-green)](./LICENSE)
+[![License](https://img.shields.io/badge/license-MPL--2.0-green)](./LICENSE)
 [![Platforms](https://img.shields.io/badge/platform-windows%20%7C%20linux-lightgrey)]()
 
 UniChat is a tool for streamers who broadcast on YouTube and Twitch, providing a chat widget with support for third-party emotes and customization via HTML/CSS/JS.
@@ -17,7 +17,7 @@ UniChat is a tool for streamers who broadcast on YouTube and Twitch, providing a
 - **Third-Party Emotes:** Integration with BetterTTV, FrankerFaceZ, and 7TV.
 - **Chat Events:** Full support for messages, donations, subscriptions, raids, and more.
 - **Customizable Widgets:** Create and customize your own chat widgets using web technologies.
-- **Open Source:** Licensed under LGPL-3.0, allowing contributions and modifications.
+- **Open Source:** Licensed under MPL-2.0, allowing contributions and modifications.
 
 
 ## 🚀 Installation
@@ -86,4 +86,4 @@ Interested in contributing? Great! Here's the information you need to get starte
 
 ## 📜 License
 
-This project is licensed under the [GNU LESSER GENERAL PUBLIC LICENSE, Version 3](./LICENSE). The example widgets located in the `widgets/default` folder are an exception and are licensed under the MIT License.
+This project is licensed under the [Mozilla Public License, Version 2.0](./LICENSE). The example widgets located in the `widgets/default` folder are an exception and are licensed under the MIT License.

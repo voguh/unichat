@@ -2,17 +2,9 @@
  * UniChat
  * Copyright (C) 2024-2025 Voguh <voguhofc@protonmail.com>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
- * version 3 only, as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
 #![warn(clippy::implicit_return)]
@@ -29,7 +21,7 @@ use std::process::Command;
 // This is a "safe guard" to remember me to change license info if I change the license.
 fn get_license_info(license: &str) -> Result<(String, String), Box<dyn std::error::Error>> {
     let mut licenses: HashMap<&str, (&str, &str)> = HashMap::new();
-    licenses.insert("LGPL-3.0-only", ("GNU Lesser General Public License, Version 3", "https://www.gnu.org/licenses/lgpl-3.0.html"));
+    licenses.insert("MPL-2.0", ("Mozilla Public License, Version 2.0", "https://www.mozilla.org/en-US/MPL/2.0/"));
 
     if let Some((name, url)) = licenses.get(license) {
         return Ok((name.to_string(), url.to_string()));
