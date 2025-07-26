@@ -2,5 +2,5 @@
     "$schema": "../gen/schemas/desktop-schema.json",
     "identifier": "default-capability",
     "windows": ["main"],
-    "permissions": ["core:default", "store:default", "log:default", "opener:default"]
+    "permissions": ["core:default", "log:default", "opener:default", "store:default"]
 }

@@ -143,9 +143,9 @@ async fn main() {
     };
 
     tauri::Builder::default().setup(setup)
-        .plugin(tauri_plugin_store::Builder::default().build())
-        .plugin(tauri_plugin_log::Builder::new().level(log_level).build())
+        .plugin(tauri_plugin_log::Builder::default().level(log_level).build())
         .plugin(tauri_plugin_opener::Builder::default().build())
+        .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             commands::get_app_info,
             commands::is_dev,
