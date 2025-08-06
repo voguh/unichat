@@ -149,6 +149,8 @@ async fn main() {
         .invoke_handler(tauri::generate_handler![
             commands::get_app_info,
             commands::is_dev,
+            commands::requires_tour,
+            commands::end_tour,
             commands::store_get_item,
             commands::store_set_item,
             commands::toggle_webview,

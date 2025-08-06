@@ -178,25 +178,33 @@ export function DashboardHome(): React.ReactNode {
                 <Card className="preview-header" withBorder shadow="xs">
                     <div className="preview-header-widget-selector">
                         <Tooltip label="Widgets" position="bottom" withArrow>
-                            <Select value={selectedWidget} data={widgets} onChange={onChangeWidget} />
+                            <Select
+                                value={selectedWidget}
+                                data={widgets}
+                                onChange={onChangeWidget}
+                                data-tour="widgets-selector"
+                            />
                         </Tooltip>
                     </div>
 
                     <Tooltip label="Open user widgets folder" position="bottom" withArrow>
-                        <Button onClick={() => revealItemInDir(metadata.widgetsDir)}>
+                        <Button onClick={() => revealItemInDir(metadata.widgetsDir)} data-tour="user-widgets-directory">
                             <IconFolderFilled size="20" />
                         </Button>
                     </Tooltip>
 
                     <Tooltip label="Reload Widget view" position="bottom" withArrow>
-                        <Button onClick={reloadIframe}>
+                        <Button onClick={reloadIframe} data-tour="preview-reload">
                             <i className="fas fa-sync" />
                             <IconReload size="20" />
                         </Button>
                     </Tooltip>
 
                     <Tooltip label="Open in browser" position="bottom" withArrow>
-                        <Button onClick={() => openUrl(`http://localhost:9527/widget/${selectedWidget}`)}>
+                        <Button
+                            onClick={() => openUrl(`http://localhost:9527/widget/${selectedWidget}`)}
+                            data-tour="preview-open-in-browser"
+                        >
                             <IconWorld size="20" />
                         </Button>
                     </Tooltip>

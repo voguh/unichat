@@ -8,7 +8,7 @@
  ******************************************************************************/
 import React from "react";
 
-import { Badge, Button, Card, Divider, Menu, Text, Tooltip } from "@mantine/core";
+import { Badge, Button, Card, Divider, Menu, Tooltip } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { IconAdjustments, IconEraser, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -86,7 +86,7 @@ export function Dashboard(_props: Props): React.ReactNode {
             <Card className="sidebar" withBorder shadow="xs">
                 <div>
                     <Tooltip label="Clear chat history" position="right" withArrow>
-                        <Button size="sm" onClick={handleClearChat}>
+                        <Button size="sm" onClick={handleClearChat} data-tour="clear-chat">
                             <IconEraser size="20" />
                         </Button>
                     </Tooltip>
@@ -94,7 +94,7 @@ export function Dashboard(_props: Props): React.ReactNode {
 
                 <Menu position="right">
                     <Menu.Target>
-                        <Button variant="default">
+                        <Button variant="default" data-tour="settings">
                             <IconAdjustments size="20" />
                         </Button>
                     </Menu.Target>
@@ -103,11 +103,16 @@ export function Dashboard(_props: Props): React.ReactNode {
                             leftSection={<IconRefresh size="14" />}
                             color={hasUpdate ? "green" : null}
                             onClick={checkForUpdates}
+                            data-tour="settings-check-for-updates"
                         >
                             {hasUpdate ? "A new version is available!" : "Check for updates"}
                         </Menu.Item>
                         <Menu.Divider />
-                        <Menu.Item leftSection={<IconInfoCircle size="14" />} onClick={toggleAboutModal}>
+                        <Menu.Item
+                            leftSection={<IconInfoCircle size="14" />}
+                            onClick={toggleAboutModal}
+                            data-tour="settings-about"
+                        >
                             About
                         </Menu.Item>
                     </Menu.Dropdown>

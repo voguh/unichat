@@ -14,6 +14,7 @@ import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 
 import { Dashboard } from "./components/Dashboard";
+import { Tour } from "./components/Tour";
 import { AppContextProvider } from "./contexts/AppContext";
 
 const theme = createTheme({
@@ -28,6 +29,7 @@ export default function App(): JSX.Element {
                 <ModalsProvider modalProps={{ centered: true }}>
                     <Notifications position="bottom-center" />
                     <Dashboard />
+                    <Tour />
                 </ModalsProvider>
             </MantineProvider>
         </AppContextProvider>
