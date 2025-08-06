@@ -75,6 +75,46 @@ fn dispatch_event(mut payload: Value) -> Result<(), String> {
 
 /* ================================================================================================================== */
 
+async fn handle_create_connection(channel_name: &str) -> Result<Client, Box<dyn std::error::Error + Send + Sync>> {
+    let mills = rand::rng().random_range(10000..=99999);
+    let nickname = format!("justinfan{}", mills);
+
+    let config = Config {
+        server: Some(String::from("irc.chat.twitch.tv")),
+        port: Some(6667),
+        ..Config::default()
+    };
+
+    let mut client = Client::from_config(config).await?;
+
+    let capabilities = vec!["twitch.tv/commands", "twitch.tv/membership", "twitch.tv/tags"];
+    let capabilities = capabilities.into_iter().map(|cap| Capability::Custom(cap)).collect::<Vec<_>>();
+    client.send_cap_req(&capabilities)?;
+    client.send(Command::PASS(String::from("SCHMOOPIIE")))?;
+    client.send(Command::NICK(nickname.clone()))?;
+    client.send(Command::USER(nickname.clone(), String::from("8"), nickname.clone()))?;
+    client.send(Command::JOIN(format!("#{}", channel_name), None, None))?;
+
+    let mut stream = client.stream()?;
+    while let Some(message) = stream.next().await.transpose()? {
+        if let Command::PING(_server1, _server2) = message.command {
+            if let Err(e) = dispatch_event(json!({ "type": "ping" })) {
+                log::error!("Failed to handle Twitch PING event: {:?}", e);
+            }
+        } else if let Command::Response(response, _args) = message.command {
+            if response == Response::RPL_WELCOME {
+                if let Err(e) = dispatch_event(json!({ "type": "ping" })) {
+                    log::error!("Failed to handle Twitch PING event: {:?}", e);
+                }
+            }
+        } else if let Err(err) = handle_message_event(&message) {
+            log::error!("Failed to handle Twitch message event: {:?}", err);
+        }
+    }
+
+    return Ok(client);
+}
+
 fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
     let url = payload.get("url").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'url' field in Twitch '{event_type}' payload"))?;
@@ -90,57 +130,29 @@ fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payl
 
         *handle = Some(tauri::async_runtime::spawn(async move {
             let channel_name = channel_name.clone();
-            let mills = rand::rng().random_range(10000..=99999);
-            let nickname = format!("justinfan{}", mills);
-            let config = Config {
-                server: Some(String::from("irc.chat.twitch.tv")),
-                port: Some(6667),
-                ..Config::default()
-            };
 
-            let mut client = Client::from_config(config).await.unwrap();
-
-            let capabilities = vec!["twitch.tv/commands", "twitch.tv/membership", "twitch.tv/tags"];
-            let capabilities = capabilities.into_iter().map(|cap| Capability::Custom(cap)).collect::<Vec<_>>();
-            client.send_cap_req(&capabilities).unwrap();
-            client.send(Command::PASS(String::from("SCHMOOPIIE"))).unwrap();
-            client.send(Command::NICK(nickname.clone())).unwrap();
-            client.send(Command::USER(nickname.clone(), String::from("8"), nickname.clone())).unwrap();
-            client.send(Command::JOIN(format!("#{}", channel_name), None, None)).unwrap();
-
-            let mut stream = client.stream().unwrap();
             loop {
-                match stream.next().await.transpose() {
-                    Ok(Some(message)) => {
-                        if let Command::PING(_server1, _server2) = message.command {
-                            if let Err(e) = dispatch_event(json!({ "type": "ping" })) {
-                                log::error!("Failed to handle Twitch PING event: {:?}", e);
-                            }
-                        } else if let Command::Response(response, _args) = message.command {
-                            if response == Response::RPL_WELCOME {
-                                if let Err(e) = dispatch_event(json!({ "type": "ping" })) {
-                                    log::error!("Failed to handle Twitch PING event: {:?}", e);
-                                }
-                            }
-                        } else if let Err(err) = handle_message_event(&message) {
-                            log::error!("Failed to handle Twitch message event: {:?}", err);
-                        }
+                log::info!("Connecting to Twitch IRC join channel '#{}'...", &channel_name);
+
+                let connect_result = handle_create_connection(&channel_name).await;
+
+                log::info!("Twitch IRC client disconnected. Attempting to reconnect...");
+                if let Err(e) = connect_result {
+                    log::error!("Failed to connect to Twitch IRC: {:?}", e);
+                    tokio::time::sleep(Duration::from_secs(5)).await;
+                } else if let Ok(client) = connect_result {
+                    log::info!("Twitch IRC task cancelled. Parting from channel: {}", channel_name);
+                    if let Err(e) = client.send(Command::PART(format!("#{}", channel_name), None)) {
+                        log::error!("Failed to send PART command: {:?}", e);
                     }
-                    Ok(None) => {},
-                    Err(_cancelled) => {
-                        log::info!("Twitch IRC task cancelled. Parting from channel: {}", channel_name);
-                        if let Err(e) = client.send(Command::PART(format!("#{}", channel_name), None)) {
-                            log::error!("Failed to send PART command: {:?}", e);
-                        }
 
-                        log::info!("Quitting from Twitch IRC server.");
-                        if let Err(e) = client.send(Command::QUIT(None)) {
-                            log::error!("Failed to send QUIT command: {:?}", e);
-                        }
-
-                        break;
+                    log::info!("Quitting from Twitch IRC server.");
+                    if let Err(e) = client.send(Command::QUIT(None)) {
+                        log::error!("Failed to send QUIT command: {:?}", e);
                     }
                 }
+
+                tokio::time::sleep(Duration::from_secs(5)).await;
             }
         }));
     }
