@@ -9,7 +9,7 @@
 
 import React from "react";
 
-import { Button, Card, ComboboxItemGroup, Select, Tooltip } from "@mantine/core";
+import { Badge, Button, Card, ComboboxItemGroup, List, Select, Tooltip } from "@mantine/core";
 import { IconFolderFilled, IconReload, IconWorld } from "@tabler/icons-react";
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 
@@ -39,6 +39,27 @@ export function DashboardHome(): React.ReactNode {
     }
 
     /* ====================================================================== */
+
+    function mountYouTubeEditingTooltip(): React.ReactNode {
+        // prettier-ignore
+        return (
+            <>
+                You can enter just the video ID or one of the following URLs to get the YouTube chat:
+                <br />
+                <List size="xs">
+                    <li dangerouslySetInnerHTML={{ __html: "youtube.com/live_chat?v={VIDEO_ID}" }} />
+                    <li dangerouslySetInnerHTML={{ __html: "youtube.com/watch?v={VIDEO_ID}" }} />
+                    <li dangerouslySetInnerHTML={{ __html: "youtube.com/live/{VIDEO_ID}" }} />
+                    <li dangerouslySetInnerHTML={{ __html: "youtube.com/shorts/{VIDEO_ID}" }} />
+                    <li dangerouslySetInnerHTML={{ __html: "youtu.be/{VIDEO_ID}" }} />
+                </List>
+                <br />
+                You can enter the URL with or without the <Badge size="xs" radius="xs">www.</Badge> prefix.
+                <br />
+                You can also include or omit the <Badge size="xs" radius="xs" color="green">https://</Badge> or <Badge size="xs" radius="xs" color="red">http://</Badge> prefix.
+            </>
+        );
+    }
 
     function validateYouTubeChatUrl(value: string): [string, string] {
         // Normalize the URL to ensure it starts with a valid protocol
@@ -71,6 +92,24 @@ export function DashboardHome(): React.ReactNode {
     }
 
     /* ====================================================================== */
+
+    function mountTwtichEditingTooltip(): React.ReactNode {
+        // prettier-ignore
+        return (
+            <>
+                You can enter just the channel name or one of the following URLs to get the Twitch chat:
+                <br />
+                <List size="xs">
+                    <li dangerouslySetInnerHTML={{ __html: "twitch.tv/popout/{CHANNEL_NAME}/chat" }} />
+                    <li dangerouslySetInnerHTML={{ __html: "twitch.tv/{CHANNEL_NAME}" }} />
+                </List>
+                <br />
+                You can enter the URL with or without the <Badge size="xs" radius="xs">www.</Badge> prefix.
+                <br />
+                You can also include or omit the <Badge size="xs" radius="xs" color="green">https://</Badge> or <Badge size="xs" radius="xs" color="red">http://</Badge> prefix.
+            </>
+        );
+    }
 
     function validateTwitchChatUrl(value: string): [string, string] {
         // Normalize the URL to ensure it starts with a valid protocol
@@ -124,8 +163,16 @@ export function DashboardHome(): React.ReactNode {
     return (
         <DashboardHomeStyledContainer>
             <div className="fields">
-                <ScrapperCard type="youtube" validateUrl={validateYouTubeChatUrl} />
-                <ScrapperCard type="twitch" validateUrl={validateTwitchChatUrl} />
+                <ScrapperCard
+                    type="youtube"
+                    validateUrl={validateYouTubeChatUrl}
+                    editingTooltip={mountYouTubeEditingTooltip()}
+                />
+                <ScrapperCard
+                    type="twitch"
+                    validateUrl={validateTwitchChatUrl}
+                    editingTooltip={mountTwtichEditingTooltip()}
+                />
             </div>
             <div className="preview">
                 <Card className="preview-header" withBorder shadow="xs">

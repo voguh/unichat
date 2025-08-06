@@ -33,6 +33,7 @@ import { ScrapperCardStyledContainer } from "./styled";
 interface Props {
     type: "youtube" | "twitch";
     validateUrl(url: string): [string, string];
+    editingTooltip: React.ReactNode;
 }
 
 const DEFAULT_STATUS_EVENT: IPCStatusEvent = {
@@ -41,7 +42,7 @@ const DEFAULT_STATUS_EVENT: IPCStatusEvent = {
     timestamp: Date.now()
 };
 
-export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
+export function ScrapperCard({ type, validateUrl, editingTooltip }: Props): React.ReactNode {
     const displayName = type === "youtube" ? "YouTube" : "Twitch";
     const [loading, setLoading] = React.useState(true);
     const [event, setEvent] = React.useState<IPCStatusEvent>({ ...DEFAULT_STATUS_EVENT, platform: type });
@@ -221,14 +222,22 @@ export function ScrapperCard({ type, validateUrl }: Props): React.ReactNode {
     return (
         <Card withBorder shadow="xs">
             <ScrapperCardStyledContainer>
-                <TextInput
-                    size="sm"
-                    label={`Scrapper: ${displayName} chat URL`}
-                    placeholder={handlePlaceholderMessage()}
-                    ref={inputRef}
-                    disabled={loading || inputRef.current?.value === currentActiveUrl}
-                    onChange={() => error != null && setError(null)}
-                />
+                <Tooltip
+                    label={editingTooltip}
+                    position="bottom-start"
+                    color="gray"
+                    events={{ hover: false, focus: true, touch: true }}
+                    style={{ maxWidth: "407px", whiteSpace: "normal" }}
+                >
+                    <TextInput
+                        size="sm"
+                        label={`Scrapper: ${displayName} chat URL`}
+                        placeholder={handlePlaceholderMessage()}
+                        ref={inputRef}
+                        disabled={loading || inputRef.current?.value === currentActiveUrl}
+                        onChange={() => error != null && setError(null)}
+                    />
+                </Tooltip>
                 <Tooltip position="left" label={STATUS_EVENT_DESCRIPTION[event.type]}>
                     <Button
                         size="sm"
