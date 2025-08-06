@@ -53,6 +53,14 @@ export class CommandService {
         return invoke("toggle_webview", { label });
     }
 
+    public async requiresTour(): Promise<boolean> {
+        return invoke("requires_tour");
+    }
+
+    public async endTour(): Promise<void> {
+        await invoke("end_tour");
+    }
+
     public async dispatchClearChat(): Promise<void> {
         await invoke("dispatch_clear_chat");
     }

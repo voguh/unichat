@@ -11,8 +11,8 @@ import React from "react";
 
 import { alpha, Button, DEFAULT_THEME } from "@mantine/core";
 import { IconCheck, IconChevronLeft, IconChevronRight, IconX } from "@tabler/icons-react";
-import { invoke } from "@tauri-apps/api/core";
 
+import { commandService } from "unichat/services/commandService";
 import { Dimensions } from "unichat/types";
 
 import { stageBuilder } from "./stages/genericStageBuilder";
@@ -46,7 +46,7 @@ export function Tour(_props: Props): React.ReactNode {
 
     async function endTour(): Promise<void> {
         setCurrentStage(-1);
-        invoke("end_tour");
+        commandService.endTour();
     }
 
     function previousStage(): void {
@@ -75,14 +75,7 @@ export function Tour(_props: Props): React.ReactNode {
             setDimensions({ width: window.innerWidth, height: window.innerHeight });
         }
 
-        invoke<boolean>("requires_tour").then((firstTimeRun) => {
-            if (firstTimeRun) {
-                setCurrentStage(0);
-            } else {
-                setCurrentStage(-1);
-            }
-        });
-
+        commandService.requiresTour().then((firstTimeRun) => setCurrentStage(firstTimeRun ? 0 : -1));
         window.addEventListener("resize", handleResize);
 
         return () => {
