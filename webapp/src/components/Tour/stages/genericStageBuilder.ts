@@ -114,6 +114,7 @@ export function stageBuilder(selector: string, title: string, subTitle: string, 
             subTitleBody.style.width = "100%";
             subTitleBody.style.height = "100%";
             subTitleBody.style.fontSize = "14px";
+            subTitleBody.style.textAlign = hLine < 0 ? "left" : "right";
             subTitleBody.style.color = INDICATORS_COLOR;
             subTitleBody.textContent = subTitle;
 

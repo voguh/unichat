@@ -36,7 +36,21 @@ const stages = [
     stageBuilder("preview-open-in-browser", "Open preview in browser", null, 50, -300),
     stageBuilder("settings", "Settings", null, -50, 300),
     settingsStageBuilder("settings-check-for-updates", "Check for updates", null, -50, 300),
-    settingsStageBuilder("settings-about", "Unichat about", null, -50, 300)
+    settingsStageBuilder("settings-about", "Unichat about", null, -50, 300),
+    stageBuilder(
+        "youtube-chat-url-input",
+        "YouTube Chat URL",
+        "Also you can paste normal video, shorts or live urls or direct video id",
+        50,
+        300
+    ),
+    stageBuilder(
+        "twitch-chat-url-input",
+        "Twitch Chat URL",
+        "Also you can paste normal twitch url or direct channel name",
+        50,
+        300
+    )
 ];
 export function Tour(_props: Props): React.ReactNode {
     const [dimensions, setDimensions] = React.useState({ width: window.innerWidth, height: window.innerHeight });

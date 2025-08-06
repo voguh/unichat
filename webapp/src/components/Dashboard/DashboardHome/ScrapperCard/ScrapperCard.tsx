@@ -236,6 +236,7 @@ export function ScrapperCard({ type, validateUrl, editingTooltip }: Props): Reac
                         ref={inputRef}
                         disabled={loading || inputRef.current?.value === currentActiveUrl}
                         onChange={() => error != null && setError(null)}
+                        data-tour={`${type}-chat-url-input`}
                     />
                 </Tooltip>
                 <Tooltip position="left" label={STATUS_EVENT_DESCRIPTION[event.type]}>
