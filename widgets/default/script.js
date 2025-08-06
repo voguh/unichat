@@ -1,4 +1,5 @@
 const USE_PLATFORM_BADGES = true;
+const IS_IN_OBS_DOCK = new URLSearchParams(window.location.search).get("obs_dock") === "true";
 const MAIN_CONTAINER = document.querySelector("#main-container");
 const MESSAGE_TEMPLATE = document.querySelector("#chatlist_item").innerHTML;
 const DONATE_TEMPLATE = document.querySelector("#donate_item").innerHTML;
@@ -54,9 +55,16 @@ function removeChildren() {
 window.addEventListener("unichat:connected", function () {
     // This listener doesn't receive any data, acctually it just notifies
     // that connection is established or re-established.
+
+    if (IS_IN_OBS_DOCK) {
+        MAIN_CONTAINER.style.maxHeight = "calc(100vh - 32px)";
+        MAIN_CONTAINER.style.overflowY = "auto";
+    }
 });
 
 window.addEventListener("unichat:event", function ({ detail: event }) {
+    const isAtBottom = MAIN_CONTAINER.scrollHeight - MAIN_CONTAINER.scrollTop <= MAIN_CONTAINER.clientHeight + 5;
+
     if (USE_PLATFORM_BADGES === true && event != null && event.data != null && Array.isArray(event.data.authorBadges)) {
         let imgUrl;
         if (event.data.platform === "youtube") {
@@ -158,6 +166,10 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         }
     } else if (event.type === 'unichat:clear') {
         MAIN_CONTAINER.innerHTML = '';
+    }
+
+    if(isAtBottom && IS_IN_OBS_DOCK) {
+        MAIN_CONTAINER.scrollTop = MAIN_CONTAINER.scrollHeight;
     }
 
     requestAnimationFrame(removeChildren);
