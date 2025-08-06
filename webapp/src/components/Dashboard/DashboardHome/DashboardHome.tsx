@@ -27,20 +27,34 @@ export function DashboardHome(): React.ReactNode {
     const { metadata } = React.useContext(AppContext);
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
+    function normalizeUrlScheme(value: string): string {
+        value = value.replace(/^https?:\/\//, "");
+        value = value.replace(/^www\./, "");
+
+        if (Strings.isValidDomain(value)) {
+            return `https://${value}`;
+        }
+
+        return value;
+    }
+
     /* ====================================================================== */
 
     function validateYouTubeChatUrl(value: string): [string, string] {
         // Normalize the URL to ensure it starts with a valid protocol
-        if (value.startsWith("youtube.com")) {
-            value = `https://www.${value}`;
-        } else if (value.startsWith("www.youtube.com")) {
-            value = `https://${value}`;
-        } else if (value.startsWith("youtu.be")) {
-            value = `https://${value}`;
+        value = normalizeUrlScheme(value);
+
+        // Ensure that the URL starts with valid domain
+        if (value.startsWith("https://youtube.com")) {
+            value = value.replace("https://", "https://www.");
         }
 
         let videoId = value;
-        if (value.startsWith("https://www.youtube.com/live/") || value.startsWith("https://youtu.be")) {
+        if (
+            value.startsWith("https://www.youtube.com/live/") ||
+            value.startsWith("https://www.youtube.com/shorts/") ||
+            value.startsWith("https://youtu.be")
+        ) {
             const parts = value.split("?")[0].split("/");
             videoId = parts.at(-1);
         } else if (value.startsWith("https://www.youtube.com")) {
@@ -48,6 +62,7 @@ export function DashboardHome(): React.ReactNode {
             videoId = params.get("v");
         }
 
+        console.log("Validating YouTube chat URL:", value, "Video ID:", videoId);
         if (!Strings.isValidYouTubeVideoId(videoId)) {
             throw new Error("Invalid YouTube chat URL");
         }
@@ -59,10 +74,11 @@ export function DashboardHome(): React.ReactNode {
 
     function validateTwitchChatUrl(value: string): [string, string] {
         // Normalize the URL to ensure it starts with a valid protocol
-        if (value.startsWith("twitch.tv")) {
-            value = `https://www.${value}`;
-        } else if (value.startsWith("www.twitch.tv")) {
-            value = `https://${value}`;
+        value = normalizeUrlScheme(value);
+
+        // Ensure that the URL starts with valid domain
+        if (value.startsWith("https://twitch.tv")) {
+            value = value.replace("https://", "https://www.");
         }
 
         let channelName = value;

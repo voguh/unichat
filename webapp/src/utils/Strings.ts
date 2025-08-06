@@ -55,4 +55,13 @@ export class Strings {
     public static isValidYouTubeVideoId(videoId: string): boolean {
         return /^[0-9A-Za-z_-]{10}[048AEIMQUYcgkosw]$/.test(videoId);
     }
+
+    public static isValidDomain(url: string): boolean {
+        let value = url.trim();
+        value = value.replace(/^https?:\/\//, "");
+        value = value.replace(/^www\./, "");
+        value = value.split("/")[0];
+
+        return /^(youtube\.com|youtu\.be|twitch\.tv)$/i.test(value);
+    }
 }
