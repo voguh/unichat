@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 
+:root {
+    --maximum-width: 100vw;
+}
+
 html, body {
     font-family: "Nunito", sans-serif;
     box-sizing: border-box;
@@ -11,7 +15,7 @@ html, body {
     position: absolute;
     bottom: 0;
     left: 0;
-    width: calc(var(--maximum-width, 100%) - 32px);
+    width: calc(--maximum-width - 32px);
     padding: 16px;
 }
 
@@ -38,7 +42,7 @@ html, body {
     background: #343a40;
 
     overflow: hidden;
-    max-width: calc(var(--maximum-width, 100%) - 64px);
+    max-width: calc(var(--maximum-width) - 64px);
 }
 
 #main-container > div > .author-meta > .badges {

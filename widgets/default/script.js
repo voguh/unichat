@@ -1,5 +1,4 @@
 const USE_PLATFORM_BADGES = true;
-let FIRST_LOAD = false;
 const MAIN_CONTAINER = document.querySelector("#main-container");
 const MESSAGE_TEMPLATE = document.querySelector("#chatlist_item").innerHTML;
 const DONATE_TEMPLATE = document.querySelector("#donate_item").innerHTML;
@@ -53,10 +52,8 @@ function removeChildren() {
 
 // Dispatch every time when websocket is connected (or reconnected)
 window.addEventListener("unichat:connected", function () {
-    if (FIRST_LOAD === false) {
-        FIRST_LOAD = true;
-        MAIN_CONTAINER.style.setProperty("--maximum-width", window.innerWidth + "px");
-    }
+    // This listener doesn't receive any data, acctually it just notifies
+    // that connection is established or re-established.
 });
 
 window.addEventListener("unichat:event", function ({ detail: event }) {
