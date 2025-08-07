@@ -129,7 +129,6 @@ jobs:
 
   rust-install-dependencies:
     runs-on: ${{ matrix.os }}
-    needs: webapp-build
     strategy:
       matrix:
         os: [ubuntu-24.04, windows-2022]
@@ -147,13 +146,12 @@ jobs:
         if: matrix.os == 'ubuntu-24.04'
         run: |
           sudo apt update
-          sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+          sudo apt install --no-install-recommends -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
 
       - name: Rust toolchain setup
         uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: ${{ env.RUST_VERSION }}
-          components: clippy
 
       - name: Cache cargo registry
         uses: actions/cache@v4.2.3
@@ -171,7 +169,7 @@ jobs:
 
   rust-lint:
     runs-on: ubuntu-24.04
-    needs: rust-install-dependencies
+    needs: [webapp-build, rust-install-dependencies]
     continue-on-error: true
     steps:
       - name: Checkout repository
@@ -186,7 +184,7 @@ jobs:
       - name: Setup tauri dependencies
         run: |
           sudo apt update
-          sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+          sudo apt install --no-install-recommends -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
 
       - name: Rust toolchain setup
         uses: dtolnay/rust-toolchain@v1
@@ -210,7 +208,7 @@ jobs:
 
   rust-tests:
     runs-on: ${{ matrix.os }}
-    needs: rust-install-dependencies
+    needs: [webapp-build, rust-install-dependencies]
     strategy:
       matrix:
         os: [ubuntu-24.04, windows-2022]
@@ -228,13 +226,12 @@ jobs:
         if: matrix.os == 'ubuntu-24.04'
         run: |
           sudo apt update
-          sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+          sudo apt install --no-install-recommends -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
 
       - name: Rust toolchain setup
         uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: ${{ env.RUST_VERSION }}
-          components: clippy
 
       - name: Cache cargo registry
         uses: actions/cache@v4.2.3
@@ -270,13 +267,12 @@ jobs:
         if: matrix.os == 'ubuntu-24.04'
         run: |
           sudo apt update
-          sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+          sudo apt install --no-install-recommends -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
 
       - name: Rust toolchain setup
         uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: ${{ env.RUST_VERSION }}
-          components: clippy
 
       - name: Cache cargo registry
         uses: actions/cache@v4.2.3
