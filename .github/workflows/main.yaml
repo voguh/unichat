@@ -173,7 +173,7 @@ jobs:
           cp ${{ github.workspace }}/target/linux/appimage/*.AppImage dist/appimage/unichat-$VERSION.AppImage
           cp ${{ github.workspace }}/target/linux/deb/*.deb dist/deb/unichat-$VERSION.deb
           cp ${{ github.workspace }}/target/linux/rpm/*.rpm dist/rpm/unichat-$VERSION.rpm
-          cp ${{ github.workspace }}/target/windows/bundle/nsis/*.exe dist/windows/unichat-$VERSION.exe
+          cp ${{ github.workspace }}/target/windows/nsis/*.exe dist/windows/unichat-$VERSION.exe
           for folder in dist/*; do
             if [ -d "$folder" ]; then
               (cd "$folder" && for file in ./*; do sha256sum "$file" > "${file}.sha256"; done)
