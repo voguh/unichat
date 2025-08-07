@@ -341,10 +341,27 @@ jobs:
             fi
           done
 
-      - name: Upload artifacts
-        uses: ./.github/actions/upload-artifact
-        with:
-          GITHUB_TOKEN: ${{ github.token }}
-          base-folder: dist
-          prefix: unichat-${{ steps.setup_version.outputs.revision }}
+      - name: Upload to GitHub Release
+        if: github.event_name == 'release'
+        shell: bash
+        run: |
+          if [ -n "$(command -v gh)" ]; then
+            echo "GitHub CLI is installed. Proceeding with to create a GitHub Release."
+            echo "${{ inputs.GITHUB_TOKEN }}" | gh auth login --with-token
+            for folder in ${{ github.workspace }}/dist/*; do
+              if [ -d "$folder" ] && [ "$(ls -A "$folder")" ]; then
+                echo "Uploading files from: $folder"
+                for file in $folder/*; do
+                  if [ -f "$file" ]; then
+                    echo "Uploading file: $file"
+                    gh release upload $GITHUB_REF_NAME "$file" || echo "Failed to upload $file to GitHub Release"
+                  fi
+                done
+              fi
+            done
+            echo "All files uploaded to GitHub Release successfully."
+          else
+            echo "GitHub CLI is not installed. Skipping upload to GitHub Release."
+            exit 0
+          fi
 
