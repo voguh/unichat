@@ -1,5 +1,7 @@
-const USE_PLATFORM_BADGES = true;
-const IS_IN_OBS_DOCK = new URLSearchParams(window.location.search).get("obs_dock") === "true";
+const searchQuery = new URLSearchParams(window.location.search);
+const USE_PLATFORM_BADGES = !(searchQuery.get("use_platform_badges") === "false");
+const IS_IN_OBS_DOCK = searchQuery.get("obs_dock") === "true";
+const MAXIMUM_MESSAGES = parseInt(searchQuery.get("max_messages") ?? "50", 10);
 const MAIN_CONTAINER = document.querySelector("#main-container");
 const MESSAGE_TEMPLATE = document.querySelector("#chatlist_item").innerHTML;
 const DONATE_TEMPLATE = document.querySelector("#donate_item").innerHTML;
@@ -45,7 +47,7 @@ function parseTierName(platform, tier) {
 }
 
 function removeChildren() {
-  if(MAIN_CONTAINER.children > 50) {
+  if(MAIN_CONTAINER.children > MAXIMUM_MESSAGES) {
     MAIN_CONTAINER.firstChild.remove();
     requestAnimationFrame(removeChildren);
   }
