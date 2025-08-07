@@ -106,12 +106,12 @@ jobs:
 
       - name: Prepare configuration
         run: |
-          cargo install tauri-cli --locked
+          npm install -g @tauri-apps/cli
           jq '.build.beforeBuildCommand = ""' tauri.conf.json > tauri.conf.tmp
           mv tauri.conf.tmp tauri.conf.json
 
       - name: Run build for linux
-        run: cargo tauri build
+        run: tauri build
 
       - name: Prepare windows environment
         run: |
@@ -120,8 +120,7 @@ jobs:
           cargo install --locked cargo-xwin
 
       - name: Run build for windows
-        run: |
-          cargo tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
+        run: tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
 
       - name: Setup version
         id: setup_version
