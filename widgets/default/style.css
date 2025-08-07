@@ -15,7 +15,7 @@ html, body {
     position: absolute;
     bottom: 0;
     left: 0;
-    width: calc(--maximum-width - 32px);
+    width: calc(var(--maximum-width) - 32px);
     padding: 16px;
 }
 
@@ -28,6 +28,7 @@ html, body {
     --badge-size: 18px;
 
     width: fit-content;
+    max-width: calc(var(--maximum-width) - 64px);
     height: var(--badge-size);
     position: absolute;
     top: 0;
@@ -42,7 +43,6 @@ html, body {
     background: #343a40;
 
     overflow: hidden;
-    max-width: calc(var(--maximum-width) - 64px);
 }
 
 #main-container > div > .author-meta > .badges {
@@ -175,6 +175,7 @@ html, body {
 }
 
 #main-container > .sponsor-item > .message-wrapper > .message {
+    width: calc(var(--maximum-width) - 32px);
     margin-top: 8px;
     background: rgba(0, 0, 0, 0.25);
     border-radius: 4px;
