@@ -235,7 +235,7 @@ jobs:
       - name: Run test
         run: cargo test --all-targets --all-features
 
-  rust-build:
+  package:
     runs-on: ${{ matrix.os }}
     needs: rust-tests
     strategy:
@@ -289,7 +289,7 @@ jobs:
 
   publish:
     runs-on: ubuntu-24.04
-    needs: rust-build
+    needs: package
     if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout repository
