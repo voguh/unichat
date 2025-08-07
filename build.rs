@@ -7,7 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-#![warn(clippy::implicit_return)]
+#![allow(clippy::implicit_return)]
 #![allow(clippy::needless_return)]
 #![allow(clippy::redundant_field_names)]
 
