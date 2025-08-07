@@ -30,8 +30,8 @@ export const INDICATORS_COLOR = DEFAULT_THEME.colors.green[6];
 
 const stages = [
     stageBuilder("clear-chat", "Clear chat history", null, 50, 200),
+    stageBuilder("user-widgets-directory", "Open user widgets directory", null, 50, 300),
     stageBuilder("widgets-selector", "Widget selector", null, 50, -200),
-    stageBuilder("user-widgets-directory", "Open user widgets directory", null, 50, -300),
     stageBuilder("preview-reload", "Reload preview", null, 50, -200),
     stageBuilder("preview-open-in-browser", "Open preview in browser", null, 50, -300),
     stageBuilder("settings", "Settings", null, -50, 300),

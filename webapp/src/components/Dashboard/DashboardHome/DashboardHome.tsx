@@ -10,21 +10,20 @@
 import React from "react";
 
 import { Badge, Button, Card, ComboboxItemGroup, List, Select, Tooltip } from "@mantine/core";
-import { IconFolderFilled, IconReload, IconWorld } from "@tabler/icons-react";
-import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
+import { IconReload, IconWorld } from "@tabler/icons-react";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { AppContext } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
 import { Strings } from "unichat/utils/Strings";
 
 import { ScrapperCard } from "./ScrapperCard/ScrapperCard";
 import { DashboardHomeStyledContainer } from "./styled";
 
+const WIDGET_URL_PREFIX = "http://localhost:9527/widget";
 export function DashboardHome(): React.ReactNode {
-    const [selectedWidget, setSelectedWidget] = React.useState("default");
+    const [selectedWidgetUrl, setSelectedWidgetUrl] = React.useState(`${WIDGET_URL_PREFIX}/default`);
     const [widgets, setWidgets] = React.useState<ComboboxItemGroup<string>[]>([]);
 
-    const { metadata } = React.useContext(AppContext);
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
     function normalizeUrlScheme(value: string): string {
@@ -140,15 +139,17 @@ export function DashboardHome(): React.ReactNode {
 
     /* ====================================================================== */
 
-    function onChangeWidget(widgetName: string): void {
-        setSelectedWidget(widgetName);
+    function onChangeWidget(widgetUrl: string): void {
+        setSelectedWidgetUrl(widgetUrl);
     }
 
     async function reloadIframe(): Promise<void> {
         const widgets = await commandService.listWidgets();
         setWidgets(widgets);
 
-        iframeRef.current?.contentWindow.location.reload();
+        if (iframeRef.current) {
+            iframeRef.current.src = selectedWidgetUrl;
+        }
     }
 
     React.useEffect(() => {
@@ -177,44 +178,32 @@ export function DashboardHome(): React.ReactNode {
             <div className="preview">
                 <Card className="preview-header" withBorder shadow="xs">
                     <div className="preview-header-widget-selector">
-                        <Tooltip label="Widgets" position="bottom" withArrow>
-                            <Select
-                                value={selectedWidget}
-                                data={widgets}
-                                onChange={onChangeWidget}
-                                data-tour="widgets-selector"
-                            />
-                        </Tooltip>
+                        <Select
+                            value={selectedWidgetUrl}
+                            data={widgets.map((group) => ({
+                                ...group,
+                                items: group.items.map((item) => `${WIDGET_URL_PREFIX}/${item}`)
+                            }))}
+                            onChange={onChangeWidget}
+                            data-tour="widgets-selector"
+                        />
                     </div>
 
-                    <Tooltip label="Open user widgets folder" position="bottom" withArrow>
-                        <Button onClick={() => revealItemInDir(metadata.widgetsDir)} data-tour="user-widgets-directory">
-                            <IconFolderFilled size="20" />
-                        </Button>
-                    </Tooltip>
-
-                    <Tooltip label="Reload Widget view" position="bottom" withArrow>
+                    <Tooltip label="Reload widget view" position="left" withArrow>
                         <Button onClick={reloadIframe} data-tour="preview-reload">
                             <i className="fas fa-sync" />
                             <IconReload size="20" />
                         </Button>
                     </Tooltip>
 
-                    <Tooltip label="Open in browser" position="bottom" withArrow>
-                        <Button
-                            onClick={() => openUrl(`http://localhost:9527/widget/${selectedWidget}`)}
-                            data-tour="preview-open-in-browser"
-                        >
+                    <Tooltip label="Open in browser" position="left" withArrow>
+                        <Button onClick={() => openUrl(selectedWidgetUrl)} data-tour="preview-open-in-browser">
                             <IconWorld size="20" />
                         </Button>
                     </Tooltip>
                 </Card>
                 <div className="iframe-wrapper">
-                    <iframe
-                        ref={iframeRef}
-                        src={`http://localhost:9527/widget/${selectedWidget}`}
-                        sandbox="allow-scripts"
-                    />
+                    <iframe ref={iframeRef} src={selectedWidgetUrl} sandbox="allow-scripts" />
                 </div>
             </div>
         </DashboardHomeStyledContainer>

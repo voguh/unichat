@@ -10,8 +10,8 @@ import React from "react";
 
 import { Badge, Button, Card, Divider, Menu, Tooltip } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { IconAdjustments, IconEraser, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { IconAdjustments, IconEraser, IconFolder, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
+import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 import { marked } from "marked";
 import semver from "semver";
 
@@ -88,6 +88,11 @@ export function Dashboard(_props: Props): React.ReactNode {
                     <Tooltip label="Clear chat history" position="right" withArrow>
                         <Button size="sm" onClick={handleClearChat} data-tour="clear-chat">
                             <IconEraser size="20" />
+                        </Button>
+                    </Tooltip>
+                    <Tooltip label="Open user widgets folder" position="right" withArrow>
+                        <Button onClick={() => revealItemInDir(metadata.widgetsDir)} data-tour="user-widgets-directory">
+                            <IconFolder size="20" />
                         </Button>
                     </Tooltip>
                 </div>
