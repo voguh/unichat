@@ -136,18 +136,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
 
-      - name: Download webapp artifact
-        uses: actions/download-artifact@v5.0.0
-        with:
-          name: webapp-dist
-          path: ${{ env.TAURI_FRONTEND_PATH }}/dist
-
-      - name: Setup tauri dependencies
-        if: matrix.os == 'ubuntu-24.04'
-        run: |
-          sudo apt update
-          sudo apt install --no-install-recommends -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
-
       - name: Rust toolchain setup
         uses: dtolnay/rust-toolchain@v1
         with:
