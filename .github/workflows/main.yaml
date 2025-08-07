@@ -147,10 +147,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
           path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry
-            ~/.cargo/git
-            target/
+            ${{ env.HOME }}/.cargo/bin/
+            ${{ env.HOME }}/.cargo/registry
+            ${{ env.HOME }}/.cargo/git
+            ${{ github.workspace }}/target
 
       - name: Install dependencies
         run: cargo fetch --locked
@@ -186,10 +186,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
           path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry
-            ~/.cargo/git
-            target/
+            ${{ env.HOME }}/.cargo/bin/
+            ${{ env.HOME }}/.cargo/registry
+            ${{ env.HOME }}/.cargo/git
+            ${{ github.workspace }}/target
 
       - name: Run lint
         run: cargo clippy --all-targets --all-features
@@ -227,10 +227,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
           path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry
-            ~/.cargo/git
-            target/
+            ${{ env.HOME }}/.cargo/bin/
+            ${{ env.HOME }}/.cargo/registry
+            ${{ env.HOME }}/.cargo/git
+            ${{ github.workspace }}/target
 
       - name: Run test
         run: cargo test --all-targets --all-features
@@ -268,10 +268,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
           path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry
-            ~/.cargo/git
-            target/
+            ${{ env.HOME }}/.cargo/bin/
+            ${{ env.HOME }}/.cargo/registry
+            ${{ env.HOME }}/.cargo/git
+            ${{ github.workspace }}/target
 
       - name: Prepare configuration
         run: |
