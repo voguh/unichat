@@ -26,8 +26,11 @@ runs:
         if [ -d "${{ inputs.base-folder }}/rpm" ]; then
           echo "rpm=true" >> $GITHUB_OUTPUT
         fi
-        if [ -d "${{ inputs.base-folder }}/windows" ]; then
-          echo "windows=true" >> $GITHUB_OUTPUT
+        if [ -d "${{ inputs.base-folder }}/nsis" ]; then
+          echo "nsis=true" >> $GITHUB_OUTPUT
+        fi
+        if [ -d "${{ inputs.base-folder }}/msi" ]; then
+          echo "msi=true" >> $GITHUB_OUTPUT
         fi
 
     - name: Upload to GitHub Actions - AppImage artifacts
@@ -51,12 +54,19 @@ runs:
         name: ${{ inputs.prefix }}-rpm
         path: ${{ inputs.base-folder }}/rpm
 
-    - name: Upload to GitHub Actions - Windows artifacts
-      if: ${{ steps.check_folders.outputs.windows == 'true' }}
+    - name: Upload to GitHub Actions - Windows NSIS artifacts
+      if: ${{ steps.check_folders.outputs.nsis == 'true' }}
       uses: actions/upload-artifact@v4.6.2
       with:
-        name: ${{ inputs.prefix }}-windows
-        path: ${{ inputs.base-folder }}/windows
+        name: ${{ inputs.prefix }}-nsis
+        path: ${{ inputs.base-folder }}/nsis
+
+    - name: Upload to GitHub Actions - Windows MSI artifacts
+      if: ${{ steps.check_folders.outputs.msi == 'true' }}
+      uses: actions/upload-artifact@v4.6.2
+      with:
+        name: ${{ inputs.prefix }}-msi
+        path: ${{ inputs.base-folder }}/msi
 
     - name: Upload to GitHub Release
       if: github.event_name == 'release'
