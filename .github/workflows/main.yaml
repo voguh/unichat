@@ -84,6 +84,7 @@ jobs:
         uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: ${{ env.RUST_VERSION }}
+          components: clippy
 
       - name: Cache cargo registry
         uses: actions/cache@v4.2.3
@@ -95,10 +96,6 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target/
-
-      - name: Run format
-        continue-on-error: true
-        run: cargo fmt --all -- --check
 
       - name: Run lint
         continue-on-error: true
