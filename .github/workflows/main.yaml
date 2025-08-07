@@ -59,8 +59,11 @@ jobs:
           path: ${{ env.TAURI_FRONTEND_PATH }}/dist
 
   rust-build:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     needs: webapp-build
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
@@ -72,9 +75,10 @@ jobs:
           path: ${{ env.TAURI_FRONTEND_PATH }}/dist
 
       - name: Setup tauri dependencies
+        if: matrix.os == 'ubuntu-24.04'
         run: |
           sudo apt update
-          sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev jq
+          sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
 
       - name: Rust toolchain setup
         uses: dtolnay/rust-toolchain@v1
@@ -88,9 +92,8 @@ jobs:
           restore-keys: ${{ runner.os }}-cargo-
           path: |
             ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
+            ~/.cargo/registry
+            ~/.cargo/git
             target/
 
       - name: Run format
@@ -101,26 +104,50 @@ jobs:
         continue-on-error: true
         run: cargo clippy --all-targets --all-features
 
-      - name: Run lint
+      - name: Run test
         run: cargo test --all-targets --all-features
 
       - name: Prepare configuration
         run: |
           npm install -g @tauri-apps/cli
-          jq '.build.beforeBuildCommand = ""' tauri.conf.json > tauri.conf.tmp
-          mv tauri.conf.tmp tauri.conf.json
+          node -e "let fs = require('fs'); let path = require('path'); let cPath = path.join(__dirname, 'tauri.conf.json'); let c = JSON.parse(fs.readFileSync(cPath)); c.build.beforeBuildCommand = ''; fs.writeFileSync(cPath, JSON.stringify(c, null, 4));"
 
-      - name: Run build for linux
+      - name: Run build app
         run: tauri build
 
-      - name: Prepare windows environment
-        run: |
-          sudo apt install -y  nsis lld llvm clang cmake ninja-build nasm
-          rustup target add x86_64-pc-windows-msvc
-          cargo install --locked cargo-xwin
+      - name: Move windows artifacts
+        if: matrix.os == 'windows-2022'
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: windows-bundles
+          path: ${{ github.workspace }}/target/release/bundle
 
-      - name: Run build for windows
-        run: tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
+      - name: Move linux artifacts
+        if: matrix.os == 'ubuntu-24.04'
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: linux-bundles
+          path: ${{ github.workspace }}/target/release/bundle
+
+  publish:
+    runs-on: ubuntu-24.04
+    needs: rust-build
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Download webapp artifact
+        uses: actions/download-artifact@v5.0.0
+        with:
+          name: windows-bundles
+          path: ${{ github.workspace }}/target/windows
+
+      - name: Download webapp artifact
+        uses: actions/download-artifact@v5.0.0
+        with:
+          name: linux-bundles
+          path: ${{ github.workspace }}/target/linux
 
       - name: Setup version
         id: setup_version
@@ -146,10 +173,10 @@ jobs:
         run: |
           export VERSION="${{ steps.setup_version.outputs.revision }}"
           mkdir -p dist/appimage dist/deb dist/rpm dist/windows
-          cp target/release/bundle/appimage/*.AppImage dist/appimage/unichat-$VERSION.AppImage
-          cp target/release/bundle/deb/*.deb dist/deb/unichat-$VERSION.deb
-          cp target/release/bundle/rpm/*.rpm dist/rpm/unichat-$VERSION.rpm
-          cp target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe dist/windows/unichat-$VERSION.exe
+          cp ${{ github.workspace }}/target/linux/appimage/*.AppImage dist/appimage/unichat-$VERSION.AppImage
+          cp ${{ github.workspace }}/target/linux/deb/*.deb dist/deb/unichat-$VERSION.deb
+          cp ${{ github.workspace }}/target/linux/rpm/*.rpm dist/rpm/unichat-$VERSION.rpm
+          cp ${{ github.workspace }}/target/windows/bundle/nsis/*.exe dist/windows/unichat-$VERSION.exe
           for folder in dist/*; do
             if [ -d "$folder" ]; then
               (cd "$folder" && for file in ./*; do sha256sum "$file" > "${file}.sha256"; done)
@@ -162,3 +189,4 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           base-folder: dist
           prefix: unichat-${{ steps.setup_version.outputs.revision }}
+
