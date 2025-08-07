@@ -8,10 +8,10 @@
  ******************************************************************************/
 import React from "react";
 
-import { Badge, Button, Card, Divider, Menu, Text, Tooltip } from "@mantine/core";
+import { Badge, Button, Card, Divider, Menu, Tooltip } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { IconAdjustments, IconEraser, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { IconAdjustments, IconEraser, IconFolder, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
+import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 import { marked } from "marked";
 import semver from "semver";
 
@@ -86,15 +86,20 @@ export function Dashboard(_props: Props): React.ReactNode {
             <Card className="sidebar" withBorder shadow="xs">
                 <div>
                     <Tooltip label="Clear chat history" position="right" withArrow>
-                        <Button size="sm" onClick={handleClearChat}>
+                        <Button size="sm" onClick={handleClearChat} data-tour="clear-chat">
                             <IconEraser size="20" />
+                        </Button>
+                    </Tooltip>
+                    <Tooltip label="Open user widgets folder" position="right" withArrow>
+                        <Button onClick={() => revealItemInDir(metadata.widgetsDir)} data-tour="user-widgets-directory">
+                            <IconFolder size="20" />
                         </Button>
                     </Tooltip>
                 </div>
 
                 <Menu position="right">
                     <Menu.Target>
-                        <Button variant="default">
+                        <Button variant="default" data-tour="settings">
                             <IconAdjustments size="20" />
                         </Button>
                     </Menu.Target>
@@ -103,11 +108,16 @@ export function Dashboard(_props: Props): React.ReactNode {
                             leftSection={<IconRefresh size="14" />}
                             color={hasUpdate ? "green" : null}
                             onClick={checkForUpdates}
+                            data-tour="settings-check-for-updates"
                         >
                             {hasUpdate ? "A new version is available!" : "Check for updates"}
                         </Menu.Item>
                         <Menu.Divider />
-                        <Menu.Item leftSection={<IconInfoCircle size="14" />} onClick={toggleAboutModal}>
+                        <Menu.Item
+                            leftSection={<IconInfoCircle size="14" />}
+                            onClick={toggleAboutModal}
+                            data-tour="settings-about"
+                        >
                             About
                         </Menu.Item>
                     </Menu.Dropdown>

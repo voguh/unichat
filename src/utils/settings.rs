@@ -31,6 +31,7 @@ pub enum SettingLogEventLevel {
 pub enum SettingsKeys {
     YouTubeVideoId,
     TwitchChannelName,
+    RequiresTour,
 
     LogYouTubeEvents,
     LogTwitchEvents,
@@ -63,6 +64,8 @@ settings_keys! {
     YouTubeVideoId => "youtube-video-id",
     TwitchChannelName => "twitch-channel-name",
 
+    RequiresTour => "settings.requires-tour",
+
     LogYouTubeEvents => "settings.log-youtube-events",
     LogTwitchEvents => "settings.log-twitch-events"
 }
@@ -74,6 +77,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     defaults.insert(SettingsKeys::YouTubeVideoId.to_string(), Value::from(""));
     defaults.insert(SettingsKeys::TwitchChannelName.to_string(), Value::from(""));
 
+    defaults.insert(SettingsKeys::RequiresTour.to_string(), Value::from(true));
     defaults.insert(SettingsKeys::LogYouTubeEvents.to_string(), serde_json::to_value(SettingLogEventLevel::OnlyErrors).unwrap());
     defaults.insert(SettingsKeys::LogTwitchEvents.to_string(), serde_json::to_value(SettingLogEventLevel::OnlyErrors).unwrap());
 

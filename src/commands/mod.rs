@@ -63,6 +63,23 @@ pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
 /* ================================================================================================================== */
 
 #[tauri::command]
+pub async fn requires_tour<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, String> {
+    let requires_tour: bool = settings::get_item(SettingsKeys::RequiresTour).map_err(|e| format!("An error occurred on set 'FirstTimeRun' setting: {}", e))?;
+
+    return Ok(requires_tour)
+}
+
+#[tauri::command]
+pub async fn end_tour<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<(), String> {
+    settings::set_item(SettingsKeys::RequiresTour, Value::from(false))
+        .map_err(|e| format!("An error occurred on set 'FirstTimeRun' setting: {}", e))?;
+
+    return Ok(())
+}
+
+/* ================================================================================================================== */
+
+#[tauri::command]
 pub async fn is_dev<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, String> {
     return Ok(utils::is_dev())
 }
