@@ -47,10 +47,6 @@ fn generate_resources(target_gen_dir: &Path) -> Result<(), Box<dyn std::error::E
     let license_code = env!("CARGO_PKG_LICENSE");
     let (license_name, license_url) = get_license_info(license_code)?;
 
-    if !target_gen_dir.exists() {
-        fs::create_dir_all(&target_gen_dir)?;
-    }
-
     let metadata = format!(r#"
         pub const CARGO_PKG_DISPLAY_NAME: &str = "{display_name}";
         pub const CARGO_PKG_NAME: &str = "{name}";
@@ -121,7 +117,7 @@ fn generate_crate_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::
                 name: String::from(name),
                 version: String::from(version),
                 authors: authors,
-                repository: String::from(repository),
+                repository: repository,
                 licenses: licenses
             });
         }
@@ -219,7 +215,7 @@ fn generate_npm_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::er
             name: String::from(name),
             version: String::from(version),
             authors: authors,
-            repository: String::from(repository),
+            repository: repository,
             licenses: licenses
         });
     }
@@ -254,6 +250,12 @@ fn main() {
     println!("cargo:rerun-if-changed=webapp/package.json");
     let root_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let target_gen_dir = root_dir.join("target").join("gen");
+
+    if !target_gen_dir.exists() {
+        if let Err(err) = fs::create_dir_all(&target_gen_dir) {
+            panic!("Failed to create target gen directory: {}", err);
+        }
+    }
 
     if let Err(err) = generate_resources(&target_gen_dir) {
         panic!("Failed to generate resources: {}", err);
