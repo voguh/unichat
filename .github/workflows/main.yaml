@@ -148,13 +148,12 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
           path: |
-            ~/.cargo/bin/
             ~/.cargo/registry/index
             ~/.cargo/registry/cache
             ~/.cargo/git/db/
-            target/
 
       - name: Install dependencies
+        if: steps.cache-cargo.outputs.cache-hit != 'true'
         run: cargo fetch --locked
 
   rust-lint:
@@ -189,10 +188,16 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
           path: |
-            ~/.cargo/bin/
             ~/.cargo/registry/index
             ~/.cargo/registry/cache
             ~/.cargo/git/db/
+
+      - name: Cache cargo target
+        uses: actions/cache@v4.2.3
+        with:
+          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-target-
+          path: |
             target/
 
       - name: Install dependencies
@@ -236,10 +241,16 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
           path: |
-            ~/.cargo/bin/
             ~/.cargo/registry/index
             ~/.cargo/registry/cache
-            ~/.cargo/git/db/
+            ~/.cargo/git/db
+
+      - name: Cache cargo target
+        uses: actions/cache@v4.2.3
+        with:
+          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-target-
+          path: |
             target/
 
       - name: Install dependencies
@@ -283,10 +294,16 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
           path: |
-            ~/.cargo/bin/
             ~/.cargo/registry/index
             ~/.cargo/registry/cache
             ~/.cargo/git/db/
+
+      - name: Cache cargo target
+        uses: actions/cache@v4.2.3
+        with:
+          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-target-
+          path: |
             target/
 
       - name: Install dependencies
