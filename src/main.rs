@@ -143,7 +143,13 @@ async fn main() {
     };
 
     tauri::Builder::default().setup(setup)
-        .plugin(tauri_plugin_log::Builder::default().level(log_level).build())
+        .plugin(tauri_plugin_log::Builder::default()
+            .level(log_level)
+            .clear_targets()
+            .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout))
+            .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir { file_name: Some(CARGO_PKG_NAME.to_string()) }))
+            .build()
+        )
         .plugin(tauri_plugin_opener::Builder::default().build())
         .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
