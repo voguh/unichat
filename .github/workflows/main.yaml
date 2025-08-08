@@ -142,15 +142,17 @@ jobs:
           toolchain: ${{ env.RUST_VERSION }}
 
       - name: Cache cargo registry
+        id: cache-cargo
         uses: actions/cache@v4.2.3
         with:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
           path: |
-            ${{ env.HOME }}/.cargo/bin/
-            ${{ env.HOME }}/.cargo/registry
-            ${{ env.HOME }}/.cargo/git
-            ${{ github.workspace }}/target
+            ~/.cargo/bin/
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db/
+            target/
 
       - name: Install dependencies
         run: cargo fetch --locked
@@ -181,17 +183,20 @@ jobs:
           components: clippy
 
       - name: Cache cargo registry
+        id: cache-cargo
         uses: actions/cache@v4.2.3
         with:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
           path: |
-            ${{ env.HOME }}/.cargo/bin/
-            ${{ env.HOME }}/.cargo/registry
-            ${{ env.HOME }}/.cargo/git
-            ${{ github.workspace }}/target
+            ~/.cargo/bin/
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db/
+            target/
 
       - name: Install dependencies
+        if: steps.cache-cargo.outputs.cache-hit != 'true'
         run: cargo fetch --locked
 
       - name: Run lint
@@ -225,17 +230,20 @@ jobs:
           toolchain: ${{ env.RUST_VERSION }}
 
       - name: Cache cargo registry
+        id: cache-cargo
         uses: actions/cache@v4.2.3
         with:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
           path: |
-            ${{ env.HOME }}/.cargo/bin/
-            ${{ env.HOME }}/.cargo/registry
-            ${{ env.HOME }}/.cargo/git
-            ${{ github.workspace }}/target
+            ~/.cargo/bin/
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db/
+            target/
 
       - name: Install dependencies
+        if: steps.cache-cargo.outputs.cache-hit != 'true'
         run: cargo fetch --locked
 
       - name: Run test
@@ -269,17 +277,20 @@ jobs:
           toolchain: ${{ env.RUST_VERSION }}
 
       - name: Cache cargo registry
+        id: cache-cargo
         uses: actions/cache@v4.2.3
         with:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
           path: |
-            ${{ env.HOME }}/.cargo/bin/
-            ${{ env.HOME }}/.cargo/registry
-            ${{ env.HOME }}/.cargo/git
-            ${{ github.workspace }}/target
+            ~/.cargo/bin/
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db/
+            target/
 
       - name: Install dependencies
+        if: steps.cache-cargo.outputs.cache-hit != 'true'
         run: cargo fetch --locked
 
       - name: Prepare configuration
@@ -345,7 +356,7 @@ jobs:
           cp ${{ github.workspace }}/target/linux/rpm/*.rpm dist/rpm/unichat-$VERSION.rpm
           cp ${{ github.workspace }}/target/windows/nsis/*.exe dist/nsis/unichat-$VERSION-setup.exe
           for folder in dist/*; do
-            if [ -d "$folder" ]; then
+            if [ -d "$folder" ] && [ "$(ls -A "$folder")" ]; then
               (cd "$folder" && for file in ./*; do sha256sum "$file" > "${file}.sha256"; done)
             fi
           done
