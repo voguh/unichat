@@ -28,46 +28,28 @@ pub enum SettingLogEventLevel {
     AllEvents
 }
 
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
 pub enum SettingsKeys {
     YouTubeVideoId,
     TwitchChannelName,
+
+    #[serde(rename = "settings.requires-tour")]
     RequiresTour,
-
+    #[serde(rename = "settings.log-youtube-events")]
     LogYouTubeEvents,
-    LogTwitchEvents,
+    #[serde(rename = "settings.log-twitch-events")]
+    LogTwitchEvents
 }
 
-macro_rules! settings_keys {
-    ($($variant:ident => $str:expr),* $(,)?) => {
-        impl SettingsKeys {
-            pub fn as_str(&self) -> &str {
-                return match self {
-                    $(SettingsKeys::$variant => $str),*
-                };
-            }
+impl SettingsKeys {
+    pub fn from_str(key: &str) -> Result<Self, String> {
+        return serde_plain::from_str(key).map_err(|e| format!("{:?}", e));
+    }
 
-            pub fn from_str(key: &str) -> Result<Self, String> {
-                return match key {
-                    $($str => Ok(SettingsKeys::$variant)),*,
-                    _ => Err(format!("Unknown storage key: '{}'", key)),
-                }
-            }
-
-            pub fn to_string(&self) -> String {
-                return String::from(self.as_str());
-            }
-        }
-    };
-}
-
-settings_keys! {
-    YouTubeVideoId => "youtube-video-id",
-    TwitchChannelName => "twitch-channel-name",
-
-    RequiresTour => "settings.requires-tour",
-
-    LogYouTubeEvents => "settings.log-youtube-events",
-    LogTwitchEvents => "settings.log-twitch-events"
+    pub fn to_string(&self) -> String {
+        return serde_plain::to_string(self).unwrap();
+    }
 }
 
 static INSTANCE: OnceLock<Arc<Store<tauri::Wry>>> = OnceLock::new();
@@ -93,13 +75,13 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
 
 pub fn get_item<T: serde::de::DeserializeOwned>(key: SettingsKeys) -> Result<T, String> {
     let storage = INSTANCE.get().ok_or("Settings not initialized".to_string())?;
-    let value_raw = storage.get(key.as_str()).ok_or(format!("Key '{}' not found in store", key.as_str()))?;
+    let value_raw = storage.get(key.to_string()).ok_or(format!("Key '{}' not found in store", key.to_string()))?;
     return serde_json::from_value(value_raw).map_err(|e| format!("{:?}", e));
 }
 
 pub fn set_item<T: serde::ser::Serialize>(key: SettingsKeys, value: T) -> Result<(), String> {
     let storage = INSTANCE.get().ok_or("Settings not initialized".to_string())?;
     let value_raw = serde_json::to_value(value).map_err(|e| format!("{:?}", e))?;
-    storage.set(key.as_str(), value_raw);
+    storage.set(key.to_string(), value_raw);
     return Ok(());
 }
