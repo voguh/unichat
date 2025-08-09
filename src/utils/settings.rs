@@ -31,7 +31,9 @@ pub enum SettingLogEventLevel {
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub enum SettingsKeys {
+    #[serde(rename = "youtube-video-id")]
     YouTubeVideoId,
+    #[serde(rename = "twitch-channel-name")]
     TwitchChannelName,
 
     #[serde(rename = "settings.requires-tour")]
