@@ -10,13 +10,13 @@ const SPONSOR_GIFT_TEMPLATE = document.querySelector("#sponsor-gift_item").inner
 const RAID_TEMPLATE = document.querySelector("#raid_item").innerHTML;
 
 function buildBadges(badges) {
-  let badgeJoin = ''
+    let badgeJoin = ''
 
-  for (const badge of badges) {
-    badgeJoin+=`\n<img src="${badge.url}" class="badge" />`
-  }
+    for (const badge of badges) {
+        badgeJoin+=`\n<img src="${badge.url}" class="badge" />`
+    }
 
-  return badgeJoin;
+    return badgeJoin;
 }
 
 function buildMessage(message, emotes) {
@@ -47,10 +47,10 @@ function parseTierName(platform, tier) {
 }
 
 function removeChildren() {
-  if(MAIN_CONTAINER.children > MAXIMUM_MESSAGES) {
-    MAIN_CONTAINER.firstChild.remove();
-    requestAnimationFrame(removeChildren);
-  }
+    if(MAIN_CONTAINER.children.length > MAXIMUM_MESSAGES) {
+        MAIN_CONTAINER.firstChild.remove();
+        requestAnimationFrame(removeChildren);
+    }
 }
 
 // Dispatch every time when websocket is connected (or reconnected)
