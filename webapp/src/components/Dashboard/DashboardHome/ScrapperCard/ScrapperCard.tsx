@@ -245,16 +245,12 @@ export function ScrapperCard({ type, validateUrl, editingTooltip }: Props): Reac
                         color="gray"
                         leftSection={handleStatusIcon()}
                         onClick={inputRef.current?.value === currentActiveUrl ? handleStop : handleStart}
-                        disabled={
-                            loading ||
-                            error != null ||
-                            (inputRef.current?.value === currentActiveUrl && event.type !== "ping")
-                        }
+                        disabled={loading || (inputRef.current?.value === currentActiveUrl && event.type !== "ping")}
                     >
                         {handleStatusLabel()}
                     </Button>
                 </Tooltip>
-                {inputRef.current?.value === currentActiveUrl && event.type === "ping" && (
+                {inputRef.current?.value === currentActiveUrl && event.type !== "idle" && (
                     <Button size="sm" onClick={handleOpenPopout}>
                         {handleOpenChatPopoutIcon()}
                     </Button>
