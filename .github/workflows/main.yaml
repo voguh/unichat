@@ -349,12 +349,13 @@ jobs:
         id: setup_version
         run: |
           export CARGO_PACKAGE_VERSION="$(cargo pkgid | cut -d# -f2)"
-          if [ "$GITHUB_EVENT_NAME" == "release" ]; then
-            if [ "$CARGO_PACKAGE_VERSION" != "$GITHUB_REF_NAME" ]; then
-              echo "Error: The version in Cargo.toml ($CARGO_PACKAGE_VERSION) does not match the release tag ($GITHUB_REF_NAME)."
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            if [ "$CARGO_PACKAGE_VERSION" != "$TAG_NAME" ]; then
+              echo "Error: The version in Cargo.toml ($CARGO_PACKAGE_VERSION) does not match the release tag ($TAG_NAME)."
               exit 1
             fi
-            echo "revision=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
+            echo "revision=$TAG_NAME" >> $GITHUB_OUTPUT
           else
             export SHORT_CARGO_VERSION="$(echo $CARGO_PACKAGE_VERSION | cut -d '-' -f1)"
             export NEW_VERSION="$SHORT_CARGO_VERSION+$GITHUB_SHA"
