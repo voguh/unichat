@@ -1,12 +1,11 @@
 name: main.yaml
 
 on:
-  release:
-    types:
-      - created
   push:
     branches:
       - '**'
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
   workflow_dispatch:
 
 env:
@@ -325,9 +324,9 @@ jobs:
           path: ${{ github.workspace }}/target/release/bundle
 
   publish:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-24.04
     needs: package
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     permissions:
       contents: write
     steps:
@@ -380,12 +379,20 @@ jobs:
             fi
           done
 
-      - name: Upload to GitHub Release
-        if: github.event_name == 'release'
-        shell: bash
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          echo "Creating GitHub Release for tag $TAG_NAME"
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+          gh release create "$TAG_NAME" --draft=false
+
+      - name: Upload to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
           if [ -n "$(command -v gh)" ]; then
-            echo "GitHub CLI is installed. Proceeding with to create a GitHub Release."
+            echo "GitHub CLI is installed. Proceeding to upload files to GitHub Release."
             echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
             for folder in ${{ github.workspace }}/dist/*; do
               if [ -d "$folder" ] && [ "$(ls -A "$folder")" ]; then
@@ -393,7 +400,7 @@ jobs:
                 for file in $folder/*; do
                   if [ -f "$file" ]; then
                     echo "Uploading file: $file"
-                    gh release upload $GITHUB_REF_NAME "$file" || echo "Failed to upload $file to GitHub Release"
+                    gh release upload "$TAG_NAME" "$file" || echo "Failed to upload $file to GitHub Release"
                   fi
                 done
               fi
