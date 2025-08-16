@@ -1,6 +1,6 @@
 const searchQuery = new URLSearchParams(window.location.search);
 const USE_PLATFORM_BADGES = !(searchQuery.get("use_platform_badges") === "false");
-const IS_IN_OBS_DOCK = searchQuery.get("obs_dock") === "true";
+const IS_IN_OBS_DOCK = window.obsstudio != null || searchQuery.get("obs_dock") === "true";
 const MAXIMUM_MESSAGES = parseInt(searchQuery.get("max_messages") ?? "50", 10);
 const MAIN_CONTAINER = document.querySelector("#main-container");
 const MESSAGE_TEMPLATE = document.querySelector("#chatlist_item").innerHTML;
@@ -53,15 +53,32 @@ function removeChildren() {
     }
 }
 
+function randomId() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+if (IS_IN_OBS_DOCK) {
+    MAIN_CONTAINER.style.maxHeight = "calc(100vh - 32px)";
+    MAIN_CONTAINER.style.overflowY = "auto";
+
+    const authorId = randomId();
+    const messageId = randomId();
+    let htmlTemplate = MESSAGE_TEMPLATE.replace("{author_id}", authorId);
+    htmlTemplate = htmlTemplate.replace("{platform}", "unichat");
+    htmlTemplate = htmlTemplate.replace("{message_id}", messageId);
+    htmlTemplate = htmlTemplate.replace("{badges}", "");
+    htmlTemplate = htmlTemplate.replace("{author_display_name}", "UniChat - OBS Integration");
+    htmlTemplate = htmlTemplate.replace("{message}", "OBS dock detected, scroll enabled, maximum messages set to " + MAXIMUM_MESSAGES);
+
+    if (MAIN_CONTAINER.querySelector(`div[data-id="${messageId}"]`) == null) {
+        $(MAIN_CONTAINER).append(htmlTemplate);
+    }
+}
+
 // Dispatch every time when websocket is connected (or reconnected)
 window.addEventListener("unichat:connected", function () {
     // This listener doesn't receive any data, acctually it just notifies
     // that connection is established or re-established.
-
-    if (IS_IN_OBS_DOCK) {
-        MAIN_CONTAINER.style.maxHeight = "calc(100vh - 32px)";
-        MAIN_CONTAINER.style.overflowY = "auto";
-    }
 });
 
 window.addEventListener("unichat:event", function ({ detail: event }) {
