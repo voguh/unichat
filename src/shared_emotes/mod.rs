@@ -21,25 +21,29 @@ pub type EmotesParserResult = Result<HashMap<String, UniChatEmote>, Box<dyn std:
 pub static EMOTES_HASHSET: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
 pub fn fetch_shared_emotes(channel_id: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let mut shared_emotes = HashMap::new();
+    let channel_id = channel_id.to_string();
 
-    if let Ok(guard) = EMOTES_HASHSET.read() {
-        if guard.is_empty() {
-            shared_emotes.extend(betterttv::fetch_global_emotes());
-            shared_emotes.extend(frankerfacez::fetch_global_emotes());
-            shared_emotes.extend(seventv::fetch_global_emotes());
+    let _ = tauri::async_runtime::spawn_blocking(move || {
+        let mut shared_emotes = HashMap::new();
+
+        if let Ok(guard) = EMOTES_HASHSET.read() {
+            if guard.is_empty() {
+                shared_emotes.extend(betterttv::fetch_global_emotes());
+                shared_emotes.extend(frankerfacez::fetch_global_emotes());
+                shared_emotes.extend(seventv::fetch_global_emotes());
+            }
         }
-    }
 
-    shared_emotes.extend(betterttv::fetch_channel_emotes(channel_id));
-    shared_emotes.extend(frankerfacez::fetch_channel_emotes(channel_id));
-    shared_emotes.extend(seventv::fetch_channel_emotes(channel_id));
+        shared_emotes.extend(betterttv::fetch_channel_emotes(&channel_id));
+        shared_emotes.extend(frankerfacez::fetch_channel_emotes(&channel_id));
+        shared_emotes.extend(seventv::fetch_channel_emotes(&channel_id));
 
-    let mut guard = EMOTES_HASHSET.write()?;
-
-    for (key, value) in shared_emotes {
-        guard.insert(key, value);
-    }
+        if let Ok(mut guard) = EMOTES_HASHSET.write() {
+            for (key, value) in shared_emotes {
+                guard.insert(key, value);
+            }
+        }
+    });
 
     return Ok(());
 }
