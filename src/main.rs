@@ -136,7 +136,7 @@ fn main() {
     if utils::is_dev() {
         log_level = log::LevelFilter::Debug;
     } else {
-        log_level = log::LevelFilter::Warn;
+        log_level = log::LevelFilter::Info;
     }
 
     tauri::Builder::default().setup(setup)
