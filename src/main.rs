@@ -13,6 +13,7 @@
 #![allow(clippy::needless_return)]
 #![allow(clippy::redundant_field_names)]
 
+use std::env;
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
@@ -136,11 +137,20 @@ async fn main() {
     tauri::async_runtime::set(tokio::runtime::Handle::current());
 
     let log_level: log::LevelFilter;
-    if utils::is_dev() {
+    if utils::is_dev() || env::var("UNICHAT_DEBUG").is_ok() {
         log_level = log::LevelFilter::Debug;
+    } else if let Ok(log_level_raw) = env::var("UNICHAT_LOG_LEVEL") {
+        log_level = match log_level_raw.to_lowercase().as_str() {
+            "error" => log::LevelFilter::Error,
+            "warn" | "warning" => log::LevelFilter::Warn,
+            "info" => log::LevelFilter::Info,
+            "debug" => log::LevelFilter::Debug,
+            "trace" => log::LevelFilter::Trace,
+            _ => log::LevelFilter::Info
+        };
     } else {
-        log_level = log::LevelFilter::Warn;
-    };
+        log_level = log::LevelFilter::Info;
+    }
 
     tauri::Builder::default().setup(setup)
         .plugin(tauri_plugin_log::Builder::default()

@@ -260,6 +260,7 @@ jobs:
         run: cargo test --all-targets --all-features
 
   package:
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/stable/') || startsWith(github.ref, 'refs/tags/')
     runs-on: ${{ matrix.os }}
     needs: rust-tests
     strategy:
