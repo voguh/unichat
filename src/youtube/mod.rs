@@ -170,8 +170,8 @@ pub async fn set_youtube_scrapper_url(app: tauri::AppHandle<tauri::Wry>, url: &s
 
 /* ================================================================================================================== */
 
-fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: tauri::Event) -> Result<(), String> {
-    let payload: Value = serde_json::from_str(event.payload()).map_err(|e| format!("{}", e))?;
+fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), String> {
+    let payload: Value = serde_json::from_str(event).map_err(|e| format!("{:?}", e))?;
     let event_type = payload.get("type").and_then(|v| v.as_str())
         .ok_or("Missing or invalid 'type' field in YouTube raw event payload")?;
 
@@ -190,8 +190,9 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
         .ok_or("YouTube chat window not found")?;
 
     window.listen(YOUTUBE_RAW_EVENT, move |event| {
-        if let Err(err) = handle_event(app_handle.clone(), event) {
+        if let Err(err) = handle_event(app_handle.clone(), event.payload()) {
             log::error!("Failed to handle YouTube raw event: {:?}", err);
+            log::error!("Event payload: {}", event.payload());
         }
     });
 
