@@ -7,7 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-async function dispatchEvent(payload) {
+async function uniChatDispatchEvent(payload) {
     payload.timestamp = Date.now();
     await window.__TAURI__.event.emit("youtube_raw::event", payload)
         .then(() => console.log(`Event with type '${payload.type}' dispatched successfully!`))
@@ -17,12 +17,12 @@ async function dispatchEvent(payload) {
         });
 }
 
-async function dispatchPing() {
-    await dispatchEvent({ type: "ping" });
-    setTimeout(dispatchPing, 5000);
+async function uniChatDispatchPing() {
+    await uniChatDispatchEvent({ type: "ping" });
+    setTimeout(uniChatDispatchPing, 5000);
 }
 
-function normalizeBase64(data) {
+function uniChatNormalizeBase64(data) {
     data = decodeURIComponent(data);
     data = data.replace(/-/g, "+").replace(/_/g, "/");
 
@@ -34,22 +34,22 @@ function normalizeBase64(data) {
     return data.replace(/\s+/g, "");
 }
 
-async function handleScrapEvent(response) {
+async function uniChatHandleScrapEvent(response) {
     try {
         const parsed = await response.json();
         const actions = parsed?.continuationContents?.liveChatContinuation?.actions;
 
         if (actions != null && actions.length > 0) {
-            await dispatchEvent({ type: "message", actions });
+            await uniChatDispatchEvent({ type: "message", actions });
         }
     } catch (err) {
         console.error(err);
         await window.__TAURI_PLUGIN_LOG__.error(err);
-        await dispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
+        await uniChatDispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
     }
 }
 
-function init() {
+function uniChatInit() {
     try {
         // Prevent right-click context menu in production
         window.__TAURI__.core.invoke("is_dev").then((isDev) => {
@@ -67,13 +67,13 @@ function init() {
         const timedContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.timedContinuationData?.continuation;
         const invalidationContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.invalidationContinuationData?.continuation;
         const encodedProtoPuf = timedContinuationData || invalidationContinuationData;
-        const normalizedData = normalizeBase64(encodedProtoPuf);
+        const normalizedData = uniChatNormalizeBase64(encodedProtoPuf);
         const protoPufBytes = atob(normalizedData);
 
         let subProtoPuf = `${protoPufBytes.split("%3D")[0]}%3D`;
         subProtoPuf = subProtoPuf.substring(10, subProtoPuf.length);
 
-        const decodedSubProtoPuf = normalizeBase64(subProtoPuf);
+        const decodedSubProtoPuf = uniChatNormalizeBase64(subProtoPuf);
         const subProtoPufBytes = atob(decodedSubProtoPuf);
 
         const lines = subProtoPufBytes.split("\n");
@@ -84,7 +84,7 @@ function init() {
             throw new Error("Channel ID not found in YouTube initial data.");
         }
 
-        dispatchEvent({ type: "ready", channelId: channelId, url: window.location.href });
+        uniChatDispatchEvent({ type: "ready", channelId: channelId, url: window.location.href });
 
         /* ====================================================================================================== */
 
@@ -95,7 +95,7 @@ function init() {
                 const res = await originalFetch(...args);
 
                 if (res.url.startsWith("https://www.youtube.com/youtubei/v1/live_chat/get_live_chat") && res.ok) {
-                    handleScrapEvent(res.clone());
+                    uniChatHandleScrapEvent(res.clone());
                 }
 
                 return res;
@@ -131,7 +131,7 @@ function init() {
         /* ====================================================================================================== */
 
         // Attach status ping event
-        dispatchPing();
+        uniChatDispatchPing();
 
         /* ====================================================================================================== */
 
@@ -141,12 +141,12 @@ function init() {
     } catch (err) {
         console.error(err);
         window.__TAURI_PLUGIN_LOG__.error(err);
-        dispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
+        uniChatDispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
     }
 }
 
 if (document.readyState === "interactive" || document.readyState === "complete") {
-    init();
+    uniChatInit();
 } else {
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", uniChatInit);
 }
