@@ -7,7 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-async function dispatchEvent(payload) {
+async function uniChatDispatchEvent(payload) {
     payload.timestamp = Date.now();
     await window.__TAURI__.event.emit("twitch_raw::event", payload)
         .then(() => console.log(`Event with type '${payload.type}' dispatched successfully!`))
@@ -17,7 +17,7 @@ async function dispatchEvent(payload) {
         });
 }
 
-async function handleFetchBadgesAndCheermotes() {
+async function uniChatHandleFetchBadgesAndCheermotes() {
     try {
         const username = window.location.pathname.split("/")[2];
         const response = await fetch("https://gql.twitch.tv/gql#origin=twilight", {
@@ -70,9 +70,9 @@ async function handleFetchBadgesAndCheermotes() {
                 const data = item.data;
 
                 if (extensions.operationName === "GlobalBadges") {
-                    await dispatchEvent({ type: "badges", badgesType: "global", badges: data.badges })
+                    await uniChatDispatchEvent({ type: "badges", badgesType: "global", badges: data.badges })
                 } else if (extensions.operationName === "ChatList_Badges") {
-                    await dispatchEvent({ type: "badges", badgesType: "user", badges: data.user.broadcastBadges });
+                    await uniChatDispatchEvent({ type: "badges", badgesType: "user", badges: data.user.broadcastBadges });
                 } else if (extensions.operationName === "BitsConfigContext_Global") {
                     const cheermotes = new Set();
 
@@ -86,18 +86,18 @@ async function handleFetchBadgesAndCheermotes() {
                         }
                     }
 
-                    await dispatchEvent({ type: "cheermotes", cheermotes: Array.from(cheermotes) });
+                    await uniChatDispatchEvent({ type: "cheermotes", cheermotes: Array.from(cheermotes) });
                 }
             }
         }
     } catch (err) {
         console.error(err);
         await window.__TAURI_PLUGIN_LOG__.error(err);
-        await dispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
+        await uniChatDispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
     }
 }
 
-function init() {
+function uniChatInit() {
     try {
         // Prevent right-click context menu in production
         window.__TAURI__.core.invoke("is_dev").then((isDev) => {
@@ -110,11 +110,11 @@ function init() {
 
         /* ====================================================================================================== */
 
-        dispatchEvent({ type: "ready", url: window.location.href });
+        uniChatDispatchEvent({ type: "ready", url: window.location.href });
 
         /* ====================================================================================================== */
 
-        handleFetchBadgesAndCheermotes()
+        uniChatHandleFetchBadgesAndCheermotes()
         Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
         window.__TAURI_PLUGIN_LOG__.info("Fetch wrapped!");
 
@@ -144,12 +144,12 @@ function init() {
     } catch (err) {
         console.error(err);
         window.__TAURI_PLUGIN_LOG__.error(err);
-        dispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
+        uniChatDispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
     }
 }
 
 if (document.readyState === "interactive" || document.readyState === "complete") {
-    init();
+    uniChatInit();
 } else {
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", uniChatInit);
 }
