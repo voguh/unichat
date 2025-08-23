@@ -26,6 +26,7 @@ use crate::youtube::mapper::structs::author::parse_author_type;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
 use crate::youtube::mapper::structs::author::AuthorNameWrapper;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
+use crate::youtube::mapper::structs::author::BeforeContentButton;
 use crate::youtube::mapper::structs::message::parse_message_emojis;
 use crate::youtube::mapper::structs::message::parse_message_string;
 use crate::youtube::mapper::structs::message::MessageRunsWrapper;
@@ -42,6 +43,8 @@ struct LiveChatTextMessageRenderer {
 
     message: MessageRunsWrapper,
 
+    before_content_buttons: Option<Vec<BeforeContentButton>>,
+
     timestamp_usec: String
 }
 
@@ -52,7 +55,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let author_username = parse_author_username(&parsed.author_name)?;
     let author_name = parse_author_name(&parsed.author_name)?;
     let author_color = parse_author_color(&author_name)?;
-    let author_badges = parse_author_badges(&parsed.author_badges)?;
+    let author_badges = parse_author_badges(&parsed.author_badges, &parsed.before_content_buttons)?;
     let author_photo = parse_author_photo(&parsed.author_photo)?;
     let author_type = parse_author_type(&parsed.author_badges)?;
     let message = parse_message_string(&parsed.message)?;

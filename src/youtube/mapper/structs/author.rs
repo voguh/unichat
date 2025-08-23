@@ -10,6 +10,7 @@
 use std::sync::LazyLock;
 use std::time::Duration;
 
+use base64::Engine;
 use moka::sync::Cache;
 use serde::Deserialize;
 use serde::Serialize;
@@ -54,6 +55,21 @@ pub type AuthorBadgeThumbnailsWrapper = ThumbnailsWrapper;
 #[serde(rename_all = "camelCase")]
 pub struct AuthorBadgeIconWrapper {
     pub icon_type: String
+}
+
+/* <================================================================================================================> */
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct BeforeContentButton {
+    pub button_view_model: ButtonViewModel
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ButtonViewModel {
+    pub title: String,
+    pub icon_name: String
 }
 
 /* <================================================================================================================> */
@@ -113,7 +129,33 @@ pub fn parse_author_color(author_name: &str) -> Result<String, Box<dyn std::erro
     return random_color_by_seed(author_name)
 }
 
-pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>) -> Result<Vec<UniChatBadge>, Box<dyn std::error::Error>> {
+static YOUTUBE_ARTIST_BADGE_RAW: &[u8] = include_bytes!("../../static/YouTubeArtist.png");
+static YOUTUBE_ARTIST_BADGE: LazyLock<String> = LazyLock::new(|| encode_bytes(YOUTUBE_ARTIST_BADGE_RAW));
+
+static YOUTUBE_BROADCASTER_BADGE_RAW: &[u8] = include_bytes!("../../static/YouTubeBroadcaster.png");
+static YOUTUBE_BROADCASTER_BADGE: LazyLock<String> = LazyLock::new(|| encode_bytes(YOUTUBE_BROADCASTER_BADGE_RAW));
+
+static YOUTUBE_MODERATOR_BADGE_RAW: &[u8] = include_bytes!("../../static/YouTubeModerator.png");
+static YOUTUBE_MODERATOR_BADGE: LazyLock<String> = LazyLock::new(|| encode_bytes(YOUTUBE_MODERATOR_BADGE_RAW));
+
+static YOUTUBE_VERIFIED_BADGE_RAW: &[u8] = include_bytes!("../../static/YouTubeVerified.png");
+static YOUTUBE_VERIFIED_BADGE: LazyLock<String> = LazyLock::new(|| encode_bytes(YOUTUBE_VERIFIED_BADGE_RAW));
+
+static YOUTUBE_LEADERBOARD_FIRST_BADGE_RAW: &[u8] = include_bytes!("../../static/YouTubeLeaderboardFirst.png");
+static YOUTUBE_LEADERBOARD_FIRST_BADGE: LazyLock<String> = LazyLock::new(|| encode_bytes(YOUTUBE_LEADERBOARD_FIRST_BADGE_RAW));
+
+static YOUTUBE_LEADERBOARD_SECOND_BADGE_RAW: &[u8] = include_bytes!("../../static/YouTubeLeaderboardSecond.png");
+static YOUTUBE_LEADERBOARD_SECOND_BADGE: LazyLock<String> = LazyLock::new(|| encode_bytes(YOUTUBE_LEADERBOARD_SECOND_BADGE_RAW));
+
+static YOUTUBE_LEADERBOARD_THIRD_BADGE_RAW: &[u8] = include_bytes!("../../static/YouTubeLeaderboardThird.png");
+static YOUTUBE_LEADERBOARD_THIRD_BADGE: LazyLock<String> = LazyLock::new(|| encode_bytes(YOUTUBE_LEADERBOARD_THIRD_BADGE_RAW));
+
+fn encode_bytes(bytes: &[u8]) -> String {
+    let b64 = base64::engine::general_purpose::STANDARD.encode(bytes);
+    return format!("data:image/png;base64,{}", b64);
+}
+
+pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_content: &Option<Vec<BeforeContentButton>>) -> Result<Vec<UniChatBadge>, Box<dyn std::error::Error>> {
     let mut parsed_badges = Vec::new();
 
     if let Some(badges) = badges {
@@ -130,18 +172,50 @@ pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>) -> Result<V
                     match icon.icon_type.as_str() {
                         "OWNER" => parsed_badges.push(UniChatBadge {
                             code: String::from("broadcaster"),
-                            url: String::from("https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/3")
+                            url: YOUTUBE_BROADCASTER_BADGE.clone()
                         }),
                         "MODERATOR" => parsed_badges.push(UniChatBadge {
                             code: String::from("moderator"),
-                            url: String::from("https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3")
+                            url: YOUTUBE_MODERATOR_BADGE.clone()
                         }),
                         "VERIFIED" => parsed_badges.push(UniChatBadge {
                             code: String::from("verified"),
-                            url: String::from("https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/3")
+                            url: YOUTUBE_VERIFIED_BADGE.clone()
+                        }),
+                        // I don't know if this is correct, but on subscriptions
+                        // this badge appears as `BADGE_STYLE_TYPE_VERIFIED_ARTIST`
+                        // and verified as `BADGE_STYLE_TYPE_VERIFIED`, so I assume
+                        // this is the correct mapping.
+                        "VERIFIED_ARTIST" => parsed_badges.push(UniChatBadge {
+                            code: String::from("verified-artist"),
+                            url: YOUTUBE_ARTIST_BADGE.clone()
                         }),
                         _ => {}
                     };
+                }
+            }
+        }
+    }
+
+    if let Some(before_content_buttons) = before_content {
+        for button in before_content_buttons {
+            let model = button.button_view_model.clone();
+            if model.icon_name == "CROWN" {
+                if model.title == "#1" {
+                    parsed_badges.push(UniChatBadge {
+                        code: String::from("youtube-leaderboard-first"),
+                        url: YOUTUBE_LEADERBOARD_FIRST_BADGE.clone()
+                    });
+                } else if model.title == "#2" {
+                    parsed_badges.push(UniChatBadge {
+                        code: String::from("youtube-leaderboard-second"),
+                        url: YOUTUBE_LEADERBOARD_SECOND_BADGE.clone()
+                    });
+                } else if model.title == "#3" {
+                    parsed_badges.push(UniChatBadge {
+                        code: String::from("youtube-leaderboard-third"),
+                        url: YOUTUBE_LEADERBOARD_THIRD_BADGE.clone()
+                    });
                 }
             }
         }
