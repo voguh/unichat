@@ -139,7 +139,6 @@ fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payl
                 log::info!("Twitch IRC client disconnected. Attempting to reconnect...");
                 if let Err(e) = connect_result {
                     log::error!("Failed to connect to Twitch IRC: {:?}", e);
-                    tokio::time::sleep(Duration::from_secs(5)).await;
                 } else if let Ok(client) = connect_result {
                     log::info!("Twitch IRC task cancelled. Parting from channel: {}", channel_name);
                     if let Err(e) = client.send(Command::PART(format!("#{}", channel_name), None)) {
