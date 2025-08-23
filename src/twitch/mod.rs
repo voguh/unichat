@@ -82,6 +82,8 @@ async fn handle_create_connection(channel_name: &str) -> Result<Client, Box<dyn 
     let config = Config {
         server: Some(String::from("irc.chat.twitch.tv")),
         port: Some(6667),
+        ping_time: Some(30),
+        ping_timeout: Some(5),
         ..Config::default()
     };
 
@@ -97,7 +99,7 @@ async fn handle_create_connection(channel_name: &str) -> Result<Client, Box<dyn 
 
     let mut stream = client.stream()?;
     while let Some(message) = stream.next().await.transpose()? {
-        if let Command::PING(_server1, _server2) = message.command {
+        if let Command::PONG(_server1, _server2) = message.command {
             if let Err(e) = dispatch_event(json!({ "type": "ping" })) {
                 log::error!("Failed to handle Twitch PING event: {:?}", e);
             }
