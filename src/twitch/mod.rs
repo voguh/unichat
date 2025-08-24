@@ -99,15 +99,9 @@ async fn handle_create_connection(channel_name: &str) -> Result<Client, Box<dyn 
 
     let mut stream = client.stream()?;
     while let Some(message) = stream.next().await.transpose()? {
-        if let Command::PONG(_server1, _server2) = message.command {
+        if matches!(message.command, Command::PONG(_, _) | Command::PING(_, _) | Command::Response(Response::RPL_WELCOME, _)) {
             if let Err(e) = dispatch_event(json!({ "type": "ping" })) {
-                log::error!("Failed to handle Twitch PING event: {:?}", e);
-            }
-        } else if let Command::Response(response, _args) = message.command {
-            if response == Response::RPL_WELCOME {
-                if let Err(e) = dispatch_event(json!({ "type": "ping" })) {
-                    log::error!("Failed to handle Twitch PING event: {:?}", e);
-                }
+                log::error!("Failed to emit ping event to window: {:?}", e);
             }
         } else if let Err(err) = handle_message_event(&message) {
             log::error!("Failed to handle Twitch message event: {:?}", err);
