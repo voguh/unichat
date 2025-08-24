@@ -132,10 +132,7 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     }
 }
 
-#[tokio::main]
-async fn main() {
-    tauri::async_runtime::set(tokio::runtime::Handle::current());
-
+fn main() {
     let log_level: log::LevelFilter;
     if utils::is_dev() || env::var("UNICHAT_DEBUG").is_ok() {
         log_level = log::LevelFilter::Debug;
