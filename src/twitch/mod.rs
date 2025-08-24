@@ -97,6 +97,8 @@ async fn handle_create_connection(channel_name: &str) -> Result<Client, Box<dyn 
     client.send(Command::USER(nickname.clone(), String::from("8"), nickname.clone()))?;
     client.send(Command::JOIN(format!("#{}", channel_name), None, None))?;
 
+    log::info!("Joined Twitch channel '#{}'.", channel_name);
+
     let mut stream = client.stream()?;
     while let Some(message) = stream.next().await.transpose()? {
         if matches!(message.command, Command::PONG(_, _) | Command::PING(_, _) | Command::Response(Response::RPL_WELCOME, _)) {
@@ -132,11 +134,10 @@ fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payl
 
                 let connect_result = handle_create_connection(&channel_name).await;
 
-                log::info!("Twitch IRC client disconnected. Attempting to reconnect...");
                 if let Err(e) = connect_result {
-                    log::error!("Failed to connect to Twitch IRC: {:?}", e);
+                    log::error!("Twitch IRC client exited with error: {:?}", e);
                 } else if let Ok(client) = connect_result {
-                    log::info!("Twitch IRC task cancelled. Parting from channel: {}", channel_name);
+                    log::info!("Twitch IRC client exited normally. Try to parting from channel: {}", channel_name);
                     if let Err(e) = client.send(Command::PART(format!("#{}", channel_name), None)) {
                         log::error!("Failed to send PART command: {:?}", e);
                     }
@@ -147,6 +148,7 @@ fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payl
                     }
                 }
 
+                log::info!("Reconnecting to Twitch IRC in 5 seconds...");
                 tokio::time::sleep(Duration::from_secs(5)).await;
             }
         }));
