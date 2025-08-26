@@ -10,19 +10,19 @@
 import { TourBuilder } from "../Tour";
 import { stageBuilder } from "./genericStageBuilder";
 
-export function settingsStageBuilder(
+export function widgetsSelectorBuilder(
     selector: string,
     title: string,
     subTitle: string,
     vLine = 50,
     hLine = 300
 ): TourBuilder {
-    const builder = stageBuilder(selector, title, subTitle, vLine, hLine);
+    const builder = stageBuilder(selector, title, subTitle, vLine, hLine, true);
 
     return async function (svg, dimensions, meta) {
-        const settingsDropDown = document.querySelector<HTMLButtonElement>("[data-tour='settings']");
-        if (settingsDropDown.getAttribute("aria-expanded") !== "true") {
-            settingsDropDown.click();
+        const widgetsSelectorDropdown = document.querySelector<HTMLButtonElement>("[data-tour='widgets-selector']");
+        if (widgetsSelectorDropdown.getAttribute("aria-expanded") !== "true") {
+            widgetsSelectorDropdown.click();
         }
 
         await new Promise((resolve) => setTimeout(resolve, 50));

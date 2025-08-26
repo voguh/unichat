@@ -164,9 +164,9 @@ fn main() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             commands::get_app_info,
+            commands::get_tour_steps,
+            commands::set_tour_steps,
             commands::is_dev,
-            commands::requires_tour,
-            commands::end_tour,
             commands::store_get_item,
             commands::store_set_item,
             commands::toggle_webview,

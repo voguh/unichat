@@ -45,20 +45,20 @@ export class CommandService {
         return invoke("get_app_info");
     }
 
+    public async getTourSteps(): Promise<string[]> {
+        return invoke("get_tour_steps");
+    }
+
+    public async setTourSteps(steps: string[]): Promise<void> {
+        return invoke("set_tour_steps", { steps });
+    }
+
     public async isDev(): Promise<boolean> {
         return invoke("is_dev");
     }
 
     public async toggleWebview(label: string): Promise<boolean> {
         return invoke("toggle_webview", { label });
-    }
-
-    public async requiresTour(): Promise<boolean> {
-        return invoke("requires_tour");
-    }
-
-    public async endTour(): Promise<void> {
-        await invoke("end_tour");
     }
 
     public async dispatchClearChat(): Promise<void> {

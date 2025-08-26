@@ -24,6 +24,9 @@ export const TourStyledContainer = styled.div`
         transform: translateX(-50%);
         z-index: 9999;
         display: flex;
+        justify-content: center;
+        align-items: center;
         gap: 10px;
+        width: 100%;
     }
 `;
