@@ -82,7 +82,6 @@ export function DashboardHome(): React.ReactNode {
             videoId = params.get("v");
         }
 
-        console.log("Validating YouTube chat URL:", value, "Video ID:", videoId);
         if (!Strings.isValidYouTubeVideoId(videoId)) {
             throw new Error("Invalid YouTube chat URL");
         }
