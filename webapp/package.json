@@ -19,7 +19,6 @@
     "dependencies": {
         "@fontsource/roboto": "5.2.6",
         "@fontsource/roboto-mono": "5.2.6",
-        "@mantine/code-highlight": "8.2.3",
         "@mantine/core": "8.2.7",
         "@mantine/form": "8.2.7",
         "@mantine/hooks": "8.2.7",

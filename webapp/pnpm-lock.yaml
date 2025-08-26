@@ -14,9 +14,6 @@ importers:
       '@fontsource/roboto-mono':
         specifier: 5.2.6
         version: 5.2.6
-      '@mantine/code-highlight':
-        specifier: 8.2.3
-        version: 8.2.3(@mantine/core@8.2.7(@mantine/hooks@8.2.7(react@18.3.1))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@mantine/hooks@8.2.7(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@mantine/core':
         specifier: 8.2.7
         version: 8.2.7(@mantine/hooks@8.2.7(react@18.3.1))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -444,14 +441,6 @@ packages:
 
   '@jridgewell/sourcemap-codec@1.5.0':
     resolution: {integrity: sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==}
-
-  '@mantine/code-highlight@8.2.3':
-    resolution: {integrity: sha512-9/CMMlV7ObYxAw42UP3U1xtGPPDoswIFmz6/nOKY34U4HQ/z88MGkiaooevx5JMsC4njNPi6ycvFzTLZoFJZJg==}
-    peerDependencies:
-      '@mantine/core': 8.2.3
-      '@mantine/hooks': 8.2.3
-      react: ^18.x || ^19.x
-      react-dom: ^18.x || ^19.x
 
   '@mantine/core@8.2.7':
     resolution: {integrity: sha512-gfVDf/qFxt66PrsktYEJt/MZbiNo3KCx6PxKKcskSe/J2g5g1kf4nhhvBFlYaicDX93PfT4MgTnipyfJQ09NDA==}
@@ -1618,10 +1607,6 @@ packages:
   hasown@2.0.2:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
-
-  highlight.js@11.11.1:
-    resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
-    engines: {node: '>=12.0.0'}
 
   html-encoding-sniffer@4.0.0:
     resolution: {integrity: sha512-Y22oTqIU4uuPgEemfz7NDJz6OeKf12Lsu+QC+s3BVpda64lTiMYCyGwg5ki4vFxkMwQdeZDl2adZoqUgdFuTgQ==}
@@ -3009,15 +2994,6 @@ snapshots:
   '@humanwhocodes/object-schema@2.0.3': {}
 
   '@jridgewell/sourcemap-codec@1.5.0': {}
-
-  '@mantine/code-highlight@8.2.3(@mantine/core@8.2.7(@mantine/hooks@8.2.7(react@18.3.1))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@mantine/hooks@8.2.7(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@mantine/core': 8.2.7(@mantine/hooks@8.2.7(react@18.3.1))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@mantine/hooks': 8.2.7(react@18.3.1)
-      clsx: 2.1.1
-      highlight.js: 11.11.1
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
 
   '@mantine/core@8.2.7(@mantine/hooks@8.2.7(react@18.3.1))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -4483,8 +4459,6 @@ snapshots:
   hasown@2.0.2:
     dependencies:
       function-bind: 1.1.2
-
-  highlight.js@11.11.1: {}
 
   html-encoding-sniffer@4.0.0:
     dependencies:
