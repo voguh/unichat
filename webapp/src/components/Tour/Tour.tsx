@@ -136,7 +136,7 @@ export function Tour(_props: Props): React.ReactNode {
     async function endTour(): Promise<void> {
         setStepsToRun([]);
         setCurrentStep(-1);
-        commandService.setTourSteps(stepsToRun.map((s) => s.id));
+        commandService.setTourSteps(steps.map((s) => s.id));
     }
 
     function previousStage(): void {
