@@ -13,6 +13,7 @@ import { alpha, Button, DEFAULT_THEME } from "@mantine/core";
 import { IconCheck, IconChevronLeft, IconChevronRight, IconX } from "@tabler/icons-react";
 
 import { commandService } from "unichat/services/commandService";
+import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
 import { Dimensions } from "unichat/types";
 
 import { stageBuilder } from "./stages/genericStageBuilder";
@@ -175,6 +176,16 @@ export function Tour(_props: Props): React.ReactNode {
         setCurrentStep(stepsToRun.length > 0 ? 0 : -1);
     }
 
+    async function handleTourStartCallback(event: EventEmitterEvents["tour:start"]): Promise<void> {
+        let completedSteps: string[] = [];
+        if (event.type === "whats-new") {
+            completedSteps = await commandService.getPrevTourSteps();
+        }
+
+        setPreviousStepsRan(completedSteps);
+        init(completedSteps);
+    }
+
     React.useEffect(() => {
         stepHandler();
     }, [currentStep]);
@@ -190,7 +201,10 @@ export function Tour(_props: Props): React.ReactNode {
         });
         window.addEventListener("resize", handleResize);
 
+        eventEmitter.on("tour:start", handleTourStartCallback);
+
         return () => {
+            eventEmitter.off("tour:start", handleTourStartCallback);
             window.removeEventListener("resize", handleResize);
         };
     }, []);

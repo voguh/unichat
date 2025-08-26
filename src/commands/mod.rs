@@ -64,6 +64,13 @@ pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
 /* ================================================================================================================== */
 
 #[tauri::command]
+pub async fn get_prev_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
+    let prev_tour_steps: Vec<String> = settings::get_item(SettingsKeys::PrevTourSteps)?;
+
+    return Ok(prev_tour_steps);
+}
+
+#[tauri::command]
 pub async fn get_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
     let tour_steps: Vec<String> = settings::get_item(SettingsKeys::TourSteps)?;
 

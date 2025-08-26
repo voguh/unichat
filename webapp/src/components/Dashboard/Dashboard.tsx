@@ -10,7 +10,16 @@ import React from "react";
 
 import { Badge, Button, Card, Divider, Menu, Tooltip } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { IconAdjustments, IconEraser, IconFolder, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
+import {
+    IconAdjustments,
+    IconCompass,
+    IconEraser,
+    IconFolder,
+    IconInfoCircle,
+    IconMap,
+    IconRefresh,
+    IconSparkles
+} from "@tabler/icons-react";
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 import { marked } from "marked";
 import semver from "semver";
@@ -18,6 +27,7 @@ import semver from "semver";
 import { AboutModal } from "unichat/components/AboutModal";
 import { AppContext } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
+import { eventEmitter } from "unichat/services/eventEmitter";
 import { loggerService } from "unichat/services/loggerService";
 
 import { DashboardHome } from "./DashboardHome";
@@ -104,6 +114,26 @@ export function Dashboard(_props: Props): React.ReactNode {
                         </Button>
                     </Menu.Target>
                     <Menu.Dropdown>
+                        <Menu.Sub>
+                            <Menu.Sub.Target>
+                                <Menu.Sub.Item leftSection={<IconCompass size="14" />}>Tour</Menu.Sub.Item>
+                            </Menu.Sub.Target>
+                            <Menu.Sub.Dropdown>
+                                <Menu.Item
+                                    leftSection={<IconMap size="14" />}
+                                    onClick={() => eventEmitter.emit("tour:start", { type: "full" })}
+                                >
+                                    Full tour
+                                </Menu.Item>
+                                <Menu.Item
+                                    leftSection={<IconSparkles size="14" />}
+                                    color="green"
+                                    onClick={() => eventEmitter.emit("tour:start", { type: "whats-new" })}
+                                >
+                                    What is new?
+                                </Menu.Item>
+                            </Menu.Sub.Dropdown>
+                        </Menu.Sub>
                         <Menu.Item
                             leftSection={<IconRefresh size="14" />}
                             color={hasUpdate ? "green" : null}

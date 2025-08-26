@@ -45,6 +45,10 @@ export class CommandService {
         return invoke("get_app_info");
     }
 
+    public async getPrevTourSteps(): Promise<string[]> {
+        return invoke("get_prev_tour_steps");
+    }
+
     public async getTourSteps(): Promise<string[]> {
         return invoke("get_tour_steps");
     }
