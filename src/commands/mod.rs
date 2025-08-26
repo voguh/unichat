@@ -64,6 +64,17 @@ pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
 /* ================================================================================================================== */
 
 #[tauri::command]
+pub async fn tour_steps_has_new<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, String> {
+    let prev_tour_steps: Vec<String> = settings::get_item(SettingsKeys::PrevTourSteps)?;
+    let steps: Vec<String> = settings::get_item(SettingsKeys::TourSteps)?;
+
+    let prev_hash_set: HashSet<_> = prev_tour_steps.iter().cloned().collect();
+    let new_hash_set: HashSet<_> = steps.iter().cloned().collect();
+
+    return Ok(prev_hash_set != new_hash_set);
+}
+
+#[tauri::command]
 pub async fn get_prev_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
     let prev_tour_steps: Vec<String> = settings::get_item(SettingsKeys::PrevTourSteps)?;
 

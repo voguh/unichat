@@ -39,6 +39,7 @@ interface Props {
 
 export function Dashboard(_props: Props): React.ReactNode {
     const [hasUpdate, setHasUpdate] = React.useState(false);
+    const [hasNewsTour, setHasNewsTour] = React.useState(false);
     const { metadata } = React.useContext(AppContext);
 
     async function handleClearChat(): Promise<void> {
@@ -88,6 +89,7 @@ export function Dashboard(_props: Props): React.ReactNode {
     }
 
     React.useEffect(() => {
+        commandService.tourStepsHasNew().then((hasNew) => setHasNewsTour(hasNew));
         checkForUpdates().catch((err) => loggerService.error("Failed to check for updates: {}", err));
     }, []);
 
@@ -125,13 +127,15 @@ export function Dashboard(_props: Props): React.ReactNode {
                                 >
                                     Full tour
                                 </Menu.Item>
-                                <Menu.Item
-                                    leftSection={<IconSparkles size="14" />}
-                                    color="green"
-                                    onClick={() => eventEmitter.emit("tour:start", { type: "whats-new" })}
-                                >
-                                    What is new?
-                                </Menu.Item>
+                                {hasNewsTour && (
+                                    <Menu.Item
+                                        leftSection={<IconSparkles size="14" />}
+                                        color="green"
+                                        onClick={() => eventEmitter.emit("tour:start", { type: "whats-new" })}
+                                    >
+                                        What is new?
+                                    </Menu.Item>
+                                )}
                             </Menu.Sub.Dropdown>
                         </Menu.Sub>
                         <Menu.Item
