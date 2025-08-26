@@ -251,6 +251,9 @@ fn main() {
     let root_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let target_gen_dir = root_dir.join("target").join("gen");
 
+    let _ = rustls::crypto::aws_lc_rs::default_provider().install_default()
+        .expect("Failed to install `aws-lc-rs` as the default TLS provider");
+
     if !target_gen_dir.exists() {
         if let Err(err) = fs::create_dir_all(&target_gen_dir) {
             panic!("Failed to create target gen directory: {}", err);

@@ -81,15 +81,16 @@ async fn handle_create_connection(channel_name: &str) -> Result<Client, Box<dyn 
 
     let config = Config {
         server: Some(String::from("irc.chat.twitch.tv")),
-        port: Some(6667),
+        port: Some(6697),
         ping_time: Some(30),
         ping_timeout: Some(5),
+        use_tls: Some(true),
         ..Config::default()
     };
 
     let mut client = Client::from_config(config).await?;
 
-    let capabilities = vec!["twitch.tv/commands", "twitch.tv/membership", "twitch.tv/tags"];
+    let capabilities = vec!["twitch.tv/commands", "twitch.tv/tags"];
     let capabilities = capabilities.into_iter().map(|cap| Capability::Custom(cap)).collect::<Vec<_>>();
     client.send_cap_req(&capabilities)?;
     client.send(Command::PASS(String::from("SCHMOOPIIE")))?;
