@@ -39,7 +39,7 @@ pub enum SettingsKeys {
     #[serde(rename = "settings.prev-tour-steps")]
     PrevTourSteps,
     #[serde(rename = "settings.tour-steps")]
-    TourSteps,
+    CurrentTourSteps,
     #[serde(rename = "settings.log-youtube-events")]
     LogYouTubeEvents,
     #[serde(rename = "settings.log-twitch-events")]
@@ -65,7 +65,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
 
     let default_tour_steps: Vec<String> = vec![];
     defaults.insert(SettingsKeys::PrevTourSteps.to_string(), Value::from(default_tour_steps.clone()));
-    defaults.insert(SettingsKeys::TourSteps.to_string(), Value::from(default_tour_steps.clone()));
+    defaults.insert(SettingsKeys::CurrentTourSteps.to_string(), Value::from(default_tour_steps.clone()));
     defaults.insert(SettingsKeys::LogYouTubeEvents.to_string(), serde_json::to_value(SettingLogEventLevel::OnlyErrors).unwrap());
     defaults.insert(SettingsKeys::LogTwitchEvents.to_string(), serde_json::to_value(SettingLogEventLevel::OnlyErrors).unwrap());
 

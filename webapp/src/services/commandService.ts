@@ -57,8 +57,8 @@ export class CommandService {
         return invoke("get_tour_steps");
     }
 
-    public async setTourSteps(steps: string[]): Promise<void> {
-        return invoke("set_tour_steps", { steps });
+    public async setTourSteps(newSteps: string[]): Promise<void> {
+        return invoke("set_tour_steps", { newSteps });
     }
 
     public async isDev(): Promise<boolean> {
