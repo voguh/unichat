@@ -149,9 +149,6 @@ fn main() {
         log_level = log::LevelFilter::Info;
     }
 
-    let _ = rustls::crypto::aws_lc_rs::default_provider().install_default()
-        .expect("Failed to install `aws-lc-rs` as the default TLS provider");
-
     tauri::Builder::default().setup(setup)
         .plugin(tauri_plugin_log::Builder::default()
             .level(log_level)
