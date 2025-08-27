@@ -10,7 +10,6 @@
 use std::sync::LazyLock;
 use std::time::Duration;
 
-use base64::Engine;
 use moka::sync::Cache;
 use serde::Deserialize;
 use serde::Serialize;
@@ -129,32 +128,6 @@ pub fn parse_author_color(author_name: &str) -> Result<String, Box<dyn std::erro
     return random_color_by_seed(author_name)
 }
 
-static YOUTUBE_ARTIST_BADGE_RAW: &[u8] = include_bytes!("../../static/YouTubeArtist.png");
-static YOUTUBE_ARTIST_BADGE: LazyLock<String> = LazyLock::new(|| encode_bytes(YOUTUBE_ARTIST_BADGE_RAW));
-
-static YOUTUBE_BROADCASTER_BADGE_RAW: &[u8] = include_bytes!("../../static/YouTubeBroadcaster.png");
-static YOUTUBE_BROADCASTER_BADGE: LazyLock<String> = LazyLock::new(|| encode_bytes(YOUTUBE_BROADCASTER_BADGE_RAW));
-
-static YOUTUBE_MODERATOR_BADGE_RAW: &[u8] = include_bytes!("../../static/YouTubeModerator.png");
-static YOUTUBE_MODERATOR_BADGE: LazyLock<String> = LazyLock::new(|| encode_bytes(YOUTUBE_MODERATOR_BADGE_RAW));
-
-static YOUTUBE_VERIFIED_BADGE_RAW: &[u8] = include_bytes!("../../static/YouTubeVerified.png");
-static YOUTUBE_VERIFIED_BADGE: LazyLock<String> = LazyLock::new(|| encode_bytes(YOUTUBE_VERIFIED_BADGE_RAW));
-
-static YOUTUBE_LEADERBOARD_FIRST_BADGE_RAW: &[u8] = include_bytes!("../../static/YouTubeLeaderboardFirst.png");
-static YOUTUBE_LEADERBOARD_FIRST_BADGE: LazyLock<String> = LazyLock::new(|| encode_bytes(YOUTUBE_LEADERBOARD_FIRST_BADGE_RAW));
-
-static YOUTUBE_LEADERBOARD_SECOND_BADGE_RAW: &[u8] = include_bytes!("../../static/YouTubeLeaderboardSecond.png");
-static YOUTUBE_LEADERBOARD_SECOND_BADGE: LazyLock<String> = LazyLock::new(|| encode_bytes(YOUTUBE_LEADERBOARD_SECOND_BADGE_RAW));
-
-static YOUTUBE_LEADERBOARD_THIRD_BADGE_RAW: &[u8] = include_bytes!("../../static/YouTubeLeaderboardThird.png");
-static YOUTUBE_LEADERBOARD_THIRD_BADGE: LazyLock<String> = LazyLock::new(|| encode_bytes(YOUTUBE_LEADERBOARD_THIRD_BADGE_RAW));
-
-fn encode_bytes(bytes: &[u8]) -> String {
-    let b64 = base64::engine::general_purpose::STANDARD.encode(bytes);
-    return format!("data:image/png;base64,{}", b64);
-}
-
 pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_content: &Option<Vec<BeforeContentButton>>) -> Result<Vec<UniChatBadge>, Box<dyn std::error::Error>> {
     let mut parsed_badges = Vec::new();
 
@@ -172,15 +145,15 @@ pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_cont
                     match icon.icon_type.as_str() {
                         "OWNER" => parsed_badges.push(UniChatBadge {
                             code: String::from("broadcaster"),
-                            url: YOUTUBE_BROADCASTER_BADGE.clone()
+                            url: String::from("/assets/youtube/YouTubeBroadcaster.png")
                         }),
                         "MODERATOR" => parsed_badges.push(UniChatBadge {
                             code: String::from("moderator"),
-                            url: YOUTUBE_MODERATOR_BADGE.clone()
+                            url: String::from("/assets/youtube/YouTubeModerator.png")
                         }),
                         "VERIFIED" => parsed_badges.push(UniChatBadge {
                             code: String::from("verified"),
-                            url: YOUTUBE_VERIFIED_BADGE.clone()
+                            url: String::from("/assets/youtube/YouTubeVerified.png")
                         }),
                         // I don't know if this is correct, but on subscriptions
                         // this badge appears as `BADGE_STYLE_TYPE_VERIFIED_ARTIST`
@@ -188,7 +161,7 @@ pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_cont
                         // this is the correct mapping.
                         "VERIFIED_ARTIST" => parsed_badges.push(UniChatBadge {
                             code: String::from("verified-artist"),
-                            url: YOUTUBE_ARTIST_BADGE.clone()
+                            url: String::from("/assets/youtube/YouTubeArtist.png")
                         }),
                         _ => {}
                     };
@@ -204,17 +177,17 @@ pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_cont
                 if model.title == "#1" {
                     parsed_badges.push(UniChatBadge {
                         code: String::from("youtube-leaderboard-first"),
-                        url: YOUTUBE_LEADERBOARD_FIRST_BADGE.clone()
+                        url: String::from("/assets/youtube/YouTubeLeaderboardFirst.png")
                     });
                 } else if model.title == "#2" {
                     parsed_badges.push(UniChatBadge {
                         code: String::from("youtube-leaderboard-second"),
-                        url: YOUTUBE_LEADERBOARD_SECOND_BADGE.clone()
+                        url: String::from("/assets/youtube/YouTubeLeaderboardSecond.png")
                     });
                 } else if model.title == "#3" {
                     parsed_badges.push(UniChatBadge {
                         code: String::from("youtube-leaderboard-third"),
-                        url: YOUTUBE_LEADERBOARD_THIRD_BADGE.clone()
+                        url: String::from("/assets/youtube/YouTubeLeaderboardThird.png")
                     });
                 }
             }
