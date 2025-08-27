@@ -13,6 +13,7 @@ pub mod constants;
 pub mod properties;
 pub mod render_emitter;
 pub mod settings;
+pub mod ureq;
 
 pub fn is_dev() -> bool {
     return cfg!(debug_assertions) || tauri::is_dev();

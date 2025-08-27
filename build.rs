@@ -19,6 +19,10 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 
+use ureq::config::Config;
+use ureq::tls::TlsConfig;
+use ureq::tls::TlsProvider;
+
 // I will not implement any api to get license information.
 // This is a "safe guard" to remember me to change license info if I change the license.
 fn get_license_info(license: &str) -> Result<(String, String), Box<dyn std::error::Error>> {
@@ -90,7 +94,7 @@ fn generate_crate_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::
 
     let packages = cargo_manifest["packages"].as_array().ok_or("missing packages")?;
     let packages_map: HashMap<String, serde_json::Value> = packages.iter().map(|pkg| {
-        (pkg["name"].as_str().unwrap_or_default().to_string(), pkg.clone())
+        return (pkg["name"].as_str().unwrap_or_default().to_string(), pkg.clone());
     }).collect();
 
     let unichat_package = packages_map["unichat"].clone();
@@ -200,7 +204,16 @@ fn generate_npm_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::er
         let raw_version = raw_version.as_str().ok_or("dependency version is not a string")?;
         let npm_url = format!("https://registry.npmjs.org/{}/{}", raw_name, raw_version);
 
-        let mut response = ureq::get(npm_url).call()?;
+        let config = Config::builder()
+            .tls_config(
+                TlsConfig::builder()
+                    .provider(TlsProvider::NativeTls)
+                    .root_certs(ureq::tls::RootCerts::PlatformVerifier)
+                    .build()
+            )
+            .build();
+
+        let mut response = config.new_agent().get(npm_url).call()?;
         let package: serde_json::Value = response.body_mut().read_json()?;
 
         let name = package["name"].as_str().ok_or("missing package.name")?;
@@ -250,9 +263,6 @@ fn main() {
     println!("cargo:rerun-if-changed=webapp/package.json");
     let root_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let target_gen_dir = root_dir.join("target").join("gen");
-
-    let _ = rustls::crypto::aws_lc_rs::default_provider().install_default()
-        .expect("Failed to install `aws-lc-rs` as the default TLS provider");
 
     if !target_gen_dir.exists() {
         if let Err(err) = fs::create_dir_all(&target_gen_dir) {
