@@ -205,7 +205,12 @@ fn generate_npm_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::er
         let npm_url = format!("https://registry.npmjs.org/{}/{}", raw_name, raw_version);
 
         let config = Config::builder()
-            .tls_config(TlsConfig::builder().provider(TlsProvider::NativeTls).build())
+            .tls_config(
+                TlsConfig::builder()
+                    .provider(TlsProvider::NativeTls)
+                    .root_certs(ureq::tls::RootCerts::PlatformVerifier)
+                    .build()
+            )
             .build();
 
         let mut response = config.new_agent().get(npm_url).call()?;

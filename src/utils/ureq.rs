@@ -20,7 +20,12 @@ use ureq::RequestBuilder;
 
 static UREQ_AGENT: LazyLock<ureq::Agent> = LazyLock::new(|| {
     let config = Config::builder()
-        .tls_config(TlsConfig::builder().provider(TlsProvider::NativeTls).build())
+        .tls_config(
+            TlsConfig::builder()
+                .provider(TlsProvider::NativeTls)
+                .root_certs(ureq::tls::RootCerts::PlatformVerifier)
+                .build()
+        )
         .build();
 
     return config.new_agent();
