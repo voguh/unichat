@@ -44,7 +44,7 @@ export function Dashboard(_props: Props): React.ReactNode {
         const latestRelease = `${metadata.homepage.replace("https://github.com", "https://api.github.com/repos")}/releases/latest`;
         const response = await fetch(latestRelease, { method: "GET", cache: "no-cache" });
         if (!response.ok) {
-            console.error("Failed to fetch latest release information.");
+            loggerService.error("Failed to fetch latest release information.");
 
             return;
         }

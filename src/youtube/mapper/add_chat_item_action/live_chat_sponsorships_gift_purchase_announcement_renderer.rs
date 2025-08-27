@@ -89,7 +89,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let author_username = parse_author_username(&render.author_name)?;
     let author_name = parse_author_name(&render.author_name)?;
     let author_color = parse_author_color(&author_name)?;
-    let author_badges = parse_author_badges(&render.author_badges)?;
+    let author_badges = parse_author_badges(&render.author_badges, &None)?;
     let author_photo = parse_author_photo(&render.author_photo)?;
     let author_type = parse_author_type(&render.author_badges)?;
     let count = parse_count(&render)?;

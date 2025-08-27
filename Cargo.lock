@@ -5457,6 +5457,7 @@ version = "1.0.0-alpha.0"
 dependencies = [
  "actix-web",
  "actix-ws",
+ "base64 0.22.1",
  "futures",
  "infer",
  "irc",

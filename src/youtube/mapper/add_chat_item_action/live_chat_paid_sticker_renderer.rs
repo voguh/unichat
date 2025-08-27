@@ -73,7 +73,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let author_username = parse_author_username(&parsed.author_name)?;
     let author_name = parse_author_name(&parsed.author_name)?;
     let author_color = parse_author_color(&author_name)?;
-    let author_badges = parse_author_badges(&parsed.author_badges)?;
+    let author_badges = parse_author_badges(&parsed.author_badges, &None)?;
     let author_photo = parse_author_photo(&parsed.author_photo)?;
     let author_type = parse_author_type(&parsed.author_badges)?;
     let (purchase_currency, purchase_value) = parse_purchase_amount(&parsed.purchase_amount_text)?;
