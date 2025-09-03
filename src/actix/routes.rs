@@ -37,6 +37,32 @@ fn safe_guard_path(base_path: &PathBuf, concat_str: &str) -> Result<PathBuf, act
     return Ok(resolved_path);
 }
 
+/* ================================================================================================================== */
+
+#[get("/assets/{path:.*}")]
+pub async fn get_assets(req: HttpRequest) -> Result<impl Responder, actix_web::Error> {
+    let asset_path: String = req.match_info().query("path").parse()?;
+    if asset_path.trim().is_empty() {
+        return Err(ErrorBadRequest("Asset path cannot be empty"));
+    }
+
+    let assets_path = properties::get_app_path(AppPaths::UniChatAssets);
+    let asset_full_path = safe_guard_path(&assets_path, &asset_path)?;
+    if !asset_full_path.exists() {
+        return Err(ErrorNotFound(format!("Asset '{}' not found", asset_path)));
+    }
+
+    let content = fs::read(&asset_full_path).map_err(|_| ErrorNotFound(format!("Failed to read asset '{}'", asset_path)))?;
+
+    if let Some(kind) = infer::get(&content) {
+        return Ok(HttpResponse::build(StatusCode::OK).content_type(kind.mime_type()).body(content));
+    } else {
+        return Err(ErrorBadRequest(format!("Could not infer MIME type for asset '{}'", asset_path)));
+    }
+}
+
+/* ================================================================================================================== */
+
 fn get_widget_dir(widget_name: &str) -> Option<PathBuf> {
     let widget_name = widget_name.trim();
     // Return none if widget name is empty or starts with a dot
@@ -69,8 +95,8 @@ pub async fn get_widget_assets(req: HttpRequest) -> Result<impl Responder, actix
     }
 
     if let Some(widget_path) = get_widget_dir(&widget_name) {
-        let assets_path = safe_guard_path(&widget_path, "assets")?;
-        let asset_full_path = safe_guard_path(&assets_path, &asset_path)?;
+        let widget_assets_path = widget_path.join("assets");
+        let asset_full_path = safe_guard_path(&widget_assets_path, &asset_path)?;
 
         if !asset_full_path.exists() {
             return Err(ErrorNotFound(format!("Asset '{}' not found in widget '{}'", asset_path, widget_name)));
@@ -89,6 +115,8 @@ pub async fn get_widget_assets(req: HttpRequest) -> Result<impl Responder, actix
         return Err(ErrorNotFound(format!("Widget '{}' not found", widget_name)));
     }
 }
+
+/* ================================================================================================================== */
 
 #[get("/widget/{name}")]
 pub async fn get_widget(req: HttpRequest) -> Result<impl Responder, actix_web::Error> {
@@ -110,8 +138,10 @@ pub async fn get_widget(req: HttpRequest) -> Result<impl Responder, actix_web::E
     }
 }
 
+/* ================================================================================================================== */
+
 #[get("/ws")]
-async fn ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, actix_web::Error> {
+pub async fn ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, actix_web::Error> {
     let (res, mut session, _stream) = actix_ws::handle(&req, stream)?;
 
     actix_web::rt::spawn(async move {

@@ -41,6 +41,7 @@ pub enum AppPaths {
     AppLocalData,
     AppLog,
 
+    UniChatAssets,
     UniChatSystemWidget,
     UniChatUserWidgets,
     UniChatLogoIcon,
@@ -56,6 +57,7 @@ impl fmt::Display for AppPaths {
             AppPaths::AppLocalData => "app_local_data_dir",
             AppPaths::AppLog => "app_log_dir",
 
+            AppPaths::UniChatAssets => "unichat_assets_dir",
             AppPaths::UniChatSystemWidget => "unichat_system_widgets_dir",
             AppPaths::UniChatUserWidgets => "unichat_user_widgets_dir",
             AppPaths::UniChatLogoIcon => "unichat_logo_icon",
@@ -74,8 +76,9 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     let app_data_dir = app.path().app_data_dir()?;
     let app_local_data_dir = app.path().app_local_data_dir()?;
     let app_log_dir = app.path().app_log_dir()?;
-    let widget_defaults_dir = app.path().resolve("widgets", BaseDirectory::Resource)?;
-    let widgets_dir = app.path().resolve("widgets", BaseDirectory::AppData)?;
+    let assets_dir = app.path().resolve("assets", BaseDirectory::Resource)?;
+    let system_widgets_dir = app.path().resolve("widgets", BaseDirectory::Resource)?;
+    let user_widgets_dir = app.path().resolve("widgets", BaseDirectory::AppData)?;
     let logo_icon_file = app.path().resolve("icons/icon.png", BaseDirectory::Resource)?;
     let license_file = app.path().resolve("LICENSE", BaseDirectory::Resource)?;
 
@@ -84,8 +87,9 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     let app_data_path = app_data_dir.to_string_lossy().to_string();
     let app_local_data_path = app_local_data_dir.to_string_lossy().to_string();
     let app_log_path = app_log_dir.to_string_lossy().to_string();
-    let widget_defaults_path = widget_defaults_dir.to_string_lossy().to_string();
-    let widgets_path = widgets_dir.to_string_lossy().to_string();
+    let assets_path = assets_dir.to_string_lossy().to_string();
+    let system_widgets_path = system_widgets_dir.to_string_lossy().to_string();
+    let user_widgets_path = user_widgets_dir.to_string_lossy().to_string();
     let logo_icon_path = logo_icon_file.to_string_lossy().to_string();
     let license_path = license_file.to_string_lossy().to_string();
 
@@ -95,8 +99,9 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     properties.insert(AppPaths::AppData.to_string(), app_data_path);
     properties.insert(AppPaths::AppLocalData.to_string(), app_local_data_path);
     properties.insert(AppPaths::AppLog.to_string(), app_log_path);
-    properties.insert(AppPaths::UniChatSystemWidget.to_string(), widget_defaults_path);
-    properties.insert(AppPaths::UniChatUserWidgets.to_string(), widgets_path);
+    properties.insert(AppPaths::UniChatAssets.to_string(), assets_path);
+    properties.insert(AppPaths::UniChatSystemWidget.to_string(), system_widgets_path);
+    properties.insert(AppPaths::UniChatUserWidgets.to_string(), user_widgets_path);
     properties.insert(AppPaths::UniChatLogoIcon.to_string(), logo_icon_path);
     properties.insert(AppPaths::UniChatLicense.to_string(), license_path);
 

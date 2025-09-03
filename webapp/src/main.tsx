@@ -8,7 +8,6 @@
  ******************************************************************************/
 
 import "@mantine/core/styles.css";
-import "@mantine/code-highlight/styles.css";
 import "@mantine/notifications/styles.css";
 import "@fontsource/roboto/400";
 import "@fontsource/roboto/400-italic";

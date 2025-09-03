@@ -13,6 +13,7 @@
 #![allow(clippy::needless_return)]
 #![allow(clippy::redundant_field_names)]
 
+use std::env;
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
@@ -133,8 +134,17 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
 
 fn main() {
     let log_level: log::LevelFilter;
-    if utils::is_dev() {
+    if utils::is_dev() || env::var("UNICHAT_DEBUG").is_ok() {
         log_level = log::LevelFilter::Debug;
+    } else if let Ok(log_level_raw) = env::var("UNICHAT_LOG_LEVEL") {
+        log_level = match log_level_raw.to_lowercase().as_str() {
+            "error" => log::LevelFilter::Error,
+            "warn" | "warning" => log::LevelFilter::Warn,
+            "info" => log::LevelFilter::Info,
+            "debug" => log::LevelFilter::Debug,
+            "trace" => log::LevelFilter::Trace,
+            _ => log::LevelFilter::Info
+        };
     } else {
         log_level = log::LevelFilter::Info;
     }
@@ -151,9 +161,11 @@ fn main() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             commands::get_app_info,
+            commands::tour_steps_has_new,
+            commands::get_prev_tour_steps,
+            commands::get_tour_steps,
+            commands::set_tour_steps,
             commands::is_dev,
-            commands::requires_tour,
-            commands::end_tour,
             commands::store_get_item,
             commands::store_set_item,
             commands::toggle_webview,

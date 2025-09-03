@@ -58,6 +58,21 @@ pub struct AuthorBadgeIconWrapper {
 
 /* <================================================================================================================> */
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct BeforeContentButton {
+    pub button_view_model: ButtonViewModel
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ButtonViewModel {
+    pub title: String,
+    pub icon_name: String
+}
+
+/* <================================================================================================================> */
+
 static USERNAME_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[\p{L}\p{N}_\.-]{3,30}$").unwrap());
 static USERNAME_CACHE: LazyLock<Cache<String, Option<String>>> = LazyLock::new(|| Cache::builder().time_to_idle(Duration::from_secs(60 * 10)).build());
 
@@ -113,7 +128,7 @@ pub fn parse_author_color(author_name: &str) -> Result<String, Box<dyn std::erro
     return random_color_by_seed(author_name)
 }
 
-pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>) -> Result<Vec<UniChatBadge>, Box<dyn std::error::Error>> {
+pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_content: &Option<Vec<BeforeContentButton>>) -> Result<Vec<UniChatBadge>, Box<dyn std::error::Error>> {
     let mut parsed_badges = Vec::new();
 
     if let Some(badges) = badges {
@@ -130,18 +145,50 @@ pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>) -> Result<V
                     match icon.icon_type.as_str() {
                         "OWNER" => parsed_badges.push(UniChatBadge {
                             code: String::from("broadcaster"),
-                            url: String::from("https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/3")
+                            url: String::from("/assets/youtube/YouTubeBroadcaster.png")
                         }),
                         "MODERATOR" => parsed_badges.push(UniChatBadge {
                             code: String::from("moderator"),
-                            url: String::from("https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3")
+                            url: String::from("/assets/youtube/YouTubeModerator.png")
                         }),
                         "VERIFIED" => parsed_badges.push(UniChatBadge {
                             code: String::from("verified"),
-                            url: String::from("https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/3")
+                            url: String::from("/assets/youtube/YouTubeVerified.png")
+                        }),
+                        // I don't know if this is correct, but on subscriptions
+                        // this badge appears as `BADGE_STYLE_TYPE_VERIFIED_ARTIST`
+                        // and verified as `BADGE_STYLE_TYPE_VERIFIED`, so I assume
+                        // this is the correct mapping.
+                        "VERIFIED_ARTIST" => parsed_badges.push(UniChatBadge {
+                            code: String::from("verified-artist"),
+                            url: String::from("/assets/youtube/YouTubeArtist.png")
                         }),
                         _ => {}
                     };
+                }
+            }
+        }
+    }
+
+    if let Some(before_content_buttons) = before_content {
+        for button in before_content_buttons {
+            let model = button.button_view_model.clone();
+            if model.icon_name == "CROWN" {
+                if model.title == "#1" {
+                    parsed_badges.push(UniChatBadge {
+                        code: String::from("youtube-leaderboard-first"),
+                        url: String::from("/assets/youtube/YouTubeLeaderboardFirst.png")
+                    });
+                } else if model.title == "#2" {
+                    parsed_badges.push(UniChatBadge {
+                        code: String::from("youtube-leaderboard-second"),
+                        url: String::from("/assets/youtube/YouTubeLeaderboardSecond.png")
+                    });
+                } else if model.title == "#3" {
+                    parsed_badges.push(UniChatBadge {
+                        code: String::from("youtube-leaderboard-third"),
+                        url: String::from("/assets/youtube/YouTubeLeaderboardThird.png")
+                    });
                 }
             }
         }

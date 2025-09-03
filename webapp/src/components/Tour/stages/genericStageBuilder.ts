@@ -9,13 +9,21 @@
 
 import { Strings } from "unichat/utils/Strings";
 
-import { BACKDROP_COLOR, INDICATORS_COLOR, TourStage } from "../Tour";
+import { BACKDROP_COLOR, INDICATORS_COLOR, TourBuilder } from "../Tour";
 
-export function stageBuilder(selector: string, title: string, subTitle: string, vLine = 50, hLine = 300): TourStage {
-    return (svg, dimensions) => {
+export function stageBuilder(
+    selector: string,
+    title: string,
+    subTitle: string,
+    vLine = 50,
+    hLine = 300,
+    ignorePrefix = false
+): TourBuilder {
+    return async function (svg, dimensions) {
         svg.innerHTML = "";
 
-        const dataTourItem = document.querySelector(`[data-tour='${selector}']`);
+        console.log(selector, ignorePrefix);
+        const dataTourItem = document.querySelector(ignorePrefix ? selector : `[data-tour='${selector}']`);
         if (!dataTourItem) {
             return;
         }

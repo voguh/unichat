@@ -7,4 +7,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-export * from "./ThirdPartyLicenses";
+import mitt from "mitt";
+
+export type EventEmitterEvents = {
+    "tour:start": { type: "full" | "whats-new" };
+};
+
+export const eventEmitter = mitt<EventEmitterEvents>();

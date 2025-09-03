@@ -17,6 +17,7 @@ use crate::events::unichat::UniChatEmote;
 use crate::shared_emotes::EmotesParserResult;
 use crate::utils::is_valid_youtube_channel_id;
 use crate::utils::parse_serde_error;
+use crate::utils::ureq;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
