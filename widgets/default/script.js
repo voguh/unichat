@@ -77,7 +77,7 @@ if (IS_IN_OBS_DOCK) {
 
 // Dispatch every time when websocket is connected (or reconnected)
 window.addEventListener("unichat:connected", function () {
-    // This listener doesn't receive any data, acctually it just notifies
+    // This listener doesn't receive any data, actually it just notifies
     // that connection is established or re-established.
 });
 
