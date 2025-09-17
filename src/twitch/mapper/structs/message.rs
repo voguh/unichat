@@ -11,6 +11,15 @@ use crate::events::unichat::UniChatEmote;
 use crate::shared_emotes;
 use crate::twitch::TWITCH_CHEERMOTES;
 
+fn normalize_message_text(message_raw: &str) -> String {
+    let mut message_raw = message_raw.trim().to_string();
+    if message_raw.starts_with("\u{1}ACTION ") && message_raw.ends_with("\u{1}") {
+        message_raw = message_raw.replace("\u{1}ACTION ", "").replace("\u{1}", "");
+    }
+
+    return message_raw;
+}
+
 fn parse_delimiter(start: &str, end: &str) -> Result<(usize, usize), Box<dyn std::error::Error>> {
     let start = start.parse::<usize>()?;
     let end = end.parse::<usize>()?;
@@ -18,6 +27,7 @@ fn parse_delimiter(start: &str, end: &str) -> Result<(usize, usize), Box<dyn std
 }
 
 pub fn parse_message_emotes(raw_emotes: Option<&String>, message_text: &str) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
+    let message_text = normalize_message_text(message_text);
     let mut emotes = Vec::new();
 
     if let Ok(custom_emotes) = shared_emotes::EMOTES_HASHSET.read() {
@@ -58,11 +68,7 @@ pub fn parse_message_emotes(raw_emotes: Option<&String>, message_text: &str) -> 
 }
 
 pub fn parse_message_string(message_raw: &String) -> Result<String, Box<dyn std::error::Error>> {
-    let mut message_raw = message_raw.trim().to_string();
-    if message_raw.starts_with("\u{1}ACTION ") && message_raw.ends_with("\u{1}") {
-        message_raw = message_raw.replace("\u{1}ACTION ", "").replace("\u{1}", "");
-    }
-
+    let message_raw = normalize_message_text(message_raw);
     let mut str_message = Vec::new();
 
     if let Ok(cheermotes) = TWITCH_CHEERMOTES.read() {
