@@ -15,6 +15,8 @@ import { AppMetadata } from "unichat/types";
 
 export interface AppContextProps {
     metadata: AppMetadata;
+    showWidgetPreview?: boolean;
+    setShowWidgetPreview?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const AppContext = React.createContext({} as AppContextProps);
@@ -26,6 +28,7 @@ interface Props {
 export function AppContextProvider({ children }: Props): React.ReactNode {
     const [loading, setLoading] = React.useState(true);
     const [metadata, setMetadata] = React.useState<AppMetadata>(null);
+    const [showWidgetPreview, setShowWidgetPreview] = React.useState(true);
     const [error, setError] = React.useState(false);
 
     async function init(): Promise<void> {
@@ -50,5 +53,9 @@ export function AppContextProvider({ children }: Props): React.ReactNode {
         return <div>Error loading app metadata, please restart the app and try again!</div>;
     }
 
-    return <AppContext.Provider value={{ metadata }}>{children}</AppContext.Provider>;
+    return (
+        <AppContext.Provider value={{ metadata, setShowWidgetPreview, showWidgetPreview }}>
+            {children}
+        </AppContext.Provider>
+    );
 }

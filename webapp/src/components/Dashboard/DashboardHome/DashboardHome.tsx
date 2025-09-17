@@ -13,6 +13,7 @@ import { Badge, Button, Card, ComboboxItemGroup, List, Select, Tooltip } from "@
 import { IconReload, IconWorld } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
+import { AppContext } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
 import { Strings } from "unichat/utils/Strings";
 
@@ -25,6 +26,7 @@ export function DashboardHome(): React.ReactNode {
     const [widgets, setWidgets] = React.useState<ComboboxItemGroup<string>[]>([]);
 
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
+    const { showWidgetPreview } = React.useContext(AppContext);
 
     function normalizeUrlScheme(value: string): string {
         value = value.replace(/^https?:\/\//, "");
@@ -175,35 +177,41 @@ export function DashboardHome(): React.ReactNode {
                 />
             </div>
             <div className="preview">
-                <Card className="preview-header" withBorder shadow="xs">
-                    <div className="preview-header-widget-selector">
-                        <Select
-                            value={selectedWidgetUrl}
-                            data={widgets.map((group) => ({
-                                ...group,
-                                items: group.items.map((item) => `${WIDGET_URL_PREFIX}/${item}`)
-                            }))}
-                            onChange={onChangeWidget}
-                            data-tour="widgets-selector"
-                        />
-                    </div>
+                {showWidgetPreview ? (
+                    <>
+                        <Card className="preview-header" withBorder shadow="xs">
+                            <div className="preview-header-widget-selector">
+                                <Select
+                                    value={selectedWidgetUrl}
+                                    data={widgets.map((group) => ({
+                                        ...group,
+                                        items: group.items.map((item) => `${WIDGET_URL_PREFIX}/${item}`)
+                                    }))}
+                                    onChange={onChangeWidget}
+                                    data-tour="widgets-selector"
+                                />
+                            </div>
 
-                    <Tooltip label="Reload widget view" position="left" withArrow>
-                        <Button onClick={reloadIframe} data-tour="preview-reload">
-                            <i className="fas fa-sync" />
-                            <IconReload size="20" />
-                        </Button>
-                    </Tooltip>
+                            <Tooltip label="Reload widget view" position="left" withArrow>
+                                <Button onClick={reloadIframe} data-tour="preview-reload">
+                                    <i className="fas fa-sync" />
+                                    <IconReload size="20" />
+                                </Button>
+                            </Tooltip>
 
-                    <Tooltip label="Open in browser" position="left" withArrow>
-                        <Button onClick={() => openUrl(selectedWidgetUrl)} data-tour="preview-open-in-browser">
-                            <IconWorld size="20" />
-                        </Button>
-                    </Tooltip>
-                </Card>
-                <div className="iframe-wrapper">
-                    <iframe ref={iframeRef} src={selectedWidgetUrl} sandbox="allow-scripts" />
-                </div>
+                            <Tooltip label="Open in browser" position="left" withArrow>
+                                <Button onClick={() => openUrl(selectedWidgetUrl)} data-tour="preview-open-in-browser">
+                                    <IconWorld size="20" />
+                                </Button>
+                            </Tooltip>
+                        </Card>
+                        <div className="iframe-wrapper">
+                            <iframe ref={iframeRef} src={selectedWidgetUrl} sandbox="allow-scripts" />
+                        </div>
+                    </>
+                ) : (
+                    <div className="iframe-placeholder">Widget preview is disabled.</div>
+                )}
             </div>
         </DashboardHomeStyledContainer>
     );

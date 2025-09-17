@@ -63,5 +63,16 @@ export const DashboardHomeStyledContainer = styled.div`
                 border: none;
             }
         }
+
+        > .iframe-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--mantine-color-dark-6);
+            border: 1px solid var(--mantine-color-dark-4);
+            border-radius: var(--mantine-radius-default);
+        }
     }
 `;

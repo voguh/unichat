@@ -18,6 +18,8 @@ import {
     IconFolder,
     IconInfoCircle,
     IconMap,
+    IconPhoto,
+    IconPhotoOff,
     IconRefresh,
     IconSparkles
 } from "@tabler/icons-react";
@@ -41,7 +43,7 @@ interface Props {
 export function Dashboard(_props: Props): React.ReactNode {
     const [hasUpdate, setHasUpdate] = React.useState(false);
     const [hasNewsTour, setHasNewsTour] = React.useState(false);
-    const { metadata } = React.useContext(AppContext);
+    const { metadata, setShowWidgetPreview, showWidgetPreview } = React.useContext(AppContext);
 
     async function handleClearChat(): Promise<void> {
         await commandService.dispatchClearChat();
@@ -106,6 +108,15 @@ export function Dashboard(_props: Props): React.ReactNode {
                     <Tooltip label="Open user widgets folder" position="right" withArrow>
                         <Button onClick={() => revealItemInDir(metadata.widgetsDir)} data-tour="user-widgets-directory">
                             <IconFolder size="20" />
+                        </Button>
+                    </Tooltip>
+                    <Tooltip label="Toggle widget preview" position="right" withArrow>
+                        <Button
+                            onClick={() => setShowWidgetPreview((old) => !old)}
+                            variant={showWidgetPreview ? "filled" : "default"}
+                            data-tour="toggle-widget-preview"
+                        >
+                            {showWidgetPreview ? <IconPhoto size="20" /> : <IconPhotoOff size="20" />}
                         </Button>
                     </Tooltip>
                 </div>

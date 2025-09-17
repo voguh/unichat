@@ -59,6 +59,10 @@ const steps: TourStep[] = [
         )
     },
     {
+        id: "1e255868-930b-4e20-be2b-41b07c8cf97f",
+        builder: stageBuilder("toggle-widget-preview", "Toggle widget preview", null, 50, 300)
+    },
+    {
         id: "94c455c6-5a1f-4131-83dd-aff3c25358ce",
         builder: stageBuilder("widgets-selector", "Widget selector", null, 50, -200)
     },
