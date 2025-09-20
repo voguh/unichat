@@ -17,6 +17,7 @@ use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UNICHAT_EVENT_DONATE_TYPE;
+use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPER_STICKER;
 use crate::utils::normalize_value;
 use crate::utils::parse_serde_error;
 use crate::utils::properties;
@@ -96,7 +97,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             channel_name: None,
 
             platform: UniChatPlatform::YouTube,
-            flags: HashMap::new(),
+            flags: HashMap::from([(String::from(UNICHAT_FLAG_YOUTUBE_SUPER_STICKER), None)]),
 
             author_id: parsed.author_external_channel_id,
             author_username: author_username,

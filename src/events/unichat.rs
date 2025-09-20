@@ -57,6 +57,12 @@ pub enum UniChatEvent {
     }
 }
 
+/* <============================================================================================> */
+
+pub const UNICHAT_FLAG_YOUTUBE_SUPER_STICKER: &str = "unichat:youtube_super_sticker";
+
+/* <============================================================================================> */
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum UniChatPlatform {
