@@ -21,26 +21,72 @@ export interface UniChatBadge {
     url: string;
 }
 
+/* <============================================================================================> */
+
 export interface UniChatEventClear {
     type: "unichat:clear";
     data: {
+        /** When filled, indicates that some platform triggered the clear. */
         platform: UniChatPlatform | null;
 
         timestamp: number;
     };
 }
 
+/* <============================================================================================> */
+
+export interface UniChatEventRemoveMessage {
+    type: "unichat:remove_message";
+    data: {
+        channelId: string;
+        /** **Disclaimer:** On YouTube, this field is always null. */
+        channelName: string | null;
+
+        platform: UniChatPlatform;
+        flags: Record<string, string | null>;
+
+        messageId: string;
+
+        timestamp: number;
+    };
+}
+
+/* <============================================================================================> */
+
+export interface UniChatEventRemoveAuthor {
+    type: "unichat:remove_author";
+    data: {
+        channelId: string;
+        /** **Disclaimer:** On YouTube, this field is always null. */
+        channelName: string | null;
+
+        platform: UniChatPlatform;
+        flags: Record<string, string | null>;
+
+        authorId: string;
+
+        timestamp: number;
+    };
+}
+
+/* <============================================================================================> */
+
 export interface UniChatEventMessage {
     type: "unichat:message";
     data: {
         channelId: string;
+        /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
+
         platform: UniChatPlatform;
+        flags: Record<string, string | null>;
 
         authorId: string;
+        /** **Disclaimer:** On YouTube, this field is null when name doesn't starts with `@`. */
         authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
+        /** **Disclaimer:** On Twitch, this field is always null. */
         authorProfilePictureUrl: string | null;
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
@@ -53,65 +99,55 @@ export interface UniChatEventMessage {
     };
 }
 
-export interface UniChatEventRemoveMessage {
-    type: "unichat:remove_message";
-    data: {
-        channelId: string;
-        channelName: string | null;
-        platform: UniChatPlatform;
-
-        messageId: string;
-
-        timestamp: number;
-    };
-}
-
-export interface UniChatEventRemoveAuthor {
-    type: "unichat:remove_author";
-    data: {
-        channelId: string;
-        channelName: string | null;
-        platform: UniChatPlatform;
-
-        authorId: string;
-
-        timestamp: number;
-    };
-}
+/* <============================================================================================> */
 
 export interface UniChatEventRaid {
     type: "unichat:raid";
     data: {
         channelId: string;
+        /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
-        platform: UniChatPlatform;
 
-        authorId: string;
+        platform: UniChatPlatform;
+        flags: Record<string, string | null>;
+
+        /** **Disclaimer:** On YouTube, this field is always null. */
+        authorId: string | null;
+        /** **Disclaimer:** On YouTube, this field is null when name doesn't starts with `@`. */
         authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
-        authorProfilePictureUrl: string | null;
+        authorProfilePictureUrl: string;
         authorBadges: UniChatBadge[];
+        /** **Disclaimer:** On YouTube, this field is always null. */
         authorType: UniChatAuthorType | null;
 
         messageId: string;
+        /** **Disclaimer:** On YouTube, this field is always null. */
         viewerCount: number | null;
 
         timestamp: number;
     };
 }
 
+/* <============================================================================================> */
+
 export interface UniChatEventSponsor {
     type: "unichat:sponsor";
     data: {
         channelId: string;
+        /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
+
         platform: UniChatPlatform;
+        flags: Record<string, string | null>;
 
         authorId: string;
+        /** **Disclaimer:** On YouTube, this field is null when name doesn't starts with `@`. */
         authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
+        /** **Disclaimer:** On Twitch, this field is always null. */
         authorProfilePictureUrl: string | null;
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
@@ -127,17 +163,24 @@ export interface UniChatEventSponsor {
     };
 }
 
+/* <============================================================================================> */
+
 export interface UniChatEventSponsorGift {
     type: "unichat:sponsor_gift";
     data: {
         channelId: string;
+        /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
+
         platform: UniChatPlatform;
+        flags: Record<string, string | null>;
 
         authorId: string;
+        /** **Disclaimer:** On YouTube, this field is null when name doesn't starts with `@`. */
         authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
+        /** **Disclaimer:** On Twitch, this field is always null. */
         authorProfilePictureUrl: string | null;
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
@@ -150,17 +193,24 @@ export interface UniChatEventSponsorGift {
     };
 }
 
+/* <============================================================================================> */
+
 export interface UniChatEventDonate {
     type: "unichat:donate";
     data: {
         channelId: string;
+        /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
+
         platform: UniChatPlatform;
+        flags: Record<string, string | null>;
 
         authorId: string;
+        /** **Disclaimer:** On YouTube, this field is null when name doesn't starts with `@`. */
         authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
+        /** **Disclaimer:** On Twitch, this field is always null. */
         authorProfilePictureUrl: string | null;
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
