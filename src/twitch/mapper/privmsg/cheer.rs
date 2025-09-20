@@ -20,6 +20,7 @@ use crate::twitch::mapper::structs::author::parse_author_color;
 use crate::twitch::mapper::structs::author::parse_author_name;
 use crate::twitch::mapper::structs::author::parse_author_type;
 use crate::twitch::mapper::structs::author::parse_author_username;
+use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::twitch::mapper::structs::message::parse_message_emotes;
 use crate::twitch::mapper::structs::message::parse_message_string;
 
@@ -46,7 +47,7 @@ pub fn parse(channel: String, text: String, message: &Message, tags: HashMap<Str
             channel_name: Some(channel),
 
             platform: UniChatPlatform::Twitch,
-            flags: HashMap::new(),
+            flags: inject_raw_tags(&tags),
 
             author_id: author_id.to_owned(),
             author_username: author_username,

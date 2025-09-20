@@ -20,10 +20,30 @@ pub fn parse_tags(tags: &Option<Vec<Tag>>) -> HashMap<String, String> {
     if let Some(tags) = tags {
         for Tag(name, value) in tags {
             if let Some(value) = value {
+                if value.trim().is_empty() {
+                    continue;
+                }
+
                 tags_map.insert(name.clone(), value.clone());
             }
         }
     }
 
     return tags_map;
+}
+
+pub fn inject_raw_tags(tags: &HashMap<String, String>) -> HashMap<String, Option<String>> {
+    let mut flags = HashMap::new();
+
+    for (key, value) in tags.iter() {
+        let key = format!("unichat:raw:twitch:{}", key);
+
+        if value.trim().is_empty() {
+            flags.insert(key, None);
+        } else {
+            flags.insert(key, Some(value.to_owned()));
+        }
+    }
+
+    return flags.clone();
 }
