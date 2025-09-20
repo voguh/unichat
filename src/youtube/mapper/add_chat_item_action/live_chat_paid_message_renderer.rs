@@ -7,6 +7,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use std::collections::HashMap;
+
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -105,7 +107,9 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
         data: UniChatDonateEventPayload {
             channel_id: properties::get_item(PropertiesKey::YouTubeChannelId)?,
             channel_name: None,
+
             platform: UniChatPlatform::YouTube,
+            flags: HashMap::new(),
 
             author_id: parsed.author_external_channel_id,
             author_username: author_username,

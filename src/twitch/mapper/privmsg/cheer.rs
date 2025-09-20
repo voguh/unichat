@@ -44,7 +44,9 @@ pub fn parse(channel: String, text: String, message: &Message, tags: HashMap<Str
         data: UniChatDonateEventPayload {
             channel_id: room_id.to_owned(),
             channel_name: Some(channel),
+
             platform: UniChatPlatform::Twitch,
+            flags: HashMap::new(),
 
             author_id: author_id.to_owned(),
             author_username: author_username,

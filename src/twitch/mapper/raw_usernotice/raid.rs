@@ -39,13 +39,15 @@ pub fn parse(channel: String, tags: &HashMap<String, String>) -> Result<Option<U
         data: UniChatRaidEventPayload {
             channel_id: room_id.to_owned(),
             channel_name: Some(channel),
+
             platform: UniChatPlatform::Twitch,
+            flags: HashMap::new(),
 
             author_id: Some(author_id.to_owned()),
             author_username: author_username,
             author_display_name: author_name,
             author_display_color: author_color,
-            author_profile_picture_url:Some(author_profile_picture_url.to_owned()),
+            author_profile_picture_url: author_profile_picture_url.to_owned(),
             author_badges: author_badges,
             author_type: Some(author_type),
 

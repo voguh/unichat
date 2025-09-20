@@ -7,6 +7,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use std::collections::HashMap;
+
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -18,11 +20,6 @@ pub enum UniChatEvent {
         event_type: String,
         data: UniChatClearEventPayload
     },
-    Message {
-        #[serde(rename = "type")]
-        event_type: String,
-        data: UniChatMessageEventPayload
-    },
     RemoveMessage {
         #[serde(rename = "type")]
         event_type: String,
@@ -32,6 +29,11 @@ pub enum UniChatEvent {
         #[serde(rename = "type")]
         event_type: String,
         data: UniChatRemoveAuthorEventPayload
+    },
+    Message {
+        #[serde(rename = "type")]
+        event_type: String,
+        data: UniChatMessageEventPayload
     },
     Raid {
         #[serde(rename = "type")]
@@ -101,33 +103,6 @@ pub struct UniChatClearEventPayload {
 
 /* <============================================================================================> */
 
-pub const UNICHAT_EVENT_MESSAGE_TYPE: &str = "unichat:message";
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct UniChatMessageEventPayload {
-    pub channel_id: String,
-    pub channel_name: Option<String>,
-    pub platform: UniChatPlatform,
-
-    pub author_id: String,
-    pub author_username: Option<String>,
-    pub author_display_name: String,
-    pub author_display_color: String,
-    pub author_profile_picture_url: Option<String>,
-    pub author_badges: Vec<UniChatBadge>,
-    pub author_type: UniChatAuthorType,
-
-    pub message_id: String,
-    pub message_text: String,
-    pub emotes: Vec<UniChatEmote>,
-
-    pub timestamp: i64
-}
-
-
-/* <============================================================================================> */
-
 pub const UNICHAT_EVENT_REMOVE_MESSAGE_TYPE: &str = "unichat:remove_message";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -160,6 +135,34 @@ pub struct UniChatRemoveAuthorEventPayload {
 
 /* <============================================================================================> */
 
+pub const UNICHAT_EVENT_MESSAGE_TYPE: &str = "unichat:message";
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UniChatMessageEventPayload {
+    pub channel_id: String,
+    pub channel_name: Option<String>,
+
+    pub platform: UniChatPlatform,
+    pub flags: HashMap<String, Option<String>>,
+
+    pub author_id: String,
+    pub author_username: Option<String>,
+    pub author_display_name: String,
+    pub author_display_color: String,
+    pub author_profile_picture_url: Option<String>,
+    pub author_badges: Vec<UniChatBadge>,
+    pub author_type: UniChatAuthorType,
+
+    pub message_id: String,
+    pub message_text: String,
+    pub emotes: Vec<UniChatEmote>,
+
+    pub timestamp: i64
+}
+
+/* <============================================================================================> */
+
 pub const UNICHAT_EVENT_RAID_TYPE: &str = "unichat:raid";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -167,13 +170,15 @@ pub const UNICHAT_EVENT_RAID_TYPE: &str = "unichat:raid";
 pub struct UniChatRaidEventPayload {
     pub channel_id: String,
     pub channel_name: Option<String>,
+
     pub platform: UniChatPlatform,
+    pub flags: HashMap<String, Option<String>>,
 
     pub author_id: Option<String>,
     pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_display_color: String,
-    pub author_profile_picture_url: Option<String>,
+    pub author_profile_picture_url: String,
     pub author_badges: Vec<UniChatBadge>,
     pub author_type: Option<UniChatAuthorType>,
 
@@ -192,7 +197,9 @@ pub const UNICHAT_EVENT_SPONSOR_TYPE: &str = "unichat:sponsor";
 pub struct UniChatSponsorEventPayload {
     pub channel_id: String,
     pub channel_name: Option<String>,
+
     pub platform: UniChatPlatform,
+    pub flags: HashMap<String, Option<String>>,
 
     pub author_id: String,
     pub author_username: Option<String>,
@@ -221,7 +228,9 @@ pub const UNICHAT_EVENT_SPONSOR_GIFT_TYPE: &str = "unichat:sponsor_gift";
 pub struct UniChatSponsorGiftEventPayload {
     pub channel_id: String,
     pub channel_name: Option<String>,
+
     pub platform: UniChatPlatform,
+    pub flags: HashMap<String, Option<String>>,
 
     pub author_id: String,
     pub author_username: Option<String>,
@@ -247,7 +256,9 @@ pub const UNICHAT_EVENT_DONATE_TYPE: &str = "unichat:donate";
 pub struct UniChatDonateEventPayload {
     pub channel_id: String,
     pub channel_name: Option<String>,
+
     pub platform: UniChatPlatform,
+    pub flags: HashMap<String, Option<String>>,
 
     pub author_id: String,
     pub author_username: Option<String>,

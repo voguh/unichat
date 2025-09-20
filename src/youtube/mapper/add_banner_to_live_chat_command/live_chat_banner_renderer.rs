@@ -7,6 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use std::collections::HashMap;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
@@ -82,13 +83,15 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
                     data: UniChatRaidEventPayload {
                         channel_id: properties::get_item(PropertiesKey::YouTubeChannelId)?,
                         channel_name: None,
+
                         platform: UniChatPlatform::YouTube,
+                        flags: HashMap::new(),
 
                         author_id: None,
                         author_username: author_username,
                         author_display_name: author_name,
                         author_display_color: author_color,
-                        author_profile_picture_url: Some(author_photo.url.clone()),
+                        author_profile_picture_url: author_photo.url.clone(),
                         author_badges: Vec::new(),
                         author_type: None,
 
