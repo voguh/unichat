@@ -83,24 +83,19 @@ pub fn parse_author_username(name: &AuthorNameWrapper) -> Result<Option<String>,
 pub fn parse_author_username_str(name: String) -> Result<Option<String>, Box<dyn std::error::Error>> {
     if let Some(cached_username) = USERNAME_CACHE.get(&name) {
         return Ok(cached_username.clone());
-    } else {
-
     }
 
-    let username: String;
     if name.starts_with("@") {
-        username = name.replacen("@", "", 1);
-    } else {
-        username = name.clone();
+        let username = name.replacen("@", "", 1);
+
+        if USERNAME_REGEX.is_match(&username) {
+            USERNAME_CACHE.insert(name, Some(username.clone()));
+            return Ok(Some(username));
+        }
     }
 
-    if !USERNAME_REGEX.is_match(&username) {
-        USERNAME_CACHE.insert(name, None);
-        return Ok(None);
-    }
-
-    USERNAME_CACHE.insert(name, Some(username.clone()));
-    return Ok(Some(username));
+    USERNAME_CACHE.insert(name, None);
+    return Ok(None);
 }
 
 pub fn parse_author_name(name: &AuthorNameWrapper) -> Result<String, Box<dyn std::error::Error>> {
