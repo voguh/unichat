@@ -153,9 +153,7 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
 
 fn main() {
     let log_level: log::LevelFilter;
-    if utils::is_dev() || env::var("UNICHAT_DEBUG").is_ok() {
-        log_level = log::LevelFilter::Debug;
-    } else if let Ok(log_level_raw) = env::var("UNICHAT_LOG_LEVEL") {
+    if let Ok(log_level_raw) = env::var("UNICHAT_LOG_LEVEL") {
         log_level = match log_level_raw.to_lowercase().as_str() {
             "error" => log::LevelFilter::Error,
             "warn" | "warning" => log::LevelFilter::Warn,
@@ -164,6 +162,8 @@ fn main() {
             "trace" => log::LevelFilter::Trace,
             _ => log::LevelFilter::Info
         };
+    } else if utils::is_dev() {
+        log_level = log::LevelFilter::Debug;
     } else {
         log_level = log::LevelFilter::Info;
     }
