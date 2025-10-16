@@ -2,6 +2,11 @@
     "include": ["./**/*.js", "./unichat.d.ts"],
     "typeAcquisition": {
         "enable": true,
-        "include": ["jquery"]
+        "include": ["jquery", "animate.css"]
+    },
+    "compilerOptions": {
+        "target": "ES2020",
+        "lib": ["ES2020", "DOM", "DOM.Iterable"],
+        "module": "ESNext"
     }
 }
