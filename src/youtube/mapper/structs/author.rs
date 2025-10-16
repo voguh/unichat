@@ -116,7 +116,7 @@ pub fn parse_author_name_str(name: String) -> Result<String, Box<dyn std::error:
 pub fn parse_author_photo(photo: &AuthorPhotoThumbnailsWrapper) -> Result<String, Box<dyn std::error::Error>> {
     let thumbnail = photo.thumbnails.last().ok_or("No thumbnails found in author photo")?;
 
-    return Ok(thumbnail.url.clone());
+    return Ok(thumbnail.url.replacen("https://yt3.ggpht.com/", "/ytimg/", 1));
 }
 
 pub fn parse_author_color(author_name: &str) -> Result<String, Box<dyn std::error::Error>> {

@@ -8,6 +8,7 @@
  ******************************************************************************/
 
 use std::fs;
+use std::io::Read as _;
 use std::path;
 use std::path::PathBuf;
 
@@ -24,6 +25,7 @@ use crate::events;
 use crate::events::event_emitter;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
+use crate::utils::ureq;
 
 static WIDGET_TEMPLATE: &str = include_str!("./static/index.html.template");
 
@@ -35,6 +37,34 @@ fn safe_guard_path(base_path: &PathBuf, concat_str: &str) -> Result<PathBuf, act
     }
 
     return Ok(resolved_path);
+}
+
+/* ================================================================================================================== */
+
+#[get("/ytimg/{path:.*}")]
+pub async fn ytimg(req: HttpRequest) -> Result<impl Responder, actix_web::Error> {
+    let asset_path: String = req.match_info().query("path").parse()?;
+    if asset_path.trim().is_empty() {
+        return Err(ErrorBadRequest("Asset path cannot be empty"));
+    }
+
+    let mut response = ureq::get(format!("https://yt3.ggpht.com/{}", asset_path))
+        .header("Referrer", "https://www.youtube.com/")
+        .call()
+        .map_err(|_| ErrorNotFound(format!("Failed to fetch asset '{}'", asset_path)))?;
+
+    let body = response.body_mut();
+    let mut reader = body.as_reader();
+    let mut buffer = Vec::new();
+    reader.read_to_end(&mut buffer).map_err(|_| ErrorNotFound(format!("Failed to read asset '{}'", asset_path)))?;
+
+    let content_type = response.headers().get("Content-Type");
+    if let Some(content_type) = content_type {
+        let content_type_str = content_type.to_str().map_err(|e| ErrorBadRequest(format!("Invalid Content-Type header: {}", e)))?;
+        return Ok(HttpResponse::build(StatusCode::OK).content_type(content_type_str).body(buffer));
+    } else {
+        return Ok(HttpResponse::build(StatusCode::OK).content_type("application/octet-stream").body(buffer));
+    }
 }
 
 /* ================================================================================================================== */

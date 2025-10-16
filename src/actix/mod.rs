@@ -7,6 +7,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use log::Level;
+
 mod routes;
 
 pub struct ActixState {
@@ -16,8 +18,9 @@ pub struct ActixState {
 pub fn new(_app: &tauri::App<tauri::Wry>) -> tauri::async_runtime::JoinHandle<()> {
     let handler = tauri::async_runtime::spawn(async move {
         let http_server = actix_web::HttpServer::new(move || {
-            return actix_web::App::new().wrap(actix_web::middleware::Logger::default())
+            return actix_web::App::new().wrap(actix_web::middleware::Logger::default().log_level(Level::Error))
                 .service(routes::ws)
+                .service(routes::ytimg)
                 .service(routes::get_assets)
                 .service(routes::get_widget_assets)
                 .service(routes::get_widget);

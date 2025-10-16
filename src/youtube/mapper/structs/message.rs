@@ -84,7 +84,7 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
                             emotes.push(UniChatEmote {
                                 id: emoji_id.clone(),
                                 code: shortcut.clone(),
-                                url: last_image.url.clone()
+                                url: last_image.url.replacen("https://yt3.ggpht.com/", "/ytimg/", 1)
                             });
                         },
                         Emoji::FontBased { emoji_id, image, .. } => {
@@ -92,7 +92,7 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
                             emotes.push(UniChatEmote {
                                 id: emoji_id.clone(),
                                 code: emoji_id.clone(),
-                                url: last_image.url.clone()
+                                url: last_image.url.replacen("https://yt3.ggpht.com/", "/ytimg/", 1)
                             });
                         }
                     }
