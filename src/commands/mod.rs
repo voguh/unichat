@@ -195,25 +195,6 @@ pub async fn list_widgets<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
         return Err("An error occurred on iterate over system widgets dir".into());
     }
 
-    let mut user_widgets: Vec<String> = Vec::new();
-    let user_widgets_read = fs::read_dir(&user_widgets_dir).map_err(|e| format!("{:?}", e))?;
-    for entry in user_widgets_read {
-        if let Ok(entry) = entry {
-            let path = entry.path();
-            if path.is_dir() {
-                if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-                    if name.starts_with(".") {
-                        continue; // Skip hidden folders
-                    }
-
-                    user_widgets.push(name.to_string());
-                }
-            }
-        } else {
-            log::error!("An error occurred on read user widgets dir: {:?}", entry);
-        }
-    }
-
     let mut system_widgets: Vec<String> = Vec::new();
     let system_widgets_read = fs::read_dir(&system_widgets_dir).map_err(|e| format!("{:?}", e))?;
     for entry in system_widgets_read {
@@ -226,6 +207,27 @@ pub async fn list_widgets<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
                     }
 
                     system_widgets.push(name.to_string());
+                }
+            }
+        } else {
+            log::error!("An error occurred on read user widgets dir: {:?}", entry);
+        }
+    }
+
+    let mut user_widgets: Vec<String> = Vec::new();
+    let user_widgets_read = fs::read_dir(&user_widgets_dir).map_err(|e| format!("{:?}", e))?;
+    for entry in user_widgets_read {
+        if let Ok(entry) = entry {
+            let path = entry.path();
+            if path.is_dir() {
+                if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
+                    if name.starts_with(".") {
+                        continue; // Skip hidden folders
+                    }
+
+                    if !system_widgets.iter().any(|w| w == name) {
+                        user_widgets.push(name.to_string());
+                    }
                 }
             }
         } else {
