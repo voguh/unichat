@@ -13,8 +13,8 @@ use crate::twitch::TWITCH_CHEERMOTES;
 
 fn normalize_message_text(message_raw: &str) -> String {
     let mut message_raw = message_raw.trim().to_string();
-    if message_raw.starts_with("\u{1}ACTION ") && message_raw.ends_with("\u{1}") {
-        message_raw = message_raw.replace("\u{1}ACTION ", "").replace("\u{1}", "");
+    if message_raw.starts_with("\u{1}ACTION") && message_raw.ends_with("\u{1}") {
+        message_raw = message_raw.replace("\u{1}ACTION", "").replace("\u{1}", "").trim().to_string();
     }
 
     return message_raw;
@@ -45,15 +45,11 @@ pub fn parse_message_emotes(raw_emotes: Option<&String>, message_text: &str) -> 
             }
 
             let (emote_id, positions_raw) = raw_emote.split_once(":").ok_or("Invalid emote format")?;
+            let first_range = positions_raw.split(",").next().ok_or("Invalid emote positions format")?;
+            let (start_str, end_str) = first_range.split_once("-").ok_or("Invalid emote positions format")?;
+            let (start, end) = parse_delimiter(start_str, end_str)?;
 
-            // Get first delimiter to retrieve emote code
-            let positions_raw = positions_raw.split(",").next().ok_or("Invalid emote positions format")?;
-            let (start, end) = positions_raw.split_once("-")
-                .and_then(|(start, end)| parse_delimiter(start, end).ok())
-                .ok_or("Invalid emote positions format")?;
-
-            let emote_code = &message_text[start..end + 1].to_string();
-
+            let emote_code: String = message_text.chars().skip(start).take((end - start) + 1).collect();
             let emote = UniChatEmote {
                 id: emote_id.to_string(),
                 code: emote_code.clone(),
