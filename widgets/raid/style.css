@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+:root {
+    --maximum-width: 100vw;
+
+    --user-avatar-size: 128px;
+    --user-avatar-border-size: 4px;
+    --username-font-size: 32px;
+    --details-font-size: 24px;
+    --accent-color: #ec4467;
+    --base-color: #212529;
+    --message-color: #FFFFFF;
+}
+
+html, body {
+    font-family: "Nunito", sans-serif;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    overflow-y: hidden;
+}
+
+#main-container {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+}
+
+#main-container > .raider-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+#main-container > .raider-info > .raider-avatar {
+    width: var(--user-avatar-size);
+    height: var(--user-avatar-size);
+    border-radius: 50%;
+    overflow: hidden;
+    border: var(--user-avatar-border-size) solid var(--accent-color);
+    box-sizing: border-box;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: rotateIn 200ms linear forwards;
+}
+
+#main-container > .raider-info > .raider-avatar > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#main-container > .raider-info > .raider-meta-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#main-container > .raider-info > .raider-meta-info > .raider-username {
+    font-size: var(--username-font-size);
+    font-weight: 700;
+    color: var(--accent-color);
+    background: var(--base-color);
+    padding: 0 16px;
+    text-align: center;
+    animation: bounceIn 500ms linear forwards;
+    font-weight: bolder;
+}
+
+#main-container > .raider-info > .raider-meta-info > .raider-message {
+    font-size: var(--details-font-size);
+    font-weight: 600;
+    color: var(--message-color);
+    background: var(--base-color);
+    padding: 0 16px;
+    text-align: center;
+    transform: scale(0);
+    animation: bounceIn 500ms linear 200ms forwards;
+}
+
+/* ================================================================================================================== */
+
+#main-container > .raider-info.fade-out > .raider-avatar {
+    animation: rotateOut 500ms linear 200ms forwards;
+}
+
+#main-container > .raider-info.fade-out > .raider-meta-info > .raider-username {
+    animation: bounceOut 500ms linear 200ms forwards;
+}
+
+#main-container > .raider-info.fade-out > .raider-meta-info > .raider-message {
+    transform: scale(1);
+    animation: bounceOut 500ms linear forwards;
+}
