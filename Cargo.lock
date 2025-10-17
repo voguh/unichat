@@ -5314,7 +5314,7 @@ dependencies = [
 
 [[package]]
 name = "unichat"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "actix-web",
  "actix-ws",
