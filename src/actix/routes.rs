@@ -75,15 +75,20 @@ pub async fn ytimg(req: HttpRequest) -> Result<impl Responder, actix_web::Error>
     })?;
 
     let content_type = response.headers().get("Content-Type");
+    let mut content_type_str = "application/octet-stream";
     if let Some(content_type) = content_type {
-        let content_type_str = content_type.to_str().map_err(|e| {
+        content_type_str = content_type.to_str().map_err(|e| {
             log::error!("{:?}", e);
             return ErrorNotFound(format!("Failed to read Content-Type for asset '{}'", asset_path));
         })?;
-        return Ok(HttpResponse::build(StatusCode::OK).content_type(content_type_str).body(buffer));
-    } else {
-        return Ok(HttpResponse::build(StatusCode::OK).content_type("application/octet-stream").body(buffer));
     }
+
+    let response = HttpResponse::build(StatusCode::OK)
+        .content_type(content_type_str)
+        .insert_header(("Cache-Control", "max-age=3600"))
+        .body(buffer);
+
+    return Ok(response);
 }
 
 /* ================================================================================================================== */
