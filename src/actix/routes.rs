@@ -31,7 +31,10 @@ static WIDGET_TEMPLATE: &str = include_str!("./static/index.html.template");
 
 fn safe_guard_path(base_path: &PathBuf, concat_str: &str) -> Result<PathBuf, actix_web::Error> {
     let concatenated_path = base_path.join(concat_str);
-    let resolved_path = path::absolute(concatenated_path).map_err(|_| ErrorNotFound("Path not found"))?;
+    let resolved_path = path::absolute(concatenated_path).map_err(|e| {
+        log::error!("{:?}", e);
+        return ErrorNotFound("Path not found");
+    })?;
     if !resolved_path.starts_with(base_path) {
         return Err(ErrorBadRequest(format!("Access to path '{}' is not allowed", resolved_path.display())));
     }
@@ -51,16 +54,25 @@ pub async fn ytimg(req: HttpRequest) -> Result<impl Responder, actix_web::Error>
     let mut response = ureq::get(format!("https://yt3.ggpht.com/{}", asset_path))
         .header("Referrer", "https://www.youtube.com/")
         .call()
-        .map_err(|_| ErrorNotFound(format!("Failed to fetch asset '{}'", asset_path)))?;
+        .map_err(|e| {
+            log::error!("{:?}", e);
+            return ErrorNotFound(format!("Failed to fetch asset '{}'", asset_path));
+        })?;
 
     let body = response.body_mut();
     let mut reader = body.as_reader();
     let mut buffer = Vec::new();
-    reader.read_to_end(&mut buffer).map_err(|_| ErrorNotFound(format!("Failed to read asset '{}'", asset_path)))?;
+    reader.read_to_end(&mut buffer).map_err(|e| {
+        log::error!("{:?}", e);
+        return ErrorNotFound(format!("Failed to read asset '{}'", asset_path));
+    })?;
 
     let content_type = response.headers().get("Content-Type");
     if let Some(content_type) = content_type {
-        let content_type_str = content_type.to_str().map_err(|e| ErrorBadRequest(format!("Invalid Content-Type header: {}", e)))?;
+        let content_type_str = content_type.to_str().map_err(|e| {
+            log::error!("{:?}", e);
+            return ErrorNotFound(format!("Failed to read Content-Type for asset '{}'", asset_path));
+        })?;
         return Ok(HttpResponse::build(StatusCode::OK).content_type(content_type_str).body(buffer));
     } else {
         return Ok(HttpResponse::build(StatusCode::OK).content_type("application/octet-stream").body(buffer));
@@ -82,7 +94,10 @@ pub async fn get_assets(req: HttpRequest) -> Result<impl Responder, actix_web::E
         return Err(ErrorNotFound(format!("Asset '{}' not found", asset_path)));
     }
 
-    let content = fs::read(&asset_full_path).map_err(|_| ErrorNotFound(format!("Failed to read asset '{}'", asset_path)))?;
+    let content = fs::read(&asset_full_path).map_err(|e| {
+        log::error!("{:?}", e);
+        return ErrorNotFound(format!("Failed to read asset '{}'", asset_path));
+    })?;
 
     if let Some(kind) = infer::get(&content) {
         return Ok(HttpResponse::build(StatusCode::OK).content_type(kind.mime_type()).body(content));
@@ -134,7 +149,10 @@ pub async fn get_widget_assets(req: HttpRequest) -> Result<impl Responder, actix
             return Err(ErrorBadRequest(format!("Asset '{}' is a directory, not a file", asset_path)));
         }
 
-        let content = fs::read(&asset_full_path).map_err(|_| ErrorNotFound(format!("Failed to read asset '{}'", asset_path)))?;
+        let content = fs::read(&asset_full_path).map_err(|e| {
+            log::error!("{:?}", e);
+            return ErrorNotFound(format!("Failed to read asset '{}'", asset_path));
+        })?;
 
         if let Some(kind) = infer::get(&content) {
             return Ok(HttpResponse::build(StatusCode::OK).content_type(kind.mime_type()).body(content));
