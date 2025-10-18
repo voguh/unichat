@@ -44,6 +44,12 @@ fn safe_guard_path(base_path: &PathBuf, concat_str: &str) -> Result<PathBuf, act
 
 /* ================================================================================================================== */
 
+#[cfg(target_os = "windows")]
+static USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) Gecko/20100101 Firefox/143.0";
+
+#[cfg(target_os = "linux")]
+static USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0";
+
 #[get("/ytimg/{path:.*}")]
 pub async fn ytimg(req: HttpRequest) -> Result<impl Responder, actix_web::Error> {
     let asset_path: String = req.match_info().query("path").parse()?;
@@ -52,6 +58,7 @@ pub async fn ytimg(req: HttpRequest) -> Result<impl Responder, actix_web::Error>
     }
 
     let mut response = ureq::get(format!("https://yt3.ggpht.com/{}", asset_path))
+        .header("User-Agent", USER_AGENT)
         .header("Referer", "https://www.youtube.com/")
         .call()
         .map_err(|e| {
