@@ -133,7 +133,7 @@ pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_cont
                     let thumbnail = custom_thumbnail.thumbnails.last().ok_or("No thumbnails found in custom thumbnail")?;
                     parsed_badges.push(UniChatBadge {
                         code: String::from("sponsor"),
-                        url: thumbnail.url.clone()
+                        url: thumbnail.url.replacen("https://yt3.ggpht.com/", "/ytimg/", 1)
                     });
                 },
                 AuthorBadgeRenderer::Internal { icon, .. } => {
