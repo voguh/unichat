@@ -52,7 +52,7 @@ pub async fn ytimg(req: HttpRequest) -> Result<impl Responder, actix_web::Error>
     }
 
     let mut response = ureq::get(format!("https://yt3.ggpht.com/{}", asset_path))
-        .header("Referrer", "https://www.youtube.com/")
+        .header("Referer", "https://www.youtube.com/")
         .call()
         .map_err(|e| {
             log::error!("{:?}", e);
