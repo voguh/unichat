@@ -15,8 +15,8 @@ import { AppMetadata } from "unichat/types";
 
 export interface AppContextProps {
     metadata: AppMetadata;
-    showWidgetPreview?: boolean;
-    setShowWidgetPreview?: React.Dispatch<React.SetStateAction<boolean>>;
+    showWidgetPreview: boolean;
+    setShowWidgetPreview: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const AppContext = React.createContext({} as AppContextProps);

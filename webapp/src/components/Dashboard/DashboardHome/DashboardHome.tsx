@@ -9,7 +9,7 @@
 
 import React from "react";
 
-import { Badge, Button, Card, ComboboxItemGroup, List, Select, Tooltip } from "@mantine/core";
+import { Badge, Button, Card, ComboboxData, List, Select, Tooltip } from "@mantine/core";
 import { IconReload, IconWorld } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
@@ -23,7 +23,7 @@ import { DashboardHomeStyledContainer } from "./styled";
 
 export function DashboardHome(): React.ReactNode {
     const [selectedWidgetUrl, setSelectedWidgetUrl] = React.useState(`${WIDGET_URL_PREFIX}/default`);
-    const [widgets, setWidgets] = React.useState<ComboboxItemGroup<string>[]>([]);
+    const [widgets, setWidgets] = React.useState<ComboboxData>([]);
 
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
     const { showWidgetPreview } = React.useContext(AppContext);

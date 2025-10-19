@@ -43,13 +43,14 @@ interface Props {
 export function Dashboard(_props: Props): React.ReactNode {
     const [hasUpdate, setHasUpdate] = React.useState(false);
     const [hasNewsTour, setHasNewsTour] = React.useState(false);
+
     const { metadata, setShowWidgetPreview, showWidgetPreview } = React.useContext(AppContext);
 
     async function handleClearChat(): Promise<void> {
         await commandService.dispatchClearChat();
     }
 
-    async function toggleAboutModal(): Promise<void> {
+    function toggleAboutModal(): void {
         modals.open({ title: `About ${metadata.displayName}`, children: <AboutModal />, centered: true });
     }
 
