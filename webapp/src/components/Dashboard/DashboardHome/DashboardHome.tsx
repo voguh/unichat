@@ -93,7 +93,7 @@ export function DashboardHome(): React.ReactNode {
 
     /* ====================================================================== */
 
-    function mountTwtichEditingTooltip(): React.ReactNode {
+    function mountTwitchEditingTooltip(): React.ReactNode {
         // prettier-ignore
         return (
             <>
@@ -173,7 +173,7 @@ export function DashboardHome(): React.ReactNode {
                 <ScrapperCard
                     type="twitch"
                     validateUrl={validateTwitchChatUrl}
-                    editingTooltip={mountTwtichEditingTooltip()}
+                    editingTooltip={mountTwitchEditingTooltip()}
                 />
             </div>
             <div className="preview">
