@@ -15,9 +15,9 @@ export const DashboardStyledContainer = styled.div`
     padding: 8px;
 
     display: grid;
-    grid-template-areas: "SID CTT" "SID CTT";
+    grid-template-areas: "SID CTT";
     grid-template-columns: 50px 1fr;
-    grid-template-rows: 46px 1fr;
+    grid-template-rows: 1fr;
     gap: 8px;
 
     > .sidebar {
