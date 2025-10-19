@@ -2,6 +2,27 @@
 
 :root {
     --maximum-width: 100vw;
+    --author-badge-size: 18px;
+    --emote-size: 18px;
+
+    --general-box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+    --message-animation: fadeIn 250ms ease-in;
+
+    --author-pill-bg: #343a40;
+    --author-pill-color: #FFFFFF;
+
+    --accent-color: #fcc419;
+
+    --message-content-bg: #FFFFFF;
+    --message-content-color: #212529;
+    --donate-content-bg: #1971c2;
+    --donate-content-color: #FFFFFF;
+    --sponsor-content-bg: #495057;
+    --sponsor-content-color: #FFFFFF;
+    --spogift-content-bg: #f08c00;
+    --spogift-content-color: #212529;
+    --raid-content-bg: #66a80f;
+    --raid-content-color: #FFFFFF;
 }
 
 html, body {
@@ -15,21 +36,21 @@ html, body {
     position: absolute;
     bottom: 0;
     left: 0;
+    max-height: calc(100vh - 32px);
     width: calc(var(--maximum-width) - 32px);
     padding: 16px;
-}
-
-#main-container > div {
-    position: relative;
+    overflow: hidden;
 }
 
 /* <================================================[ SHARED STYLE ]================================================> */
-#main-container > div > .author-meta {
-    --badge-size: 18px;
+#main-container > div {
+    position: relative;
+    animation: var(--message-animation);
+}
 
+#main-container > div > .author-meta {
     width: fit-content;
     max-width: calc(var(--maximum-width) - 64px);
-    height: var(--badge-size);
     position: absolute;
     top: 0;
     left: 8px;
@@ -40,14 +61,13 @@ html, body {
     gap: 8px;
     padding: 4px 8px;
     border-radius: 4px;
-    background: #343a40;
+    background: var(--author-pill-bg);
 
     overflow: hidden;
 }
 
 #main-container > div > .author-meta > .badges {
     width: fit-content;
-    height: var(--badge-size);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -59,15 +79,14 @@ html, body {
 }
 
 #main-container > div > .author-meta > .badges > img {
-    width: var(--badge-size);
-    height: var(--badge-size);
+    width: var(--author-badge-size);
+    height: var(--author-badge-size);
     border-radius: 2px;
 }
 
 #main-container > div > .author-meta > .name {
     flex: 1 1 auto;
-    height: var(--badge-size);
-    color: #FFFFFF;
+    color: var(--author-pill-color);
     font-weight: bold;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -79,27 +98,29 @@ html, body {
 
 /* <============================================[ SIMPLE MESSAGE STYLE ]============================================> */
 #main-container > .message-item {
-    margin-top: calc((26px / 2) + 8px); /* 8px top margin + 26px for the meta section height divided by 2 */
+    margin-top: calc(((var(--author-badge-size) + 8px) / 2) + 8px);
     position: relative;
 }
 
 #main-container > .message-item > .message {
-    padding: calc(8px + (26px / 2)) 8px 8px 8px; /* 8px top padding + 26px for the meta section height divided by 2 */
+    padding: calc(((var(--author-badge-size) + 8px) / 2) + 8px) 8px 8px 8px;
     border-radius: 4px;
-    background: #FFFFFF;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+    background: var(--message-content-bg);
+    color: var(--message-content-color);
+    box-shadow: var(--general-box-shadow);
     white-space: normal;
     word-break: break-word;
 }
 
 #main-container > .message-item > .message > img {
-    height: 18px;
+    height: var(--emote-size);
+    vertical-align: middle;
 }
 /* <==========================================[ END SIMPLE MESSAGE STYLE ]==========================================> */
 
 /* <============================================[ DONATE MESSAGE STYLE ]============================================> */
 #main-container > .donate-item {
-    margin-top: calc((26px / 2) + 8px); /* 8px top margin + 26px for the meta section height divided by 2 */
+    margin-top: calc(((var(--author-badge-size) + 8px) / 2) + 8px);
     position: relative;
 }
 
@@ -109,11 +130,11 @@ html, body {
 }
 
 #main-container > .donate-item > .message-wrapper {
-    padding: calc(8px + (26px / 2)) 8px 8px 8px; /* 8px top padding + 26px for the meta section height divided by 2 */
+    padding: calc(((var(--author-badge-size) + 8px) / 2) + 8px) 8px 8px 8px;
     border-radius: 4px;
-    background: #1971c2;
-    color: #FFFFFF;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+    background: var(--donate-content-bg);
+    color: var(--donate-content-color);
+    box-shadow: var(--general-box-shadow);
 }
 
 #main-container > .donate-item > .message-wrapper > .donate-meta {
@@ -123,7 +144,7 @@ html, body {
 
 #main-container > .donate-item > .message-wrapper > .donate-meta > .value {
     font-weight: bolder;
-    color: #fcc419; /* Highlight the value in a different color */
+    color: var(--accent-color);
 }
 
 #main-container > .donate-item > .message-wrapper > .message {
@@ -137,17 +158,18 @@ html, body {
 }
 
 #main-container > .donate-item > .message-wrapper > .message:empty {
-    display: none; /* Hide the message if it's empty */
+    display: none;
 }
 
 #main-container > .donate-item > .message-wrapper > .message > img {
-    height: 18px;
+    height: var(--emote-size);
+    vertical-align: middle;
 }
 /* <==========================================[ END DONATE MESSAGE STYLE ]==========================================> */
 
 /* <============================================[ SPONSOR MESSAGE STYLE ]============================================> */
 #main-container > .sponsor-item {
-    margin-top: calc((26px / 2) + 8px); /* 8px top margin + 26px for the meta section height divided by 2 */
+    margin-top: calc(((var(--author-badge-size) + 8px) / 2) + 8px);
     position: relative;
 }
 
@@ -157,11 +179,11 @@ html, body {
 }
 
 #main-container > .sponsor-item > .message-wrapper {
-    padding: calc(8px + (26px / 2)) 8px 8px 8px; /* 8px top padding + 26px for the meta section height divided by 2 */
+    padding: calc(((var(--author-badge-size) + 8px) / 2) + 8px) 8px 8px 8px;
     border-radius: 4px;
-    background: #495057;
-    color: #FFFFFF;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+    background: var(--sponsor-content-bg);
+    color: var(--sponsor-content-color);
+    box-shadow: var(--general-box-shadow);
 }
 
 #main-container > .sponsor-item > .message-wrapper > .sponsor-meta {
@@ -171,7 +193,7 @@ html, body {
 
 #main-container > .sponsor-item > .message-wrapper > .sponsor-meta > span {
     font-weight: bolder;
-    color: #fcc419; /* Highlight the value in a different color */
+    color: var(--accent-color);
 }
 
 #main-container > .sponsor-item > .message-wrapper > .message {
@@ -186,11 +208,12 @@ html, body {
 }
 
 #main-container > .sponsor-item > .message-wrapper > .message:empty {
-    display: none; /* Hide the message if it's empty */
+    display: none;
 }
 
 #main-container > .sponsor-item > .message-wrapper > .message > img {
-    height: 18px;
+    height: var(--emote-size);
+    vertical-align: middle;
 }
 /* <==========================================[ END SPONSOR MESSAGE STYLE ]==========================================> */
 
@@ -205,10 +228,10 @@ html, body {
     padding: 8px;
     text-align: center;
     border-radius: 4px;
-    background: #f08c00;
-    color: #212529;
+    background: var(--spogift-content-bg);
+    color: var(--spogift-content-color);
     font-weight: bold;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--general-box-shadow);
     height: 64px;
     display: flex;
     justify-content: center;
@@ -217,7 +240,7 @@ html, body {
 }
 
 #main-container > .spogift-item > .message:before {
-    font-family: "Font Awesome 6 Free";
+    font-family: "Font Awesome 5 Free";
     font-weight: 900;
     content: "\f06b";
     font-size: calc(64px + 16px);
@@ -246,13 +269,13 @@ html, body {
     position: relative;
 }
 
-#main-container > .raid-item > .message {
+#main-container > .raid-item > .message-wrapper {
     padding: 8px;
     border-radius: 4px;
-    background: #66a80f;
-    color: #FFFFFF;
+    background: var(--raid-content-bg);
+    color: var(--raid-content-color);
     font-weight: bold;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--general-box-shadow);
     height: 64px;
     display: flex;
     justify-content: center;
@@ -261,7 +284,7 @@ html, body {
     word-break: break-word;
 }
 
-#main-container > .raid-item > .message > span {
+#main-container > .raid-item > .message-wrapper > span {
     font-weight: bolder;
 }
 /* <===========================================[ END RAID MESSAGE STYLE ]===========================================> */
