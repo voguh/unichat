@@ -75,7 +75,7 @@ fn dispatch_event(mut payload: Value) -> Result<(), String> {
 
 /* ================================================================================================================== */
 
-async fn handle_create_connection(channel_name: &str) -> Result<Client, Box<dyn std::error::Error + Send + Sync>> {
+async fn handle_create_connection(channel_name: &str) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let mills = rand::rng().random_range(10000..=99999);
     let nickname = format!("justinfan{}", mills);
 
@@ -101,17 +101,31 @@ async fn handle_create_connection(channel_name: &str) -> Result<Client, Box<dyn 
     log::info!("Joined Twitch channel '#{}'.", channel_name);
 
     let mut stream = client.stream()?;
-    while let Some(message) = stream.next().await.transpose()? {
-        if matches!(message.command, Command::PONG(_, _) | Command::PING(_, _) | Command::Response(Response::RPL_WELCOME, _)) {
-            if let Err(e) = dispatch_event(json!({ "type": "ping" })) {
-                log::error!("Failed to emit ping event to window: {:?}", e);
+    let mut timeout = tokio::time::interval(Duration::from_secs(60));
+    timeout.tick().await;
+
+    loop {
+        match tokio::time::timeout(Duration::from_secs(60), stream.next()).await {
+            Ok(Some(Ok(message))) => {
+                if matches!(message.command, Command::PONG(_, _) | Command::PING(_, _) | Command::Response(Response::RPL_WELCOME, _)) {
+                    if let Err(e) = dispatch_event(json!({ "type": "ping" })) {
+                        log::error!("Failed to emit ping event to window: {:?}", e);
+                    }
+                } else if let Err(err) = handle_message_event(&message) {
+                    log::error!("Failed to handle Twitch message event: {:?}", err);
+                }
             }
-        } else if let Err(err) = handle_message_event(&message) {
-            log::error!("Failed to handle Twitch message event: {:?}", err);
+            Ok(Some(Err(e))) => {
+                return Err(Box::new(e));
+            }
+            Ok(None) => {
+                return Err("Stream ended".into());
+            }
+            Err(e) => {
+                return Err(Box::new(e));
+            }
         }
     }
-
-    return Ok(client);
 }
 
 fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
@@ -133,20 +147,8 @@ fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payl
             loop {
                 log::info!("Connecting to Twitch IRC join channel '#{}'...", &channel_name);
 
-                let connect_result = handle_create_connection(&channel_name).await;
-
-                if let Err(e) = connect_result {
+                if let Err(e) = handle_create_connection(&channel_name).await {
                     log::error!("Twitch IRC client exited with error: {:?}", e);
-                } else if let Ok(client) = connect_result {
-                    log::info!("Twitch IRC client exited normally. Try to parting from channel: {}", channel_name);
-                    if let Err(e) = client.send(Command::PART(format!("#{}", channel_name), None)) {
-                        log::error!("Failed to send PART command: {:?}", e);
-                    }
-
-                    log::info!("Quitting from Twitch IRC server.");
-                    if let Err(e) = client.send(Command::QUIT(None)) {
-                        log::error!("Failed to send QUIT command: {:?}", e);
-                    }
                 }
 
                 log::info!("Reconnecting to Twitch IRC in 5 seconds...");
