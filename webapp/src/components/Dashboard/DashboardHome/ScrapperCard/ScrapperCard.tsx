@@ -21,6 +21,7 @@ import {
 } from "@tabler/icons-react";
 import * as eventService from "@tauri-apps/api/event";
 
+import { AppContext } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
 import { loggerService } from "unichat/services/loggerService";
 import { storageService } from "unichat/services/storageService";
@@ -50,6 +51,7 @@ export function ScrapperCard({ type, validateUrl, editingTooltip }: Props): Reac
     const [error, setError] = React.useState<string>(null);
 
     const inputRef = React.useRef<HTMLInputElement>(null);
+    const { setShowWidgetPreview } = React.useContext(AppContext);
 
     async function handleStart(): Promise<void> {
         try {
@@ -79,6 +81,7 @@ export function ScrapperCard({ type, validateUrl, editingTooltip }: Props): Reac
             loggerService.error(`An error occurred while starting the ${displayName} chat scrapper: {}`, err);
         } finally {
             setLoading(false);
+            setShowWidgetPreview(false);
         }
     }
 
