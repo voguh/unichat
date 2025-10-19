@@ -7,5 +7,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+export const WIDGET_URL_PREFIX = "http://localhost:9527/widget";
 export const YOUTUBE_VIDEO_ID_KEY = "youtube-video-id";
 export const TWITCH_CHANNEL_NAME_KEY = "twitch-channel-name";

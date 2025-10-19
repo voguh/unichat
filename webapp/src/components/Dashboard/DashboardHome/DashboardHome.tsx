@@ -15,12 +15,12 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { AppContext } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
+import { WIDGET_URL_PREFIX } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
 
 import { ScrapperCard } from "./ScrapperCard/ScrapperCard";
 import { DashboardHomeStyledContainer } from "./styled";
 
-const WIDGET_URL_PREFIX = "http://localhost:9527/widget";
 export function DashboardHome(): React.ReactNode {
     const [selectedWidgetUrl, setSelectedWidgetUrl] = React.useState(`${WIDGET_URL_PREFIX}/default`);
     const [widgets, setWidgets] = React.useState<ComboboxItemGroup<string>[]>([]);
@@ -140,10 +140,6 @@ export function DashboardHome(): React.ReactNode {
 
     /* ====================================================================== */
 
-    function onChangeWidget(widgetUrl: string): void {
-        setSelectedWidgetUrl(widgetUrl);
-    }
-
     async function reloadIframe(): Promise<void> {
         const widgets = await commandService.listWidgets();
         setWidgets(widgets);
@@ -187,7 +183,7 @@ export function DashboardHome(): React.ReactNode {
                                         ...group,
                                         items: group.items.map((item) => `${WIDGET_URL_PREFIX}/${item}`)
                                     }))}
-                                    onChange={onChangeWidget}
+                                    onChange={setSelectedWidgetUrl}
                                     data-tour="widgets-selector"
                                 />
                             </div>
