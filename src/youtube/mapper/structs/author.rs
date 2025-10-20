@@ -17,6 +17,7 @@ use serde::Serialize;
 use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatBadge;
 use crate::utils::random_color_by_seed;
+use crate::youtube::mapper::structs::proxy_youtube_url;
 use crate::youtube::mapper::structs::ThumbnailsWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -116,7 +117,7 @@ pub fn parse_author_name_str(name: String) -> Result<String, Box<dyn std::error:
 pub fn parse_author_photo(photo: &AuthorPhotoThumbnailsWrapper) -> Result<String, Box<dyn std::error::Error>> {
     let thumbnail = photo.thumbnails.last().ok_or("No thumbnails found in author photo")?;
 
-    return Ok(thumbnail.url.replacen("https://yt3.ggpht.com/", "/ytimg/", 1));
+    return Ok(proxy_youtube_url(&thumbnail.url));
 }
 
 pub fn parse_author_color(author_name: &str) -> Result<String, Box<dyn std::error::Error>> {
@@ -133,7 +134,7 @@ pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_cont
                     let thumbnail = custom_thumbnail.thumbnails.last().ok_or("No thumbnails found in custom thumbnail")?;
                     parsed_badges.push(UniChatBadge {
                         code: String::from("sponsor"),
-                        url: thumbnail.url.replacen("https://yt3.ggpht.com/", "/ytimg/", 1)
+                        url: proxy_youtube_url(&thumbnail.url)
                     });
                 },
                 AuthorBadgeRenderer::Internal { icon, .. } => {

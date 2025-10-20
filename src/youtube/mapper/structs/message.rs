@@ -12,6 +12,7 @@ use serde::Serialize;
 
 use crate::shared_emotes;
 use crate::events::unichat::UniChatEmote;
+use crate::youtube::mapper::structs::proxy_youtube_url;
 use crate::youtube::mapper::structs::ThumbnailsWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -84,7 +85,7 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
                             emotes.push(UniChatEmote {
                                 id: emoji_id.clone(),
                                 code: shortcut.clone(),
-                                url: last_image.url.replacen("https://yt3.ggpht.com/", "/ytimg/", 1)
+                                url: proxy_youtube_url(&last_image.url)
                             });
                         },
                         Emoji::FontBased { emoji_id, image, .. } => {
@@ -92,7 +93,7 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
                             emotes.push(UniChatEmote {
                                 id: emoji_id.clone(),
                                 code: emoji_id.clone(),
-                                url: last_image.url.replacen("https://yt3.ggpht.com/", "/ytimg/", 1)
+                                url: proxy_youtube_url(&last_image.url)
                             });
                         }
                     }

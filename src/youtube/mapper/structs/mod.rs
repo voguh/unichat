@@ -26,3 +26,13 @@ pub struct Thumbnail {
     pub width: Option<u32>,
     pub height: Option<u32>
 }
+
+pub fn proxy_youtube_url(url: &str) -> String {
+    if url.contains("ggpht.com/") {
+        let path = url.split("ggpht.com/").collect::<Vec<&str>>()[1];
+
+        return format!("/ytimg/{}", path);
+    }
+
+    return url.to_string();
+}
