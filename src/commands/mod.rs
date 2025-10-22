@@ -9,6 +9,7 @@
 
 use std::collections::HashSet;
 use std::fs;
+use std::path::PathBuf;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
@@ -239,4 +240,59 @@ pub async fn list_widgets<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
         { "group": "System Widgets", "items": system_widgets },
         { "group": "User Widgets", "items": user_widgets }
     ]));
+}
+
+fn parse_fs_error(e: std::io::Error, path: &PathBuf) -> String {
+    return match e.kind() {
+        std::io::ErrorKind::NotFound => format!("File or directory '{:?}' not found", path),
+        std::io::ErrorKind::PermissionDenied => format!("Permission denied for file or directory '{:?}'", path),
+        std::io::ErrorKind::AlreadyExists => format!("File or directory '{:?}' already exists", path),
+        _ => format!("{:?}", e)
+    };
+}
+
+#[tauri::command]
+pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, String> {
+    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
+    if !user_widgets_dir.is_dir() {
+        return Err("User widgets directory does not exist".into());
+    }
+
+    let fields_path = user_widgets_dir.join(&widget).join("fields.json");
+    if !fields_path.is_file() {
+        return Err("Widget fields file does not exist".into());
+    }
+
+    return fs::read_to_string(&fields_path).map_err(|e| parse_fs_error(e, &fields_path));
+}
+
+#[tauri::command]
+pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, String> {
+    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
+    if !user_widgets_dir.is_dir() {
+        return Err("User widgets directory does not exist".into());
+    }
+
+    let fieldstate_path = user_widgets_dir.join(&widget).join("fieldstate.json");
+    if !fieldstate_path.is_file() {
+        return Err("Widget fieldstate file does not exist".into());
+    }
+
+    return fs::read_to_string(&fieldstate_path).map_err(|e| parse_fs_error(e, &fieldstate_path));
+}
+
+
+#[tauri::command]
+pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String, data: String) -> Result<(), String> {
+    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
+    if !user_widgets_dir.is_dir() {
+        return Err("User widgets directory does not exist".into());
+    }
+
+    let fieldstate_path = user_widgets_dir.join(&widget).join("fieldstate.json");
+    if !fieldstate_path.is_file() {
+        return Err("Widget fieldstate file does not exist".into());
+    }
+
+    return fs::write(&fieldstate_path, data).map_err(|e| parse_fs_error(e, &fieldstate_path));
 }

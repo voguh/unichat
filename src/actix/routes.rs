@@ -7,6 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use std::collections::HashMap;
 use std::fs;
 use std::io::Read as _;
 use std::path;
@@ -40,6 +41,51 @@ fn safe_guard_path(base_path: &PathBuf, concat_str: &str) -> Result<PathBuf, act
     }
 
     return Ok(resolved_path);
+}
+
+fn get_widget_dir(widget_name: &str) -> Option<PathBuf> {
+    let widget_name = widget_name.trim();
+
+    if widget_name.is_empty() || widget_name.starts_with(".") {
+        return None;
+    }
+
+    let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidget);
+    let system_widget_path = system_widgets_dir.join(widget_name);
+    if system_widget_path.exists() {
+        return Some(system_widget_path);
+    }
+
+    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
+    let user_widget_path = user_widgets_dir.join(widget_name);
+    if user_widget_path.exists() {
+        return Some(user_widget_path);
+    }
+
+    return None;
+}
+
+fn load_fieldstate(widget_path: &PathBuf) -> Result<HashMap<String, serde_json::Value>, Box<dyn std::error::Error>> {
+    let fields_raw = fs::read_to_string(widget_path.join("fields.json"))?;
+    let fields_map: HashMap<String, serde_json::Value> = serde_json::from_str(&fields_raw)?;
+
+    let fieldstate_raw = fs::read_to_string(widget_path.join("fieldstate.json"))?;
+    let fieldstate_map: HashMap<String, serde_json::Value> = serde_json::from_str(&fieldstate_raw)?;
+
+    let mut final_fieldstate: HashMap<String, serde_json::Value> = HashMap::new();
+
+    for (key, value) in fields_map.iter() {
+        if let Some(state_value) = fieldstate_map.get(key) {
+            final_fieldstate.insert(key.clone(), state_value.clone());
+        } else {
+            let obj = value.as_object().ok_or("Invalid field definition")?;
+            if let Some(default_value) = obj.get("value") {
+                final_fieldstate.insert(key.clone(), default_value.clone());
+            }
+        }
+    }
+
+    return Ok(final_fieldstate);
 }
 
 /* ================================================================================================================== */
@@ -120,28 +166,6 @@ pub async fn get_assets(req: HttpRequest) -> Result<impl Responder, actix_web::E
 
 /* ================================================================================================================== */
 
-fn get_widget_dir(widget_name: &str) -> Option<PathBuf> {
-    let widget_name = widget_name.trim();
-    // Return none if widget name is empty or starts with a dot
-    if widget_name.is_empty() || widget_name.starts_with(".") {
-        return None;
-    }
-
-    let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidget);
-    let system_widget_path = system_widgets_dir.join(widget_name);
-    if system_widget_path.exists() {
-        return Some(system_widget_path);
-    }
-
-    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
-    let user_widget_path = user_widgets_dir.join(widget_name);
-    if user_widget_path.exists() {
-        return Some(user_widget_path);
-    }
-
-    return None;
-}
-
 #[get("/widget/{name}/assets/{path:.*}")]
 pub async fn get_widget_assets(req: HttpRequest) -> Result<impl Responder, actix_web::Error> {
     let widget_name: String = req.match_info().query("name").parse()?;
@@ -176,21 +200,29 @@ pub async fn get_widget_assets(req: HttpRequest) -> Result<impl Responder, actix
     }
 }
 
-/* ================================================================================================================== */
-
 #[get("/widget/{name}")]
 pub async fn get_widget(req: HttpRequest) -> Result<impl Responder, actix_web::Error> {
     let widget_name: String = req.match_info().query("name").parse()?;
 
     if let Some(widget_path) = get_widget_dir(&widget_name) {
-        let css = fs::read_to_string(widget_path.join("style.css")).unwrap_or_default();
-        let js = fs::read_to_string(widget_path.join("script.js")).unwrap_or_default();
         let html = fs::read_to_string(widget_path.join("main.html")).unwrap_or_default();
+        let js = fs::read_to_string(widget_path.join("script.js")).unwrap_or_default();
+        let css = fs::read_to_string(widget_path.join("style.css")).unwrap_or_default();
 
-        let content = WIDGET_TEMPLATE
-            .replace("{{WIDGET_STYLE}}", &css)
-            .replace("{{WIDGET_SCRIPT}}", &js)
-            .replace("{{WIDGET_HTML}}", &html);
+        let mut content = String::from(WIDGET_TEMPLATE);
+        content = content.replace("{{WIDGET_STYLE}}", &css);
+        content = content.replace("{{WIDGET_SCRIPT}}", &js);
+        content = content.replace("{{WIDGET_HTML}}", &html);
+
+        let fieldstate = load_fieldstate(&widget_path).unwrap_or_default();
+        for (key, value) in fieldstate.iter() {
+            let value_str = serde_plain::to_string(value).map_err(|e| {
+                log::error!("{:?}", e);
+                return ErrorBadRequest("Failed to serialize field state value");
+            })?;
+            content = content.replace(&format!("{{{{{}}}}}", key), &value_str);
+            content = content.replace(&format!("{{{}}}", key), &value_str);
+        }
 
         return Ok(HttpResponse::build(StatusCode::OK).content_type("text/html; charset=utf-8").body(content));
     } else {
