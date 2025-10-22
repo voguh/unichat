@@ -110,7 +110,6 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                                 key={key}
                                 label={builder.label}
                                 description={builder.description}
-                                placeholder={builder.placeholder}
                                 value={value}
                                 withPickerFree={builder.withPickerFree ?? true}
                                 swatches={builder.swatches ?? []}
@@ -123,7 +122,6 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                                 key={key}
                                 label={builder.label}
                                 description={builder.description}
-                                placeholder={builder.placeholder}
                                 value={value}
                                 onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
                                 data={Object.entries(builder.options).map(([value, label]) => ({ value, label }))}
@@ -135,7 +133,6 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                                 key={key}
                                 label={builder.label}
                                 description={builder.description}
-                                placeholder={builder.placeholder}
                                 value={value}
                                 onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
                                 min={builder.min}
@@ -151,7 +148,6 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                                 key={key}
                                 label={builder.label}
                                 description={builder.description}
-                                placeholder={builder.placeholder}
                                 value={value}
                                 rows={3}
                                 onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
@@ -163,7 +159,6 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                                 key={key}
                                 label={builder.label}
                                 description={builder.description}
-                                placeholder={builder.placeholder}
                                 value={value}
                                 onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
                             />

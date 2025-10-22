@@ -13,7 +13,6 @@
             "type": { "enum": ["text", "textarea"] },
             "label": { "type": "string" },
             "description": { "type": "string" },
-            "placeholder": { "type": "string" },
             "value": { "type": "string" }
           },
           "required": ["type", "label"],
@@ -25,7 +24,6 @@
             "type": { "enum": ["number", "slider"] },
             "label": { "type": "string" },
             "description": { "type": "string" },
-            "placeholder": { "type": "string" },
             "value": { "type": "number" },
             "min": { "type": "number" },
             "max": { "type": "number" },
@@ -40,7 +38,6 @@
             "type": { "const": "checkbox" },
             "label": { "type": "string" },
             "description": { "type": "string" },
-            "placeholder": { "type": "string" },
             "value": { "type": "boolean" }
           },
           "required": ["type", "label"],
@@ -52,7 +49,6 @@
             "type": { "const": "colorpicker" },
             "label": { "type": "string" },
             "description": { "type": "string" },
-            "placeholder": { "type": "string" },
             "value": { "type": "string" },
             "withPickerFree": { "type": "boolean" },
             "swatches": {
@@ -69,7 +65,6 @@
             "type": { "const": "dropdown" },
             "label": { "type": "string" },
             "description": { "type": "string" },
-            "placeholder": { "type": "string" },
             "value": { "type": "string" },
             "options": {
               "type": "object",
