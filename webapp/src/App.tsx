@@ -59,7 +59,7 @@ const tabs = {
 export default function App(): JSX.Element {
     const [hasUpdate, setHasUpdate] = React.useState(false);
     const [hasNewsTour, setHasNewsTour] = React.useState(false);
-    const [selectedTab, setSelectedTab] = React.useState<keyof typeof tabs>("widgetEditor");
+    const [selectedTab, setSelectedTab] = React.useState<keyof typeof tabs>("dashboard");
 
     const { metadata, setShowWidgetPreview, showWidgetPreview } = React.useContext(AppContext);
 
