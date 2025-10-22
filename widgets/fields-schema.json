@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "UniChat - Fields Schema",
+  "description": "The schema for `fields.json` file used in UniChat widgets for customization.",
+  "additionalProperties": false,
+  "patternProperties": {
+    ".*": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": { "enum": ["text", "textarea"] },
+            "label": { "type": "string" },
+            "description": { "type": "string" },
+            "placeholder": { "type": "string" },
+            "value": { "type": "string" }
+          },
+          "required": ["type", "label"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "enum": ["number", "slider"] },
+            "label": { "type": "string" },
+            "description": { "type": "string" },
+            "placeholder": { "type": "string" },
+            "value": { "type": "number" },
+            "min": { "type": "number" },
+            "max": { "type": "number" },
+            "step": { "type": "number" }
+          },
+          "required": ["type", "label"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "checkbox" },
+            "label": { "type": "string" },
+            "description": { "type": "string" },
+            "placeholder": { "type": "string" },
+            "value": { "type": "boolean" }
+          },
+          "required": ["type", "label"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "colorpicker" },
+            "label": { "type": "string" },
+            "description": { "type": "string" },
+            "placeholder": { "type": "string" },
+            "value": { "type": "string" },
+            "withPickerFree": { "type": "boolean" },
+            "swatches": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "required": ["type", "label"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "dropdown" },
+            "label": { "type": "string" },
+            "description": { "type": "string" },
+            "placeholder": { "type": "string" },
+            "value": { "type": "string" },
+            "options": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
+            }
+          },
+          "required": ["type", "label", "options"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "divider" }
+          },
+          "required": ["type"],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}
