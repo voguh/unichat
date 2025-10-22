@@ -73,98 +73,102 @@ export function WidgetEditor(_props: Props): React.ReactNode {
             return <div>No fields defined for this widget.</div>;
         }
 
-        return Object.entries(fields).map(([key, builder]) => {
-            const value = fieldState[key] ?? ("value" in builder ? builder.value : null);
+        return Object.entries(fields)
+            .filter(([key, value]) => key !== "$schema" && typeof value === "object")
+            .map(([key, builder]) => {
+                const value = fieldState[key] ?? ("value" in builder ? builder.value : null);
 
-            switch (builder.type) {
-                case "slider":
-                    return (
-                        <Input.Wrapper>
-                            <Slider
+                switch (builder.type) {
+                    case "slider":
+                        return (
+                            <Input.Wrapper>
+                                <Slider
+                                    value={value}
+                                    step={builder.step ?? 0.1}
+                                    min={builder.min ?? 0}
+                                    max={builder.max ?? 100}
+                                    onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
+                                />
+                            </Input.Wrapper>
+                        );
+                    case "checkbox":
+                        return (
+                            <Checkbox
+                                key={key}
+                                label={builder.label}
+                                description={builder.description}
+                                checked={value}
+                                onChange={(evt) =>
+                                    setFieldState((old) => ({ ...old, [key]: evt.currentTarget.checked }))
+                                }
+                            />
+                        );
+                    case "colorpicker":
+                        return (
+                            <ColorPicker
+                                key={key}
+                                label={builder.label}
+                                description={builder.description}
+                                placeholder={builder.placeholder}
                                 value={value}
-                                step={builder.step ?? 0.1}
-                                min={builder.min ?? 0}
-                                max={builder.max ?? 100}
+                                withPickerFree={builder.withPickerFree ?? true}
+                                swatches={builder.swatches ?? []}
                                 onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
                             />
-                        </Input.Wrapper>
-                    );
-                case "checkbox":
-                    return (
-                        <Checkbox
-                            key={key}
-                            label={builder.label}
-                            description={builder.description}
-                            checked={value}
-                            onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.checked }))}
-                        />
-                    );
-                case "colorpicker":
-                    return (
-                        <ColorPicker
-                            key={key}
-                            label={builder.label}
-                            description={builder.description}
-                            placeholder={builder.placeholder}
-                            value={value}
-                            withPickerFree={builder.withPickerFree ?? true}
-                            swatches={builder.swatches ?? []}
-                            onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
-                        />
-                    );
-                case "dropdown":
-                    return (
-                        <Select
-                            key={key}
-                            label={builder.label}
-                            description={builder.description}
-                            placeholder={builder.placeholder}
-                            value={value}
-                            onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
-                            data={Object.entries(builder.options).map(([value, label]) => ({ value, label }))}
-                        />
-                    );
-                case "number":
-                    return (
-                        <NumberInput
-                            key={key}
-                            label={builder.label}
-                            description={builder.description}
-                            placeholder={builder.placeholder}
-                            value={value}
-                            onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
-                            min={builder.min}
-                            max={builder.max}
-                            step={builder.step}
-                        />
-                    );
-                case "divider":
-                    return <Divider key={key} />;
-                case "textarea":
-                    return (
-                        <Textarea
-                            key={key}
-                            label={builder.label}
-                            description={builder.description}
-                            placeholder={builder.placeholder}
-                            value={value}
-                            rows={3}
-                            onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
-                        />
-                    );
-                default:
-                    return (
-                        <TextInput
-                            key={key}
-                            label={builder.label}
-                            description={builder.description}
-                            placeholder={builder.placeholder}
-                            value={value}
-                            onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
-                        />
-                    );
-            }
-        });
+                        );
+                    case "dropdown":
+                        return (
+                            <Select
+                                key={key}
+                                label={builder.label}
+                                description={builder.description}
+                                placeholder={builder.placeholder}
+                                value={value}
+                                onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
+                                data={Object.entries(builder.options).map(([value, label]) => ({ value, label }))}
+                            />
+                        );
+                    case "number":
+                        return (
+                            <NumberInput
+                                key={key}
+                                label={builder.label}
+                                description={builder.description}
+                                placeholder={builder.placeholder}
+                                value={value}
+                                onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
+                                min={builder.min}
+                                max={builder.max}
+                                step={builder.step}
+                            />
+                        );
+                    case "divider":
+                        return <Divider key={key} />;
+                    case "textarea":
+                        return (
+                            <Textarea
+                                key={key}
+                                label={builder.label}
+                                description={builder.description}
+                                placeholder={builder.placeholder}
+                                value={value}
+                                rows={3}
+                                onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                            />
+                        );
+                    default:
+                        return (
+                            <TextInput
+                                key={key}
+                                label={builder.label}
+                                description={builder.description}
+                                placeholder={builder.placeholder}
+                                value={value}
+                                onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                            />
+                        );
+                }
+            });
     }
 
     /* ====================================================================== */
