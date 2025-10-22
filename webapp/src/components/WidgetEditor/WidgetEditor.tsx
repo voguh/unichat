@@ -31,6 +31,7 @@ import {
     IconMessage,
     IconMoneybag,
     IconReload,
+    IconRestore,
     IconStar,
     IconStars
 } from "@tabler/icons-react";
@@ -176,12 +177,12 @@ export function WidgetEditor(_props: Props): React.ReactNode {
     function dispatchEmulatedEvent<T extends UniChatEvent>(eventType: T["type"]): void {
         const requirePlatform = emulationMode === "mixed" ? null : (emulationMode as UniChatPlatform);
 
-        const data = buildEmulatedEventData<T>(eventType, requirePlatform);
-
-        if (iframeRef.current && iframeRef.current.contentWindow) {
-            const detail = { type: eventType, data };
-            iframeRef.current.contentWindow.postMessage({ type: "unichat:event", detail }, "*");
-        }
+        buildEmulatedEventData<T>(eventType, requirePlatform).then((data) => {
+            if (iframeRef.current && iframeRef.current.contentWindow) {
+                const detail = { type: eventType, data };
+                iframeRef.current.contentWindow.postMessage({ type: "unichat:event", detail }, "*");
+            }
+        });
     }
 
     async function handleFetchWidgetData(): Promise<void> {
@@ -217,6 +218,31 @@ export function WidgetEditor(_props: Props): React.ReactNode {
         if (iframeRef.current) {
             iframeRef.current.src = selectedWidgetUrl;
             handleFetchWidgetData();
+        }
+    }
+
+    async function handleReset(): Promise<void> {
+        try {
+            const widgetName = (selectedWidgetUrl ?? "").replace(`${WIDGET_URL_PREFIX}/`, "");
+
+            if (!Strings.isNullOrEmpty(widgetName)) {
+                await commandService.setWidgetFieldState(widgetName, {});
+                setFieldState({});
+                reloadIframe();
+                notifications.show({
+                    title: "Success",
+                    message: "Widget field state reset.",
+                    color: "green",
+                    position: "top-center"
+                });
+            }
+        } catch (err) {
+            loggerService.error("An error occurred on save 'fieldstate.json'", err);
+            notifications.show({
+                title: "Error",
+                message: `Failed to apply widget field state: ${(err as Error).message}`,
+                color: "red"
+            });
         }
     }
 
@@ -314,6 +340,9 @@ export function WidgetEditor(_props: Props): React.ReactNode {
             <div className="editor-area">
                 <div className="editor-area-header">
                     <div>Fields</div>
+                    <Button size="xs" variant="default" leftSection={<IconRestore size="20" />} onClick={handleReset}>
+                        Reset
+                    </Button>
                     <Button size="xs" color="green" leftSection={<IconCheck size="20" />} onClick={handleApply}>
                         Apply
                     </Button>
@@ -333,8 +362,8 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         label="Emulation Mode"
                         data={[
                             { value: "mixed", label: "Mixed" },
-                            { value: "twitch-only", label: "Twitch Only" },
-                            { value: "youtube-only", label: "YouTube Only" }
+                            { value: "twitch", label: "Twitch Only" },
+                            { value: "youtube", label: "YouTube Only" }
                         ]}
                         allowDeselect={false}
                         onChange={(value) => setEmulationMode(value as UniChatPlatform | "mixed")}

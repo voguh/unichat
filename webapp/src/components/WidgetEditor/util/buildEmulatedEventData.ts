@@ -13,6 +13,7 @@ import { seededRandom } from "unichat/utils/seededRandom";
 
 import { randomizeAuthorDisplayName } from "./randomizeAuthorDisplayName";
 import { randomizeBadgeAndAuthorType } from "./randomizeBadgeAndAuthorType";
+import { randomizeMessage } from "./randomizeMessage";
 import { randomizeSponsorData, randomizeSponsorTier } from "./randomizeSponsorData";
 
 const DUMMY_YOUTUBE_CHANNEL_ID = "UCBR8-60-B28hp2BmDPdntcQ";
@@ -20,14 +21,14 @@ const DUMMY_YOUTUBE_CHANNEL_ID = "UCBR8-60-B28hp2BmDPdntcQ";
 const DUMMY_TWITCH_CHANNEL_ID = "12826";
 const DUMMY_TWITCH_CHANNEL_NAME = "Twitch";
 
-export function buildEmulatedEventData<T extends UniChatEvent>(
+export async function buildEmulatedEventData<T extends UniChatEvent>(
     eventType: T["type"],
     requirePlatform: UniChatPlatform
-): T["data"] {
+): Promise<T["data"]> {
     const userDisplayName = randomizeAuthorDisplayName();
     const rng = seededRandom(userDisplayName);
 
-    const platform = (requirePlatform ?? rng() < 0.5) ? "youtube" : "twitch";
+    const platform = requirePlatform ?? (rng() < 0.5 ? "youtube" : "twitch");
     const channelId = platform === "youtube" ? DUMMY_YOUTUBE_CHANNEL_ID : DUMMY_TWITCH_CHANNEL_ID;
     const channelName = platform === "youtube" ? null : DUMMY_TWITCH_CHANNEL_NAME;
 
@@ -36,6 +37,8 @@ export function buildEmulatedEventData<T extends UniChatEvent>(
     const authorDisplayColor = randomColorBySeed(userDisplayName);
     const authorProfilePictureUrl = platform === "twitch" ? null : "/ytimg/AIoZ1j2w1KXo3I9n1b0f6Yc0j6jR4s5X2Yk3s4k5l6m7n8o9p=s160-c-k-c0x00ffffff-no-rj"; // prettier-ignore
     const [authorBadges, authorType] = randomizeBadgeAndAuthorType(platform, rng);
+
+    const [messageText, emotes] = await randomizeMessage(() => Math.random());
 
     let data = {
         channelId: channelId,
@@ -61,8 +64,8 @@ export function buildEmulatedEventData<T extends UniChatEvent>(
                 ...data,
 
                 messageId: crypto.randomUUID(),
-                messageText: "Hello, this is a test message!",
-                emotes: []
+                messageText: messageText,
+                emotes: emotes
             };
 
             break;
@@ -79,14 +82,14 @@ export function buildEmulatedEventData<T extends UniChatEvent>(
                 currency: platform === "youtube" ? "$" : "Bits",
 
                 messageId: crypto.randomUUID(),
-                messageText: "This is a test donation!",
-                emotes: []
+                messageText: messageText,
+                emotes: emotes
             };
 
             break;
         }
         case "unichat:sponsor": {
-            const [sponsorTier, sponsorMonths, sponsorMessage, sponsorEmotes] = randomizeSponsorData(platform);
+            const [sponsorTier, sponsorMonths] = randomizeSponsorData(platform);
             data = {
                 ...data,
 
@@ -94,8 +97,8 @@ export function buildEmulatedEventData<T extends UniChatEvent>(
                 months: sponsorMonths,
 
                 messageId: crypto.randomUUID(),
-                messageText: sponsorMessage,
-                emotes: sponsorEmotes
+                messageText: messageText,
+                emotes: emotes
             };
 
             break;
