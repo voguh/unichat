@@ -55,6 +55,12 @@
                 }
 
                 connect();
+
+                window.addEventListener("message", ({ data: event }) => {
+                    if (event.type === "unichat:event") {
+                        window.dispatchEvent(new CustomEvent("unichat:event", { detail: event.detail }));
+                    }
+                });
             });
         </script>
         <script defer>
