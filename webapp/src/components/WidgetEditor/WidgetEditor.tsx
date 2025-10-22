@@ -275,8 +275,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
             setWidgets(widgets);
 
             if (widgets.length > 0) {
-                // setSelectedWidgetUrl(widgets[0]);
-                setSelectedWidgetUrl(`${WIDGET_URL_PREFIX}/w95chat`);
+                setSelectedWidgetUrl(widgets[0]);
             }
         }
 
