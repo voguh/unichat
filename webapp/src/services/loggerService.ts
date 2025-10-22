@@ -33,12 +33,21 @@ export class LoggerService {
     public error(message: string, ...args: any[]): void {
         const formattedMessage = this._formatMessage(message, ...args);
         error(formattedMessage).catch((err) => console.error(err));
+
+        if (args.at(-1) instanceof Error) {
+            const lastArg = args.at(-1) as Error;
+            error(lastArg.stack ?? lastArg.message).catch((err) => console.error(err));
+        }
     }
 
     private _formatMessage(message: string, ...args: any[]): string {
         if (args.length > 0) {
             for (const arg of args) {
-                message = message.replace("{}", String(arg));
+                if (arg instanceof Error) {
+                    message = message.replace("{}", arg.message);
+                } else {
+                    message = message.replace("{}", String(arg));
+                }
             }
         }
 
