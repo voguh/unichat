@@ -1,5 +1,5 @@
 {
-  "include": ["__tests__", "src"],
+  "include": ["__tests__", "src", "../widgets/unichat.d.ts"],
   "compilerOptions": {
         /* Visit https://aka.ms/tsconfig to read more about this file */
 
@@ -110,7 +110,8 @@
         "skipLibCheck": true,                                              /* Skip type checking all .d.ts files. */
         "baseUrl": ".",                                                    /* Specify the base directory to resolve non-relative module names. */
         "paths": {                                                         /* Specify a set of entries that re-map imports to additional lookup locations. */
-            "unichat/*": ["./src/*"]
+            "unichat/*": ["./src/*"],
+            "unichat-widgets/unichat": ["../widgets/unichat.d.ts"]
         }
   }
 }

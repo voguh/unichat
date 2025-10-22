@@ -73,7 +73,7 @@
             "warn",
             {
                 "newlinesBetween": "always",
-                "groups": [["/^react/", "/^node:/"], "module", "/^unichat//", ["parent", "sibling", "index"]],
+                "groups": [["/^react/", "/^node:/"], "module", ["/^unichat//", "/^unichat-widgets//"], ["parent", "sibling", "index"]],
                 "alphabetize": { "order": "asc", "ignoreCase": true }
             }
         ],
@@ -109,6 +109,9 @@
 
         /* Disable error on class methods without this */
         // "class-methods-use-this": "off",
+
+        /* Disable need for shorthand object properties */
+        "object-shorthand": ["off"],
 
         /* Fix unused vars */
         "no-unused-vars": "off",
