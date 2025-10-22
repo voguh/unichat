@@ -1,0 +1,78 @@
+{
+    "$schema": "https://raw.githubusercontent.com/voguh/unichat/refs/heads/feature/widget-editor/widgets/fields-schema.json",
+    "checkboxProperty": {
+        "type": "checkbox",
+        "label": "I'm a checkbox",
+        "description": "This is a checkbox property",
+        "value": true
+    },
+    "colorpickerProperty": {
+        "type": "colorpicker",
+        "label": "I'm a color picker",
+        "description": "This is a color picker property with only swatches",
+        "value": "#ff0000",
+        "withPickerFree": false,
+        "swatches": [
+            "#000000",
+            "#800000",
+            "#008000",
+            "#808000",
+            "#000080",
+            "#800080",
+            "#008080",
+            "#c0c0c0",
+            "#808080",
+            "#ff0000",
+            "#00ff00",
+            "#ffff00",
+            "#0000ff",
+            "#ff00ff",
+            "#00ffff",
+            "#ffffff"
+        ]
+    },
+    "dividerProperty": {
+        "type": "divider"
+    },
+    "dropdownProperty": {
+        "type": "dropdown",
+        "label": "I'm a dropdown",
+        "description": "This is a dropdown property",
+        "value": "option3",
+        "options": {
+            "option1": "Option 1",
+            "option2": "Option 2",
+            "option3": "Option 3"
+        }
+    },
+    "numberProperty": {
+        "type": "number",
+        "label": "I'm a number input",
+        "description": "This is a number input property",
+        "value": 42,
+        "min": 0,
+        "max": 100,
+        "step": 1
+    },
+    "sliderProperty": {
+        "type": "slider",
+        "label": "I'm a slider",
+        "description": "This is a slider property",
+        "value": 50,
+        "min": 0,
+        "max": 100,
+        "step": 1
+    },
+    "textProperty": {
+        "type": "text",
+        "label": "I'm a text input",
+        "description": "This is a text input property",
+        "value": "Hello, World!"
+    },
+    "textareaProperty": {
+        "type": "textarea",
+        "label": "I'm a textarea",
+        "description": "This is a textarea property",
+        "value": "This is a longer piece of text.\nIt can span multiple lines."
+    }
+}
