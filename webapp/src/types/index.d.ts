@@ -42,15 +42,7 @@ export interface AppMetadata {
 /* ========================================================================== */
 
 export interface WidgetFieldsText {
-    type: "text";
-    label: string;
-    description?: string;
-    placeholder?: string;
-    value?: string;
-}
-
-export interface WidgetFieldsTextArea {
-    type: "textarea";
+    type: "text" | "textarea";
     label: string;
     description?: string;
     placeholder?: string;
@@ -101,7 +93,6 @@ export interface WidgetFieldsDivider {
 
 export type WidgetFields =
     | WidgetFieldsText
-    | WidgetFieldsTextArea
     | WidgetFieldsNumber
     | WidgetFieldsCheckbox
     | WidgetFieldsColorPicker
