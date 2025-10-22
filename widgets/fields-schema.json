@@ -77,7 +77,8 @@
         {
           "type": "object",
           "properties": {
-            "type": { "const": "divider" }
+            "type": { "const": "divider" },
+            "label": { "type": "string" }
           },
           "required": ["type"],
           "additionalProperties": false

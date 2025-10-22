@@ -141,7 +141,12 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                             />
                         );
                     case "divider":
-                        return <Divider key={key} />;
+                        return (
+                            <div key={key}>
+                                <Divider />
+                                {builder.label && <Text size="sm">{builder.label}</Text>}
+                            </div>
+                        );
                     case "textarea":
                         return (
                             <Textarea

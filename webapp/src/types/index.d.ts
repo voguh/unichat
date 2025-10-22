@@ -84,6 +84,7 @@ export interface WidgetFieldsDropdown {
 
 export interface WidgetFieldsDivider {
     type: "divider";
+    label?: string;
 }
 
 export type WidgetFields =
