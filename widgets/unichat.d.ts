@@ -21,6 +21,8 @@ export interface UniChatBadge {
     url: string;
 }
 
+export type UniChatEvent = UniChatEventClear | UniChatEventRemoveMessage | UniChatEventRemoveAuthor | UniChatEventMessage | UniChatEventRaid | UniChatEventSponsor | UniChatEventSponsorGift | UniChatEventDonate;
+
 /* <============================================================================================> */
 
 export interface UniChatEventClear {
@@ -101,8 +103,8 @@ export interface UniChatEventMessage {
 
 /* <============================================================================================> */
 
-export interface UniChatEventRaid {
-    type: "unichat:raid";
+export interface UniChatEventDonate {
+    type: "unichat:donate";
     data: {
         channelId: string;
         /** **Disclaimer:** On YouTube, this field is always null. */
@@ -111,20 +113,22 @@ export interface UniChatEventRaid {
         platform: UniChatPlatform;
         flags: Record<string, string | null>;
 
-        /** **Disclaimer:** On YouTube, this field is always null. */
-        authorId: string | null;
+        authorId: string;
         /** **Disclaimer:** On YouTube, this field is null when name doesn't starts with `@`. */
         authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
-        authorProfilePictureUrl: string;
+        /** **Disclaimer:** On Twitch, this field is always null. */
+        authorProfilePictureUrl: string | null;
         authorBadges: UniChatBadge[];
-        /** **Disclaimer:** On YouTube, this field is always null. */
-        authorType: UniChatAuthorType | null;
+        authorType: UniChatAuthorType;
+
+        value: number;
+        currency: string;
 
         messageId: string;
-        /** **Disclaimer:** On YouTube, this field is always null. */
-        viewerCount: number | null;
+        messageText: string | null;
+        emotes: UniChatEmote[];
 
         timestamp: number;
     };
@@ -195,8 +199,8 @@ export interface UniChatEventSponsorGift {
 
 /* <============================================================================================> */
 
-export interface UniChatEventDonate {
-    type: "unichat:donate";
+export interface UniChatEventRaid {
+    type: "unichat:raid";
     data: {
         channelId: string;
         /** **Disclaimer:** On YouTube, this field is always null. */
@@ -205,22 +209,21 @@ export interface UniChatEventDonate {
         platform: UniChatPlatform;
         flags: Record<string, string | null>;
 
-        authorId: string;
+        /** **Disclaimer:** On YouTube, this field is always null. */
+        authorId: string | null;
         /** **Disclaimer:** On YouTube, this field is null when name doesn't starts with `@`. */
         authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
-        /** **Disclaimer:** On Twitch, this field is always null. */
-        authorProfilePictureUrl: string | null;
+        authorProfilePictureUrl: string;
+        /** **Disclaimer:** On YouTube, this field is an empty list. */
         authorBadges: UniChatBadge[];
-        authorType: UniChatAuthorType;
-
-        value: number;
-        currency: string;
+        /** **Disclaimer:** On YouTube, this field is always null. */
+        authorType: UniChatAuthorType | null;
 
         messageId: string;
-        messageText: string | null;
-        emotes: UniChatEmote[];
+        /** **Disclaimer:** On YouTube, this field is always null. */
+        viewerCount: number | null;
 
         timestamp: number;
     };
