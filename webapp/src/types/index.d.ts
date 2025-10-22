@@ -38,3 +38,74 @@ export interface AppMetadata {
 
     thirdPartyLicenses?: ThirdPartyLicenseInfo[];
 }
+
+/* ========================================================================== */
+
+export interface WidgetFieldsText {
+    type: "text";
+    label: string;
+    description?: string;
+    placeholder?: string;
+    value?: string;
+}
+
+export interface WidgetFieldsTextArea {
+    type: "textarea";
+    label: string;
+    description?: string;
+    placeholder?: string;
+    value?: string;
+}
+
+export interface WidgetFieldsNumber {
+    type: "number" | "slider";
+    label: string;
+    description?: string;
+    placeholder?: string;
+    value?: number;
+    min?: number;
+    max?: number;
+    step?: number;
+}
+
+export interface WidgetFieldsCheckbox {
+    type: "checkbox";
+    label: string;
+    description?: string;
+    placeholder?: string;
+    value?: boolean;
+}
+
+export interface WidgetFieldsColorPicker {
+    type: "colorpicker";
+    label: string;
+    description?: string;
+    placeholder?: string;
+    value?: string;
+    withPickerFree?: boolean;
+    swatches?: string[];
+}
+
+export interface WidgetFieldsDropdown {
+    type: "dropdown";
+    label: string;
+    description?: string;
+    placeholder?: string;
+    value?: string;
+    options: Record<string, string>;
+}
+
+export interface WidgetFieldsDivider {
+    type: "divider";
+}
+
+export type WidgetFields =
+    | WidgetFieldsText
+    | WidgetFieldsTextArea
+    | WidgetFieldsNumber
+    | WidgetFieldsCheckbox
+    | WidgetFieldsColorPicker
+    | WidgetFieldsDropdown
+    | WidgetFieldsDivider;
+
+/* ========================================================================== */
