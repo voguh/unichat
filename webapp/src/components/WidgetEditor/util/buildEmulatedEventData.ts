@@ -35,7 +35,8 @@ export async function buildEmulatedEventData<T extends UniChatEvent>(
     const authorUsername = platform === "youtube" ? null : userDisplayName.toLowerCase();
     const authorDisplayName = userDisplayName;
     const authorDisplayColor = randomColorBySeed(userDisplayName);
-    const authorProfilePictureUrl = platform === "twitch" ? null : "/ytimg/AIoZ1j2w1KXo3I9n1b0f6Yc0j6jR4s5X2Yk3s4k5l6m7n8o9p=s160-c-k-c0x00ffffff-no-rj"; // prettier-ignore
+    const authorProfilePictureUrl = platform === "twitch" ? null : "/ytimg/qyk46Tghzh6pu38WDItFln1hnbDe1GGsTfXj0OQrYtzGkQ0IDrgHtxdY9tK1OQpS2Rbh9EiuXw=s160-c-k-c0x00ffffff-no-rj"; // prettier-ignore
+
     const [authorBadges, authorType] = randomizeBadgeAndAuthorType(platform, rng);
 
     const [messageText, emotes] = await randomizeMessage(() => Math.random());
