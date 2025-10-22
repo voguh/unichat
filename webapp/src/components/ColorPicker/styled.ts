@@ -69,5 +69,6 @@ export const ColorPickerStyledContainer = styled(Input.Wrapper)`
         bottom: calc(36px + 4px);
         left: 0;
         padding: 8px;
+        background: var(--mantine-color-dark-6);
     }
 `;

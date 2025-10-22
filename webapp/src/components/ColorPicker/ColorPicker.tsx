@@ -81,7 +81,7 @@ export function ColorPicker(props: Props): React.ReactNode {
                 </div>
             </div>
             {opened && (
-                <Paper ref={ref} className="colorpicker-picker-wrapper">
+                <Paper ref={ref} shadow="sm" withBorder className="colorpicker-picker-wrapper">
                     <MantineColorPicker
                         format="hexa"
                         value={value}
