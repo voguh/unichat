@@ -53,7 +53,7 @@ export const WidgetEditorStyledContainer = styled.div`
     height: 100%;
     display: grid;
     grid-template-areas: "HDR HDR HDR" "EDT PRV EMT";
-    grid-template-columns: calc(272px + 16px) 400px 1fr;
+    grid-template-columns: 308px 400px 1fr;
     grid-template-rows: 54px 1fr;
 
     > .preview-header {
@@ -105,27 +105,53 @@ export const WidgetEditorStyledContainer = styled.div`
         > .editor-fields {
             grid-area: EDF;
             overflow-y: auto;
-            padding: 8px 16px 8px 8px;
-            margin-right: -8px;
             height: calc(100vh - (54px + 30px + 32px + 8px));
 
-            > div {
-                &:not(:first-child) {
-                    margin-top: 8px;
-                }
+            > .mantine-Accordion-root {
+                > .mantine-Accordion-item {
+                    background: var(--mantine-color-dark-7);
 
-                &.divider-wrapper {
-                    margin-top: 32px;
-                    margin-bottom: 32px;
-
-                    > .mantine-Divider-root {
-                        margin: 0;
-                        margin-bottom: 8px;
+                    &:first-child {
+                        border-bottom-left-radius: 0;
+                        border-bottom-right-radius: 0;
                     }
 
-                    > .mantine-Text-root {
-                        text-align: center;
-                        font-weight: bolder;
+                    &:not(:first-child):not(:last-child) {
+                        border-radius: 0;
+                    }
+
+                    &:last-child {
+                        border-top-left-radius: 0;
+                        border-top-right-radius: 0;
+                    }
+
+                    &:not(:first-child) {
+                        margin-top: 0;
+                    }
+
+                    > .mantine-Accordion-panel {
+                        > .mantine-Accordion-content {
+                            > div {
+                                &:not(:last-child) {
+                                    margin-bottom: 8px;
+                                }
+
+                                &.divider-wrapper {
+                                    margin-top: 32px;
+                                    margin-bottom: 32px;
+
+                                    > .mantine-Divider-root {
+                                        margin: 0;
+                                        margin-bottom: 8px;
+                                    }
+
+                                    > .mantine-Text-root {
+                                        text-align: center;
+                                        font-weight: bolder;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

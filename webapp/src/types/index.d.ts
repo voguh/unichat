@@ -43,6 +43,7 @@ export interface AppMetadata {
 
 export interface WidgetFieldsText {
     type: "text" | "textarea";
+    group?: string;
     label: string;
     description?: string;
     value?: string;
@@ -50,6 +51,7 @@ export interface WidgetFieldsText {
 
 export interface WidgetFieldsNumber {
     type: "number" | "slider";
+    group?: string;
     label: string;
     description?: string;
     value?: number;
@@ -60,6 +62,7 @@ export interface WidgetFieldsNumber {
 
 export interface WidgetFieldsCheckbox {
     type: "checkbox";
+    group?: string;
     label: string;
     description?: string;
     value?: boolean;
@@ -67,6 +70,7 @@ export interface WidgetFieldsCheckbox {
 
 export interface WidgetFieldsColorPicker {
     type: "colorpicker";
+    group?: string;
     label: string;
     description?: string;
     value?: string;
@@ -76,6 +80,7 @@ export interface WidgetFieldsColorPicker {
 
 export interface WidgetFieldsDropdown {
     type: "dropdown";
+    group?: string;
     label: string;
     description?: string;
     value?: string;
@@ -84,6 +89,7 @@ export interface WidgetFieldsDropdown {
 
 export interface WidgetFieldsDivider {
     type: "divider";
+    group?: string;
     label?: string;
 }
 

@@ -10,6 +10,7 @@
 import React from "react";
 
 import {
+    Accordion,
     Button,
     Card,
     Checkbox,
@@ -69,107 +70,136 @@ export function WidgetEditor(_props: Props): React.ReactNode {
 
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
+    function buildField(key: string, builder: WidgetFields): JSX.Element {
+        const value = fieldState[key] ?? ("value" in builder ? builder.value : null);
+
+        switch (builder.type) {
+            case "slider":
+                return (
+                    <Input.Wrapper>
+                        <Slider
+                            value={value}
+                            step={builder.step ?? 0.1}
+                            min={builder.min ?? 0}
+                            max={builder.max ?? 100}
+                            onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
+                        />
+                    </Input.Wrapper>
+                );
+            case "checkbox":
+                return (
+                    <Checkbox
+                        key={key}
+                        label={builder.label}
+                        description={builder.description}
+                        checked={value}
+                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.checked }))}
+                    />
+                );
+            case "colorpicker":
+                return (
+                    <ColorPicker
+                        key={key}
+                        label={builder.label}
+                        description={builder.description}
+                        value={value}
+                        withPickerFree={builder.withPickerFree ?? true}
+                        swatches={builder.swatches ?? []}
+                        onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
+                    />
+                );
+            case "dropdown":
+                return (
+                    <Select
+                        key={key}
+                        label={builder.label}
+                        description={builder.description}
+                        value={value}
+                        onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
+                        data={Object.entries(builder.options).map(([value, label]) => ({ value, label }))}
+                    />
+                );
+            case "number":
+                return (
+                    <NumberInput
+                        key={key}
+                        label={builder.label}
+                        description={builder.description}
+                        value={value}
+                        onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
+                        min={builder.min}
+                        max={builder.max}
+                        step={builder.step}
+                    />
+                );
+            case "textarea":
+                return (
+                    <Textarea
+                        key={key}
+                        label={builder.label}
+                        description={builder.description}
+                        value={value}
+                        rows={3}
+                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                    />
+                );
+            case "divider":
+                return (
+                    <div key={key} className="divider-wrapper">
+                        <Divider />
+                        {builder.label && <Text size="sm">{builder.label}</Text>}
+                    </div>
+                );
+            default:
+                return (
+                    <TextInput
+                        key={key}
+                        label={builder.label}
+                        description={builder.description}
+                        value={value}
+                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                    />
+                );
+        }
+    }
+
     function buildFieldsEditor(): React.ReactNode {
         if (fields == null || Object.keys(fields).length === 0) {
             return <div>No fields defined for this widget.</div>;
         }
 
-        return Object.entries(fields)
-            .filter(([key, value]) => key !== "$schema" && typeof value === "object")
-            .map(([key, builder]) => {
-                const value = fieldState[key] ?? ("value" in builder ? builder.value : null);
+        const groups: Record<string, JSX.Element[]> = {
+            Ungrouped: []
+        };
 
-                switch (builder.type) {
-                    case "slider":
+        const filteredFields = Object.entries(fields).filter(([_, value]) => typeof value === "object");
+        for (const [key, value] of filteredFields) {
+            const group = value.group ?? "Ungrouped";
+            if (!groups[group]) {
+                groups[group] = [];
+            }
+
+            groups[group].push(buildField(key, value));
+        }
+
+        const firstSelectedGroup = Object.entries(groups)
+            .filter(([_, elements]) => elements.length > 0)
+            .map(([k]) => k)[0];
+
+        return (
+            <Accordion variant="separated" chevronIconSize={18} defaultValue={firstSelectedGroup}>
+                {Object.entries(groups)
+                    .filter(([_, elements]) => elements.length > 0)
+                    .map(([groupName, elements]) => {
                         return (
-                            <Input.Wrapper>
-                                <Slider
-                                    value={value}
-                                    step={builder.step ?? 0.1}
-                                    min={builder.min ?? 0}
-                                    max={builder.max ?? 100}
-                                    onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
-                                />
-                            </Input.Wrapper>
+                            <Accordion.Item key={groupName} value={groupName}>
+                                <Accordion.Control>{groupName}</Accordion.Control>
+                                <Accordion.Panel>{elements}</Accordion.Panel>
+                            </Accordion.Item>
                         );
-                    case "checkbox":
-                        return (
-                            <Checkbox
-                                key={key}
-                                label={builder.label}
-                                description={builder.description}
-                                checked={value}
-                                onChange={(evt) =>
-                                    setFieldState((old) => ({ ...old, [key]: evt.currentTarget.checked }))
-                                }
-                            />
-                        );
-                    case "colorpicker":
-                        return (
-                            <ColorPicker
-                                key={key}
-                                label={builder.label}
-                                description={builder.description}
-                                value={value}
-                                withPickerFree={builder.withPickerFree ?? true}
-                                swatches={builder.swatches ?? []}
-                                onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
-                            />
-                        );
-                    case "dropdown":
-                        return (
-                            <Select
-                                key={key}
-                                label={builder.label}
-                                description={builder.description}
-                                value={value}
-                                onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
-                                data={Object.entries(builder.options).map(([value, label]) => ({ value, label }))}
-                            />
-                        );
-                    case "number":
-                        return (
-                            <NumberInput
-                                key={key}
-                                label={builder.label}
-                                description={builder.description}
-                                value={value}
-                                onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
-                                min={builder.min}
-                                max={builder.max}
-                                step={builder.step}
-                            />
-                        );
-                    case "divider":
-                        return (
-                            <div key={key} className="divider-wrapper">
-                                <Divider />
-                                {builder.label && <Text size="sm">{builder.label}</Text>}
-                            </div>
-                        );
-                    case "textarea":
-                        return (
-                            <Textarea
-                                key={key}
-                                label={builder.label}
-                                description={builder.description}
-                                value={value}
-                                rows={3}
-                                onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
-                            />
-                        );
-                    default:
-                        return (
-                            <TextInput
-                                key={key}
-                                label={builder.label}
-                                description={builder.description}
-                                value={value}
-                                onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
-                            />
-                        );
-                }
-            });
+                    })}
+            </Accordion>
+        );
     }
 
     /* ====================================================================== */
