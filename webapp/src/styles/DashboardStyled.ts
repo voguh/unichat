@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2024-2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -33,6 +33,14 @@ export const DashboardStyledContainer = styled.div`
             display: flex;
             flex-direction: column;
             gap: 8px;
+
+            > .divider {
+                width: 100%;
+                height: 0;
+                border-bottom: 1px solid var(--mantine-color-gray-1);
+                opacity: 0.25;
+                margin: 8px 0;
+            }
         }
 
         button {
