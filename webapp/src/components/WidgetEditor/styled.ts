@@ -114,13 +114,19 @@ export const WidgetEditorStyledContainer = styled.div`
                     margin-top: 8px;
                 }
 
-                > .mantine-Divider-root {
-                    margin-top: 16px;
-                    margin-bottom: 16px;
-                }
+                &.divider-wrapper {
+                    margin-top: 32px;
+                    margin-bottom: 32px;
 
-                > .mantine-Text-root {
-                    text-align: center;
+                    > .mantine-Divider-root {
+                        margin: 0;
+                        margin-bottom: 8px;
+                    }
+
+                    > .mantine-Text-root {
+                        text-align: center;
+                        font-weight: bolder;
+                    }
                 }
             }
         }

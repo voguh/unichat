@@ -142,7 +142,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         );
                     case "divider":
                         return (
-                            <div key={key}>
+                            <div key={key} className="divider-wrapper">
                                 <Divider />
                                 {builder.label && <Text size="sm">{builder.label}</Text>}
                             </div>
