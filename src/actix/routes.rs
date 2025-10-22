@@ -75,6 +75,10 @@ fn load_fieldstate(widget_path: &PathBuf) -> Result<HashMap<String, serde_json::
     let mut final_fieldstate: HashMap<String, serde_json::Value> = HashMap::new();
 
     for (key, value) in fields_map.iter() {
+        if !value.is_object() {
+            continue;
+        }
+
         if let Some(state_value) = fieldstate_map.get(key) {
             final_fieldstate.insert(key.clone(), state_value.clone());
         } else {
