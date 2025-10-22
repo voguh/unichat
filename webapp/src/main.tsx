@@ -25,8 +25,9 @@ import "@fontsource/roboto-mono/700-italic";
 import React from "react";
 import { createRoot } from "react-dom/client";
 
-import App from "./App";
-import { commandService } from "./services/commandService";
+import App from "unichat/App";
+import { AppContextProvider } from "unichat/contexts/AppContext";
+import { commandService } from "unichat/services/commandService";
 
 commandService.isDev().then((isDev) => {
     if (!isDev) {
@@ -37,4 +38,10 @@ commandService.isDev().then((isDev) => {
 });
 
 const root = createRoot(document.querySelector("#root"));
-root.render(<App />);
+root.render(
+    <React.StrictMode>
+        <AppContextProvider>
+            <App />
+        </AppContextProvider>
+    </React.StrictMode>
+);

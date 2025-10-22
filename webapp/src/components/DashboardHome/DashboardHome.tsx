@@ -18,7 +18,7 @@ import { commandService } from "unichat/services/commandService";
 import { WIDGET_URL_PREFIX } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
 
-import { ScrapperCard } from "./ScrapperCard/ScrapperCard";
+import { ScrapperCard } from "./ScrapperCard";
 import { DashboardHomeStyledContainer } from "./styled";
 
 export function DashboardHome(): React.ReactNode {
