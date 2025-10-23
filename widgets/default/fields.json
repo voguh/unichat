@@ -1,5 +1,5 @@
 {
-    "$schema": "https://raw.githubusercontent.com/voguh/unichat/refs/heads/feature/widget-editor/widgets/fields-schema.json",
+    "$schema": "https://raw.githubusercontent.com/voguh/unichat/refs/tags/1.3.0/widgets/fields-schema.json",
     "checkboxProperty": {
         "type": "checkbox",
         "label": "I'm a checkbox",
