@@ -132,8 +132,8 @@ export const WidgetEditorStyledContainer = styled.div`
                     > .mantine-Accordion-panel {
                         > .mantine-Accordion-content {
                             > div {
-                                &:not(:last-child) {
-                                    margin-bottom: 8px;
+                                &:not(:first-child) {
+                                    margin-top: 8px;
                                 }
 
                                 &.divider-wrapper {
@@ -142,10 +142,10 @@ export const WidgetEditorStyledContainer = styled.div`
 
                                     > .mantine-Divider-root {
                                         margin: 0;
-                                        margin-bottom: 8px;
                                     }
 
                                     > .mantine-Text-root {
+                                        margin-top: 8px;
                                         text-align: center;
                                         font-weight: bolder;
                                     }
