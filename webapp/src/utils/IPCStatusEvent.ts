@@ -11,13 +11,6 @@ export enum IPCEvents {
     STATUS_EVENT = "unichat://status:event"
 }
 
-export const EVENT_DESCRIPTION: Record<IPCStatusEvent["type"], string> = {
-    idle: "The chat scrapper is idle.",
-    ready: "The chat scrapper is ready to use.",
-    ping: "The chat scrapper is working.",
-    error: "The chat scrapper is not responding or has encountered an error."
-};
-
 export interface IPCStatusIdleEvent {
     type: "idle";
     platform: "youtube" | "twitch";

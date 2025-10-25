@@ -25,7 +25,7 @@ import { commandService } from "unichat/services/commandService";
 import { loggerService } from "unichat/services/loggerService";
 import { storageService } from "unichat/services/storageService";
 import { TWITCH_CHANNEL_NAME_KEY, YOUTUBE_VIDEO_ID_KEY } from "unichat/utils/constants";
-import { EVENT_DESCRIPTION as STATUS_EVENT_DESCRIPTION, IPCEvents, IPCStatusEvent } from "unichat/utils/IPCStatusEvent";
+import { IPCEvents, IPCStatusEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
 
 import { ScrapperCardStyledContainer } from "./styled";
@@ -44,7 +44,7 @@ const DEFAULT_STATUS_EVENT: IPCStatusEvent = {
 
 export function ScrapperCard({ type, validateUrl, editingTooltip }: Props): React.ReactNode {
     const displayName = type === "youtube" ? "YouTube" : "Twitch";
-    const [loading, setLoading] = React.useState(true);
+    const [loading, setLoading] = React.useState(false);
     const [event, setEvent] = React.useState<IPCStatusEvent>({ ...DEFAULT_STATUS_EVENT, platform: type });
     const [currentActiveUrl, setCurrentActiveUrl] = React.useState("about:blank");
     const [error, setError] = React.useState<string>(null);
@@ -131,11 +131,11 @@ export function ScrapperCard({ type, validateUrl, editingTooltip }: Props): Reac
     function handleStatusLabel(): string {
         if (error != null) {
             return "Error";
-        } else if (loading || (inputRef.current?.value === currentActiveUrl && event.type !== "ping")) {
+        } else if (loading) {
             return "Starting";
-        } else if (inputRef.current?.value === currentActiveUrl && event.type === "ping") {
+        } else if (inputRef.current?.value === currentActiveUrl) {
             return "Stop";
-        } else if (event.type === "idle") {
+        } else if (inputRef.current?.value !== currentActiveUrl) {
             return "Start";
         }
 
@@ -145,11 +145,11 @@ export function ScrapperCard({ type, validateUrl, editingTooltip }: Props): Reac
     function handleStatusIcon(): React.ReactNode {
         if (error != null) {
             return <IconX size="20" />;
-        } else if (loading || (inputRef.current?.value === currentActiveUrl && event.type !== "ping")) {
+        } else if (loading) {
             return <IconLoader size="20" />;
-        } else if (inputRef.current?.value === currentActiveUrl && event.type === "ping") {
+        } else if (inputRef.current?.value === currentActiveUrl) {
             return <IconPlayerStop size="20" />;
-        } else if (event.type === "idle") {
+        } else if (inputRef.current?.value !== currentActiveUrl) {
             return <IconPlayerPlay size="20" />;
         }
 
@@ -234,23 +234,21 @@ export function ScrapperCard({ type, validateUrl, editingTooltip }: Props): Reac
                         label={`Scrapper: ${displayName} chat URL`}
                         placeholder={handlePlaceholderMessage()}
                         ref={inputRef}
-                        disabled={loading || inputRef.current?.value === currentActiveUrl}
+                        disabled={loading}
                         onChange={() => error != null && setError(null)}
                         data-tour={`${type}-chat-url-input`}
                     />
                 </Tooltip>
-                <Tooltip position="left" label={STATUS_EVENT_DESCRIPTION[event.type]}>
-                    <Button
-                        size="sm"
-                        color="gray"
-                        leftSection={handleStatusIcon()}
-                        onClick={inputRef.current?.value === currentActiveUrl ? handleStop : handleStart}
-                        disabled={loading || (inputRef.current?.value === currentActiveUrl && event.type !== "ping")}
-                    >
-                        {handleStatusLabel()}
-                    </Button>
-                </Tooltip>
-                {inputRef.current?.value === currentActiveUrl && event.type !== "idle" && (
+                <Button
+                    size="sm"
+                    color="gray"
+                    leftSection={handleStatusIcon()}
+                    onClick={inputRef.current?.value === currentActiveUrl ? handleStop : handleStart}
+                    disabled={loading}
+                >
+                    {handleStatusLabel()}
+                </Button>
+                {inputRef.current?.value === currentActiveUrl && (
                     <Button size="sm" onClick={handleOpenPopout}>
                         {handleOpenChatPopoutIcon()}
                     </Button>
