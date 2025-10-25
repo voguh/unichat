@@ -9,3 +9,4 @@
 /webapp/coverage
 /webapp/dist
 /webapp/node_modules
+/widgets/*/fieldstate.json
