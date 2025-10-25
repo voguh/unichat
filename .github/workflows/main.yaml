@@ -387,7 +387,7 @@ jobs:
           TAG_NAME="${GITHUB_REF#refs/tags/}"
           echo "Creating GitHub Release for tag $TAG_NAME"
           echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
-          gh release create "$TAG_NAME" --draft=true
+          gh release create "$TAG_NAME" --prerelease
 
       - name: Upload to GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
