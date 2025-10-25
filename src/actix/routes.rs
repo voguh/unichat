@@ -66,10 +66,12 @@ fn get_widget_dir(widget_name: &str) -> Option<PathBuf> {
 }
 
 fn load_fieldstate(widget_path: &PathBuf) -> Result<HashMap<String, serde_json::Value>, Box<dyn std::error::Error>> {
-    let fields_raw = fs::read_to_string(widget_path.join("fields.json"))?;
+    let fields_path = widget_path.join("fields.json");
+    let fields_raw = fs::read_to_string(fields_path).unwrap_or(String::from("{}"));
     let fields_map: HashMap<String, serde_json::Value> = serde_json::from_str(&fields_raw)?;
 
-    let fieldstate_raw = fs::read_to_string(widget_path.join("fieldstate.json"))?;
+    let fieldstate_path = widget_path.join("fieldstate.json");
+    let fieldstate_raw = fs::read_to_string(fieldstate_path).unwrap_or(String::from("{}"));
     let fieldstate_map: HashMap<String, serde_json::Value> = serde_json::from_str(&fieldstate_raw)?;
 
     let mut final_fieldstate: HashMap<String, serde_json::Value> = HashMap::new();
