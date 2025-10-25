@@ -290,8 +290,8 @@ pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
     }
 
     let fieldstate_path = user_widgets_dir.join(&widget).join("fieldstate.json");
-    if !fieldstate_path.is_file() {
-        return Err("Widget fieldstate file does not exist".into());
+    if fieldstate_path.exists() && !fieldstate_path.is_file() {
+        return Err("Widget fieldstate path is not a file".into());
     }
 
     return fs::write(&fieldstate_path, data).map_err(|e| parse_fs_error(e, &fieldstate_path));
