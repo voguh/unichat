@@ -140,8 +140,20 @@ export function DashboardHome(): React.ReactNode {
 
     /* ====================================================================== */
 
-    async function reloadIframe(): Promise<void> {
+    async function handleFetchWidgets(): Promise<ComboboxData> {
         const widgets = await commandService.listWidgets();
+
+        return widgets.map((groupItem) => ({
+            group: groupItem.group,
+            items: groupItem.items
+                .filter((item) => item !== "example")
+                .map((item) => `${WIDGET_URL_PREFIX}/${item}`)
+                .sort((a, b) => a.localeCompare(b))
+        }));
+    }
+
+    async function reloadIframe(): Promise<void> {
+        const widgets = await handleFetchWidgets();
         setWidgets(widgets);
 
         if (iframeRef.current) {
@@ -151,7 +163,7 @@ export function DashboardHome(): React.ReactNode {
 
     React.useEffect(() => {
         async function init(): Promise<void> {
-            const widgets = await commandService.listWidgets();
+            const widgets = await handleFetchWidgets();
             setWidgets(widgets);
         }
 
@@ -179,10 +191,7 @@ export function DashboardHome(): React.ReactNode {
                             <div className="preview-header-widget-selector">
                                 <Select
                                     value={selectedWidgetUrl}
-                                    data={widgets.map((group) => ({
-                                        ...group,
-                                        items: group.items.map((item) => `${WIDGET_URL_PREFIX}/${item}`)
-                                    }))}
+                                    data={widgets}
                                     onChange={setSelectedWidgetUrl}
                                     data-tour="widgets-selector"
                                 />
