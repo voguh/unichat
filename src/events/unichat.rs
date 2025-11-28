@@ -61,6 +61,9 @@ pub enum UniChatEvent {
 
 pub const UNICHAT_FLAG_YOUTUBE_SUPER_STICKER: &str = "unichat:youtube_super_sticker";
 
+pub const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_BACKGROUND_COLOR: &str = "unichat:youtube_superchat_background_color";
+pub const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_TEXT_COLOR: &str = "unichat:youtube_superchat_text_color";
+
 /* <============================================================================================> */
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

@@ -12,11 +12,14 @@ use std::collections::HashMap;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_BACKGROUND_COLOR;
+use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_TEXT_COLOR;
 use crate::events::unichat::UniChatDonateEventPayload;
 use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UNICHAT_EVENT_DONATE_TYPE;
+use crate::utils;
 use crate::utils::normalize_value;
 use crate::utils::parse_serde_error;
 use crate::utils::properties;
@@ -46,6 +49,10 @@ struct LiveChatPaidMessageRenderer {
 
     purchase_amount_text: PurchaseAmountText,
     message: Option<MessageRunsWrapper>,
+
+    // ARGB background color
+    header_background_color: u32,
+    header_text_color: u32,
 
     timestamp_usec: String
 }
@@ -89,8 +96,20 @@ fn build_option_emotes(message: &Option<MessageRunsWrapper>) -> Result<Vec<UniCh
     return Ok(Vec::new());
 }
 
+fn create_flags_map(parsed: & LiveChatPaidMessageRenderer) -> HashMap<String, Option<String>> {
+    let mut flags = HashMap::new();
+
+    let (r_bg, g_bg, b_bg, a_bg) = utils::parse_u32_to_rgba(parsed.header_background_color);
+    flags.insert(UNICHAT_FLAG_YOUTUBE_SUPERCHAT_BACKGROUND_COLOR.to_string(), Some(format!("rgba({}, {}, {}, {:.3})", r_bg, g_bg, b_bg, a_bg)));
+    let (r_text, g_text, b_text, a_text) = utils::parse_u32_to_rgba(parsed.header_text_color);
+    flags.insert(UNICHAT_FLAG_YOUTUBE_SUPERCHAT_TEXT_COLOR.to_string(), Some(format!("rgba({}, {}, {}, {:.3})", r_text, g_text, b_text, a_text)));
+
+    return flags;
+}
+
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
     let parsed: LiveChatPaidMessageRenderer = serde_json::from_value(value).map_err(parse_serde_error)?;
+    let flags = create_flags_map(&parsed);
     let author_username = parse_author_username(&parsed.author_name)?;
     let author_name = parse_author_name(&parsed.author_name)?;
     let author_color = parse_author_color(&author_name)?;
@@ -102,6 +121,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let emotes = build_option_emotes(&parsed.message)?;
     let timestamp_usec = parsed.timestamp_usec.parse::<i64>()?;
 
+
     let event = UniChatEvent::Donate {
         event_type: String::from(UNICHAT_EVENT_DONATE_TYPE),
         data: UniChatDonateEventPayload {
@@ -109,7 +129,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             channel_name: None,
 
             platform: UniChatPlatform::YouTube,
-            flags: HashMap::new(),
+            flags: flags,
 
             author_id: parsed.author_external_channel_id,
             author_username: author_username,

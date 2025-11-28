@@ -15,6 +15,15 @@ pub mod render_emitter;
 pub mod settings;
 pub mod ureq;
 
+pub fn parse_u32_to_rgba(color: u32) -> (u8, u8, u8, f32) {
+    let a = ((color >> 24) & 0xFF) as u8;
+    let r = ((color >> 16) & 0xFF) as u8;
+    let g = ((color >> 8) & 0xFF) as u8;
+    let b = (color & 0xFF) as u8;
+
+    return (r, g, b, a as f32 / 255.0);
+}
+
 pub fn is_dev() -> bool {
     return cfg!(debug_assertions) || tauri::is_dev();
 }
