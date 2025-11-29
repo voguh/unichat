@@ -21,6 +21,30 @@ const DUMMY_YOUTUBE_CHANNEL_ID = "UCBR8-60-B28hp2BmDPdntcQ";
 const DUMMY_TWITCH_CHANNEL_ID = "12826";
 const DUMMY_TWITCH_CHANNEL_NAME = "Twitch";
 
+function fakeSuperChatTier(ytValue: string, platform: UniChatPlatform): number | undefined {
+    if (platform === "youtube") {
+        const value = parseFloat(ytValue);
+
+        if (value >= 100) {
+            return 7;
+        } else if (value >= 50) {
+            return 6;
+        } else if (value >= 20) {
+            return 5;
+        } else if (value >= 10) {
+            return 4;
+        } else if (value >= 5) {
+            return 3;
+        } else if (value >= 2) {
+            return 2;
+        } else if (value >= 1) {
+            return 1;
+        }
+    }
+
+    return undefined;
+}
+
 export async function buildEmulatedEventData<T extends UniChatEvent>(
     eventType: T["type"],
     requirePlatform: UniChatPlatform
@@ -72,14 +96,17 @@ export async function buildEmulatedEventData<T extends UniChatEvent>(
             break;
         }
         case "unichat:donate": {
+            const ytValue = (Math.random() * 500 + 1).toFixed(2);
+            const twitchValue = Math.floor(Math.random() * 10000) + 100;
+            const value = Number(platform === "youtube" ? ytValue : twitchValue);
+
             data = {
                 ...data,
+                flags: {
+                    "unichat:youtube_superchat_tier": fakeSuperChatTier(ytValue, platform)
+                },
 
-                value: Number(
-                    platform === "youtube"
-                        ? (Math.random() * 500 + 1).toFixed(2)
-                        : Math.floor(Math.random() * 10000) + 100
-                ),
+                value: value,
                 currency: platform === "youtube" ? "$" : "Bits",
 
                 messageId: crypto.randomUUID(),
