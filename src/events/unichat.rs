@@ -61,8 +61,11 @@ pub enum UniChatEvent {
 
 pub const UNICHAT_FLAG_YOUTUBE_SUPER_STICKER: &str = "unichat:youtube_super_sticker";
 
-pub const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_BACKGROUND_COLOR: &str = "unichat:youtube_superchat_background_color";
-pub const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_TEXT_COLOR: &str = "unichat:youtube_superchat_text_color";
+pub const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_HEADER_BACKGROUND_COLOR: &str = "unichat:youtube_superchat_header_background_color";
+pub const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_HEADER_TEXT_COLOR: &str = "unichat:youtube_superchat_header_text_color";
+
+pub const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_BODY_BACKGROUND_COLOR: &str = "unichat:youtube_superchat_body_background_color";
+pub const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_BODY_TEXT_COLOR: &str = "unichat:youtube_superchat_body_text_color";
 
 /* <============================================================================================> */
 
