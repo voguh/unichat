@@ -12,10 +12,11 @@ use std::collections::HashMap;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_BODY_BACKGROUND_COLOR;
-use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_BODY_TEXT_COLOR;
-use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_HEADER_BACKGROUND_COLOR;
-use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_HEADER_TEXT_COLOR;
+use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_PRIMARY_BACKGROUND_COLOR;
+use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_PRIMARY_TEXT_COLOR;
+use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_SECONDARY_BACKGROUND_COLOR;
+use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_SECONDARY_TEXT_COLOR;
+use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_TIER;
 use crate::events::unichat::UniChatDonateEventPayload;
 use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
@@ -38,6 +39,7 @@ use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
 use crate::youtube::mapper::structs::message::parse_message_emojis;
 use crate::youtube::mapper::structs::message::parse_message_string;
 use crate::youtube::mapper::structs::message::MessageRunsWrapper;
+use crate::youtube::mapper::structs::message::parse_super_chat_tier;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -105,31 +107,36 @@ fn create_flags_map(parsed: & LiveChatPaidMessageRenderer) -> HashMap<String, Op
 
     /* ====================================================================== */
 
-    if let Some(header_background_color) = parsed.header_background_color {
-        let (r, g, b, a) = utils::parse_u32_to_rgba(header_background_color);
-        let rgba = format!("rgba({}, {}, {}, {:.3})", r, g, b, a);
-        flags.insert(UNICHAT_FLAG_YOUTUBE_SUPERCHAT_HEADER_BACKGROUND_COLOR.to_string(), Some(rgba));
-    }
-
-    if let Some(header_text_color) = parsed.header_text_color {
-        let (r, g, b, a) = utils::parse_u32_to_rgba(header_text_color);
-        let rgba = format!("rgba({}, {}, {}, {:.3})", r, g, b, a);
-        flags.insert(UNICHAT_FLAG_YOUTUBE_SUPERCHAT_HEADER_TEXT_COLOR.to_string(), Some(rgba));
-    }
-
-    /* ====================================================================== */
-
     if let Some(body_background_color) = parsed.body_background_color {
         let (r, g, b, a) = utils::parse_u32_to_rgba(body_background_color);
         let rgba = format!("rgba({}, {}, {}, {:.3})", r, g, b, a);
-        flags.insert(UNICHAT_FLAG_YOUTUBE_SUPERCHAT_BODY_BACKGROUND_COLOR.to_string(), Some(rgba));
+        flags.insert(UNICHAT_FLAG_YOUTUBE_SUPERCHAT_PRIMARY_BACKGROUND_COLOR.to_string(), Some(rgba.clone()));
+
+        let tier = parse_super_chat_tier(&rgba);
+        flags.insert(UNICHAT_FLAG_YOUTUBE_SUPERCHAT_TIER.to_string(), tier.map(|t| t.to_string()));
     }
 
     if let Some(body_text_color) = parsed.body_text_color {
         let (r, g, b, a) = utils::parse_u32_to_rgba(body_text_color);
         let rgba = format!("rgba({}, {}, {}, {:.3})", r, g, b, a);
-        flags.insert(UNICHAT_FLAG_YOUTUBE_SUPERCHAT_BODY_TEXT_COLOR.to_string(), Some(rgba));
+        flags.insert(UNICHAT_FLAG_YOUTUBE_SUPERCHAT_PRIMARY_TEXT_COLOR.to_string(), Some(rgba));
     }
+
+    /* ====================================================================== */
+
+    if let Some(header_background_color) = parsed.header_background_color {
+        let (r, g, b, a) = utils::parse_u32_to_rgba(header_background_color);
+        let rgba = format!("rgba({}, {}, {}, {:.3})", r, g, b, a);
+        flags.insert(UNICHAT_FLAG_YOUTUBE_SUPERCHAT_SECONDARY_BACKGROUND_COLOR.to_string(), Some(rgba));
+    }
+
+    if let Some(header_text_color) = parsed.header_text_color {
+        let (r, g, b, a) = utils::parse_u32_to_rgba(header_text_color);
+        let rgba = format!("rgba({}, {}, {}, {:.3})", r, g, b, a);
+        flags.insert(UNICHAT_FLAG_YOUTUBE_SUPERCHAT_SECONDARY_TEXT_COLOR.to_string(), Some(rgba));
+    }
+
+    /* ====================================================================== */
 
     return flags;
 }

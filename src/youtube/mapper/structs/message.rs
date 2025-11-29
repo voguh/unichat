@@ -59,6 +59,26 @@ pub type FontBaseEmojiThumbnailsWrapper = ThumbnailsWrapper;
 
 /* <================================================================================================================> */
 
+pub fn parse_super_chat_tier(primary_superchat_background_color: &str) -> Option<u8> {
+    if primary_superchat_background_color.contains("230, 33, 23") {
+        return Some(7);
+    } else if primary_superchat_background_color.contains("233, 30, 99") {
+        return Some(6);
+    } else if primary_superchat_background_color.contains("245, 124, 0") {
+        return Some(5);
+    } else if primary_superchat_background_color.contains("255, 202, 40") {
+        return Some(4);
+    } else if primary_superchat_background_color.contains("29, 233, 182") {
+        return Some(3);
+    } else if primary_superchat_background_color.contains("0, 229, 255") {
+        return Some(2);
+    } else if primary_superchat_background_color.contains("30, 136, 229") {
+        return Some(1);
+    } else {
+        return None;
+    }
+}
+
 pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
     let mut emotes = Vec::new();
 
