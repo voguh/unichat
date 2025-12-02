@@ -266,16 +266,16 @@ fn main() {
 
     if !target_gen_dir.exists() {
         if let Err(err) = fs::create_dir_all(&target_gen_dir) {
-            panic!("Failed to create target gen directory: {}", err);
+            panic!("Failed to create target gen directory: {:?}", err);
         }
     }
 
     if let Err(err) = generate_resources(&target_gen_dir) {
-        panic!("Failed to generate resources: {}", err);
+        panic!("Failed to generate resources: {:?}", err);
     }
 
     if let Err(err) = generate_third_party_licenses(&target_gen_dir) {
-        panic!("Failed to generate third party licenses: {}", err);
+        panic!("Failed to generate third party licenses: {:?}", err);
     }
 
     tauri_build::build();
