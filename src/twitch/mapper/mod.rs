@@ -15,13 +15,14 @@ mod privmsg;
 mod raw_clearchat;
 mod raw_clearmsg;
 mod raw_usernotice;
+mod ws_reward_redemption;
 pub mod structs;
 
 fn parse_channel_name(channel: &String) -> String {
     return channel.replace("#", "");
 }
 
-pub fn parse(message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+pub fn parse_irc(message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
     if let Command::PRIVMSG(channel, text) = &message.command {
         let channel_name = parse_channel_name(channel);
         return privmsg::parse(channel_name, text.to_owned(), message);
@@ -36,6 +37,14 @@ pub fn parse(message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::err
         } else if cmd == "USERNOTICE" {
             return raw_usernotice::parse(channel_name, message);
         }
+    }
+
+    return Ok(None);
+}
+
+pub fn parse_ws(message: &serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+    if let Some(reward_redemption) = message.get("rewardRedemption") {
+        return ws_reward_redemption::parse(reward_redemption.clone());
     }
 
     return Ok(None);

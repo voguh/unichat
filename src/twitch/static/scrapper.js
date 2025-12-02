@@ -97,6 +97,49 @@ async function uniChatHandleFetchBadgesAndCheermotes() {
     }
 }
 
+/* ================================================================================================================== */
+
+async function uniChatHandleRewardRedemption(payload) {
+    const redemption = payload.redemption;
+    await uniChatDispatchEvent({ type: "redemption", rewardRedemption: redemption })
+}
+
+async function uniChatHandlePubSubNotification(pubsub) {
+    if (pubsub.type === "reward-redeemed") {
+        await uniChatHandleRewardRedemption(pubsub.data);
+    }
+}
+
+async function uniChatHandleNotification(notification) {
+    if (notification.type === "pubsub") {
+        await uniChatHandlePubSubNotification(JSON.parse(notification.pubsub));
+    }
+}
+
+function uniChatWebSocketInterceptor() {
+    const OriginalWebSocket = window.WebSocket;
+
+    window.WebSocket = function (...args) {
+        const ws = new OriginalWebSocket(...args);
+
+        ws.addEventListener("message", async function (event) {
+            try {
+                const data = event.data;
+
+                if (data.type === "notification") {
+                    await uniChatHandleNotification(data.notification);
+                }
+            } catch (err) {
+                // Ignore errors
+            }
+        });
+
+        return ws;
+    }
+}
+
+/* ================================================================================================================== */
+
 function uniChatInit() {
     try {
         // Prevent right-click context menu in production
@@ -114,6 +157,7 @@ function uniChatInit() {
 
         /* ====================================================================================================== */
 
+        uniChatWebSocketInterceptor();
         uniChatHandleFetchBadgesAndCheermotes()
         Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
         window.__TAURI_PLUGIN_LOG__.info("Fetch wrapped!");
