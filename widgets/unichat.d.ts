@@ -21,7 +21,7 @@ export interface UniChatBadge {
     url: string;
 }
 
-export type UniChatEvent = UniChatEventClear | UniChatEventRemoveMessage | UniChatEventRemoveAuthor | UniChatEventMessage | UniChatEventRaid | UniChatEventSponsor | UniChatEventSponsorGift | UniChatEventDonate;
+export type UniChatEvent = UniChatEventClear | UniChatEventRemoveMessage | UniChatEventRemoveAuthor | UniChatEventMessage | UniChatEventRaid | UniChatEventSponsor | UniChatEventSponsorGift | UniChatEventDonate | UniChatEventRedemption;
 
 /* <============================================================================================> */
 
@@ -43,9 +43,7 @@ export interface UniChatEventRemoveMessage {
         channelId: string;
         /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
-
         platform: UniChatPlatform;
-        flags: Record<string, string | null>;
 
         messageId: string;
 
@@ -61,9 +59,7 @@ export interface UniChatEventRemoveAuthor {
         channelId: string;
         /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
-
         platform: UniChatPlatform;
-        flags: Record<string, string | null>;
 
         authorId: string;
 
@@ -156,7 +152,8 @@ export interface UniChatEventSponsor {
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
 
-        tier: string;
+        /** **Disclaimer:** On YouTube, this field could be null. */
+        tier: string | null;
         months: number;
 
         messageId: string;
@@ -190,6 +187,7 @@ export interface UniChatEventSponsorGift {
         authorType: UniChatAuthorType;
 
         messageId: string;
+        /** **Disclaimer:** On YouTube, this field could be null. */
         tier: string | null;
         count: number;
 
@@ -227,4 +225,41 @@ export interface UniChatEventRaid {
 
         timestamp: number;
     };
+}
+
+/* <============================================================================================> */
+
+/** **Disclaimer:** This event is exclusive for Twitch */
+export interface UniChatEventRedemption {
+    type: "unichat:redemption";
+    data: {
+        channelId: string;
+        /** **Disclaimer:** This field is always null. */
+        channelName: string | null;
+
+        platform: UniChatPlatform;
+        flags: Record<string, string | null>;
+
+        authorId: string;
+        /** **Disclaimer:** On YouTube, this field is null when name doesn't starts with `@`. */
+        authorUsername: string | null;
+        authorDisplayName: string;
+        authorDisplayColor: string;
+        /** **Disclaimer:** On Twitch, this field is always null. */
+        authorProfilePictureUrl: string | null;
+        /** **Disclaimer:** On Twitch, this field is an empty list. */
+        authorBadges: UniChatBadge[];
+        /** **Disclaimer:** On Twitch, this field is always null. */
+        authorType: UniChatAuthorType | null;
+
+        redemptionId: string;
+        redemptionUserInput: string | null;
+        rewardId: string;
+        rewardTitle: string;
+        rewardDescription: string | null;
+        rewardCost: number;
+        rewardIconUrl: string;
+
+        timestamp: number;
+    }
 }

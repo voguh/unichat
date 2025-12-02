@@ -54,6 +54,11 @@ pub enum UniChatEvent {
         #[serde(rename = "type")]
         event_type: String,
         data: UniChatDonateEventPayload
+    },
+    Redemption {
+        #[serde(rename = "type")]
+        event_type: String,
+        data: UniChatRedemptionEventPayload
     }
 }
 
@@ -176,27 +181,31 @@ pub struct UniChatMessageEventPayload {
 
 /* <============================================================================================> */
 
-pub const UNICHAT_EVENT_RAID_TYPE: &str = "unichat:raid";
+pub const UNICHAT_EVENT_DONATE_TYPE: &str = "unichat:donate";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct UniChatRaidEventPayload {
+pub struct UniChatDonateEventPayload {
     pub channel_id: String,
     pub channel_name: Option<String>,
 
     pub platform: UniChatPlatform,
     pub flags: HashMap<String, Option<String>>,
 
-    pub author_id: Option<String>,
+    pub author_id: String,
     pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_display_color: String,
-    pub author_profile_picture_url: String,
+    pub author_profile_picture_url: Option<String>,
     pub author_badges: Vec<UniChatBadge>,
-    pub author_type: Option<UniChatAuthorType>,
+    pub author_type: UniChatAuthorType,
+
+    pub value: f32,
+    pub currency: String,
 
     pub message_id: String,
-    pub viewer_count: Option<u16>,
+    pub message_text: Option<String>,
+    pub emotes: Vec<UniChatEmote>,
 
     pub timestamp: i64
 }
@@ -262,11 +271,38 @@ pub struct UniChatSponsorGiftEventPayload {
 
 /* <============================================================================================> */
 
-pub const UNICHAT_EVENT_DONATE_TYPE: &str = "unichat:donate";
+pub const UNICHAT_EVENT_RAID_TYPE: &str = "unichat:raid";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct UniChatDonateEventPayload {
+pub struct UniChatRaidEventPayload {
+    pub channel_id: String,
+    pub channel_name: Option<String>,
+
+    pub platform: UniChatPlatform,
+    pub flags: HashMap<String, Option<String>>,
+
+    pub author_id: Option<String>,
+    pub author_username: Option<String>,
+    pub author_display_name: String,
+    pub author_display_color: String,
+    pub author_profile_picture_url: String,
+    pub author_badges: Vec<UniChatBadge>,
+    pub author_type: Option<UniChatAuthorType>,
+
+    pub message_id: String,
+    pub viewer_count: Option<u16>,
+
+    pub timestamp: i64
+}
+
+/* <============================================================================================> */
+
+pub const UNICHAT_EVENT_REDEMPTION_TYPE: &str = "unichat:redemption";
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UniChatRedemptionEventPayload {
     pub channel_id: String,
     pub channel_name: Option<String>,
 
@@ -279,14 +315,15 @@ pub struct UniChatDonateEventPayload {
     pub author_display_color: String,
     pub author_profile_picture_url: Option<String>,
     pub author_badges: Vec<UniChatBadge>,
-    pub author_type: UniChatAuthorType,
+    pub author_type: Option<UniChatAuthorType>,
 
-    pub value: f32,
-    pub currency: String,
-
-    pub message_id: String,
-    pub message_text: Option<String>,
-    pub emotes: Vec<UniChatEmote>,
+    pub redemption_id: String,
+    pub redemption_user_input: Option<String>,
+    pub reward_id: String,
+    pub reward_title: String,
+    pub reward_description: Option<String>,
+    pub reward_cost: u32,
+    pub reward_icon_url: String,
 
     pub timestamp: i64
 }
