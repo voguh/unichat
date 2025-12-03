@@ -182,7 +182,7 @@ export async function buildEmulatedEventData<T extends UniChatEvent>(
                 rewardCost: Math.floor(Math.random() * 10000 + 100),
                 rewardIconUrl: "https://static-cdn.jtvnw.net/custom-reward-images/tree-4.png",
 
-                redemptionId: crypto.randomUUID(),
+                messageId: crypto.randomUUID(),
                 messageText: withMessage ? messageText : null,
                 emotes: withMessage ? emotes : []
             };

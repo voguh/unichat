@@ -31,11 +31,11 @@ static REDEMPTION_MESSAGE_EVENT_CACHE: LazyLock<Mutex<HashMap<String, HashMap<St
 
 fn merge_redemption_events(redemption_event: UniChatRedemptionEventPayload, message_event: UniChatMessageEventPayload) -> UniChatRedemptionEventPayload {
     return UniChatRedemptionEventPayload {
-        channel_id: redemption_event.channel_id,
-        channel_name: redemption_event.channel_name,
+        channel_id: message_event.channel_id,
+        channel_name: message_event.channel_name,
 
-        platform: redemption_event.platform,
-        flags: redemption_event.flags,
+        platform: message_event.platform,
+        flags: message_event.flags,
 
         author_id: message_event.author_id,
         author_username: message_event.author_username,
@@ -51,7 +51,7 @@ fn merge_redemption_events(redemption_event: UniChatRedemptionEventPayload, mess
         reward_cost: redemption_event.reward_cost,
         reward_icon_url: redemption_event.reward_icon_url,
 
-        redemption_id: redemption_event.redemption_id,
+        message_id: redemption_event.message_id,
         message_text: Some(message_event.message_text),
         emotes: message_event.emotes,
 
@@ -66,7 +66,6 @@ pub fn handle_redemption_event(redemption_event: UniChatRedemptionEventPayload) 
                 return Some(merge_redemption_events(redemption_event, message_event))
             }
         } else {
-            log::info!("Caching redemption event with ID {}", &redemption_event.redemption_id);
             if let Ok(mut redemption_event_cache) = REDEMPTION_EVENT_CACHE.lock() {
                 let reward_redemption_events = redemption_event_cache.entry(redemption_event.reward_id.clone()).or_insert_with(HashMap::new);
                 reward_redemption_events.insert(redemption_event.author_id.clone(), redemption_event);
@@ -84,7 +83,6 @@ pub fn handle_redemption_message_event(reward_id: &str, message_event: UniChatMe
                 return Some(merge_redemption_events(redemption_event, message_event))
             }
         } else {
-            log::info!("Caching redemption message event with ID {}", reward_id);
             if let Ok(mut message_event_cache) = REDEMPTION_MESSAGE_EVENT_CACHE.lock() {
                 let reward_message_events = message_event_cache.entry(reward_id.to_string()).or_insert_with(HashMap::new);
                 reward_message_events.insert(message_event.author_id.clone(), message_event);

@@ -323,7 +323,7 @@ pub struct UniChatRedemptionEventPayload {
     pub reward_cost: u32,
     pub reward_icon_url: String,
 
-    pub redemption_id: String,
+    pub message_id: String,
     pub message_text: Option<String>,
     pub emotes: Vec<UniChatEmote>,
 

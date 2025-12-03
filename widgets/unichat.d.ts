@@ -258,7 +258,7 @@ export interface UniChatEventRedemption {
         rewardCost: number;
         rewardIconUrl: string;
 
-        redemptionId: string;
+        messageId: string;
         messageText: string | null;
         emotes: UniChatEmote[];
 

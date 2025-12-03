@@ -92,7 +92,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
         reward_cost: parsed.reward.cost,
         reward_icon_url: icon_url,
 
-        redemption_id: parsed.id,
+        message_id: parsed.id,
         message_text: parsed.user_input.clone(),
         emotes: Vec::new(),
 

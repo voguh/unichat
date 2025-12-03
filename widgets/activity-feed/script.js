@@ -184,7 +184,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
 
         htmlTemplate = FEED_ITEM_TEMPLATE.replace("{author_id}", data.authorId);
         htmlTemplate = htmlTemplate.replace("{platform}", data.platform);
-        htmlTemplate = htmlTemplate.replace("{message_id}", data.redemptionId);
+        htmlTemplate = htmlTemplate.replace("{message_id}", data.messageId);
         htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data, [data.rewardTitle, "#4263eb"]));
         htmlTemplate = htmlTemplate.replace("{details}", data.authorDisplayName);
         htmlTemplate = htmlTemplate.replace("{timestmap}", (new Date(data.timestamp)).toLocaleString());
