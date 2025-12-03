@@ -163,7 +163,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
     } else {
         let htmlTemplate;
 
-        if (event.type === "unichat:message") {
+        if (event.type === "unichat:message" || (event.type === "unichat:redemption" && event.data.messageText != null)) {
             /** @type {import("../unichat").UniChatEventMessage['data']} */
             const data = event.data;
 
