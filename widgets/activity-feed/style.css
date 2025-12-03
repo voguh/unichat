@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+:root {
+    --emote-size: 28px;
+}
+
+html, body {
+    font-family: "Nunito", sans-serif;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+/* ============================================================================================== */
+
+.badge {
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 10px;
+    background: #2b8a3e;
+    font-weight: bolder;
+    min-width: calc(20px - 8px);
+    height: calc(20px - 8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tooltip {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(calc(-100% - 8px), -50%);
+    background: #212529;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.tooltip::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -8px;
+    transform: translateY(-50%);
+    border-width: 4px;
+    border-style: solid;
+    border-color: transparent transparent transparent #212529;
+}
+
+/* ============================================================================================== */
+
+#main-container {
+    position: absolute;
+    inset: 0;
+    padding: 8px;
+    background: #212529;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+}
+
+#main-container > .feed-item {
+    position: relative;
+    background: #343a40;
+    padding: 8px;
+    border-radius: 4px;
+
+}
+
+#main-container > .feed-item > .feed-item-header {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 4px;
+    color: #f8f9fa;
+}
+
+#main-container > .feed-item > .feed-item-header > .meta {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+}
+
+#main-container > .feed-item > .feed-item-header > .details {
+    flex: 1;
+    font-weight: bold;
+}
+
+#main-container > .feed-item > .feed-item-header > .timestmap {
+    position: relative;
+    font-size: 10px;
+    color: #868e96;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#main-container > .feed-item > .feed-item-header > .timestmap > .timestamp-tooltip {
+    display: none;
+}
+
+#main-container > .feed-item > .feed-item-header > .timestmap:hover > .timestamp-tooltip {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+#main-container > .feed-item > .feed-item-content {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #495057;
+    color: #f8f9fa;
+    gap: 4px;
+}
+
+#main-container > .feed-item > .feed-item-content > img {
+    height: var(--emote-size);
+    vertical-align: middle;
+}
+
+#main-container > .feed-item.no-message > .feed-item-content {
+    display: none;
+}
