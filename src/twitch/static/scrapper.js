@@ -116,26 +116,40 @@ async function uniChatHandleNotification(notification) {
     }
 }
 
+/* ========================================================================== */
+
 function uniChatWebSocketInterceptor() {
     const OriginalWebSocket = window.WebSocket;
 
-    window.WebSocket = function (...args) {
-        const ws = new OriginalWebSocket(...args);
+    window.WebSocket = function (url, protocols) {
+        const wsInstance = protocols ? new OriginalWebSocket(url, protocols) : new OriginalWebSocket(url);
 
-        ws.addEventListener("message", async function (event) {
+        wsInstance.addEventListener("message", async (event) => {
             try {
-                const data = event.data;
+                const data = JSON.parse(event.data);
 
-                if (data.type === "notification") {
-                    await uniChatHandleNotification(data.notification);
+                if (url.startsWith("wss://hermes.twitch.tv/v1")) {
+                    if (data.type === "notification") {
+                        await uniChatHandleNotification(data.notification);
+                    }
+                } else if (url.startsWith("wss://irc-ws.chat.twitch.tv")) {
+                    // IRC WebSocket handling can be added here if needed
                 }
+
             } catch (err) {
-                // Ignore errors
+                console.error("Failed to process WebSocket message:", err);
+                window.__TAURI_PLUGIN_LOG__.error(err);
             }
         });
 
-        return ws;
-    }
+        return wsInstance;
+    };
+
+    window.WebSocket.prototype = OriginalWebSocket.prototype;
+    Object.defineProperty(window.WebSocket, "CONNECTING", { value: OriginalWebSocket.CONNECTING });
+    Object.defineProperty(window.WebSocket, "OPEN", { value: OriginalWebSocket.OPEN });
+    Object.defineProperty(window.WebSocket, "CLOSING", { value: OriginalWebSocket.CLOSING });
+    Object.defineProperty(window.WebSocket, "CLOSED", { value: OriginalWebSocket.CLOSED });
 }
 
 /* ================================================================================================================== */
