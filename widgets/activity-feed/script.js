@@ -172,7 +172,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         if (data.platform === "youtube") {
             htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data, ["RAID", "#7048e8"]));
         } else {
-            htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data, [data.viewerCount, "#7048e8"], ["raiders", "#7048e880"]));
+            htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data, [data.viewerCount, "#7048e8"], ["Raiders", "#7048e880"]));
         }
         htmlTemplate = htmlTemplate.replace("{details}", data.authorDisplayName);
         htmlTemplate = htmlTemplate.replace("{timestmap}", (new Date(data.timestamp)).toLocaleString());
