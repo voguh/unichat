@@ -252,13 +252,15 @@ export interface UniChatEventRedemption {
         /** **Disclaimer:** On Twitch, this field is always null. */
         authorType: UniChatAuthorType | null;
 
-        redemptionId: string;
-        redemptionUserInput: string | null;
         rewardId: string;
         rewardTitle: string;
         rewardDescription: string | null;
         rewardCost: number;
         rewardIconUrl: string;
+
+        redemptionId: string;
+        messageText: string | null;
+        emotes: UniChatEmote[];
 
         timestamp: number;
     }

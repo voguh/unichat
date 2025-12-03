@@ -317,13 +317,15 @@ pub struct UniChatRedemptionEventPayload {
     pub author_badges: Vec<UniChatBadge>,
     pub author_type: Option<UniChatAuthorType>,
 
-    pub redemption_id: String,
-    pub redemption_user_input: Option<String>,
     pub reward_id: String,
     pub reward_title: String,
     pub reward_description: Option<String>,
     pub reward_cost: u32,
     pub reward_icon_url: String,
+
+    pub redemption_id: String,
+    pub message_text: Option<String>,
+    pub emotes: Vec<UniChatEmote>,
 
     pub timestamp: i64
 }

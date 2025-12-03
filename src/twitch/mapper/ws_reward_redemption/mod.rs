@@ -87,13 +87,15 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
             author_badges: Vec::new(),
             author_type: None,
 
-            redemption_id: parsed.id,
-            redemption_user_input: parsed.user_input,
             reward_id: parsed.reward.id,
             reward_title: parsed.reward.title,
             reward_description: parsed.reward.prompt,
             reward_cost: parsed.reward.cost,
             reward_icon_url: icon_url,
+
+            redemption_id: parsed.id,
+            message_text: parsed.user_input.clone(),
+            emotes: Vec::new(),
 
             timestamp: timestamp_usec
         }
