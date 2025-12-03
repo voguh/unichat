@@ -163,6 +163,29 @@ export async function buildEmulatedEventData<T extends UniChatEvent>(
 
                 timestamp: Date.now()
             };
+
+            break;
+        }
+        case "unichat:redemption": {
+            const withMessage = Math.random() < 0.7;
+
+            data = {
+                ...data,
+                channelName: null,
+
+                authorBadges: [],
+                authorType: null,
+
+                rewardId: crypto.randomUUID(),
+                rewardTitle: "Sample Reward",
+                rewardDescription: null,
+                rewardCost: Math.floor(Math.random() * 10000 + 100),
+                rewardIconUrl: "https://static-cdn.jtvnw.net/custom-reward-images/tree-4.png",
+
+                redemptionId: crypto.randomUUID(),
+                messageText: withMessage ? messageText : null,
+                emotes: withMessage ? emotes : []
+            };
         }
     }
 
