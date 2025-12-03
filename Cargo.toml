@@ -37,5 +37,6 @@ tauri = { version = "2.8.5", features = ["native-tls"] }
 tauri-plugin-log = "2.7.0"
 tauri-plugin-opener = "2.5.0"
 tauri-plugin-store = "2.4.0"
+time = "0.3.44"
 tokio = { version = "1.48.0", features = ["full"] }
 ureq = { version = "3.1.2", default-features = false, features = ["json", "native-tls"] }

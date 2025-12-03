@@ -220,6 +220,10 @@ pub async fn get_widget(req: HttpRequest) -> Result<impl Responder, actix_web::E
         content = content.replace("{{WIDGET_SCRIPT}}", &js);
         content = content.replace("{{WIDGET_HTML}}", &html);
 
+        let info = req.connection_info();
+        let base_url = format!("{}://{}/widget/{}/", info.scheme(), info.host(), widget_name);
+        content = content.replace("{{WIDGET_BASE_URL}}", &base_url);
+
         let fieldstate = load_fieldstate(&widget_path).unwrap_or_default();
         for (key, value) in fieldstate.iter() {
             let value_str = serde_plain::to_string(value).map_err(|e| {

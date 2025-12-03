@@ -124,6 +124,7 @@ window.addEventListener("unichat:connected", function () {
 
 window.addEventListener("unichat:event", function ({ detail: event }) {
     let htmlTemplate = null;
+    event.data.timestamp = parseInt(event.data.timestamp, 10) > 1e11 ? parseInt(event.data.timestamp, 10) : parseInt(event.data.timestamp, 10) * 1000;
 
     if (event.type === "unichat:donate") {
         /** @type {import("../unichat").UniChatEventDonate['data']} */
@@ -183,7 +184,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
 
         htmlTemplate = FEED_ITEM_TEMPLATE.replace("{author_id}", data.authorId);
         htmlTemplate = htmlTemplate.replace("{platform}", data.platform);
-        htmlTemplate = htmlTemplate.replace("{message_id}", data.redemptionId);
+        htmlTemplate = htmlTemplate.replace("{message_id}", data.messageId);
         htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data, [data.rewardTitle, "#4263eb"]));
         htmlTemplate = htmlTemplate.replace("{details}", data.authorDisplayName);
         htmlTemplate = htmlTemplate.replace("{timestmap}", (new Date(data.timestamp)).toLocaleString());

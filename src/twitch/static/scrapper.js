@@ -97,6 +97,63 @@ async function uniChatHandleFetchBadgesAndCheermotes() {
     }
 }
 
+/* ================================================================================================================== */
+
+async function uniChatHandleRewardRedemption(payload) {
+    const redemption = payload.redemption;
+    await uniChatDispatchEvent({ type: "redemption", rewardRedemption: redemption })
+}
+
+async function uniChatHandlePubSubNotification(pubsub) {
+    if (pubsub.type === "reward-redeemed") {
+        await uniChatHandleRewardRedemption(pubsub.data);
+    }
+}
+
+async function uniChatHandleNotification(notification) {
+    if (notification.type === "pubsub") {
+        await uniChatHandlePubSubNotification(JSON.parse(notification.pubsub));
+    }
+}
+
+/* ========================================================================== */
+
+function uniChatWebSocketInterceptor() {
+    const OriginalWebSocket = window.WebSocket;
+
+    window.WebSocket = function (url, protocols) {
+        const wsInstance = protocols ? new OriginalWebSocket(url, protocols) : new OriginalWebSocket(url);
+
+        wsInstance.addEventListener("message", async (event) => {
+            try {
+                const data = JSON.parse(event.data);
+
+                if (url.startsWith("wss://hermes.twitch.tv/v1")) {
+                    if (data.type === "notification") {
+                        await uniChatHandleNotification(data.notification);
+                    }
+                } else if (url.startsWith("wss://irc-ws.chat.twitch.tv")) {
+                    // IRC WebSocket handling can be added here if needed
+                }
+
+            } catch (err) {
+                console.error("Failed to process WebSocket message:", err);
+                window.__TAURI_PLUGIN_LOG__.error(err);
+            }
+        });
+
+        return wsInstance;
+    };
+
+    window.WebSocket.prototype = OriginalWebSocket.prototype;
+    Object.defineProperty(window.WebSocket, "CONNECTING", { value: OriginalWebSocket.CONNECTING });
+    Object.defineProperty(window.WebSocket, "OPEN", { value: OriginalWebSocket.OPEN });
+    Object.defineProperty(window.WebSocket, "CLOSING", { value: OriginalWebSocket.CLOSING });
+    Object.defineProperty(window.WebSocket, "CLOSED", { value: OriginalWebSocket.CLOSED });
+}
+
+/* ================================================================================================================== */
+
 function uniChatInit() {
     try {
         // Prevent right-click context menu in production
@@ -114,6 +171,7 @@ function uniChatInit() {
 
         /* ====================================================================================================== */
 
+        uniChatWebSocketInterceptor();
         uniChatHandleFetchBadgesAndCheermotes()
         Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
         window.__TAURI_PLUGIN_LOG__.info("Fetch wrapped!");

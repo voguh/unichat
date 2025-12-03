@@ -27,6 +27,7 @@ import {
 import { notifications } from "@mantine/notifications";
 import {
     IconAffiliate,
+    IconBox,
     IconCheck,
     IconEraser,
     IconMessage,
@@ -204,8 +205,13 @@ export function WidgetEditor(_props: Props): React.ReactNode {
 
     /* ====================================================================== */
 
-    function dispatchEmulatedEvent<T extends UniChatEvent>(eventType: T["type"]): void {
-        const requirePlatform = emulationMode === "mixed" ? null : (emulationMode as UniChatPlatform);
+    function dispatchEmulatedEvent<T extends UniChatEvent>(
+        eventType: T["type"],
+        requirePlatform?: UniChatPlatform
+    ): void {
+        if (requirePlatform == null && emulationMode !== "mixed") {
+            requirePlatform = emulationMode as UniChatPlatform;
+        }
 
         buildEmulatedEventData<T>(eventType, requirePlatform).then((data) => {
             if (iframeRef.current && iframeRef.current.contentWindow) {
@@ -439,6 +445,13 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                             onClick={() => dispatchEmulatedEvent("unichat:raid")}
                         >
                             Raid
+                        </Button>
+                        <Button
+                            variant="default"
+                            leftSection={<IconBox size="14" />}
+                            onClick={() => dispatchEmulatedEvent("unichat:redemption", "twitch")}
+                        >
+                            Redemption
                         </Button>
                     </Button.Group>
                 </div>
