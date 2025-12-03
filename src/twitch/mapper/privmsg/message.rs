@@ -11,10 +11,12 @@ use std::collections::HashMap;
 
 use irc::client::prelude::*;
 
+use crate::events::unichat::UNICHAT_EVENT_REDEMPTION_TYPE;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatMessageEventPayload;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UNICHAT_EVENT_MESSAGE_TYPE;
+use crate::twitch::mapper::handle_redemption_message_event;
 use crate::twitch::mapper::structs::author::parse_author_badges;
 use crate::twitch::mapper::structs::author::parse_author_color;
 use crate::twitch::mapper::structs::author::parse_author_name;
@@ -38,30 +40,45 @@ pub fn parse(channel: String, text: String, message: &Message, tags: HashMap<Str
     let timestamp_usec = tags.get("tmi-sent-ts").ok_or("Missing or invalid tmi-sent-ts tag")?;
     let timestamp_usec: i64 = timestamp_usec.parse()?;
 
-    let event = UniChatEvent::Message {
-        event_type: String::from(UNICHAT_EVENT_MESSAGE_TYPE),
-        data: UniChatMessageEventPayload {
-            channel_id: room_id.to_owned(),
-            channel_name: Some(channel),
+    let event_payload = UniChatMessageEventPayload {
+        channel_id: room_id.to_owned(),
+        channel_name: Some(channel),
 
-            platform: UniChatPlatform::Twitch,
-            flags: inject_raw_tags(&tags),
+        platform: UniChatPlatform::Twitch,
+        flags: inject_raw_tags(&tags),
 
-            author_id: author_id.to_owned(),
-            author_username: author_username,
-            author_display_name: author_name,
-            author_display_color: author_color,
-            author_profile_picture_url: None,
-            author_badges: author_badges,
-            author_type: author_type,
+        author_id: author_id.to_owned(),
+        author_username: author_username,
+        author_display_name: author_name,
+        author_display_color: author_color,
+        author_profile_picture_url: None,
+        author_badges: author_badges,
+        author_type: author_type,
 
-            message_id: message_id.to_owned(),
-            message_text: message,
-            emotes: emotes,
+        message_id: message_id.to_owned(),
+        message_text: message,
+        emotes: emotes,
 
-            timestamp: timestamp_usec
-        }
+        timestamp: timestamp_usec
     };
 
-    return Ok(Some(event));
+    if let Some(reward_id) = tags.get("custom-reward-id") {
+        if let Some(redemption_payload) = handle_redemption_message_event(reward_id, event_payload) {
+            let event = UniChatEvent::Redemption {
+                event_type: String::from(UNICHAT_EVENT_REDEMPTION_TYPE),
+                data: redemption_payload
+            };
+
+            return Ok(Some(event));
+        }
+    } else {
+        let event = UniChatEvent::Message {
+            event_type: String::from(UNICHAT_EVENT_MESSAGE_TYPE),
+            data: event_payload
+        };
+
+        return Ok(Some(event));
+    }
+
+    return Ok(None);
 }

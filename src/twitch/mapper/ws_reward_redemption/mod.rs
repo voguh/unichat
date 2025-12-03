@@ -17,6 +17,7 @@ use crate::events::unichat::UNICHAT_EVENT_REDEMPTION_TYPE;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRedemptionEventPayload;
+use crate::twitch::mapper::handle_redemption_event;
 use crate::twitch::mapper::structs::author::parse_author_color;
 use crate::utils::parse_serde_error;
 
@@ -70,36 +71,53 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn s
     let icon_url = parse_reward_icon_url(&parsed.reward)?;
     let timestamp_usec = offset_date_time.unix_timestamp();
 
-    let event = UniChatEvent::Redemption {
-        event_type: String::from(UNICHAT_EVENT_REDEMPTION_TYPE),
-        data: UniChatRedemptionEventPayload {
-            channel_id: parsed.channel_id,
-            channel_name: None,
+    let event_payload = UniChatRedemptionEventPayload {
+        channel_id: parsed.channel_id,
+        channel_name: None,
 
-            platform: UniChatPlatform::Twitch,
-            flags: HashMap::new(),
+        platform: UniChatPlatform::Twitch,
+        flags: HashMap::new(),
 
-            author_id: parsed.user.id,
-            author_username: Some(parsed.user.login),
-            author_display_name: parsed.user.display_name,
-            author_display_color: display_color,
-            author_profile_picture_url: None,
-            author_badges: Vec::new(),
-            author_type: None,
+        author_id: parsed.user.id,
+        author_username: Some(parsed.user.login),
+        author_display_name: parsed.user.display_name,
+        author_display_color: display_color,
+        author_profile_picture_url: None,
+        author_badges: Vec::new(),
+        author_type: None,
 
-            reward_id: parsed.reward.id,
-            reward_title: parsed.reward.title,
-            reward_description: parsed.reward.prompt,
-            reward_cost: parsed.reward.cost,
-            reward_icon_url: icon_url,
+        reward_id: parsed.reward.id,
+        reward_title: parsed.reward.title,
+        reward_description: parsed.reward.prompt,
+        reward_cost: parsed.reward.cost,
+        reward_icon_url: icon_url,
 
-            redemption_id: parsed.id,
-            message_text: parsed.user_input.clone(),
-            emotes: Vec::new(),
+        redemption_id: parsed.id,
+        message_text: parsed.user_input.clone(),
+        emotes: Vec::new(),
 
-            timestamp: timestamp_usec
-        }
+        timestamp: timestamp_usec
     };
 
-    return Ok(Some(event));
+    if parsed.user_input.is_some_and(|ui| !ui.is_empty()) {
+        if let Some(redemption_event) = handle_redemption_event(event_payload) {
+            let event = UniChatEvent::Redemption {
+                event_type: String::from(UNICHAT_EVENT_REDEMPTION_TYPE),
+                data: redemption_event
+            };
+
+            return Ok(Some(event));
+        }
+    } else {
+        let event = UniChatEvent::Redemption {
+            event_type: String::from(UNICHAT_EVENT_REDEMPTION_TYPE),
+            data: event_payload
+        };
+
+        return Ok(Some(event));
+    }
+
+
+
+    return Ok(None);
 }
