@@ -1,0 +1,23 @@
+<div id="main-container"></div>
+
+<script type="text/template" id="feed_item">
+    <div class="feed-item {show_content}" data-from="{author_id}" data-platform="{platform}" data-id="{message_id}">
+        <div class="feed-item-header">
+            <div class="meta">
+                {badges}
+            </div>
+            <span class="details">{details}</span>
+            <span class="timestmap">
+                <div class="timestamp-ago" data-timestamp="{raw_timestamp}">
+                    {timeago}
+                </div>
+                <div class="tooltip timestamp-tooltip">
+                    {timestmap}
+                </div>
+            </span>
+        </div>
+        <div class="feed-item-content">
+            {message_text}
+        </div>
+    </div>
+</script>
