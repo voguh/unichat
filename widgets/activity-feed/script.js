@@ -124,6 +124,7 @@ window.addEventListener("unichat:connected", function () {
 
 window.addEventListener("unichat:event", function ({ detail: event }) {
     let htmlTemplate = null;
+    event.data.timestamp = parseInt(event.data.timestamp, 10) > 1e11 ? parseInt(event.data.timestamp, 10) : parseInt(event.data.timestamp, 10) * 1000;
 
     if (event.type === "unichat:donate") {
         /** @type {import("../unichat").UniChatEventDonate['data']} */
