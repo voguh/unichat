@@ -35,7 +35,7 @@ function parseTierName(platform, tier) {
         return `T${parseInt(tier, 10) / 1000}`;
     }
 
-    return tier;
+    return tier || (platform === "twitch" ? "Subscription" : "Membership");
 }
 
 function buildMessage(message, emotes) {

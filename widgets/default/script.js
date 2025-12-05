@@ -51,7 +51,7 @@ function parseTierName(platform, tier) {
         return parseInt(tier, 10) / 1000
     }
 
-    return tier;
+    return tier || (platform === "twitch" ? "Subscription" : "Membership");
 }
 
 const platformConditionalRegExp = /\{if_platform\(([^)]+)\)::([^:}]*)::([^:{}]*)\}/g;
