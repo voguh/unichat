@@ -50,7 +50,7 @@ fn get_widget_dir(widget_name: &str) -> Option<PathBuf> {
         return None;
     }
 
-    let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidget);
+    let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidgets);
     let system_widget_path = system_widgets_dir.join(widget_name);
     if system_widget_path.exists() {
         return Some(system_widget_path);

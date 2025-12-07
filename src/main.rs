@@ -84,7 +84,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
     /* ========================================================================================== */
 
-    let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidget);
+    let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidgets);
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     if !&user_widgets_dir.exists() {
         fs::create_dir_all(&user_widgets_dir)?;

@@ -191,7 +191,7 @@ pub async fn list_widgets<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
         return Err("An error occurred on iterate over user widgets dir".into());
     }
 
-    let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidget);
+    let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidgets);
     if !system_widgets_dir.is_dir() {
         return Err("An error occurred on iterate over system widgets dir".into());
     }
