@@ -56,7 +56,7 @@ Interested in contributing? Great! Here's the information you need to get starte
 
 **Prerequisites:**
 - Rust v1.87.0;
-- Node.js v22.14.0;
+- Node.js v24.10.0;
 - PNPM v10.7.1;
 - Tauri v2 dependencies for your platform. Follow the [official guide](https://v2.tauri.app/start/prerequisites/);
 - Tauri CLI (You can install it with `cargo install tauri-cli --locked`);

@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '22.14.0'
+  NODE_VERSION: '24.10.0'
   PNPM_VERSION: '10.7.1'
   RUST_VERSION: '1.87.0'
   TAURI_APP_PATH: ${{ github.workspace }}
