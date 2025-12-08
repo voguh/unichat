@@ -1,0 +1,8 @@
+name: plugin-example
+description: This is a example plugin for UniChat.
+version: ${unichat_version}
+author: ${unichat_authors}
+license: ${unichat_license}
+homepage: ${unichat_homepage}
+dependencies:
+  - unichat@[1.4.0-alpha.2,)

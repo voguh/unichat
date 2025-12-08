@@ -36,6 +36,8 @@ pub enum SettingsKeys {
     #[serde(rename = "twitch-channel-name")]
     TwitchChannelName,
 
+    #[serde(rename = "settings.active-plugins")]
+    ActivePlugins,
     #[serde(rename = "settings.prev-tour-steps")]
     PrevTourSteps,
     #[serde(rename = "settings.tour-steps")]
@@ -63,7 +65,9 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     defaults.insert(SettingsKeys::YouTubeVideoId.to_string(), Value::from(""));
     defaults.insert(SettingsKeys::TwitchChannelName.to_string(), Value::from(""));
 
-    let default_tour_steps: Vec<String> = vec![];
+    let default_active_plugins: Vec<String> = Vec::new();
+    defaults.insert(SettingsKeys::ActivePlugins.to_string(), Value::from(default_active_plugins));
+    let default_tour_steps: Vec<String> = Vec::new();
     defaults.insert(SettingsKeys::PrevTourSteps.to_string(), Value::from(default_tour_steps.clone()));
     defaults.insert(SettingsKeys::CurrentTourSteps.to_string(), Value::from(default_tour_steps.clone()));
     defaults.insert(SettingsKeys::LogYouTubeEvents.to_string(), serde_json::to_value(SettingLogEventLevel::OnlyErrors).unwrap());

@@ -28,6 +28,7 @@ include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 mod actix;
 mod commands;
 mod events;
+mod plugins;
 mod shared_emotes;
 mod twitch;
 mod utils;
@@ -81,6 +82,15 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     utils::render_emitter::init(app)?;
     utils::settings::init(app)?;
     youtube::init(app)?;
+
+    /* ========================================================================================== */
+
+    let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
+    if !&user_plugins_dir.exists() {
+        fs::create_dir_all(&user_plugins_dir)?;
+    }
+
+    plugins::init(app)?;
 
     /* ========================================================================================== */
 
