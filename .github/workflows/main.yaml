@@ -375,27 +375,21 @@ jobs:
           cp ${{ github.workspace }}/target/linux/deb/*.deb dist/deb/unichat-$VERSION.deb
           cp ${{ github.workspace }}/target/linux/rpm/*.rpm dist/rpm/unichat-$VERSION.rpm
           cp ${{ github.workspace }}/target/windows/nsis/*.exe dist/nsis/unichat-$VERSION-setup.exe
+          cp ${{ github.workspace }}/target/windows/msi/*.msi dist/msi/unichat-$VERSION.msi
           for folder in dist/*; do
             if [ -d "$folder" ] && [ "$(ls -A "$folder")" ]; then
               (cd "$folder" && for file in ./*; do sha256sum "$file" > "${file}.sha256"; done)
             fi
           done
 
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
-          echo "Creating GitHub Release for tag $TAG_NAME"
-          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
-          gh release create "$TAG_NAME" --prerelease
-
-      - name: Upload to GitHub Release
+      - name: Create and upload to GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           TAG_NAME="${GITHUB_REF#refs/tags/}"
           if [ -n "$(command -v gh)" ]; then
-            echo "GitHub CLI is installed. Proceeding to upload files to GitHub Release."
+            echo "Creating GitHub Release for tag $TAG_NAME"
             echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+            gh release create "$TAG_NAME" --prerelease
             for folder in ${{ github.workspace }}/dist/*; do
               if [ -d "$folder" ] && [ "$(ls -A "$folder")" ]; then
                 echo "Uploading files from: $folder"
