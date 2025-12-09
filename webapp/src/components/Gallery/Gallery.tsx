@@ -25,7 +25,7 @@ import { GalleryStyledContainer, GalleryTabContainer } from "./styled";
 export type GalleryTabs = GalleryItem["type"] | "custom";
 
 interface Props {
-    showTabs?: GalleryTabs[];
+    showTabs?: Omit<GalleryTabs, "custom">[];
     startSelectedTab?: GalleryTabs;
     selectedItem?: string;
     onSelectItem?: (url: string) => void;
@@ -54,7 +54,7 @@ export function Gallery(props: Props): React.ReactNode {
         return itemsToPrint.map((item) => (
             <GalleryItemDisplay
                 key={item.title}
-                onClick={() => onSelectItem(item.url)}
+                onClick={typeof onSelectItem === "function" ? () => onSelectItem(item.url) : undefined}
                 selected={item.url === selectedItem}
                 {...item}
             />
@@ -131,15 +131,13 @@ export function Gallery(props: Props): React.ReactNode {
                 <input ref={uploadInputRef} type="file" style={{ display: "none" }} onChange={onFilesUpload} />
                 Upload
             </Button>
-            <Tabs variant="outline" defaultValue={startSelectedTab ?? showTabs[0]}>
+            <Tabs variant="outline" defaultValue={(startSelectedTab ?? showTabs[0]) as GalleryTabs}>
                 <Tabs.List>
                     {showTabs.includes("image") && <Tabs.Tab value="image">Images</Tabs.Tab>}
                     {showTabs.includes("video") && <Tabs.Tab value="video">Videos</Tabs.Tab>}
                     {showTabs.includes("audio") && <Tabs.Tab value="audio">Audios</Tabs.Tab>}
                     {showTabs.includes("file") && <Tabs.Tab value="file">Others</Tabs.Tab>}
-                    {(showTabs.includes("custom") || selectedItem.startsWith("http")) && (
-                        <Tabs.Tab value="custom">Custom</Tabs.Tab>
-                    )}
+                    {typeof onSelectItem === "function" && <Tabs.Tab value="custom">Custom</Tabs.Tab>}
                 </Tabs.List>
 
                 {showTabs.includes("image") && (
@@ -170,7 +168,7 @@ export function Gallery(props: Props): React.ReactNode {
                         </GalleryTabContainer>
                     </Tabs.Panel>
                 )}
-                {(showTabs.includes("custom") || selectedItem.startsWith("http")) && (
+                {typeof onSelectItem === "function" && (
                     <Tabs.Panel value="custom">
                         <GalleryTabContainer cols={1}>
                             <GalleyCustomDisplay selectedItem={selectedItem} onSelectItem={onSelectItem} />

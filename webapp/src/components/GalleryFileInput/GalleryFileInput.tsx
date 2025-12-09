@@ -7,28 +7,29 @@ import { Gallery, GalleryTabs } from "../Gallery/Gallery";
 
 interface Props extends Omit<TextInputProps, "ref"> {
     showTabs?: GalleryTabs[];
-    startSelectedTab?: Omit<GalleryTabs, "custom">;
 }
 
 export const GalleryFileInput = React.forwardRef<HTMLInputElement, Props>(function GalleryFileInput(props, ref) {
-    const { showTabs, startSelectedTab, onClick, onChange, ...rest } = props;
+    const { showTabs = [], onClick, onChange, ...rest } = props;
 
     const inputRef = React.useRef<HTMLInputElement>(null);
 
     function handleShowTabs(): GalleryTabs[] {
-        if (Array.isArray(showTabs) && showTabs.length > 0) {
-            return [...showTabs, "custom"];
+        let _showTabs = Array.isArray(showTabs) ? showTabs : [];
+        if (_showTabs.length === 0) {
+            _showTabs = ["image", "video", "audio", "file"];
         }
 
-        return ["image", "video", "audio", "file", "custom"];
+        return _showTabs;
     }
 
     function handleClick(event: React.MouseEvent<HTMLInputElement>): void {
         event.stopPropagation();
 
+        const _showTabs = handleShowTabs();
         let wrappedSelectedTab: GalleryTabs = inputRef.current?.value.startsWith("http") ? "custom" : undefined;
         if (wrappedSelectedTab == null) {
-            wrappedSelectedTab = (startSelectedTab ?? showTabs?.[0] ?? "image") as GalleryTabs;
+            wrappedSelectedTab = (_showTabs ?? [])[0] ?? "image";
         }
 
         modals.open({
@@ -36,7 +37,7 @@ export const GalleryFileInput = React.forwardRef<HTMLInputElement, Props>(functi
             size: "xl",
             children: (
                 <Gallery
-                    showTabs={handleShowTabs()}
+                    showTabs={_showTabs}
                     startSelectedTab={wrappedSelectedTab}
                     selectedItem={inputRef.current?.value}
                     onSelectItem={(url) => {
