@@ -9,7 +9,7 @@
 
 import React from "react";
 
-import { Button, Card, Text } from "@mantine/core";
+import { Button, Card, Text, Tooltip } from "@mantine/core";
 
 import { GalleryItem } from "unichat/types";
 
@@ -42,9 +42,11 @@ export function GalleryItemDisplay(props: Props): React.ReactNode {
             <Card.Section style={{ height: 162 }}>
                 <div className="media-wrapper">{renderPreview()}</div>
             </Card.Section>
-            <Text fw={500} mt="xs">
-                {title}
-            </Text>
+            <Tooltip label={title} position="top" withArrow>
+                <Text fw={500} mt="xs">
+                    {title}
+                </Text>
+            </Tooltip>
 
             {!!onClick && (
                 <Button fullWidth mt="md" variant="light" disabled={selected} onClick={onClick}>

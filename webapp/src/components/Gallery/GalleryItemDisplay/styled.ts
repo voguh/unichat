@@ -36,4 +36,10 @@ export const GalleryItemDisplayStyledContainer = styled(Card)`
             }
         }
     }
+
+    > .mantine-Text-root {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 `;
