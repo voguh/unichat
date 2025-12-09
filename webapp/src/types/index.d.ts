@@ -21,6 +21,12 @@ export interface ThirdPartyLicenseInfo {
     licenses: string[];
 }
 
+export interface GalleryItem {
+    title: string;
+    type: "image" | "video" | "audio" | "file";
+    url: string;
+}
+
 export interface AppMetadata {
     displayName: string;
     identifier: string;

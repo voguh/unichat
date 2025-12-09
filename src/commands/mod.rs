@@ -23,6 +23,7 @@ use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UNICHAT_EVENT_CLEAR_TYPE;
 use crate::utils;
+use crate::utils::constants::BASE_REST_PORT;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::settings;
@@ -38,6 +39,19 @@ use crate::CARGO_PKG_NAME;
 use crate::CARGO_PKG_VERSION;
 use crate::STATIC_APP_ICON;
 use crate::THIRD_PARTY_LICENSES;
+
+/* ================================================================================================================== */
+
+fn parse_fs_error(e: std::io::Error, path: &PathBuf) -> String {
+    return match e.kind() {
+        std::io::ErrorKind::NotFound => format!("File or directory '{:?}' not found", path),
+        std::io::ErrorKind::PermissionDenied => format!("Permission denied for file or directory '{:?}'", path),
+        std::io::ErrorKind::AlreadyExists => format!("File or directory '{:?}' already exists", path),
+        _ => format!("{:?}", e)
+    };
+}
+
+/* ================================================================================================================== */
 
 #[tauri::command]
 pub async fn get_app_info<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value, String> {
@@ -242,14 +256,7 @@ pub async fn list_widgets<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Value
     ]));
 }
 
-fn parse_fs_error(e: std::io::Error, path: &PathBuf) -> String {
-    return match e.kind() {
-        std::io::ErrorKind::NotFound => format!("File or directory '{:?}' not found", path),
-        std::io::ErrorKind::PermissionDenied => format!("Permission denied for file or directory '{:?}'", path),
-        std::io::ErrorKind::AlreadyExists => format!("File or directory '{:?}' already exists", path),
-        _ => format!("{:?}", e)
-    };
-}
+/* ================================================================================================================== */
 
 #[tauri::command]
 pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, String> {
@@ -281,7 +288,6 @@ pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
     return fs::read_to_string(&fieldstate_path).map_err(|e| parse_fs_error(e, &fieldstate_path));
 }
 
-
 #[tauri::command]
 pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String, data: String) -> Result<(), String> {
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
@@ -295,4 +301,66 @@ pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
     }
 
     return fs::write(&fieldstate_path, data).map_err(|e| parse_fs_error(e, &fieldstate_path));
+}
+
+/* ================================================================================================================== */
+
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct GalleryItem {
+    title: String,
+    #[serde(rename = "type")]
+    item_type: String,
+    url: String
+}
+
+#[tauri::command]
+pub async fn get_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<GalleryItem>, String> {
+    let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
+
+    let mut gallery_items: Vec<GalleryItem> = Vec::new();
+
+    let gallery_read = fs::read_dir(&gallery_path).map_err(|e| format!("{:?}", e))?;
+    for entry in gallery_read {
+        if let Ok(entry) = entry {
+            let path = entry.path();
+            if path.is_file() {
+                if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
+                    let title = path.file_stem().and_then(|n| n.to_str()).unwrap_or("Untitled").to_string();
+                    let url = format!("http://localhost:{}/gallery/{}", BASE_REST_PORT, path.file_name().and_then(|n| n.to_str()).unwrap_or(""));
+
+                    let item_type = match ext.to_lowercase().as_str() {
+                        "png" | "jpg" | "jpeg" | "gif" | "bmp" | "webp" => "image",
+                        "mp4" | "webm" | "ogg" | "mov" => "video",
+                        "mp3" | "wav" | "flac" | "aac" => "audio",
+                        _ => "file"
+                    }.to_string();
+
+                    gallery_items.push(GalleryItem { title, item_type, url });
+                }
+            }
+        }
+    }
+
+    return Ok(gallery_items);
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct GalleryFile {
+    name: String,
+    data: Vec<u8>
+}
+
+#[tauri::command]
+pub async fn upload_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>, files: Vec<GalleryFile>) -> Result<(), String> {
+    let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
+    if !gallery_path.exists() {
+        fs::create_dir_all(&gallery_path).map_err(|e| parse_fs_error(e, &gallery_path))?;
+    }
+
+    for file in files {
+        let file_path = gallery_path.join(&file.name);
+        fs::write(&file_path, &file.data).map_err(|e| parse_fs_error(e, &file_path))?;
+    }
+
+    return Ok(());
 }

@@ -193,6 +193,8 @@ fn main() {
             commands::get_widget_fields,
             commands::get_widget_fieldstate,
             commands::set_widget_fieldstate,
+            commands::get_gallery_items,
+            commands::upload_gallery_items,
             twitch::get_twitch_scrapper_url,
             twitch::set_twitch_scrapper_url,
             youtube::get_youtube_scrapper_url,

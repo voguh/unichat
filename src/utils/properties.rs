@@ -42,6 +42,7 @@ pub enum AppPaths {
     AppLog,
 
     UniChatAssets,
+    UniChatGallery,
     UniChatSystemWidgets,
     UniChatUserWidgets,
     UniChatLogoIcon,
@@ -58,6 +59,7 @@ impl fmt::Display for AppPaths {
             AppPaths::AppLog => "app_log_dir",
 
             AppPaths::UniChatAssets => "unichat_assets_dir",
+            AppPaths::UniChatGallery => "unichat_gallery_dir",
             AppPaths::UniChatSystemWidgets => "unichat_system_widgets_dir",
             AppPaths::UniChatUserWidgets => "unichat_user_widgets_dir",
             AppPaths::UniChatLogoIcon => "unichat_logo_icon",
@@ -77,6 +79,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     let app_local_data_dir = app.path().app_local_data_dir()?;
     let app_log_dir = app.path().app_log_dir()?;
     let assets_dir = app.path().resolve("assets", BaseDirectory::Resource)?;
+    let gallery_dir = app.path().resolve("gallery", BaseDirectory::AppData)?;
     let system_widgets_dir = app.path().resolve("widgets", BaseDirectory::Resource)?;
     let user_widgets_dir = app.path().resolve("widgets", BaseDirectory::AppData)?;
     let logo_icon_file = app.path().resolve("icons/icon.png", BaseDirectory::Resource)?;
@@ -88,6 +91,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     let app_local_data_path = app_local_data_dir.to_string_lossy().to_string();
     let app_log_path = app_log_dir.to_string_lossy().to_string();
     let assets_path = assets_dir.to_string_lossy().to_string();
+    let gallery_path = gallery_dir.to_string_lossy().to_string();
     let system_widgets_path = system_widgets_dir.to_string_lossy().to_string();
     let user_widgets_path = user_widgets_dir.to_string_lossy().to_string();
     let logo_icon_path = logo_icon_file.to_string_lossy().to_string();
@@ -100,6 +104,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     properties.insert(AppPaths::AppLocalData.to_string(), app_local_data_path);
     properties.insert(AppPaths::AppLog.to_string(), app_log_path);
     properties.insert(AppPaths::UniChatAssets.to_string(), assets_path);
+    properties.insert(AppPaths::UniChatGallery.to_string(), gallery_path);
     properties.insert(AppPaths::UniChatSystemWidgets.to_string(), system_widgets_path);
     properties.insert(AppPaths::UniChatUserWidgets.to_string(), user_widgets_path);
     properties.insert(AppPaths::UniChatLogoIcon.to_string(), logo_icon_path);
