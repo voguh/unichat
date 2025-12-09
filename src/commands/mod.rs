@@ -315,6 +315,34 @@ pub struct GalleryItem {
     url: String
 }
 
+fn choose_file_type_by_path(path: &PathBuf) -> String {
+    let mut item_type = "file";
+    if let Ok(result) = infer::get_from_path(path.to_string_lossy().to_string()) {
+        if let Some(info) = result {
+            item_type = info.mime_type().split("/").next().unwrap_or("file");
+        }
+    }
+
+    if matches!(item_type, "image" | "video" | "audio") {
+        return String::from(item_type);
+    }
+
+    return String::from("file");
+}
+
+fn get_file_url(file_name: &str) -> Result<url::Url, Box<dyn std::error::Error>> {
+    let raw_path = format!("/gallery/{}", file_name);
+    let segments: Vec<&str> = raw_path.split("/").collect();
+    let mut abs = url::Url::parse(&format!("http://localhost:{}", BASE_REST_PORT))?;
+    {
+        let mut p = abs.path_segments_mut().map_err(|_| "Cannot be base")?;
+        p.clear();
+        p.extend(segments.iter().cloned());
+    }
+
+    return Ok(abs);
+}
+
 #[tauri::command]
 pub async fn get_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<GalleryItem>, String> {
     let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
@@ -327,34 +355,15 @@ pub async fn get_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<
             let path = entry.path();
             if path.is_file() {
                 let title = path.file_name().and_then(|n| n.to_str()).ok_or("An error occurred on parse gallery item title")?;
+                let item_type = choose_file_type_by_path(&path);
 
-                let file_ext = path.extension().and_then(|e| e.to_str()).ok_or("An error occurred on parse gallery item extension")?;
-                let item_type: &str;
-                if matches!(file_ext, "png" | "jpg" | "jpeg" | "gif" | "bmp" | "webp") {
-                    item_type = "image";
-                } else if matches!(file_ext, "mp4" | "webm" | "ogg" | "mov") {
-                    item_type = "video";
-                } else if matches!(file_ext, "mp3" | "wav" | "flac" | "aac") {
-                    item_type = "audio";
-                } else {
-                    item_type = "file";
-                }
-
-                let raw_path = format!("/gallery/{}", title);
-                let segments: Vec<&str> = raw_path.split("/").collect();
-                let mut abs = url::Url::parse(&format!("http://localhost:{}", BASE_REST_PORT)).map_err(|e| format!("{:?}", e))?;
-                {
-                    let mut p = abs.path_segments_mut().map_err(|e| format!("{:?}", e))?;
-                    p.clear();
-                    p.extend(segments.iter().cloned());
-                }
-
-                let preview_url = abs.clone().into();
-                let url = abs.path().into();
+                let file_url = get_file_url(title).map_err(|e| format!("{:?}", e))?;
+                let preview_url = file_url.clone().into();
+                let url = file_url.path().into();
 
                 gallery_items.push(GalleryItem {
                     title: String::from(title),
-                    item_type: String::from(item_type),
+                    item_type: item_type,
                     preview_url: preview_url,
                     url: url
                 });
@@ -377,6 +386,11 @@ pub async fn upload_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>, files: 
     let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
     if !gallery_path.exists() {
         fs::create_dir_all(&gallery_path).map_err(|e| parse_fs_error(e, &gallery_path))?;
+    }
+
+    let gallery_metadata_path = gallery_path.join(".metadata.json");
+    if !gallery_metadata_path.exists() {
+        fs::write(&gallery_metadata_path, "[]").map_err(|e| parse_fs_error(e, &gallery_metadata_path))?;
     }
 
     for file in files {
