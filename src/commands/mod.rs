@@ -306,10 +306,12 @@ pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
 /* ================================================================================================================== */
 
 #[derive(serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GalleryItem {
     title: String,
     #[serde(rename = "type")]
     item_type: String,
+    preview_url: String,
     url: String
 }
 
@@ -324,19 +326,38 @@ pub async fn get_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<
         if let Ok(entry) = entry {
             let path = entry.path();
             if path.is_file() {
-                if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
-                    let title = path.file_stem().and_then(|n| n.to_str()).unwrap_or("Untitled").to_string();
-                    let url = format!("http://localhost:{}/gallery/{}", BASE_REST_PORT, path.file_name().and_then(|n| n.to_str()).unwrap_or(""));
+                let title = path.file_name().and_then(|n| n.to_str()).ok_or("An error occurred on parse gallery item title")?;
 
-                    let item_type = match ext.to_lowercase().as_str() {
-                        "png" | "jpg" | "jpeg" | "gif" | "bmp" | "webp" => "image",
-                        "mp4" | "webm" | "ogg" | "mov" => "video",
-                        "mp3" | "wav" | "flac" | "aac" => "audio",
-                        _ => "file"
-                    }.to_string();
-
-                    gallery_items.push(GalleryItem { title, item_type, url });
+                let file_ext = path.extension().and_then(|e| e.to_str()).ok_or("An error occurred on parse gallery item extension")?;
+                let item_type: &str;
+                if matches!(file_ext, "png" | "jpg" | "jpeg" | "gif" | "bmp" | "webp") {
+                    item_type = "image";
+                } else if matches!(file_ext, "mp4" | "webm" | "ogg" | "mov") {
+                    item_type = "video";
+                } else if matches!(file_ext, "mp3" | "wav" | "flac" | "aac") {
+                    item_type = "audio";
+                } else {
+                    item_type = "file";
                 }
+
+                let raw_path = format!("/gallery/{}", title);
+                let segments: Vec<&str> = raw_path.split("/").collect();
+                let mut abs = url::Url::parse(&format!("http://localhost:{}", BASE_REST_PORT)).map_err(|e| format!("{:?}", e))?;
+                {
+                    let mut p = abs.path_segments_mut().map_err(|e| format!("{:?}", e))?;
+                    p.clear();
+                    p.extend(segments.iter().cloned());
+                }
+
+                let preview_url = abs.clone().into();
+                let url = abs.path().into();
+
+                gallery_items.push(GalleryItem {
+                    title: String::from(title),
+                    item_type: String::from(item_type),
+                    preview_url: preview_url,
+                    url: url
+                });
             }
         }
     }
@@ -345,6 +366,7 @@ pub async fn get_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GalleryFile {
     name: String,
     data: Vec<u8>
