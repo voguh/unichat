@@ -158,7 +158,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         <GalleryFileInput
                             label={builder.label}
                             description={builder.description}
-                            value={value}
+                            defaultValue={value}
                             onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
                             showTabs={builder.fileType}
                         />
