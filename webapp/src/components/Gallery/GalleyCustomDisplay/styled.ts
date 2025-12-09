@@ -22,6 +22,7 @@ export const GalleyTabEmptyStyledContainer = styled.div`
         align-items: center;
         width: 231px;
         height: 162px;
+        background-color: var(--mantine-color-gray-9);
 
         > img {
             max-width: 231px;
