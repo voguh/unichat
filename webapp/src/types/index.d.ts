@@ -100,7 +100,7 @@ export interface WidgetFieldsFilePicker {
     label: string;
     description?: string;
     value?: string;
-    fileType: "image" | "video" | "audio" | "file";
+    fileType: ("image" | "video" | "audio" | "file")[];
 }
 
 export interface WidgetFieldsDivider {

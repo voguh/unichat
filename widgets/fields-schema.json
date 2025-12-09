@@ -87,7 +87,14 @@
                         "label": { "type": "string" },
                         "description": { "type": "string" },
                         "value": { "type": "string" },
-                        "fileType": { "enum": ["image", "video", "audio", "file"] }
+                        "fileType": {
+                            "type": "array",
+                            "items": {
+                                "enum": ["image", "video", "audio", "file"]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
                     },
                     "required": ["type", "label", "fileType"],
                     "additionalProperties": false
