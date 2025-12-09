@@ -26,11 +26,13 @@
         <script defer>
             document.addEventListener("DOMContentLoaded", () => {
                 function connect() {
-                    const socket = new WebSocket('ws://localhost:9527/ws')
+                    let wsSchema = window.location.protocol === "https:" ? "wss" : "ws";
+                    let wsHost = window.location.host;
+                    const socket = new WebSocket(`${wsSchema}://${wsHost}/ws`)
 
                     socket.addEventListener("open", () => {
                         window.dispatchEvent(new CustomEvent("unichat:connected"));
-                    })
+                    });
 
                     socket.addEventListener("message", (message) => {
                         const event = JSON.parse(message.data);
