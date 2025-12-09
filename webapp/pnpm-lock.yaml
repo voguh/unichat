@@ -35,6 +35,9 @@ importers:
       '@tauri-apps/api':
         specifier: 2.9.1
         version: 2.9.1
+      '@tauri-apps/plugin-dialog':
+        specifier: 2.4.2
+        version: 2.4.2
       '@tauri-apps/plugin-log':
         specifier: 2.7.1
         version: 2.7.1
@@ -800,6 +803,9 @@ packages:
 
   '@tauri-apps/api@2.9.1':
     resolution: {integrity: sha512-IGlhP6EivjXHepbBic618GOmiWe4URJiIeZFlB7x3czM0yDHHYviH1Xvoiv4FefdkQtn6v7TuwWCRfOGdnVUGw==}
+
+  '@tauri-apps/plugin-dialog@2.4.2':
+    resolution: {integrity: sha512-lNIn5CZuw8WZOn8zHzmFmDSzg5zfohWoa3mdULP0YFh/VogVdMVWZPcWSHlydsiJhRQYaTNSYKN7RmZKE2lCYQ==}
 
   '@tauri-apps/plugin-log@2.7.1':
     resolution: {integrity: sha512-jdb+o0wxQc8PjnLktgGpOs9Dh1YupaOGDXzO+Y8peA1UZ1ep3eXv4E1oiJ7nIQVN0XUFDDhnn3aBszl8ijhR+A==}
@@ -3495,6 +3501,10 @@ snapshots:
   '@tabler/icons@3.35.0': {}
 
   '@tauri-apps/api@2.9.1': {}
+
+  '@tauri-apps/plugin-dialog@2.4.2':
+    dependencies:
+      '@tauri-apps/api': 2.9.1
 
   '@tauri-apps/plugin-log@2.7.1':
     dependencies:

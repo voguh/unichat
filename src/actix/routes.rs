@@ -14,6 +14,7 @@ use std::path;
 use std::path::PathBuf;
 
 use actix_web::error::ErrorBadRequest;
+use actix_web::error::ErrorInternalServerError;
 use actix_web::error::ErrorNotFound;
 use actix_web::get;
 use actix_web::http::StatusCode;
@@ -32,10 +33,7 @@ static WIDGET_TEMPLATE: &str = include_str!("./static/index.html.template");
 
 fn safe_guard_path(base_path: &PathBuf, concat_str: &str) -> Result<PathBuf, actix_web::Error> {
     let concatenated_path = base_path.join(concat_str);
-    let resolved_path = path::absolute(concatenated_path).map_err(|e| {
-        log::error!("{:?}", e);
-        return ErrorNotFound("Path not found");
-    })?;
+    let resolved_path = path::absolute(concatenated_path).map_err(|e| ErrorInternalServerError(e))?;
     if !resolved_path.starts_with(base_path) {
         return Err(ErrorBadRequest(format!("Access to path '{}' is not allowed", resolved_path.display())));
     }
@@ -183,8 +181,8 @@ pub async fn get_widget_assets(req: HttpRequest) -> Result<impl Responder, actix
 
     if let Some(widget_path) = get_widget_dir(&widget_name) {
         let widget_assets_path = widget_path.join("assets");
-        let asset_full_path = safe_guard_path(&widget_assets_path, &asset_path)?;
 
+        let asset_full_path = safe_guard_path(&widget_assets_path, &asset_path)?;
         if !asset_full_path.exists() {
             return Err(ErrorNotFound(format!("Asset '{}' not found in widget '{}'", asset_path, widget_name)));
         } else if asset_full_path.is_dir() {
@@ -237,6 +235,32 @@ pub async fn get_widget(req: HttpRequest) -> Result<impl Responder, actix_web::E
         return Ok(HttpResponse::build(StatusCode::OK).content_type("text/html; charset=utf-8").body(content));
     } else {
         return Err(actix_web::error::ErrorNotFound(format!("Widget '{}' not found", widget_name)));
+    }
+}
+
+/* ================================================================================================================== */
+
+#[get("/gallery/{name}")]
+pub async fn gallery(req: HttpRequest) -> Result<impl Responder, actix_web::Error> {
+    let asset_name: String = req.match_info().query("name").parse()?;
+    let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
+
+    let asset_full_path = safe_guard_path(&gallery_path, &asset_name)?;
+    if !asset_full_path.exists() {
+        return Err(ErrorNotFound(format!("Gallery Item '{}' not found", asset_name)));
+    } else if asset_full_path.is_dir() {
+        return Err(ErrorBadRequest(format!("Gallery Item '{}' is a directory, not a file", asset_name)));
+    }
+
+    let content = fs::read(&asset_full_path).map_err(|e| {
+        log::error!("{:?}", e);
+        return ErrorNotFound(format!("Failed to read asset '{}'", asset_name));
+    })?;
+
+    if let Some(kind) = infer::get(&content) {
+        return Ok(HttpResponse::build(StatusCode::OK).content_type(kind.mime_type()).body(content));
+    } else {
+        return Err(ErrorBadRequest(format!("Could not infer MIME type for gallery item '{}'", asset_name)));
     }
 }
 

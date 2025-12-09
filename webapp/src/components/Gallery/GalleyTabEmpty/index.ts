@@ -7,6 +7,4 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-pub const BASE_REST_PORT: u16 = 9527;
-pub const YOUTUBE_CHAT_WINDOW: &str = "youtube-chat";
-pub const TWITCH_CHAT_WINDOW: &str = "twitch-chat";
+export * from "./GalleyTabEmpty";

@@ -10,7 +10,7 @@
 import { ComboboxItemGroup } from "@mantine/core";
 import { invoke } from "@tauri-apps/api/core";
 
-import { AppMetadata, WidgetFields } from "unichat/types";
+import { AppMetadata, GalleryItem, WidgetFields } from "unichat/types";
 
 export class YouTubeCommandService {
     public async getScrapperUrl(): Promise<string> {
@@ -92,6 +92,14 @@ export class CommandService {
     public async setWidgetFieldState(widget: string, fieldstate: Record<string, any>): Promise<void> {
         const data = JSON.stringify(fieldstate);
         await invoke("set_widget_fieldstate", { widget, data });
+    }
+
+    public async getGalleryItems(): Promise<GalleryItem[]> {
+        return invoke("get_gallery_items");
+    }
+
+    public async uploadGalleryItems(files: string[]): Promise<void> {
+        await invoke("upload_gallery_items", { files });
     }
 }
 

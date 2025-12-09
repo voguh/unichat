@@ -46,6 +46,7 @@ import { WidgetFields } from "unichat/types";
 import { WIDGET_URL_PREFIX } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
 
+import { GalleryFileInput } from "../GalleryFileInput";
 import { WidgetEditorEmptyStyledContainer, WidgetEditorStyledContainer } from "./styled";
 import { buildEmulatedEventData } from "./util/buildEmulatedEventData";
 
@@ -149,6 +150,18 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                     <div key={key} className="divider-wrapper">
                         <Divider />
                         {builder.label && <Text size="sm">{builder.label}</Text>}
+                    </div>
+                );
+            case "filepicker":
+                return (
+                    <div key={key} className="filepicker-wrapper">
+                        <GalleryFileInput
+                            label={builder.label}
+                            description={builder.description}
+                            defaultValue={value}
+                            onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                            showTabs={builder.fileType}
+                        />
                     </div>
                 );
             default:

@@ -84,6 +84,13 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
     /* ========================================================================================== */
 
+    let gallery_dir = properties::get_app_path(AppPaths::UniChatGallery);
+    if !&gallery_dir.exists() {
+        fs::create_dir_all(&gallery_dir)?;
+    }
+
+    /* ========================================================================================== */
+
     let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidgets);
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     if !&user_widgets_dir.exists() {
@@ -169,6 +176,7 @@ fn main() {
     }
 
     tauri::Builder::default().setup(setup)
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_log::Builder::default()
             .level(log_level)
             .clear_targets()
@@ -193,6 +201,8 @@ fn main() {
             commands::get_widget_fields,
             commands::get_widget_fieldstate,
             commands::set_widget_fieldstate,
+            commands::get_gallery_items,
+            commands::upload_gallery_items,
             twitch::get_twitch_scrapper_url,
             twitch::set_twitch_scrapper_url,
             youtube::get_youtube_scrapper_url,
