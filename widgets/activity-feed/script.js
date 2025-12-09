@@ -1,4 +1,4 @@
-const MAIN_CONTAINER = document.querySelector("#main-container");
+const FEED_ITEMS_CONTAINER = document.querySelector("#main-container > .feed-items-container");
 const FEED_ITEM_TEMPLATE = document.querySelector("#feed_item").innerHTML;
 
 let timeagoUpdateInterval = null;
@@ -98,7 +98,7 @@ function buildBadges(data, ...badges) {
 /* ============================================================================================== */
 
 function updateEntriesTimeAgo() {
-    const entries = MAIN_CONTAINER.querySelectorAll(".timestamp-ago");
+    const entries = FEED_ITEMS_CONTAINER.querySelectorAll(".timestamp-ago");
 
     for (const entry of entries) {
         const timestamp = entry.getAttribute("data-timestamp");
@@ -115,6 +115,55 @@ if (timeagoUpdateInterval == null) {
         requestAnimationFrame(updateEntriesTimeAgo);
     }, 60000);
 }
+
+/* ============================================================================================== */
+
+function toggleEventTypeView(btnElement, type) {
+    const newValue = !btnElement.classList.contains("toggle-btn-active");
+    console.log(newValue);
+    const items = FEED_ITEMS_CONTAINER.querySelectorAll(`.feed-item[data-event-type="${type}"]`);
+
+    for (const item of items) {
+        if (newValue) {
+            item.style.display = "block";
+        } else {
+            item.style.display = "none";
+        }
+    }
+
+    if (newValue) {
+        btnElement.classList.add("toggle-btn-active");
+    } else {
+        btnElement.classList.remove("toggle-btn-active");
+    }
+}
+
+const toggleDonateButton = document.querySelector("#main-container > .actions-container > .toggle-btn-donate");
+if (toggleDonateButton != null) {
+    toggleDonateButton.addEventListener("click", () => toggleEventTypeView(toggleDonateButton, "unichat:donate"));
+}
+
+const toggleSponsorButton = document.querySelector("#main-container > .actions-container > .toggle-btn-sponsor");
+if (toggleSponsorButton != null) {
+    toggleSponsorButton.addEventListener("click", () => toggleEventTypeView(toggleSponsorButton, "unichat:sponsor"));
+}
+
+const toggleSponsorGiftButton = document.querySelector("#main-container > .actions-container > .toggle-btn-sponsor-gift");
+if (toggleSponsorGiftButton != null) {
+    toggleSponsorGiftButton.addEventListener("click", () => toggleEventTypeView(toggleSponsorGiftButton, "unichat:sponsor_gift"));
+}
+
+const toggleRaidButton = document.querySelector("#main-container > .actions-container > .toggle-btn-raid");
+if (toggleRaidButton != null) {
+    toggleRaidButton.addEventListener("click", () => toggleEventTypeView(toggleRaidButton, "unichat:raid"));
+}
+
+const toggleRedemptionButton = document.querySelector("#main-container > .actions-container > .toggle-btn-redemption");
+if (toggleRedemptionButton != null) {
+    toggleRedemptionButton.addEventListener("click", () => toggleEventTypeView(toggleRedemptionButton, "unichat:redemption"));
+}
+
+/* ============================================================================================== */
 
 // Dispatch every time when websocket is connected (or reconnected)
 window.addEventListener("unichat:connected", function () {
@@ -191,7 +240,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         htmlTemplate = wrapMessage(htmlTemplate, data.messageText, data.emotes);
     }
 
-    if (htmlTemplate != null && MAIN_CONTAINER.querySelector(`div[data-id="${event.data.messageId}"]`) == null) {
+    if (htmlTemplate != null && FEED_ITEMS_CONTAINER.querySelector(`div[data-id="${event.data.messageId}"]`) == null) {
         if (htmlTemplate.includes("{timestmap}")) {
             const timestamp = (new Date(event.data.timestamp)).toLocaleString();
             htmlTemplate = htmlTemplate.replace("{timestmap}", timestamp);
@@ -205,6 +254,10 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
             htmlTemplate = htmlTemplate.replace("{timeago}", parseTimeago(event.data.timestamp));
         }
 
-        $(MAIN_CONTAINER).prepend(htmlTemplate);
+        if (htmlTemplate.includes("{event_type}")) {
+            htmlTemplate = htmlTemplate.replace("{event_type}", event.type);
+        }
+
+        $(FEED_ITEMS_CONTAINER).prepend(htmlTemplate);
     }
 });
