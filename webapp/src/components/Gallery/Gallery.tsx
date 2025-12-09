@@ -18,37 +18,46 @@ import { loggerService } from "unichat/services/loggerService";
 import { GalleryItem } from "unichat/types";
 
 import { GalleryItemDisplay } from "./GalleryItemDisplay";
+import { GalleyCustomDisplay } from "./GalleyCustomDisplay";
 import { GalleyTabEmpty } from "./GalleyTabEmpty";
 import { GalleryStyledContainer, GalleryTabContainer } from "./styled";
 
+export type GalleryTabs = GalleryItem["type"] | "custom";
+
 interface Props {
-    showTabs?: (GalleryItem["type"] | "custom")[];
-    startSelectedTab?: GalleryItem["type"];
+    showTabs?: GalleryTabs[];
+    startSelectedTab?: GalleryTabs;
+    selectedItem?: string;
     onSelectItem?: (url: string) => void;
 }
 
 export function Gallery(props: Props): React.ReactNode {
-    const { onSelectItem, showTabs = ["image", "video", "audio", "file"], startSelectedTab } = props;
+    const { onSelectItem, selectedItem = "", showTabs = ["image", "video", "audio", "file"], startSelectedTab } = props;
 
     const [loading, setLoading] = React.useState<boolean>(false);
     const [galleryItems, setGalleryItems] = React.useState<GalleryItem[]>([]);
 
     const uploadInputRef = React.useRef<HTMLInputElement>(null);
 
-    function hasItemsInTab(type: GalleryItem["type"]): boolean {
+    function hasItemsInTab(type: GalleryTabs): boolean {
         const itemsInTab = (galleryItems ?? []).filter((item) => item.type === type);
 
         return itemsInTab.length > 0;
     }
 
-    function printGalleryItems(type: GalleryItem["type"]): JSX.Element[] {
+    function printGalleryItems(type: GalleryTabs): JSX.Element[] {
         const itemsToPrint = (galleryItems ?? []).filter((item) => item.type === type);
         if (itemsToPrint.length === 0) {
             return [<GalleyTabEmpty key={crypto.randomUUID()} />];
         }
 
         return itemsToPrint.map((item) => (
-            <GalleryItemDisplay key={item.title} onClick={() => onSelectItem(item.url)} {...item} />
+            <GalleryItemDisplay
+                key={item.title}
+                onClick={() => onSelectItem(item.url)}
+                selected={item.url === selectedItem}
+                {...item}
+            />
         ));
     }
 
@@ -128,7 +137,9 @@ export function Gallery(props: Props): React.ReactNode {
                     {showTabs.includes("video") && <Tabs.Tab value="video">Videos</Tabs.Tab>}
                     {showTabs.includes("audio") && <Tabs.Tab value="audio">Audios</Tabs.Tab>}
                     {showTabs.includes("file") && <Tabs.Tab value="file">Others</Tabs.Tab>}
-                    {showTabs.includes("custom") && <Tabs.Tab value="custom">Custom</Tabs.Tab>}
+                    {(showTabs.includes("custom") || selectedItem.startsWith("http")) && (
+                        <Tabs.Tab value="custom">Custom</Tabs.Tab>
+                    )}
                 </Tabs.List>
 
                 {showTabs.includes("image") && (
@@ -159,9 +170,11 @@ export function Gallery(props: Props): React.ReactNode {
                         </GalleryTabContainer>
                     </Tabs.Panel>
                 )}
-                {showTabs.includes("custom") && (
+                {(showTabs.includes("custom") || selectedItem.startsWith("http")) && (
                     <Tabs.Panel value="custom">
-                        <GalleryTabContainer></GalleryTabContainer>
+                        <GalleryTabContainer cols={1}>
+                            <GalleyCustomDisplay selectedItem={selectedItem} onSelectItem={onSelectItem} />
+                        </GalleryTabContainer>
                     </Tabs.Panel>
                 )}
             </Tabs>

@@ -16,22 +16,25 @@ import { GalleryItem } from "unichat/types";
 import { GalleryItemDisplayStyledContainer } from "./styled";
 
 interface Props extends GalleryItem {
+    selected?: boolean;
     onClick?: () => void;
 }
 
 export function GalleryItemDisplay(props: Props): React.ReactNode {
-    const { onClick } = props;
+    const { previewUrl, title, type, onClick, selected } = props;
 
     function renderPreview(): React.ReactNode {
-        if (props.type === "image") {
-            return <img src={props.previewUrl} alt={props.title} />;
-        } else if (props.type === "video") {
-            return <video src={props.previewUrl} controls />;
-        } else if (props.type === "audio") {
-            return <audio src={props.previewUrl} controls />;
+        if ((previewUrl ?? "").trim().length > 0) {
+            if (type === "image") {
+                return <img src={previewUrl} alt={title} />;
+            } else if (type === "video") {
+                return <video src={previewUrl} controls />;
+            } else if (type === "audio") {
+                return <audio src={previewUrl} controls />;
+            }
         }
 
-        return <img src="https://placehold.co/600x400/EEE/31343C" alt={props.title} />;
+        return <img src="https://placehold.co/600x400?text=No+Preview" alt="No Preview Available" />;
     }
 
     return (
@@ -40,11 +43,11 @@ export function GalleryItemDisplay(props: Props): React.ReactNode {
                 <div className="media-wrapper">{renderPreview()}</div>
             </Card.Section>
             <Text fw={500} mt="xs">
-                {props.title}
+                {title}
             </Text>
 
             {!!onClick && (
-                <Button fullWidth mt="md" variant="light" onClick={onClick}>
+                <Button fullWidth mt="md" variant="light" disabled={selected} onClick={onClick}>
                     Select
                 </Button>
             )}

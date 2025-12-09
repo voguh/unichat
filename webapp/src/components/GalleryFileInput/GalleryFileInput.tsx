@@ -3,13 +3,11 @@ import React from "react";
 import { TextInput, TextInputProps } from "@mantine/core";
 import { modals } from "@mantine/modals";
 
-import { GalleryItem } from "unichat/types";
-
-import { Gallery } from "../Gallery/Gallery";
+import { Gallery, GalleryTabs } from "../Gallery/Gallery";
 
 interface Props extends Omit<TextInputProps, "ref"> {
-    showTabs?: (GalleryItem["type"] | "custom")[];
-    startSelectedTab?: GalleryItem["type"];
+    showTabs?: GalleryTabs[];
+    startSelectedTab?: Omit<GalleryTabs, "custom">;
 }
 
 export const GalleryFileInput = React.forwardRef<HTMLInputElement, Props>(function GalleryFileInput(props, ref) {
@@ -17,7 +15,7 @@ export const GalleryFileInput = React.forwardRef<HTMLInputElement, Props>(functi
 
     const inputRef = React.useRef<HTMLInputElement>(null);
 
-    function handleShowTabs(): (GalleryItem["type"] | "custom")[] {
+    function handleShowTabs(): GalleryTabs[] {
         if (Array.isArray(showTabs) && showTabs.length > 0) {
             return [...showTabs, "custom"];
         }
@@ -28,13 +26,19 @@ export const GalleryFileInput = React.forwardRef<HTMLInputElement, Props>(functi
     function handleClick(event: React.MouseEvent<HTMLInputElement>): void {
         event.stopPropagation();
 
+        let wrappedSelectedTab: GalleryTabs = inputRef.current?.value.startsWith("http") ? "custom" : undefined;
+        if (wrappedSelectedTab == null) {
+            wrappedSelectedTab = (startSelectedTab ?? showTabs?.[0] ?? "image") as GalleryTabs;
+        }
+
         modals.open({
             title: "Gallery",
             size: "xl",
             children: (
                 <Gallery
                     showTabs={handleShowTabs()}
-                    startSelectedTab={(startSelectedTab ?? showTabs?.[0] ?? "image") as GalleryItem["type"]}
+                    startSelectedTab={wrappedSelectedTab}
+                    selectedItem={inputRef.current?.value}
                     onSelectItem={(url) => {
                         if (inputRef.current) {
                             inputRef.current.value = url;
@@ -60,6 +64,12 @@ export const GalleryFileInput = React.forwardRef<HTMLInputElement, Props>(functi
             onClick(event);
         }
     }
+
+    React.useEffect(() => {
+        if (rest.defaultValue && inputRef.current) {
+            inputRef.current.value = rest.defaultValue.toString();
+        }
+    }, [rest.defaultValue]);
 
     return (
         <TextInput
