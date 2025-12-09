@@ -370,12 +370,11 @@ jobs:
       - name: Move build artifacts
         run: |
           export VERSION="${{ steps.setup_version.outputs.revision }}"
-          mkdir -p dist/appimage dist/deb dist/rpm dist/nsis dist/msi
+          mkdir -p dist/appimage dist/deb dist/rpm dist/nsis
           cp ${{ github.workspace }}/target/linux/appimage/*.AppImage dist/appimage/unichat-$VERSION.AppImage
           cp ${{ github.workspace }}/target/linux/deb/*.deb dist/deb/unichat-$VERSION.deb
           cp ${{ github.workspace }}/target/linux/rpm/*.rpm dist/rpm/unichat-$VERSION.rpm
           cp ${{ github.workspace }}/target/windows/nsis/*.exe dist/nsis/unichat-$VERSION-setup.exe
-          cp ${{ github.workspace }}/target/windows/msi/*.msi dist/msi/unichat-$VERSION.msi
           for folder in dist/*; do
             if [ -d "$folder" ] && [ "$(ls -A "$folder")" ]; then
               (cd "$folder" && for file in ./*; do sha256sum "$file" > "${file}.sha256"; done)
