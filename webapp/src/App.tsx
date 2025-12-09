@@ -77,7 +77,7 @@ export default function App(): JSX.Element {
         modals.open({
             title: "Gallery",
             size: "xl",
-            children: <Gallery includeCustomTabs={false} />
+            children: <Gallery />
         });
     }
 
@@ -120,7 +120,6 @@ export default function App(): JSX.Element {
     }
 
     React.useEffect(() => {
-        toggleGallery();
         commandService.tourStepsHasNew().then((hasNew) => setHasNewsTour(hasNew));
         commandService
             .isDev()

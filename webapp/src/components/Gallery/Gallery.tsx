@@ -22,11 +22,14 @@ import { GalleyTabEmpty } from "./GalleyTabEmpty";
 import { GalleryStyledContainer, GalleryTabContainer } from "./styled";
 
 interface Props {
-    includeCustomTabs?: boolean;
+    showTabs?: (GalleryItem["type"] | "custom")[];
+    startSelectedTab?: GalleryItem["type"];
     onSelectItem?: (url: string) => void;
 }
 
 export function Gallery(props: Props): React.ReactNode {
+    const { onSelectItem, showTabs = ["image", "video", "audio", "file"], startSelectedTab } = props;
+
     const [loading, setLoading] = React.useState<boolean>(false);
     const [galleryItems, setGalleryItems] = React.useState<GalleryItem[]>([]);
 
@@ -44,7 +47,9 @@ export function Gallery(props: Props): React.ReactNode {
             return [<GalleyTabEmpty key={crypto.randomUUID()} />];
         }
 
-        return itemsToPrint.map((item) => <GalleryItemDisplay {...item} key={item.title} />);
+        return itemsToPrint.map((item) => (
+            <GalleryItemDisplay key={item.title} onClick={() => onSelectItem(item.url)} {...item} />
+        ));
     }
 
     async function handleFetchGalleryItems(): Promise<void> {
@@ -117,36 +122,44 @@ export function Gallery(props: Props): React.ReactNode {
                 <input ref={uploadInputRef} type="file" style={{ display: "none" }} onChange={onFilesUpload} />
                 Upload
             </Button>
-            <Tabs variant="outline" defaultValue="images">
+            <Tabs variant="outline" defaultValue={startSelectedTab ?? showTabs[0]}>
                 <Tabs.List>
-                    <Tabs.Tab value="images">Images</Tabs.Tab>
-                    <Tabs.Tab value="videos">Videos</Tabs.Tab>
-                    <Tabs.Tab value="audios">Audios</Tabs.Tab>
-                    <Tabs.Tab value="others">Others</Tabs.Tab>
-                    {props.includeCustomTabs && <Tabs.Tab value="custom">Custom</Tabs.Tab>}
+                    {showTabs.includes("image") && <Tabs.Tab value="image">Images</Tabs.Tab>}
+                    {showTabs.includes("video") && <Tabs.Tab value="video">Videos</Tabs.Tab>}
+                    {showTabs.includes("audio") && <Tabs.Tab value="audio">Audios</Tabs.Tab>}
+                    {showTabs.includes("file") && <Tabs.Tab value="file">Others</Tabs.Tab>}
+                    {showTabs.includes("custom") && <Tabs.Tab value="custom">Custom</Tabs.Tab>}
                 </Tabs.List>
 
-                <Tabs.Panel value="images">
-                    <GalleryTabContainer cols={hasItemsInTab("image") ? 3 : 1}>
-                        {printGalleryItems("image")}
-                    </GalleryTabContainer>
-                </Tabs.Panel>
-                <Tabs.Panel value="videos">
-                    <GalleryTabContainer cols={hasItemsInTab("video") ? 3 : 1}>
-                        {printGalleryItems("video")}
-                    </GalleryTabContainer>
-                </Tabs.Panel>
-                <Tabs.Panel value="audios">
-                    <GalleryTabContainer cols={hasItemsInTab("audio") ? 3 : 1}>
-                        {printGalleryItems("audio")}
-                    </GalleryTabContainer>
-                </Tabs.Panel>
-                <Tabs.Panel value="others">
-                    <GalleryTabContainer cols={hasItemsInTab("file") ? 3 : 1}>
-                        {printGalleryItems("file")}
-                    </GalleryTabContainer>
-                </Tabs.Panel>
-                {props.includeCustomTabs && (
+                {showTabs.includes("image") && (
+                    <Tabs.Panel value="image">
+                        <GalleryTabContainer cols={hasItemsInTab("image") ? 3 : 1}>
+                            {printGalleryItems("image")}
+                        </GalleryTabContainer>
+                    </Tabs.Panel>
+                )}
+                {showTabs.includes("video") && (
+                    <Tabs.Panel value="video">
+                        <GalleryTabContainer cols={hasItemsInTab("video") ? 3 : 1}>
+                            {printGalleryItems("video")}
+                        </GalleryTabContainer>
+                    </Tabs.Panel>
+                )}
+                {showTabs.includes("audio") && (
+                    <Tabs.Panel value="audio">
+                        <GalleryTabContainer cols={hasItemsInTab("audio") ? 3 : 1}>
+                            {printGalleryItems("audio")}
+                        </GalleryTabContainer>
+                    </Tabs.Panel>
+                )}
+                {showTabs.includes("file") && (
+                    <Tabs.Panel value="file">
+                        <GalleryTabContainer cols={hasItemsInTab("file") ? 3 : 1}>
+                            {printGalleryItems("file")}
+                        </GalleryTabContainer>
+                    </Tabs.Panel>
+                )}
+                {showTabs.includes("custom") && (
                     <Tabs.Panel value="custom">
                         <GalleryTabContainer></GalleryTabContainer>
                     </Tabs.Panel>

@@ -10,9 +10,7 @@
 import { Card } from "@mantine/core";
 import styled from "styled-components";
 
-export const GalleryItemDisplayStyledContainer = styled(Card).attrs({
-    padding: "xs"
-})`
+export const GalleryItemDisplayStyledContainer = styled(Card)`
     > .mantine-Card-section {
         > .media-wrapper {
             display: flex;
