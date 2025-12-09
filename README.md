@@ -86,4 +86,6 @@ Interested in contributing? Great! Here's the information you need to get starte
 
 ## 📜 License
 
-This project is licensed under the [Mozilla Public License, Version 2.0](./LICENSE). The example widgets located in the `widgets/default` folder are an exception and are licensed under the MIT License.
+This project is licensed under the [Mozilla Public License, Version 2.0](./LICENSE).
+
+The widgets located in the [`widgets directory`](./widgets/) are licensed under the MIT license.
