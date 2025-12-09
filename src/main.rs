@@ -176,6 +176,7 @@ fn main() {
     }
 
     tauri::Builder::default().setup(setup)
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_log::Builder::default()
             .level(log_level)
             .clear_targets()

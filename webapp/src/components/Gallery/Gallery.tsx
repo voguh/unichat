@@ -12,6 +12,7 @@ import React from "react";
 import { Button, LoadingOverlay, Tabs } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconX } from "@tabler/icons-react";
+import * as dialog from "@tauri-apps/plugin-dialog";
 
 import { commandService } from "unichat/services/commandService";
 import { loggerService } from "unichat/services/loggerService";
@@ -36,8 +37,6 @@ export function Gallery(props: Props): React.ReactNode {
 
     const [loading, setLoading] = React.useState<boolean>(false);
     const [galleryItems, setGalleryItems] = React.useState<GalleryItem[]>([]);
-
-    const uploadInputRef = React.useRef<HTMLInputElement>(null);
 
     function hasItemsInTab(type: GalleryTabs): boolean {
         const itemsInTab = (galleryItems ?? []).filter((item) => item.type === type);
@@ -78,46 +77,25 @@ export function Gallery(props: Props): React.ReactNode {
         }
     }
 
-    async function onFilesUpload(evt: React.ChangeEvent<HTMLInputElement>): Promise<void> {
+    async function onFilesUploadClick(): Promise<void> {
         try {
             setLoading(true);
-
-            const files = evt.target.files;
-            if (files == null || files.length === 0) {
-                return;
-            }
-
-            const filesArray = Array.from(files);
-            await commandService.uploadGalleryItems(filesArray);
-            await handleFetchGalleryItems();
+            const response = await dialog.open({ multiple: true, directory: false });
+            commandService.uploadGalleryItems(response);
         } catch (error) {
             console.log(error);
-            loggerService.error("An error occurred on upload gallery item", error);
+            loggerService.error("An error occurred on upload gallery items", error);
 
             notifications.show({
                 title: "Upload Error",
-                message: "An error occurred while uploading files to the gallery.",
+                message: "An error occurred while uploading gallery items.",
                 color: "red",
                 icon: <IconX />
             });
         } finally {
             setLoading(false);
+            await handleFetchGalleryItems();
         }
-    }
-
-    function onFilesUploadClick(): void {
-        if (uploadInputRef.current == null) {
-            notifications.show({
-                title: "Error",
-                message: "File input element not found.",
-                color: "red",
-                icon: <IconX />
-            });
-
-            return;
-        }
-
-        uploadInputRef.current.click();
     }
 
     React.useEffect(() => {
@@ -128,7 +106,6 @@ export function Gallery(props: Props): React.ReactNode {
         <GalleryStyledContainer>
             <LoadingOverlay visible={loading} />
             <Button className="upload-to-gallery" size="xs" onClick={onFilesUploadClick}>
-                <input ref={uploadInputRef} type="file" style={{ display: "none" }} onChange={onFilesUpload} />
                 Upload
             </Button>
             <Tabs variant="outline" defaultValue={(startSelectedTab ?? showTabs[0]) as GalleryTabs}>

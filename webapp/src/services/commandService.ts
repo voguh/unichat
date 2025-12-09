@@ -98,19 +98,8 @@ export class CommandService {
         return invoke("get_gallery_items");
     }
 
-    public async uploadGalleryItems(files: File[]): Promise<void> {
-        const mimifiedFiles = await Promise.all(
-            files.map(async (file) => {
-                const arrayBuffer = await file.arrayBuffer();
-
-                return {
-                    name: file.name,
-                    data: Array.from(new Uint8Array(arrayBuffer))
-                };
-            })
-        );
-
-        await invoke("upload_gallery_items", { files: mimifiedFiles });
+    public async uploadGalleryItems(files: string[]): Promise<void> {
+        await invoke("upload_gallery_items", { files });
     }
 }
 

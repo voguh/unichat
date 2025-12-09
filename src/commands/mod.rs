@@ -374,28 +374,18 @@ pub async fn get_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<
     return Ok(gallery_items);
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct GalleryFile {
-    name: String,
-    data: Vec<u8>
-}
-
 #[tauri::command]
-pub async fn upload_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>, files: Vec<GalleryFile>) -> Result<(), String> {
+pub async fn upload_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>, files: Vec<String>) -> Result<(), String> {
     let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
     if !gallery_path.exists() {
         fs::create_dir_all(&gallery_path).map_err(|e| parse_fs_error(e, &gallery_path))?;
     }
 
-    let gallery_metadata_path = gallery_path.join(".metadata.json");
-    if !gallery_metadata_path.exists() {
-        fs::write(&gallery_metadata_path, "[]").map_err(|e| parse_fs_error(e, &gallery_metadata_path))?;
-    }
-
-    for file in files {
-        let file_path = gallery_path.join(&file.name);
-        fs::write(&file_path, &file.data).map_err(|e| parse_fs_error(e, &file_path))?;
+    for file_path_raw in files {
+        let file_path = PathBuf::from(&file_path_raw);
+        let file_name = file_path.file_name().and_then(|n| n.to_str()).ok_or("An error occurred on parse gallery item title")?;
+        let gallery_file_path = gallery_path.join(file_name);
+        fs::copy(&file_path, &gallery_file_path).map_err(|e| parse_fs_error(e, &gallery_file_path))?;
     }
 
     return Ok(());
