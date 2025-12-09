@@ -82,6 +82,19 @@
                 {
                     "type": "object",
                     "properties": {
+                        "type": { "const": "filepicker" },
+                        "group": { "type": "string" },
+                        "label": { "type": "string" },
+                        "description": { "type": "string" },
+                        "value": { "type": "string" },
+                        "fileType": { "enum": ["image", "video", "audio", "file"] }
+                    },
+                    "required": ["type", "label", "fileType"],
+                    "additionalProperties": false
+                },
+                {
+                    "type": "object",
+                    "properties": {
                         "type": { "const": "divider" },
                         "group": { "type": "string" },
                         "label": { "type": "string" }
