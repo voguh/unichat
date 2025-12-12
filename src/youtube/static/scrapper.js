@@ -7,18 +7,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-async function uniChatDispatchEvent(payload) {
-    payload.timestamp = Date.now();
-    await window.__TAURI__.event.emit("youtube_raw::event", payload)
-        .then(() => console.log(`Event with type '${payload.type}' dispatched successfully!`))
-        .catch((err) => {
-            console.error(`Failed to dispatch event with type '${payload.type}':`, err);
-            window.__TAURI_PLUGIN_LOG__.error(err);
-        });
-}
-
 async function uniChatDispatchPing() {
-    await uniChatDispatchEvent({ type: "ping" });
+    await unichatDispatchEvent({ type: "ping" });
     setTimeout(uniChatDispatchPing, 5000);
 }
 
@@ -40,25 +30,20 @@ async function uniChatHandleScrapEvent(response) {
         const actions = parsed?.continuationContents?.liveChatContinuation?.actions;
 
         if (actions != null && actions.length > 0) {
-            await uniChatDispatchEvent({ type: "message", actions });
+            await unichatDispatchEvent({ type: "message", actions });
         }
     } catch (err) {
         console.error(err);
         await window.__TAURI_PLUGIN_LOG__.error(err);
-        await uniChatDispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
+        await unichatDispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
     }
 }
 
 function uniChatInit() {
     try {
-        // Prevent right-click context menu in production
-        window.__TAURI__.core.invoke("is_dev").then((isDev) => {
-            if (!isDev) {
-                window.addEventListener("contextmenu", async (event) => {
-                    event.preventDefault();
-                });
-            }
-        });
+        if (window.unichat == null) {
+            throw new Error("UniChat object is not initialized.");
+        }
 
         /* ====================================================================================================== */
 
@@ -84,49 +69,15 @@ function uniChatInit() {
             throw new Error("Channel ID not found in YouTube initial data.");
         }
 
-        uniChatDispatchEvent({ type: "ready", channelId: channelId, url: window.location.href });
+        unichatDispatchEvent({ type: "ready", channelId: channelId, url: window.location.href });
 
         /* ====================================================================================================== */
 
-        // Wrap fetch to intercept YouTube live chat messages
-        const originalFetch = window.fetch;
-        Object.defineProperty(window, "fetch", {
-            value: async (...args) => {
-                const res = await originalFetch(...args);
-
-                if (res.url.startsWith("https://www.youtube.com/youtubei/v1/live_chat/get_live_chat") && res.ok) {
-                    uniChatHandleScrapEvent(res.clone());
-                }
-
-                return res;
-            },
-            configurable: true,
-            writable: true
-        });
-        Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
-        window.__TAURI_PLUGIN_LOG__.info("Fetch wrapped!");
-
-        /* ====================================================================================================== */
-
-        // Add a warning message to the page
-        const style = document.createElement("style");
-        style.textContent = `
-            html::before {
-                content: "UniChat installed! You can close this window.";
-                position: fixed;
-                top: 0;
-                left: 50%;
-                transform: translateX(-50%);
-                z-index: 9999;
-                background-color: rgba(0, 0, 0, 0.8);
-                color: white;
-                padding: 10px;
-                white-space: nowrap;
-                border-bottom-left-radius: 4px;
-                border-bottom-right-radius: 4px;
+        window.unichat.onFetchResponse = async function(res) {
+            if (res.url.startsWith("https://www.youtube.com/youtubei/v1/live_chat/get_live_chat") && res.ok) {
+                await uniChatHandleScrapEvent(res);
             }
-        `;
-        document.head.appendChild(style);
+        }
 
         /* ====================================================================================================== */
 
@@ -141,12 +92,6 @@ function uniChatInit() {
     } catch (err) {
         console.error(err);
         window.__TAURI_PLUGIN_LOG__.error(err);
-        uniChatDispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
+        unichatDispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
     }
-}
-
-if (document.readyState === "interactive" || document.readyState === "complete") {
-    uniChatInit();
-} else {
-    document.addEventListener("DOMContentLoaded", uniChatInit);
 }

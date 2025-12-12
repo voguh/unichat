@@ -15,6 +15,8 @@ pub mod render_emitter;
 pub mod settings;
 pub mod ureq;
 
+pub static COMMON_SCRAPPER_JS: &str = include_str!("./static/common_scrapper.js");
+
 pub fn parse_u32_to_rgba(color: u32) -> (u8, u8, u8, f32) {
     let a = ((color >> 24) & 0xFF) as u8;
     let r = ((color >> 16) & 0xFF) as u8;

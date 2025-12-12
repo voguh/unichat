@@ -7,16 +7,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-async function uniChatDispatchEvent(payload) {
-    payload.timestamp = Date.now();
-    await window.__TAURI__.event.emit("twitch_raw::event", payload)
-        .then(() => console.log(`Event with type '${payload.type}' dispatched successfully!`))
-        .catch((err) => {
-            console.error(`Failed to dispatch event with type '${payload.type}':`, err);
-            window.__TAURI_PLUGIN_LOG__.error(err);
-        });
-}
-
 async function uniChatHandleFetchBadgesAndCheermotes() {
     try {
         const username = window.location.pathname.split("/")[2];
@@ -70,9 +60,9 @@ async function uniChatHandleFetchBadgesAndCheermotes() {
                 const data = item.data;
 
                 if (extensions.operationName === "GlobalBadges") {
-                    await uniChatDispatchEvent({ type: "badges", badgesType: "global", badges: data.badges })
+                    await unichatDispatchEvent({ type: "badges", badgesType: "global", badges: data.badges })
                 } else if (extensions.operationName === "ChatList_Badges") {
-                    await uniChatDispatchEvent({ type: "badges", badgesType: "user", badges: data.user.broadcastBadges });
+                    await unichatDispatchEvent({ type: "badges", badgesType: "user", badges: data.user.broadcastBadges });
                 } else if (extensions.operationName === "BitsConfigContext_Global") {
                     const cheermotes = new Set();
 
@@ -86,14 +76,14 @@ async function uniChatHandleFetchBadgesAndCheermotes() {
                         }
                     }
 
-                    await uniChatDispatchEvent({ type: "cheermotes", cheermotes: Array.from(cheermotes) });
+                    await unichatDispatchEvent({ type: "cheermotes", cheermotes: Array.from(cheermotes) });
                 }
             }
         }
     } catch (err) {
         console.error(err);
         await window.__TAURI_PLUGIN_LOG__.error(err);
-        await uniChatDispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
+        await unichatDispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
     }
 }
 
@@ -101,7 +91,7 @@ async function uniChatHandleFetchBadgesAndCheermotes() {
 
 async function uniChatHandleRewardRedemption(payload) {
     const redemption = payload.redemption;
-    await uniChatDispatchEvent({ type: "redemption", rewardRedemption: redemption })
+    await unichatDispatchEvent({ type: "redemption", rewardRedemption: redemption })
 }
 
 async function uniChatHandlePubSubNotification(pubsub) {
@@ -116,54 +106,27 @@ async function uniChatHandleNotification(notification) {
     }
 }
 
-/* ========================================================================== */
-
-function uniChatWebSocketInterceptor() {
-    const OriginalWebSocket = window.WebSocket;
-
-    window.WebSocket = function (url, protocols) {
-        const wsInstance = protocols ? new OriginalWebSocket(url, protocols) : new OriginalWebSocket(url);
-
-        wsInstance.addEventListener("message", async (event) => {
-            try {
-                const data = JSON.parse(event.data);
-
-                if (url.startsWith("wss://hermes.twitch.tv/v1")) {
-                    if (data.type === "notification") {
-                        await uniChatHandleNotification(data.notification);
-                    }
-                } else if (url.startsWith("wss://irc-ws.chat.twitch.tv")) {
-                    // IRC WebSocket handling can be added here if needed
-                }
-
-            } catch (err) {
-                console.error("Failed to process WebSocket message:", err);
-                window.__TAURI_PLUGIN_LOG__.error(err);
-            }
-        });
-
-        return wsInstance;
-    };
-
-    window.WebSocket.prototype = OriginalWebSocket.prototype;
-    Object.defineProperty(window.WebSocket, "CONNECTING", { value: OriginalWebSocket.CONNECTING });
-    Object.defineProperty(window.WebSocket, "OPEN", { value: OriginalWebSocket.OPEN });
-    Object.defineProperty(window.WebSocket, "CLOSING", { value: OriginalWebSocket.CLOSING });
-    Object.defineProperty(window.WebSocket, "CLOSED", { value: OriginalWebSocket.CLOSED });
-}
-
 /* ================================================================================================================== */
 
 function uniChatInit() {
     try {
-        // Prevent right-click context menu in production
-        window.__TAURI__.core.invoke("is_dev").then((isDev) => {
-            if (!isDev) {
-                window.addEventListener("contextmenu", async (event) => {
-                    event.preventDefault();
-                });
+        if (window.unichat == null) {
+            throw new Error("UniChat object is not initialized.");
+        }
+
+        /* ====================================================================================================== */
+
+        window.unichat.onWebSocketMessage = async function(event, { wsInstance, url, protocols }) {
+            const data = JSON.parse(event.data);
+
+            if (url.startsWith("wss://hermes.twitch.tv/v1")) {
+                if (data.type === "notification") {
+                    await uniChatHandleNotification(data.notification);
+                }
+            } else if (url.startsWith("wss://irc-ws.chat.twitch.tv")) {
+                // IRC WebSocket handling can be added here if needed
             }
-        });
+        }
 
         /* ====================================================================================================== */
 
@@ -173,41 +136,9 @@ function uniChatInit() {
 
         uniChatWebSocketInterceptor();
         uniChatHandleFetchBadgesAndCheermotes()
-        Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, configurable: true, writable: true });
-        window.__TAURI_PLUGIN_LOG__.info("Fetch wrapped!");
-
-        /* ====================================================================================================== */
-
-        // Add a warning message to the page
-        const style = document.createElement("style");
-        style.textContent = `
-            html::before {
-                content: "UniChat installed! You can close this window.";
-                position: fixed;
-                top: 0;
-                left: 50%;
-                transform: translateX(-50%);
-                z-index: 9999;
-                background-color: rgba(0, 0, 0, 0.8);
-                color: white;
-                padding: 10px;
-                white-space: nowrap;
-                border-bottom-left-radius: 4px;
-                border-bottom-right-radius: 4px;
-            }
-        `;
-        document.head.appendChild(style);
-
-        /* ====================================================================================================== */
     } catch (err) {
         console.error(err);
         window.__TAURI_PLUGIN_LOG__.error(err);
-        uniChatDispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
+        unichatDispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: JSON.stringify(err.stack) });
     }
-}
-
-if (document.readyState === "interactive" || document.readyState === "complete") {
-    uniChatInit();
-} else {
-    document.addEventListener("DOMContentLoaded", uniChatInit);
 }

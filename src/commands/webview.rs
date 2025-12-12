@@ -7,18 +7,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use std::thread;
-use std::time;
-
 use tauri::AppHandle;
 use tauri::Manager as _;
 use tauri::Runtime;
 use tauri::Url;
 
 use crate::commands::serialize_error;
-use crate::twitch;
 use crate::utils::constants::CHAT_WINDOWS;
-use crate::youtube;
 
 fn decode_url(scrapper: &str, url: &str) -> Result<Url, String> {
     let mut url = url.to_string();
@@ -56,20 +51,8 @@ pub fn set_scrapper_webview_url<R: Runtime>(app: AppHandle<R>, label: &str, url:
     let parsed_url = decode_url(label.trim_end_matches("-chat"), url)?;
     webview_window.navigate(parsed_url).map_err(serialize_error)?;
 
-    thread::sleep(time::Duration::from_millis(500));
     if url == "about:blank" {
-        log::info!("Idle scrapper worker for scrapper window '{}'...", label);
         webview_window.hide().map_err(serialize_error)?;
-    } else {
-        log::info!("Injecting scrapper worker for scrapper window '{}'...", label);
-
-        if label.starts_with("youtube") {
-            webview_window.eval(youtube::SCRAPPER_JS).map_err(serialize_error)?;
-        } else if label.starts_with("twitch") {
-            webview_window.eval(twitch::SCRAPPER_JS).map_err(serialize_error)?;
-        } else {
-            log::warn!("No worker found for scrapper window '{}'!", label);
-        }
     }
 
     return Ok(());

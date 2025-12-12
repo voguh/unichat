@@ -11,6 +11,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
 use std::io::Write;
+use std::path::PathBuf;
 use std::sync::LazyLock;
 use std::sync::RwLock;
 use std::time::Duration;
@@ -22,9 +23,9 @@ use irc::client::prelude::*;
 use rand::Rng;
 use serde_json::json;
 use serde_json::Value;
+use tauri::WebviewWindowBuilder;
 use tauri::async_runtime::JoinHandle;
 use tauri::Listener;
-use tauri::Manager;
 
 use crate::events;
 use crate::events::unichat::UniChatBadge;
@@ -32,6 +33,7 @@ use crate::events::unichat::UniChatPlatform;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
 use crate::twitch::mapper::structs::parse_tags;
+use crate::utils::COMMON_SCRAPPER_JS;
 use crate::utils::constants::TWITCH_CHAT_WINDOW;
 use crate::utils::is_dev;
 use crate::utils::properties;
@@ -44,7 +46,7 @@ use crate::utils::settings::SettingsKeys;
 
 mod mapper;
 
-pub static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
+static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
 static RAW_EVENT: &str = "twitch_raw::event";
 static ASYNC_HANDLE: LazyLock<RwLock<Option<JoinHandle<()>>>> = LazyLock::new(|| RwLock::new(None));
 
@@ -318,11 +320,17 @@ fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), Bo
 }
 
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
+    let webview_url = tauri::WebviewUrl::App(PathBuf::from("scrapper-idle.html"));
+    let window = WebviewWindowBuilder::new(app, TWITCH_CHAT_WINDOW, webview_url)
+        .title("Twitch Chat")
+        .inner_size(400.0, 576.0)
+        .visible(false)
+        .resizable(false)
+        .maximizable(false)
+        .initialization_script(COMMON_SCRAPPER_JS.replace("{{SCRAPPER_JS}}", SCRAPPER_JS))
+        .build()?;
+
     let app_handle = app.handle().clone();
-
-    let window = app.get_webview_window(TWITCH_CHAT_WINDOW)
-        .ok_or("Twitch chat window not found")?;
-
     window.listen(RAW_EVENT, move |event| {
         if let Err(err) = handle_event(app_handle.clone(), event.payload()) {
             log::error!("Failed to handle Twitch raw event: {:?}", err);
