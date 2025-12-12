@@ -13,7 +13,6 @@ use std::fs;
 use std::io::Write;
 use std::sync::LazyLock;
 use std::sync::RwLock;
-use std::thread::sleep;
 use std::time::Duration;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
@@ -26,7 +25,6 @@ use serde_json::Value;
 use tauri::async_runtime::JoinHandle;
 use tauri::Listener;
 use tauri::Manager;
-use tauri::Url;
 
 use crate::events;
 use crate::events::unichat::UniChatBadge;
@@ -34,7 +32,6 @@ use crate::events::unichat::UniChatPlatform;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
 use crate::twitch::mapper::structs::parse_tags;
-use crate::utils;
 use crate::utils::constants::TWITCH_CHAT_WINDOW;
 use crate::utils::is_dev;
 use crate::utils::properties;
@@ -47,7 +44,7 @@ use crate::utils::settings::SettingsKeys;
 
 mod mapper;
 
-static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
+pub static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
 static RAW_EVENT: &str = "twitch_raw::event";
 static ASYNC_HANDLE: LazyLock<RwLock<Option<JoinHandle<()>>>> = LazyLock::new(|| RwLock::new(None));
 
@@ -297,47 +294,6 @@ fn handle_message_event(message: &Message) -> Result<(), Box<dyn std::error::Err
         Err(err) => {
             log_action("events-error.log", &format!("{} -- {:?}", err, message));
         }
-    }
-
-    return Ok(());
-}
-
-/* ================================================================================================================== */
-
-fn decode_url(url: &str) -> Result<Url, Box<dyn std::error::Error>> {
-    let mut url = url.to_string();
-
-    if url.is_empty() || url == "about:blank" || !url.starts_with("https://") {
-        if utils::is_dev() {
-            url = String::from("http://localhost:1421/twitch-await.html");
-        } else {
-            url = String::from("tauri://localhost/twitch-await.html");
-        }
-    }
-
-    return Url::parse(url.as_str()).map_err(|e| Box::new(e) as Box<dyn std::error::Error>);
-}
-
-#[tauri::command]
-pub async fn get_twitch_scrapper_url(app: tauri::AppHandle<tauri::Wry>) -> Result<String, String> {
-    let window = app.get_webview_window(TWITCH_CHAT_WINDOW).ok_or("Twitch chat window not found")?;
-    let url = window.url().map_err(|e| format!("{:?}", e))?;
-
-    return Ok(url.as_str().to_string());
-}
-
-#[tauri::command]
-pub async fn set_twitch_scrapper_url(app: tauri::AppHandle<tauri::Wry>, url: &str) -> Result<(), String> {
-    let window = app.get_webview_window(TWITCH_CHAT_WINDOW).ok_or("Twitch chat window not found")?;
-    let tauri_url = decode_url(url).map_err(|e| format!("{:?}", e))?;
-
-    window.navigate(tauri_url).map_err(|e| format!("{:?}", e))?;
-
-    if url != "about:blank" {
-        sleep(Duration::from_millis(500));
-        window.eval(SCRAPPER_JS).map_err(|e| format!("{:?}", e))?;
-    } else {
-        window.hide().map_err(|e| format!("{:?}", e))?;
     }
 
     return Ok(());

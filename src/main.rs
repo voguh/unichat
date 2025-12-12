@@ -187,26 +187,24 @@ fn main() {
         .plugin(tauri_plugin_opener::Builder::default().build())
         .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
-            commands::get_app_info,
-            commands::tour_steps_has_new,
-            commands::get_prev_tour_steps,
-            commands::get_tour_steps,
-            commands::set_tour_steps,
-            commands::is_dev,
-            commands::store_get_item,
-            commands::store_set_item,
-            commands::toggle_webview,
             commands::dispatch_clear_chat,
-            commands::list_widgets,
-            commands::get_widget_fields,
-            commands::get_widget_fieldstate,
-            commands::set_widget_fieldstate,
-            commands::get_gallery_items,
-            commands::upload_gallery_items,
-            twitch::get_twitch_scrapper_url,
-            twitch::set_twitch_scrapper_url,
-            youtube::get_youtube_scrapper_url,
-            youtube::set_youtube_scrapper_url
+            commands::get_app_info,
+            commands::is_dev,
+            commands::gallery::get_gallery_items,
+            commands::gallery::upload_gallery_items,
+            commands::store::store_get_item,
+            commands::store::store_set_item,
+            commands::tour::get_prev_tour_steps,
+            commands::tour::get_tour_steps,
+            commands::tour::set_tour_steps,
+            commands::tour::tour_steps_has_new,
+            commands::webview::get_scrapper_webview_url,
+            commands::webview::set_scrapper_webview_url,
+            commands::webview::toggle_scrapper_webview,
+            commands::widgets::get_widget_fields,
+            commands::widgets::get_widget_fieldstate,
+            commands::widgets::list_widgets,
+            commands::widgets::set_widget_fieldstate
         ])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())

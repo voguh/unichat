@@ -103,7 +103,7 @@ export function ScrapperCard({ type, validateUrl, editingTooltip }: Props): Reac
     }
 
     async function handleOpenPopout(): Promise<void> {
-        await commandService.toggleWebview(`${type}-chat`);
+        await commandService.toggleScrapperWebview(`${type}-chat`);
     }
 
     /* ============================================================================================================== */
