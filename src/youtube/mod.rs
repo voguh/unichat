@@ -9,19 +9,17 @@
 
 use std::fs;
 use std::io::Write;
-use std::path::PathBuf;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
 use serde_json::Value;
 use tauri::Listener;
-use tauri::WebviewWindowBuilder;
 
 use crate::error::Error;
 use crate::events;
 use crate::shared_emotes;
-use crate::utils::COMMON_SCRAPPER_JS;
 use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
+use crate::utils::create_scrapper_webview_window;
 use crate::utils::is_dev;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -33,7 +31,6 @@ use crate::utils::settings::SettingLogEventLevel;
 mod mapper;
 
 static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
-static YOUTUBE_RAW_EVENT: &str = "youtube_raw::event";
 
 /* ================================================================================================================== */
 
@@ -140,18 +137,10 @@ fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), Er
 }
 
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
-    let webview_url = tauri::WebviewUrl::App(PathBuf::from("scrapper_idle.html"));
-    let window = WebviewWindowBuilder::new(app, YOUTUBE_CHAT_WINDOW, webview_url)
-        .title("YouTube Chat")
-        .inner_size(400.0, 576.0)
-        .visible(false)
-        .resizable(false)
-        .maximizable(false)
-        .initialization_script(COMMON_SCRAPPER_JS.replace("{{SCRAPPER_JS}}", SCRAPPER_JS))
-        .build()?;
+    let window = create_scrapper_webview_window(app, YOUTUBE_CHAT_WINDOW, SCRAPPER_JS)?;
 
     let app_handle = app.handle().clone();
-    window.listen(YOUTUBE_RAW_EVENT, move |event| {
+    window.listen("unichat://scrapper_event", move |event| {
         if let Err(err) = handle_event(app_handle.clone(), event.payload()) {
             log::error!("Failed to handle YouTube raw event: {:?}", err);
             log::error!("Event payload: {}", event.payload());

@@ -7,7 +7,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use std::path::PathBuf;
 use std::sync::LazyLock;
+
+use tauri::WebviewWindowBuilder;
 
 use crate::error::Error;
 
@@ -18,6 +21,20 @@ pub mod settings;
 pub mod ureq;
 
 pub static COMMON_SCRAPPER_JS: &str = include_str!("./static/common_scrapper.js");
+
+pub fn create_scrapper_webview_window(app: &tauri::App<tauri::Wry>, label: &str, scrapper_js: &str) -> Result<tauri::WebviewWindow, Error> {
+    let webview_url = tauri::WebviewUrl::App(PathBuf::from("scrapper_idle.html"));
+    let window = WebviewWindowBuilder::new(app, label, webview_url)
+        .title("Scrapper Window")
+        .inner_size(400.0, 576.0)
+        .visible(false)
+        .resizable(false)
+        .maximizable(false)
+        .initialization_script(COMMON_SCRAPPER_JS.replace("{{SCRAPPER_JS}}", scrapper_js))
+        .build()?;
+
+    return Ok(window);
+}
 
 pub fn parse_u32_to_rgba(color: u32) -> (u8, u8, u8, f32) {
     let a = ((color >> 24) & 0xFF) as u8;

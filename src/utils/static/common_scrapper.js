@@ -11,8 +11,7 @@ class UniChatLogger {
     constructor() {
         const scrapperWebviewWindow = __TAURI__.webviewWindow.getCurrentWebviewWindow();
         const label = scrapperWebviewWindow.label;
-        const scrapperName = label.replace("-chat", "");
-        this.scrapperName = scrapperName;
+        this.scrapperName = label;
     }
 
     trace(message, ...args) {
@@ -124,10 +123,9 @@ if (uniChat.dispatchEvent == null || typeof uniChat.dispatchEvent !== "function"
         uniChatLogger.debug("Dispatching event of type '{}'", payload.type);
         const scrapperWebviewWindow = __TAURI__.webviewWindow.getCurrentWebviewWindow();
         const label = scrapperWebviewWindow.label;
-        const scrapperName = label.replace("-chat", "");
 
         payload.timestamp = Date.now();
-        await __TAURI__.event.emit(`${scrapperName}_raw::event`, payload)
+        await __TAURI__.event.emit("unichat://scrapper_event", payload)
             .then(() => uniChatLogger.debug("Event of type '{}' dispatched successfully", payload.type))
             .catch((err) => uniChatLogger.error(err.message, err));
     }
