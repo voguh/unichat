@@ -53,7 +53,7 @@ fn dispatch_event(mut payload: Value) -> Result<(), Error> {
 
 /* ================================================================================================================== */
 
-fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Error> {
+fn handle_ready_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let channel_id = payload.get("channelId").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'channelId' field in YouTube '{event_type}' payload"))?;
 
@@ -66,7 +66,7 @@ fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payl
 }
 
 
-fn handle_idle_event(_app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payload: &Value) -> Result<(), Error> {
+fn handle_idle_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
     return dispatch_event(payload.clone());
 }
 
@@ -84,7 +84,7 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     writeln!(file, "{content}").unwrap();
 }
 
-fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Error> {
+fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let actions = payload.get("actions").and_then(|v| v.as_array())
         .ok_or(Error::Message(format!("Missing or invalid 'actions' field in '{event_type}' event payload")))?;
 
@@ -123,15 +123,15 @@ fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, pa
 
 /* ================================================================================================================== */
 
-fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), Error> {
+fn handle_event(event: &str) -> Result<(), Error> {
     let payload: Value = serde_json::from_str(event)?;
     let event_type = payload.get("type").and_then(|v| v.as_str())
         .ok_or("Missing or invalid 'type' field in YouTube raw event payload")?;
 
     return match event_type {
-        "ready" => handle_ready_event(app, event_type, &payload),
-        "idle" => handle_idle_event(app, event_type, &payload),
-        "message" => handle_message_event(app, event_type, &payload),
+        "ready" => handle_ready_event(event_type, &payload),
+        "idle" => handle_idle_event(event_type, &payload),
+        "message" => handle_message_event(event_type, &payload),
         _ => dispatch_event(payload.clone())
     };
 }
@@ -139,9 +139,8 @@ fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), Er
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     let window = create_scrapper_webview_window(app, YOUTUBE_CHAT_WINDOW, SCRAPPER_JS)?;
 
-    let app_handle = app.handle().clone();
     window.listen("unichat://scrapper_event", move |event| {
-        if let Err(err) = handle_event(app_handle.clone(), event.payload()) {
+        if let Err(err) = handle_event(event.payload()) {
             log::error!("Failed to handle YouTube raw event: {:?}", err);
             log::error!("Event payload: {}", event.payload());
         }

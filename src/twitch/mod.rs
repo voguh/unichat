@@ -53,7 +53,7 @@ pub static TWITCH_BADGES: LazyLock<RwLock<HashMap<String, UniChatBadge>>> = Lazy
 
 fn dispatch_event(mut payload: Value) -> Result<(), Error> {
     if payload.get("type").is_none() {
-        return Err("Missing 'type' field in YouTube raw event payload".into());
+        return Err("Missing 'type' field in Twitch raw event payload".into());
     }
 
     if payload.get("scrapperId").is_none() {
@@ -123,7 +123,7 @@ async fn handle_create_connection(channel_name: &str) -> Result<(), Box<dyn std:
     }
 }
 
-fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Error> {
+fn handle_ready_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let url = payload.get("url").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'url' field in Twitch '{event_type}' payload"))?;
 
@@ -155,7 +155,7 @@ fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payl
     return dispatch_event(payload.clone());
 }
 
-fn handle_idle_event(_app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payload: &Value) -> Result<(), Error> {
+fn handle_idle_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
     if let Ok(mut handle) = ASYNC_HANDLE.write() {
         if let Some(join_handle) = handle.take() {
             join_handle.abort();
@@ -167,7 +167,7 @@ fn handle_idle_event(_app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payl
     return dispatch_event(payload.clone());
 }
 
-fn handle_badges_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Error> {
+fn handle_badges_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let badges_type = payload.get("badgesType").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'badgesType' field in Twitch '{}' payload", event_type))?;
     let badges = payload.get("badges").and_then(|v| v.as_array()).cloned()
@@ -191,7 +191,7 @@ fn handle_badges_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, pay
     return Ok(());
 }
 
-fn handle_cheermotes_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Error> {
+fn handle_cheermotes_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let cheermotes = payload.get("cheermotes").and_then(|v| v.as_array()).cloned()
         .ok_or(format!("Missing or invalid 'cheermotes' field in Twitch '{}' payload", event_type))?;
 
@@ -298,16 +298,16 @@ fn handle_message_event(message: &Message) -> Result<(), Error> {
 
 /* ================================================================================================================== */
 
-fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), Error> {
+fn handle_event(event: &str) -> Result<(), Error> {
     let payload: Value = serde_json::from_str(event)?;
     let event_type = payload.get("type").and_then(|v| v.as_str())
         .ok_or("Missing or invalid 'type' field in Twitch raw event payload")?;
 
     return match event_type {
-        "ready" => handle_ready_event(app, event_type, &payload),
-        "idle" => handle_idle_event(app, event_type, &payload),
-        "badges" => handle_badges_event(app, event_type, &payload),
-        "cheermotes" => handle_cheermotes_event(app, event_type, &payload),
+        "ready" => handle_ready_event(event_type, &payload),
+        "idle" => handle_idle_event(event_type, &payload),
+        "badges" => handle_badges_event(event_type, &payload),
+        "cheermotes" => handle_cheermotes_event(event_type, &payload),
         "redemption" => handle_ws_event(&payload),
         "message" => Ok(()),
         _ => dispatch_event(payload.clone())
@@ -317,9 +317,8 @@ fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), Er
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     let window = create_scrapper_webview_window(app, TWITCH_CHAT_WINDOW, SCRAPPER_JS)?;
 
-    let app_handle = app.handle().clone();
     window.listen("unichat://scrapper_event", move |event| {
-        if let Err(err) = handle_event(app_handle.clone(), event.payload()) {
+        if let Err(err) = handle_event(event.payload()) {
             log::error!("Failed to handle Twitch raw event: {:?}", err);
             log::error!("Event payload: {}", event.payload());
         }
