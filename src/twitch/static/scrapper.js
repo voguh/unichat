@@ -59,7 +59,6 @@ async function uniChatHandleGraphQLResponse(res) {
         }
     } catch (err) {
         uniChatLogger.error(err.message, err);
-        uniChat.dispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: err.stack });
     }
 }
 

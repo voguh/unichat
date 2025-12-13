@@ -28,22 +28,35 @@ async function uniChatHandleScrapEvent(response) {
             await uniChat.dispatchEvent({ type: "message", actions });
         }
     } catch (err) {
-        let errorMessage = 'Unknown error occurred';
-        let errorStack = null;
-        if (err instanceof Error) {
-            uniChatLogger.error(err.message, err);
-            errorMessage = err.message;
-            errorStack = err.stack;
-        } else {
-            uniChatLogger.error(String(err));
-            errorMessage = String(err);
-        }
-
-        await uniChat.dispatchEvent({ type: "error", message: errorMessage, stack: errorStack });
+        uniChatLogger.error(err.message, err);
     }
 }
 
 function uniChatInit() {
+    // Retrieve channel ID from YouTube initial data
+    const ytInitialData = window.ytInitialData;
+    const timedContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.timedContinuationData?.continuation;
+    const invalidationContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.invalidationContinuationData?.continuation;
+    const encodedProtoPuf = timedContinuationData || invalidationContinuationData;
+    const normalizedData = uniChatNormalizeBase64(encodedProtoPuf);
+    const protoPufBytes = atob(normalizedData);
+
+    let subProtoPuf = `${protoPufBytes.split("%3D")[0]}%3D`;
+    subProtoPuf = subProtoPuf.substring(10, subProtoPuf.length);
+
+    const decodedSubProtoPuf = uniChatNormalizeBase64(subProtoPuf);
+    const subProtoPufBytes = atob(decodedSubProtoPuf);
+
+    const lines = subProtoPufBytes.split("\n");
+    const channelIdLine = lines[2];
+    const channelId = channelIdLine.replace("\x18", "").split("\x12")[0];
+
+    if (!channelId) {
+        throw new Error("Channel ID not found in YouTube initial data.");
+    }
+
+    /* ====================================================================================================== */
+
     if (!window.location.href.startsWith("https://www.youtube.com/live_chat")) {
         throw new Error("This scrapper can only be initialized on YouTube live chat pages.");
     }
@@ -66,30 +79,6 @@ function uniChatInit() {
     // Select live chat instead top chat
     document.querySelector("#live-chat-view-selector-sub-menu #trigger")?.click();
     document.querySelector("#live-chat-view-selector-sub-menu #dropdown a:nth-child(2)")?.click()
-
-    /* ====================================================================================================== */
-
-    // Retrieve channel ID from YouTube initial data
-    const ytInitialData = window.ytInitialData;
-    const timedContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.timedContinuationData?.continuation;
-    const invalidationContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.invalidationContinuationData?.continuation;
-    const encodedProtoPuf = timedContinuationData || invalidationContinuationData;
-    const normalizedData = uniChatNormalizeBase64(encodedProtoPuf);
-    const protoPufBytes = atob(normalizedData);
-
-    let subProtoPuf = `${protoPufBytes.split("%3D")[0]}%3D`;
-    subProtoPuf = subProtoPuf.substring(10, subProtoPuf.length);
-
-    const decodedSubProtoPuf = uniChatNormalizeBase64(subProtoPuf);
-    const subProtoPufBytes = atob(decodedSubProtoPuf);
-
-    const lines = subProtoPufBytes.split("\n");
-    const channelIdLine = lines[2];
-    const channelId = channelIdLine.replace("\x18", "").split("\x12")[0];
-
-    if (!channelId) {
-        throw new Error("Channel ID not found in YouTube initial data.");
-    }
 
     return { channelId };
 }

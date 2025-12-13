@@ -21,9 +21,6 @@ export interface IPCStatusReadyEvent {
     type: "ready";
     scrapperId: string;
     timestamp: number;
-
-    url: string;
-    clientId: string;
 }
 
 export interface IPCStatusPingEvent {
@@ -33,7 +30,7 @@ export interface IPCStatusPingEvent {
 }
 
 export interface IPCStatusErrorEvent {
-    type: "error";
+    type: "error" | "fatal";
     scrapperId: string;
     timestamp: number;
 
