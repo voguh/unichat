@@ -15,8 +15,8 @@ import { notifications } from "@mantine/notifications";
 import { IconAppWindow, IconLoader, IconPlayerPlay, IconPlayerStop, IconX } from "@tabler/icons-react";
 import * as eventService from "@tauri-apps/api/event";
 
+import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
-import { LoggerFactory } from "unichat/services/loggerService";
 import { IPCEvents, IPCStatusEvent } from "unichat/utils/IPCStatusEvent";
 
 import { ScrapperCardStyledContainer } from "./styled";

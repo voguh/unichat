@@ -7,7 +7,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-import { LoggerFactory } from "unichat/logging/LoggerFactory";
+import { Logger } from "./Logger";
 
-/** @deprecated use {@link LoggerFactory.getLogger} instead. */
-export const loggerService = LoggerFactory.getLogger("legacy-logger-service");
+export class LoggerFactory {
+    constructor() {
+        throw new Error("LoggerFactory is a static class and cannot be instantiated.");
+    }
+
+    public static getLogger(name: string): Logger {
+        return new Logger(name);
+    }
+}
