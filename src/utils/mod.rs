@@ -25,13 +25,27 @@ pub static COMMON_SCRAPPER_JS: &str = include_str!("./static/common_scrapper.js"
 pub fn create_scrapper_webview_window(app: &tauri::App<tauri::Wry>, label: &str, scrapper_js: &str) -> Result<tauri::WebviewWindow, Error> {
     let start_hidden = settings::get_settings_create_webview_hidden()?;
     let webview_url = tauri::WebviewUrl::App(PathBuf::from("scrapper_idle.html"));
+    let scrapper_js = scrapper_js.to_string();
+
     let window = WebviewWindowBuilder::new(app, label, webview_url)
         .title(format!("UniChat - Scrapper ({})", label))
         .inner_size(400.0, 576.0)
         .visible(!start_hidden)
         .resizable(false)
         .maximizable(false)
-        .initialization_script(COMMON_SCRAPPER_JS.replace("{{SCRAPPER_JS}}", scrapper_js))
+        .on_page_load(move |window, payload| {
+            let event = payload.event();
+
+            match event {
+                tauri::webview::PageLoadEvent::Started => {
+                    log::info!("Scrapper webview '{}' started loading: {:}", window.label(), payload.url());
+                }
+                tauri::webview::PageLoadEvent::Finished => {
+                    log::info!("Scrapper webview '{}' finished loading: {:}", window.label(), payload.url());
+                    window.eval(COMMON_SCRAPPER_JS.replace("{{SCRAPPER_JS}}", &scrapper_js)).unwrap();
+                }
+            }
+        })
         .build()?;
 
     return Ok(window);
