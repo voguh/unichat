@@ -14,13 +14,12 @@ use serde_json::json;
 use tauri::AppHandle;
 use tauri::Runtime;
 
-use crate::commands::parse_fs_error;
-use crate::commands::serialize_error;
+use crate::error::Error;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
 #[tauri::command]
-pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, String> {
+pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, Error> {
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     if !user_widgets_dir.is_dir() {
         return Err("User widgets directory does not exist".into());
@@ -31,11 +30,12 @@ pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: St
         return Err("Widget fields file does not exist".into());
     }
 
-    return fs::read_to_string(&fields_path).map_err(|e| parse_fs_error(e, &fields_path));
+    let result = fs::read_to_string(&fields_path)?;
+    return Ok(result);
 }
 
 #[tauri::command]
-pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, String> {
+pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, Error> {
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     if !user_widgets_dir.is_dir() {
         return Err("User widgets directory does not exist".into());
@@ -46,11 +46,12 @@ pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
         return Err("Widget fieldstate file does not exist".into());
     }
 
-    return fs::read_to_string(&fieldstate_path).map_err(|e| parse_fs_error(e, &fieldstate_path));
+    let result = fs::read_to_string(&fieldstate_path)?;
+    return Ok(result);
 }
 
 #[tauri::command]
-pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String, data: String) -> Result<(), String> {
+pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String, data: String) -> Result<(), Error> {
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     if !user_widgets_dir.is_dir() {
         return Err("User widgets directory does not exist".into());
@@ -61,13 +62,14 @@ pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
         return Err("Widget fieldstate path is not a file".into());
     }
 
-    return fs::write(&fieldstate_path, data).map_err(|e| parse_fs_error(e, &fieldstate_path));
+    fs::write(&fieldstate_path, data)?;
+    return Ok(());
 }
 
 /* ================================================================================================================== */
 
 #[tauri::command]
-pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, String> {
+pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Error> {
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     if !user_widgets_dir.is_dir() {
         return Err("An error occurred on iterate over user widgets dir".into());
@@ -79,7 +81,7 @@ pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Strin
     }
 
     let mut system_widgets: Vec<String> = Vec::new();
-    let system_widgets_read = fs::read_dir(&system_widgets_dir).map_err(serialize_error)?;
+    let system_widgets_read = fs::read_dir(&system_widgets_dir)?;
     for entry in system_widgets_read {
         if let Ok(entry) = entry {
             let path = entry.path();
@@ -98,7 +100,7 @@ pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Strin
     }
 
     let mut user_widgets: Vec<String> = Vec::new();
-    let user_widgets_read = fs::read_dir(&user_widgets_dir).map_err(serialize_error)?;
+    let user_widgets_read = fs::read_dir(&user_widgets_dir)?;
     for entry in user_widgets_read {
         if let Ok(entry) = entry {
             let path = entry.path();

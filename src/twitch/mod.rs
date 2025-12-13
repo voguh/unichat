@@ -11,7 +11,6 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
 use std::io::Write;
-use std::path::PathBuf;
 use std::sync::LazyLock;
 use std::sync::RwLock;
 use std::time::Duration;
@@ -27,6 +26,7 @@ use tauri::WebviewWindowBuilder;
 use tauri::async_runtime::JoinHandle;
 use tauri::Listener;
 
+use crate::error::Error;
 use crate::events;
 use crate::events::unichat::UniChatBadge;
 use crate::events::unichat::UniChatPlatform;
@@ -42,7 +42,6 @@ use crate::utils::properties::PropertiesKey;
 use crate::utils::render_emitter;
 use crate::utils::settings;
 use crate::utils::settings::SettingLogEventLevel;
-use crate::utils::settings::SettingsKeys;
 
 mod mapper;
 
@@ -55,7 +54,7 @@ pub static TWITCH_BADGES: LazyLock<RwLock<HashMap<String, UniChatBadge>>> = Lazy
 
 /* ================================================================================================================== */
 
-fn dispatch_event(mut payload: Value) -> Result<(), Box<dyn std::error::Error>> {
+fn dispatch_event(mut payload: Value) -> Result<(), Error> {
     if payload.get("type").is_none() {
         return Err("Missing 'type' field in YouTube raw event payload".into());
     }
@@ -127,7 +126,7 @@ async fn handle_create_connection(channel_name: &str) -> Result<(), Box<dyn std:
     }
 }
 
-fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Box<dyn std::error::Error>> {
+fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Error> {
     let url = payload.get("url").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'url' field in Twitch '{event_type}' payload"))?;
 
@@ -159,7 +158,7 @@ fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payl
     return dispatch_event(payload.clone());
 }
 
-fn handle_idle_event(_app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payload: &Value) -> Result<(), Box<dyn std::error::Error>> {
+fn handle_idle_event(_app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payload: &Value) -> Result<(), Error> {
     if let Ok(mut handle) = ASYNC_HANDLE.write() {
         if let Some(join_handle) = handle.take() {
             join_handle.abort();
@@ -171,14 +170,13 @@ fn handle_idle_event(_app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payl
     return dispatch_event(payload.clone());
 }
 
-fn handle_badges_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Box<dyn std::error::Error>> {
+fn handle_badges_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Error> {
     let badges_type = payload.get("badgesType").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'badgesType' field in Twitch '{}' payload", event_type))?;
     let badges = payload.get("badges").and_then(|v| v.as_array()).cloned()
         .ok_or(format!("Missing or invalid 'badges' field in Twitch '{}' payload", event_type))?;
 
-    let twitch_badges: Vec<TwitchRawBadge> = serde_json::from_value(serde_json::Value::Array(badges))
-        .map_err(|e| format!("{:?}", e))?;
+    let twitch_badges: Vec<TwitchRawBadge> = serde_json::from_value(serde_json::Value::Array(badges))?;
 
     if let Ok(mut badges) = TWITCH_BADGES.write() {
         for twitch_badge in twitch_badges {
@@ -196,7 +194,7 @@ fn handle_badges_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, pay
     return Ok(());
 }
 
-fn handle_cheermotes_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Box<dyn std::error::Error>> {
+fn handle_cheermotes_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Error> {
     let cheermotes = payload.get("cheermotes").and_then(|v| v.as_array()).cloned()
         .ok_or(format!("Missing or invalid 'cheermotes' field in Twitch '{}' payload", event_type))?;
 
@@ -225,8 +223,8 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     writeln!(file, "{content}").unwrap();
 }
 
-fn handle_ws_event(message: &Value) -> Result<(), Box<dyn std::error::Error>> {
-    let log_events: SettingLogEventLevel = settings::get_item(SettingsKeys::LogTwitchEvents)?;
+fn handle_ws_event(message: &Value) -> Result<(), Error> {
+    let log_events = settings::get_settings_log_twitch_events()?;
 
     if is_dev() || log_events == SettingLogEventLevel::AllEvents {
         log_action("events-raw.log", &format!("{:?}", message));
@@ -257,8 +255,8 @@ fn handle_ws_event(message: &Value) -> Result<(), Box<dyn std::error::Error>> {
     return Ok(());
 }
 
-fn handle_message_event(message: &Message) -> Result<(), Box<dyn std::error::Error>> {
-    let log_events: SettingLogEventLevel = settings::get_item(SettingsKeys::LogTwitchEvents)?;
+fn handle_message_event(message: &Message) -> Result<(), Error> {
+    let log_events = settings::get_settings_log_twitch_events()?;
 
     if is_dev() || log_events == SettingLogEventLevel::AllEvents {
         log_action("events-raw.log", &format!("{:?}", message));
@@ -303,8 +301,8 @@ fn handle_message_event(message: &Message) -> Result<(), Box<dyn std::error::Err
 
 /* ================================================================================================================== */
 
-fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let payload: Value = serde_json::from_str(event).map_err(|e| format!("{:?}", e))?;
+fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), Error> {
+    let payload: Value = serde_json::from_str(event)?;
     let event_type = payload.get("type").and_then(|v| v.as_str())
         .ok_or("Missing or invalid 'type' field in Twitch raw event payload")?;
 
@@ -319,8 +317,15 @@ fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), Bo
     };
 }
 
-pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
-    let webview_url = tauri::WebviewUrl::App(PathBuf::from("scrapper-idle.html"));
+fn get_webview_url() -> Result<tauri::WebviewUrl, Error> {
+    let webview_url = settings::get_scrapper_url(TWITCH_CHAT_WINDOW)?;
+    let webview_url = url::Url::parse(&webview_url)?;
+    let webview_url = tauri::WebviewUrl::External(webview_url);
+    return Ok(webview_url);
+}
+
+pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
+    let webview_url = get_webview_url()?;
     let window = WebviewWindowBuilder::new(app, TWITCH_CHAT_WINDOW, webview_url)
         .title("Twitch Chat")
         .inner_size(400.0, 576.0)

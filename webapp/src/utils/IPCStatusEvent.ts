@@ -13,30 +13,32 @@ export enum IPCEvents {
 
 export interface IPCStatusIdleEvent {
     type: "idle";
-    platform: "youtube" | "twitch";
+    scrapperId: string;
     timestamp: number;
 }
 
 export interface IPCStatusReadyEvent {
     type: "ready";
-    platform: "youtube" | "twitch";
+    scrapperId: string;
+    timestamp: number;
+
     url: string;
     clientId: string;
-    timestamp: number;
 }
 
 export interface IPCStatusPingEvent {
     type: "ping";
-    platform: "youtube" | "twitch";
+    scrapperId: string;
     timestamp: number;
 }
 
 export interface IPCStatusErrorEvent {
     type: "error";
-    platform: "youtube" | "twitch";
+    scrapperId: string;
+    timestamp: number;
+
     message: string;
     stack: string;
-    timestamp: number;
 }
 
 export type IPCStatusEvent = IPCStatusIdleEvent | IPCStatusReadyEvent | IPCStatusPingEvent | IPCStatusErrorEvent;

@@ -16,7 +16,6 @@ use serde_json::Value;
 use crate::events::unichat::UniChatEmote;
 use crate::shared_emotes::EmotesParserResult;
 use crate::utils::is_valid_youtube_channel_id;
-use crate::utils::parse_serde_error;
 use crate::utils::ureq;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -48,7 +47,7 @@ pub fn fetch_global_emotes() -> HashMap<String, UniChatEmote> {
     let url = "https://7tv.io/v3/emote-sets/global";
     let parser = |data: Value| -> EmotesParserResult {
         let emotes = data.get("emotes").and_then(|v| v.as_array()).cloned().unwrap_or_default();
-        let emotes: Vec<SevenTVEmote> = serde_json::from_value(Value::Array(emotes)).map_err(parse_serde_error)?;
+        let emotes: Vec<SevenTVEmote> = serde_json::from_value(Value::Array(emotes))?;
 
         let mut parsed = HashMap::new();
         for emote in emotes.iter() {
@@ -75,7 +74,7 @@ pub fn fetch_channel_emotes(channel_id: &str) -> HashMap<String, UniChatEmote> {
     let parser = |data: Value| -> EmotesParserResult {
         let emote_set = data.get("emote_set").ok_or("Emote set not found")?;
         let emotes = emote_set.get("emotes").and_then(|v| v.as_array()).cloned().unwrap_or_default();
-        let emotes: Vec<SevenTVEmote> = serde_json::from_value(Value::Array(emotes)).map_err(parse_serde_error)?;
+        let emotes: Vec<SevenTVEmote> = serde_json::from_value(Value::Array(emotes))?;
 
         let mut parsed = HashMap::new();
         for emote in emotes.iter() {

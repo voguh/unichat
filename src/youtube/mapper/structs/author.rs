@@ -14,6 +14,7 @@ use moka::sync::Cache;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::error::Error;
 use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatBadge;
 use crate::utils::random_color_by_seed;
@@ -77,11 +78,11 @@ pub struct ButtonViewModel {
 static USERNAME_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[\p{L}\p{N}_\.-]{3,30}$").unwrap());
 static USERNAME_CACHE: LazyLock<Cache<String, Option<String>>> = LazyLock::new(|| Cache::builder().time_to_idle(Duration::from_secs(60 * 10)).build());
 
-pub fn parse_author_username(name: &AuthorNameWrapper) -> Result<Option<String>, Box<dyn std::error::Error>> {
+pub fn parse_author_username(name: &AuthorNameWrapper) -> Result<Option<String>, Error> {
     return parse_author_username_str(name.simple_text.clone());
 }
 
-pub fn parse_author_username_str(name: String) -> Result<Option<String>, Box<dyn std::error::Error>> {
+pub fn parse_author_username_str(name: String) -> Result<Option<String>, Error> {
     if let Some(cached_username) = USERNAME_CACHE.get(&name) {
         return Ok(cached_username.clone());
     }
@@ -99,11 +100,11 @@ pub fn parse_author_username_str(name: String) -> Result<Option<String>, Box<dyn
     return Ok(None);
 }
 
-pub fn parse_author_name(name: &AuthorNameWrapper) -> Result<String, Box<dyn std::error::Error>> {
+pub fn parse_author_name(name: &AuthorNameWrapper) -> Result<String, Error> {
     return parse_author_name_str(name.simple_text.clone());
 }
 
-pub fn parse_author_name_str(name: String) -> Result<String, Box<dyn std::error::Error>> {
+pub fn parse_author_name_str(name: String) -> Result<String, Error> {
     let username: String;
     if name.starts_with("@") {
         username = name.replacen("@", "", 1);
@@ -114,17 +115,17 @@ pub fn parse_author_name_str(name: String) -> Result<String, Box<dyn std::error:
     return Ok(username);
 }
 
-pub fn parse_author_photo(photo: &AuthorPhotoThumbnailsWrapper) -> Result<String, Box<dyn std::error::Error>> {
+pub fn parse_author_photo(photo: &AuthorPhotoThumbnailsWrapper) -> Result<String, Error> {
     let thumbnail = photo.thumbnails.last().ok_or("No thumbnails found in author photo")?;
 
     return Ok(proxy_youtube_url(&thumbnail.url));
 }
 
-pub fn parse_author_color(author_name: &str) -> Result<String, Box<dyn std::error::Error>> {
+pub fn parse_author_color(author_name: &str) -> Result<String, Error> {
     return random_color_by_seed(author_name)
 }
 
-pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_content: &Option<Vec<BeforeContentButton>>) -> Result<Vec<UniChatBadge>, Box<dyn std::error::Error>> {
+pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_content: &Option<Vec<BeforeContentButton>>) -> Result<Vec<UniChatBadge>, Error> {
     let mut parsed_badges = Vec::new();
 
     if let Some(badges) = badges {
@@ -207,7 +208,7 @@ fn expect_badge_type(badges: &[AuthorBadgeWrapper], badge_type: &str) -> bool {
     ));
 }
 
-pub fn parse_author_type(badges: &Option<Vec<AuthorBadgeWrapper>>) -> Result<UniChatAuthorType, Box<dyn std::error::Error>> {
+pub fn parse_author_type(badges: &Option<Vec<AuthorBadgeWrapper>>) -> Result<UniChatAuthorType, Error> {
     let mut author_type = UniChatAuthorType::Viewer;
 
     if let Some(badges) = badges {

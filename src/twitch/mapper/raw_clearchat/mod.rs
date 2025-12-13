@@ -9,6 +9,7 @@
 
 use irc::client::prelude::*;
 
+use crate::error::Error;
 use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
@@ -17,7 +18,7 @@ use crate::events::unichat::UNICHAT_EVENT_CLEAR_TYPE;
 use crate::events::unichat::UNICHAT_EVENT_REMOVE_AUTHOR_TYPE;
 use crate::twitch::mapper::structs::parse_tags;
 
-pub fn parse(channel: String, message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+pub fn parse(channel: String, message: &Message) -> Result<Option<UniChatEvent>, Error> {
     let event: UniChatEvent;
     let tags = parse_tags(&message.tags);
 

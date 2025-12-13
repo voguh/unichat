@@ -11,41 +11,8 @@ import { ComboboxItemGroup } from "@mantine/core";
 import { invoke } from "@tauri-apps/api/core";
 
 import { AppMetadata, GalleryItem, WidgetFields } from "unichat/types";
-import { TWITCH_SCRAPPER_WEBVIEW_ID, YOUTUBE_SCRAPPER_WEBVIEW_ID } from "unichat/utils/constants";
-
-/** @deprecated Deprecated in favor of using CommandService.getScrapperWebviewUrl and CommandService.setScrapperWebviewUrl */
-export class YouTubeCommandService {
-    public async getScrapperUrl(): Promise<string> {
-        return invoke("get_scrapper_webview_url", { label: YOUTUBE_SCRAPPER_WEBVIEW_ID });
-    }
-
-    public async setScrapperUrl(url: string): Promise<void> {
-        await invoke("set_scrapper_webview_url", { label: YOUTUBE_SCRAPPER_WEBVIEW_ID, url });
-    }
-}
-
-/** @deprecated Deprecated in favor of using CommandService.getScrapperWebviewUrl and CommandService.setScrapperWebviewUrl */
-export class TwitchCommandService {
-    public async getScrapperUrl(): Promise<string> {
-        return invoke("get_scrapper_webview_url", { label: TWITCH_SCRAPPER_WEBVIEW_ID });
-    }
-
-    public async setScrapperUrl(url: string): Promise<void> {
-        await invoke("set_scrapper_webview_url", { label: TWITCH_SCRAPPER_WEBVIEW_ID, url });
-    }
-}
 
 export class CommandService {
-    public get youTube(): YouTubeCommandService {
-        return new YouTubeCommandService();
-    }
-
-    public get twitch(): TwitchCommandService {
-        return new TwitchCommandService();
-    }
-
-    /* ========================================================================================== */
-
     public async dispatchClearChat(): Promise<void> {
         await invoke("dispatch_clear_chat");
     }

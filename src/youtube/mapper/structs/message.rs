@@ -10,6 +10,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::error::Error;
 use crate::shared_emotes;
 use crate::events::unichat::UniChatEmote;
 use crate::youtube::mapper::structs::proxy_youtube_url;
@@ -79,7 +80,7 @@ pub fn parse_super_chat_tier(primary_superchat_background_color: &str) -> Option
     }
 }
 
-pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
+pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<UniChatEmote>, Error> {
     let mut emotes = Vec::new();
 
     if let Ok(custom_emotes) = shared_emotes::EMOTES_HASHSET.read() {
@@ -125,7 +126,7 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
     return Ok(emotes);
 }
 
-pub fn parse_message_string(message_runs: &MessageRunsWrapper) -> Result<String, Box<dyn std::error::Error>> {
+pub fn parse_message_string(message_runs: &MessageRunsWrapper) -> Result<String, Error> {
     let mut str_message = Vec::new();
 
     for run in &message_runs.runs {

@@ -16,6 +16,8 @@ use std::sync::RwLock;
 use tauri::path::BaseDirectory;
 use tauri::Manager;
 
+use crate::error::Error;
+
 #[derive(PartialEq, Eq)]
 pub enum PropertiesKey {
     YouTubeChannelId,
@@ -72,7 +74,7 @@ impl fmt::Display for AppPaths {
 
 static PROPERTIES: OnceLock<RwLock<HashMap<String, String>>> = OnceLock::new();
 
-pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
+pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     let app_cache_dir = app.path().app_cache_dir()?;
     let app_config_dir = app.path().app_config_dir()?;
     let app_data_dir = app.path().app_data_dir()?;
@@ -118,19 +120,19 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     return Ok(());
 }
 
-fn get_item_raw(key: String) -> Result<String, Box<dyn std::error::Error>> {
+fn get_item_raw(key: String) -> Result<String, Error> {
     let props = PROPERTIES.get().ok_or("Properties not initialized")?;
-    let props_guard = props.read()?;
+    let props_guard = props.read().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
     return props_guard.get(&key).cloned().ok_or(format!("Key '{}' not found", key).into());
 }
 
-pub fn get_item(key: PropertiesKey) -> Result<String, Box<dyn std::error::Error>> {
+pub fn get_item(key: PropertiesKey) -> Result<String, Error> {
     return get_item_raw(key.to_string());
 }
 
-pub fn set_item(key: PropertiesKey, value: String) -> Result<(), Box<dyn std::error::Error>> {
+pub fn set_item(key: PropertiesKey, value: String) -> Result<(), Error> {
     let props = PROPERTIES.get().ok_or("Properties not initialized")?;
-    let mut props_guard = props.write()?;
+    let mut props_guard = props.write().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
     props_guard.insert(key.to_string(), value);
 
     return Ok(());

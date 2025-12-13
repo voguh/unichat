@@ -9,6 +9,7 @@
 
 use std::collections::HashMap;
 
+use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatSponsorGiftEventPayload;
@@ -20,7 +21,7 @@ use crate::twitch::mapper::structs::author::parse_author_type;
 use crate::twitch::mapper::structs::author::parse_author_username_str;
 use crate::twitch::mapper::structs::inject_raw_tags;
 
-pub fn parse(channel: String, tags: &HashMap<String, String>) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+pub fn parse(channel: String, tags: &HashMap<String, String>) -> Result<Option<UniChatEvent>, Error> {
     let room_id = tags.get("room-id").ok_or("Missing room-id tag")?;
     let author_id = tags.get("user-id").ok_or("Missing user-id tag")?;
     let author_username = parse_author_username_str(tags.get("login"))?;

@@ -23,6 +23,7 @@ use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::Responder;
 
+use crate::error::Error;
 use crate::events;
 use crate::events::event_emitter;
 use crate::utils::properties;
@@ -63,7 +64,7 @@ fn get_widget_dir(widget_name: &str) -> Option<PathBuf> {
     return None;
 }
 
-fn load_fieldstate(widget_path: &PathBuf) -> Result<HashMap<String, serde_json::Value>, Box<dyn std::error::Error>> {
+fn load_fieldstate(widget_path: &PathBuf) -> Result<HashMap<String, serde_json::Value>, Error> {
     let fields_path = widget_path.join("fields.json");
     let fields_raw = fs::read_to_string(fields_path).unwrap_or(String::from("{}"));
     let fields_map: HashMap<String, serde_json::Value> = serde_json::from_str(&fields_raw)?;

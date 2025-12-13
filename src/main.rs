@@ -20,6 +20,7 @@ use std::path::PathBuf;
 
 use tauri::Manager;
 
+use crate::error::Error;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
@@ -27,6 +28,7 @@ include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 
 mod actix;
 mod commands;
+mod error;
 mod events;
 mod shared_emotes;
 mod twitch;
@@ -36,7 +38,7 @@ mod youtube;
 pub static STATIC_APP_ICON: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/icons/icon.png"));
 pub static THIRD_PARTY_LICENSES: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/third_party_licenses.json"));
 
-fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Error> {
     if !dest.exists() {
         fs::create_dir(dest)?;
     }
@@ -57,7 +59,7 @@ fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error::
     return Ok(());
 }
 
-fn copy_wrapper(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+fn copy_wrapper(src: &PathBuf, dest: &PathBuf) -> Result<(), Error> {
     if dest.exists() {
         if dest.is_dir() {
             fs::remove_dir_all(dest)?;
@@ -76,10 +78,10 @@ fn copy_wrapper(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error:
 }
 
 fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
-    twitch::init(app)?;
     utils::properties::init(app)?;
-    utils::render_emitter::init(app)?;
     utils::settings::init(app)?;
+    utils::render_emitter::init(app)?;
+    twitch::init(app)?;
     youtube::init(app)?;
 
     /* ========================================================================================== */
@@ -193,7 +195,6 @@ fn main() {
             commands::gallery::get_gallery_items,
             commands::gallery::upload_gallery_items,
             commands::store::store_get_item,
-            commands::store::store_set_item,
             commands::tour::get_prev_tour_steps,
             commands::tour::get_tour_steps,
             commands::tour::set_tour_steps,

@@ -7,7 +7,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use std::path::PathBuf;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
@@ -16,6 +15,7 @@ use serde_json::Value;
 use tauri::AppHandle;
 use tauri::Runtime;
 
+use crate::error::Error;
 use crate::events;
 use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
@@ -41,26 +41,8 @@ pub mod tour;
 pub mod webview;
 pub mod widgets;
 
-/* ================================================================================================================== */
-
-pub fn serialize_error<E: std::fmt::Debug + 'static>(e: E) -> String {
-    log::error!("{:?}", e);
-    return format!("{:?}", e);
-}
-
-pub fn parse_fs_error(e: std::io::Error, path: &PathBuf) -> String {
-    return match e.kind() {
-        std::io::ErrorKind::NotFound => format!("File or directory '{:?}' not found", path),
-        std::io::ErrorKind::PermissionDenied => format!("Permission denied for file or directory '{:?}'", path),
-        std::io::ErrorKind::AlreadyExists => format!("File or directory '{:?}' already exists", path),
-        _ => format!("An error occurred with file or directory '{:?}': {:?}", path, e),
-    };
-}
-
-/* ================================================================================================================== */
-
 #[tauri::command]
-pub async fn get_app_info<R: Runtime>(_app: AppHandle<R>) -> Result<Value, String> {
+pub async fn get_app_info<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Error> {
     let metadata = json!({
         "displayName": CARGO_PKG_DISPLAY_NAME,
         "identifier": CARGO_PKG_NAME,
@@ -85,15 +67,15 @@ pub async fn get_app_info<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Strin
 /* ================================================================================================================== */
 
 #[tauri::command]
-pub async fn is_dev<R: Runtime>(_app: AppHandle<R>) -> Result<bool, String> {
+pub async fn is_dev<R: Runtime>(_app: AppHandle<R>) -> Result<bool, Error> {
     return Ok(utils::is_dev())
 }
 
 /* ================================================================================================================== */
 
 #[tauri::command]
-pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), String> {
-    let timestamp_usec = SystemTime::now().duration_since(UNIX_EPOCH).map_err(serialize_error)?;
+pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), Error> {
+    let timestamp_usec = SystemTime::now().duration_since(UNIX_EPOCH)?;
 
     let event = UniChatEvent::Clear {
         event_type: String::from(UNICHAT_EVENT_CLEAR_TYPE),
@@ -104,7 +86,7 @@ pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), S
         }
     };
 
-    events::event_emitter().emit(event).map_err(serialize_error)?;
+    events::event_emitter().emit(event)?;
 
     return Ok(());
 }

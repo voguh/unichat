@@ -18,55 +18,55 @@ export class Logger {
 
     public trace(message: string, ...args: any[]): void {
         const { formatted, throwable } = this._formatMessage(message, args);
-        trace(formatted, { file: this.name }).catch(console.error);
+        trace(`[${this.name}] ${formatted}`).catch(console.error);
         console.trace(formatted);
 
         if (throwable) {
-            error(throwable.stack, { file: this.name }).catch(console.error);
+            error(throwable.stack).catch(console.error);
             console.error(throwable);
         }
     }
 
     public debug(message: string, ...args: any[]): void {
         const { formatted, throwable } = this._formatMessage(message, args);
-        debug(formatted, { file: this.name }).catch(console.error);
+        debug(`[${this.name}] ${formatted}`).catch(console.error);
         console.debug(formatted);
 
         if (throwable) {
-            error(throwable.stack, { file: this.name }).catch(console.error);
+            error(throwable.stack).catch(console.error);
             console.error(throwable);
         }
     }
 
     public info(message: string, ...args: any[]): void {
         const { formatted, throwable } = this._formatMessage(message, args);
-        info(formatted, { file: this.name }).catch(console.error);
+        info(`[${this.name}] ${formatted}`).catch(console.error);
         console.info(formatted);
 
         if (throwable) {
-            error(throwable.stack, { file: this.name }).catch(console.error);
+            error(throwable.stack).catch(console.error);
             console.error(throwable);
         }
     }
 
     public warn(message: string, ...args: any[]): void {
         const { formatted, throwable } = this._formatMessage(message, args);
-        warn(formatted, { file: this.name }).catch(console.error);
+        warn(`[${this.name}] ${formatted}`).catch(console.error);
         console.warn(formatted);
 
         if (throwable) {
-            error(throwable.stack, { file: this.name }).catch(console.error);
+            error(throwable.stack).catch(console.error);
             console.error(throwable);
         }
     }
 
     public error(message: string, ...args: any[]): void {
         const { formatted, throwable } = this._formatMessage(message, args);
-        error(formatted, { file: this.name }).catch(console.error);
+        error(`[${this.name}] ${formatted}`).catch(console.error);
         console.error(formatted);
 
         if (throwable) {
-            error(throwable.stack, { file: this.name }).catch(console.error);
+            error(throwable.stack).catch(console.error);
             console.error(throwable);
         }
     }

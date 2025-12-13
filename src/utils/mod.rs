@@ -9,6 +9,8 @@
 
 use std::sync::LazyLock;
 
+use crate::error::Error;
+
 pub mod constants;
 pub mod properties;
 pub mod render_emitter;
@@ -30,11 +32,7 @@ pub fn is_dev() -> bool {
     return cfg!(debug_assertions) || tauri::is_dev();
 }
 
-pub fn parse_serde_error(error: serde_json::Error) -> Box<dyn std::error::Error> {
-    return Box::new(error);
-}
-
-pub fn normalize_value(value_raw: &str) -> Result<f32, Box<dyn std::error::Error>> {
+pub fn normalize_value(value_raw: &str) -> Result<f32, Error> {
     let last_dot = value_raw.rfind('.');
     let last_comma = value_raw.rfind(',');
     let normalized = match(last_dot, last_comma) {
@@ -64,10 +62,12 @@ pub fn normalize_value(value_raw: &str) -> Result<f32, Box<dyn std::error::Error
         (None, None) => value_raw.to_string()
     };
 
-    return normalized.parse().map_err(|e| Box::new(e) as Box<dyn std::error::Error>);
+    let value: f32 = normalized.parse()?;
+
+    return Ok(value);
 }
 
-pub fn random_color_by_seed(seed: &str) -> Result<String, Box<dyn std::error::Error>> {
+pub fn random_color_by_seed(seed: &str) -> Result<String, Error> {
     let mut hash: u32 = 2166136261;
     for byte in seed.as_bytes() {
         hash ^= *byte as u32;

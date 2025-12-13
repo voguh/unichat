@@ -14,8 +14,7 @@ use tauri::AppHandle;
 use tauri::Runtime;
 use tauri::Url;
 
-use crate::commands::parse_fs_error;
-use crate::commands::serialize_error;
+use crate::error::Error;
 use crate::utils::constants::BASE_REST_PORT;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -45,12 +44,12 @@ fn choose_file_type_by_path(path: &PathBuf) -> String {
     return String::from("file");
 }
 
-fn get_file_url(file_name: &str) -> Result<Url, Box<dyn std::error::Error>> {
+fn get_file_url(file_name: &str) -> Result<Url, Error> {
     let raw_path = format!("/gallery/{}", file_name);
     let segments: Vec<&str> = raw_path.split("/").collect();
     let mut abs = Url::parse(&format!("http://localhost:{}", BASE_REST_PORT))?;
     {
-        let mut p = abs.path_segments_mut().map_err(|_| "Cannot be base")?;
+        let mut p = abs.path_segments_mut().map_err(|_| url::ParseError::SetHostOnCannotBeABaseUrl)?;
         p.clear();
         p.extend(segments.iter().cloned());
     }
@@ -59,12 +58,12 @@ fn get_file_url(file_name: &str) -> Result<Url, Box<dyn std::error::Error>> {
 }
 
 #[tauri::command]
-pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<GalleryItem>, String> {
+pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<GalleryItem>, Error> {
     let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
 
     let mut gallery_items: Vec<GalleryItem> = Vec::new();
 
-    let gallery_read = fs::read_dir(&gallery_path).map_err(serialize_error)?;
+    let gallery_read = fs::read_dir(&gallery_path)?;
     for entry in gallery_read {
         if let Ok(entry) = entry {
             let path = entry.path();
@@ -72,7 +71,7 @@ pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Gal
                 let title = path.file_name().and_then(|n| n.to_str()).ok_or("An error occurred on parse gallery item title")?;
                 let item_type = choose_file_type_by_path(&path);
 
-                let file_url = get_file_url(title).map_err(serialize_error)?;
+                let file_url = get_file_url(title)?;
                 let preview_url = file_url.clone().into();
                 let url = file_url.path().into();
 
@@ -90,17 +89,17 @@ pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Gal
 }
 
 #[tauri::command]
-pub async fn upload_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>, files: Vec<String>) -> Result<(), String> {
+pub async fn upload_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>, files: Vec<String>) -> Result<(), Error> {
     let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
     if !gallery_path.exists() {
-        fs::create_dir_all(&gallery_path).map_err(|e| parse_fs_error(e, &gallery_path))?;
+        fs::create_dir_all(&gallery_path)?;
     }
 
     for file_path_raw in files {
         let file_path = PathBuf::from(&file_path_raw);
         let file_name = file_path.file_name().and_then(|n| n.to_str()).ok_or("An error occurred on parse gallery item title")?;
         let gallery_file_path = gallery_path.join(file_name);
-        fs::copy(&file_path, &gallery_file_path).map_err(|e| parse_fs_error(e, &gallery_file_path))?;
+        fs::copy(&file_path, &gallery_file_path)?;
     }
 
     return Ok(());

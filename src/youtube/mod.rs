@@ -9,7 +9,6 @@
 
 use std::fs;
 use std::io::Write;
-use std::path::PathBuf;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
@@ -17,6 +16,7 @@ use serde_json::Value;
 use tauri::Listener;
 use tauri::WebviewWindowBuilder;
 
+use crate::error::Error;
 use crate::events;
 use crate::events::unichat::UniChatPlatform;
 use crate::shared_emotes;
@@ -28,7 +28,6 @@ use crate::utils::properties::AppPaths;
 use crate::utils::properties::PropertiesKey;
 use crate::utils::render_emitter;
 use crate::utils::settings;
-use crate::utils::settings::SettingsKeys;
 use crate::utils::settings::SettingLogEventLevel;
 
 mod mapper;
@@ -38,9 +37,9 @@ static YOUTUBE_RAW_EVENT: &str = "youtube_raw::event";
 
 /* ================================================================================================================== */
 
-fn dispatch_event(mut payload: Value) -> Result<(), String> {
+fn dispatch_event(mut payload: Value) -> Result<(), Error> {
     if payload.get("type").is_none() {
-        return Err("Missing 'type' field in YouTube raw event payload".to_string());
+        return Err(Error::from("Missing 'type' field in YouTube raw event payload"));
     }
 
     if payload.get("platform").is_none() {
@@ -48,29 +47,29 @@ fn dispatch_event(mut payload: Value) -> Result<(), String> {
     }
 
     if payload.get("timestamp").is_none() {
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| format!("{:?}", e))?;
+        let now = SystemTime::now().duration_since(UNIX_EPOCH)?;
         payload["timestamp"] = serde_json::json!(now.as_millis());
     }
 
-    return render_emitter::emit(payload).map_err(|e| format!("{:?}", e));
+    return render_emitter::emit(payload);
 }
 
 /* ================================================================================================================== */
 
-fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
+fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Error> {
     let channel_id = payload.get("channelId").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'channelId' field in YouTube '{event_type}' payload"))?;
 
     properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))
-        .map_err(|e| format!("{:?}", e))?;
+        ?;
 
-    shared_emotes::fetch_shared_emotes(channel_id).map_err(|e| format!("{:?}", e))?;
+    shared_emotes::fetch_shared_emotes(channel_id)?;
 
     return dispatch_event(payload.clone());
 }
 
 
-fn handle_idle_event(_app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payload: &Value) -> Result<(), String> {
+fn handle_idle_event(_app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payload: &Value) -> Result<(), Error> {
     return dispatch_event(payload.clone());
 }
 
@@ -88,11 +87,11 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     writeln!(file, "{content}").unwrap();
 }
 
-fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), String> {
+fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Error> {
     let actions = payload.get("actions").and_then(|v| v.as_array())
-        .ok_or(format!("Missing or invalid 'actions' field in '{event_type}' event payload"))?;
+        .ok_or(Error::Message(format!("Missing or invalid 'actions' field in '{event_type}' event payload")))?;
 
-    let log_events: SettingLogEventLevel = settings::get_item(SettingsKeys::LogYouTubeEvents)?;
+    let log_events = settings::get_settings_log_youtube_events()?;
 
     for action in actions {
         if is_dev() || log_events == SettingLogEventLevel::AllEvents {
@@ -127,8 +126,8 @@ fn handle_message_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, pa
 
 /* ================================================================================================================== */
 
-fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), String> {
-    let payload: Value = serde_json::from_str(event).map_err(|e| format!("{:?}", e))?;
+fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), Error> {
+    let payload: Value = serde_json::from_str(event)?;
     let event_type = payload.get("type").and_then(|v| v.as_str())
         .ok_or("Missing or invalid 'type' field in YouTube raw event payload")?;
 
@@ -140,9 +139,16 @@ fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), St
     };
 }
 
-pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
-    let url = tauri::WebviewUrl::App(PathBuf::from("scrapper-idle.html"));
-    let window = WebviewWindowBuilder::new(app, YOUTUBE_CHAT_WINDOW, url)
+fn get_webview_url() -> Result<tauri::WebviewUrl, Error> {
+    let webview_url = settings::get_scrapper_url(YOUTUBE_CHAT_WINDOW)?;
+    let webview_url = url::Url::parse(&webview_url)?;
+    let webview_url = tauri::WebviewUrl::External(webview_url);
+    return Ok(webview_url);
+}
+
+pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
+    let webview_url = get_webview_url()?;
+    let window = WebviewWindowBuilder::new(app, YOUTUBE_CHAT_WINDOW, webview_url)
         .title("YouTube Chat")
         .inner_size(400.0, 576.0)
         .visible(false)

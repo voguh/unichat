@@ -7,6 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use crate::error::Error;
 use crate::events::unichat::UniChatEmote;
 use crate::shared_emotes;
 use crate::twitch::TWITCH_CHEERMOTES;
@@ -20,13 +21,13 @@ fn normalize_message_text(message_raw: &str) -> String {
     return message_raw;
 }
 
-fn parse_delimiter(start: &str, end: &str) -> Result<(usize, usize), Box<dyn std::error::Error>> {
+fn parse_delimiter(start: &str, end: &str) -> Result<(usize, usize), Error> {
     let start = start.parse::<usize>()?;
     let end = end.parse::<usize>()?;
     return Ok((start, end));
 }
 
-pub fn parse_message_emotes(raw_emotes: Option<&String>, message_text: &str) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
+pub fn parse_message_emotes(raw_emotes: Option<&String>, message_text: &str) -> Result<Vec<UniChatEmote>, Error> {
     let message_text = normalize_message_text(message_text);
     let mut emotes = Vec::new();
 
@@ -63,7 +64,7 @@ pub fn parse_message_emotes(raw_emotes: Option<&String>, message_text: &str) -> 
     return Ok(emotes);
 }
 
-pub fn parse_message_string(message_raw: &String) -> Result<String, Box<dyn std::error::Error>> {
+pub fn parse_message_string(message_raw: &String) -> Result<String, Error> {
     let message_raw = normalize_message_text(message_raw);
     let mut str_message = Vec::new();
 

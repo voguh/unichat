@@ -5461,9 +5461,11 @@ dependencies = [
  "tauri-plugin-log",
  "tauri-plugin-opener",
  "tauri-plugin-store",
+ "thiserror 2.0.17",
  "time",
  "tokio",
  "ureq",
+ "url",
 ]
 
 [[package]]

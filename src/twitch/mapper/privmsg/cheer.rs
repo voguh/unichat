@@ -11,6 +11,7 @@ use std::collections::HashMap;
 
 use irc::client::prelude::*;
 
+use crate::error::Error;
 use crate::events::unichat::UniChatDonateEventPayload;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
@@ -24,7 +25,7 @@ use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::twitch::mapper::structs::message::parse_message_emotes;
 use crate::twitch::mapper::structs::message::parse_message_string;
 
-pub fn parse(channel: String, text: String, message: &Message, tags: HashMap<String, String>) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+pub fn parse(channel: String, text: String, message: &Message, tags: HashMap<String, String>) -> Result<Option<UniChatEvent>, Error> {
     let room_id = tags.get("room-id").ok_or("Missing room-id tag")?;
     let author_id = tags.get("user-id").ok_or("Missing user-id tag")?;
     let author_username = parse_author_username(&message.prefix)?;

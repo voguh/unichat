@@ -14,6 +14,8 @@ use std::sync::RwLock;
 use tokio::sync::broadcast;
 use unichat::UniChatEvent;
 
+use crate::error::Error;
+
 pub mod unichat;
 
 const MAX_CAPACITY: usize = 50;
@@ -72,11 +74,8 @@ impl EventEmitter {
         return self.tx.subscribe();
     }
 
-    pub fn emit(&self, event: UniChatEvent) -> Result<(), Box<dyn std::error::Error>> {
-        if let Err(err) = self.tx.send(event.clone()) {
-            return Err(Box::new(err));
-        }
-
+    pub fn emit(&self, event: UniChatEvent) -> Result<(), Error> {
+        self.tx.send(event.clone()).map_err(|e| Error::TokioSendError { source: Box::from(e) })?;
         return Ok(());
     }
 }

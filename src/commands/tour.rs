@@ -11,47 +11,49 @@ use std::collections::HashSet;
 
 use tauri::Runtime;
 
+use crate::error::Error;
 use crate::utils::settings;
-use crate::utils::settings::SettingsKeys;
 
 #[tauri::command]
-pub async fn get_prev_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
-    let prev_tour_steps: Vec<String> = settings::get_item(SettingsKeys::PrevTourSteps)?;
+pub async fn get_prev_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, Error> {
+    let prev_tour_steps = settings::get_tour_prev_steps()?;
 
     return Ok(prev_tour_steps);
 }
 
 #[tauri::command]
-pub async fn get_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
-    let tour_steps: Vec<String> = settings::get_item(SettingsKeys::CurrentTourSteps)?;
+pub async fn get_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, Error> {
+    let tour_steps = settings::get_tour_current_steps()?;
 
     return Ok(tour_steps)
 }
 
 #[tauri::command]
-pub async fn set_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>, new_steps: Vec<String>) -> Result<(), String> {
-    let current_tour_steps: Vec<String> = settings::get_item(SettingsKeys::CurrentTourSteps)?;
+pub async fn set_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>, new_steps: Vec<String>) -> Result<(), Error> {
+    let current_tour_steps = settings::get_tour_current_steps()?;
 
     let current_hash_set: HashSet<_> = current_tour_steps.iter().cloned().collect();
     let new_hash_set: HashSet<_> = new_steps.iter().cloned().collect();
 
     if current_hash_set != new_hash_set {
+        let new_prev_tour_steps: Vec<String>;
         if current_tour_steps.is_empty() {
-            settings::set_item(SettingsKeys::PrevTourSteps, new_steps.clone())?;
+            new_prev_tour_steps = new_steps.clone();
         } else {
-            settings::set_item(SettingsKeys::PrevTourSteps, current_tour_steps)?;
+            new_prev_tour_steps = current_tour_steps;
         }
 
-        settings::set_item(SettingsKeys::CurrentTourSteps, new_steps)?;
+        settings::set_tour_prev_steps(new_prev_tour_steps)?;
+        settings::set_tour_current_steps(new_steps)?;
     }
 
     return Ok(())
 }
 
 #[tauri::command]
-pub async fn tour_steps_has_new<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, String> {
-    let prev_tour_steps: Vec<String> = settings::get_item(SettingsKeys::PrevTourSteps)?;
-    let current_tour_steps: Vec<String> = settings::get_item(SettingsKeys::CurrentTourSteps)?;
+pub async fn tour_steps_has_new<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, Error> {
+    let prev_tour_steps = settings::get_tour_prev_steps()?;
+    let current_tour_steps = settings::get_tour_current_steps()?;
 
     let prev_hash_set: HashSet<_> = prev_tour_steps.iter().cloned().collect();
     let mut new_hash_set: HashSet<_> = current_tour_steps.iter().cloned().collect();

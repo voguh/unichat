@@ -13,12 +13,12 @@ use std::sync::LazyLock;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::error::Error;
 use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatSponsorEventPayload;
 use crate::events::unichat::UNICHAT_EVENT_SPONSOR_TYPE;
-use crate::utils::parse_serde_error;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::parse_author_badges;
@@ -63,7 +63,7 @@ struct HeaderSubtext {
 
 // Following the examples 7 and 8, when headerSubtext contains a simpleText, it is the tier
 // of the membership.
-fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> Result<Option<String>, Box<dyn std::error::Error>> {
+fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> Result<Option<String>, Error> {
     let mut tier = None;
 
     if let Some(simple_text) = &parsed.header_subtext.simple_text {
@@ -91,7 +91,7 @@ static MONTHS_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new
 // Some times the headerPrimaryText contains only one run with all text, so I'm try to get the second run
 // if it exists, otherwise I will try to get the first run.
 // Also to extract the number of months, I am using a regex to find the first number in the text.
-fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> Result<u16, Box<dyn std::error::Error>> {
+fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> Result<u16, Error> {
     let mut months: u16 = 0;
 
     if let Some(header_primary_text) = &parsed.header_primary_text {
@@ -115,7 +115,7 @@ fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> Result<u16, Box<dyn 
     return Ok(months);
 }
 
-fn optional_build_message(message: &Option<MessageRunsWrapper>) -> Result<Option<String>, Box<dyn std::error::Error>> {
+fn optional_build_message(message: &Option<MessageRunsWrapper>) -> Result<Option<String>, Error> {
     if let Some(message_runs) = message {
         let message = parse_message_string(message_runs)?;
         return Ok(Some(message));
@@ -124,7 +124,7 @@ fn optional_build_message(message: &Option<MessageRunsWrapper>) -> Result<Option
     return Ok(None);
 }
 
-fn optional_build_emotes(message: &Option<MessageRunsWrapper>) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
+fn optional_build_emotes(message: &Option<MessageRunsWrapper>) -> Result<Vec<UniChatEmote>, Error> {
     if let Some(message_runs) = message {
         let emotes = parse_message_emojis(message_runs)?;
         return Ok(emotes);
@@ -133,8 +133,9 @@ fn optional_build_emotes(message: &Option<MessageRunsWrapper>) -> Result<Vec<Uni
     return Ok(Vec::new());
 }
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
-    let parsed: LiveChatMembershipItemRenderer = serde_json::from_value(value).map_err(parse_serde_error)?;
+pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
+    let parsed: LiveChatMembershipItemRenderer = serde_json::from_value(value)?;
+
     let author_username = parse_author_username(&parsed.author_name)?;
     let author_name = parse_author_name(&parsed.author_name)?;
     let author_color = parse_author_color(&author_name)?;
