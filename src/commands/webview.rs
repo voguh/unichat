@@ -50,9 +50,9 @@ pub fn set_scrapper_webview_url<R: Runtime>(app: AppHandle<R>, label: &str, url:
     let webview_window = app.get_webview_window(label).ok_or(format!("Scrapper window '{}' not found", label))?;
 
     let parsed_url = decode_url(url)?;
-    webview_window.navigate(parsed_url)?;
+    webview_window.navigate(parsed_url.clone())?;
 
-    if url == "about:blank" {
+    if parsed_url.as_str() == "tauri://localhost/scrapper_idle.html" {
         webview_window.hide()?;
     } else {
         settings::set_scrapper_url(label, url)?;
