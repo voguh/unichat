@@ -37,6 +37,12 @@ export class CommandService {
 
     /* ========================================================================================== */
 
+    public async storeGetItem<T = object>(key: string): Promise<T> {
+        return invoke("store_get_item", { key });
+    }
+
+    /* ========================================================================================== */
+
     public async getPrevTourSteps(): Promise<string[]> {
         return invoke("get_prev_tour_steps");
     }
