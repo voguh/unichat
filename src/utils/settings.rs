@@ -29,11 +29,13 @@ pub enum SettingLogEventLevel {
 
 const ONCE_LOCK_NAME: &str = "Settings::INSTANCE";
 static INSTANCE: OnceLock<Arc<Store<tauri::Wry>>> = OnceLock::new();
-const SCRAPPER_KEY_TEMPLATE: &str = "scrapper::{}::{}";
+const SCRAPPER_KEY_TEMPLATE: &str = "scrapper:{}:{}";
+const STORE_VERSION_KEY: &str = "store:version";
 const SETTINGS_TOUR_CURRENT_STEPS_KEY: &str = "settings.tour-steps";
 const SETTINGS_TOUR_PREV_STEPS_KEY: &str = "settings.prev-tour-steps";
 const SETTINGS_LOG_TWITCH_EVENTS_KEY: &str = "settings.log-twitch-events";
 const SETTINGS_LOG_YOUTUBE_EVENTS_KEY: &str = "settings.log-youtube-events";
+const SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY: &str = "settings.create-webview-hidden";
 
 fn store_mount_scrapper_key(scrapper_id: &str, key: &str) -> String {
     return SCRAPPER_KEY_TEMPLATE.replacen("{}", scrapper_id, 1).replacen("{}", key, 1);
@@ -45,8 +47,7 @@ fn store_mount_scrapper_key(scrapper_id: &str, key: &str) -> String {
 pub fn get_store_version() -> Result<u8, Error> {
     let store = INSTANCE.get().ok_or(Error::OnceLockNotInitialized(ONCE_LOCK_NAME))?;
 
-    let key = "store::version";
-    let raw_value = store.get(key);
+    let raw_value = store.get(STORE_VERSION_KEY);
 
     if let Some(value) = raw_value {
         let version: u8 = serde_json::from_value(value)?;
@@ -63,10 +64,8 @@ fn migrate_store_version() -> Result<(), Error> {
     let target_version: u8 = 1;
 
     while current_version < target_version {
-
         match current_version {
             0 => {
-                // Migrate from version 0 to version 1
                 let twitch_channel_name = store.get("twitch-channel-name");
                 if let Some(value) = twitch_channel_name {
                     log::info!("Migrating Twitch channel name to scrapper URL format");
@@ -76,8 +75,6 @@ fn migrate_store_version() -> Result<(), Error> {
                     let value_raw = serde_json::to_value(value_str)?;
                     store.set(key, value_raw);
                     store.delete("twitch-channel-name");
-                } else {
-                    log::info!("No Twitch channel name found for migration");
                 }
 
                 let youtube_video_id = store.get("youtube-video-id");
@@ -89,14 +86,67 @@ fn migrate_store_version() -> Result<(), Error> {
                     let value_raw = serde_json::to_value(value_str)?;
                     store.set(key, value_raw);
                     store.delete("youtube-video-id");
-                } else {
-                    log::info!("No YouTube video ID found for migration");
                 }
 
-                // After successful migration, update the store version
-                let key = "store::version";
+                /* ============================================================================== */
+
+                let create_webview_hidden = store.get(SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY);
+                if create_webview_hidden.is_none() {
+                    log::info!("Setting default value for {} setting", SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY);
+                    let raw_value = serde_json::to_value(true)?;
+                    store.set(SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY, raw_value);
+                }
+
+                /* ============================================================================== */
+
+                let mut twitch_log_level_need_migration = true;
+                let twitch_log_level = store.get(SETTINGS_LOG_TWITCH_EVENTS_KEY);
+                if let Some(value) = twitch_log_level {
+                    if let Ok(_) = serde_json::from_value::<SettingLogEventLevel>(value) {
+                        twitch_log_level_need_migration = false;
+                    }
+                }
+
+                if twitch_log_level_need_migration {
+                    log::info!("Setting default value for {} setting", SETTINGS_LOG_TWITCH_EVENTS_KEY);
+                    let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
+                    store.set(SETTINGS_LOG_TWITCH_EVENTS_KEY, raw_value);
+                }
+
+                /* ============================================================================== */
+
+                let mut youtube_log_level_need_migration = true;
+                let youtube_log_level = store.get(SETTINGS_LOG_YOUTUBE_EVENTS_KEY);
+                if let Some(value) = youtube_log_level {
+                    if let Ok(_) = serde_json::from_value::<SettingLogEventLevel>(value) {
+                        youtube_log_level_need_migration = false;
+                    }
+                }
+
+                if youtube_log_level_need_migration {
+                    log::info!("Setting default value for {} setting", SETTINGS_LOG_YOUTUBE_EVENTS_KEY);
+                    let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
+                    store.set(SETTINGS_LOG_YOUTUBE_EVENTS_KEY, raw_value);
+                }
+
+                /* ============================================================================== */
+
+                if store.get(SETTINGS_TOUR_CURRENT_STEPS_KEY).is_none() {
+                    log::info!("Setting default value for {} setting", SETTINGS_TOUR_CURRENT_STEPS_KEY);
+                    let raw_value = serde_json::to_value(Vec::<String>::new())?;
+                    store.set(SETTINGS_TOUR_CURRENT_STEPS_KEY, raw_value);
+                }
+
+                if store.get(SETTINGS_TOUR_PREV_STEPS_KEY).is_none() {
+                    log::info!("Setting default value for {} setting", SETTINGS_TOUR_PREV_STEPS_KEY);
+                    let raw_value = serde_json::to_value(Vec::<String>::new())?;
+                    store.set(SETTINGS_TOUR_PREV_STEPS_KEY, raw_value);
+                }
+
+                /* ============================================================================== */
+
                 let raw_value = serde_json::to_value(1)?;
-                store.set(key, raw_value);
+                store.set(STORE_VERSION_KEY, raw_value);
                 current_version = 1;
             }
             _ => {
@@ -201,6 +251,28 @@ pub fn set_tour_prev_steps(steps: Vec<String>) -> Result<(), Error> {
 }
 
 /* ====================================================================== */
+
+pub fn get_settings_create_webview_hidden() -> Result<bool, Error> {
+    let store = INSTANCE.get().ok_or(Error::OnceLockNotInitialized(ONCE_LOCK_NAME))?;
+
+    let raw_value = store.get(SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY);
+
+    if let Some(value) = raw_value {
+        let flag: bool = serde_json::from_value(value)?;
+        return Ok(flag);
+    } else {
+        return Ok(false);
+    }
+}
+
+pub fn set_settings_create_webview_hidden(flag: bool) -> Result<(), Error> {
+    let store = INSTANCE.get().ok_or(Error::OnceLockNotInitialized(ONCE_LOCK_NAME))?;
+
+    let raw_value = serde_json::to_value(flag)?;
+    store.set(SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY, raw_value);
+
+    return Ok(());
+}
 
 pub fn get_settings_log_twitch_events() -> Result<SettingLogEventLevel, Error> {
     let store = INSTANCE.get().ok_or(Error::OnceLockNotInitialized(ONCE_LOCK_NAME))?;
