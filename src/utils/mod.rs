@@ -26,7 +26,7 @@ pub fn create_scrapper_webview_window(app: &tauri::App<tauri::Wry>, label: &str,
     let start_hidden = settings::get_settings_create_webview_hidden()?;
     let webview_url = tauri::WebviewUrl::App(PathBuf::from("scrapper_idle.html"));
     let window = WebviewWindowBuilder::new(app, label, webview_url)
-        .title("Scrapper Window")
+        .title(format!("UniChat - Scrapper ({})", label))
         .inner_size(400.0, 576.0)
         .visible(!start_hidden)
         .resizable(false)
