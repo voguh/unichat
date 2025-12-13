@@ -195,7 +195,7 @@ export function ScrapperCard(props: Props): React.ReactNode {
                         placeholder={placeholderText}
                         ref={inputRef}
                         disabled={loading || scrapperIsRunning}
-                        data-tour={`${scrapperId}-chat-url-input`}
+                        data-tour={`${scrapperId}--url-input`}
                     />
                 </Tooltip>
                 <Button
