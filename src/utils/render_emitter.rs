@@ -35,8 +35,8 @@ pub fn emit(mut payload: Value) -> Result<(), Error> {
         return Err("Missing 'type' field in YouTube raw event payload".into());
     }
 
-    if payload.get("platform").is_none() {
-        return Err("Missing 'platform' field in YouTube raw event payload".into());
+    if payload.get("scrapperId").is_none() {
+        return Err("Missing 'scrapperId' field in YouTube raw event payload".into());
     }
 
     if payload.get("timestamp").is_none() {

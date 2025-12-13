@@ -19,7 +19,6 @@ use tauri::WebviewWindowBuilder;
 
 use crate::error::Error;
 use crate::events;
-use crate::events::unichat::UniChatPlatform;
 use crate::shared_emotes;
 use crate::utils::COMMON_SCRAPPER_JS;
 use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
@@ -43,8 +42,8 @@ fn dispatch_event(mut payload: Value) -> Result<(), Error> {
         return Err(Error::from("Missing 'type' field in YouTube raw event payload"));
     }
 
-    if payload.get("platform").is_none() {
-        payload["platform"] = serde_json::json!(UniChatPlatform::YouTube);
+    if payload.get("scrapperId").is_none() {
+        payload["scrapperId"] = serde_json::json!(YOUTUBE_CHAT_WINDOW);
     }
 
     if payload.get("timestamp").is_none() {

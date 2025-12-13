@@ -30,7 +30,6 @@ use tauri::Listener;
 use crate::error::Error;
 use crate::events;
 use crate::events::unichat::UniChatBadge;
-use crate::events::unichat::UniChatPlatform;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
 use crate::twitch::mapper::structs::parse_tags;
@@ -60,8 +59,8 @@ fn dispatch_event(mut payload: Value) -> Result<(), Error> {
         return Err("Missing 'type' field in YouTube raw event payload".into());
     }
 
-    if payload.get("platform").is_none() {
-        payload["platform"] = serde_json::json!(UniChatPlatform::Twitch);
+    if payload.get("scrapperId").is_none() {
+        payload["scrapperId"] = serde_json::json!(TWITCH_CHAT_WINDOW);
     }
 
     if payload.get("timestamp").is_none() {
