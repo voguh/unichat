@@ -7,30 +7,141 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-async function unichatDispatchEvent(payload) {
-    const scrapperWebviewWindow = window.__TAURI__.webviewWindow.getCurrentWebviewWindow();
-    const label = scrapperWebviewWindow.label;
-    const scrapperName = label.replace("-chat", "");
+class UniChatLogger {
+    constructor() {
+        const scrapperWebviewWindow = __TAURI__.webviewWindow.getCurrentWebviewWindow();
+        const label = scrapperWebviewWindow.label;
+        const scrapperName = label.replace("-chat", "");
+        this.scrapperName = scrapperName;
+    }
 
-    payload.timestamp = Date.now();
-    await window.__TAURI__.event.emit(`${scrapperName}_raw::event`, payload)
-        .then(() => {
-            console.log(`Dispatched event with type '${payload.type}'.`);
-        })
-        .catch((err) => {
-            console.error("Failed to dispatch event:", err);
-            window.__TAURI_PLUGIN_LOG__.error(err);
-        });
+    trace(message, ...args) {
+        const { formatted, throwable } = this.#format(message, args);
+        window.__TAURI_PLUGIN_LOG__.trace(formatted).catch(console.error);
+        console.trace(formatted);
+
+        if (throwable) {
+            window.__TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
+            console.error(throwable);
+        }
+    }
+
+    debug(message, ...args) {
+        const { formatted, throwable } = this.#format(message, args);
+        window.__TAURI_PLUGIN_LOG__.debug(formatted).catch(console.error);
+        console.debug(formatted);
+
+        if (throwable) {
+            window.__TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
+            console.error(throwable);
+        }
+    }
+
+    info(message, ...args) {
+        const { formatted, throwable } = this.#format(message, args);
+        window.__TAURI_PLUGIN_LOG__.info(formatted).catch(console.error);
+        console.info(formatted);
+
+        if (throwable) {
+            window.__TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
+            console.error(throwable);
+        }
+    }
+
+    warn(message, ...args) {
+        const { formatted, throwable } = this.#format(message, args);
+        window.__TAURI_PLUGIN_LOG__.warn(formatted).catch(console.error);
+        console.warn(formatted);
+
+        if (throwable) {
+            window.__TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
+            console.error(throwable);
+        }
+    }
+
+    error(message, ...args) {
+        const { formatted, throwable } = this.#format(message, args);
+        window.__TAURI_PLUGIN_LOG__.error(formatted).catch(console.error);
+        console.error(formatted);
+
+        if (throwable) {
+            window.__TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
+            console.error(throwable);
+        }
+    }
+
+    #format(message, args) {
+        let throwable = null;
+        let usedArgs = args;
+
+        if (args.length > 0 && args[args.length - 1] instanceof Error) {
+            throwable = args[args.length - 1];
+            usedArgs = args.slice(0, -1);
+        }
+
+        let formatted = message;
+        for (const arg of usedArgs) {
+            formatted = formatted.replace("{}", String(arg));
+        }
+
+        formatted = `[UniChat Scrapper - ${this.scrapperName}] ${formatted}`;
+
+        return { formatted, throwable };
+    }
 }
 
-async function unichatDispatchIdle() {
-    await unichatDispatchEvent({ type: "idle" });
+/** @type {UniChatLogger} */
+globalThis.uniChatLogger = globalThis.uniChatLogger || new UniChatLogger();
+
+/* ================================================================================================================== */
+
+if (globalThis.uniChat == null || typeof globalThis.uniChat !== "object") {
+    /**
+     * @typedef {Object} UniChat
+     * @property {function(UniChatEventPayload): Promise<void>} dispatchEvent - Function to dispatch events to the main application.
+     */
+    /** @type {UniChat} */
+    globalThis.uniChat = globalThis.uniChat || {};
+}
+
+if (uniChat.dispatchEvent == null || typeof uniChat.dispatchEvent !== "function") {
+    uniChat.dispatchEvent = async function (payload) {
+        if (payload == null || typeof payload !== "object") {
+            throw new Error("Payload must be a non-null object.");
+        }
+
+        if (payload.type == null || typeof payload.type !== "string" || payload.type.trim() === "") {
+            throw new Error("Payload must have a non-empty string 'type' property.");
+        }
+
+        uniChatLogger.debug("Dispatching event of type '{}'", payload.type);
+        const scrapperWebviewWindow = __TAURI__.webviewWindow.getCurrentWebviewWindow();
+        const label = scrapperWebviewWindow.label;
+        const scrapperName = label.replace("-chat", "");
+
+        payload.timestamp = Date.now();
+        await __TAURI__.event.emit(`${scrapperName}_raw::event`, payload)
+            .then(() => uniChatLogger.debug("Event of type '{}' dispatched successfully", payload.type))
+            .catch((err) => uniChatLogger.error(err.message, err));
+    }
+}
+
+/* ================================================================================================================== */
+
+async function uniChatDispatchIdle() {
+    await uniChat.dispatchEvent({ type: "idle" });
+    setTimeout(uniChatDispatchIdle, 5000);
+}
+
+async function uniChatDispatchPing() {
+    await uniChat.dispatchEvent({ type: "ping" });
+    setTimeout(uniChatDispatchPing, 5000);
 }
 
 /* ================================================================================================================== */
 
 if (window.WebSocket.__WRAPPED__ !== true) {
-    console.log("Wrapping WebSocket to monitor messages.");
+    uniChatLogger.info("Wrapping WebSocket to monitor messages.");
     const OriginalWebSocket = window.WebSocket;
 
     window.WebSocket = function (url, protocols) {
@@ -38,14 +149,11 @@ if (window.WebSocket.__WRAPPED__ !== true) {
 
         wsInstance.addEventListener("message", async (event) => {
             try {
-                const unichat = window.unichat || {};
-
-                if (typeof unichat.onWebSocketMessage === "function") {
-                    await unichat.onWebSocketMessage(event, { wsInstance, url, protocols });
+                if (typeof uniChat.onWebSocketMessage === "function") {
+                    await uniChat.onWebSocketMessage(event, { wsInstance, url, protocols });
                 }
             } catch (err) {
-                console.error("Failed to process WebSocket message:", err);
-                window.__TAURI_PLUGIN_LOG__.error(err);
+                uniChatLogger.error(err.message, err);
             }
         });
 
@@ -61,15 +169,14 @@ if (window.WebSocket.__WRAPPED__ !== true) {
 }
 
 if (window.fetch.__WRAPPED__ !== true) {
-    console.log("Wrapping fetch function to monitor network requests.");
+    uniChatLogger.info("Wrapping fetch function to monitor network requests.");
     const originalFetch = window.fetch;
 
     window.fetch = async function (...args) {
         const res = await originalFetch.apply(this, args);
 
-        const unichat = window.unichat || {};
-        if (typeof unichat.onFetchResponse === "function") {
-            unichat.onFetchResponse(res.clone(), ...args);
+        if (typeof uniChat.onFetchResponse === "function") {
+            uniChat.onFetchResponse(res.clone(), ...args);
         }
 
         return res;
@@ -85,46 +192,54 @@ if (window.fetch.__WRAPPED__ !== true) {
 /* ================================================================================================================== */
 
 function uniChatPreInit() {
-    if (window.unichat == null || typeof window.unichat !== "object") {
-        window.unichat = {};
-    }
-
-    if (window.location.protocol === "tauri:") {
-        console.log("Scrapper is not running, setting up idle dispatch.");
-        setInterval(unichatDispatchIdle, 5000);
-        return;
-    }
-
-    console.log("UniChat scrapper initializing...");
-    const style = document.createElement("style");
-    style.textContent = `
-        html::before {
-            content: "UniChat installed! You can close this window.";
-            position: fixed;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px;
-            white-space: nowrap;
-            border-bottom-left-radius: 4px;
-            border-bottom-right-radius: 4px;
+    try {
+        if ( window.location.href.startsWith("tauri://") || window.location.href.startsWith("http://localhost")) {
+            uniChatLogger.info("Scrapper is not running, setting up idle dispatch.");
+            uniChatDispatchIdle();
+            return;
         }
-    `;
-    document.head.appendChild(style);
 
-    window.__TAURI__.core.invoke("is_dev").then((isDev) => {
-        if (!isDev) {
-            window.addEventListener("contextmenu", async (event) => {
-                event.preventDefault();
-            });
+        uniChatLogger.info("UniChat scrapper initializing...")
+        const style = document.createElement("style");
+        style.textContent = `
+            html::before {
+                content: "UniChat installed! You can close this window.";
+                position: fixed;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 9999;
+                background-color: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 10px;
+                white-space: nowrap;
+                border-bottom-left-radius: 4px;
+                border-bottom-right-radius: 4px;
+            }
+        `;
+        document.head.appendChild(style);
+
+        __TAURI__.core.invoke("is_dev").then((isDev) => {
+            if (!isDev) {
+                window.addEventListener("contextmenu", async (event) => {
+                    event.preventDefault();
+                });
+            }
+        });
+
+        if (typeof uniChatInit !== "function") {
+            throw new Error("UniChat scrapper initialization function not found.");
         }
-    });
 
-    uniChatInit();
-    console.log("UniChat scrapper initialized.");
+        uniChatLogger.info("Calling uniChatInit...");
+        const payload = uniChatInit();
+
+        uniChat.dispatchEvent({ type: "ready", url: window.location.href, ...payload });
+        uniChatLogger.info("UniChat scrapper initialized.");
+    } catch (err) {
+        uniChatLogger.error(err.message, err);
+        uniChat.dispatchEvent({ type: "error", message: err.message ?? 'Unknown error occurred', stack: err.stack });
+    }
 }
 
 if (document.readyState === "interactive" || document.readyState === "complete") {
