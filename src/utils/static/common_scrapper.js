@@ -17,8 +17,7 @@ class UniChatLogger {
 
     trace(message, ...args) {
         const { formatted, throwable } = this.#format(message, args);
-        __TAURI_PLUGIN_LOG__.trace(formatted).catch(console.error);
-        console.trace(formatted);
+        this.#dispatchLog("trace", formatted)
 
         if (throwable) {
             this.#dispatchThrowable(throwable);
@@ -27,8 +26,7 @@ class UniChatLogger {
 
     debug(message, ...args) {
         const { formatted, throwable } = this.#format(message, args);
-        __TAURI_PLUGIN_LOG__.debug(formatted).catch(console.error);
-        console.debug(formatted);
+        this.#dispatchLog("debug", formatted)
 
         if (throwable) {
             this.#dispatchThrowable(throwable);
@@ -37,8 +35,7 @@ class UniChatLogger {
 
     info(message, ...args) {
         const { formatted, throwable } = this.#format(message, args);
-        __TAURI_PLUGIN_LOG__.info(formatted).catch(console.error);
-        console.info(formatted);
+        this.#dispatchLog("", formatted)
 
         if (throwable) {
             this.#dispatchThrowable(throwable);
@@ -47,8 +44,7 @@ class UniChatLogger {
 
     warn(message, ...args) {
         const { formatted, throwable } = this.#format(message, args);
-        __TAURI_PLUGIN_LOG__.warn(formatted).catch(console.error);
-        console.warn(formatted);
+        this.#dispatchLog("warn", formatted)
 
         if (throwable) {
             this.#dispatchThrowable(throwable);
@@ -62,33 +58,25 @@ class UniChatLogger {
         }
 
         const { formatted, throwable } = this.#format(message, args);
-        __TAURI_PLUGIN_LOG__.error(formatted).catch(console.error);
-        console.error(formatted);
+        this.#dispatchLog("error", formatted)
 
         if (throwable) {
             this.#dispatchThrowable(throwable);
         }
     }
 
-    fatal(message, ...args) {
-        if (message instanceof Error && args.length === 0) {
-            args.push(message);
-            message = message.message;
+    #dispatchLog(level, message) {
+        if (!["trace", "debug", "info", "warn", "error"].includes(level)) {
+            level = "info";
         }
 
-        const { formatted, throwable } = this.#format(message, args);
-        __TAURI_PLUGIN_LOG__.error(formatted).catch(console.error);
-        console.error(formatted);
-
-        if (throwable) {
-            this.#dispatchThrowable(throwable, true);
-        }
+        __TAURI_PLUGIN_LOG__[level](`[UniChat Scrapper - ${this.scrapperName}] ${message}`).catch(console.error);
+        console[level](message);
     }
 
-    #dispatchThrowable(throwable, isFatal = false) {
+    #dispatchThrowable(throwable) {
         __TAURI_PLUGIN_LOG__.error(`[UniChat Scrapper - ${this.scrapperName}] ${throwable.stack}`).catch(console.error);
         console.error(throwable);
-        uniChat.dispatchEvent({ type: isFatal ? "fatal" : "error", message: throwable.message, stack: throwable.stack });
     }
 
     #format(message, args) {
@@ -104,8 +92,6 @@ class UniChatLogger {
         for (const arg of usedArgs) {
             formatted = formatted.replace("{}", String(arg));
         }
-
-        formatted = `[UniChat Scrapper - ${this.scrapperName}] ${formatted}`;
 
         return { formatted, throwable };
     }
@@ -258,7 +244,8 @@ function uniChatPreInit() {
         uniChat.dispatchEvent({ type: "ready", url: window.location.href, ...payload });
         uniChatLogger.info("UniChat scrapper initialized.");
     } catch (err) {
-        uniChatLogger.fatal(err.message, err);
+        uniChatLogger.error(err.message, err);
+        uniChat.dispatchEvent({ type: "fatal", message: err.message, stack: err.stack });
     }
 }
 
