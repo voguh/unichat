@@ -110,7 +110,7 @@ export function ScrapperCard(props: Props): React.ReactNode {
             setLoading(true);
 
             try {
-                const scrapperStoredUrl = await commandService.storeGetItem<string>(`scrapper::${scrapperId}::url`);
+                const scrapperStoredUrl = await commandService.storeGetItem<string>(`scrapper:${scrapperId}:url`);
 
                 if (inputRef.current) {
                     inputRef.current.value = scrapperStoredUrl;
