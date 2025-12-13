@@ -106,20 +106,6 @@ export function ScrapperCard(props: Props): React.ReactNode {
     }
 
     React.useEffect(() => {
-        async function handleUpdateInputValue(): Promise<void> {
-            const activeUrl = await commandService.getScrapperWebviewUrl(scrapperId);
-
-            if (inputRef.current && inputRef.current.value !== activeUrl) {
-                inputRef.current.value = activeUrl;
-            }
-        }
-
-        if (scrapperIsRunning) {
-            handleUpdateInputValue();
-        }
-    }, [scrapperIsRunning]);
-
-    React.useEffect(() => {
         async function init(): Promise<void> {
             setLoading(true);
 
