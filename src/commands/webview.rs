@@ -16,13 +16,13 @@ use crate::error::Error;
 use crate::utils::constants::CHAT_WINDOWS;
 use crate::utils::settings;
 
-fn decode_url(scrapper: &str, url: &str) -> Result<Url, Error> {
-    let mut url = url.to_string();
+fn decode_url(url: &str) -> Result<Url, Error> {
+    let mut url = url;
     if url.trim().is_empty() || url == "about:blank" || !url.starts_with("https://") {
-        url = format!("tauri://localhost/{}-await.html", scrapper);
+        url = "tauri://localhost/scrapper_idle.html";
     }
 
-    let url = Url::parse(&url)?;
+    let url = Url::parse(url)?;
     return Ok(url);
 }
 
@@ -49,7 +49,7 @@ pub fn set_scrapper_webview_url<R: Runtime>(app: AppHandle<R>, label: &str, url:
     log::info!("Setting scrapper webview '{}' to URL '{}'", label, url);
     let webview_window = app.get_webview_window(label).ok_or(format!("Scrapper window '{}' not found", label))?;
 
-    let parsed_url = decode_url(label.trim_end_matches("-chat"), url)?;
+    let parsed_url = decode_url(url)?;
     webview_window.navigate(parsed_url)?;
 
     if url == "about:blank" {

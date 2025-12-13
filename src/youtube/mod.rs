@@ -9,6 +9,7 @@
 
 use std::fs;
 use std::io::Write;
+use std::path::PathBuf;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
@@ -139,15 +140,8 @@ fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), Er
     };
 }
 
-fn get_webview_url() -> Result<tauri::WebviewUrl, Error> {
-    let webview_url = settings::get_scrapper_url(YOUTUBE_CHAT_WINDOW)?;
-    let webview_url = url::Url::parse(&webview_url)?;
-    let webview_url = tauri::WebviewUrl::External(webview_url);
-    return Ok(webview_url);
-}
-
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
-    let webview_url = get_webview_url()?;
+    let webview_url = tauri::WebviewUrl::App(PathBuf::from("scrapper_idle.html"));
     let window = WebviewWindowBuilder::new(app, YOUTUBE_CHAT_WINDOW, webview_url)
         .title("YouTube Chat")
         .inner_size(400.0, 576.0)
