@@ -10,7 +10,7 @@
 import React from "react";
 
 import { Button, Card, TextInput, Tooltip } from "@mantine/core";
-import { IconLoader, IconPlayerPlay, IconPlayerStop, IconWindow, IconX } from "@tabler/icons-react";
+import { IconAppWindow, IconLoader, IconPlayerPlay, IconPlayerStop, IconX } from "@tabler/icons-react";
 import * as eventService from "@tauri-apps/api/event";
 
 import { commandService } from "unichat/services/commandService";
@@ -84,7 +84,7 @@ export function ScrapperCard(props: Props): React.ReactNode {
             return scrapperIcon;
         }
 
-        return <IconWindow size="20" />;
+        return <IconAppWindow size="20" />;
     }
 
     function handleStatusLabel(): string {

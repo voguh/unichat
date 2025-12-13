@@ -10,7 +10,7 @@
 import React from "react";
 
 import { Badge, Button, Card, ComboboxData, List, Select, Tooltip } from "@mantine/core";
-import { IconBrandYoutube, IconReload, IconWorld } from "@tabler/icons-react";
+import { IconBrandTwitch, IconBrandYoutube, IconReload, IconWorld } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { AppContext } from "unichat/contexts/AppContext";
@@ -187,6 +187,7 @@ export function DashboardHome(): React.ReactNode {
                     editingTooltip={mountTwitchEditingTooltip()}
                     displayName="Twitch"
                     placeholderText="https://www.twitch.tv/popout/{CHANNEL_NAME}/chat"
+                    scrapperIcon={<IconBrandTwitch size="20" />}
                 />
             </div>
             <div className="preview">
