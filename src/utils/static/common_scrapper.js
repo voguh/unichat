@@ -133,14 +133,15 @@ if (uniChat.dispatchEvent == null || typeof uniChat.dispatchEvent !== "function"
 
 /* ================================================================================================================== */
 
-async function uniChatDispatchIdle() {
-    await uniChat.dispatchEvent({ type: "idle" });
-    setTimeout(uniChatDispatchIdle, 5000);
-}
+function registerIntermittentEventDispatcher(type) {
+    async function dispatch() {
+        await uniChat.dispatchEvent({ type });
+    }
 
-async function uniChatDispatchPing() {
-    await uniChat.dispatchEvent({ type: "ping" });
-    setTimeout(uniChatDispatchPing, 5000);
+    let intervalId = setInterval(dispatch, 5000);
+    window.addEventListener("unload", () => {
+        clearInterval(intervalId);
+    });
 }
 
 /* ================================================================================================================== */
@@ -198,11 +199,13 @@ if (window.fetch.__WRAPPED__ !== true) {
 
 function uniChatPreInit() {
     try {
-        if ( window.location.href.startsWith("tauri://") || window.location.href.startsWith("http://localhost")) {
+        if (window.location.href.startsWith("tauri://") || window.location.href.startsWith("http://localhost")) {
             uniChatLogger.info("Scrapper is not running, setting up idle dispatch.");
-            uniChatDispatchIdle();
+            registerIntermittentEventDispatcher("idle");
             return;
         }
+
+        console.log("UniChat Scrapper JS Version: {{SCRAPPER_JS_VERSION}}");
 
         uniChatLogger.info("UniChat scrapper initializing...")
         const style = document.createElement("style");
@@ -241,6 +244,8 @@ function uniChatPreInit() {
 
         uniChat.dispatchEvent({ type: "ready", url: window.location.href, ...payload });
         uniChatLogger.info("UniChat scrapper initialized.");
+
+        registerIntermittentEventDispatcher("ping");
     } catch (err) {
         uniChatLogger.error(err.message, err);
         uniChat.dispatchEvent({ type: "fatal", message: err.message, stack: err.stack });

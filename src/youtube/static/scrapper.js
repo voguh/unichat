@@ -71,11 +71,6 @@ function uniChatInit() {
 
     /* ====================================================================================================== */
 
-    // Attach status ping event
-    uniChatDispatchPing();
-
-    /* ====================================================================================================== */
-
     // Select live chat instead top chat
     document.querySelector("#live-chat-view-selector-sub-menu #trigger")?.click();
     document.querySelector("#live-chat-view-selector-sub-menu #dropdown a:nth-child(2)")?.click()
