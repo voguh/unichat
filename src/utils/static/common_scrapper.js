@@ -17,56 +17,66 @@ class UniChatLogger {
 
     trace(message, ...args) {
         const { formatted, throwable } = this.#format(message, args);
-        window.__TAURI_PLUGIN_LOG__.trace(formatted).catch(console.error);
+        __TAURI_PLUGIN_LOG__.trace(formatted).catch(console.error);
         console.trace(formatted);
 
         if (throwable) {
-            window.__TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
+            __TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
             console.error(throwable);
+            uniChat.dispatchEvent({ type: "error", message: throwable.message, stack: throwable.stack });
         }
     }
 
     debug(message, ...args) {
         const { formatted, throwable } = this.#format(message, args);
-        window.__TAURI_PLUGIN_LOG__.debug(formatted).catch(console.error);
+        __TAURI_PLUGIN_LOG__.debug(formatted).catch(console.error);
         console.debug(formatted);
 
         if (throwable) {
-            window.__TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
+            __TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
             console.error(throwable);
+            uniChat.dispatchEvent({ type: "error", message: throwable.message, stack: throwable.stack });
         }
     }
 
     info(message, ...args) {
         const { formatted, throwable } = this.#format(message, args);
-        window.__TAURI_PLUGIN_LOG__.info(formatted).catch(console.error);
+        __TAURI_PLUGIN_LOG__.info(formatted).catch(console.error);
         console.info(formatted);
 
         if (throwable) {
-            window.__TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
+            __TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
             console.error(throwable);
+            uniChat.dispatchEvent({ type: "error", message: throwable.message, stack: throwable.stack });
         }
     }
 
     warn(message, ...args) {
         const { formatted, throwable } = this.#format(message, args);
-        window.__TAURI_PLUGIN_LOG__.warn(formatted).catch(console.error);
+        __TAURI_PLUGIN_LOG__.warn(formatted).catch(console.error);
         console.warn(formatted);
 
         if (throwable) {
-            window.__TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
+            __TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
             console.error(throwable);
+            uniChat.dispatchEvent({ type: "error", message: throwable.message, stack: throwable.stack });
         }
     }
 
     error(message, ...args) {
+        if (message instanceof Error && args.length === 0) {
+            args.push(message);
+            message = message.message;
+        }
+
         const { formatted, throwable } = this.#format(message, args);
-        window.__TAURI_PLUGIN_LOG__.error(formatted).catch(console.error);
+        __TAURI_PLUGIN_LOG__.error(formatted).catch(console.error);
         console.error(formatted);
 
         if (throwable) {
-            window.__TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
+            __TAURI_PLUGIN_LOG__.error(throwable.stack).catch(console.error);
             console.error(throwable);
+            uniChat.dispatchEvent({ type: "error", message: throwable.message, stack: throwable.stack });
         }
     }
 
