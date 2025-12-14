@@ -22,7 +22,7 @@ pub mod ureq;
 
 pub static COMMON_SCRAPPER_JS: &str = include_str!("./static/common_scrapper.js");
 
-pub fn create_scrapper_webview_window(app: &tauri::App<tauri::Wry>, label: &str, scrapper_js: &str) -> Result<tauri::WebviewWindow, Error> {
+pub fn create_scrapper_webview_window(app: &tauri::AppHandle<tauri::Wry>, label: &str, scrapper_js: &str) -> Result<tauri::WebviewWindow, Error> {
     let start_hidden = settings::get_settings_create_webview_hidden()?;
     let webview_url = tauri::WebviewUrl::App(PathBuf::from("scrapper_idle.html"));
     let scrapper_js = scrapper_js.to_string();

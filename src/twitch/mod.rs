@@ -23,6 +23,7 @@ use rand::Rng;
 use serde_json::json;
 use serde_json::Value;
 use tauri::async_runtime::JoinHandle;
+use tauri::Manager as _;
 use tauri::Listener;
 
 use crate::error::Error;
@@ -220,7 +221,7 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     writeln!(file, "{content}").unwrap();
 }
 
-fn handle_ws_event(message: &Value) -> Result<(), Error> {
+fn handle_ws_event(_event_type: &str, message: &Value) -> Result<(), Error> {
     let log_events = settings::get_settings_log_twitch_events()?;
 
     if is_dev() || log_events == SettingLogEventLevel::AllEvents {
@@ -314,14 +315,14 @@ fn handle_event(event: &str) -> Result<(), Error> {
         "idle" => handle_idle_event(event_type, &payload),
         "badges" => handle_badges_event(event_type, &payload),
         "cheermotes" => handle_cheermotes_event(event_type, &payload),
-        "redemption" => handle_ws_event(&payload),
+        "redemption" => handle_ws_event(event_type, &payload),
         "message" => Ok(()),
         _ => dispatch_event(payload.clone())
     };
 }
 
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
-    let window = create_scrapper_webview_window(app, TWITCH_CHAT_WINDOW, SCRAPPER_JS)?;
+    let window = create_scrapper_webview_window(app.app_handle(), TWITCH_CHAT_WINDOW, SCRAPPER_JS)?;
 
     window.listen("unichat://scrapper_event", move |event| {
         if let Err(err) = handle_event(event.payload()) {

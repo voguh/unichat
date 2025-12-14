@@ -14,6 +14,7 @@ use std::time::UNIX_EPOCH;
 
 use serde_json::Value;
 use tauri::Listener;
+use tauri::Manager as _;
 
 use crate::error::Error;
 use crate::events;
@@ -57,9 +58,7 @@ fn handle_ready_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let channel_id = payload.get("channelId").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'channelId' field in YouTube '{event_type}' payload"))?;
 
-    properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))
-        ?;
-
+    properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))?;
     shared_emotes::fetch_shared_emotes(channel_id)?;
 
     return dispatch_event(payload.clone());
@@ -143,7 +142,7 @@ fn handle_event(event: &str) -> Result<(), Error> {
 }
 
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
-    let window = create_scrapper_webview_window(app, YOUTUBE_CHAT_WINDOW, SCRAPPER_JS)?;
+    let window = create_scrapper_webview_window(app.app_handle(), YOUTUBE_CHAT_WINDOW, SCRAPPER_JS)?;
 
     window.listen("unichat://scrapper_event", move |event| {
         if let Err(err) = handle_event(event.payload()) {
