@@ -42,7 +42,10 @@ pub fn create_scrapper_webview_window(app: &tauri::App<tauri::Wry>, label: &str,
                 }
                 tauri::webview::PageLoadEvent::Finished => {
                     log::info!("Scrapper webview '{}' finished loading: {:}", window.label(), payload.url());
-                    window.eval(COMMON_SCRAPPER_JS.replace("{{SCRAPPER_JS}}", &scrapper_js)).unwrap();
+                    let formatted_js = COMMON_SCRAPPER_JS
+                        .replace("{{SCRAPPER_JS}}", &scrapper_js)
+                        .replace("{{SCRAPPER_ID}}", window.label());
+                    window.eval(&formatted_js).unwrap();
                 }
             }
         })

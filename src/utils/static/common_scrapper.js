@@ -8,10 +8,8 @@
  ******************************************************************************/
 
 class UniChatLogger {
-    constructor() {
-        const scrapperWebviewWindow = __TAURI__.webviewWindow.getCurrentWebviewWindow();
-        const label = scrapperWebviewWindow.label;
-        this.scrapperName = label;
+    get scrapperId() {
+        return "{{SCRAPPER_ID}}";
     }
 
     trace(message, ...args) {
@@ -69,12 +67,12 @@ class UniChatLogger {
             level = "info";
         }
 
-        __TAURI_PLUGIN_LOG__[level](`[UniChat Scrapper - ${this.scrapperName}] ${message}`).catch(console.error);
+        __TAURI_PLUGIN_LOG__[level](`[UniChat Scrapper - ${this.scrapperId}] ${message}`).catch(console.error);
         console[level](message);
     }
 
     #dispatchThrowable(throwable) {
-        __TAURI_PLUGIN_LOG__.error(`[UniChat Scrapper - ${this.scrapperName}] ${throwable.stack}`).catch(console.error);
+        __TAURI_PLUGIN_LOG__.error(`[UniChat Scrapper - ${this.scrapperId}] ${throwable.stack}`).catch(console.error);
         console.error(throwable);
     }
 
@@ -101,17 +99,12 @@ globalThis.uniChatLogger = globalThis.uniChatLogger || new UniChatLogger();
 
 /* ================================================================================================================== */
 
-if (globalThis.uniChat == null || typeof globalThis.uniChat !== "object") {
-    /**
-     * @typedef {Object} UniChat
-     * @property {function(UniChatEventPayload): Promise<void>} dispatchEvent - Function to dispatch events to the main application.
-     */
-    /** @type {UniChat} */
-    globalThis.uniChat = globalThis.uniChat || {};
-}
+class UniChat {
+    get scrapperId() {
+        return "{{SCRAPPER_ID}}";
+    }
 
-if (uniChat.dispatchEvent == null || typeof uniChat.dispatchEvent !== "function") {
-    uniChat.dispatchEvent = async function (payload) {
+    async dispatchEvent(payload) {
         if (payload == null || typeof payload !== "object") {
             throw new Error("Payload must be a non-null object.");
         }
@@ -120,16 +113,18 @@ if (uniChat.dispatchEvent == null || typeof uniChat.dispatchEvent !== "function"
             throw new Error("Payload must have a non-empty string 'type' property.");
         }
 
-        uniChatLogger.debug("Dispatching event of type '{}'", payload.type);
-        const scrapperWebviewWindow = __TAURI__.webviewWindow.getCurrentWebviewWindow();
-        const label = scrapperWebviewWindow.label;
+        payload.scrapperId = this.scrapperId;
+        payload.timestamp = Date.now() / 1000;
 
-        payload.timestamp = Date.now();
-        await __TAURI__.event.emit("unichat://scrapper_event", payload)
+        uniChatLogger.debug("Dispatching event of type '{}'", payload.type);
+        await __TAURI__.event.emitTo(this.scrapperId, "unichat://scrapper_event", payload)
             .then(() => uniChatLogger.debug("Event of type '{}' dispatched successfully", payload.type))
             .catch((err) => uniChatLogger.error(err.message, err));
     }
 }
+
+/** @type {UniChat} */
+globalThis.uniChat = globalThis.uniChat || new UniChat();
 
 /* ================================================================================================================== */
 
@@ -137,11 +132,6 @@ function registerIntermittentEventDispatcher(type) {
     async function dispatch() {
         await uniChat.dispatchEvent({ type });
     }
-
-    let intervalId = setInterval(dispatch, 5000);
-    window.addEventListener("unload", () => {
-        clearInterval(intervalId);
-    });
 }
 
 /* ================================================================================================================== */

@@ -125,8 +125,14 @@ fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> 
 
 fn handle_event(event: &str) -> Result<(), Error> {
     let payload: Value = serde_json::from_str(event)?;
+    let scrapper_id = payload.get("scrapperId").and_then(|v| v.as_str())
+        .ok_or("Missing or invalid 'scrapperId' field in YouTube raw event payload")?;
     let event_type = payload.get("type").and_then(|v| v.as_str())
         .ok_or("Missing or invalid 'type' field in YouTube raw event payload")?;
+
+    if scrapper_id != YOUTUBE_CHAT_WINDOW {
+        return Ok(());
+    }
 
     return match event_type {
         "ready" => handle_ready_event(event_type, &payload),
