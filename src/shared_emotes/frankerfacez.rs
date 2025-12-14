@@ -16,7 +16,6 @@ use serde_json::Value;
 use crate::events::unichat::UniChatEmote;
 use crate::shared_emotes::EmotesParserResult;
 use crate::utils::is_valid_youtube_channel_id;
-use crate::utils::parse_serde_error;
 use crate::utils::ureq;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -45,7 +44,7 @@ fn handle_request(url: &str, parser: fn(Value) -> EmotesParserResult) -> EmotesP
 pub fn fetch_global_emotes() -> HashMap<String, UniChatEmote> {
     let url = "https://api.betterttv.net/3/cached/frankerfacez/emotes/global";
     let parser = |data: Value| -> EmotesParserResult {
-        let emotes: Vec<FrankerFaceZEmote> = serde_json::from_value(data).map_err(parse_serde_error)?;
+        let emotes: Vec<FrankerFaceZEmote> = serde_json::from_value(data)?;
 
         let mut parsed = HashMap::new();
         for emote in emotes.iter() {
@@ -70,7 +69,7 @@ pub fn fetch_channel_emotes(channel_id: &str) -> HashMap<String, UniChatEmote> {
     }
 
     let parser = |data: Value| -> EmotesParserResult {
-        let emotes: Vec<FrankerFaceZEmote> = serde_json::from_value(data).map_err(parse_serde_error)?;
+        let emotes: Vec<FrankerFaceZEmote> = serde_json::from_value(data)?;
 
         let mut parsed = HashMap::new();
         for emote in emotes.iter() {

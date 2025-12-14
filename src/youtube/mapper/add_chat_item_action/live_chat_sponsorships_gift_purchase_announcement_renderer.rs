@@ -12,11 +12,11 @@ use std::collections::HashMap;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatSponsorGiftEventPayload;
 use crate::events::unichat::UNICHAT_EVENT_SPONSOR_GIFT_TYPE;
-use crate::utils::parse_serde_error;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::parse_author_badges;
@@ -71,7 +71,7 @@ struct Run {
     pub text: String
 }
 
-fn parse_count(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<u16, Box<dyn std::error::Error>> {
+fn parse_count(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<u16, Error> {
     let run = render.primary_text.runs.get(1).ok_or("No count run found")?;
     let raw_count = match run {
         MessageRun::Text { text } => text,
@@ -85,8 +85,8 @@ fn parse_count(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<u16, Box<d
 
 /* <============================================================================================> */
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
-    let parsed: LiveChatSponsorshipsGiftPurchaseAnnouncementRenderer = serde_json::from_value(value).map_err(parse_serde_error)?;
+pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
+    let parsed: LiveChatSponsorshipsGiftPurchaseAnnouncementRenderer = serde_json::from_value(value)?;
     let render = parsed.header.live_chat_sponsorships_header_renderer;
     let author_username = parse_author_username(&render.author_name)?;
     let author_name = parse_author_name(&render.author_name)?;

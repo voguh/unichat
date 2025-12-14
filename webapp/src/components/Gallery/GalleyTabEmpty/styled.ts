@@ -1,0 +1,18 @@
+/*!******************************************************************************
+ * UniChat
+ * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ ******************************************************************************/
+
+import styled from "styled-components";
+
+export const GalleyTabEmptyStyledContainer = styled.div`
+    width: 100%;
+    height: 210px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;

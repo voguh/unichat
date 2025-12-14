@@ -10,12 +10,12 @@
 import React from "react";
 
 import { Badge, Button, Card, ComboboxData, List, Select, Tooltip } from "@mantine/core";
-import { IconReload, IconWorld } from "@tabler/icons-react";
+import { IconBrandTwitch, IconBrandYoutube, IconReload, IconWorld } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { AppContext } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
-import { WIDGET_URL_PREFIX } from "unichat/utils/constants";
+import { TWITCH_SCRAPPER_ID, WIDGET_URL_PREFIX, YOUTUBE_SCRAPPER_ID } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
 
 import { ScrapperCard } from "./ScrapperCard";
@@ -62,7 +62,7 @@ export function DashboardHome(): React.ReactNode {
         );
     }
 
-    function validateYouTubeChatUrl(value: string): [string, string] {
+    function validateYouTubeChatUrl(value: string): string {
         // Normalize the URL to ensure it starts with a valid protocol
         value = normalizeUrlScheme(value);
 
@@ -88,7 +88,7 @@ export function DashboardHome(): React.ReactNode {
             throw new Error("Invalid YouTube chat URL");
         }
 
-        return [`https://www.youtube.com/live_chat?v=${videoId}`, videoId];
+        return `https://www.youtube.com/live_chat?v=${videoId}`;
     }
 
     /* ====================================================================== */
@@ -111,7 +111,7 @@ export function DashboardHome(): React.ReactNode {
         );
     }
 
-    function validateTwitchChatUrl(value: string): [string, string] {
+    function validateTwitchChatUrl(value: string): string {
         // Normalize the URL to ensure it starts with a valid protocol
         value = normalizeUrlScheme(value);
 
@@ -135,7 +135,7 @@ export function DashboardHome(): React.ReactNode {
             throw new Error("Invalid Twitch chat URL");
         }
 
-        return [`https://www.twitch.tv/popout/${channelName}/chat`, channelName];
+        return `https://www.twitch.tv/popout/${channelName}/chat`;
     }
 
     /* ====================================================================== */
@@ -174,14 +174,20 @@ export function DashboardHome(): React.ReactNode {
         <DashboardHomeStyledContainer>
             <div className="fields">
                 <ScrapperCard
-                    type="youtube"
+                    scrapperId={YOUTUBE_SCRAPPER_ID}
+                    displayName="YouTube"
                     validateUrl={validateYouTubeChatUrl}
                     editingTooltip={mountYouTubeEditingTooltip()}
+                    placeholderText="https://www.youtube.com/live_chat?v={VIDEO_ID}"
+                    scrapperIcon={<IconBrandYoutube size="20" />}
                 />
                 <ScrapperCard
-                    type="twitch"
+                    scrapperId={TWITCH_SCRAPPER_ID}
                     validateUrl={validateTwitchChatUrl}
                     editingTooltip={mountTwitchEditingTooltip()}
+                    displayName="Twitch"
+                    placeholderText="https://www.twitch.tv/popout/{CHANNEL_NAME}/chat"
+                    scrapperIcon={<IconBrandTwitch size="20" />}
                 />
             </div>
             <div className="preview">

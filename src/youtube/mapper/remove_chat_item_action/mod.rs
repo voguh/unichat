@@ -13,11 +13,11 @@ use std::time::UNIX_EPOCH;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRemoveMessageEventPayload;
 use crate::events::unichat::UNICHAT_EVENT_REMOVE_MESSAGE_TYPE;
-use crate::utils::parse_serde_error;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 
@@ -27,8 +27,8 @@ struct RemoveChatItemAction {
     target_item_id: String
 }
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
-    let parsed: RemoveChatItemAction = serde_json::from_value(value).map_err(parse_serde_error)?;
+pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
+    let parsed: RemoveChatItemAction = serde_json::from_value(value)?;
 
     let timestamp_usec = SystemTime::now().duration_since(UNIX_EPOCH)?;
 

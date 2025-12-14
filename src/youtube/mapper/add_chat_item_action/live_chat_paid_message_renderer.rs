@@ -12,6 +12,7 @@ use std::collections::HashMap;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::error::Error;
 use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_PRIMARY_BACKGROUND_COLOR;
 use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_PRIMARY_TEXT_COLOR;
 use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_SECONDARY_BACKGROUND_COLOR;
@@ -24,7 +25,6 @@ use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UNICHAT_EVENT_DONATE_TYPE;
 use crate::utils;
 use crate::utils::normalize_value;
-use crate::utils::parse_serde_error;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::parse_author_badges;
@@ -71,7 +71,7 @@ struct PurchaseAmountText {
 
 /* <============================================================================================> */
 
-fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(String, f32), Box<dyn std::error::Error>> {
+fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(String, f32), Error> {
     let raw_text = &purchase_amount_text.simple_text;
 
     if let Some(index) = raw_text.find(|c: char| c.is_ascii_digit()) {
@@ -84,7 +84,7 @@ fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(S
     return Err("Invalid purchase amount text format".into());
 }
 
-fn build_option_message(message: &Option<MessageRunsWrapper>) -> Result<Option<String>, Box<dyn std::error::Error>> {
+fn build_option_message(message: &Option<MessageRunsWrapper>) -> Result<Option<String>, Error> {
     if let Some(message) = message {
         let message_text = parse_message_string(message)?;
         return Ok(Some(message_text));
@@ -93,7 +93,7 @@ fn build_option_message(message: &Option<MessageRunsWrapper>) -> Result<Option<S
     return Ok(None);
 }
 
-fn build_option_emotes(message: &Option<MessageRunsWrapper>) -> Result<Vec<UniChatEmote>, Box<dyn std::error::Error>> {
+fn build_option_emotes(message: &Option<MessageRunsWrapper>) -> Result<Vec<UniChatEmote>, Error> {
     if let Some(message) = message {
         let emotes = parse_message_emojis(message)?;
         return Ok(emotes);
@@ -141,8 +141,9 @@ fn create_flags_map(parsed: & LiveChatPaidMessageRenderer) -> HashMap<String, Op
     return flags;
 }
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
-    let parsed: LiveChatPaidMessageRenderer = serde_json::from_value(value).map_err(parse_serde_error)?;
+pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
+    let parsed: LiveChatPaidMessageRenderer = serde_json::from_value(value)?;
+
     let flags = create_flags_map(&parsed);
     let author_username = parse_author_username(&parsed.author_name)?;
     let author_name = parse_author_name(&parsed.author_name)?;

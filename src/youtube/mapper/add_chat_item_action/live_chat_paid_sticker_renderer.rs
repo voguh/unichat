@@ -12,6 +12,7 @@ use std::collections::HashMap;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::error::Error;
 use crate::events::unichat::UniChatDonateEventPayload;
 use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
@@ -19,7 +20,6 @@ use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UNICHAT_EVENT_DONATE_TYPE;
 use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPER_STICKER;
 use crate::utils::normalize_value;
-use crate::utils::parse_serde_error;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::parse_author_badges;
@@ -58,7 +58,7 @@ struct PurchaseAmountText {
 
 /* <============================================================================================> */
 
-fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(String, f32), Box<dyn std::error::Error>> {
+fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(String, f32), Error> {
     let raw_text = &purchase_amount_text.simple_text;
 
     if let Some(index) = raw_text.find(|c: char| c.is_ascii_digit()) {
@@ -71,8 +71,8 @@ fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(S
     return Err("Invalid purchase amount text format".into());
 }
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
-    let parsed: LiveChatPaidStickerRenderer = serde_json::from_value(value).map_err(parse_serde_error)?;
+pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
+    let parsed: LiveChatPaidStickerRenderer = serde_json::from_value(value)?;
     let author_username = parse_author_username(&parsed.author_name)?;
     let author_name = parse_author_name(&parsed.author_name)?;
     let author_color = parse_author_color(&author_name)?;

@@ -21,6 +21,13 @@ export interface ThirdPartyLicenseInfo {
     licenses: string[];
 }
 
+export interface GalleryItem {
+    title: string;
+    type: "image" | "video" | "audio" | "file";
+    previewUrl: string;
+    url: string;
+}
+
 export interface AppMetadata {
     displayName: string;
     identifier: string;
@@ -87,6 +94,15 @@ export interface WidgetFieldsDropdown {
     options: Record<string, string>;
 }
 
+export interface WidgetFieldsFilePicker {
+    type: "filepicker";
+    group?: string;
+    label: string;
+    description?: string;
+    value?: string;
+    fileType: ("image" | "video" | "audio" | "file")[];
+}
+
 export interface WidgetFieldsDivider {
     type: "divider";
     group?: string;
@@ -99,6 +115,7 @@ export type WidgetFields =
     | WidgetFieldsCheckbox
     | WidgetFieldsColorPicker
     | WidgetFieldsDropdown
+    | WidgetFieldsFilePicker
     | WidgetFieldsDivider;
 
 /* ========================================================================== */

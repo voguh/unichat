@@ -1,6 +1,6 @@
 # Voguh's UniChat
 
-[![Version](https://img.shields.io/badge/version-v1.4.0--alpha.1-blue)](https://github.com/voguh/unichat/releases)
+[![Version](https://img.shields.io/badge/version-v1.4.0--alpha.2-blue)](https://github.com/voguh/unichat/releases)
 [![License](https://img.shields.io/badge/license-MPL--2.0-green)](./LICENSE)
 [![Platforms](https://img.shields.io/badge/platform-windows%20%7C%20linux-lightgrey)]()
 
@@ -56,7 +56,7 @@ Interested in contributing? Great! Here's the information you need to get starte
 
 **Prerequisites:**
 - Rust v1.87.0;
-- Node.js v22.14.0;
+- Node.js v24.10.0;
 - PNPM v10.7.1;
 - Tauri v2 dependencies for your platform. Follow the [official guide](https://v2.tauri.app/start/prerequisites/);
 - Tauri CLI (You can install it with `cargo install tauri-cli --locked`);
@@ -86,4 +86,6 @@ Interested in contributing? Great! Here's the information you need to get starte
 
 ## 📜 License
 
-This project is licensed under the [Mozilla Public License, Version 2.0](./LICENSE). The example widgets located in the `widgets/default` folder are an exception and are licensed under the MIT License.
+This project is licensed under the [Mozilla Public License, Version 2.0](./LICENSE).
+
+The widgets located in the [`widgets directory`](./widgets/) are licensed under the MIT license.

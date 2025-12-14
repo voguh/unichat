@@ -13,7 +13,6 @@ use std::fs;
 use std::io::Write;
 use std::sync::LazyLock;
 use std::sync::RwLock;
-use std::thread::sleep;
 use std::time::Duration;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
@@ -25,17 +24,15 @@ use serde_json::json;
 use serde_json::Value;
 use tauri::async_runtime::JoinHandle;
 use tauri::Listener;
-use tauri::Manager;
-use tauri::Url;
 
+use crate::error::Error;
 use crate::events;
 use crate::events::unichat::UniChatBadge;
-use crate::events::unichat::UniChatPlatform;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
 use crate::twitch::mapper::structs::parse_tags;
-use crate::utils;
 use crate::utils::constants::TWITCH_CHAT_WINDOW;
+use crate::utils::create_scrapper_webview_window;
 use crate::utils::is_dev;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -43,12 +40,10 @@ use crate::utils::properties::PropertiesKey;
 use crate::utils::render_emitter;
 use crate::utils::settings;
 use crate::utils::settings::SettingLogEventLevel;
-use crate::utils::settings::SettingsKeys;
 
 mod mapper;
 
 static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
-static RAW_EVENT: &str = "twitch_raw::event";
 static ASYNC_HANDLE: LazyLock<RwLock<Option<JoinHandle<()>>>> = LazyLock::new(|| RwLock::new(None));
 
 pub static TWITCH_CHEERMOTES: LazyLock<RwLock<HashSet<String>>> = LazyLock::new(|| RwLock::new(HashSet::new()));
@@ -56,13 +51,13 @@ pub static TWITCH_BADGES: LazyLock<RwLock<HashMap<String, UniChatBadge>>> = Lazy
 
 /* ================================================================================================================== */
 
-fn dispatch_event(mut payload: Value) -> Result<(), Box<dyn std::error::Error>> {
+fn dispatch_event(mut payload: Value) -> Result<(), Error> {
     if payload.get("type").is_none() {
-        return Err("Missing 'type' field in YouTube raw event payload".into());
+        return Err("Missing 'type' field in Twitch raw event payload".into());
     }
 
-    if payload.get("platform").is_none() {
-        payload["platform"] = serde_json::json!(UniChatPlatform::Twitch);
+    if payload.get("scrapperId").is_none() {
+        payload["scrapperId"] = serde_json::json!(TWITCH_CHAT_WINDOW);
     }
 
     if payload.get("timestamp").is_none() {
@@ -128,7 +123,7 @@ async fn handle_create_connection(channel_name: &str) -> Result<(), Box<dyn std:
     }
 }
 
-fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Box<dyn std::error::Error>> {
+fn handle_ready_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let url = payload.get("url").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'url' field in Twitch '{event_type}' payload"))?;
 
@@ -160,7 +155,7 @@ fn handle_ready_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payl
     return dispatch_event(payload.clone());
 }
 
-fn handle_idle_event(_app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payload: &Value) -> Result<(), Box<dyn std::error::Error>> {
+fn handle_idle_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
     if let Ok(mut handle) = ASYNC_HANDLE.write() {
         if let Some(join_handle) = handle.take() {
             join_handle.abort();
@@ -172,14 +167,13 @@ fn handle_idle_event(_app: tauri::AppHandle<tauri::Wry>, _event_type: &str, payl
     return dispatch_event(payload.clone());
 }
 
-fn handle_badges_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Box<dyn std::error::Error>> {
+fn handle_badges_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let badges_type = payload.get("badgesType").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'badgesType' field in Twitch '{}' payload", event_type))?;
     let badges = payload.get("badges").and_then(|v| v.as_array()).cloned()
         .ok_or(format!("Missing or invalid 'badges' field in Twitch '{}' payload", event_type))?;
 
-    let twitch_badges: Vec<TwitchRawBadge> = serde_json::from_value(serde_json::Value::Array(badges))
-        .map_err(|e| format!("{:?}", e))?;
+    let twitch_badges: Vec<TwitchRawBadge> = serde_json::from_value(serde_json::Value::Array(badges))?;
 
     if let Ok(mut badges) = TWITCH_BADGES.write() {
         for twitch_badge in twitch_badges {
@@ -197,7 +191,7 @@ fn handle_badges_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, pay
     return Ok(());
 }
 
-fn handle_cheermotes_event(_app: tauri::AppHandle<tauri::Wry>, event_type: &str, payload: &Value) -> Result<(), Box<dyn std::error::Error>> {
+fn handle_cheermotes_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let cheermotes = payload.get("cheermotes").and_then(|v| v.as_array()).cloned()
         .ok_or(format!("Missing or invalid 'cheermotes' field in Twitch '{}' payload", event_type))?;
 
@@ -226,8 +220,8 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     writeln!(file, "{content}").unwrap();
 }
 
-fn handle_ws_event(message: &Value) -> Result<(), Box<dyn std::error::Error>> {
-    let log_events: SettingLogEventLevel = settings::get_item(SettingsKeys::LogTwitchEvents)?;
+fn handle_ws_event(message: &Value) -> Result<(), Error> {
+    let log_events = settings::get_settings_log_twitch_events()?;
 
     if is_dev() || log_events == SettingLogEventLevel::AllEvents {
         log_action("events-raw.log", &format!("{:?}", message));
@@ -258,8 +252,8 @@ fn handle_ws_event(message: &Value) -> Result<(), Box<dyn std::error::Error>> {
     return Ok(());
 }
 
-fn handle_message_event(message: &Message) -> Result<(), Box<dyn std::error::Error>> {
-    let log_events: SettingLogEventLevel = settings::get_item(SettingsKeys::LogTwitchEvents)?;
+fn handle_message_event(message: &Message) -> Result<(), Error> {
+    let log_events = settings::get_settings_log_twitch_events()?;
 
     if is_dev() || log_events == SettingLogEventLevel::AllEvents {
         log_action("events-raw.log", &format!("{:?}", message));
@@ -304,71 +298,33 @@ fn handle_message_event(message: &Message) -> Result<(), Box<dyn std::error::Err
 
 /* ================================================================================================================== */
 
-fn decode_url(url: &str) -> Result<Url, Box<dyn std::error::Error>> {
-    let mut url = url.to_string();
-
-    if url.is_empty() || url == "about:blank" || !url.starts_with("https://") {
-        if utils::is_dev() {
-            url = String::from("http://localhost:1421/twitch-await.html");
-        } else {
-            url = String::from("tauri://localhost/twitch-await.html");
-        }
-    }
-
-    return Url::parse(url.as_str()).map_err(|e| Box::new(e) as Box<dyn std::error::Error>);
-}
-
-#[tauri::command]
-pub async fn get_twitch_scrapper_url(app: tauri::AppHandle<tauri::Wry>) -> Result<String, String> {
-    let window = app.get_webview_window(TWITCH_CHAT_WINDOW).ok_or("Twitch chat window not found")?;
-    let url = window.url().map_err(|e| format!("{:?}", e))?;
-
-    return Ok(url.as_str().to_string());
-}
-
-#[tauri::command]
-pub async fn set_twitch_scrapper_url(app: tauri::AppHandle<tauri::Wry>, url: &str) -> Result<(), String> {
-    let window = app.get_webview_window(TWITCH_CHAT_WINDOW).ok_or("Twitch chat window not found")?;
-    let tauri_url = decode_url(url).map_err(|e| format!("{:?}", e))?;
-
-    window.navigate(tauri_url).map_err(|e| format!("{:?}", e))?;
-
-    if url != "about:blank" {
-        sleep(Duration::from_millis(500));
-        window.eval(SCRAPPER_JS).map_err(|e| format!("{:?}", e))?;
-    } else {
-        window.hide().map_err(|e| format!("{:?}", e))?;
-    }
-
-    return Ok(());
-}
-
-/* ================================================================================================================== */
-
-fn handle_event(app: tauri::AppHandle<tauri::Wry>, event: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let payload: Value = serde_json::from_str(event).map_err(|e| format!("{:?}", e))?;
+fn handle_event(event: &str) -> Result<(), Error> {
+    let payload: Value = serde_json::from_str(event)?;
+    let scrapper_id = payload.get("scrapperId").and_then(|v| v.as_str())
+        .ok_or("Missing or invalid 'scrapperId' field in Twitch raw event payload")?;
     let event_type = payload.get("type").and_then(|v| v.as_str())
         .ok_or("Missing or invalid 'type' field in Twitch raw event payload")?;
 
+    if scrapper_id != TWITCH_CHAT_WINDOW {
+        return Ok(());
+    }
+
     return match event_type {
-        "ready" => handle_ready_event(app, event_type, &payload),
-        "idle" => handle_idle_event(app, event_type, &payload),
-        "badges" => handle_badges_event(app, event_type, &payload),
-        "cheermotes" => handle_cheermotes_event(app, event_type, &payload),
+        "ready" => handle_ready_event(event_type, &payload),
+        "idle" => handle_idle_event(event_type, &payload),
+        "badges" => handle_badges_event(event_type, &payload),
+        "cheermotes" => handle_cheermotes_event(event_type, &payload),
         "redemption" => handle_ws_event(&payload),
         "message" => Ok(()),
         _ => dispatch_event(payload.clone())
     };
 }
 
-pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
-    let app_handle = app.handle().clone();
+pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
+    let window = create_scrapper_webview_window(app, TWITCH_CHAT_WINDOW, SCRAPPER_JS)?;
 
-    let window = app.get_webview_window(TWITCH_CHAT_WINDOW)
-        .ok_or("Twitch chat window not found")?;
-
-    window.listen(RAW_EVENT, move |event| {
-        if let Err(err) = handle_event(app_handle.clone(), event.payload()) {
+    window.listen("unichat://scrapper_event", move |event| {
+        if let Err(err) = handle_event(event.payload()) {
             log::error!("Failed to handle Twitch raw event: {:?}", err);
             log::error!("Event payload: {}", event.payload());
         }

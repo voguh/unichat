@@ -14,6 +14,8 @@ import { ModalsProvider, modals } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import {
     IconAdjustments,
+    IconBox,
+    IconBoxOff,
     IconCompass,
     IconEraser,
     IconFolder,
@@ -21,7 +23,6 @@ import {
     IconLayout,
     IconMap,
     IconPhoto,
-    IconPhotoOff,
     IconRefresh,
     IconRuler,
     IconSparkles
@@ -32,6 +33,7 @@ import semver from "semver";
 
 import { AboutModal } from "./components/AboutModal";
 import { DashboardHome } from "./components/DashboardHome";
+import { Gallery } from "./components/Gallery";
 import { Tour } from "./components/Tour";
 import { WidgetEditor } from "./components/WidgetEditor";
 import { AppContext } from "./contexts/AppContext";
@@ -68,7 +70,15 @@ export default function App(): JSX.Element {
     }
 
     function toggleAboutModal(): void {
-        modals.open({ title: `About ${metadata.displayName}`, children: <AboutModal />, centered: true });
+        modals.open({ title: `About ${metadata.displayName}`, children: <AboutModal /> });
+    }
+
+    function toggleGallery(): void {
+        modals.open({
+            title: "Gallery",
+            size: "xl",
+            children: <Gallery />
+        });
     }
 
     async function checkForUpdates(): Promise<void> {
@@ -173,7 +183,14 @@ export default function App(): JSX.Element {
                                         variant={showWidgetPreview ? "filled" : "default"}
                                         data-tour="toggle-widget-preview"
                                     >
-                                        {showWidgetPreview ? <IconPhoto size="20" /> : <IconPhotoOff size="20" />}
+                                        {showWidgetPreview ? <IconBox size="20" /> : <IconBoxOff size="20" />}
+                                    </Button>
+                                </Tooltip>
+                            )}
+                            {selectedTab === "widgetEditor" && (
+                                <Tooltip label="Gallery" position="right" withArrow>
+                                    <Button onClick={toggleGallery} data-tour="gallery-toggle">
+                                        <IconPhoto size="20" />
                                     </Button>
                                 </Tooltip>
                             )}

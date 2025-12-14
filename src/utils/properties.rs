@@ -16,6 +16,8 @@ use std::sync::RwLock;
 use tauri::path::BaseDirectory;
 use tauri::Manager;
 
+use crate::error::Error;
+
 #[derive(PartialEq, Eq)]
 pub enum PropertiesKey {
     YouTubeChannelId,
@@ -42,6 +44,7 @@ pub enum AppPaths {
     AppLog,
 
     UniChatAssets,
+    UniChatGallery,
     UniChatSystemWidgets,
     UniChatUserWidgets,
     UniChatSystemPlugins,
@@ -60,6 +63,7 @@ impl fmt::Display for AppPaths {
             AppPaths::AppLog => "app_log_dir",
 
             AppPaths::UniChatAssets => "unichat_assets_dir",
+            AppPaths::UniChatGallery => "unichat_gallery_dir",
             AppPaths::UniChatSystemWidgets => "unichat_system_widgets_dir",
             AppPaths::UniChatUserWidgets => "unichat_user_widgets_dir",
             AppPaths::UniChatSystemPlugins => "unichat_system_plugins_dir",
@@ -74,13 +78,14 @@ impl fmt::Display for AppPaths {
 
 static PROPERTIES: OnceLock<RwLock<HashMap<String, String>>> = OnceLock::new();
 
-pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
+pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     let app_cache_dir = app.path().app_cache_dir()?;
     let app_config_dir = app.path().app_config_dir()?;
     let app_data_dir = app.path().app_data_dir()?;
     let app_local_data_dir = app.path().app_local_data_dir()?;
     let app_log_dir = app.path().app_log_dir()?;
     let assets_dir = app.path().resolve("assets", BaseDirectory::Resource)?;
+    let gallery_dir = app.path().resolve("gallery", BaseDirectory::AppData)?;
     let system_widgets_dir = app.path().resolve("widgets", BaseDirectory::Resource)?;
     let user_widgets_dir = app.path().resolve("widgets", BaseDirectory::AppData)?;
     let system_plugins_dir = app.path().resolve("plugins", BaseDirectory::Resource)?;
@@ -94,6 +99,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     let app_local_data_path = app_local_data_dir.to_string_lossy().to_string();
     let app_log_path = app_log_dir.to_string_lossy().to_string();
     let assets_path = assets_dir.to_string_lossy().to_string();
+    let gallery_path = gallery_dir.to_string_lossy().to_string();
     let system_widgets_path = system_widgets_dir.to_string_lossy().to_string();
     let user_widgets_path = user_widgets_dir.to_string_lossy().to_string();
     let system_plugins_path = system_plugins_dir.to_string_lossy().to_string();
@@ -108,6 +114,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     properties.insert(AppPaths::AppLocalData.to_string(), app_local_data_path);
     properties.insert(AppPaths::AppLog.to_string(), app_log_path);
     properties.insert(AppPaths::UniChatAssets.to_string(), assets_path);
+    properties.insert(AppPaths::UniChatGallery.to_string(), gallery_path);
     properties.insert(AppPaths::UniChatSystemWidgets.to_string(), system_widgets_path);
     properties.insert(AppPaths::UniChatUserWidgets.to_string(), user_widgets_path);
     properties.insert(AppPaths::UniChatSystemPlugins.to_string(), system_plugins_path);
@@ -123,19 +130,19 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::
     return Ok(());
 }
 
-fn get_item_raw(key: String) -> Result<String, Box<dyn std::error::Error>> {
+fn get_item_raw(key: String) -> Result<String, Error> {
     let props = PROPERTIES.get().ok_or("Properties not initialized")?;
-    let props_guard = props.read()?;
+    let props_guard = props.read().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
     return props_guard.get(&key).cloned().ok_or(format!("Key '{}' not found", key).into());
 }
 
-pub fn get_item(key: PropertiesKey) -> Result<String, Box<dyn std::error::Error>> {
+pub fn get_item(key: PropertiesKey) -> Result<String, Error> {
     return get_item_raw(key.to_string());
 }
 
-pub fn set_item(key: PropertiesKey, value: String) -> Result<(), Box<dyn std::error::Error>> {
+pub fn set_item(key: PropertiesKey, value: String) -> Result<(), Error> {
     let props = PROPERTIES.get().ok_or("Properties not initialized")?;
-    let mut props_guard = props.write()?;
+    let mut props_guard = props.write().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
     props_guard.insert(key.to_string(), value);
 
     return Ok(());

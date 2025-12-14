@@ -20,6 +20,7 @@ use std::path::PathBuf;
 
 use tauri::Manager;
 
+use crate::error::Error;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
@@ -27,6 +28,7 @@ include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 
 mod actix;
 mod commands;
+mod error;
 mod events;
 mod plugins;
 mod shared_emotes;
@@ -37,7 +39,7 @@ mod youtube;
 pub static STATIC_APP_ICON: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/icons/icon.png"));
 pub static THIRD_PARTY_LICENSES: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/third_party_licenses.json"));
 
-fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Error> {
     if !dest.exists() {
         fs::create_dir(dest)?;
     }
@@ -58,7 +60,7 @@ fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error::
     return Ok(());
 }
 
-fn copy_wrapper(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+fn copy_wrapper(src: &PathBuf, dest: &PathBuf) -> Result<(), Error> {
     if dest.exists() {
         if dest.is_dir() {
             fs::remove_dir_all(dest)?;
@@ -77,10 +79,10 @@ fn copy_wrapper(src: &PathBuf, dest: &PathBuf) -> Result<(), Box<dyn std::error:
 }
 
 fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
-    twitch::init(app)?;
     utils::properties::init(app)?;
-    utils::render_emitter::init(app)?;
     utils::settings::init(app)?;
+    utils::render_emitter::init(app)?;
+    twitch::init(app)?;
     youtube::init(app)?;
 
     /* ========================================================================================== */
@@ -91,6 +93,13 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     }
 
     plugins::init(app)?;
+
+    /* ========================================================================================== */
+
+    let gallery_dir = properties::get_app_path(AppPaths::UniChatGallery);
+    if !&gallery_dir.exists() {
+        fs::create_dir_all(&gallery_dir)?;
+    }
 
     /* ========================================================================================== */
 
@@ -179,6 +188,7 @@ fn main() {
     }
 
     tauri::Builder::default().setup(setup)
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_log::Builder::default()
             .level(log_level)
             .clear_targets()
@@ -189,24 +199,23 @@ fn main() {
         .plugin(tauri_plugin_opener::Builder::default().build())
         .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
-            commands::get_app_info,
-            commands::tour_steps_has_new,
-            commands::get_prev_tour_steps,
-            commands::get_tour_steps,
-            commands::set_tour_steps,
-            commands::is_dev,
-            commands::store_get_item,
-            commands::store_set_item,
-            commands::toggle_webview,
             commands::dispatch_clear_chat,
-            commands::list_widgets,
-            commands::get_widget_fields,
-            commands::get_widget_fieldstate,
-            commands::set_widget_fieldstate,
-            twitch::get_twitch_scrapper_url,
-            twitch::set_twitch_scrapper_url,
-            youtube::get_youtube_scrapper_url,
-            youtube::set_youtube_scrapper_url
+            commands::get_app_info,
+            commands::is_dev,
+            commands::gallery::get_gallery_items,
+            commands::gallery::upload_gallery_items,
+            commands::store::store_get_item,
+            commands::tour::get_prev_tour_steps,
+            commands::tour::get_tour_steps,
+            commands::tour::set_tour_steps,
+            commands::tour::tour_steps_has_new,
+            commands::webview::get_scrapper_webview_url,
+            commands::webview::set_scrapper_webview_url,
+            commands::webview::toggle_scrapper_webview,
+            commands::widgets::get_widget_fields,
+            commands::widgets::get_widget_fieldstate,
+            commands::widgets::list_widgets,
+            commands::widgets::set_widget_fieldstate
         ])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())

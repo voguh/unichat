@@ -54,13 +54,45 @@ html, body {
     inset: 0;
     padding: 8px;
     background: #212529;
+    overflow: hidden;
+}
+
+#main-container > .actions-container {
+    height: 32px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+#main-container > .actions-container > button {
+    height: 32px;
+    padding: 0 8px;
+    border: none;
+    background: #343a40;
+    color: #f8f9fa;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 10px;
+
+}
+
+#main-container > .actions-container > button.toggle-btn-active {
+    background: #339af0;
+}
+
+#main-container > .feed-items-container {
     display: flex;
     flex-direction: column;
     gap: 8px;
     overflow-y: auto;
+    height: calc(100% - (32px + 8px));
 }
 
-#main-container > .feed-item {
+#main-container > .feed-items-container > .feed-item {
     position: relative;
     background: #343a40;
     padding: 8px;
@@ -68,7 +100,7 @@ html, body {
 
 }
 
-#main-container > .feed-item > .feed-item-header {
+#main-container > .feed-items-container > .feed-item > .feed-item-header {
     position: relative;
     display: flex;
     flex-wrap: nowrap;
@@ -78,7 +110,7 @@ html, body {
     color: #f8f9fa;
 }
 
-#main-container > .feed-item > .feed-item-header > .meta {
+#main-container > .feed-items-container > .feed-item > .feed-item-header > .meta {
     display: flex;
     flex-wrap: nowrap;
     justify-content: center;
@@ -86,12 +118,12 @@ html, body {
     gap: 4px;
 }
 
-#main-container > .feed-item > .feed-item-header > .details {
+#main-container > .feed-items-container > .feed-item > .feed-item-header > .details {
     flex: 1;
     font-weight: bold;
 }
 
-#main-container > .feed-item > .feed-item-header > .timestmap {
+#main-container > .feed-items-container > .feed-item > .feed-item-header > .timestmap {
     position: relative;
     font-size: 10px;
     color: #868e96;
@@ -100,11 +132,11 @@ html, body {
     align-items: center;
 }
 
-#main-container > .feed-item > .feed-item-header > .timestmap > .timestamp-tooltip {
+#main-container > .feed-items-container > .feed-item > .feed-item-header > .timestmap > .timestamp-tooltip {
     display: none;
 }
 
-#main-container > .feed-item > .feed-item-header > .timestmap:hover > .timestamp-tooltip {
+#main-container > .feed-items-container > .feed-item > .feed-item-header > .timestmap:hover > .timestamp-tooltip {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -112,19 +144,20 @@ html, body {
     white-space: nowrap;
 }
 
-#main-container > .feed-item > .feed-item-content {
+#main-container > .feed-items-container > .feed-item > .feed-item-content {
     margin-top: 8px;
     padding-top: 8px;
     border-top: 1px solid #495057;
     color: #f8f9fa;
     gap: 4px;
+    line-height: var(--emote-size);
 }
 
-#main-container > .feed-item > .feed-item-content > img {
+#main-container > .feed-items-container > .feed-item > .feed-item-content > img {
     height: var(--emote-size);
     vertical-align: middle;
 }
 
-#main-container > .feed-item.no-message > .feed-item-content {
+#main-container > .feed-items-container > .feed-item.no-message > .feed-item-content {
     display: none;
 }

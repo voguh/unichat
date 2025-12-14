@@ -7,6 +7,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use crate::utils::constants::BASE_REST_PORT;
+
 mod routes;
 
 pub struct ActixState {
@@ -19,10 +21,11 @@ pub fn new(_app: &tauri::App<tauri::Wry>) -> tauri::async_runtime::JoinHandle<()
             return actix_web::App::new().wrap(actix_web::middleware::Logger::default())
                 .service(routes::ws)
                 .service(routes::ytimg)
+                .service(routes::gallery)
                 .service(routes::get_assets)
                 .service(routes::get_widget_assets)
                 .service(routes::get_widget);
-        }).bind(("127.0.0.1", 9527)).expect("An error occurred on bind address 127.0.0.1:9527");
+        }).bind(("127.0.0.1", BASE_REST_PORT)).expect("Failed to bind actix server to port");
 
         http_server.run().await.expect("An error occurred on run actix server")
     });

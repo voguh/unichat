@@ -9,13 +9,14 @@
 
 use irc::client::prelude::*;
 
+use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::twitch::mapper::structs::parse_tags;
 
 mod cheer;
 mod message;
 
-pub fn parse(channel: String, text: String, message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+pub fn parse(channel: String, text: String, message: &Message) -> Result<Option<UniChatEvent>, Error> {
     let tags = parse_tags(&message.tags);
 
     if tags.get("bits").is_some() {

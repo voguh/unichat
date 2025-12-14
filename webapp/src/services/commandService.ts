@@ -10,44 +10,38 @@
 import { ComboboxItemGroup } from "@mantine/core";
 import { invoke } from "@tauri-apps/api/core";
 
-import { AppMetadata, WidgetFields } from "unichat/types";
-
-export class YouTubeCommandService {
-    public async getScrapperUrl(): Promise<string> {
-        return invoke("get_youtube_scrapper_url");
-    }
-
-    public async setScrapperUrl(url: string): Promise<void> {
-        await invoke("set_youtube_scrapper_url", { url });
-    }
-}
-
-export class TwitchCommandService {
-    public async getScrapperUrl(): Promise<string> {
-        return invoke("get_twitch_scrapper_url");
-    }
-
-    public async setScrapperUrl(url: string): Promise<void> {
-        await invoke("set_twitch_scrapper_url", { url });
-    }
-}
+import { AppMetadata, GalleryItem, WidgetFields } from "unichat/types";
 
 export class CommandService {
-    public get youTube(): YouTubeCommandService {
-        return new YouTubeCommandService();
-    }
-
-    public get twitch(): TwitchCommandService {
-        return new TwitchCommandService();
+    public async dispatchClearChat(): Promise<void> {
+        await invoke("dispatch_clear_chat");
     }
 
     public async getAppInfo(): Promise<AppMetadata> {
         return invoke("get_app_info");
     }
 
-    public async tourStepsHasNew(): Promise<boolean> {
-        return invoke("tour_steps_has_new");
+    public async isDev(): Promise<boolean> {
+        return invoke("is_dev");
     }
+
+    /* ========================================================================================== */
+
+    public async getGalleryItems(): Promise<GalleryItem[]> {
+        return invoke("get_gallery_items");
+    }
+
+    public async uploadGalleryItems(files: string[]): Promise<void> {
+        await invoke("upload_gallery_items", { files });
+    }
+
+    /* ========================================================================================== */
+
+    public async storeGetItem<T = object>(key: string): Promise<T> {
+        return invoke("store_get_item", { key });
+    }
+
+    /* ========================================================================================== */
 
     public async getPrevTourSteps(): Promise<string[]> {
         return invoke("get_prev_tour_steps");
@@ -61,21 +55,25 @@ export class CommandService {
         return invoke("set_tour_steps", { newSteps });
     }
 
-    public async isDev(): Promise<boolean> {
-        return invoke("is_dev");
+    public async tourStepsHasNew(): Promise<boolean> {
+        return invoke("tour_steps_has_new");
     }
 
-    public async toggleWebview(label: string): Promise<boolean> {
-        return invoke("toggle_webview", { label });
+    /* ========================================================================================== */
+
+    public async getScrapperWebviewUrl(label: string): Promise<string> {
+        return invoke("get_scrapper_webview_url", { label });
     }
 
-    public async dispatchClearChat(): Promise<void> {
-        await invoke("dispatch_clear_chat");
+    public async setScrapperWebviewUrl(label: string, url: string): Promise<void> {
+        await invoke("set_scrapper_webview_url", { label, url });
     }
 
-    public async listWidgets(): Promise<ComboboxItemGroup<string>[]> {
-        return invoke("list_widgets");
+    public async toggleScrapperWebview(label: string): Promise<boolean> {
+        return invoke("toggle_scrapper_webview", { label });
     }
+
+    /* ========================================================================================== */
 
     public async getWidgetFields(widget: string): Promise<Record<string, WidgetFields>> {
         const data = await invoke<string>("get_widget_fields", { widget });
@@ -87,6 +85,10 @@ export class CommandService {
         const data = await invoke<string>("get_widget_fieldstate", { widget });
 
         return JSON.parse(data);
+    }
+
+    public async listWidgets(): Promise<ComboboxItemGroup<string>[]> {
+        return invoke("list_widgets");
     }
 
     public async setWidgetFieldState(widget: string, fieldstate: Record<string, any>): Promise<void> {

@@ -69,19 +69,9 @@ const steps: TourStep[] = [
     {
         id: "830dee0e-c81f-4f3a-8fe4-2567f05ceebd",
         builder: widgetsSelectorBuilder(
-            "div.mantine-Select-group[role='group']:nth-child(1)",
-            "System widgets",
-            "Default widgets provided by UniChat",
-            50,
-            -300
-        )
-    },
-    {
-        id: "924fb7a4-d681-456b-bec3-4db79e84a021",
-        builder: widgetsSelectorBuilder(
-            "div.mantine-Select-group[role='group']:nth-child(2)",
-            "User widgets",
-            "Custom widgets added by you",
+            "div.mantine-Select-dropdown",
+            "Widgets",
+            "Contains all available widgets provided by default or created by you",
             50,
             -300
         )
@@ -109,7 +99,7 @@ const steps: TourStep[] = [
     {
         id: "908b35ad-0127-49af-b37a-d3ec625f1d0e",
         builder: stageBuilder(
-            "youtube-chat-url-input",
+            "youtube-chat--url-input",
             "YouTube Chat URL",
             "Also you can paste normal video, shorts or live urls or direct video id",
             50,
@@ -119,7 +109,7 @@ const steps: TourStep[] = [
     {
         id: "44515b23-2a9e-4c73-9c45-96a232d52fc2",
         builder: stageBuilder(
-            "twitch-chat-url-input",
+            "twitch-chat--url-input",
             "Twitch Chat URL",
             "Also you can paste normal twitch url or direct channel name",
             50,

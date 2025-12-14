@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.tauri.app/config/2.8.5",
+    "$schema": "https://schema.tauri.app/config/2.9.5",
     "productName": "UniChat",
     "identifier": "unichat",
     "build": {
@@ -23,26 +23,6 @@
                 "minHeight": 576,
                 "maximizable": false,
                 "center": true
-            },
-            {
-                "label": "youtube-chat",
-                "title": "YouTube chat",
-                "url": "youtube-await.html",
-                "width": 400,
-                "height": 576,
-                "visible": false,
-                "resizable": false,
-                "maximizable": false
-            },
-            {
-                "label": "twitch-chat",
-                "title": "Twitch chat",
-                "url": "twitch-await.html",
-                "width": 400,
-                "height": 576,
-                "visible": false,
-                "resizable": false,
-                "maximizable": false
             }
         ],
         "security": {

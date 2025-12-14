@@ -13,6 +13,7 @@ use std::sync::Mutex;
 
 use irc::client::prelude::*;
 
+use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatMessageEventPayload;
 use crate::events::unichat::UniChatRedemptionEventPayload;
@@ -99,7 +100,7 @@ fn parse_channel_name(channel: &String) -> String {
     return channel.replace("#", "");
 }
 
-pub fn parse_irc(message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+pub fn parse_irc(message: &Message) -> Result<Option<UniChatEvent>, Error> {
     if let Command::PRIVMSG(channel, text) = &message.command {
         let channel_name = parse_channel_name(channel);
         return privmsg::parse(channel_name, text.to_owned(), message);
@@ -119,7 +120,7 @@ pub fn parse_irc(message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std:
     return Ok(None);
 }
 
-pub fn parse_ws(message: &serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+pub fn parse_ws(message: &serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     if let Some(reward_redemption) = message.get("rewardRedemption") {
         return ws_reward_redemption::parse(reward_redemption.clone());
     }

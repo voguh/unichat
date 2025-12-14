@@ -17,31 +17,34 @@ use tauri::AppHandle;
 use tauri::Emitter;
 use tauri::Manager;
 
+use crate::error::Error;
+
+const ONCE_LOCK_NAME: &str = "RenderEmitter::APP_HANDLE";
 static APP_HANDLE: OnceLock<AppHandle<tauri::Wry>> = OnceLock::new();
 
-pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
-    APP_HANDLE.set(app.handle().to_owned()).map_err(|_| "RenderEmitter already initialized")?;
+pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
+    APP_HANDLE.set(app.handle().to_owned()).map_err(|_| Error::OnceLockAlreadyInitialized(ONCE_LOCK_NAME))?;
 
     return Ok(());
 }
 
-pub fn emit(mut payload: Value) -> Result<(), Box<dyn std::error::Error>> {
-    let app_handle = APP_HANDLE.get().ok_or("App handle not initialized")?;
+pub fn emit(mut payload: Value) -> Result<(), Error> {
+    let app_handle = APP_HANDLE.get().ok_or(Error::OnceLockNotInitialized(ONCE_LOCK_NAME))?;
 
     if payload.get("type").is_none() {
         return Err("Missing 'type' field in YouTube raw event payload".into());
     }
 
-    if payload.get("platform").is_none() {
-        return Err("Missing 'platform' field in YouTube raw event payload".into());
+    if payload.get("scrapperId").is_none() {
+        return Err("Missing 'scrapperId' field in YouTube raw event payload".into());
     }
 
     if payload.get("timestamp").is_none() {
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| format!("{:?}", e))?;
+        let now = SystemTime::now().duration_since(UNIX_EPOCH)?;
         payload["timestamp"] = json!(now.as_millis());
     }
 
     let window = app_handle.get_webview_window("main").ok_or("Main window not found")?;
-    window.emit("unichat://status:event", payload).map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+    window.emit("unichat://status:event", payload)?;
     return Ok(());
 }

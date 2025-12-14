@@ -11,16 +11,17 @@ use std::collections::HashMap;
 use std::sync::LazyLock;
 use std::sync::RwLock;
 
+use crate::error::Error;
 use crate::events::unichat::UniChatEmote;
 
 mod betterttv;
 mod frankerfacez;
 mod seventv;
 
-pub type EmotesParserResult = Result<HashMap<String, UniChatEmote>, Box<dyn std::error::Error>>;
+pub type EmotesParserResult = Result<HashMap<String, UniChatEmote>, Error>;
 pub static EMOTES_HASHSET: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
-pub fn fetch_shared_emotes(channel_id: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub fn fetch_shared_emotes(channel_id: &str) -> Result<(), Error> {
     let channel_id = channel_id.to_string();
 
     let _ = tauri::async_runtime::spawn_blocking(move || {

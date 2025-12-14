@@ -9,6 +9,7 @@
 
 use irc::client::prelude::*;
 
+use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::twitch::mapper::structs::parse_tags;
 
@@ -18,7 +19,7 @@ mod raid;
 mod subgift;
 mod subscription;
 
-pub fn parse(channel_name: String, message: &Message) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
+pub fn parse(channel_name: String, message: &Message) -> Result<Option<UniChatEvent>, Error> {
     let tags = parse_tags(&message.tags);
 
     let msg_id = tags.get("msg-id").ok_or("Missing msg-id tag")?;

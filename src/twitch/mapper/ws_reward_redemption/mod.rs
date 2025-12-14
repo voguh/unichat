@@ -13,13 +13,13 @@ use actix_web::cookie::time;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::error::Error;
 use crate::events::unichat::UNICHAT_EVENT_REDEMPTION_TYPE;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRedemptionEventPayload;
 use crate::twitch::mapper::handle_redemption_event;
 use crate::twitch::mapper::structs::author::parse_author_color;
-use crate::utils::parse_serde_error;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct WsRewardRedemption {
@@ -49,7 +49,7 @@ struct WsRewardRedemptionReward {
     default_image: HashMap<String, String>,
 }
 
-fn parse_reward_icon_url(reward: &WsRewardRedemptionReward) -> Result<String, Box<dyn std::error::Error>> {
+fn parse_reward_icon_url(reward: &WsRewardRedemptionReward) -> Result<String, Error> {
     if let Some(images) = &reward.image {
         if let Some(url) = images.get("url_1x") {
             return Ok(url.to_owned());
@@ -63,8 +63,8 @@ fn parse_reward_icon_url(reward: &WsRewardRedemptionReward) -> Result<String, Bo
     return Ok(String::new());
 }
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Box<dyn std::error::Error>> {
-    let parsed: WsRewardRedemption = serde_json::from_value(value).map_err(parse_serde_error)?;
+pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
+    let parsed: WsRewardRedemption = serde_json::from_value(value)?;
 
     let display_color = parse_author_color(None, &Some(parsed.user.login.clone()))?;
     let offset_date_time = time::OffsetDateTime::parse(&parsed.redeemed_at, &time::format_description::well_known::Rfc3339)?;

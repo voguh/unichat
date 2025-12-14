@@ -7,13 +7,52 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use std::path::PathBuf;
 use std::sync::LazyLock;
+
+use tauri::WebviewWindowBuilder;
+
+use crate::error::Error;
 
 pub mod constants;
 pub mod properties;
 pub mod render_emitter;
 pub mod settings;
 pub mod ureq;
+
+pub static COMMON_SCRAPPER_JS: &str = include_str!("./static/common_scrapper.js");
+
+pub fn create_scrapper_webview_window(app: &tauri::App<tauri::Wry>, label: &str, scrapper_js: &str) -> Result<tauri::WebviewWindow, Error> {
+    let start_hidden = settings::get_settings_create_webview_hidden()?;
+    let webview_url = tauri::WebviewUrl::App(PathBuf::from("scrapper_idle.html"));
+    let scrapper_js = scrapper_js.to_string();
+
+    let window = WebviewWindowBuilder::new(app, label, webview_url)
+        .title(format!("UniChat - Scrapper ({})", label))
+        .inner_size(400.0, 576.0)
+        .visible(!start_hidden)
+        .resizable(false)
+        .maximizable(false)
+        .on_page_load(move |window, payload| {
+            let event = payload.event();
+
+            match event {
+                tauri::webview::PageLoadEvent::Started => {
+                    log::info!("Scrapper webview '{}' started loading: {:}", window.label(), payload.url());
+                }
+                tauri::webview::PageLoadEvent::Finished => {
+                    log::info!("Scrapper webview '{}' finished loading: {:}", window.label(), payload.url());
+                    let formatted_js = COMMON_SCRAPPER_JS
+                        .replace("{{SCRAPPER_JS}}", &scrapper_js)
+                        .replace("{{SCRAPPER_ID}}", window.label());
+                    window.eval(&formatted_js).unwrap();
+                }
+            }
+        })
+        .build()?;
+
+    return Ok(window);
+}
 
 pub fn parse_u32_to_rgba(color: u32) -> (u8, u8, u8, f32) {
     let a = ((color >> 24) & 0xFF) as u8;
@@ -28,11 +67,7 @@ pub fn is_dev() -> bool {
     return cfg!(debug_assertions) || tauri::is_dev();
 }
 
-pub fn parse_serde_error(error: serde_json::Error) -> Box<dyn std::error::Error> {
-    return Box::new(error);
-}
-
-pub fn normalize_value(value_raw: &str) -> Result<f32, Box<dyn std::error::Error>> {
+pub fn normalize_value(value_raw: &str) -> Result<f32, Error> {
     let last_dot = value_raw.rfind('.');
     let last_comma = value_raw.rfind(',');
     let normalized = match(last_dot, last_comma) {
@@ -62,10 +97,12 @@ pub fn normalize_value(value_raw: &str) -> Result<f32, Box<dyn std::error::Error
         (None, None) => value_raw.to_string()
     };
 
-    return normalized.parse().map_err(|e| Box::new(e) as Box<dyn std::error::Error>);
+    let value: f32 = normalized.parse()?;
+
+    return Ok(value);
 }
 
-pub fn random_color_by_seed(seed: &str) -> Result<String, Box<dyn std::error::Error>> {
+pub fn random_color_by_seed(seed: &str) -> Result<String, Error> {
     let mut hash: u32 = 2166136261;
     for byte in seed.as_bytes() {
         hash ^= *byte as u32;
