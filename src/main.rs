@@ -82,8 +82,6 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     utils::properties::init(app)?;
     utils::settings::init(app)?;
     utils::render_emitter::init(app)?;
-    twitch::init(app)?;
-    youtube::init(app)?;
 
     /* ========================================================================================== */
 
@@ -146,6 +144,11 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
     let http_server = actix::new(app);
     app.manage(actix::ActixState{ handle: http_server });
+
+    /* ========================================================================================== */
+
+    twitch::init(app)?;
+    youtube::init(app)?;
 
     return Ok(());
 }
