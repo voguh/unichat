@@ -13,25 +13,20 @@ use std::fs;
 use std::io::Write;
 use std::sync::LazyLock;
 use std::sync::RwLock;
-use std::time::Duration;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
-use futures::prelude::*;
-use irc::client::prelude::*;
-use rand::Rng;
-use serde_json::json;
 use serde_json::Value;
-use tauri::async_runtime::JoinHandle;
 use tauri::Manager as _;
 use tauri::Listener;
 
 use crate::error::Error;
 use crate::events;
 use crate::events::unichat::UniChatBadge;
+use crate::irc::IRCCommand;
+use crate::irc::IRCMessage;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
-use crate::twitch::mapper::structs::parse_tags;
 use crate::utils::constants::TWITCH_CHAT_WINDOW;
 use crate::utils::create_scrapper_webview_window;
 use crate::utils::is_dev;
@@ -45,7 +40,6 @@ use crate::utils::settings::SettingLogEventLevel;
 mod mapper;
 
 static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
-static ASYNC_HANDLE: LazyLock<RwLock<Option<JoinHandle<()>>>> = LazyLock::new(|| RwLock::new(None));
 
 pub static TWITCH_CHEERMOTES: LazyLock<RwLock<HashSet<String>>> = LazyLock::new(|| RwLock::new(HashSet::new()));
 pub static TWITCH_BADGES: LazyLock<RwLock<HashMap<String, UniChatBadge>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
@@ -71,100 +65,11 @@ fn dispatch_event(mut payload: Value) -> Result<(), Error> {
 
 /* ================================================================================================================== */
 
-async fn handle_create_connection(channel_name: &str) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let mills = rand::rng().random_range(10000..=99999);
-    let nickname = format!("justinfan{}", mills);
-
-    let config = Config {
-        server: Some(String::from("irc.chat.twitch.tv")),
-        port: Some(6697),
-        ping_time: Some(30),
-        ping_timeout: Some(5),
-        use_tls: Some(true),
-        ..Config::default()
-    };
-
-    let mut client = Client::from_config(config).await?;
-
-    let capabilities = vec!["twitch.tv/commands", "twitch.tv/tags"];
-    let capabilities = capabilities.into_iter().map(|cap| Capability::Custom(cap)).collect::<Vec<_>>();
-    client.send_cap_req(&capabilities)?;
-    client.send(Command::PASS(String::from("SCHMOOPIIE")))?;
-    client.send(Command::NICK(nickname.clone()))?;
-    client.send(Command::USER(nickname.clone(), String::from("8"), nickname.clone()))?;
-    client.send(Command::JOIN(format!("#{}", channel_name), None, None))?;
-
-    log::info!("Joined Twitch channel '#{}'.", channel_name);
-
-    let mut stream = client.stream()?;
-    let mut timeout = tokio::time::interval(Duration::from_secs(60));
-    timeout.tick().await;
-
-    loop {
-        match tokio::time::timeout(Duration::from_secs(60), stream.next()).await {
-            Ok(Some(Ok(message))) => {
-                if matches!(message.command, Command::PONG(_, _) | Command::PING(_, _) | Command::Response(Response::RPL_WELCOME, _)) {
-                    if let Err(e) = dispatch_event(json!({ "type": "ping" })) {
-                        log::error!("Failed to emit ping event to window: {:?}", e);
-                    }
-                } else if let Err(err) = handle_message_event(&message) {
-                    log::error!("Failed to handle Twitch message event: {:?}", err);
-                }
-            }
-            Ok(Some(Err(e))) => {
-                return Err(Box::new(e));
-            }
-            Ok(None) => {
-                return Err("Stream ended".into());
-            }
-            Err(e) => {
-                return Err(Box::new(e));
-            }
-        }
-    }
-}
-
-fn handle_ready_event(event_type: &str, payload: &Value) -> Result<(), Error> {
-    let url = payload.get("url").and_then(|v| v.as_str())
-        .ok_or(format!("Missing or invalid 'url' field in Twitch '{event_type}' payload"))?;
-
-    let channel_name = url.replace("https://www.twitch.tv/popout/", "").split("/").next()
-        .ok_or("Failed to extract channel name from URL")?
-        .to_lowercase();
-
-    if let Ok(mut handle) = ASYNC_HANDLE.write() {
-        if let Some(join_handle) = handle.take() {
-            join_handle.abort();
-        }
-
-        *handle = Some(tauri::async_runtime::spawn(async move {
-            let channel_name = channel_name.clone();
-
-            loop {
-                log::info!("Connecting to Twitch IRC join channel '#{}'...", &channel_name);
-
-                if let Err(e) = handle_create_connection(&channel_name).await {
-                    log::error!("Twitch IRC client exited with error: {:?}", e);
-                }
-
-                log::info!("Reconnecting to Twitch IRC in 5 seconds...");
-                tokio::time::sleep(Duration::from_secs(5)).await;
-            }
-        }));
-    }
-
+fn handle_ready_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
     return dispatch_event(payload.clone());
 }
 
 fn handle_idle_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
-    if let Ok(mut handle) = ASYNC_HANDLE.write() {
-        if let Some(join_handle) = handle.take() {
-            join_handle.abort();
-        }
-
-        *handle = None;
-    }
-
     return dispatch_event(payload.clone());
 }
 
@@ -253,18 +158,19 @@ fn handle_ws_event(_event_type: &str, message: &Value) -> Result<(), Error> {
     return Ok(());
 }
 
-fn handle_message_event(message: &Message) -> Result<(), Error> {
+fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
+    let message = IRCMessage::parse(payload.get("message"))?;
     let log_events = settings::get_settings_log_twitch_events()?;
 
     if is_dev() || log_events == SettingLogEventLevel::AllEvents {
         log_action("events-raw.log", &format!("{:?}", message));
     }
 
-    if let Command::Raw(cmd, _args) = &message.command {
+    if let IRCCommand::Raw(cmd, _args) = &message.command {
         if cmd == "ROOMSTATE" {
-            let tags = parse_tags(&message.tags);
-            if let Some(channel_id) = tags.get("room-id") {
-                shared_emotes::fetch_shared_emotes(&channel_id)?;
+            let tags = &message.tags.clone();
+            if let Some(channel_id) = tags.get("room-id").and_then(|v| v.as_ref()) {
+                shared_emotes::fetch_shared_emotes(channel_id)?;
                 properties::set_item(PropertiesKey::TwitchChannelId, channel_id.clone())?;
             }
 
@@ -272,7 +178,7 @@ fn handle_message_event(message: &Message) -> Result<(), Error> {
         }
     }
 
-    match mapper::parse_irc(message) {
+    match mapper::parse_irc(&message) {
         Ok(Some(parsed)) => {
             if is_dev() || log_events == SettingLogEventLevel::AllEvents {
                 log_action("events-parsed.log", &serde_json::to_string(&parsed).unwrap());
@@ -316,7 +222,7 @@ fn handle_event(event: &str) -> Result<(), Error> {
         "badges" => handle_badges_event(event_type, &payload),
         "cheermotes" => handle_cheermotes_event(event_type, &payload),
         "redemption" => handle_ws_event(event_type, &payload),
-        "message" => Ok(()),
+        "message" => handle_message_event(event_type, &payload),
         _ => dispatch_event(payload.clone())
     };
 }
