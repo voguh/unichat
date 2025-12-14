@@ -12,7 +12,6 @@ import React from "react";
 import { Button, Card, TextInput, Tooltip } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { IconAppWindow, IconLoader, IconPlayerPlay, IconPlayerStop, IconX } from "@tabler/icons-react";
 import * as eventService from "@tauri-apps/api/event";
 
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
@@ -86,7 +85,7 @@ export function ScrapperCard(props: Props): React.ReactNode {
             return scrapperIcon;
         }
 
-        return <IconAppWindow size="20" />;
+        return <i className="fas fa-square" />;
     }
 
     function handleStatusLabel(): string {
@@ -99,9 +98,9 @@ export function ScrapperCard(props: Props): React.ReactNode {
 
     function handleStatusIcon(): React.ReactNode {
         if (loading || scrapperIsStarting) {
-            return <IconLoader size="20" />;
+            return <i className="fas fa-spinner fa-spin" />;
         } else {
-            return scrapperIsRunning ? <IconPlayerStop size="20" /> : <IconPlayerPlay size="20" />;
+            return scrapperIsRunning ? <i className="fas fa-stop" /> : <i className="fas fa-play" />;
         }
     }
 
@@ -136,7 +135,7 @@ export function ScrapperCard(props: Props): React.ReactNode {
                     title: `Error on ${displayName} Scrapper execution`,
                     message: payload.message ?? "An unknown error occurred in the scrapper.",
                     color: "red",
-                    icon: <IconX />
+                    icon: <i className="fas fa-times" />
                 });
             }
 

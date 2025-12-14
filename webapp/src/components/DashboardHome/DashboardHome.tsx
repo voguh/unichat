@@ -10,7 +10,6 @@
 import React from "react";
 
 import { Badge, Button, Card, ComboboxData, List, Select, Tooltip } from "@mantine/core";
-import { IconBrandTwitch, IconBrandYoutube, IconReload, IconWorld } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { AppContext } from "unichat/contexts/AppContext";
@@ -179,7 +178,7 @@ export function DashboardHome(): React.ReactNode {
                     validateUrl={validateYouTubeChatUrl}
                     editingTooltip={mountYouTubeEditingTooltip()}
                     placeholderText="https://www.youtube.com/live_chat?v={VIDEO_ID}"
-                    scrapperIcon={<IconBrandYoutube size="20" />}
+                    scrapperIcon={<i className="fab fa-youtube" />}
                 />
                 <ScrapperCard
                     scrapperId={TWITCH_SCRAPPER_ID}
@@ -187,7 +186,7 @@ export function DashboardHome(): React.ReactNode {
                     editingTooltip={mountTwitchEditingTooltip()}
                     displayName="Twitch"
                     placeholderText="https://www.twitch.tv/popout/{CHANNEL_NAME}/chat"
-                    scrapperIcon={<IconBrandTwitch size="20" />}
+                    scrapperIcon={<i className="fab fa-twitch" />}
                 />
             </div>
             <div className="preview">
@@ -206,13 +205,12 @@ export function DashboardHome(): React.ReactNode {
                             <Tooltip label="Reload widget view" position="left" withArrow>
                                 <Button onClick={reloadIframe} data-tour="preview-reload">
                                     <i className="fas fa-sync" />
-                                    <IconReload size="20" />
                                 </Button>
                             </Tooltip>
 
                             <Tooltip label="Open in browser" position="left" withArrow>
                                 <Button onClick={() => openUrl(selectedWidgetUrl)} data-tour="preview-open-in-browser">
-                                    <IconWorld size="20" />
+                                    <i className="fas fa-globe" />
                                 </Button>
                             </Tooltip>
                         </Card>
