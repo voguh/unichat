@@ -1,9 +1,9 @@
 {
     "$schema": "../gen/schemas/desktop-schema.json",
-    "identifier": "youtube-chat__capability",
-    "windows": ["youtube-chat"],
+    "identifier": "scrappers__capability",
+    "windows": ["*-chat"],
     "permissions": ["core:event:allow-emit-to", "log:allow-log"],
     "remote": {
-        "urls": ["https://www.youtube.com/*"]
+        "urls": ["https://*"]
     }
 }
