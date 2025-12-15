@@ -14,13 +14,16 @@ use std::time::UNIX_EPOCH;
 
 use serde_json::Value;
 use tauri::Listener;
+use tauri::Manager as _;
 
 use crate::error::Error;
 use crate::events;
+use crate::scrapper;
+use crate::scrapper::UniChatScrapper;
 use crate::shared_emotes;
 use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
-use crate::utils::create_scrapper_webview_window;
 use crate::utils::is_dev;
+use crate::utils::is_valid_youtube_video_id;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::properties::PropertiesKey;
@@ -57,9 +60,7 @@ fn handle_ready_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let channel_id = payload.get("channelId").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'channelId' field in YouTube '{event_type}' payload"))?;
 
-    properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))
-        ?;
-
+    properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))?;
     shared_emotes::fetch_shared_emotes(channel_id)?;
 
     return dispatch_event(payload.clone());
@@ -142,8 +143,62 @@ fn handle_event(event: &str) -> Result<(), Error> {
     };
 }
 
+pub const AVAILABLE_URLS: &[&str] = &[
+    "youtube.com/live_chat?v={VIDEO_ID}",
+    "youtube.com/watch?v={VIDEO_ID}",
+    "youtube.com/live/{VIDEO_ID}",
+    "youtube.com/shorts/{VIDEO_ID}",
+    "youtu.be/{VIDEO_ID}"
+];
+
+fn validate_url(value: String) -> Result<String, Error> {
+    let mut value = value.trim();
+    value = value.strip_prefix("http://").unwrap_or(value);
+    value = value.strip_prefix("https://").unwrap_or(value);
+    value = value.strip_prefix("www.").unwrap_or(value);
+
+    let mut video_id: Option<&str> = None;
+    if value.starts_with("youtu.be/") {
+        let mut parts = value.splitn(2, '/');
+        parts.next();
+        video_id = parts.next();
+    } else if value.starts_with("youtube.com/live/") || value.starts_with("youtube.com/shorts/") {
+        let mut parts = value.splitn(3, '/');
+        parts.next();
+        parts.next();
+        video_id = parts.next();
+    } else if value.starts_with("youtube.com/watch") || value.starts_with("youtube.com/live_chat") {
+        let query = value.splitn(2, "?").nth(1).ok_or(Error::from("Missing query"))?;
+        for param in query.split('&') {
+            let mut kv = param.splitn(2, '=');
+            if kv.next() == Some("v") {
+                video_id = kv.next();
+                break;
+            }
+        }
+    }
+
+    if let Some(video_id) = video_id.filter(|video_id| is_valid_youtube_video_id(video_id)) {
+        let formatted_url = format!("https://www.youtube.com/live_chat?v={}", video_id);
+        return Ok(formatted_url);
+    }
+
+    return Err(Error::from("Could not extract video ID from YouTube URL"));
+}
+
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
-    let window = create_scrapper_webview_window(app, YOUTUBE_CHAT_WINDOW, SCRAPPER_JS)?;
+    let scrapper_data = UniChatScrapper {
+        id: String::from(YOUTUBE_CHAT_WINDOW),
+        name: String::from("YouTube"),
+        editing_tooltup_message: String::from("You can enter just the video ID or one of the following URLs to get the YouTube chat:"),
+        editing_tooltip_urls: AVAILABLE_URLS.iter().map(|s| s.to_string()).collect(),
+        placeholder_text: String::from("https://www.youtube.com/live_chat?v={VIDEO_ID}"),
+        icon: String::from("fab fa-youtube"),
+
+        validate_url: validate_url,
+        scrapper_js: String::from(SCRAPPER_JS)
+    };
+    let window = scrapper::register_scrapper(app.app_handle(), scrapper_data)?;
 
     window.listen("unichat://scrapper_event", move |event| {
         if let Err(err) = handle_event(event.payload()) {

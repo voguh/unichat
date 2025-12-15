@@ -11,7 +11,6 @@ import React from "react";
 
 import { Button, LoadingOverlay, Tabs } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconX } from "@tabler/icons-react";
 import * as dialog from "@tauri-apps/plugin-dialog";
 
 import { commandService } from "unichat/services/commandService";
@@ -72,7 +71,7 @@ export function Gallery(props: Props): React.ReactNode {
                 title: "Fetch Error",
                 message: "An error occurred while fetching gallery items.",
                 color: "red",
-                icon: <IconX />
+                icon: <i className="fas fa-times" />
             });
         }
     }
@@ -90,7 +89,7 @@ export function Gallery(props: Props): React.ReactNode {
                 title: "Upload Error",
                 message: "An error occurred while uploading gallery items.",
                 color: "red",
-                icon: <IconX />
+                icon: <i className="fas fa-times" />
             });
         } finally {
             setLoading(false);

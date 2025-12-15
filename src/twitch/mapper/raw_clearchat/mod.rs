@@ -7,8 +7,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use irc::client::prelude::*;
-
 use crate::error::Error;
 use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
@@ -16,17 +14,17 @@ use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRemoveAuthorEventPayload;
 use crate::events::unichat::UNICHAT_EVENT_CLEAR_TYPE;
 use crate::events::unichat::UNICHAT_EVENT_REMOVE_AUTHOR_TYPE;
-use crate::twitch::mapper::structs::parse_tags;
+use crate::irc::IRCMessage;
 
-pub fn parse(channel: String, message: &Message) -> Result<Option<UniChatEvent>, Error> {
+pub fn parse(channel: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let event: UniChatEvent;
-    let tags = parse_tags(&message.tags);
+    let tags = message.tags.clone();
 
-    let room_id = tags.get("room-id").ok_or("Missing room-id tag")?;
-    let timestamp_usec = tags.get("tmi-sent-ts").ok_or("Missing or invalid tmi-sent-ts tag")?;
+    let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or("Missing room-id tag")?;
+    let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or("Missing or invalid tmi-sent-ts tag")?;
     let timestamp_usec: i64 = timestamp_usec.parse()?;
 
-    if let Some(target_user_id) = tags.get("target-user-id") {
+    if let Some(target_user_id) = tags.get("target-user-id").and_then(|v| v.as_ref()) {
         event = UniChatEvent::RemoveAuthor {
             event_type: String::from(UNICHAT_EVENT_REMOVE_AUTHOR_TYPE),
             data: UniChatRemoveAuthorEventPayload {

@@ -13,6 +13,8 @@ use tauri::Runtime;
 use url::Url;
 
 use crate::error::Error;
+use crate::scrapper;
+use crate::scrapper::UniChatScrapper;
 use crate::utils::constants::CHAT_WINDOWS;
 use crate::utils::settings;
 
@@ -24,6 +26,26 @@ fn decode_url(url: &str) -> Result<Url, Error> {
 
     let url = Url::parse(url)?;
     return Ok(url);
+}
+
+/* ============================================================================================== */
+
+#[tauri::command]
+pub fn get_scrappers<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<UniChatScrapper>, Error> {
+    return scrapper::get_scrappers();
+}
+
+#[tauri::command]
+pub fn get_scrapper<R: Runtime>(_app: AppHandle<R>, id: &str) -> Result<Option<UniChatScrapper>, Error> {
+    return scrapper::get_scrapper(id);
+}
+
+#[tauri::command]
+pub fn validate_scrapper_url<R: Runtime>(_app: AppHandle<R>, id: &str, url: &str) -> Result<String, Error> {
+    let scrapper = scrapper::get_scrapper(id)?;
+    let scrapper = scrapper.ok_or(Error::Message(format!("Scrapper with ID '{}' not found", id)))?;
+
+    return (scrapper.validate_url)(url.to_string());
 }
 
 /* ============================================================================================== */

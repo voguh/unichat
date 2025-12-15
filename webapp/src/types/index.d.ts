@@ -48,6 +48,17 @@ export interface AppMetadata {
 
 /* ========================================================================== */
 
+export interface UniChatScrapper {
+    id: string;
+    name: string;
+    editingTooltipMessage: string;
+    editingTooltipUrls: string[];
+    placeholderText: string;
+    icon: string;
+}
+
+/* ========================================================================== */
+
 export interface WidgetFieldsText {
     type: "text" | "textarea";
     group?: string;

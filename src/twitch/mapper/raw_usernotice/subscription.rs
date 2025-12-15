@@ -9,13 +9,13 @@
 
 use std::collections::HashMap;
 
-use irc::client::prelude::*;
-
 use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatSponsorEventPayload;
 use crate::events::unichat::UNICHAT_EVENT_SPONSOR_TYPE;
+use crate::irc::IRCCommand;
+use crate::irc::IRCMessage;
 use crate::twitch::mapper::structs::author::parse_author_badges;
 use crate::twitch::mapper::structs::author::parse_author_color;
 use crate::twitch::mapper::structs::author::parse_author_name;
@@ -25,26 +25,26 @@ use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::twitch::mapper::structs::message::parse_message_emotes;
 use crate::twitch::mapper::structs::message::parse_message_string;
 
-pub fn parse(message: &Message, tags: &HashMap<String, String>) -> Result<Option<UniChatEvent>, Error> {
+pub fn parse(message: &IRCMessage, tags: &HashMap<String, Option<String>>) -> Result<Option<UniChatEvent>, Error> {
     let (channel, message_text) = match &message.command {
-        Command::Raw(_, payload) => Ok((payload[0].clone(), payload.get(1))),
+        IRCCommand::Raw(_, payload) => Ok((payload[0].clone(), payload.get(1))),
         _ => Err("Invalid message command type")
     }?;
 
-    let room_id = tags.get("room-id").ok_or("Missing room-id tag")?;
-    let author_id = tags.get("user-id").ok_or("Missing user-id tag")?;
+    let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or("Missing room-id tag")?;
+    let author_id = tags.get("user-id").and_then(|v| v.as_ref()).ok_or("Missing user-id tag")?;
     let author_username = parse_author_username_str(tags.get("login"))?;
     let author_name = parse_author_name(tags.get("display-name"))?;
     let author_color = parse_author_color(tags.get("color"), &author_username)?;
     let author_badges = parse_author_badges(tags.get("badges"))?;
     let author_type = parse_author_type(&tags)?;
-    let tier = tags.get("msg-param-sub-plan").ok_or("Missing msg-param-sub-plan tag")?;
-    let months_str = tags.get("msg-param-cumulative-months").ok_or("Missing msg-param-cumulative-months tag")?;
+    let tier = tags.get("msg-param-sub-plan").and_then(|v| v.as_ref()).ok_or("Missing msg-param-sub-plan tag")?;
+    let months_str = tags.get("msg-param-cumulative-months").and_then(|v| v.as_ref()).ok_or("Missing msg-param-cumulative-months tag")?;
     let months: u16 = months_str.parse()?;
-    let message_id = tags.get("id").ok_or("Missing id tag")?;
+    let message_id = tags.get("id").and_then(|v| v.as_ref()).ok_or("Missing id tag")?;
     let message = message_text.and_then(|text| parse_message_string(text).ok());
     let emotes = parse_message_emotes(tags.get("emotes"), &message.clone().unwrap_or_default())?;
-    let timestamp_usec = tags.get("tmi-sent-ts").ok_or("Missing or invalid tmi-sent-ts tag")?;
+    let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or("Missing or invalid tmi-sent-ts tag")?;
     let timestamp_usec: i64 = timestamp_usec.parse()?;
 
     let event = UniChatEvent::Sponsor {

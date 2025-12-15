@@ -7,11 +7,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use irc::client::prelude::*;
-
 use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
-use crate::twitch::mapper::structs::parse_tags;
+use crate::irc::IRCMessage;
 
 mod announcement;
 mod community_gift;
@@ -19,10 +17,10 @@ mod raid;
 mod subgift;
 mod subscription;
 
-pub fn parse(channel_name: String, message: &Message) -> Result<Option<UniChatEvent>, Error> {
-    let tags = parse_tags(&message.tags);
+pub fn parse(channel_name: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
+    let tags = message.tags.clone();
 
-    let msg_id = tags.get("msg-id").ok_or("Missing msg-id tag")?;
+    let msg_id = tags.get("msg-id").and_then(|v| v.as_ref()).ok_or("Missing msg-id tag")?;
 
     if msg_id == "announcement" {
         return announcement::parse(message, &tags);
