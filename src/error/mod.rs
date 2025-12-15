@@ -29,6 +29,8 @@ pub enum Error {
     #[error(transparent)]
     SerdeJson(#[from] serde_json::error::Error),
     #[error(transparent)]
+    SerdeSaphyr(#[from] serde_saphyr::Error),
+    #[error(transparent)]
     UrlParse(#[from] url::ParseError),
     #[error(transparent)]
     Tauri(#[from] tauri::Error),
@@ -38,6 +40,8 @@ pub enum Error {
     TokioSendError { #[source] source: Box<dyn std::error::Error> },
     #[error(transparent)]
     TimeParse(#[from] time::error::Parse),
+    #[error(transparent)]
+    Lua(#[from] mlua::Error),
 
     #[error("{0}")]
     Message(String),
