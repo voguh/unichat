@@ -11,12 +11,12 @@ use std::collections::HashMap;
 use std::sync::LazyLock;
 use std::sync::Mutex;
 
-use irc::client::prelude::*;
-
 use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatMessageEventPayload;
 use crate::events::unichat::UniChatRedemptionEventPayload;
+use crate::irc::IRCCommand;
+use crate::irc::IRCMessage;
 
 mod privmsg;
 mod raw_clearchat;
@@ -100,11 +100,11 @@ fn parse_channel_name(channel: &String) -> String {
     return channel.replace("#", "");
 }
 
-pub fn parse_irc(message: &Message) -> Result<Option<UniChatEvent>, Error> {
-    if let Command::PRIVMSG(channel, text) = &message.command {
+pub fn parse_irc(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
+    if let IRCCommand::PRIVMSG(channel, text) = &message.command {
         let channel_name = parse_channel_name(channel);
         return privmsg::parse(channel_name, text.to_owned(), message);
-    } else if let Command::Raw(cmd, payload) = &message.command {
+    } else if let IRCCommand::Raw(cmd, payload) = &message.command {
         let channel = payload.get(0).ok_or("Missing channel name")?;
         let channel_name = parse_channel_name(channel);
 

@@ -30,6 +30,7 @@ mod actix;
 mod commands;
 mod error;
 mod events;
+mod irc;
 mod scrapper;
 mod shared_emotes;
 mod twitch;

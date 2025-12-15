@@ -7,21 +7,19 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use irc::client::prelude::*;
-
 use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRemoveMessageEventPayload;
 use crate::events::unichat::UNICHAT_EVENT_REMOVE_MESSAGE_TYPE;
-use crate::twitch::mapper::structs::parse_tags;
+use crate::irc::IRCMessage;
 
-pub fn parse(channel: String, message: &Message) -> Result<Option<UniChatEvent>, Error> {
-    let tags = parse_tags(&message.tags);
+pub fn parse(channel: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
+    let tags = message.tags.clone();
 
-    let room_id = tags.get("room-id").ok_or("Missing room-id tag")?;
-    let target_msg_id = tags.get("target-msg-id").ok_or("Missing target-msg-id tag")?;
-    let timestamp_usec = tags.get("tmi-sent-ts").ok_or("Missing or invalid tmi-sent-ts tag")?;
+    let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or("Missing room-id tag")?;
+    let target_msg_id = tags.get("target-msg-id").and_then(|v| v.as_ref()).ok_or("Missing target-msg-id tag")?;
+    let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or("Missing or invalid tmi-sent-ts tag")?;
     let timestamp_usec: i64 = timestamp_usec.parse()?;
 
     let event = UniChatEvent::RemoveMessage {

@@ -7,17 +7,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use irc::client::prelude::*;
-
 use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
-use crate::twitch::mapper::structs::parse_tags;
+use crate::irc::IRCMessage;
 
 mod cheer;
 mod message;
 
-pub fn parse(channel: String, text: String, message: &Message) -> Result<Option<UniChatEvent>, Error> {
-    let tags = parse_tags(&message.tags);
+pub fn parse(channel: String, text: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
+    let tags = message.tags.clone();
 
     if tags.get("bits").is_some() {
         return cheer::parse(channel, text, message, tags);

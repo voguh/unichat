@@ -73,13 +73,68 @@ function uniChatInit() {
 
     uniChat.onWebSocketMessage = async function(event, { wsInstance, url, protocols }) {
         if (url.startsWith("wss://hermes.twitch.tv/v1")) {
-            const data = JSON.parse(event.data);
+            try {
+                const data = JSON.parse(event.data);
 
-            if (data.type === "notification") {
-                await uniChatHandleNotification(data.notification);
+                if (data.type === "notification") {
+                    await uniChatHandleNotification(data.notification);
+                }
+            } catch (err) {
+                uniChatLogger.error("Failed to parse Hermes message: {}\n\nRaw: {}", err.message, event.data, err);
             }
         } else if (url.startsWith("wss://irc-ws.chat.twitch.tv")) {
-            // IRC WebSocket handling can be added here if needed
+            try {
+                let message = event.data.split("\r\n")[0];
+
+                const tags = {};
+                if (message.startsWith("@")) {
+                    const [tagsRaw, ...rest] = message.slice(1).split(" ");
+                    message = rest.join(" ");
+
+                    for (const tag of tagsRaw.split(";")) {
+                        const [key, value] = tag.split("=");
+                        tags[key] = value || null;
+                    }
+                }
+
+                const prefix = [];
+                if (message.startsWith(":")) {
+                    const [prefixRaw, ...rest] = message.slice(1).split(" ");
+                    message = rest.join(" ");
+
+                    if (prefixRaw.includes("!")) {
+                        const [nick, ...rest] = prefixRaw.split("!");
+                        const [user, host] = rest.join("!").split("@");
+                        prefix.push(nick, user, host);
+                    } else {
+                        prefix.push(prefixRaw);
+                    }
+                }
+
+                const [commandName, ...params] = message.split(" ");
+                const command = { name: commandName, params: [] };
+                while (params.length > 0) {
+                    let param = params.shift();
+                    if (param.startsWith(":")) {
+                        param = param.slice(1) + " " + params.join(" ");
+                        command.params.push(param);
+                        break;
+                    } else {
+                        command.params.push(param);
+                    }
+                }
+
+                const ircMessage = {
+                    raw: event.data,
+                    tags: tags,
+                    prefix: prefix,
+                    command: command
+                };
+
+                await uniChat.dispatchEvent({ type: "message", message: ircMessage } );
+            } catch (err) {
+                uniChatLogger.error("Failed to parse IRC message: {}\n\nRaw: {}", err.message, event.data, err);
+            }
         }
     }
 

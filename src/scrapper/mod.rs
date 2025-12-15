@@ -73,13 +73,13 @@ pub fn register_scrapper(app: &tauri::AppHandle<tauri::Wry>, scrapper: UniChatSc
             match event {
                 tauri::webview::PageLoadEvent::Started => {
                     log::info!("Scrapper webview '{}' started loading: {:}", window.label(), payload.url());
-                }
-                tauri::webview::PageLoadEvent::Finished => {
-                    log::info!("Scrapper webview '{}' finished loading: {:}", window.label(), payload.url());
                     let formatted_js = COMMON_SCRAPPER_JS
                         .replace("{{SCRAPPER_JS}}", &scrapper_js)
                         .replace("{{SCRAPPER_ID}}", window.label());
                     window.eval(&formatted_js).unwrap();
+                }
+                tauri::webview::PageLoadEvent::Finished => {
+                    log::info!("Scrapper webview '{}' finished loading: {:}", window.label(), payload.url());
                 }
             }
         })
