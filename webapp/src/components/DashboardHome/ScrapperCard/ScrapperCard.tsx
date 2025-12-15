@@ -23,7 +23,7 @@ import { ScrapperCardStyledContainer } from "./styled";
 interface Props {
     displayName: string;
     scrapperId: string;
-    validateUrl(url: string): string;
+    validateUrl(url: string): Promise<string>;
     placeholderText?: string;
     editingTooltip?: React.ReactNode;
     scrapperIcon?: React.ReactNode;
@@ -50,7 +50,7 @@ export function ScrapperCard(props: Props): React.ReactNode {
     async function handleStart(): Promise<void> {
         try {
             setLoading(true);
-            const inputValue = validateUrl(inputRef.current?.value ?? "");
+            const inputValue = await validateUrl(inputRef.current?.value ?? "");
             inputRef.current.value = inputValue;
 
             await commandService.setScrapperWebviewUrl(scrapperId, inputValue);
@@ -109,7 +109,7 @@ export function ScrapperCard(props: Props): React.ReactNode {
             setLoading(true);
 
             try {
-                const scrapperStoredUrl = await commandService.storeGetItem<string>(`scrapper:${scrapperId}:url`);
+                const scrapperStoredUrl = await commandService.getScrapperStoredUrl(scrapperId);
 
                 if (inputRef.current) {
                     inputRef.current.value = scrapperStoredUrl;

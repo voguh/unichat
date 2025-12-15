@@ -7,10 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use std::path::PathBuf;
 use std::sync::LazyLock;
-
-use tauri::WebviewWindowBuilder;
 
 use crate::error::Error;
 
@@ -19,40 +16,6 @@ pub mod properties;
 pub mod render_emitter;
 pub mod settings;
 pub mod ureq;
-
-pub static COMMON_SCRAPPER_JS: &str = include_str!("./static/common_scrapper.js");
-
-pub fn create_scrapper_webview_window(app: &tauri::AppHandle<tauri::Wry>, label: &str, scrapper_js: &str) -> Result<tauri::WebviewWindow, Error> {
-    let start_hidden = settings::get_settings_create_webview_hidden()?;
-    let webview_url = tauri::WebviewUrl::App(PathBuf::from("scrapper_idle.html"));
-    let scrapper_js = scrapper_js.to_string();
-
-    let window = WebviewWindowBuilder::new(app, label, webview_url)
-        .title(format!("UniChat - Scrapper ({})", label))
-        .inner_size(400.0, 576.0)
-        .visible(!start_hidden)
-        .resizable(false)
-        .maximizable(false)
-        .on_page_load(move |window, payload| {
-            let event = payload.event();
-
-            match event {
-                tauri::webview::PageLoadEvent::Started => {
-                    log::info!("Scrapper webview '{}' started loading: {:}", window.label(), payload.url());
-                }
-                tauri::webview::PageLoadEvent::Finished => {
-                    log::info!("Scrapper webview '{}' finished loading: {:}", window.label(), payload.url());
-                    let formatted_js = COMMON_SCRAPPER_JS
-                        .replace("{{SCRAPPER_JS}}", &scrapper_js)
-                        .replace("{{SCRAPPER_ID}}", window.label());
-                    window.eval(&formatted_js).unwrap();
-                }
-            }
-        })
-        .build()?;
-
-    return Ok(window);
-}
 
 pub fn parse_u32_to_rgba(color: u32) -> (u8, u8, u8, f32) {
     let a = ((color >> 24) & 0xFF) as u8;
@@ -116,7 +79,7 @@ pub fn random_color_by_seed(seed: &str) -> Result<String, Error> {
     return Ok(format!("#{:02X}{:02X}{:02X}", r, g, b));
 }
 
-// Thanks to Glenn Slayden which explained the YouTube video ID format
+// Thanks to Glenn Slayden which explained the YouTube channel ID format
 // on https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video/101153#101153
 static YOUTUBE_CHANNEL_ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^UC[0-9A-Za-z_-]{21}[AQgw]$").unwrap());
 pub fn is_valid_youtube_channel_id(channel_id: &str) -> bool {
@@ -125,4 +88,24 @@ pub fn is_valid_youtube_channel_id(channel_id: &str) -> bool {
     }
 
     return YOUTUBE_CHANNEL_ID_REGEX.is_match(channel_id);
+}
+
+// Thanks to Glenn Slayden which explained the YouTube video ID format
+// on https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video/101153#101153
+static YOUTUBE_VIDEO_ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[0-9A-Za-z_-]{10}[048AEIMQUYcgkosw]$").unwrap());
+pub fn is_valid_youtube_video_id(video_id: &str) -> bool {
+    if video_id.is_empty() || video_id.len() != 11 {
+        return false;
+    }
+
+    return YOUTUBE_VIDEO_ID_REGEX.is_match(video_id);
+}
+
+static TWITCH_CHANNEL_NAME_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[0-9A-Za-z_]+$").unwrap());
+pub fn is_valid_twitch_channel_name(channel_name: &str) -> bool {
+    if channel_name.is_empty() || channel_name.len() < 4 || channel_name.len() > 25 {
+        return false;
+    }
+
+    return TWITCH_CHANNEL_NAME_REGEX.is_match(channel_name);
 }

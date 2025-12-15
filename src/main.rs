@@ -30,6 +30,7 @@ mod actix;
 mod commands;
 mod error;
 mod events;
+mod scrapper;
 mod shared_emotes;
 mod twitch;
 mod utils;
@@ -137,8 +138,8 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
     /* ========================================================================================== */
 
-    twitch::init(app)?;
     youtube::init(app)?;
+    twitch::init(app)?;
 
     return Ok(());
 }
@@ -202,9 +203,12 @@ fn main() {
             commands::tour::get_tour_steps,
             commands::tour::set_tour_steps,
             commands::tour::tour_steps_has_new,
-            commands::webview::get_scrapper_webview_url,
-            commands::webview::set_scrapper_webview_url,
-            commands::webview::toggle_scrapper_webview,
+            commands::scrappers::get_scrappers,
+            commands::scrappers::get_scrapper,
+            commands::scrappers::validate_scrapper_url,
+            commands::scrappers::get_scrapper_webview_url,
+            commands::scrappers::set_scrapper_webview_url,
+            commands::scrappers::toggle_scrapper_webview,
             commands::widgets::get_widget_fields,
             commands::widgets::get_widget_fieldstate,
             commands::widgets::list_widgets,

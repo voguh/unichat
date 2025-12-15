@@ -38,7 +38,7 @@ use crate::THIRD_PARTY_LICENSES;
 pub mod gallery;
 pub mod store;
 pub mod tour;
-pub mod webview;
+pub mod scrappers;
 pub mod widgets;
 
 #[tauri::command]

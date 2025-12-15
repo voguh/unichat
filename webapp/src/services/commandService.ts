@@ -10,7 +10,7 @@
 import { ComboboxItemGroup } from "@mantine/core";
 import { invoke } from "@tauri-apps/api/core";
 
-import { AppMetadata, GalleryItem, WidgetFields } from "unichat/types";
+import { AppMetadata, GalleryItem, UniChatScrapper, WidgetFields } from "unichat/types";
 
 export class CommandService {
     public async dispatchClearChat(): Promise<void> {
@@ -60,6 +60,22 @@ export class CommandService {
     }
 
     /* ========================================================================================== */
+
+    public async getScrappers(): Promise<UniChatScrapper[]> {
+        return invoke("get_scrappers");
+    }
+
+    public async getScrapper(id: string): Promise<UniChatScrapper> {
+        return invoke("get_scrapper", { id });
+    }
+
+    public async validateScrapperUrl(id: string, url: string): Promise<string> {
+        return invoke("validate_scrapper_url", { id, url });
+    }
+
+    public async getScrapperStoredUrl(label: string): Promise<string> {
+        return this.storeGetItem(`scrapper:${label}:url`);
+    }
 
     public async getScrapperWebviewUrl(label: string): Promise<string> {
         return invoke("get_scrapper_webview_url", { label });
