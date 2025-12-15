@@ -25,18 +25,6 @@ import {
     Tooltip
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import {
-    IconAffiliate,
-    IconBox,
-    IconCheck,
-    IconEraser,
-    IconMessage,
-    IconMoneybag,
-    IconReload,
-    IconRestore,
-    IconStar,
-    IconStars
-} from "@tabler/icons-react";
 
 import type { UniChatEvent, UniChatPlatform } from "unichat-widgets/unichat";
 import { ColorPicker } from "unichat/components/ColorPicker";
@@ -355,7 +343,6 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                     <Tooltip label="Reload widget view" position="left" withArrow>
                         <Button onClick={reloadIframe}>
                             <i className="fas fa-sync" />
-                            <IconReload size="20" />
                         </Button>
                     </Tooltip>
                 </Card>
@@ -381,17 +368,21 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                 <Tooltip label="Reload widget view" position="left" withArrow>
                     <Button onClick={reloadIframe}>
                         <i className="fas fa-sync" />
-                        <IconReload size="20" />
                     </Button>
                 </Tooltip>
             </Card>
             <div className="editor-area">
                 <div className="editor-area-header">
                     <div>Fields</div>
-                    <Button size="xs" variant="default" leftSection={<IconRestore size="20" />} onClick={handleReset}>
+                    <Button
+                        size="xs"
+                        variant="default"
+                        leftSection={<i className="fas fa-undo" />}
+                        onClick={handleReset}
+                    >
                         Reset
                     </Button>
-                    <Button size="xs" color="green" leftSection={<IconCheck size="20" />} onClick={handleApply}>
+                    <Button size="xs" color="green" leftSection={<i className="fas fa-check" />} onClick={handleApply}>
                         Apply
                     </Button>
                 </div>
@@ -417,7 +408,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         onChange={(value) => setEmulationMode(value as UniChatPlatform | "mixed")}
                     />
                     <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:clear")}>
-                        <IconEraser size="14" />
+                        <i className="fas fa-eraser" />
                     </Button>
                 </div>
 
@@ -426,42 +417,42 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                     <Button.Group orientation="vertical">
                         <Button
                             variant="default"
-                            leftSection={<IconMessage size="14" />}
+                            leftSection={<i className="fas fa-comment" />}
                             onClick={() => dispatchEmulatedEvent("unichat:message")}
                         >
                             Message
                         </Button>
                         <Button
                             variant="default"
-                            leftSection={<IconMoneybag size="14" />}
+                            leftSection={<i className="fas fa-money-bill-wave" />}
                             onClick={() => dispatchEmulatedEvent("unichat:donate")}
                         >
                             Donate
                         </Button>
                         <Button
                             variant="default"
-                            leftSection={<IconStar size="14" />}
+                            leftSection={<i className="fas fa-star" />}
                             onClick={() => dispatchEmulatedEvent("unichat:sponsor")}
                         >
                             Sponsor
                         </Button>
                         <Button
                             variant="default"
-                            leftSection={<IconStars size="14" />}
+                            leftSection={<i className="fas fa-stars" />}
                             onClick={() => dispatchEmulatedEvent("unichat:sponsor_gift")}
                         >
                             Sponsor Gift
                         </Button>
                         <Button
                             variant="default"
-                            leftSection={<IconAffiliate size="14" />}
+                            leftSection={<i className="fas fa-user-friends" />}
                             onClick={() => dispatchEmulatedEvent("unichat:raid")}
                         >
                             Raid
                         </Button>
                         <Button
                             variant="default"
-                            leftSection={<IconBox size="14" />}
+                            leftSection={<i className="fas fa-box" />}
                             onClick={() => dispatchEmulatedEvent("unichat:redemption", "twitch")}
                         >
                             Redemption

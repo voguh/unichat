@@ -9,6 +9,7 @@
 
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import "@fontsource/roboto/400";
 import "@fontsource/roboto/400-italic";
 import "@fontsource/roboto/600";

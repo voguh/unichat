@@ -25,11 +25,13 @@ use crate::events;
 use crate::events::unichat::UniChatBadge;
 use crate::irc::IRCCommand;
 use crate::irc::IRCMessage;
+use crate::scrapper;
+use crate::scrapper::UniChatScrapper;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
 use crate::utils::constants::TWITCH_CHAT_WINDOW;
-use crate::utils::create_scrapper_webview_window;
 use crate::utils::is_dev;
+use crate::utils::is_valid_twitch_channel_name;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::properties::PropertiesKey;
@@ -227,8 +229,55 @@ fn handle_event(event: &str) -> Result<(), Error> {
     };
 }
 
+pub const AVAILABLE_URLS: &[&str] = &[
+    "twitch.tv/popout/{CHANNEL_NAME}/chat",
+    "twitch.tv/{CHANNEL_NAME}"
+];
+
+fn validate_url(value: String) -> Result<String, Error> {
+    let mut value = value.trim();
+    value = value.strip_prefix("http://").unwrap_or(value);
+    value = value.strip_prefix("https://").unwrap_or(value);
+    value = value.strip_prefix("www.").unwrap_or(value);
+
+    let mut channel_name: Option<&str> = None;
+    if value.starts_with("twitch.tv") {
+        let mut parts = value.split('/');
+        parts.next();
+
+        let channel_name_or_popout = parts.next();
+        if let Some(channel_name_or_popout) = channel_name_or_popout {
+            if channel_name_or_popout == "popout" {
+                channel_name = parts.next();
+            } else {
+                channel_name = Some(channel_name_or_popout);
+            }
+        } else {
+            return Err(Error::from("Could not extract channel name from Twitch URL"));
+        }
+    }
+
+    if let Some(channel_name) = channel_name.filter(|channel_name| is_valid_twitch_channel_name(channel_name)) {
+        let formatted_url = format!("https://www.twitch.tv/popout/{}/chat", channel_name);
+        return Ok(formatted_url);
+    }
+
+    return Err(Error::from("Could not extract channel name from Twitch URL"));
+}
+
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
-    let window = create_scrapper_webview_window(app.app_handle(), TWITCH_CHAT_WINDOW, SCRAPPER_JS)?;
+    let scrapper_data = UniChatScrapper {
+        id: String::from(TWITCH_CHAT_WINDOW),
+        name: String::from("Twitch"),
+        editing_tooltup_message: String::from("You can enter just the channel name or one of the following URLs to get the Twitch chat:"),
+        editing_tooltip_urls: AVAILABLE_URLS.iter().map(|s| s.to_string()).collect(),
+        placeholder_text: String::from("https://www.twitch.tv/popout/{CHANNEL_NAME}/chat"),
+        icon: String::from("fab fa-twitch"),
+
+        validate_url: validate_url,
+        scrapper_js: String::from(SCRAPPER_JS)
+    };
+    let window = scrapper::register_scrapper(app.app_handle(), scrapper_data)?;
 
     window.listen("unichat://scrapper_event", move |event| {
         if let Err(err) = handle_event(event.payload()) {

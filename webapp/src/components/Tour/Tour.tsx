@@ -10,7 +10,6 @@
 import React from "react";
 
 import { alpha, Button, DEFAULT_THEME } from "@mantine/core";
-import { IconCheck, IconChevronLeft, IconChevronRight, IconX } from "@tabler/icons-react";
 
 import { commandService } from "unichat/services/commandService";
 import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
@@ -217,7 +216,7 @@ export function Tour(_props: Props): React.ReactNode {
                     <>
                         <Button
                             disabled={currentStep === 0}
-                            leftSection={<IconChevronLeft size={14} />}
+                            leftSection={<i className="fas fa-chevron-left" />}
                             onClick={previousStage}
                         >
                             Previous
@@ -225,7 +224,7 @@ export function Tour(_props: Props): React.ReactNode {
 
                         <Button
                             disabled={currentStep === stepsToRun.length - 1}
-                            rightSection={<IconChevronRight size={14} />}
+                            rightSection={<i className="fas fa-chevron-right" />}
                             onClick={nextStage}
                         >
                             Next
@@ -238,7 +237,7 @@ export function Tour(_props: Props): React.ReactNode {
                         style={{ position: "absolute", transform: "translateY(calc(-100% - 8px))" }}
                         variant="light"
                         color="red"
-                        leftSection={<IconX size={14} />}
+                        leftSection={<i className="fas fa-times" />}
                         onClick={endTour}
                     >
                         Skip Tour
@@ -250,7 +249,7 @@ export function Tour(_props: Props): React.ReactNode {
                         style={{ position: "absolute", transform: "translateY(calc(-100% - 8px))" }}
                         variant="light"
                         color="green"
-                        rightSection={<IconCheck size={14} />}
+                        rightSection={<i className="fas fa-check" />}
                         onClick={endTour}
                     >
                         End Tour

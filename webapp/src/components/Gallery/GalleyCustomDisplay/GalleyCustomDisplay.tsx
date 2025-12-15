@@ -10,7 +10,6 @@
 import React from "react";
 
 import { Button, TextInput } from "@mantine/core";
-import { IconCheck } from "@tabler/icons-react";
 
 import { GalleryItem } from "unichat/types";
 
@@ -130,7 +129,7 @@ export function GalleyCustomDisplay(props: Props): React.ReactNode {
             <div className="input-wrapper">
                 <TextInput ref={inputRef} label="Media URL" placeholder="Enter media URL" defaultValue={tempURL} />
                 <Button onClick={handleApply}>
-                    <IconCheck size={16} />
+                    <i className="fas fa-check" />
                 </Button>
             </div>
 

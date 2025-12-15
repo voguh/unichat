@@ -12,21 +12,6 @@ import React from "react";
 import { createTheme, MantineProvider, Badge, Button, Card, Divider, Menu, Tooltip } from "@mantine/core";
 import { ModalsProvider, modals } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
-import {
-    IconAdjustments,
-    IconBox,
-    IconBoxOff,
-    IconCompass,
-    IconEraser,
-    IconFolder,
-    IconInfoCircle,
-    IconLayout,
-    IconMap,
-    IconPhoto,
-    IconRefresh,
-    IconRuler,
-    IconSparkles
-} from "@tabler/icons-react";
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 import { marked } from "marked";
 import semver from "semver";
@@ -145,7 +130,7 @@ export default function App(): JSX.Element {
                                     variant={selectedTab === "dashboard" ? "filled" : "default"}
                                     color="green"
                                 >
-                                    <IconLayout size="20" />
+                                    <i className="fas fa-th-large" />
                                 </Button>
                             </Tooltip>
                             <Tooltip label="Widget Editor" position="right" withArrow>
@@ -155,7 +140,7 @@ export default function App(): JSX.Element {
                                     variant={selectedTab === "widgetEditor" ? "filled" : "default"}
                                     color="green"
                                 >
-                                    <IconRuler size="20" />
+                                    <i className="fas fa-pencil-ruler" />
                                 </Button>
                             </Tooltip>
 
@@ -164,7 +149,7 @@ export default function App(): JSX.Element {
                             {selectedTab === "dashboard" && (
                                 <Tooltip label="Clear chat history" position="right" withArrow>
                                     <Button size="sm" onClick={handleClearChat} data-tour="clear-chat">
-                                        <IconEraser size="20" />
+                                        <i className="fas fa-eraser" />
                                     </Button>
                                 </Tooltip>
                             )}
@@ -173,7 +158,7 @@ export default function App(): JSX.Element {
                                     onClick={() => revealItemInDir(metadata.widgetsDir)}
                                     data-tour="user-widgets-directory"
                                 >
-                                    <IconFolder size="20" />
+                                    <i className="fas fa-folder" />
                                 </Button>
                             </Tooltip>
                             {selectedTab === "dashboard" && (
@@ -183,14 +168,18 @@ export default function App(): JSX.Element {
                                         variant={showWidgetPreview ? "filled" : "default"}
                                         data-tour="toggle-widget-preview"
                                     >
-                                        {showWidgetPreview ? <IconBox size="20" /> : <IconBoxOff size="20" />}
+                                        {showWidgetPreview ? (
+                                            <i className="fas fa-window-maximize" />
+                                        ) : (
+                                            <i className="far fa-window-maximize" />
+                                        )}
                                     </Button>
                                 </Tooltip>
                             )}
                             {selectedTab === "widgetEditor" && (
                                 <Tooltip label="Gallery" position="right" withArrow>
                                     <Button onClick={toggleGallery} data-tour="gallery-toggle">
-                                        <IconPhoto size="20" />
+                                        <i className="fas fa-images" />
                                     </Button>
                                 </Tooltip>
                             )}
@@ -199,24 +188,26 @@ export default function App(): JSX.Element {
                         <Menu position="right">
                             <Menu.Target>
                                 <Button variant="default" data-tour="settings">
-                                    <IconAdjustments size="20" />
+                                    <i className="fas fa-sliders-h" />
                                 </Button>
                             </Menu.Target>
                             <Menu.Dropdown>
                                 <Menu.Sub>
                                     <Menu.Sub.Target>
-                                        <Menu.Sub.Item leftSection={<IconCompass size="14" />}>Tour</Menu.Sub.Item>
+                                        <Menu.Sub.Item leftSection={<i className="fas fa-compass" />}>
+                                            Tour
+                                        </Menu.Sub.Item>
                                     </Menu.Sub.Target>
                                     <Menu.Sub.Dropdown>
                                         <Menu.Item
-                                            leftSection={<IconMap size="14" />}
+                                            leftSection={<i className="fas fa-map" />}
                                             onClick={() => eventEmitter.emit("tour:start", { type: "full" })}
                                         >
                                             Full tour
                                         </Menu.Item>
                                         {hasNewsTour && (
                                             <Menu.Item
-                                                leftSection={<IconSparkles size="14" />}
+                                                leftSection={<i className="fas fa-sparkles" />}
                                                 color="green"
                                                 onClick={() => eventEmitter.emit("tour:start", { type: "whats-new" })}
                                             >
@@ -226,7 +217,7 @@ export default function App(): JSX.Element {
                                     </Menu.Sub.Dropdown>
                                 </Menu.Sub>
                                 <Menu.Item
-                                    leftSection={<IconRefresh size="14" />}
+                                    leftSection={<i className="fas fa-sync" />}
                                     color={hasUpdate ? "green" : null}
                                     onClick={checkForUpdates}
                                     data-tour="settings-check-for-updates"
@@ -235,7 +226,7 @@ export default function App(): JSX.Element {
                                 </Menu.Item>
                                 <Menu.Divider />
                                 <Menu.Item
-                                    leftSection={<IconInfoCircle size="14" />}
+                                    leftSection={<i className="fas fa-info-circle" />}
                                     onClick={toggleAboutModal}
                                     data-tour="settings-about"
                                 >
