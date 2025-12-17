@@ -7,6 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use std::path;
 use std::sync::LazyLock;
 
 use crate::error::Error;
@@ -17,18 +18,11 @@ pub mod render_emitter;
 pub mod settings;
 pub mod ureq;
 
-pub fn parse_u32_to_rgba(color: u32) -> (u8, u8, u8, f32) {
-    let a = ((color >> 24) & 0xFF) as u8;
-    let r = ((color >> 16) & 0xFF) as u8;
-    let g = ((color >> 8) & 0xFF) as u8;
-    let b = (color & 0xFF) as u8;
-
-    return (r, g, b, a as f32 / 255.0);
-}
-
 pub fn is_dev() -> bool {
     return cfg!(debug_assertions) || tauri::is_dev();
 }
+
+/* ================================================================================================================== */
 
 pub fn normalize_value(value_raw: &str) -> Result<f32, Error> {
     let last_dot = value_raw.rfind('.');
@@ -65,6 +59,17 @@ pub fn normalize_value(value_raw: &str) -> Result<f32, Error> {
     return Ok(value);
 }
 
+/* ================================================================================================================== */
+
+pub fn parse_u32_to_rgba(color: u32) -> (u8, u8, u8, f32) {
+    let a = ((color >> 24) & 0xFF) as u8;
+    let r = ((color >> 16) & 0xFF) as u8;
+    let g = ((color >> 8) & 0xFF) as u8;
+    let b = (color & 0xFF) as u8;
+
+    return (r, g, b, a as f32 / 255.0);
+}
+
 pub fn random_color_by_seed(seed: &str) -> Result<String, Error> {
     let mut hash: u32 = 2166136261;
     for byte in seed.as_bytes() {
@@ -78,6 +83,8 @@ pub fn random_color_by_seed(seed: &str) -> Result<String, Error> {
 
     return Ok(format!("#{:02X}{:02X}{:02X}", r, g, b));
 }
+
+/* ================================================================================================================== */
 
 // Thanks to Glenn Slayden which explained the YouTube channel ID format
 // on https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video/101153#101153
@@ -108,4 +115,16 @@ pub fn is_valid_twitch_channel_name(channel_name: &str) -> bool {
     }
 
     return TWITCH_CHANNEL_NAME_REGEX.is_match(channel_name);
+}
+
+/* ================================================================================================================== */
+
+pub fn safe_guard_path(base_path: &path::PathBuf, concat_str: &str) -> Result<path::PathBuf, Error> {
+    let concatenated_path = base_path.join(concat_str);
+    let resolved_path = path::absolute(concatenated_path)?;
+    if !resolved_path.starts_with(base_path) {
+        return Err(Error::Message(format!("Access to path '{}' is not allowed", resolved_path.display())));
+    }
+
+    return Ok(resolved_path);
 }

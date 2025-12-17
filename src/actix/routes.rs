@@ -10,7 +10,6 @@
 use std::collections::HashMap;
 use std::fs;
 use std::io::Read as _;
-use std::path;
 use std::path::PathBuf;
 
 use actix_web::error::ErrorBadRequest;
@@ -25,6 +24,7 @@ use actix_web::Responder;
 
 use crate::error::Error;
 use crate::events;
+use crate::utils;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::ureq;
@@ -32,13 +32,10 @@ use crate::utils::ureq;
 static WIDGET_TEMPLATE: &str = include_str!("./static/index.html.template");
 
 fn safe_guard_path(base_path: &PathBuf, concat_str: &str) -> Result<PathBuf, actix_web::Error> {
-    let concatenated_path = base_path.join(concat_str);
-    let resolved_path = path::absolute(concatenated_path).map_err(|e| ErrorInternalServerError(e))?;
-    if !resolved_path.starts_with(base_path) {
-        return Err(ErrorBadRequest(format!("Access to path '{}' is not allowed", resolved_path.display())));
-    }
-
-    return Ok(resolved_path);
+    return utils::safe_guard_path(base_path, concat_str).map_err(|e| {
+        log::error!("{:?}", e);
+        return ErrorInternalServerError("Failed to resolve asset path safely");
+    });
 }
 
 fn get_widget_dir(widget_name: &str) -> Option<PathBuf> {
