@@ -80,6 +80,7 @@ fn copy_wrapper(src: &PathBuf, dest: &PathBuf) -> Result<(), Error> {
 }
 
 fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
+    events::init(app)?;
     utils::properties::init(app)?;
     utils::settings::init(app)?;
     utils::render_emitter::init(app)?;
@@ -165,7 +166,10 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
+    tauri::async_runtime::set(tokio::runtime::Handle::current());
+
     let log_level: log::LevelFilter;
     if let Ok(log_level_raw) = env::var("UNICHAT_LOG_LEVEL") {
         log_level = match log_level_raw.to_lowercase().as_str() {

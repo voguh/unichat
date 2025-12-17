@@ -141,7 +141,7 @@ fn handle_ws_event(_event_type: &str, message: &Value) -> Result<(), Error> {
                 log_action("events-parsed.log", &serde_json::to_string(&parsed).unwrap());
             }
 
-            if let Err(err) = events::event_emitter().emit(parsed) {
+            if let Err(err) = events::emit(parsed) {
                 log::error!("An error occurred on send unichat event: {}", err);
             }
         }
@@ -186,7 +186,7 @@ fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error>
                 log_action("events-parsed.log", &serde_json::to_string(&parsed).unwrap());
             }
 
-            if let Err(err) = events::event_emitter().emit(parsed) {
+            if let Err(err) = events::emit(parsed) {
                 log::error!("An error occurred on send unichat event: {}", err);
             }
         }

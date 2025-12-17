@@ -25,7 +25,6 @@ use actix_web::Responder;
 
 use crate::error::Error;
 use crate::events;
-use crate::events::event_emitter;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::ureq;
@@ -279,7 +278,7 @@ pub async fn ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, 
 
         /* ====================================================================================== */
 
-        let history = event_emitter().latest_events();
+        let history = events::latest_events();
         let event = serde_json::json!({ "type": "unichat:history", "data": serde_json::to_value(history).unwrap_or_default() });
         if let Ok(parsed) = serde_json::to_string(&event) {
             if let Err(err) = session.text(parsed).await {
@@ -291,7 +290,7 @@ pub async fn ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, 
 
         /* ====================================================================================== */
 
-        let mut rx = events::event_emitter().subscribe();
+        let mut rx = events::subscribe().unwrap();
 
         loop {
             let received = rx.recv().await;
