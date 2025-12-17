@@ -217,6 +217,7 @@ fn main() {
             commands::scrappers::get_scrappers,
             commands::scrappers::get_scrapper,
             commands::scrappers::validate_scrapper_url,
+            commands::scrappers::get_scrapper_stored_url,
             commands::scrappers::get_scrapper_webview_url,
             commands::scrappers::set_scrapper_webview_url,
             commands::scrappers::toggle_scrapper_webview,

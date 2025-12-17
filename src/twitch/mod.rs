@@ -129,7 +129,7 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
 }
 
 fn handle_ws_event(_event_type: &str, message: &Value) -> Result<(), Error> {
-    let log_events = settings::get_settings_log_twitch_events()?;
+    let log_events: SettingLogEventLevel = settings::get_scrapper_property(TWITCH_CHAT_WINDOW, "log_level")?;
 
     if is_dev() || log_events == SettingLogEventLevel::AllEvents {
         log_action("events-raw.log", &format!("{:?}", message));
@@ -162,7 +162,7 @@ fn handle_ws_event(_event_type: &str, message: &Value) -> Result<(), Error> {
 
 fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
     let message = IRCMessage::parse(payload.get("message"))?;
-    let log_events = settings::get_settings_log_twitch_events()?;
+    let log_events: SettingLogEventLevel = settings::get_scrapper_property(TWITCH_CHAT_WINDOW, "log_level")?;
 
     if is_dev() || log_events == SettingLogEventLevel::AllEvents {
         log_action("events-raw.log", &format!("{:?}", message));

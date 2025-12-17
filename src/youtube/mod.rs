@@ -89,7 +89,7 @@ fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> 
     let actions = payload.get("actions").and_then(|v| v.as_array())
         .ok_or(Error::Message(format!("Missing or invalid 'actions' field in '{event_type}' event payload")))?;
 
-    let log_events = settings::get_settings_log_youtube_events()?;
+    let log_events: SettingLogEventLevel = settings::get_scrapper_property(YOUTUBE_CHAT_WINDOW, "log_level")?;
 
     for action in actions {
         if is_dev() || log_events == SettingLogEventLevel::AllEvents {

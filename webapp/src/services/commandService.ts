@@ -73,20 +73,20 @@ export class CommandService {
         return invoke("validate_scrapper_url", { id, url });
     }
 
-    public async getScrapperStoredUrl(label: string): Promise<string> {
-        return this.storeGetItem(`scrapper:${label}:url`);
+    public async getScrapperStoredUrl(scrapper_id: string): Promise<string> {
+        return invoke("get_scrapper_stored_url", { scrapper_id });
     }
 
-    public async getScrapperWebviewUrl(label: string): Promise<string> {
-        return invoke("get_scrapper_webview_url", { label });
+    public async getScrapperWebviewUrl(scrapper_id: string): Promise<string> {
+        return invoke("get_scrapper_webview_url", { scrapper_id });
     }
 
-    public async setScrapperWebviewUrl(label: string, url: string): Promise<void> {
-        await invoke("set_scrapper_webview_url", { label, url });
+    public async setScrapperWebviewUrl(scrapper_id: string, url: string): Promise<void> {
+        await invoke("set_scrapper_webview_url", { scrapper_id, url });
     }
 
-    public async toggleScrapperWebview(label: string): Promise<boolean> {
-        return invoke("toggle_scrapper_webview", { label });
+    public async toggleScrapperWebview(scrapper_id: string): Promise<boolean> {
+        return invoke("toggle_scrapper_webview", { scrapper_id });
     }
 
     /* ========================================================================================== */
