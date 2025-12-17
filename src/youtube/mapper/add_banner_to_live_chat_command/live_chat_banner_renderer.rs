@@ -18,7 +18,6 @@ use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRaidEventPayload;
-use crate::events::unichat::UNICHAT_EVENT_RAID_TYPE;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::parse_author_color;
@@ -71,6 +70,8 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     if parsed.banner_type == "LIVE_CHAT_BANNER_TYPE_CROSS_CHANNEL_REDIRECT" {
         if let Some(renderer) = parsed.contents.live_chat_banner_redirect_renderer {
             let first_run = renderer.banner_message.runs.first().ok_or("No runs found in banner message")?;
+
+            let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
             let author_username = parse_author_username_str(first_run.text.clone())?;
             let author_name = parse_author_name_str(first_run.text.clone())?;
             let author_color = parse_author_color(&author_name)?;
@@ -78,29 +79,26 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
             let timestamp_usec = SystemTime::now().duration_since(UNIX_EPOCH)?;
 
             if first_run.bold.is_some() {
-                event = Some(UniChatEvent::Raid {
-                    event_type: String::from(UNICHAT_EVENT_RAID_TYPE),
-                    data: UniChatRaidEventPayload {
-                        channel_id: properties::get_item(PropertiesKey::YouTubeChannelId)?,
-                        channel_name: None,
+                event = Some(UniChatEvent::Raid(UniChatRaidEventPayload {
+                    channel_id: channel_id,
+                    channel_name: None,
 
-                        platform: UniChatPlatform::YouTube,
-                        flags: HashMap::new(),
+                    platform: UniChatPlatform::YouTube,
+                    flags: HashMap::new(),
 
-                        author_id: None,
-                        author_username: author_username,
-                        author_display_name: author_name,
-                        author_display_color: author_color,
-                        author_profile_picture_url: author_photo.url.clone(),
-                        author_badges: Vec::new(),
-                        author_type: None,
+                    author_id: None,
+                    author_username: author_username,
+                    author_display_name: author_name,
+                    author_display_color: author_color,
+                    author_profile_picture_url: author_photo.url.clone(),
+                    author_badges: Vec::new(),
+                    author_type: None,
 
-                        message_id: parsed.action_id,
-                        viewer_count: None,
+                    message_id: parsed.action_id,
+                    viewer_count: None,
 
-                        timestamp: timestamp_usec.as_secs() as i64
-                    }
-                })
+                    timestamp: timestamp_usec.as_secs() as i64
+                }));
             }
         }
     }

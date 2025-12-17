@@ -11,7 +11,6 @@ use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRemoveMessageEventPayload;
-use crate::events::unichat::UNICHAT_EVENT_REMOVE_MESSAGE_TYPE;
 use crate::irc::IRCMessage;
 
 pub fn parse(channel: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
@@ -22,18 +21,15 @@ pub fn parse(channel: String, message: &IRCMessage) -> Result<Option<UniChatEven
     let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or("Missing or invalid tmi-sent-ts tag")?;
     let timestamp_usec: i64 = timestamp_usec.parse()?;
 
-    let event = UniChatEvent::RemoveMessage {
-        event_type: String::from(UNICHAT_EVENT_REMOVE_MESSAGE_TYPE),
-        data: UniChatRemoveMessageEventPayload {
-            channel_id: room_id.to_owned(),
-            channel_name: Some(channel),
-            platform: UniChatPlatform::Twitch,
+    let event = UniChatEvent::RemoveMessage(UniChatRemoveMessageEventPayload {
+        channel_id: room_id.to_owned(),
+        channel_name: Some(channel),
+        platform: UniChatPlatform::Twitch,
 
-            message_id: target_msg_id.to_owned(),
+        message_id: target_msg_id.to_owned(),
 
-            timestamp: timestamp_usec
-        }
-    };
+        timestamp: timestamp_usec
+    });
 
     return Ok(Some(event));
 }

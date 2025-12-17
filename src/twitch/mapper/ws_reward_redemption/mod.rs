@@ -14,7 +14,6 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::error::Error;
-use crate::events::unichat::UNICHAT_EVENT_REDEMPTION_TYPE;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRedemptionEventPayload;
@@ -101,18 +100,12 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
 
     if parsed.user_input.is_some_and(|ui| !ui.is_empty()) {
         if let Some(redemption_event) = handle_redemption_event(event_payload) {
-            let event = UniChatEvent::Redemption {
-                event_type: String::from(UNICHAT_EVENT_REDEMPTION_TYPE),
-                data: redemption_event
-            };
+            let event = UniChatEvent::Redemption(redemption_event);
 
             return Ok(Some(event));
         }
     } else {
-        let event = UniChatEvent::Redemption {
-            event_type: String::from(UNICHAT_EVENT_REDEMPTION_TYPE),
-            data: event_payload
-        };
+        let event = UniChatEvent::Redemption(event_payload);
 
         return Ok(Some(event));
     }

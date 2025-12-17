@@ -10,11 +10,9 @@
 use std::collections::HashMap;
 
 use crate::error::Error;
-use crate::events::unichat::UNICHAT_EVENT_REDEMPTION_TYPE;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatMessageEventPayload;
 use crate::events::unichat::UniChatPlatform;
-use crate::events::unichat::UNICHAT_EVENT_MESSAGE_TYPE;
 use crate::irc::IRCMessage;
 use crate::twitch::mapper::handle_redemption_message_event;
 use crate::twitch::mapper::structs::author::parse_author_badges;
@@ -64,18 +62,12 @@ pub fn parse(channel: String, text: String, message: &IRCMessage, tags: HashMap<
 
     if let Some(reward_id) = tags.get("custom-reward-id").and_then(|v| v.as_ref()) {
         if let Some(redemption_payload) = handle_redemption_message_event(&reward_id, event_payload) {
-            let event = UniChatEvent::Redemption {
-                event_type: String::from(UNICHAT_EVENT_REDEMPTION_TYPE),
-                data: redemption_payload
-            };
+            let event = UniChatEvent::Redemption(redemption_payload);
 
             return Ok(Some(event));
         }
     } else {
-        let event = UniChatEvent::Message {
-            event_type: String::from(UNICHAT_EVENT_MESSAGE_TYPE),
-            data: event_payload
-        };
+        let event = UniChatEvent::Message(event_payload);
 
         return Ok(Some(event));
     }
