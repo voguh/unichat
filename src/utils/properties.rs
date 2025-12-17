@@ -18,24 +18,15 @@ use tauri::Manager;
 
 use crate::error::Error;
 
-#[derive(PartialEq, Eq)]
+#[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
 pub enum PropertiesKey {
     YouTubeChannelId,
     TwitchChannelId
 }
 
-impl fmt::Display for PropertiesKey {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = match self {
-            PropertiesKey::YouTubeChannelId => "youtube_channel_id",
-            PropertiesKey::TwitchChannelId => "twitch_channel_id",
-        };
-
-        return write!(f, "{}", s);
-    }
-}
-
-#[derive(PartialEq, Eq)]
+#[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
 pub enum AppPaths {
     AppCache,
     AppConfig,
@@ -47,6 +38,8 @@ pub enum AppPaths {
     UniChatGallery,
     UniChatSystemWidgets,
     UniChatUserWidgets,
+    UniChatSystemPlugins,
+    UniChatUserPlugins,
     UniChatLogoIcon,
     UniChatLicense
 }
@@ -64,6 +57,8 @@ impl fmt::Display for AppPaths {
             AppPaths::UniChatGallery => "unichat_gallery_dir",
             AppPaths::UniChatSystemWidgets => "unichat_system_widgets_dir",
             AppPaths::UniChatUserWidgets => "unichat_user_widgets_dir",
+            AppPaths::UniChatSystemPlugins => "unichat_system_plugins_dir",
+            AppPaths::UniChatUserPlugins => "unichat_user_plugins_dir",
             AppPaths::UniChatLogoIcon => "unichat_logo_icon",
             AppPaths::UniChatLicense => "unichat_license"
         };
@@ -72,7 +67,8 @@ impl fmt::Display for AppPaths {
     }
 }
 
-static PROPERTIES: OnceLock<RwLock<HashMap<String, String>>> = OnceLock::new();
+const ONCE_LOCK_NAME: &str = "Properties::INSTANCE";
+static INSTANCE: OnceLock<RwLock<HashMap<String, String>>> = OnceLock::new();
 
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     let app_cache_dir = app.path().app_cache_dir()?;
@@ -84,6 +80,8 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     let gallery_dir = app.path().resolve("gallery", BaseDirectory::AppData)?;
     let system_widgets_dir = app.path().resolve("widgets", BaseDirectory::Resource)?;
     let user_widgets_dir = app.path().resolve("widgets", BaseDirectory::AppData)?;
+    let system_plugins_dir = app.path().resolve("plugins", BaseDirectory::Resource)?;
+    let user_plugins_dir = app.path().resolve("plugins", BaseDirectory::AppData)?;
     let logo_icon_file = app.path().resolve("icons/icon.png", BaseDirectory::Resource)?;
     let license_file = app.path().resolve("LICENSE", BaseDirectory::Resource)?;
 
@@ -96,6 +94,8 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     let gallery_path = gallery_dir.to_string_lossy().to_string();
     let system_widgets_path = system_widgets_dir.to_string_lossy().to_string();
     let user_widgets_path = user_widgets_dir.to_string_lossy().to_string();
+    let system_plugins_path = system_plugins_dir.to_string_lossy().to_string();
+    let user_plugins_path = user_plugins_dir.to_string_lossy().to_string();
     let logo_icon_path = logo_icon_file.to_string_lossy().to_string();
     let license_path = license_file.to_string_lossy().to_string();
 
@@ -109,10 +109,12 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     properties.insert(AppPaths::UniChatGallery.to_string(), gallery_path);
     properties.insert(AppPaths::UniChatSystemWidgets.to_string(), system_widgets_path);
     properties.insert(AppPaths::UniChatUserWidgets.to_string(), user_widgets_path);
+    properties.insert(AppPaths::UniChatSystemPlugins.to_string(), system_plugins_path);
+    properties.insert(AppPaths::UniChatUserPlugins.to_string(), user_plugins_path);
     properties.insert(AppPaths::UniChatLogoIcon.to_string(), logo_icon_path);
     properties.insert(AppPaths::UniChatLicense.to_string(), license_path);
 
-    let result = PROPERTIES.set(RwLock::new(properties));
+    let result = INSTANCE.set(RwLock::new(properties));
     if result.is_err() {
         return Err("Failed to initialize properties".into());
     }
@@ -121,24 +123,31 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
 }
 
 fn get_item_raw(key: String) -> Result<String, Error> {
-    let props = PROPERTIES.get().ok_or("Properties not initialized")?;
+    let props = INSTANCE.get().ok_or(Error::OnceLockNotInitialized(ONCE_LOCK_NAME))?;
     let props_guard = props.read().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
     return props_guard.get(&key).cloned().ok_or(format!("Key '{}' not found", key).into());
 }
 
 pub fn get_item(key: PropertiesKey) -> Result<String, Error> {
-    return get_item_raw(key.to_string());
+    let key = serde_plain::to_string(&key)?;
+    return get_item_raw(key);
 }
 
 pub fn set_item(key: PropertiesKey, value: String) -> Result<(), Error> {
-    let props = PROPERTIES.get().ok_or("Properties not initialized")?;
-    let mut props_guard = props.write().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
-    props_guard.insert(key.to_string(), value);
+    let props = INSTANCE.get().ok_or(Error::OnceLockNotInitialized(ONCE_LOCK_NAME))?;
 
-    return Ok(());
+    if let Ok(mut props) = props.write() {
+        let key = serde_plain::to_string(&key)?;
+        props.insert(key.to_string(), value);
+
+        return Ok(());
+    } else {
+        return Err(Error::from("Failed to acquire write lock on properties"));
+    }
 }
 
 pub fn get_app_path(key: AppPaths) -> PathBuf {
-    let path_str = get_item_raw(key.to_string()).expect("Failed to get app path");
+    let key = serde_plain::to_string(&key).expect("Failed to serialize AppPaths key");
+    let path_str = get_item_raw(key).expect("Failed to get app path");
     return PathBuf::from(path_str);
 }

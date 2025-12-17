@@ -57,7 +57,7 @@ pub fn register_scrapper(app: &tauri::AppHandle<tauri::Wry>, scrapper: UniChatSc
 
     /* ========================================================================================== */
 
-    let start_hidden = settings::get_settings_create_webview_hidden()?;
+    let start_hidden: bool = settings::get_item(settings::SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY)?;
     let webview_url = tauri::WebviewUrl::App(PathBuf::from("scrapper_idle.html"));
     let scrapper_js = scrapper.scrapper_js.clone();
 

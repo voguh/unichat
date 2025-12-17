@@ -16,21 +16,21 @@ use crate::utils::settings;
 
 #[tauri::command]
 pub async fn get_prev_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, Error> {
-    let prev_tour_steps = settings::get_tour_prev_steps()?;
+    let prev_tour_steps = settings::get_item(settings::SETTINGS_TOUR_PREV_STEPS_KEY)?;
 
     return Ok(prev_tour_steps);
 }
 
 #[tauri::command]
 pub async fn get_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, Error> {
-    let tour_steps = settings::get_tour_current_steps()?;
+    let tour_steps = settings::get_item(settings::SETTINGS_TOUR_CURRENT_STEPS_KEY)?;
 
     return Ok(tour_steps)
 }
 
 #[tauri::command]
 pub async fn set_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>, new_steps: Vec<String>) -> Result<(), Error> {
-    let current_tour_steps = settings::get_tour_current_steps()?;
+    let current_tour_steps: Vec<String> = settings::get_item(settings::SETTINGS_TOUR_CURRENT_STEPS_KEY)?;
 
     let current_hash_set: HashSet<_> = current_tour_steps.iter().cloned().collect();
     let new_hash_set: HashSet<_> = new_steps.iter().cloned().collect();
@@ -43,8 +43,8 @@ pub async fn set_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>, new_steps: Ve
             new_prev_tour_steps = current_tour_steps;
         }
 
-        settings::set_tour_prev_steps(new_prev_tour_steps)?;
-        settings::set_tour_current_steps(new_steps)?;
+        settings::set_item(settings::SETTINGS_TOUR_PREV_STEPS_KEY, &new_prev_tour_steps)?;
+        settings::set_item(settings::SETTINGS_TOUR_CURRENT_STEPS_KEY, &new_steps)?;
     }
 
     return Ok(())
@@ -52,8 +52,8 @@ pub async fn set_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>, new_steps: Ve
 
 #[tauri::command]
 pub async fn tour_steps_has_new<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, Error> {
-    let prev_tour_steps = settings::get_tour_prev_steps()?;
-    let current_tour_steps = settings::get_tour_current_steps()?;
+    let prev_tour_steps: Vec<String> = settings::get_item(settings::SETTINGS_TOUR_PREV_STEPS_KEY)?;
+    let current_tour_steps: Vec<String> = settings::get_item(settings::SETTINGS_TOUR_CURRENT_STEPS_KEY)?;
 
     let prev_hash_set: HashSet<_> = prev_tour_steps.iter().cloned().collect();
     let mut new_hash_set: HashSet<_> = current_tour_steps.iter().cloned().collect();

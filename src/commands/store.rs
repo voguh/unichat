@@ -16,10 +16,6 @@ use crate::utils::settings;
 
 #[tauri::command]
 pub async fn store_get_item<R: Runtime>(_app: AppHandle<R>, key: &str) -> Result<Value, Error> {
-    if key.starts_with("settings") {
-        return Err(Error::from("Use specific settings commands to get settings values"));
-    }
-
-    let raw_value = settings::get_store_item_raw(key)?;
+    let raw_value = settings::get_item(key)?;
     return Ok(raw_value);
 }

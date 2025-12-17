@@ -28,6 +28,8 @@ pub enum Error {
 
     #[error(transparent)]
     SerdeJson(#[from] serde_json::error::Error),
+    #[error("serde_plain error")]
+    SerdePlain { ty: &'static str, msg: String },
     #[error(transparent)]
     UrlParse(#[from] url::ParseError),
     #[error(transparent)]
@@ -81,6 +83,17 @@ impl From<tauri_plugin_store::Error> for Error {
             E::SerializeFunctionNotFound(e) => Error::Message(e),
             E::DeserializeFunctionNotFound(e) => Error::Message(e),
             _ => unreachable!()
+        }
+    }
+}
+
+impl From<serde_plain::Error> for Error {
+    fn from(e: serde_plain::Error) -> Self {
+        return match e {
+            serde_plain::Error::ImpossibleSerialization(ty) => Error::SerdePlain { ty, msg: String::from("cannot serialize non primitive type") },
+            serde_plain::Error::ImpossibleDeserialization(ty) => Error::SerdePlain { ty, msg: String::from("cannot deserialize to non primitive type") },
+            serde_plain::Error::Message(msg) => Error::Message(msg),
+            serde_plain::Error::Parse(ty, msg) => Error::SerdePlain { ty, msg: msg.clone() },
         }
     }
 }
