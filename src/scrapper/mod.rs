@@ -31,6 +31,7 @@ pub trait UniChatScrapper {
     fn editing_tooltip_message(&self) -> &str;
     fn editing_tooltip_urls(&self) -> &[String];
     fn placeholder_text(&self) -> &str;
+    fn badges(&self) -> &[String];
     fn icon(&self) -> &str;
     fn validate_url(&self, url: String) -> Result<String, Error>;
     fn scrapper_js(&self) -> &str;
@@ -102,6 +103,10 @@ impl UniChatScrapper for UniChatScrapperInternal {
         return &self.placeholder_text;
     }
 
+    fn badges(&self) -> &[String] {
+        return &[];
+    }
+
     fn icon(&self) -> &str {
         return &self.icon;
     }
@@ -128,6 +133,7 @@ pub fn serialize_scrapper(scrapper: &Arc<dyn UniChatScrapper + Send + Sync>) -> 
         "editingTooltipMessage": scrapper.editing_tooltip_message(),
         "editingTooltipUrls": scrapper.editing_tooltip_urls(),
         "placeholderText": scrapper.placeholder_text(),
+        "badges": scrapper.badges(),
         "icon": scrapper.icon(),
     });
 

@@ -54,6 +54,7 @@ export interface UniChatScrapper {
     editingTooltipMessage: string;
     editingTooltipUrls: string[];
     placeholderText: string;
+    badges: string[];
     icon: string;
 }
 

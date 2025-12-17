@@ -35,7 +35,7 @@ export function DashboardHome(): React.ReactNode {
                 {message}
                 <br />
                 <List size="xs">
-                    {availableUrls.map((url, idx) => <li key={idx} dangerouslySetInnerHTML={{ __html: url }} />)}
+                    {availableUrls.map((url, idx) => <li key={idx}>{url}</li>)}
                 </List>
                 <br />
                 You can enter the URL with or without the <Badge size="xs" radius="xs">www.</Badge> prefix.
@@ -93,15 +93,12 @@ export function DashboardHome(): React.ReactNode {
     return (
         <DashboardHomeStyledContainer>
             <div className="fields">
-                {scrappers.map(({ editingTooltipMessage, editingTooltipUrls, ...scrapper }) => (
+                {scrappers.map((s) => (
                     <ScrapperCard
-                        key={scrapper.id}
-                        scrapperId={scrapper.id}
-                        displayName={scrapper.name}
-                        validateUrl={(value) => commandService.validateScrapperUrl(scrapper.id, value)}
-                        editingTooltip={mountEditingTooltip(editingTooltipMessage, editingTooltipUrls)}
-                        placeholderText={scrapper.placeholderText}
-                        scrapperIcon={<i className={scrapper.icon} />}
+                        key={s.id}
+                        editingTooltip={mountEditingTooltip(s.editingTooltipMessage, s.editingTooltipUrls)}
+                        validateUrl={(value) => commandService.validateScrapperUrl(s.id, value)}
+                        scrapper={s}
                     />
                 ))}
             </div>
