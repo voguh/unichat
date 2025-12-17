@@ -1,5 +1,5 @@
-name: plugin-example
-description: This is a example plugin for UniChat.
+name: plugin-kick
+description: Kick integration plugin for UniChat
 version: ${unichat_version}
 author: ${unichat_authors}
 license: ${unichat_license}
