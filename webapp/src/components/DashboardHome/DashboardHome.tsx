@@ -15,7 +15,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { AppContext } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
 import { UniChatScrapper } from "unichat/types";
-import { WIDGET_URL_PREFIX } from "unichat/utils/constants";
+import { scrapperPriority, WIDGET_URL_PREFIX } from "unichat/utils/constants";
 
 import { ScrapperCard } from "./ScrapperCard";
 import { DashboardHomeStyledContainer } from "./styled";
@@ -74,8 +74,17 @@ export function DashboardHome(): React.ReactNode {
             setWidgets(widgets);
 
             const scrappers = await commandService.getScrappers();
-            console.log("Scrappers fetched:", scrappers);
-            setScrappers(scrappers);
+            const sortedScrappers = scrappers.sort((a, b) => {
+                const pa = scrapperPriority(a.id);
+                const pb = scrapperPriority(b.id);
+
+                if (pa !== pb) {
+                    return pa - pb;
+                }
+
+                return a.name.localeCompare(b.name);
+            });
+            setScrappers(sortedScrappers);
         }
 
         init();
