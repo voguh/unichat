@@ -16,7 +16,6 @@ use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatSponsorGiftEventPayload;
-use crate::events::unichat::UNICHAT_EVENT_SPONSOR_GIFT_TYPE;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::parse_author_badges;
@@ -87,6 +86,9 @@ fn parse_count(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<u16, Error
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let parsed: LiveChatSponsorshipsGiftPurchaseAnnouncementRenderer = serde_json::from_value(value)?;
+
+    let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
+    let author_id = parsed.author_external_channel_id;
     let render = parsed.header.live_chat_sponsorships_header_renderer;
     let author_username = parse_author_username(&render.author_name)?;
     let author_name = parse_author_name(&render.author_name)?;
@@ -97,30 +99,27 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let count = parse_count(&render)?;
     let timestamp_usec = parsed.timestamp_usec.parse::<i64>()?;
 
-    let event = UniChatEvent::SponsorGift {
-        event_type: String::from(UNICHAT_EVENT_SPONSOR_GIFT_TYPE),
-        data: UniChatSponsorGiftEventPayload {
-            channel_id: properties::get_item(PropertiesKey::YouTubeChannelId)?,
-            channel_name: None,
+    let event = UniChatEvent::SponsorGift(UniChatSponsorGiftEventPayload {
+        channel_id: channel_id,
+        channel_name: None,
 
-            platform: UniChatPlatform::YouTube,
-            flags: HashMap::new(),
+        platform: UniChatPlatform::YouTube,
+        flags: HashMap::new(),
 
-            author_id: parsed.author_external_channel_id,
-            author_username: author_username,
-            author_display_name: author_name,
-            author_display_color: author_color,
-            author_badges: author_badges,
-            author_profile_picture_url: Some(author_photo),
-            author_type: author_type,
+        author_id: author_id,
+        author_username: author_username,
+        author_display_name: author_name,
+        author_display_color: author_color,
+        author_badges: author_badges,
+        author_profile_picture_url: Some(author_photo),
+        author_type: author_type,
 
-            message_id: parsed.id,
-            tier: None,
-            count: count,
+        message_id: parsed.id,
+        tier: None,
+        count: count,
 
-            timestamp: timestamp_usec
-        }
-    };
+        timestamp: timestamp_usec
+    });
 
     return Ok(Some(event));
 }

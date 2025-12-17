@@ -12,8 +12,6 @@ use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRemoveAuthorEventPayload;
-use crate::events::unichat::UNICHAT_EVENT_CLEAR_TYPE;
-use crate::events::unichat::UNICHAT_EVENT_REMOVE_AUTHOR_TYPE;
 use crate::irc::IRCMessage;
 
 pub fn parse(channel: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
@@ -25,27 +23,21 @@ pub fn parse(channel: String, message: &IRCMessage) -> Result<Option<UniChatEven
     let timestamp_usec: i64 = timestamp_usec.parse()?;
 
     if let Some(target_user_id) = tags.get("target-user-id").and_then(|v| v.as_ref()) {
-        event = UniChatEvent::RemoveAuthor {
-            event_type: String::from(UNICHAT_EVENT_REMOVE_AUTHOR_TYPE),
-            data: UniChatRemoveAuthorEventPayload {
-                channel_id: room_id.to_owned(),
-                channel_name: Some(channel),
-                platform: UniChatPlatform::Twitch,
+        event = UniChatEvent::RemoveAuthor(UniChatRemoveAuthorEventPayload {
+            channel_id: room_id.to_owned(),
+            channel_name: Some(channel),
+            platform: UniChatPlatform::Twitch,
 
-                author_id: target_user_id.to_owned(),
+            author_id: target_user_id.to_owned(),
 
-                timestamp: timestamp_usec
-            }
-        };
+            timestamp: timestamp_usec
+        });
     } else {
-        event = UniChatEvent::Clear {
-            event_type: String::from(UNICHAT_EVENT_CLEAR_TYPE),
-            data: UniChatClearEventPayload {
-                platform: Some(UniChatPlatform::Twitch),
+        event = UniChatEvent::Clear(UniChatClearEventPayload {
+            platform: Some(UniChatPlatform::Twitch),
 
-                timestamp: timestamp_usec
-            }
-        };
+            timestamp: timestamp_usec
+        });
     }
 
     return Ok(Some(event));

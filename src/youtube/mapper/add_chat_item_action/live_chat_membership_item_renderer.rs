@@ -18,7 +18,6 @@ use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatSponsorEventPayload;
-use crate::events::unichat::UNICHAT_EVENT_SPONSOR_TYPE;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::parse_author_badges;
@@ -136,6 +135,8 @@ fn optional_build_emotes(message: &Option<MessageRunsWrapper>) -> Result<Vec<Uni
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let parsed: LiveChatMembershipItemRenderer = serde_json::from_value(value)?;
 
+    let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
+    let author_id = parsed.author_external_channel_id.clone();
     let author_username = parse_author_username(&parsed.author_name)?;
     let author_name = parse_author_name(&parsed.author_name)?;
     let author_color = parse_author_color(&author_name)?;
@@ -148,33 +149,30 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let emotes = optional_build_emotes(&parsed.message)?;
     let timestamp_usec = parsed.timestamp_usec.parse::<i64>()?;
 
-    let event = UniChatEvent::Sponsor {
-        event_type: String::from(UNICHAT_EVENT_SPONSOR_TYPE),
-        data: UniChatSponsorEventPayload {
-            channel_id: properties::get_item(PropertiesKey::YouTubeChannelId)?,
-            channel_name: None,
+    let event = UniChatEvent::Sponsor(UniChatSponsorEventPayload {
+        channel_id: channel_id,
+        channel_name: None,
 
-            platform: UniChatPlatform::YouTube,
-            flags: HashMap::new(),
+        platform: UniChatPlatform::YouTube,
+        flags: HashMap::new(),
 
-            author_id: parsed.author_external_channel_id,
-            author_username: author_username,
-            author_display_name: author_name,
-            author_display_color: author_color,
-            author_badges: author_badges,
-            author_profile_picture_url: Some(author_photo),
-            author_type: author_type,
+        author_id: author_id,
+        author_username: author_username,
+        author_display_name: author_name,
+        author_display_color: author_color,
+        author_badges: author_badges,
+        author_profile_picture_url: Some(author_photo),
+        author_type: author_type,
 
-            tier: tier,
-            months: months,
+        tier: tier,
+        months: months,
 
-            message_id: parsed.id,
-            message_text: message,
-            emotes: emotes,
+        message_id: parsed.id,
+        message_text: message,
+        emotes: emotes,
 
-            timestamp: timestamp_usec
-        }
-    };
+        timestamp: timestamp_usec
+    });
 
     return Ok(Some(event));
 }

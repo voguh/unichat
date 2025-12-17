@@ -13,7 +13,6 @@ use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatSponsorEventPayload;
-use crate::events::unichat::UNICHAT_EVENT_SPONSOR_TYPE;
 use crate::irc::IRCCommand;
 use crate::irc::IRCMessage;
 use crate::twitch::mapper::structs::author::parse_author_badges;
@@ -47,33 +46,30 @@ pub fn parse(message: &IRCMessage, tags: &HashMap<String, Option<String>>) -> Re
     let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or("Missing or invalid tmi-sent-ts tag")?;
     let timestamp_usec: i64 = timestamp_usec.parse()?;
 
-    let event = UniChatEvent::Sponsor {
-        event_type: String::from(UNICHAT_EVENT_SPONSOR_TYPE),
-        data: UniChatSponsorEventPayload {
-            channel_id: room_id.to_owned(),
-            channel_name: Some(channel),
+    let event = UniChatEvent::Sponsor(UniChatSponsorEventPayload {
+        channel_id: room_id.to_owned(),
+        channel_name: Some(channel),
 
-            platform: UniChatPlatform::Twitch,
-            flags: inject_raw_tags(&tags),
+        platform: UniChatPlatform::Twitch,
+        flags: inject_raw_tags(&tags),
 
-            author_id: author_id.to_owned(),
-            author_username: author_username,
-            author_display_name: author_name,
-            author_display_color: author_color,
-            author_profile_picture_url: None,
-            author_badges: author_badges,
-            author_type: author_type,
+        author_id: author_id.to_owned(),
+        author_username: author_username,
+        author_display_name: author_name,
+        author_display_color: author_color,
+        author_profile_picture_url: None,
+        author_badges: author_badges,
+        author_type: author_type,
 
-            tier: Some(tier.to_owned()),
-            months: months,
+        tier: Some(tier.to_owned()),
+        months: months,
 
-            message_id: message_id.to_owned(),
-            message_text: message.clone(),
-            emotes: emotes,
+        message_id: message_id.to_owned(),
+        message_text: message.clone(),
+        emotes: emotes,
 
-            timestamp: timestamp_usec
-        }
-    };
+        timestamp: timestamp_usec
+    });
 
     return Ok(Some(event));
 }

@@ -65,28 +65,28 @@ export class CommandService {
         return invoke("get_scrappers");
     }
 
-    public async getScrapper(id: string): Promise<UniChatScrapper> {
-        return invoke("get_scrapper", { id });
+    public async getScrapper(scrapperId: string): Promise<UniChatScrapper> {
+        return invoke("get_scrapper", { scrapperId });
     }
 
-    public async validateScrapperUrl(id: string, url: string): Promise<string> {
-        return invoke("validate_scrapper_url", { id, url });
+    public async validateScrapperUrl(scrapperId: string, url: string): Promise<string> {
+        return invoke("validate_scrapper_url", { scrapperId, url });
     }
 
-    public async getScrapperStoredUrl(scrapper_id: string): Promise<string> {
-        return invoke("get_scrapper_stored_url", { scrapper_id });
+    public async getScrapperStoredUrl(scrapperId: string): Promise<string> {
+        return invoke("get_scrapper_stored_url", { scrapperId });
     }
 
-    public async getScrapperWebviewUrl(scrapper_id: string): Promise<string> {
-        return invoke("get_scrapper_webview_url", { scrapper_id });
+    public async getScrapperWebviewUrl(scrapperId: string): Promise<string> {
+        return invoke("get_scrapper_webview_url", { scrapperId });
     }
 
-    public async setScrapperWebviewUrl(scrapper_id: string, url: string): Promise<void> {
-        await invoke("set_scrapper_webview_url", { scrapper_id, url });
+    public async setScrapperWebviewUrl(scrapperId: string, url: string): Promise<void> {
+        await invoke("set_scrapper_webview_url", { scrapperId, url });
     }
 
-    public async toggleScrapperWebview(scrapper_id: string): Promise<boolean> {
-        return invoke("toggle_scrapper_webview", { scrapper_id });
+    public async toggleScrapperWebview(scrapperId: string): Promise<boolean> {
+        return invoke("toggle_scrapper_webview", { scrapperId });
     }
 
     /* ========================================================================================== */

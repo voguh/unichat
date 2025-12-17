@@ -17,7 +17,6 @@ use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRemoveMessageEventPayload;
-use crate::events::unichat::UNICHAT_EVENT_REMOVE_MESSAGE_TYPE;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 
@@ -30,20 +29,18 @@ struct RemoveChatItemAction {
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let parsed: RemoveChatItemAction = serde_json::from_value(value)?;
 
+    let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
     let timestamp_usec = SystemTime::now().duration_since(UNIX_EPOCH)?;
 
-    let event = UniChatEvent::RemoveMessage {
-        event_type: String::from(UNICHAT_EVENT_REMOVE_MESSAGE_TYPE),
-        data: UniChatRemoveMessageEventPayload {
-            channel_id: properties::get_item(PropertiesKey::YouTubeChannelId)?,
-            channel_name: None,
-            platform: UniChatPlatform::YouTube,
+    let event = UniChatEvent::RemoveMessage(UniChatRemoveMessageEventPayload {
+        channel_id: channel_id,
+        channel_name: None,
+        platform: UniChatPlatform::YouTube,
 
-            message_id: parsed.target_item_id.clone(),
+        message_id: parsed.target_item_id.clone(),
 
-            timestamp: timestamp_usec.as_secs() as i64
-        }
-    };
+        timestamp: timestamp_usec.as_secs() as i64
+    });
 
     return Ok(Some(event));
 }

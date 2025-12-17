@@ -102,7 +102,7 @@ fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> 
                     log_action("events-parsed.log", &serde_json::to_string(&parsed).unwrap());
                 }
 
-                if let Err(err) = events::event_emitter().emit(parsed) {
+                if let Err(err) = events::emit(parsed) {
                     log::error!("An error occurred on send unichat event: {}", err);
                 }
             }

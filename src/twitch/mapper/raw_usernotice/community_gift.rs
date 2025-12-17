@@ -13,7 +13,6 @@ use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatSponsorGiftEventPayload;
-use crate::events::unichat::UNICHAT_EVENT_SPONSOR_GIFT_TYPE;
 use crate::twitch::mapper::structs::author::parse_author_badges;
 use crate::twitch::mapper::structs::author::parse_author_color;
 use crate::twitch::mapper::structs::author::parse_author_name;
@@ -36,30 +35,27 @@ pub fn parse(channel: String, tags: &HashMap<String, Option<String>>) -> Result<
     let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or("Missing or invalid tmi-sent-ts tag")?;
     let timestamp_usec: i64 = timestamp_usec.parse()?;
 
-    let event = UniChatEvent::SponsorGift {
-        event_type: String::from(UNICHAT_EVENT_SPONSOR_GIFT_TYPE),
-        data: UniChatSponsorGiftEventPayload {
-            channel_id: room_id.to_owned(),
-            channel_name: Some(channel),
+    let event = UniChatEvent::SponsorGift(UniChatSponsorGiftEventPayload {
+        channel_id: room_id.to_owned(),
+        channel_name: Some(channel),
 
-            platform: UniChatPlatform::Twitch,
-            flags: inject_raw_tags(&tags),
+        platform: UniChatPlatform::Twitch,
+        flags: inject_raw_tags(&tags),
 
-            author_id: author_id.to_owned(),
-            author_username: author_username,
-            author_display_name: author_name,
-            author_display_color: author_color,
-            author_profile_picture_url:None,
-            author_badges: author_badges,
-            author_type: author_type,
+        author_id: author_id.to_owned(),
+        author_username: author_username,
+        author_display_name: author_name,
+        author_display_color: author_color,
+        author_profile_picture_url:None,
+        author_badges: author_badges,
+        author_type: author_type,
 
-            message_id: message_id.to_owned(),
-            tier: Some(tier.to_owned()),
-            count: count,
+        message_id: message_id.to_owned(),
+        tier: Some(tier.to_owned()),
+        count: count,
 
-            timestamp: timestamp_usec
-        }
-    };
+        timestamp: timestamp_usec
+    });
 
     return Ok(Some(event));
 }

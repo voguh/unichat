@@ -19,7 +19,6 @@ use crate::error::Error;
 use crate::events;
 use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UNICHAT_EVENT_CLEAR_TYPE;
 use crate::utils;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -77,16 +76,13 @@ pub async fn is_dev<R: Runtime>(_app: AppHandle<R>) -> Result<bool, Error> {
 pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), Error> {
     let timestamp_usec = SystemTime::now().duration_since(UNIX_EPOCH)?;
 
-    let event = UniChatEvent::Clear {
-        event_type: String::from(UNICHAT_EVENT_CLEAR_TYPE),
-        data: UniChatClearEventPayload {
-            platform: None,
+    let event = UniChatEvent::Clear(UniChatClearEventPayload {
+        platform: None,
 
-            timestamp: timestamp_usec.as_secs() as i64
-        }
-    };
+        timestamp: timestamp_usec.as_secs() as i64
+    });
 
-    events::event_emitter().emit(event)?;
+    events::emit(event)?;
 
     return Ok(());
 }
