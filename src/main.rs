@@ -93,8 +93,6 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
         fs::create_dir_all(&user_plugins_dir)?;
     }
 
-    plugins::init(app)?;
-
     /* ========================================================================================== */
 
     let gallery_dir = properties::get_app_path(AppPaths::UniChatGallery);
@@ -152,6 +150,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
     youtube::init(app)?;
     twitch::init(app)?;
+    plugins::init(app)?;
 
     return Ok(());
 }
