@@ -11,14 +11,13 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
 use std::io::Write;
+use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::RwLock;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
 use serde_json::Value;
-use tauri::Manager as _;
-use tauri::Listener;
 
 use crate::error::Error;
 use crate::events;
@@ -27,6 +26,7 @@ use crate::irc::IRCCommand;
 use crate::irc::IRCMessage;
 use crate::scrapper;
 use crate::scrapper::UniChatScrapper;
+use crate::scrapper::UniChatScrapperInternal;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
 use crate::utils::constants::TWITCH_CHAT_WINDOW;
@@ -162,7 +162,7 @@ fn handle_ws_event(_event_type: &str, message: &Value) -> Result<(), Error> {
 
 fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
     let message = IRCMessage::parse(payload.get("message"))?;
-    let log_events: SettingLogEventLevel = settings::get_scrapper_property(TWITCH_CHAT_WINDOW, "log_level")?;
+    let log_events = settings::get_scrapper_property(TWITCH_CHAT_WINDOW, "log_level")?;
 
     if is_dev() || log_events == SettingLogEventLevel::AllEvents {
         log_action("events-raw.log", &format!("{:?}", message));
@@ -207,8 +207,7 @@ fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error>
 
 /* ================================================================================================================== */
 
-fn handle_event(event: &str) -> Result<(), Error> {
-    let payload: Value = serde_json::from_str(event)?;
+fn handle_event(payload: serde_json::Value) -> Result<(), Error> {
     let scrapper_id = payload.get("scrapperId").and_then(|v| v.as_str())
         .ok_or("Missing or invalid 'scrapperId' field in Twitch raw event payload")?;
     let event_type = payload.get("type").and_then(|v| v.as_str())
@@ -234,7 +233,7 @@ pub const AVAILABLE_URLS: &[&str] = &[
     "twitch.tv/{CHANNEL_NAME}"
 ];
 
-fn validate_url(value: String) -> Result<String, Error> {
+fn validate_twitch_url(value: String) -> Result<String, Error> {
     let mut value = value.trim();
     value = value.strip_prefix("http://").unwrap_or(value);
     value = value.strip_prefix("https://").unwrap_or(value);
@@ -266,25 +265,20 @@ fn validate_url(value: String) -> Result<String, Error> {
 }
 
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
-    let scrapper_data = UniChatScrapper {
-        id: String::from(TWITCH_CHAT_WINDOW),
-        name: String::from("Twitch"),
-        editing_tooltup_message: String::from("You can enter just the channel name or one of the following URLs to get the Twitch chat:"),
-        editing_tooltip_urls: AVAILABLE_URLS.iter().map(|s| s.to_string()).collect(),
-        placeholder_text: String::from("https://www.twitch.tv/popout/{CHANNEL_NAME}/chat"),
-        icon: String::from("fab fa-twitch"),
+    let scrapper_data = UniChatScrapperInternal::new(
+        String::from(TWITCH_CHAT_WINDOW),
+        String::from("Twitch"),
+        String::from("You can enter just the channel name or one of the following URLs to get the Twitch chat:"),
+        AVAILABLE_URLS.iter().map(|s| s.to_string()).collect(),
+        String::from("https://www.twitch.tv/popout/{CHANNEL_NAME}/chat"),
+        String::from("fab fa-twitch"),
+        validate_twitch_url,
+        handle_event,
+        String::from(SCRAPPER_JS)
+    )?;
 
-        validate_url: validate_url,
-        scrapper_js: String::from(SCRAPPER_JS)
-    };
-    let window = scrapper::register_scrapper(app.app_handle(), scrapper_data)?;
-
-    window.listen("unichat://scrapper_event", move |event| {
-        if let Err(err) = handle_event(event.payload()) {
-            log::error!("Failed to handle Twitch raw event: {:?}", err);
-            log::error!("Event payload: {}", event.payload());
-        }
-    });
+    let scrapper: Arc<dyn UniChatScrapper + Send + Sync> = Arc::new(scrapper_data);
+    scrapper::register_scrapper(app.handle(), scrapper)?;
 
     return Ok(());
 }
