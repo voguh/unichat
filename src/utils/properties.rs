@@ -8,7 +8,6 @@
  ******************************************************************************/
 
 use std::collections::HashMap;
-use std::fmt;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 use std::sync::RwLock;
@@ -44,31 +43,16 @@ pub enum AppPaths {
     UniChatLicense
 }
 
-impl fmt::Display for AppPaths {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = match self {
-            AppPaths::AppCache => "app_cache_dir",
-            AppPaths::AppConfig => "app_config_dir",
-            AppPaths::AppData => "app_data_dir",
-            AppPaths::AppLocalData => "app_local_data_dir",
-            AppPaths::AppLog => "app_log_dir",
-
-            AppPaths::UniChatAssets => "unichat_assets_dir",
-            AppPaths::UniChatGallery => "unichat_gallery_dir",
-            AppPaths::UniChatSystemWidgets => "unichat_system_widgets_dir",
-            AppPaths::UniChatUserWidgets => "unichat_user_widgets_dir",
-            AppPaths::UniChatSystemPlugins => "unichat_system_plugins_dir",
-            AppPaths::UniChatUserPlugins => "unichat_user_plugins_dir",
-            AppPaths::UniChatLogoIcon => "unichat_logo_icon",
-            AppPaths::UniChatLicense => "unichat_license"
-        };
-
-        return write!(f, "{}", s);
-    }
-}
-
 const ONCE_LOCK_NAME: &str = "Properties::INSTANCE";
 static INSTANCE: OnceLock<RwLock<HashMap<String, String>>> = OnceLock::new();
+
+fn serialize_key<S: serde::ser::Serialize>(key: S) -> String {
+    if let Ok(key_str) = serde_plain::to_string(&key) {
+        return key_str;
+    } else {
+        panic!("Failed to serialize PropertiesKey");
+    }
+}
 
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     let app_cache_dir = app.path().app_cache_dir()?;
@@ -100,36 +84,45 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     let license_path = license_file.to_string_lossy().to_string();
 
     let mut properties = HashMap::new();
-    properties.insert(AppPaths::AppCache.to_string(), app_cache_path);
-    properties.insert(AppPaths::AppConfig.to_string(), app_config_path);
-    properties.insert(AppPaths::AppData.to_string(), app_data_path);
-    properties.insert(AppPaths::AppLocalData.to_string(), app_local_data_path);
-    properties.insert(AppPaths::AppLog.to_string(), app_log_path);
-    properties.insert(AppPaths::UniChatAssets.to_string(), assets_path);
-    properties.insert(AppPaths::UniChatGallery.to_string(), gallery_path);
-    properties.insert(AppPaths::UniChatSystemWidgets.to_string(), system_widgets_path);
-    properties.insert(AppPaths::UniChatUserWidgets.to_string(), user_widgets_path);
-    properties.insert(AppPaths::UniChatSystemPlugins.to_string(), system_plugins_path);
-    properties.insert(AppPaths::UniChatUserPlugins.to_string(), user_plugins_path);
-    properties.insert(AppPaths::UniChatLogoIcon.to_string(), logo_icon_path);
-    properties.insert(AppPaths::UniChatLicense.to_string(), license_path);
+    properties.insert(serialize_key(AppPaths::AppCache), app_cache_path);
+    properties.insert(serialize_key(AppPaths::AppConfig), app_config_path);
+    properties.insert(serialize_key(AppPaths::AppData), app_data_path);
+    properties.insert(serialize_key(AppPaths::AppLocalData), app_local_data_path);
+    properties.insert(serialize_key(AppPaths::AppLog), app_log_path);
+    properties.insert(serialize_key(AppPaths::UniChatAssets), assets_path);
+    properties.insert(serialize_key(AppPaths::UniChatGallery), gallery_path);
+    properties.insert(serialize_key(AppPaths::UniChatSystemWidgets), system_widgets_path);
+    properties.insert(serialize_key(AppPaths::UniChatUserWidgets), user_widgets_path);
+    properties.insert(serialize_key(AppPaths::UniChatSystemPlugins), system_plugins_path);
+    properties.insert(serialize_key(AppPaths::UniChatUserPlugins), user_plugins_path);
+    properties.insert(serialize_key(AppPaths::UniChatLogoIcon), logo_icon_path);
+    properties.insert(serialize_key(AppPaths::UniChatLicense), license_path);
 
     let result = INSTANCE.set(RwLock::new(properties));
     if result.is_err() {
-        return Err("Failed to initialize properties".into());
+        return Err(Error::from("Failed to initialize properties"));
     }
 
     return Ok(());
 }
 
-fn get_item_raw(key: String) -> Result<String, Error> {
+fn get_item_raw<S: serde::ser::Serialize> (key: S) -> Result<String, Error> {
     let props = INSTANCE.get().ok_or(Error::OnceLockNotInitialized(ONCE_LOCK_NAME))?;
-    let props_guard = props.read().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
-    return props_guard.get(&key).cloned().ok_or(format!("Key '{}' not found", key).into());
+
+    if let Ok(props) = props.read() {
+        let key = serialize_key(key);
+
+        if let Some(value) = props.get(&key) {
+            return Ok(value.clone());
+        } else {
+            return Err(Error::from(format!("Property key '{}' not found", key)));
+        }
+    } else {
+        return Err(Error::from("Failed to acquire read lock on properties"));
+    }
 }
 
 pub fn get_item(key: PropertiesKey) -> Result<String, Error> {
-    let key = serde_plain::to_string(&key)?;
     return get_item_raw(key);
 }
 
@@ -138,7 +131,7 @@ pub fn set_item(key: PropertiesKey, value: String) -> Result<(), Error> {
 
     if let Ok(mut props) = props.write() {
         let key = serde_plain::to_string(&key)?;
-        props.insert(key.to_string(), value);
+        props.insert(key, value);
 
         return Ok(());
     } else {
@@ -147,7 +140,6 @@ pub fn set_item(key: PropertiesKey, value: String) -> Result<(), Error> {
 }
 
 pub fn get_app_path(key: AppPaths) -> PathBuf {
-    let key = serde_plain::to_string(&key).expect("Failed to serialize AppPaths key");
     let path_str = get_item_raw(key).expect("Failed to get app path");
     return PathBuf::from(path_str);
 }
