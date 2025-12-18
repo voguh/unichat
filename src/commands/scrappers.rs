@@ -66,12 +66,12 @@ pub fn validate_scrapper_url<R: Runtime>(_app: AppHandle<R>, scrapper_id: &str, 
 /* ============================================================================================== */
 
 #[tauri::command]
-pub fn get_scrapper_stored_url<R: Runtime>(_app: AppHandle<R>, scrapper_id: &str) -> Result<String, Error> {
+pub fn get_scrapper_stored_url<R: Runtime>(_app: AppHandle<R>, scrapper_id: &str) -> Result<Option<String>, Error> {
     if !scrapper_id.ends_with("-chat") {
         return Err(Error::Message(format!("Scrapper webview '{}' not recognized", scrapper_id)));
     }
 
-    let url = settings::get_scrapper_property(scrapper_id, "url")?;
+    let url = settings::get_scrapper_property(scrapper_id, "url").ok();
     return Ok(url);
 }
 

@@ -17,6 +17,7 @@ import * as eventService from "@tauri-apps/api/event";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { IPCEvents, IPCStatusEvent } from "unichat/utils/IPCStatusEvent";
+import { Strings } from "unichat/utils/Strings";
 
 import { ScrapperCardStyledContainer } from "./styled";
 
@@ -111,7 +112,7 @@ export function ScrapperCard(props: Props): React.ReactNode {
             try {
                 const scrapperStoredUrl = await commandService.getScrapperStoredUrl(scrapperId);
 
-                if (inputRef.current) {
+                if (inputRef.current && !Strings.isNullOrEmpty(scrapperStoredUrl)) {
                     inputRef.current.value = scrapperStoredUrl;
                 }
             } catch (err) {
