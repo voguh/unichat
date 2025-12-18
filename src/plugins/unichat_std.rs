@@ -186,8 +186,12 @@ impl mlua::UserData for UniChatAPI {
 
         methods.add_method("emit_unichat_event", |_lua, _this, payload: mlua::AnyUserData| {
             let payload = payload.borrow::<LuaUniChatEvent>()?;
+
             let value = payload.inner.clone();
-            events::emit(value).map_err(|e| mlua::Error::runtime(e))?;
+            if let Err(err) = events::emit(value) {
+                log::error!("An error occurred on send unichat event: {:?}", err);
+            }
+
             return Ok(());
         });
     }
