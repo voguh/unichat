@@ -9,6 +9,8 @@
 
 use std::fs;
 use std::sync::Arc;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
 
 use mlua::LuaSerdeExt as _;
 
@@ -163,7 +165,21 @@ impl mlua::UserData for UniChatAPI {
         });
 
         methods.add_method("emit_status_event", |lua, _this, payload: mlua::Value| {
-            let value: serde_json::Value = lua.from_value(payload)?;
+            let mut value: serde_json::Value = lua.from_value(payload)?;
+
+            if value.get("type").is_none() {
+                return Err(mlua::Error::runtime("Status event is missing 'type' field"));
+            }
+
+            if value.get("scrapperId").is_none() {
+                return Err(mlua::Error::runtime("Status event is missing 'scrapperId' field"));
+            }
+
+            if value.get("timestamp").is_none() {
+                let now = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| mlua::Error::external(e))?;
+                value["timestamp"] = serde_json::json!(now.as_millis());
+            }
+
             render_emitter::emit(value).map_err(|e| mlua::Error::runtime(e))?;
             return Ok(());
         });
