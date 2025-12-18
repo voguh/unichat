@@ -54,15 +54,15 @@ struct PluginManifestYAML {
 }
 
 #[allow(dead_code)]
-struct PluginManifest {
-    name: String,
-    description: Option<String>,
-    version: String,
-    author: Option<String>,
-    license: Option<String>,
-    homepage: Option<String>,
-    dependencies: Option<Vec<String>>,
-    plugin_path: path::PathBuf
+pub struct PluginManifest {
+    pub name: String,
+    pub description: Option<String>,
+    pub version: String,
+    pub author: Option<String>,
+    pub license: Option<String>,
+    pub homepage: Option<String>,
+    pub dependencies: Vec<(String, semver::VersionReq)>,
+    pub plugin_path: path::PathBuf
 }
 
 const PLUGIN_NAME_KEY: &str = "__plugin_name";
@@ -71,16 +71,27 @@ const UNICHAT_API_KEY: &str = "UniChatAPI";
 const UNICHAT_EVENT_KEY: &str = "UniChatEvent";
 const UNICHAT_PLATFORM_KEY: &str = "UniChatPlatform";
 const UNICHAT_AUTHOR_TYPE_KEY: &str = "UniChatAuthorType";
-const INCLUSIVE_START: &str = "[";
-const INCLUSIVE_END: &str = "]";
-const EXCLUSIVE_START: &str = "(";
-const EXCLUSIVE_END: &str = ")";
+const INCLUSIVE_START: char = '[';
+const INCLUSIVE_END: char = ']';
+const EXCLUSIVE_START: char = '(';
+const EXCLUSIVE_END: char = ')';
 
 const LUA_RUNTIME_ONCE_LOCK_KEY: &str = "Plugins::LUA_RUNTIME";
 static LUA_RUNTIME: OnceLock<Arc<mlua::Lua>> = OnceLock::new();
 const APP_HANDLE_ONCE_LOCK_KEY: &str = "Plugins::APP_HANDLE";
 static APP_HANDLE: OnceLock<tauri::AppHandle<tauri::Wry>> = OnceLock::new();
 static LOADED_PLUGINS: LazyLock<RwLock<HashMap<String, Arc<PluginManifest>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+
+pub fn get_plugins() -> Result<Vec<Arc<PluginManifest>>, Error> {
+    let envs = LOADED_PLUGINS.read().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
+
+    let mut plugins: Vec<Arc<PluginManifest>> = Vec::new();
+    for (_name, manifest) in envs.iter() {
+        plugins.push(manifest.clone());
+    }
+
+    return Ok(plugins);
+}
 
 fn get_app_handle() -> Result<tauri::AppHandle<tauri::Wry>, mlua::Error> {
     let app_handle = APP_HANDLE.get().ok_or(mlua::Error::runtime(Error::OnceLockNotInitialized(APP_HANDLE_ONCE_LOCK_KEY)))?;
@@ -428,6 +439,58 @@ fn create_lua_env(manifest: &Arc<PluginManifest>) -> Result<(), Error> {
     return Ok(());
 }
 
+fn parse_dependency_version(version: &str) -> Result<semver::VersionReq, Error> {
+    let v = version.trim();
+
+    let first = v.chars().next();
+    let last = v.chars().last();
+
+    if matches!(first, Some(INCLUSIVE_START | EXCLUSIVE_START)) && matches!(last, Some(INCLUSIVE_END | EXCLUSIVE_END)) {
+        let (min, max) = v[1..v.len() -1].split_once(',').ok_or(Error::Message(format!("Invalid dependency version range: '{}'", version)))?;
+        let min = min.trim();
+        let max = max.trim();
+
+        let mut parts = Vec::new();
+        if !min.is_empty() {
+            let min_op = if first == Some(INCLUSIVE_START) { ">=" } else { ">" };
+            parts.push(format!("{} {}", min_op, min));
+        }
+
+        if !max.is_empty() {
+            let max_op = if last == Some(INCLUSIVE_END) { "<=" } else { "<" };
+            parts.push(format!("{} {}", max_op, max));
+        }
+
+        let range_str = parts.join(", ");
+        let version_req = semver::VersionReq::parse(&range_str)?;
+        return Ok(version_req);
+    }
+
+    let version_req = semver::VersionReq::parse(version)?;
+    return Ok(version_req);
+}
+
+fn parse_dependencies(versions: Option<Vec<String>>) -> Result<Vec<(String, semver::VersionReq)>, Error> {
+    let mut dependencies: Vec<(String, semver::VersionReq)> = Vec::new();
+
+    if let Some(versions) = versions {
+        for dep in versions {
+            let parts: Vec<&str> = dep.splitn(2, '@').collect();
+            if parts.len() != 2 {
+                return Err(Error::Message(format!("Invalid dependency format: '{}'. Expected format is 'name@version_req'", dep)));
+            }
+
+            let name = parts[0].trim().to_string();
+            let version = parts[1].trim();
+            let version_req = parse_dependency_version(version)?;
+
+            dependencies.push((name, version_req));
+        }
+    }
+
+    return Ok(dependencies);
+}
+
 fn load_plugin(plugin_path: path::PathBuf) -> Result<(), Error> {
     let manifest_path = plugin_path.join("manifest.yaml");
     let manifest_content = fs::read_to_string(&manifest_path)?;
@@ -455,6 +518,16 @@ fn load_plugin(plugin_path: path::PathBuf) -> Result<(), Error> {
         return Err(Error::Message(format!("Invalid version '{}' for plugin '{}': {:?}", manifest.version, manifest.name, err)));
     }
 
+    let parsed_dependencies = parse_dependencies(manifest.dependencies)?;
+    for (key, version_req) in parsed_dependencies.iter() {
+        if key == "unichat" {
+            let unichat_version = semver::Version::parse(CARGO_PKG_VERSION)?;
+            if !version_req.matches(&unichat_version) {
+                return Err(Error::Message(format!("Plugin '{}' requires unichat version '{}' which does not satisfy the current version '{}'", manifest.name, version_req, unichat_version)));
+            }
+        }
+    }
+
     let manifest = Arc::new(PluginManifest {
         name: manifest.name,
         description: manifest.description,
@@ -462,7 +535,7 @@ fn load_plugin(plugin_path: path::PathBuf) -> Result<(), Error> {
         author: manifest.author,
         license: manifest.license,
         homepage: manifest.homepage,
-        dependencies: manifest.dependencies,
+        dependencies: parsed_dependencies,
         plugin_path: plugin_path.clone()
     });
 
@@ -501,8 +574,9 @@ pub fn load_plugins() -> Result<(), Error> {
 
             if path.is_dir() {
                 log::info!("Found system plugin directory: {:?}", path);
-                load_plugin(path)?;
-
+                if let Err(e) = load_plugin(path) {
+                    log::error!("Failed to load system plugin: {:?}", e);
+                }
             }
         }
     }
@@ -514,7 +588,9 @@ pub fn load_plugins() -> Result<(), Error> {
 
             if path.is_dir() {
                 log::info!("Found user plugin directory: {:?}", path);
-                load_plugin(path)?;
+                if let Err(e) = load_plugin(path) {
+                    log::error!("Failed to load user plugin: {:?}", e);
+                }
             }
         }
     }

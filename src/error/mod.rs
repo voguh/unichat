@@ -44,6 +44,8 @@ pub enum Error {
     TimeParse(#[from] time::error::Parse),
     #[error(transparent)]
     Lua(#[from] mlua::Error),
+    #[error(transparent)]
+    Semver(#[from] semver::Error),
 
     #[error("{0}")]
     Message(String),
