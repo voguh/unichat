@@ -21,9 +21,9 @@ mod seventv;
 pub type EmotesParserResult = Result<HashMap<String, UniChatEmote>, Error>;
 pub static EMOTES_HASHSET: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
-pub fn fetch_shared_emotes(channel_id: &str) -> Result<(), Error> {
+pub fn fetch_shared_emotes(platform: &str, channel_id: &str) -> Result<(), Error> {
+    let platform = platform.to_string();
     let channel_id = channel_id.to_string();
-
     let _ = tauri::async_runtime::spawn_blocking(move || {
         let mut shared_emotes = HashMap::new();
 
@@ -35,9 +35,9 @@ pub fn fetch_shared_emotes(channel_id: &str) -> Result<(), Error> {
             }
         }
 
-        shared_emotes.extend(betterttv::fetch_channel_emotes(&channel_id));
-        shared_emotes.extend(frankerfacez::fetch_channel_emotes(&channel_id));
-        shared_emotes.extend(seventv::fetch_channel_emotes(&channel_id));
+        shared_emotes.extend(betterttv::fetch_channel_emotes(&platform, &channel_id));
+        shared_emotes.extend(frankerfacez::fetch_channel_emotes(&platform, &channel_id));
+        shared_emotes.extend(seventv::fetch_channel_emotes(&platform, &channel_id));
 
         if let Ok(mut guard) = EMOTES_HASHSET.write() {
             for (key, value) in shared_emotes {

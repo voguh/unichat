@@ -23,6 +23,7 @@ use crate::plugins::get_lua_runtime;
 use crate::plugins::unichat_event::LuaUniChatEvent;
 use crate::scrapper;
 use crate::scrapper::UniChatScrapper;
+use crate::shared_emotes;
 use crate::utils::render_emitter;
 
 fn get_property_from_table<R: mlua::FromLua>(table: &mlua::Table, k1: &str, k2: Option<&'static str>, default_value: Option<R>) -> Result<R, mlua::Error> {
@@ -194,5 +195,10 @@ impl mlua::UserData for UniChatAPI {
 
             return Ok(());
         });
+
+        methods.add_method("fetch_shared_emotes", |_lua, _this, (platform, channel_id): (String, String)| {
+            shared_emotes::fetch_shared_emotes(&platform, &channel_id).map_err(|e| mlua::Error::runtime(e))?;
+            return Ok(());
+        })
     }
 }

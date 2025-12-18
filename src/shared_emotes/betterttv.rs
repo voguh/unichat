@@ -15,7 +15,6 @@ use serde_json::Value;
 
 use crate::events::unichat::UniChatEmote;
 use crate::shared_emotes::EmotesParserResult;
-use crate::utils::is_valid_youtube_channel_id;
 use crate::utils::ureq;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -62,13 +61,8 @@ pub fn fetch_global_emotes() -> HashMap<String, UniChatEmote> {
     });
 }
 
-pub fn fetch_channel_emotes(channel_id: &str) -> HashMap<String, UniChatEmote> {
-    let url: String;
-    if is_valid_youtube_channel_id(&channel_id) {
-        url = format!("https://api.betterttv.net/3/cached/users/youtube/{}", channel_id);
-    } else {
-        url = format!("https://api.betterttv.net/3/cached/users/twitch/{}", channel_id);
-    }
+pub fn fetch_channel_emotes(platform: &str, channel_id: &str) -> HashMap<String, UniChatEmote> {
+    let url = format!("https://api.betterttv.net/3/cached/users/{}/{}", platform, channel_id);
 
     let parser = |data: Value| -> EmotesParserResult {
         let mut emotes_list: Vec<Value> = Vec::new();
@@ -94,7 +88,7 @@ pub fn fetch_channel_emotes(channel_id: &str) -> HashMap<String, UniChatEmote> {
     };
 
     return handle_request(&url, parser).unwrap_or_else(|err| {
-        log::error!("Failed to fetch channel BetterTTV emotes for {}: {:?}", channel_id, err);
+        log::error!("Failed to fetch channel BetterTTV emotes ({}:{}): {:?}", platform, channel_id, err);
         return HashMap::new();
     });
 }

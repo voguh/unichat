@@ -172,7 +172,7 @@ fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error>
         if cmd == "ROOMSTATE" {
             let tags = &message.tags.clone();
             if let Some(channel_id) = tags.get("room-id").and_then(|v| v.as_ref()) {
-                shared_emotes::fetch_shared_emotes(channel_id)?;
+                shared_emotes::fetch_shared_emotes("twitch", channel_id)?;
                 properties::set_item(PropertiesKey::TwitchChannelId, channel_id.clone())?;
             }
 

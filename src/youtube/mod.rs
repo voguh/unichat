@@ -61,7 +61,7 @@ fn handle_ready_event(event_type: &str, payload: &Value) -> Result<(), Error> {
         .ok_or(format!("Missing or invalid 'channelId' field in YouTube '{event_type}' payload"))?;
 
     properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))?;
-    shared_emotes::fetch_shared_emotes(channel_id)?;
+    shared_emotes::fetch_shared_emotes("youtube", channel_id)?;
 
     return dispatch_event(payload.clone());
 }

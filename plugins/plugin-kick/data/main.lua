@@ -138,6 +138,7 @@ local function on_kick_event(event)
     if event.type == "ready" then
         channel_id = event.channelId;
         UniChatAPI:emit_status_event(event);
+        UniChatAPI:fetch_shared_emotes("kick", channel_id);
     elseif event.type == "ping" or event.type == "error" then
         UniChatAPI:emit_status_event(event);
     elseif event.type == "message" then
