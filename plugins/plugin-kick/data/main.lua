@@ -18,7 +18,8 @@ end
 -- ============================================================================================== --
 
 local static_badges_urls = {
-    ["moderator"] = "/assets/"..__plugin_name.."/moderator_badge.png",
+    moderator = "/assets/"..__plugin_name.."/moderator.svg",
+    broadcaster = "/assets/"..__plugin_name.."/broadcaster.svg",
 }
 
 local function parse_author_badges(raw_badges)
@@ -104,8 +105,8 @@ local function handle_message_event(data)
         authorDisplayName = data.sender.slug,
         authorDisplayColor = data.sender.identity.color,
         authorProfilePictureUrl = nil,
-        authorBadges = parse_author_badges(data.sender.badges),
-        authorType = parse_author_type(data.sender.badges),
+        authorBadges = parse_author_badges(data.sender.identity.badges),
+        authorType = parse_author_type(data.sender.identity.badges),
 
         messageId = data.id,
         messageText = parse_message_text(data.content),
@@ -113,8 +114,6 @@ local function handle_message_event(data)
 
         timestamp = time.parse(data.created_at),
     });
-
-    logger.info("Emitting kick event: {}", JSON.encode(event));
 
     UniChatAPI:emit_unichat_event(event);
 end
