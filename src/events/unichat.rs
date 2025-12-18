@@ -50,12 +50,23 @@ pub const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_SECONDARY_TEXT_COLOR: &str = "unichat:y
 
 /* <============================================================================================> */
 
-#[derive(Serialize, Clone, Debug)]
-#[serde(rename_all = "lowercase")]
+#[derive(Clone, Debug)]
 pub enum UniChatPlatform {
     YouTube,
     Twitch,
     Other(String)
+}
+
+impl Serialize for UniChatPlatform {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let s = match self {
+            UniChatPlatform::YouTube => "youtube",
+            UniChatPlatform::Twitch => "twitch",
+            UniChatPlatform::Other(v) => v.as_str()
+        };
+
+        return serializer.serialize_str(s);
+    }
 }
 
 impl <'de> Deserialize<'de> for UniChatPlatform {
@@ -71,8 +82,7 @@ impl <'de> Deserialize<'de> for UniChatPlatform {
     }
 }
 
-#[derive(Serialize, Clone, Debug)]
-#[serde(rename_all = "UPPERCASE")]
+#[derive(Clone, Debug)]
 pub enum UniChatAuthorType {
     Viewer,
     Sponsor,
@@ -80,6 +90,21 @@ pub enum UniChatAuthorType {
     Moderator,
     Broadcaster,
     Other(String)
+}
+
+impl Serialize for UniChatAuthorType {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let s = match self {
+            UniChatAuthorType::Viewer => "VIEWER",
+            UniChatAuthorType::Sponsor => "SPONSOR",
+            UniChatAuthorType::Vip => "VIP",
+            UniChatAuthorType::Moderator => "MODERATOR",
+            UniChatAuthorType::Broadcaster => "BROADCASTER",
+            UniChatAuthorType::Other(v) => v.as_str()
+        };
+
+        return serializer.serialize_str(s);
+    }
 }
 
 impl <'de> Deserialize<'de> for UniChatAuthorType {
