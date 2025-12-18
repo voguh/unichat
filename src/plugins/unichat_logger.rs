@@ -11,6 +11,8 @@ use std::sync::Arc;
 
 use mlua::LuaSerdeExt as _;
 
+use crate::plugins::utils::table_deep_readonly;
+
 fn format_str(lua: &mlua::Lua, args: mlua::Variadic<mlua::Value>) -> Result<(String, Option<mlua::Error>), mlua::Error> {
     if args.is_empty() {
         return Err(mlua::Error::external("No log message provided"));
@@ -59,6 +61,7 @@ pub fn create_module(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Value, 
 
         return Ok(());
     })?;
+    module.set("debug", debug_func)?;
 
     let info_target = target.clone();
     let info_func = lua.create_function(move |lua, args: mlua::Variadic<mlua::Value>| {
@@ -71,6 +74,7 @@ pub fn create_module(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Value, 
 
         return Ok(());
     })?;
+    module.set("info", info_func)?;
 
     let warn_target = target.clone();
     let warn_func = lua.create_function(move |lua, args: mlua::Variadic<mlua::Value>| {
@@ -83,6 +87,7 @@ pub fn create_module(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Value, 
 
         return Ok(());
     })?;
+    module.set("warn", warn_func)?;
 
     let error_target = target.clone();
     let error_func = lua.create_function(move |lua, args: mlua::Variadic<mlua::Value>| {
@@ -95,19 +100,11 @@ pub fn create_module(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Value, 
 
         return Ok(());
     })?;
-
-    module.set("debug", debug_func)?;
-    module.set("info", info_func)?;
-    module.set("warn", warn_func)?;
     module.set("error", error_func)?;
 
-    let mt = lua.create_table()?;
-    let newindex_func = lua.create_function(|_, (_table, _key, _value): (mlua::Value, mlua::Value, mlua::Value)| -> mlua::Result<()> {
-        return Err(mlua::Error::external("unichat_logger module is read-only"));
-    })?;
-    mt.set("__newindex", newindex_func)?;
-    mt.set("__metatable", false)?;
-    module.set_metatable(Some(mt))?;
+    let table_name = lua.create_string("unichat:logger")?;
+    let table_name = mlua::Value::String(table_name);
+    let readonly_module = table_deep_readonly(lua, &table_name, module).map_err(|e| mlua::Error::runtime(e))?;
 
-    return Ok(mlua::Value::Table(module));
+    return Ok(mlua::Value::Table(readonly_module));
 }

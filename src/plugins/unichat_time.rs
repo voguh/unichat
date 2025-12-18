@@ -7,6 +7,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use crate::plugins::utils::table_deep_readonly;
+
 pub fn create_module(lua: &mlua::Lua) -> Result<mlua::Value, mlua::Error> {
     let module = lua.create_table()?;
 
@@ -24,16 +26,17 @@ pub fn create_module(lua: &mlua::Lua) -> Result<mlua::Value, mlua::Error> {
 
         return Err(mlua::Error::external("Unknown time format"));
     })?;
-
     module.set("parse", encode_func)?;
 
-    let mt = lua.create_table()?;
-    let newindex_func = lua.create_function(|_, (_table, _key, _value): (mlua::Value, mlua::Value, mlua::Value)| -> mlua::Result<()> {
-        return Err(mlua::Error::external("unichat_time module is read-only"));
+    let now_func = lua.create_function(|_, ()| -> mlua::Result<mlua::Integer> {
+        let now = time::OffsetDateTime::now_utc();
+        return Ok(now.unix_timestamp());
     })?;
-    mt.set("__newindex", newindex_func)?;
-    mt.set("__metatable", false)?;
-    module.set_metatable(Some(mt))?;
+    module.set("now", now_func)?;
 
-    return Ok(mlua::Value::Table(module));
+    let table_name = lua.create_string("unichat:time")?;
+    let table_name = mlua::Value::String(table_name);
+    let readonly_module = table_deep_readonly(lua, &table_name, module).map_err(|e| mlua::Error::runtime(e))?;
+
+    return Ok(mlua::Value::Table(readonly_module));
 }
