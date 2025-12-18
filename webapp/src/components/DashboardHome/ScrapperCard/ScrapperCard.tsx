@@ -18,6 +18,7 @@ import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { UniChatScrapper } from "unichat/types";
 import { IPCEvents, IPCStatusEvent } from "unichat/utils/IPCStatusEvent";
+import { Strings } from "unichat/utils/Strings";
 
 import { ScrapperBadgesWrapper, ScrapperCardStyledContainer } from "./styled";
 
@@ -101,7 +102,7 @@ export function ScrapperCard(props: Props): React.ReactNode {
             try {
                 const scrapperStoredUrl = await commandService.getScrapperStoredUrl(scrapper.id);
 
-                if (inputRef.current) {
+                if (inputRef.current && !Strings.isNullOrEmpty(scrapperStoredUrl)) {
                     inputRef.current.value = scrapperStoredUrl;
                 }
             } catch (err) {

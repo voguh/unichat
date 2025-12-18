@@ -73,7 +73,7 @@ export class CommandService {
         return invoke("validate_scrapper_url", { scrapperId, url });
     }
 
-    public async getScrapperStoredUrl(scrapperId: string): Promise<string> {
+    public async getScrapperStoredUrl(scrapperId: string): Promise<string | null> {
         return invoke("get_scrapper_stored_url", { scrapperId });
     }
 

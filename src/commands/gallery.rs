@@ -31,9 +31,14 @@ pub struct GalleryItem {
 
 fn choose_file_type_by_path(path: &PathBuf) -> String {
     let mut item_type = "file";
-    if let Ok(result) = infer::get_from_path(path.to_string_lossy().to_string()) {
-        if let Some(info) = result {
-            item_type = info.mime_type().split("/").next().unwrap_or("file");
+    if let Some(kind) = mime_guess::from_path(path).first() {
+        let mime = kind.essence_str();
+        if mime.starts_with("image/") {
+            item_type = "image";
+        } else if mime.starts_with("video/") {
+            item_type = "video";
+        } else if mime.starts_with("audio/") {
+            item_type = "audio";
         }
     }
 
