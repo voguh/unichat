@@ -92,6 +92,11 @@ fn migrate_store_version() -> Result<(), Error> {
                     let key = store_mount_scrapper_key("twitch-chat", "log_level");
                     store.set(key, value);
                     store.delete("settings.log-twitch-events");
+                } else {
+                    log::info!("Setting default log level for Twitch scrapper");
+                    let key = store_mount_scrapper_key("twitch-chat", "log_level");
+                    let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
+                    store.set(key, raw_value);
                 }
 
                 let youtube_log_level = store.get("settings.log-youtube-events");
@@ -100,6 +105,11 @@ fn migrate_store_version() -> Result<(), Error> {
                     let key = store_mount_scrapper_key("youtube-chat", "log_level");
                     store.set(key, value);
                     store.delete("settings.log-youtube-events");
+                } else {
+                    log::info!("Setting default log level for YouTube scrapper");
+                    let key = store_mount_scrapper_key("youtube-chat", "log_level");
+                    let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
+                    store.set(key, raw_value);
                 }
 
                 /* ============================================================================== */
@@ -158,7 +168,6 @@ pub fn get_store_version() -> Result<u8, Error> {
     let store = INSTANCE.get().ok_or(Error::OnceLockNotInitialized(ONCE_LOCK_NAME))?;
 
     let raw_value = store.get(STORE_VERSION_KEY);
-
     if let Some(value) = raw_value {
         let version: u8 = serde_json::from_value(value)?;
         return Ok(version);
@@ -210,7 +219,7 @@ pub fn get_scrapper_property<R: serde::de::DeserializeOwned>(scrapper_id: &str, 
     if let Some(value) = raw_value {
         return serde_json::from_value(value).map_err(|e| Error::SerdeJson(e));
     } else {
-        return Err(format!("Scrapper URL for ID '{}' not found", scrapper_id).into());
+        return Err(format!("Scrapper property '{}' of '{}' scrapper not found", property, scrapper_id).into());
     }
 }
 
