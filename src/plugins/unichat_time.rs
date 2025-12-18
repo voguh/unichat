@@ -11,7 +11,6 @@ pub fn create_module(lua: &mlua::Lua) -> Result<mlua::Value, mlua::Error> {
     let module = lua.create_table()?;
 
     let encode_func = lua.create_function(|_, value: mlua::Value| -> mlua::Result<mlua::Integer> {
-        log::info!("Parsing time value: {:?}", value);
         if let mlua::Value::String(str) = value {
             let str = str.to_string_lossy();
             let datetime = time::OffsetDateTime::parse(&str, &time::format_description::well_known::Rfc3339)
