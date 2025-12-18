@@ -187,7 +187,7 @@ if (window.fetch.__WRAPPED__ !== true) {
 
 /* ================================================================================================================== */
 
-function uniChatPreInit() {
+async function uniChatPreInit() {
     try {
         if (window.location.href.startsWith("tauri://") || window.location.href.startsWith("http://localhost")) {
             uniChatLogger.info("Scrapper is not running, setting up idle dispatch.");
@@ -230,7 +230,7 @@ function uniChatPreInit() {
         }
 
         uniChatLogger.info("Calling uniChatInit...");
-        const payload = uniChatInit();
+        const payload = await uniChatInit();
 
         uniChat.dispatchEvent({ type: "ready", url: window.location.href, ...payload });
         uniChatLogger.info("UniChat scrapper initialized.");
