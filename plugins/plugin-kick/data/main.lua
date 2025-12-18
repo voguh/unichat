@@ -17,6 +17,7 @@ end
 
 -- ============================================================================================== --
 
+local channel_id = nil;
 local static_badges_urls = {
     moderator = "/assets/"..__plugin_name.."/moderator.svg",
     broadcaster = "/assets/"..__plugin_name.."/broadcaster.svg",
@@ -92,7 +93,7 @@ end
 
 local function handle_message_event(data)
     local event = UniChatEvent:Message({
-        channelId = tostring(data.chatroom_id),
+        channelId = channel_id,
         channelName = nil,
 
         platform = UniChatPlatform:Other("kick"),
@@ -118,11 +119,33 @@ local function handle_message_event(data)
     UniChatAPI:emit_unichat_event(event);
 end
 
+local function handle_delete_message_event(data)
+    local event = UniChatEvent:RemoveMessage({
+        channelId = channel_id,
+        channelName = nil,
+
+        platform = UniChatPlatform:Other("kick"),
+
+        messageId = data.message.id,
+
+        timestamp = time.now()
+    })
+
+    UniChatAPI:emit_unichat_event(event);
+end
+
 local function on_kick_event(event)
-    -- Here you can handle the incoming chat event from Kick.
-    -- The 'event' parameter is a table containing the chat message data.
-    if event.type == "message" then
+    if event.type == "ready" then
+        channel_id = event.channelId;
+        UniChatAPI:emit_status_event(event);
+    elseif event.type == "ping" or event.type == "error" then
+        UniChatAPI:emit_status_event(event);
+    elseif event.type == "message" then
         handle_message_event(event.data);
+    elseif event.type == "messageDeleted" then
+        handle_delete_message_event(event.data);
+    else
+        logger.warn("Kick scrapper received unknown event: {}", JSON.encode(event));
     end
 end
 
