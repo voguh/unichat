@@ -24,6 +24,7 @@ use actix_web::Responder;
 
 use crate::error::Error;
 use crate::events;
+use crate::plugins;
 use crate::utils;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -148,7 +149,17 @@ pub async fn get_assets(req: HttpRequest) -> Result<impl Responder, actix_web::E
     }
 
     let assets_path = properties::get_app_path(AppPaths::UniChatAssets);
-    let asset_full_path = safe_guard_path(&assets_path, &asset_path)?;
+    let mut asset_full_path = safe_guard_path(&assets_path, &asset_path)?;
+
+    let first_part = asset_path.split('/').next().unwrap_or("");
+    let plugins = plugins::get_plugins().map_err(|e| ErrorInternalServerError(e))?;
+    if let Some(plugin) = plugins.iter().find(|p| p.name == first_part) {
+        let plugin_path = plugin.plugin_path.join("assets");
+        let relative_asset_path = asset_path.trim_start_matches(first_part).trim_start_matches('/');
+
+        asset_full_path = safe_guard_path(&plugin_path, relative_asset_path)?;
+    }
+
     if !asset_full_path.exists() {
         return Err(ErrorNotFound(format!("Asset '{}' not found", asset_path)));
     }
@@ -159,7 +170,11 @@ pub async fn get_assets(req: HttpRequest) -> Result<impl Responder, actix_web::E
     })?;
 
     if let Some(kind) = infer::get(&content) {
-        return Ok(HttpResponse::build(StatusCode::OK).content_type(kind.mime_type()).body(content));
+        let mime = kind.mime_type();
+        return Ok(HttpResponse::build(StatusCode::OK).content_type(mime).body(content));
+    } else if let Some(kind) = mime_guess::from_path(&asset_full_path).first() {
+        let mime = kind.essence_str();
+        return Ok(HttpResponse::build(StatusCode::OK).content_type(mime).body(content));
     } else {
         return Err(ErrorBadRequest(format!("Could not infer MIME type for asset '{}'", asset_path)));
     }
