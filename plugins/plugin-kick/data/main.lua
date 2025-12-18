@@ -7,6 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
 --]]
 
+---@diagnostic disable: undefined-global
 local JSON = require("unichat:json");
 local logger = require("unichat:logger");
 local time = require("unichat:time");
