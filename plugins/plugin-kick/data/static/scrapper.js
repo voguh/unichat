@@ -21,9 +21,11 @@ async function uniChatInit() {
                 const payload = JSON.parse(event.data);
 
                 if (payload.event === "App\\Events\\ChatMessageEvent") {
-                    await uniChat.dispatchEvent({ type: "message", data: JSON.parse(payload.data) })
+                    await uniChat.dispatchEvent({ type: "chatMessage", data: JSON.parse(payload.data) })
                 } else if (payload.event === "App\\Events\\MessageDeletedEvent") {
                     await uniChat.dispatchEvent({ type: "messageDeleted", data: JSON.parse(payload.data) })
+                } else if (payload.event === "App\\Events\\UserBannedEvent") {
+                    await uniChat.dispatchEvent({ type: "userBanned", data: JSON.parse(payload.data) })
                 } else if (payload.event === "pusher_internal:subscription_succeeded" && payload.channel.startsWith("chatrooms.")) {
                     clearTimeout(timeout);
 

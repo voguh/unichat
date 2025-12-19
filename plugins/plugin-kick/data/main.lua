@@ -135,6 +135,21 @@ local function handle_delete_message_event(data)
     UniChatAPI:emit_unichat_event(event);
 end
 
+local function handle_remove_user_event(data)
+    local event = UniChatEvent:RemoveAuthor({
+        channelId = channel_id,
+        channelName = nil,
+
+        platform = UniChatPlatform:Other("kick"),
+
+        authorId = tostring(data.user.id),
+
+        timestamp = time.now()
+    })
+
+    UniChatAPI:emit_unichat_event(event);
+end
+
 local function on_kick_event(event)
     if event.type == "ready" then
         channel_id = event.channelId;
@@ -142,10 +157,12 @@ local function on_kick_event(event)
         UniChatAPI:fetch_shared_emotes("kick", channel_id);
     elseif event.type == "ping" or event.type == "error" then
         UniChatAPI:emit_status_event(event);
-    elseif event.type == "message" then
+    elseif event.type == "chatMessage" then
         handle_message_event(event.data);
     elseif event.type == "messageDeleted" then
         handle_delete_message_event(event.data);
+    elseif event.type == "userBanned" then
+        handle_remove_user_event(event.data);
     else
         logger.warn("Kick scrapper received unknown event: {}", JSON.encode(event));
     end
