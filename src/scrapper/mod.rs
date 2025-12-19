@@ -162,8 +162,13 @@ fn handle_event(payload: &str) -> Result<(), Error> {
     return Ok(());
 }
 
+static SCRAPPER_ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[a-z]+-chat$").unwrap());
 pub fn register_scrapper(app: &tauri::AppHandle<tauri::Wry>, scrapper: impl Into<Arc<dyn UniChatScrapper + Send + Sync>>) -> Result<WebviewWindow, Error> {
     let scrapper = scrapper.into();
+
+    if !SCRAPPER_ID_REGEX.is_match(scrapper.id()) {
+        return Err(Error::Message("Scrapper ID must be a non-empty lowercase string".to_string()));
+    }
 
     /* ========================================================================================== */
 
