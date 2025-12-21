@@ -16,6 +16,7 @@ use crate::plugins::unichat_json;
 use crate::plugins::unichat_logger;
 use crate::plugins::unichat_strings;
 use crate::plugins::unichat_time;
+use crate::plugins::unichat_yaml;
 use crate::utils::safe_guard_path;
 
 pub fn create_print_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Function, mlua::Error> {
@@ -57,6 +58,8 @@ pub fn create_require_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Fun
                 return unichat_strings::create_module(lua);
             } else if module == "unichat:time" {
                 return unichat_time::create_module(lua);
+            } else if module == "unichat:yaml" {
+                return unichat_yaml::create_module(lua);
             }
 
             let manifest = get_loaded_plugin(plugin_name)?;

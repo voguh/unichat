@@ -40,6 +40,7 @@ mod unichat_logger;
 mod unichat_std;
 mod unichat_strings;
 mod unichat_time;
+mod unichat_yaml;
 mod utils;
 
 const PLUGIN_NAME_KEY: &str = "__PLUGIN_NAME";

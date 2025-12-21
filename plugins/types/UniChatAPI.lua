@@ -198,11 +198,11 @@ UniChatEmote = UniChatEmote or nil;
 UniChatBadge = UniChatBadge or nil;
 -- =========================================[ End UniChat Standard Library ]========================================= --
 
--- =============================================[ UniChat Json Library ]============================================= --
+-- =============================================[ UniChat JSON Library ]============================================= --
 ---@class UniChatJson
----@field encode fun(data: unknown): string
----@field decode fun(json: string): unknown
--- ===========================================[ End UniChat Json Library ]=========================================== --
+---@field encode fun(data: table): string
+---@field decode fun(json: string): table
+-- ===========================================[ End UniChat JSON Library ]=========================================== --
 
 -- ============================================[ UniChat Logger Library ]============================================ --
 ---@class UniChatLogger
@@ -242,4 +242,10 @@ UniChatBadge = UniChatBadge or nil;
 ---@field format fun(ts: number, fmt: string): string
 ---@field add_seconds fun(ts: number, seconds: number): number
 -- ===========================================[ End UniChat Time Library ]=========================================== --
+
+-- =============================================[ UniChat YAML Library ]============================================= --
+---@class UniChatYaml
+---@field encode fun(data: table): string
+---@field decode fun(yaml: string): table
+-- ===========================================[ End UniChat YAML Library ]=========================================== --
 
