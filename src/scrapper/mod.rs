@@ -40,92 +40,6 @@ pub trait UniChatScrapper {
 
 /* ============================================================================================== */
 
-#[derive(Clone)]
-pub struct UniChatScrapperInternal {
-    id: String,
-    name: String,
-    editing_tooltip_message: String,
-    editing_tooltip_urls: Vec<String>,
-    placeholder_text: String,
-    icon: String,
-    validate_url: Arc<dyn Fn(String) -> Result<String, Error> + Send + Sync>,
-    on_event: Arc<dyn Fn(serde_json::Value) -> Result<(), Error> + Send + Sync>,
-    scrapper_js: String
-}
-
-impl UniChatScrapperInternal {
-    pub fn new<
-        F1: Fn(String) -> Result<String, Error> + Send + Sync + 'static,
-        F2: Fn(serde_json::Value) -> Result<(), Error> + Send + Sync + 'static
-    >(
-        id: String,
-        name: String,
-        editing_tooltip_message: String,
-        editing_tooltip_urls: Vec<String>,
-        placeholder_text: String,
-        icon: String,
-        validate_url: F1,
-        on_event: F2,
-        scrapper_js: String
-    ) -> Result<Self, Error> {
-        return Ok(Self {
-            id: id,
-            name: name,
-            editing_tooltip_message: editing_tooltip_message,
-            editing_tooltip_urls: editing_tooltip_urls,
-            placeholder_text: placeholder_text,
-            icon: icon,
-            validate_url: Arc::new(validate_url),
-            on_event: Arc::new(on_event),
-            scrapper_js: scrapper_js
-        });
-    }
-}
-
-impl UniChatScrapper for UniChatScrapperInternal {
-    fn id(&self) -> &str {
-        return &self.id;
-    }
-
-    fn name(&self) -> &str {
-        return &self.name;
-    }
-
-    fn editing_tooltip_message(&self) -> &str {
-        return &self.editing_tooltip_message;
-    }
-
-    fn editing_tooltip_urls(&self) -> &[String] {
-        return &self.editing_tooltip_urls;
-    }
-
-    fn placeholder_text(&self) -> &str {
-        return &self.placeholder_text;
-    }
-
-    fn badges(&self) -> &[String] {
-        return &[];
-    }
-
-    fn icon(&self) -> &str {
-        return &self.icon;
-    }
-
-    fn validate_url(&self, url: String) -> Result<String, Error> {
-        return (self.validate_url)(url);
-    }
-
-    fn on_event(&self, event: serde_json::Value) -> Result<(), Error> {
-        return (self.on_event)(event);
-    }
-
-    fn scrapper_js(&self) -> &str {
-        return &self.scrapper_js;
-    }
-}
-
-/* ============================================================================================== */
-
 pub fn serialize_scrapper(scrapper: &Arc<dyn UniChatScrapper + Send + Sync>) -> serde_json::Value {
     let serialized = serde_json::json!({
         "id": scrapper.id(),
@@ -163,9 +77,7 @@ fn handle_event(payload: &str) -> Result<(), Error> {
 }
 
 static SCRAPPER_ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[a-z]+-chat$").unwrap());
-pub fn register_scrapper(app: &tauri::AppHandle<tauri::Wry>, scrapper: impl Into<Arc<dyn UniChatScrapper + Send + Sync>>) -> Result<WebviewWindow, Error> {
-    let scrapper = scrapper.into();
-
+pub fn register_scrapper(app: &tauri::AppHandle<tauri::Wry>, scrapper: Arc<dyn UniChatScrapper + Send + Sync>) -> Result<WebviewWindow, Error> {
     if !SCRAPPER_ID_REGEX.is_match(scrapper.id()) {
         return Err(Error::Message("Scrapper ID must be a non-empty lowercase string".to_string()));
     }

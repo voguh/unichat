@@ -26,7 +26,6 @@ use crate::irc::IRCCommand;
 use crate::irc::IRCMessage;
 use crate::scrapper;
 use crate::scrapper::UniChatScrapper;
-use crate::scrapper::UniChatScrapperInternal;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
 use crate::utils::constants::TWITCH_CHAT_WINDOW;
@@ -207,75 +206,104 @@ fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error>
 
 /* ================================================================================================================== */
 
-fn handle_event(payload: serde_json::Value) -> Result<(), Error> {
-    let scrapper_id = payload.get("scrapperId").and_then(|v| v.as_str())
-        .ok_or("Missing or invalid 'scrapperId' field in Twitch raw event payload")?;
-    let event_type = payload.get("type").and_then(|v| v.as_str())
-        .ok_or("Missing or invalid 'type' field in Twitch raw event payload")?;
+static TWITCH_VALID_URLS: LazyLock<Vec<String>> = LazyLock::new(|| vec![
+    String::from("https://www.twitch.tv/{CHANNEL_NAME}/chat"),
+    String::from("https://www.twitch.tv/popout/{CHANNEL_NAME}/chat"),
+]);
 
-    if scrapper_id != TWITCH_CHAT_WINDOW {
-        return Ok(());
+#[derive(Default)]
+struct TwitchUniChatScrapper;
+
+impl UniChatScrapper for TwitchUniChatScrapper {
+    fn id(&self) -> &str {
+        return TWITCH_CHAT_WINDOW;
     }
 
-    return match event_type {
-        "ready" => handle_ready_event(event_type, &payload),
-        "idle" => handle_idle_event(event_type, &payload),
-        "badges" => handle_badges_event(event_type, &payload),
-        "cheermotes" => handle_cheermotes_event(event_type, &payload),
-        "redemption" => handle_ws_event(event_type, &payload),
-        "message" => handle_message_event(event_type, &payload),
-        _ => dispatch_event(payload.clone())
-    };
-}
+    fn name(&self) -> &str {
+        return "Twitch";
+    }
 
-pub const AVAILABLE_URLS: &[&str] = &[
-    "twitch.tv/popout/{CHANNEL_NAME}/chat",
-    "twitch.tv/{CHANNEL_NAME}"
-];
+    fn editing_tooltip_message(&self) -> &str {
+        return "You can enter just the channel name or one of the following URLs to get the Twitch chat:";
+    }
 
-fn validate_twitch_url(value: String) -> Result<String, Error> {
-    let mut value = value.trim();
-    value = value.strip_prefix("http://").unwrap_or(value);
-    value = value.strip_prefix("https://").unwrap_or(value);
-    value = value.strip_prefix("www.").unwrap_or(value);
+    fn editing_tooltip_urls(&self) -> &[String] {
+        return &TWITCH_VALID_URLS;
+    }
 
-    let mut channel_name: Option<&str> = None;
-    if value.starts_with("twitch.tv") {
-        let mut parts = value.split('/');
-        parts.next();
+    fn placeholder_text(&self) -> &str {
+        return "https://www.twitch.tv/popout/{CHANNEL_NAME}/chat";
+    }
 
-        let channel_name_or_popout = parts.next();
-        if let Some(channel_name_or_popout) = channel_name_or_popout {
-            if channel_name_or_popout == "popout" {
-                channel_name = parts.next();
+    fn badges(&self) -> &[String] {
+        return &[];
+    }
+
+    fn icon(&self) -> &str {
+        return "fab fa-twitch";
+    }
+
+    fn validate_url(&self, url: String) -> Result<String, Error> {
+        let mut url = url.trim();
+        url = url.strip_prefix("http://").unwrap_or(url);
+        url = url.strip_prefix("https://").unwrap_or(url);
+        url = url.strip_prefix("www.").unwrap_or(url);
+
+        let mut channel_name: Option<&str> = None;
+        if url.starts_with("twitch.tv") {
+            let mut parts = url.split('/');
+            parts.next();
+
+            let channel_name_or_popout = parts.next();
+            if let Some(channel_name_or_popout) = channel_name_or_popout {
+                if channel_name_or_popout == "popout" {
+                    channel_name = parts.next();
+                } else {
+                    channel_name = Some(channel_name_or_popout);
+                }
             } else {
-                channel_name = Some(channel_name_or_popout);
+                return Err(Error::from("Could not extract channel name from Twitch URL"));
             }
-        } else {
-            return Err(Error::from("Could not extract channel name from Twitch URL"));
         }
+
+        if let Some(channel_name) = channel_name.filter(|channel_name| is_valid_twitch_channel_name(channel_name)) {
+            let formatted_url = format!("https://www.twitch.tv/popout/{}/chat", channel_name);
+            return Ok(formatted_url);
+        }
+
+        return Err(Error::from("Could not extract channel name from Twitch URL"));
     }
 
-    if let Some(channel_name) = channel_name.filter(|channel_name| is_valid_twitch_channel_name(channel_name)) {
-        let formatted_url = format!("https://www.twitch.tv/popout/{}/chat", channel_name);
-        return Ok(formatted_url);
+    fn scrapper_js(&self) -> &str {
+        return SCRAPPER_JS;
     }
 
-    return Err(Error::from("Could not extract channel name from Twitch URL"));
+    fn on_event(&self, event: serde_json::Value) -> Result<(), Error> {
+        let scrapper_id = event.get("scrapperId").and_then(|v| v.as_str())
+            .ok_or("Missing or invalid 'scrapperId' field in Twitch raw event payload")?;
+        let event_type = event.get("type").and_then(|v| v.as_str())
+            .ok_or("Missing or invalid 'type' field in Twitch raw event payload")?;
+
+        if scrapper_id != TWITCH_CHAT_WINDOW {
+            return Ok(());
+        }
+
+        return match event_type {
+            "ready" => handle_ready_event(event_type, &event),
+            "idle" => handle_idle_event(event_type, &event),
+            "badges" => handle_badges_event(event_type, &event),
+            "cheermotes" => handle_cheermotes_event(event_type, &event),
+            "redemption" => handle_ws_event(event_type, &event),
+            "message" => handle_message_event(event_type, &event),
+            _ => dispatch_event(event.clone())
+        };
+    }
 }
+
+/* ================================================================================================================== */
 
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
-    let scrapper_data = UniChatScrapperInternal::new(
-        String::from(TWITCH_CHAT_WINDOW),
-        String::from("Twitch"),
-        String::from("You can enter just the channel name or one of the following URLs to get the Twitch chat:"),
-        AVAILABLE_URLS.iter().map(|s| s.to_string()).collect(),
-        String::from("https://www.twitch.tv/popout/{CHANNEL_NAME}/chat"),
-        String::from("fab fa-twitch"),
-        validate_twitch_url,
-        handle_event,
-        String::from(SCRAPPER_JS)
-    )?;
+    let scrapper_data = TwitchUniChatScrapper::default();
 
     let scrapper: Arc<dyn UniChatScrapper + Send + Sync> = Arc::new(scrapper_data);
     scrapper::register_scrapper(app.handle(), scrapper)?;
