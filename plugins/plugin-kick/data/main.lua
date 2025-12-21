@@ -170,9 +170,7 @@ end
 
 -- ============================================================================================== --
 
-UniChatAPI:register_scrapper({
-    id = "kick-chat",
-    name = "Kick",
+local opts = {
     editing_tooltip_message = "You can enter just the channel name or one of the following URLs to get the Kick chat:",
     editing_tooltip_urls = {
         "kick.com/popout/{CHANNEL_NAME}/chat",
@@ -181,7 +179,10 @@ UniChatAPI:register_scrapper({
     placeholder_text = "https://kick.com/popout/{CHANNEL_NAME}/chat",
     badges = { "experimental" },
     icon = "fas fa-video",
-    validate_url = validate_kick_url,
-    on_event = on_kick_event,
-    scrapper_js_path = "static/scrapper.js"
-});
+    validate_url = validate_kick_url
+}
+
+local scrapper = UniChatAPI:register_scrapper("kick-chat", "Kick", "static/scrapper.js", opts);
+scrapper:add_event_listener("chatMessage", handle_message_event);
+scrapper:add_event_listener("messageDeleted", handle_delete_message_event);
+scrapper:add_event_listener("userBanned", handle_remove_user_event);
