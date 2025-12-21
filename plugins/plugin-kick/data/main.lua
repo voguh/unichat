@@ -10,10 +10,33 @@
 ---@diagnostic disable: undefined-global
 local JSON = require("unichat:json");
 local logger = require("unichat:logger");
+local strings = require("unichat:strings");
 local time = require("unichat:time");
 
+
 local function validate_kick_url(url)
-    return url;
+    url = strings.trim(url);
+    url = strings.strip_prefix(url, "http://") or strings.strip_prefix(url, "https://") or url;
+    url = strings.strip_prefix(url, "www.") or url;
+
+    local channel_name = nil;
+    if strings.starts_with(url, "kick.com/") then
+        local parts = strings.split(url, "/");
+        table.remove(parts, 1);
+
+        local channel_name_or_popout = parts[1] or "";
+        if channel_name_or_popout == "popout" then
+            channel_name = parts[2];
+        else
+            channel_name = channel_name_or_popout;
+        end
+    end
+
+    if channel_name ~= nil then
+        return "https://kick.com/popout/" .. channel_name .. "/chat";
+    end
+
+    error("Could not extract channel name from Kick URL.");
 end
 
 -- ============================================================================================== --
@@ -117,7 +140,7 @@ local function handle_message_event(data)
         timestamp = time.parse(data.created_at),
     });
 
-    UniChatAPI:emit_unichat_event(event);
+    return event;
 end
 
 local function handle_delete_message_event(data)
@@ -132,7 +155,7 @@ local function handle_delete_message_event(data)
         timestamp = time.now()
     })
 
-    UniChatAPI:emit_unichat_event(event);
+    return event;
 end
 
 local function handle_remove_user_event(data)
@@ -147,25 +170,23 @@ local function handle_remove_user_event(data)
         timestamp = time.now()
     })
 
-    UniChatAPI:emit_unichat_event(event);
+    return event;
+end
+
+local function on_kick_ready(event)
+    channel_id = event.channelId;
 end
 
 local function on_kick_event(event)
-    if event.type == "ready" then
-        channel_id = event.channelId;
-        UniChatAPI:emit_status_event(event);
-        UniChatAPI:fetch_shared_emotes("kick", channel_id);
-    elseif event.type == "ping" or event.type == "error" then
-        UniChatAPI:emit_status_event(event);
-    elseif event.type == "chatMessage" then
-        handle_message_event(event.data);
+    if event.type == "chatMessage" then
+        return handle_message_event(event.data);
     elseif event.type == "messageDeleted" then
-        handle_delete_message_event(event.data);
+        return handle_delete_message_event(event.data);
     elseif event.type == "userBanned" then
-        handle_remove_user_event(event.data);
-    else
-        logger.warn("Kick scrapper received unknown event: {}", JSON.encode(event));
+        return handle_remove_user_event(event.data);
     end
+
+    return nil;
 end
 
 -- ============================================================================================== --
@@ -179,10 +200,10 @@ local opts = {
     placeholder_text = "https://kick.com/popout/{CHANNEL_NAME}/chat",
     badges = { "experimental" },
     icon = "fas fa-video",
-    validate_url = validate_kick_url
+    validate_url = validate_kick_url,
+    on_event = on_kick_event,
+
+    on_ready = on_kick_ready
 }
 
-local scrapper = UniChatAPI:register_scrapper("kick-chat", "Kick", "static/scrapper.js", opts);
-scrapper:add_event_listener("chatMessage", handle_message_event);
-scrapper:add_event_listener("messageDeleted", handle_delete_message_event);
-scrapper:add_event_listener("userBanned", handle_remove_user_event);
+UniChatAPI:register_scrapper("kick-chat", "Kick", "static/scrapper.js", opts);
