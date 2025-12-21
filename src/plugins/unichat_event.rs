@@ -26,6 +26,20 @@ impl mlua::UserData for LuaUniChatEvent {
     }
 }
 
+impl mlua::FromLua for LuaUniChatEvent {
+    fn from_lua(value: mlua::Value, lua: &mlua::Lua) -> mlua::Result<Self> {
+        if let mlua::Value::UserData(userdata) = value {
+            let borrow = userdata.borrow::<LuaUniChatEvent>()?;
+            return Ok(LuaUniChatEvent { inner: borrow.inner.clone() });
+        } else {
+            let json: serde_json::Value = lua.from_value(value)?;
+            let event: UniChatEvent = serde_json::from_value(json).map_err(mlua::Error::external)?;
+
+            return Ok(LuaUniChatEvent { inner: event });
+        }
+    }
+}
+
 pub struct LuaUniChatEventFactory;
 
 impl mlua::UserData for LuaUniChatEventFactory {
@@ -99,17 +113,17 @@ pub struct LuaUniChatPlatformFactory;
 impl mlua::UserData for LuaUniChatPlatformFactory {
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("Twitch", |_lua, _this, ()| {
-            let lv = serde_plain::to_string(&UniChatPlatform::Twitch).map_err(|e| mlua::Error::external(e))?;
+            let lv = serde_plain::to_string(&UniChatPlatform::Twitch).map_err(mlua::Error::external)?;
             return Ok(lv);
         });
 
         methods.add_method("YouTube", |_lua, _this, ()| {
-            let lv = serde_plain::to_string(&UniChatPlatform::YouTube).map_err(|e| mlua::Error::external(e))?;
+            let lv = serde_plain::to_string(&UniChatPlatform::YouTube).map_err(mlua::Error::external)?;
             return Ok(lv);
         });
 
         methods.add_method("Other", |_lua, _this, str: String| {
-            let lv = serde_plain::to_string(&UniChatPlatform::Other(str)).map_err(|e| mlua::Error::external(e))?;
+            let lv = serde_plain::to_string(&UniChatPlatform::Other(str)).map_err(mlua::Error::external)?;
             return Ok(lv);
         });
     }
@@ -122,32 +136,32 @@ pub struct LuaUniChatAuthorTypeFactory;
 impl mlua::UserData for LuaUniChatAuthorTypeFactory {
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("Viewer", |_lua, _this, ()| {
-            let lv = serde_plain::to_string(&UniChatAuthorType::Viewer).map_err(|e| mlua::Error::external(e))?;
+            let lv = serde_plain::to_string(&UniChatAuthorType::Viewer).map_err(mlua::Error::external)?;
             return Ok(lv);
         });
 
         methods.add_method("Sponsor", |_lua, _this, ()| {
-            let lv = serde_plain::to_string(&UniChatAuthorType::Sponsor).map_err(|e| mlua::Error::external(e))?;
+            let lv = serde_plain::to_string(&UniChatAuthorType::Sponsor).map_err(mlua::Error::external)?;
             return Ok(lv);
         });
 
         methods.add_method("Vip", |_lua, _this, ()| {
-            let lv = serde_plain::to_string(&UniChatAuthorType::Vip).map_err(|e| mlua::Error::external(e))?;
+            let lv = serde_plain::to_string(&UniChatAuthorType::Vip).map_err(mlua::Error::external)?;
             return Ok(lv);
         });
 
         methods.add_method("Moderator", |_lua, _this, ()| {
-            let lv = serde_plain::to_string(&UniChatAuthorType::Moderator).map_err(|e| mlua::Error::external(e))?;
+            let lv = serde_plain::to_string(&UniChatAuthorType::Moderator).map_err(mlua::Error::external)?;
             return Ok(lv);
         });
 
         methods.add_method("Broadcaster", |_lua, _this, ()| {
-            let lv = serde_plain::to_string(&UniChatAuthorType::Broadcaster).map_err(|e| mlua::Error::external(e))?;
+            let lv = serde_plain::to_string(&UniChatAuthorType::Broadcaster).map_err(mlua::Error::external)?;
             return Ok(lv);
         });
 
         methods.add_method("Other", |_lua, _this, str: String| {
-            let lv = serde_plain::to_string(&UniChatAuthorType::Other(str)).map_err(|e| mlua::Error::external(e))?;
+            let lv = serde_plain::to_string(&UniChatAuthorType::Other(str)).map_err(mlua::Error::external)?;
             return Ok(lv);
         });
     }
