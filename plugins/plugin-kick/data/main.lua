@@ -7,12 +7,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
 --]]
 
----@diagnostic disable: undefined-global
-local JSON = require("unichat:json");
+---@type UniChatLogger
 local logger = require("unichat:logger");
+---@type UniChatStrings
 local strings = require("unichat:strings");
+---@type UniChatTime
 local time = require("unichat:time");
-
 
 local function validate_kick_url(url)
     url = strings.trim(url);
@@ -43,8 +43,8 @@ end
 
 local channel_id = nil;
 local static_badges_urls = {
-    moderator = "/assets/"..__plugin_name.."/moderator.svg",
-    broadcaster = "/assets/"..__plugin_name.."/broadcaster.svg",
+    moderator = "/assets/"..__PLUGIN_NAME.."/moderator.svg",
+    broadcaster = "/assets/"..__PLUGIN_NAME.."/broadcaster.svg",
 }
 
 local function parse_author_badges(raw_badges)
@@ -54,10 +54,7 @@ local function parse_author_badges(raw_badges)
         local badge_type = badge.type;
         local badge_url = static_badges_urls[badge_type];
         if badge_url ~= nil then
-            table.insert(badges, {
-                code = badge_type,
-                url = badge_url,
-            })
+            table.insert(badges, UniChatBadge:new(badge_type, badge_url));
         end
     end
 
@@ -104,11 +101,7 @@ local function parse_emotes(raw_content)
         local _, id, name = word:match("^%[(%w+):(%d+):([%w_]+)%]$")
 
         if id ~= nil and name ~= nil then
-            table.insert(emotes, {
-                id = id,
-                code = ":" .. name .. ":",
-                url = "https://files.kick.com/emotes/" .. id .. "/fullsize",
-            });
+            table.insert(emotes, UniChatEmote:new(id, ":" .. name .. ":", "https://files.kick.com/emotes/" .. id .. "/fullsize"));
         end
     end
 
@@ -117,7 +110,7 @@ end
 
 local function handle_message_event(data)
     local event = UniChatEvent:Message({
-        channelId = channel_id,
+        channelId = assert(channel_id),
         channelName = nil,
 
         platform = UniChatPlatform:Other("kick"),
@@ -145,7 +138,7 @@ end
 
 local function handle_delete_message_event(data)
     local event = UniChatEvent:RemoveMessage({
-        channelId = channel_id,
+        channelId = assert(channel_id),
         channelName = nil,
 
         platform = UniChatPlatform:Other("kick"),
@@ -160,7 +153,7 @@ end
 
 local function handle_remove_user_event(data)
     local event = UniChatEvent:RemoveAuthor({
-        channelId = channel_id,
+        channelId = assert(channel_id),
         channelName = nil,
 
         platform = UniChatPlatform:Other("kick"),
@@ -178,6 +171,11 @@ local function on_kick_ready(event)
 end
 
 local function on_kick_event(event)
+    if channel_id == nil then
+        logger.warn("Kick scrapper received an event before being ready. Ignoring event.");
+        return nil;
+    end
+
     if event.type == "chatMessage" then
         return handle_message_event(event.data);
     elseif event.type == "messageDeleted" then
