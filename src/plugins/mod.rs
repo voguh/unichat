@@ -38,6 +38,7 @@ mod unichat_event;
 mod unichat_json;
 mod unichat_logger;
 mod unichat_std;
+mod unichat_strings;
 mod unichat_time;
 mod utils;
 
@@ -226,6 +227,8 @@ fn create_lua_env(manifest: &Arc<PluginManifest>) -> Result<(), Error> {
             return unichat_json::create_module(lua);
         } else if module == "unichat:logger" {
             return unichat_logger::create_module(lua, &plugin_name);
+        } else if module == "unichat:strings" {
+            return unichat_strings::create_module(lua);
         } else if module == "unichat:time" {
             return unichat_time::create_module(lua);
         }
