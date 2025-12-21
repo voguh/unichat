@@ -72,7 +72,7 @@ impl Serialize for UniChatPlatform {
 impl <'de> Deserialize<'de> for UniChatPlatform {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         let s = String::deserialize(deserializer)?;
-        let normalized = s.to_uppercase();
+        let normalized = s.to_lowercase();
 
         return Ok(match normalized.as_str() {
             "youtube" => UniChatPlatform::YouTube,
