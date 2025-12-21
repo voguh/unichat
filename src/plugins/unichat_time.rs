@@ -34,6 +34,27 @@ pub fn create_module(lua: &mlua::Lua) -> Result<mlua::Value, mlua::Error> {
     })?;
     module.set("now", now_func)?;
 
+    let format_func = lua.create_function(|_, (ts, fmt): (mlua::Integer, String)| -> mlua::Result<String> {
+        let datetime = time::OffsetDateTime::from_unix_timestamp(ts)
+            .map_err(|e| mlua::Error::external(format!("Failed to create time from timestamp: {}", e)))?;
+        let format = time::format_description::parse(&fmt)
+            .map_err(|e| mlua::Error::external(format!("Failed to parse format description: {}", e)))?;
+        let formatted = datetime.format(&format)
+            .map_err(|e| mlua::Error::external(format!("Failed to format time: {}", e)))?;
+        return Ok(formatted);
+    })?;
+    module.set("format", format_func)?;
+
+    let add_seconds_func = lua.create_function(|_, (ts, seconds): (mlua::Integer, mlua::Integer)| -> mlua::Result<mlua::Integer> {
+        let datetime = time::OffsetDateTime::from_unix_timestamp(ts)
+            .map_err(|e| mlua::Error::external(format!("Failed to create time from timestamp: {}", e)))?;
+        let new_datetime = datetime + time::Duration::seconds(seconds);
+        return Ok(new_datetime.unix_timestamp());
+    })?;
+    module.set("add_seconds", add_seconds_func)?;
+
+    /* ========================================================================================== */
+
     let table_name = lua.create_string("unichat:time")?;
     let table_name = mlua::Value::String(table_name);
     let readonly_module = table_deep_readonly(lua, &table_name, module).map_err(|e| mlua::Error::runtime(e))?;
