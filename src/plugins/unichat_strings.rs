@@ -111,9 +111,8 @@ pub fn create_module(lua: &mlua::Lua) -> Result<mlua::Value, mlua::Error> {
     })?;
     module.set("to_bytes", to_bytes_func)?;
 
-    let from_bytes_func = lua.create_function(|_, bytes: mlua::String| {
-        let byte_vec = bytes.as_bytes().to_vec();
-        match String::from_utf8(byte_vec) {
+    let from_bytes_func = lua.create_function(|_, bytes: Vec<u8>| {
+        match String::from_utf8(bytes) {
             Ok(s) => Ok(Some(s)),
             Err(_) => Ok(None),
         }
@@ -133,17 +132,16 @@ pub fn create_module(lua: &mlua::Lua) -> Result<mlua::Value, mlua::Error> {
     })?;
     module.set("length", length_func)?;
 
-    let replace_func = lua.create_function(|_, (s, from, to): (String, String, String)| {
+    let replace_func = lua.create_function(|_, (s, from, to, count): (String, String, String, Option<usize>)| {
+        if let Some(n) = count {
+            let result = s.replacen(&from, &to, n);
+            return Ok(result);
+        }
+
         let result = s.replace(&from, &to);
         return Ok(result);
     })?;
     module.set("replace", replace_func)?;
-
-    let remove_func = lua.create_function(|_, (s, to_remove): (String, String)| {
-        let result = s.replace(&to_remove, "");
-        return Ok(result);
-    })?;
-    module.set("remove", remove_func)?;
 
     let contains_func = lua.create_function(|_, (s, substring): (String, String)| {
         return Ok(s.contains(&substring));

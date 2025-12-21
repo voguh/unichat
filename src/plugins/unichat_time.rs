@@ -12,7 +12,7 @@ use crate::plugins::utils::table_deep_readonly;
 pub fn create_module(lua: &mlua::Lua) -> Result<mlua::Value, mlua::Error> {
     let module = lua.create_table()?;
 
-    let encode_func = lua.create_function(|_, value: mlua::Value| -> mlua::Result<mlua::Integer> {
+    let parse_func = lua.create_function(|_, value: mlua::Value| -> mlua::Result<mlua::Integer> {
         if let mlua::Value::String(str) = value {
             let str = str.to_string_lossy();
             let datetime = time::OffsetDateTime::parse(&str, &time::format_description::well_known::Rfc3339)
@@ -26,7 +26,7 @@ pub fn create_module(lua: &mlua::Lua) -> Result<mlua::Value, mlua::Error> {
 
         return Err(mlua::Error::external("Unknown time format"));
     })?;
-    module.set("parse", encode_func)?;
+    module.set("parse", parse_func)?;
 
     let now_func = lua.create_function(|_, ()| -> mlua::Result<mlua::Integer> {
         let now = time::OffsetDateTime::now_utc();
