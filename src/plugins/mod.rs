@@ -91,7 +91,7 @@ pub(in crate::plugins) fn get_app_handle() -> Result<tauri::AppHandle<tauri::Wry
 /* ================================================================================================================== */
 
 #[derive(Serialize, Deserialize, Debug)]
-pub(in crate::plugins) struct PluginManifestYAML {
+struct PluginManifestYAML {
     name: String,
     description: Option<String>,
     version: String,
@@ -138,11 +138,11 @@ impl UniChatPlugin {
         });
     }
 
-    pub fn get_plugin_env(&self) -> mlua::Result<Arc<mlua::Table>> {
+    pub(in crate::plugins) fn get_plugin_env(&self) -> mlua::Result<Arc<mlua::Table>> {
         return Ok(self.plugin_env.clone());
     }
 
-    pub fn get_cached_loaded_module(&self, module_name: &str) -> mlua::Result<mlua::Value> {
+    pub(in crate::plugins) fn get_cached_loaded_module(&self, module_name: &str) -> mlua::Result<mlua::Value> {
         let cache = self.loaded_modules_cache.read().map_err(mlua::Error::runtime)?;
         if let Some(cached_module) = cache.get(module_name) {
             return Ok(cached_module.as_ref().clone());
@@ -151,7 +151,7 @@ impl UniChatPlugin {
         return Err(mlua::Error::runtime(format!("Module '{}' is not cached", module_name)));
     }
 
-    pub fn set_cached_loaded_module(&self, module_name: &str, module: Arc<mlua::Value>) -> mlua::Result<Arc<mlua::Value>> {
+    pub(in crate::plugins) fn set_cached_loaded_module(&self, module_name: &str, module: Arc<mlua::Value>) -> mlua::Result<Arc<mlua::Value>> {
         let mut cache = self.loaded_modules_cache.write().map_err(mlua::Error::runtime)?;
         cache.insert(module_name.to_string(), module);
         return Ok(cache.get(module_name).unwrap().clone());

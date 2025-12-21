@@ -60,7 +60,7 @@ fn get_table_property<R: mlua::FromLua>(table: &mlua::Table, default_value: Opti
     return Err(mlua::Error::runtime(format!("Missing required property '{}' in scrapper options table", first)));
 }
 
-pub struct LuaUniChatScrapper {
+struct LuaUniChatScrapper {
     id: String,
     name: String,
     editing_tooltip_message: String,
@@ -77,7 +77,7 @@ pub struct LuaUniChatScrapper {
 }
 
 impl LuaUniChatScrapper {
-    pub fn new(id: String, name: String, scrapper_js: String, opts: mlua::Table) -> Result<Self, mlua::Error> {
+    fn new(id: String, name: String, scrapper_js: String, opts: mlua::Table) -> Result<Self, mlua::Error> {
         let editing_tooltip_message = get_table_property(&opts, Some(format!("Enter {} chat url...", name)), vec!["editingTooltipMessage", "editing_tooltip_message"])?;
         let editing_tooltip_urls = get_table_property(&opts, Some(Vec::new()), vec!["editingTooltipUrls", "editing_tooltip_urls"])?;
         let placeholder_text = get_table_property(&opts, Some(format!("Enter {} chat url...", name)), vec!["placeholderText", "placeholder_text"])?;
