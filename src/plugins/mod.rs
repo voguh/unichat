@@ -27,13 +27,13 @@ use crate::error::Error;
 use crate::plugins::unichat_event::LuaUniChatAuthorTypeFactory;
 use crate::plugins::unichat_event::LuaUniChatEventFactory;
 use crate::plugins::unichat_event::LuaUniChatPlatformFactory;
-use crate::plugins::unichat_std::UniChatAPI;
+use crate::plugins::unichat_api::UniChatAPI;
 
 use crate::plugins::utils::table_deep_readonly;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
-use crate::utils::safe_guard_path;
 
+mod unichat_api;
 mod unichat_event;
 mod unichat_json;
 mod unichat_logger;
@@ -41,29 +41,6 @@ mod unichat_std;
 mod unichat_strings;
 mod unichat_time;
 mod utils;
-
-#[derive(Serialize, Deserialize, Debug)]
-struct PluginManifestYAML {
-    name: String,
-    description: Option<String>,
-    version: String,
-    author: Option<String>,
-    license: Option<String>,
-    homepage: Option<String>,
-    dependencies: Option<Vec<String>>
-}
-
-#[allow(dead_code)]
-pub struct PluginManifest {
-    pub name: String,
-    pub description: Option<String>,
-    pub version: String,
-    pub author: Option<String>,
-    pub license: Option<String>,
-    pub homepage: Option<String>,
-    pub dependencies: Vec<(String, semver::VersionReq)>,
-    pub plugin_path: path::PathBuf
-}
 
 const PLUGIN_NAME_KEY: &str = "__plugin_name";
 const PLUGIN_VERSION_KEY: &str = "__plugin_version";
@@ -80,17 +57,23 @@ const LUA_RUNTIME_ONCE_LOCK_KEY: &str = "Plugins::LUA_RUNTIME";
 static LUA_RUNTIME: OnceLock<Arc<mlua::Lua>> = OnceLock::new();
 const APP_HANDLE_ONCE_LOCK_KEY: &str = "Plugins::APP_HANDLE";
 static APP_HANDLE: OnceLock<tauri::AppHandle<tauri::Wry>> = OnceLock::new();
-static LOADED_PLUGINS: LazyLock<RwLock<HashMap<String, Arc<PluginManifest>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+static LOADED_PLUGINS: LazyLock<RwLock<HashMap<String, Arc<UniChatPlugin>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
-pub fn get_plugins() -> Result<Vec<Arc<PluginManifest>>, Error> {
+pub fn get_plugins() -> Result<Vec<Arc<UniChatPlugin>>, Error> {
     let envs = LOADED_PLUGINS.read().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
 
-    let mut plugins: Vec<Arc<PluginManifest>> = Vec::new();
+    let mut plugins: Vec<Arc<UniChatPlugin>> = Vec::new();
     for (_name, manifest) in envs.iter() {
         plugins.push(manifest.clone());
     }
 
     return Ok(plugins);
+}
+
+pub(in crate::plugins) fn get_loaded_plugin(plugin_name: &str) -> Result<Arc<UniChatPlugin>, mlua::Error> {
+    let envs = LOADED_PLUGINS.read().map_err(|e| mlua::Error::runtime(e))?;
+    let manifest = envs.get(plugin_name).ok_or(mlua::Error::runtime(format!("Plugin '{}' is not loaded", plugin_name)))?;
+    return Ok(manifest.clone());
 }
 
 pub(in crate::plugins) fn get_lua_runtime() -> Result<Arc<mlua::Lua>, Error> {
@@ -103,26 +86,85 @@ pub(in crate::plugins) fn get_app_handle() -> Result<tauri::AppHandle<tauri::Wry
     return Ok(app_handle.clone());
 }
 
-pub(in crate::plugins) fn get_loaded_plugin_manifest(plugin_name: &str) -> Result<Arc<PluginManifest>, mlua::Error> {
-    let envs = LOADED_PLUGINS.read().map_err(|e| mlua::Error::runtime(e))?;
-    let manifest = envs.get(plugin_name).ok_or(mlua::Error::runtime(format!("Plugin '{}' is not loaded", plugin_name)))?;
-    return Ok(manifest.clone());
+/* ================================================================================================================== */
+
+#[derive(Serialize, Deserialize, Debug)]
+pub(in crate::plugins) struct PluginManifestYAML {
+    name: String,
+    description: Option<String>,
+    version: String,
+    author: Option<String>,
+    license: Option<String>,
+    homepage: Option<String>,
+    dependencies: Vec<String>
 }
 
-/* ============================================================================================== */
+#[allow(dead_code)]
+pub struct UniChatPlugin {
+    pub name: String,
+    pub description: Option<String>,
+    pub version: semver::Version,
+    pub author: Option<String>,
+    pub license: Option<String>,
+    pub homepage: Option<String>,
+    pub dependencies: Vec<(String, semver::VersionReq)>,
+
+    plugin_path: path::PathBuf,
+    plugin_env: Arc<mlua::Table>,
+}
+
+impl UniChatPlugin {
+    pub(in crate::plugins) fn new(manifest: &PluginManifestYAML, dependencies: Vec<(String, semver::VersionReq)>, plugin_path: path::PathBuf) -> Result<Self, Error> {
+        let version = semver::Version::parse(&manifest.version)?;
+
+        let lua = get_lua_runtime()?;
+        let env = lua.create_table()?;
+        let arc_env = Arc::new(env);
+
+        return Ok(Self {
+            name: manifest.name.clone(),
+            description: manifest.description.clone(),
+            version: version,
+            author: manifest.author.clone(),
+            license: manifest.license.clone(),
+            homepage: manifest.homepage.clone(),
+            dependencies: dependencies,
+            plugin_path: plugin_path,
+            plugin_env: arc_env,
+        });
+    }
+
+    pub fn get_plugin_env(&self) -> mlua::Result<Arc<mlua::Table>> {
+        return Ok(self.plugin_env.clone());
+    }
+
+    pub fn get_plugin_assets_path(&self) -> path::PathBuf {
+        return self.plugin_path.join("assets");
+    }
+
+    pub fn get_plugin_data_path(&self) -> path::PathBuf {
+        return self.plugin_path.join("data");
+    }
+
+    pub fn get_entrypoint_path(&self) -> path::PathBuf {
+        return self.get_plugin_data_path().join("main.lua");
+    }
+}
+
+/* ================================================================================================================== */
 
 fn configure_lua_env() -> Result<(), Error> {
     log::info!("Configuring LUA runtime");
     let lua = mlua::Lua::new();
     let _globals = lua.globals();
 
-    /* <==========================================[ LUA Standard Library ]==========================================> */
+    /* <======================[ LUA Standard Library ]======================> */
     log::debug!("Configuring LUA standard library");
     _globals.set("_G", mlua::Value::Nil)?;
     _globals.set("coroutine", mlua::Value::Nil)?;
     _globals.set("debug", mlua::Value::Nil)?;
     _globals.set("dofile", mlua::Value::Nil)?;
-    // _globals.set("getmetatable", mlua::Value::Nil)?;
+    _globals.set("getmetatable", mlua::Value::Nil)?;
     _globals.set("io", mlua::Value::Nil)?;
     _globals.set("load", mlua::Value::Nil)?;
     _globals.set("loadfile", mlua::Value::Nil)?;
@@ -145,12 +187,12 @@ fn configure_lua_env() -> Result<(), Error> {
     _globals.set("rawset", mlua::Value::Nil)?;
     _globals.set("require", mlua::Value::Nil)?;
 
-    // _globals.set("setmetatable", mlua::Value::Nil)?;
+    _globals.set("setmetatable", mlua::Value::Nil)?;
 
     let _string: mlua::Table = _globals.get("string")?;
     _string.set("dump", mlua::Value::Nil)?;
     _globals.set("string", _string)?;
-    /* <========================================[ End LUA Standard Library ]========================================> */
+    /* <====================[ End LUA Standard Library ]====================> */
 
     log::debug!("Setting LUA globals as read-only");
     for pair in _globals.pairs::<mlua::Value, mlua::Value>() {
@@ -167,16 +209,39 @@ fn configure_lua_env() -> Result<(), Error> {
     return LUA_RUNTIME.set(Arc::new(lua)).map_err(|_| Error::OnceLockAlreadyInitialized(LUA_RUNTIME_ONCE_LOCK_KEY));
 }
 
-fn create_lua_env(manifest: &Arc<PluginManifest>) -> Result<(), Error> {
+fn create_lua_env(plugin: Arc<UniChatPlugin>) -> Result<(), Error> {
     let lua = LUA_RUNTIME.get().ok_or(Error::OnceLockNotInitialized(LUA_RUNTIME_ONCE_LOCK_KEY))?;
+    let plugin_env = plugin.get_plugin_env()?;
 
-    let plugin_env = lua.create_table()?;
+    /* <======================[ LUA Standard Library ]======================> */
+    let print_func = unichat_std::create_print_fn(lua, &plugin.name)?;
+    plugin_env.set("print", print_func)?;
 
-    /* ========================================================================================== */
+    let packages  = unichat_std::create_package_table(lua)?;
+    plugin_env.set("package", packages)?;
+
+    let require_fn = unichat_std::create_require_fn(lua, &plugin.name)?;
+    plugin_env.set("require", require_fn)?;
+    /* <====================[ End LUA Standard Library ]====================> */
+
+    /* <====================[ UniChat Standard Library ]====================> */
+    plugin_env.set(PLUGIN_NAME_KEY, plugin.name.clone())?;
+    plugin_env.set(PLUGIN_VERSION_KEY, plugin.version.to_string())?;
+    plugin_env.set(UNICHAT_API_KEY, UniChatAPI::new(&plugin.name))?;
+    plugin_env.set(UNICHAT_PLATFORM_KEY, LuaUniChatPlatformFactory)?;
+    plugin_env.set(UNICHAT_AUTHOR_TYPE_KEY, LuaUniChatAuthorTypeFactory)?;
+    plugin_env.set(UNICHAT_EVENT_KEY, LuaUniChatEventFactory)?;
+    /* <==================[ End UniChat Standard Library ]==================> */
 
     let mt = lua.create_table()?;
     let mut protected_keys: HashSet<String> = HashSet::new();
     for pair in lua.globals().pairs::<mlua::Value, mlua::Value>() {
+        let (k, _) = pair?;
+        if let mlua::Value::String(s) = k {
+            protected_keys.insert(s.to_string_lossy().to_string());
+        }
+    }
+    for pair in plugin_env.pairs::<mlua::Value, mlua::Value>() {
         let (k, _) = pair?;
         if let mlua::Value::String(s) = k {
             protected_keys.insert(s.to_string_lossy().to_string());
@@ -187,8 +252,6 @@ fn create_lua_env(manifest: &Arc<PluginManifest>) -> Result<(), Error> {
             let k = key.to_string_lossy();
             if protected_keys.contains(k.as_str()) {
                 return Err(mlua::Error::runtime(format!("Immutable table: cannot modify key '{}'", k)));
-            } else if matches!(k.as_ref(), PLUGIN_NAME_KEY | PLUGIN_VERSION_KEY | UNICHAT_API_KEY | UNICHAT_PLATFORM_KEY | UNICHAT_AUTHOR_TYPE_KEY | UNICHAT_EVENT_KEY | "print" | "require") {
-                return Err(mlua::Error::runtime(format!("Immutable table: cannot modify protected key '{}'", k)));
             }
         }
 
@@ -200,68 +263,11 @@ fn create_lua_env(manifest: &Arc<PluginManifest>) -> Result<(), Error> {
     mt.set("__metatable", mlua::Value::Boolean(false))?;
     plugin_env.set_metatable(Some(mt))?;
 
-    /* <==========================================[ LUA Standard Library ]==========================================> */
-    let plugin_name = manifest.name.clone();
-    let print_func = lua.create_function(move |lua, args: mlua::Variadic<mlua::Value>| {
-        let mut output_parts: Vec<String> = Vec::new();
+    /* ========================================================================================== */
 
-        for arg in args.into_iter() {
-            if let Some(arg_str) = lua.coerce_string(arg)? {
-                let str = arg_str.to_string_lossy();
-                output_parts.push(str);
-            } else {
-                output_parts.push(String::from("<non-stringifiable>"));
-            }
-        }
-
-        let output = output_parts.join("\t");
-        log::info!(target: &format!("plugin:{}", plugin_name), "{}", output);
-        return Ok(());
-    })?;
-    plugin_env.raw_set("print", print_func)?;
-
-    let plugin_env_clone = plugin_env.clone();
-    let plugin_name = manifest.name.clone();
-    let require_func = lua.create_function(move |lua, module: String| -> mlua::Result<mlua::Value> {
-        if module == "unichat:json" {
-            return unichat_json::create_module(lua);
-        } else if module == "unichat:logger" {
-            return unichat_logger::create_module(lua, &plugin_name);
-        } else if module == "unichat:strings" {
-            return unichat_strings::create_module(lua);
-        } else if module == "unichat:time" {
-            return unichat_time::create_module(lua);
-        }
-
-        let manifest = get_loaded_plugin_manifest(&plugin_name)?;
-        let plugin_root = manifest.plugin_path.join("data");
-        let mut module_path = module.replace('.', "/");
-        if !module_path.ends_with(".lua") {
-            module_path.push_str(".lua");
-        }
-
-        let path = safe_guard_path(&plugin_root, &module_path).map_err(|e| mlua::Error::runtime(e))?;
-        let code = fs::read_to_string(path).map_err(|e| mlua::Error::external(e))?;
-        let result: mlua::Value = lua.load(&code).set_environment(plugin_env_clone.clone()).eval()?;
-
-        return Ok(result);
-    })?;
-    plugin_env.raw_set("require", require_func)?;
-    /* <========================================[ End LUA Standard Library ]========================================> */
-
-    /* <========================================[ UniChat Standard Library ]========================================> */
-    plugin_env.raw_set(PLUGIN_NAME_KEY, manifest.name.as_str())?;
-    plugin_env.raw_set(PLUGIN_VERSION_KEY, manifest.version.as_str())?;
-    plugin_env.raw_set(UNICHAT_API_KEY, UniChatAPI::new(manifest.name.clone()))?;
-    plugin_env.raw_set(UNICHAT_PLATFORM_KEY, LuaUniChatPlatformFactory)?;
-    plugin_env.raw_set(UNICHAT_AUTHOR_TYPE_KEY, LuaUniChatAuthorTypeFactory)?;
-    plugin_env.raw_set(UNICHAT_EVENT_KEY, LuaUniChatEventFactory)?;
-    /* <======================================[ End UniChat Standard Library ]======================================> */
-
-    log::info!("Executing plugin entrypoint for plugin: {} v{}", manifest.name, manifest.version);
-    let entrypoint_path = manifest.plugin_path.join("data").join("main.lua");
-    let entrypoint_code = fs::read_to_string(entrypoint_path)?;
-    lua.load(&entrypoint_code).set_environment(plugin_env).exec()?;
+    log::info!("Executing plugin entrypoint for plugin: {} v{}", plugin.name, plugin.version);
+    let entrypoint_code = fs::read_to_string(plugin.get_entrypoint_path())?;
+    lua.load(&entrypoint_code).set_environment(plugin_env.as_ref().clone()).exec()?;
 
     return Ok(());
 }
@@ -297,22 +303,20 @@ fn parse_dependency_version(version: &str) -> Result<semver::VersionReq, Error> 
     return Ok(version_req);
 }
 
-fn parse_dependencies(versions: Option<Vec<String>>) -> Result<Vec<(String, semver::VersionReq)>, Error> {
+fn parse_dependencies(raw_dependencies: &Vec<String>) -> Result<Vec<(String, semver::VersionReq)>, Error> {
     let mut dependencies: Vec<(String, semver::VersionReq)> = Vec::new();
 
-    if let Some(versions) = versions {
-        for dep in versions {
-            let parts: Vec<&str> = dep.splitn(2, '@').collect();
-            if parts.len() != 2 {
-                return Err(Error::Message(format!("Invalid dependency format: '{}'. Expected format is 'name@version_req'", dep)));
-            }
-
-            let name = parts[0].trim().to_string();
-            let version = parts[1].trim();
-            let version_req = parse_dependency_version(version)?;
-
-            dependencies.push((name, version_req));
+    for dep in raw_dependencies {
+        let parts: Vec<&str> = dep.splitn(2, '@').collect();
+        if parts.len() != 2 {
+            return Err(Error::Message(format!("Invalid dependency format: '{}'. Expected format is 'name@version_req'", dep)));
         }
+
+        let name = parts[0].trim().to_string();
+        let version = parts[1].trim();
+        let version_req = parse_dependency_version(version)?;
+
+        dependencies.push((name, version_req));
     }
 
     return Ok(dependencies);
@@ -320,6 +324,10 @@ fn parse_dependencies(versions: Option<Vec<String>>) -> Result<Vec<(String, semv
 
 fn load_plugin(plugin_path: path::PathBuf) -> Result<(), Error> {
     let manifest_path = plugin_path.join("manifest.yaml");
+    if !manifest_path.exists() || !manifest_path.is_file() {
+        return Err(Error::Message(format!("Folder '{:?}' is not a valid plugin: missing or invalid 'manifest.yaml'", plugin_path)));
+    }
+
     let manifest_content = fs::read_to_string(&manifest_path)?;
     let mut manifest: PluginManifestYAML = serde_saphyr::from_str(&manifest_content)?;
 
@@ -345,7 +353,7 @@ fn load_plugin(plugin_path: path::PathBuf) -> Result<(), Error> {
         return Err(Error::Message(format!("Invalid version '{}' for plugin '{}': {:?}", manifest.version, manifest.name, err)));
     }
 
-    let parsed_dependencies = parse_dependencies(manifest.dependencies)?;
+    let parsed_dependencies = parse_dependencies(&manifest.dependencies)?;
     for (key, version_req) in parsed_dependencies.iter() {
         if key == "unichat" {
             let unichat_version = semver::Version::parse(CARGO_PKG_VERSION)?;
@@ -355,34 +363,32 @@ fn load_plugin(plugin_path: path::PathBuf) -> Result<(), Error> {
         }
     }
 
-    let manifest = Arc::new(PluginManifest {
-        name: manifest.name,
-        description: manifest.description,
-        version: manifest.version,
-        author: manifest.author,
-        license: manifest.license,
-        homepage: manifest.homepage,
-        dependencies: parsed_dependencies,
-        plugin_path: plugin_path.clone()
-    });
+    let plugin = UniChatPlugin::new(&manifest, parsed_dependencies, plugin_path.clone())?;
+    let plugin = Arc::new(plugin);
 
-    log::info!("Loading plugin: {} v{}", manifest.name, manifest.version);
+    if !plugin.get_plugin_data_path().is_dir() {
+        return Err(Error::Message(format!("Plugin folder '{:?}' is missing required 'data' directory", plugin_path)));
+    } else if !plugin.get_entrypoint_path().is_file() {
+        return Err(Error::Message(format!("Plugin folder '{:?}' is missing required 'data/main.lua' entrypoint file", plugin_path)));
+    }
+
+    log::info!("Loading plugin: {} v{}", plugin.name, plugin.version);
     {
         let mut loaded_plugins = LOADED_PLUGINS.write().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
-        if loaded_plugins.contains_key(&manifest.name) {
-            return Err(Error::Message(format!("Plugin with name '{}' is already loaded", manifest.name)));
+        if loaded_plugins.contains_key(&plugin.name) {
+            return Err(Error::Message(format!("Plugin with name '{}' is already loaded", plugin.name)));
         }
 
-        loaded_plugins.insert(manifest.name.clone(), manifest.clone());
+        loaded_plugins.insert(plugin.name.clone(), plugin.clone());
     }
 
-    if let Err(e) = create_lua_env(&manifest) {
+    if let Err(e) = create_lua_env(plugin.clone()) {
         let mut loaded_plugins = LOADED_PLUGINS.write().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
-        loaded_plugins.remove(&manifest.name);
-        return Err(Error::Message(format!("Failed to load plugin '{}': {}", manifest.name, e)));
+        loaded_plugins.remove(&plugin.name);
+        return Err(Error::Message(format!("Failed to load plugin '{}': {}", plugin.name, e)));
     }
 
-    log::info!("Loaded plugin: {} v{}", manifest.name, manifest.version);
+    log::info!("Loaded plugin: {} v{}", plugin.name, plugin.version);
 
     return Ok(());
 }
