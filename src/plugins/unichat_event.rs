@@ -20,7 +20,7 @@ pub struct LuaUniChatEvent {
 impl mlua::UserData for LuaUniChatEvent {
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
         methods.add_meta_method(mlua::MetaMethod::ToString, |_lua, this, ()| {
-            let str = serde_json::to_string(&this.inner).map_err(|e| mlua::Error::external(e))?;
+            let str = serde_json::to_string(&this.inner).map_err(mlua::Error::external)?;
             return Ok(str);
         });
     }
@@ -102,6 +102,37 @@ impl mlua::UserData for LuaUniChatEventFactory {
             let payload = lua.from_value(data)?;
             let event = UniChatEvent::Custom(payload);
             return lua.create_userdata(LuaUniChatEvent { inner: event });
+        });
+    }
+}
+
+/* ============================================================================================== */
+
+pub struct LuaUniChatEmoteFactory;
+
+impl mlua::UserData for LuaUniChatEmoteFactory {
+    fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("new", |lua, _this, (id, code, url): (String, String, String)| {
+            let table = lua.create_table()?;
+            table.set("id", id)?;
+            table.set("code", code)?;
+            table.set("url", url)?;
+            return Ok(table);
+        });
+    }
+}
+
+/* ============================================================================================== */
+
+pub struct LuaUniChatBadgeFactory;
+
+impl mlua::UserData for LuaUniChatBadgeFactory {
+    fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("new", |lua, _this, (code, url): (String, String)| {
+            let table = lua.create_table()?;
+            table.set("code", code)?;
+            table.set("url", url)?;
+            return Ok(table);
         });
     }
 }

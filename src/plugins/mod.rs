@@ -42,12 +42,14 @@ mod unichat_strings;
 mod unichat_time;
 mod utils;
 
-const PLUGIN_NAME_KEY: &str = "__plugin_name";
-const PLUGIN_VERSION_KEY: &str = "__plugin_version";
+const PLUGIN_NAME_KEY: &str = "__PLUGIN_NAME";
+const PLUGIN_VERSION_KEY: &str = "__PLUGIN_VERSION";
 const UNICHAT_API_KEY: &str = "UniChatAPI";
 const UNICHAT_EVENT_KEY: &str = "UniChatEvent";
 const UNICHAT_PLATFORM_KEY: &str = "UniChatPlatform";
 const UNICHAT_AUTHOR_TYPE_KEY: &str = "UniChatAuthorType";
+const UNICHAT_EMOTE_KEY: &str = "UniChatEmote";
+const UNICHAT_BADGE_KEY: &str = "UniChatBadge";
 const INCLUSIVE_START: char = '[';
 const INCLUSIVE_END: char = ']';
 const EXCLUSIVE_START: char = '(';
@@ -111,6 +113,7 @@ pub struct UniChatPlugin {
 
     plugin_path: path::PathBuf,
     plugin_env: Arc<mlua::Table>,
+    loaded_modules_cache: RwLock<HashMap<String, Arc<mlua::Value>>>,
 }
 
 impl UniChatPlugin {
@@ -131,11 +134,27 @@ impl UniChatPlugin {
             dependencies: dependencies,
             plugin_path: plugin_path,
             plugin_env: arc_env,
+            loaded_modules_cache: RwLock::new(HashMap::new()),
         });
     }
 
     pub fn get_plugin_env(&self) -> mlua::Result<Arc<mlua::Table>> {
         return Ok(self.plugin_env.clone());
+    }
+
+    pub fn get_cached_loaded_module(&self, module_name: &str) -> mlua::Result<mlua::Value> {
+        let cache = self.loaded_modules_cache.read().map_err(mlua::Error::runtime)?;
+        if let Some(cached_module) = cache.get(module_name) {
+            return Ok(cached_module.as_ref().clone());
+        }
+
+        return Err(mlua::Error::runtime(format!("Module '{}' is not cached", module_name)));
+    }
+
+    pub fn set_cached_loaded_module(&self, module_name: &str, module: Arc<mlua::Value>) -> mlua::Result<Arc<mlua::Value>> {
+        let mut cache = self.loaded_modules_cache.write().map_err(mlua::Error::runtime)?;
+        cache.insert(module_name.to_string(), module);
+        return Ok(cache.get(module_name).unwrap().clone());
     }
 
     pub fn get_plugin_assets_path(&self) -> path::PathBuf {
@@ -217,9 +236,6 @@ fn create_lua_env(plugin: Arc<UniChatPlugin>) -> Result<(), Error> {
     let print_func = unichat_std::create_print_fn(lua, &plugin.name)?;
     plugin_env.set("print", print_func)?;
 
-    let packages  = unichat_std::create_package_table(lua)?;
-    plugin_env.set("package", packages)?;
-
     let require_fn = unichat_std::create_require_fn(lua, &plugin.name)?;
     plugin_env.set("require", require_fn)?;
     /* <====================[ End LUA Standard Library ]====================> */
@@ -231,6 +247,8 @@ fn create_lua_env(plugin: Arc<UniChatPlugin>) -> Result<(), Error> {
     plugin_env.set(UNICHAT_PLATFORM_KEY, LuaUniChatPlatformFactory)?;
     plugin_env.set(UNICHAT_AUTHOR_TYPE_KEY, LuaUniChatAuthorTypeFactory)?;
     plugin_env.set(UNICHAT_EVENT_KEY, LuaUniChatEventFactory)?;
+    plugin_env.set(UNICHAT_EMOTE_KEY, unichat_event::LuaUniChatEmoteFactory)?;
+    plugin_env.set(UNICHAT_BADGE_KEY, unichat_event::LuaUniChatBadgeFactory)?;
     /* <==================[ End UniChat Standard Library ]==================> */
 
     let mt = lua.create_table()?;
