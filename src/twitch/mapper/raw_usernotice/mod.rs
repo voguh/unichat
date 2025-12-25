@@ -16,11 +16,13 @@ mod community_gift;
 mod raid;
 mod subgift;
 mod subscription;
+mod watch_streak;
 
 pub fn parse(channel_name: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let tags = message.tags.clone();
 
-    let msg_id = tags.get("msg-id").and_then(|v| v.as_ref()).ok_or("Missing msg-id tag")?;
+    let msg_id = tags.get("msg-id").and_then(|v| v.to_owned()).ok_or("Missing msg-id tag")?;
+    let msg_category = tags.get("msg-param-category").and_then(|v| v.to_owned()).unwrap_or_default();
 
     if msg_id == "announcement" {
         return announcement::parse(message, &tags);
@@ -32,6 +34,8 @@ pub fn parse(channel_name: String, message: &IRCMessage) -> Result<Option<UniCha
         return subgift::parse(channel_name, &tags);
     } else if msg_id == "sub" || msg_id == "resub" {
         return subscription::parse(message, &tags);
+    } else if msg_id == "viewermilestone" && msg_category == "watch-streak" {
+        return watch_streak::parse(message);
     }
 
     return Ok(None);
