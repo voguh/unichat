@@ -213,7 +213,7 @@ export interface UniChatEventRaid {
         authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
-        authorProfilePictureUrl: string;
+        authorProfilePictureUrl: string | null;
         /** **Disclaimer:** On YouTube, this field is an empty list. */
         authorBadges: UniChatBadge[];
         /** **Disclaimer:** On YouTube, this field is always null. */

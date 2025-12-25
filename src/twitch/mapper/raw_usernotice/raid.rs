@@ -46,7 +46,7 @@ pub fn parse(channel: String, tags: &HashMap<String, Option<String>>) -> Result<
         author_username: author_username,
         author_display_name: author_name,
         author_display_color: author_color,
-        author_profile_picture_url: author_profile_picture_url.to_owned(),
+        author_profile_picture_url: Some(author_profile_picture_url.clone()),
         author_badges: author_badges,
         author_type: Some(author_type),
 

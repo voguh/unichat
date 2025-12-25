@@ -10,7 +10,6 @@
 use std::collections::HashMap;
 use std::fs;
 use std::io::Read as _;
-use std::path;
 use std::path::PathBuf;
 
 use actix_web::error::ErrorBadRequest;
@@ -25,6 +24,8 @@ use actix_web::Responder;
 
 use crate::error::Error;
 use crate::events;
+use crate::plugins;
+use crate::utils;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::ureq;
@@ -32,13 +33,10 @@ use crate::utils::ureq;
 static WIDGET_TEMPLATE: &str = include_str!("./static/index.html.template");
 
 fn safe_guard_path(base_path: &PathBuf, concat_str: &str) -> Result<PathBuf, actix_web::Error> {
-    let concatenated_path = base_path.join(concat_str);
-    let resolved_path = path::absolute(concatenated_path).map_err(|e| ErrorInternalServerError(e))?;
-    if !resolved_path.starts_with(base_path) {
-        return Err(ErrorBadRequest(format!("Access to path '{}' is not allowed", resolved_path.display())));
-    }
-
-    return Ok(resolved_path);
+    return utils::safe_guard_path(base_path, concat_str).map_err(|e| {
+        log::error!("{:?}", e);
+        return ErrorInternalServerError("Failed to resolve asset path safely");
+    });
 }
 
 fn get_widget_dir(widget_name: &str) -> Option<PathBuf> {
@@ -151,7 +149,20 @@ pub async fn get_assets(req: HttpRequest) -> Result<impl Responder, actix_web::E
     }
 
     let assets_path = properties::get_app_path(AppPaths::UniChatAssets);
-    let asset_full_path = safe_guard_path(&assets_path, &asset_path)?;
+    let mut asset_full_path = safe_guard_path(&assets_path, &asset_path)?;
+
+    let first_part = asset_path.split('/').next().unwrap_or("");
+    let plugins = plugins::get_plugins().map_err(|e| ErrorInternalServerError(e))?;
+    if let Some(plugin) = plugins.iter().find(|p| p.name == first_part) {
+        let plugin_assets_path = plugin.get_plugin_assets_path();
+        if !plugin_assets_path.is_dir() {
+            return Err(ErrorNotFound(format!("Plugin '{}' does not have an assets directory", plugin.name)));
+        }
+
+        let relative_asset_path = asset_path.trim_start_matches(first_part).trim_start_matches('/');
+        asset_full_path = safe_guard_path(&plugin_assets_path, relative_asset_path)?;
+    }
+
     if !asset_full_path.exists() {
         return Err(ErrorNotFound(format!("Asset '{}' not found", asset_path)));
     }
@@ -162,7 +173,11 @@ pub async fn get_assets(req: HttpRequest) -> Result<impl Responder, actix_web::E
     })?;
 
     if let Some(kind) = infer::get(&content) {
-        return Ok(HttpResponse::build(StatusCode::OK).content_type(kind.mime_type()).body(content));
+        let mime = kind.mime_type();
+        return Ok(HttpResponse::build(StatusCode::OK).content_type(mime).body(content));
+    } else if let Some(kind) = mime_guess::from_path(&asset_full_path).first() {
+        let mime = kind.essence_str();
+        return Ok(HttpResponse::build(StatusCode::OK).content_type(mime).body(content));
     } else {
         return Err(ErrorBadRequest(format!("Could not infer MIME type for asset '{}'", asset_path)));
     }

@@ -16,10 +16,6 @@ export const ScrapperCardStyledContainer = styled.div`
     align-items: flex-end;
     gap: 8px;
 
-    &:not(:first-child) {
-        margin-top: 8px;
-    }
-
     > .mantine-TextInput-root {
         flex: 1;
     }
@@ -28,4 +24,15 @@ export const ScrapperCardStyledContainer = styled.div`
         padding: 0;
         width: 36px;
     }
+`;
+
+export const ScrapperBadgesWrapper = styled.div`
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    margin-bottom: 8px;
+    position: absolute;
+    top: 8px;
+    right: 8px;
 `;

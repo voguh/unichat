@@ -31,6 +31,8 @@ pub enum Error {
     #[error("serde_plain error")]
     SerdePlain { ty: &'static str, msg: String },
     #[error(transparent)]
+    SerdeSaphyr(#[from] serde_saphyr::Error),
+    #[error(transparent)]
     UrlParse(#[from] url::ParseError),
     #[error(transparent)]
     Tauri(#[from] tauri::Error),
@@ -40,6 +42,10 @@ pub enum Error {
     TokioSendError { #[source] source: Box<dyn std::error::Error> },
     #[error(transparent)]
     TimeParse(#[from] time::error::Parse),
+    #[error(transparent)]
+    Lua(#[from] mlua::Error),
+    #[error(transparent)]
+    Semver(#[from] semver::Error),
 
     #[error("{0}")]
     Message(String),

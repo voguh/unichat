@@ -14,7 +14,7 @@ use url::Url;
 
 use crate::error::Error;
 use crate::scrapper;
-use crate::utils::constants::CHAT_WINDOWS;
+use crate::scrapper::serialize_scrapper;
 use crate::utils::settings;
 
 fn decode_url(url: &str) -> Result<Url, Error> {
@@ -32,13 +32,7 @@ fn decode_url(url: &str) -> Result<Url, Error> {
 #[tauri::command]
 pub fn get_scrappers<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<serde_json::Value>, Error> {
     let scrappers = scrapper::get_scrappers()?;
-
-    let mut serialized_scrappers = Vec::new();
-    for scrapper in scrappers {
-        let serialized_scrapper = serde_json::to_value(&scrapper)?;
-        serialized_scrappers.push(serialized_scrapper);
-    }
-
+    let serialized_scrappers: Vec<serde_json::Value> = scrappers.iter().map(|s| serialize_scrapper(s)).collect();
     return Ok(serialized_scrappers);
 }
 
@@ -46,7 +40,7 @@ pub fn get_scrappers<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<serde_json::V
 pub fn get_scrapper<R: Runtime>(_app: AppHandle<R>, scrapper_id: &str) -> Result<Option<serde_json::Value>, Error> {
     let scrapper = scrapper::get_scrapper(scrapper_id)?;
     if let Some(scrapper) = scrapper {
-        let serialized_scrapper = serde_json::to_value(&scrapper)?;
+        let serialized_scrapper = serialize_scrapper(&scrapper);
         return Ok(Some(serialized_scrapper));
     }
 
@@ -57,7 +51,7 @@ pub fn get_scrapper<R: Runtime>(_app: AppHandle<R>, scrapper_id: &str) -> Result
 pub fn validate_scrapper_url<R: Runtime>(_app: AppHandle<R>, scrapper_id: &str, url: String) -> Result<String, Error> {
     let scrapper = scrapper::get_scrapper(scrapper_id)?;
     if let Some(scrapper) = &scrapper {
-        return (scrapper.validate_url)(url);
+        return scrapper.validate_url(url);
     }
 
     return Err(Error::Message(format!("Scrapper with ID '{}' not found", scrapper_id)));
@@ -77,7 +71,7 @@ pub fn get_scrapper_stored_url<R: Runtime>(_app: AppHandle<R>, scrapper_id: &str
 
 #[tauri::command]
 pub fn get_scrapper_webview_url<R: Runtime>(app: AppHandle<R>, scrapper_id: &str) -> Result<String, Error> {
-    if !scrapper_id.ends_with("-chat") || CHAT_WINDOWS.iter().all(|&w| w != scrapper_id) {
+    if !scrapper_id.ends_with("-chat") {
         return Err(Error::Message(format!("Webview window '{}' not recognized", scrapper_id)));
     }
 

@@ -31,6 +31,7 @@ mod commands;
 mod error;
 mod events;
 mod irc;
+mod plugins;
 mod scrapper;
 mod shared_emotes;
 mod twitch;
@@ -81,9 +82,17 @@ fn copy_wrapper(src: &PathBuf, dest: &PathBuf) -> Result<(), Error> {
 
 fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
     events::init(app)?;
+    plugins::init(app)?;
     utils::properties::init(app)?;
     utils::settings::init(app)?;
     utils::render_emitter::init(app)?;
+
+    /* ========================================================================================== */
+
+    let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
+    if !&user_plugins_dir.exists() {
+        fs::create_dir_all(&user_plugins_dir)?;
+    }
 
     /* ========================================================================================== */
 
@@ -142,6 +151,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
     youtube::init(app)?;
     twitch::init(app)?;
+    plugins::load_plugins()?;
 
     return Ok(());
 }

@@ -17,3 +17,6 @@ indent_size = 2
 
 [examples/**/*]
 indent_size = 2
+
+[**/*.yaml, **/*.yml]
+indent_size = 2
