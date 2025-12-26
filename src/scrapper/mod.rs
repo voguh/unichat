@@ -19,6 +19,7 @@ use tauri::WebviewWindowBuilder;
 
 use crate::error::Error;
 use crate::utils::decode_scrapper_url;
+use crate::utils::is_dev;
 use crate::utils::settings;
 
 pub static COMMON_SCRAPPER_JS: &str = include_str!("./static/common_scrapper.js");
@@ -77,6 +78,49 @@ fn handle_event(payload: &str) -> Result<(), Error> {
     return Ok(());
 }
 
+/* ================================================================================================================== */
+
+fn on_page_load(scrapper_js: &str, window: &tauri::WebviewWindow, payload: tauri::webview::PageLoadPayload<'_>) -> Result<(), Error> {
+    let scrapper_id = window.label();
+    let event = payload.event();
+
+    match event {
+        tauri::webview::PageLoadEvent::Started => {
+            log::debug!("Scrapper webview '{}' started loading: {:}", scrapper_id, payload.url());
+            let stored_url: String = settings::get_scrapper_property(scrapper_id, "url").unwrap_or_default();
+            let stored_url = url::Url::parse(&stored_url).ok();
+            let current_url = payload.url();
+
+            let is_remote = stored_url.is_some_and(|stored_url| stored_url.scheme() == current_url.scheme() && stored_url.host() == current_url.host() && stored_url.path() == current_url.path());
+            let is_local: bool;
+            if is_dev() {
+                is_local = current_url.scheme() == "http" && current_url.host_str() == Some("localhost") && current_url.port() == Some(1421) && current_url.path() == "/scrapper_idle.html";
+            } else {
+                is_local = current_url.scheme() == "tauri" && current_url.host_str() == Some("localhost") && current_url.path() == "/scrapper_idle.html";
+            }
+
+            if is_local || is_remote {
+                log::info!("Injecting scrapper JS into scrapper '{}'", scrapper_id);
+                let formatted_js = COMMON_SCRAPPER_JS
+                    .replace("{{SCRAPPER_JS}}", &scrapper_js)
+                    .replace("{{SCRAPPER_ID}}", scrapper_id);
+                window.eval(&formatted_js)?;
+            } else {
+                log::warn!("Blocked navigation attempt in scrapper '{}': {}", scrapper_id, current_url);
+                window.eval("window.stop();")?;
+
+                let idle_url = decode_scrapper_url("about:blank")?;
+                window.navigate(idle_url)?;
+            }
+        }
+        tauri::webview::PageLoadEvent::Finished => {
+            log::debug!("Scrapper webview '{}' finished loading: {:}", window.label(), payload.url());
+        }
+    }
+
+    return Ok(());
+}
+
 static SCRAPPER_ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[a-z]+-chat$").unwrap());
 pub fn register_scrapper(app: &tauri::AppHandle<tauri::Wry>, scrapper: Arc<dyn UniChatScrapper + Send + Sync>) -> Result<WebviewWindow, Error> {
     if !SCRAPPER_ID_REGEX.is_match(scrapper.id()) {
@@ -103,33 +147,8 @@ pub fn register_scrapper(app: &tauri::AppHandle<tauri::Wry>, scrapper: Arc<dyn U
         .resizable(false)
         .maximizable(false)
         .on_page_load(move |window, payload| {
-            let event = payload.event();
-
-            match event {
-                tauri::webview::PageLoadEvent::Started => {
-                    log::info!("Scrapper webview '{}' started loading: {:}", window.label(), payload.url());
-                    let stored_url: String = settings::get_scrapper_property(window.label(), "url").unwrap_or_default();
-                    let str_url = payload.url().to_string();
-
-                    if stored_url.is_empty() {
-                        log::info!("No stored URL for scrapper '{}', skipping navigation check.", window.label());
-                    } else if str_url == stored_url || str_url.starts_with("tauri://") {
-                        log::info!("Navigation to stored URL or tauri scheme allowed for scrapper '{}': {}", window.label(), str_url);
-                        let formatted_js = COMMON_SCRAPPER_JS
-                            .replace("{{SCRAPPER_JS}}", &scrapper_js)
-                            .replace("{{SCRAPPER_ID}}", window.label());
-                        window.eval(&formatted_js).unwrap();
-                    } else {
-                        log::warn!("Blocked navigation attempt in scrapper '{}': {}", window.label(), str_url);
-                        window.eval("window.stop();").unwrap();
-
-                        let idle_url = decode_scrapper_url("about:blank").unwrap();
-                        window.navigate(idle_url).unwrap();
-                    }
-                }
-                tauri::webview::PageLoadEvent::Finished => {
-                    log::info!("Scrapper webview '{}' finished loading: {:}", window.label(), payload.url());
-                }
+            if let Err(err) = on_page_load(&scrapper_js, &window, payload) {
+                log::error!("Failed to handle page load event for scrapper '{}': {:?}", window.label(), err);
             }
         })
         .build()?;
