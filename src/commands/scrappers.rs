@@ -10,22 +10,12 @@
 use tauri::AppHandle;
 use tauri::Manager as _;
 use tauri::Runtime;
-use url::Url;
 
 use crate::error::Error;
 use crate::scrapper;
 use crate::scrapper::serialize_scrapper;
+use crate::utils::decode_scrapper_url;
 use crate::utils::settings;
-
-fn decode_url(url: &str) -> Result<Url, Error> {
-    let mut url = url;
-    if url.trim().is_empty() || url == "about:blank" || !url.starts_with("https://") {
-        url = "tauri://localhost/scrapper_idle.html";
-    }
-
-    let url = Url::parse(url)?;
-    return Ok(url);
-}
 
 /* ============================================================================================== */
 
@@ -90,7 +80,7 @@ pub fn set_scrapper_webview_url<R: Runtime>(app: AppHandle<R>, scrapper_id: &str
     log::info!("Setting scrapper webview '{}' to URL '{}'", scrapper_id, url);
     let webview_window = app.get_webview_window(scrapper_id).ok_or(format!("Scrapper webview '{}' not found", scrapper_id))?;
 
-    let parsed_url = decode_url(url)?;
+    let parsed_url = decode_scrapper_url(url)?;
     webview_window.navigate(parsed_url.clone())?;
 
     if parsed_url.to_string() == "tauri://localhost/scrapper_idle.html" {

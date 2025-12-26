@@ -10,6 +10,8 @@
 use std::path;
 use std::sync::LazyLock;
 
+use url::Url;
+
 use crate::error::Error;
 
 pub mod constants;
@@ -20,6 +22,18 @@ pub mod ureq;
 
 pub fn is_dev() -> bool {
     return cfg!(debug_assertions) || tauri::is_dev();
+}
+
+/* ================================================================================================================== */
+
+pub fn decode_scrapper_url(url: &str) -> Result<Url, Error> {
+    let mut url = url;
+    if url.trim().is_empty() || url == "about:blank" || !url.starts_with("https://") {
+        url = "tauri://localhost/scrapper_idle.html";
+    }
+
+    let url = Url::parse(url)?;
+    return Ok(url);
 }
 
 /* ================================================================================================================== */

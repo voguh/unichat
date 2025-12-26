@@ -18,6 +18,7 @@ use tauri::WebviewWindow;
 use tauri::WebviewWindowBuilder;
 
 use crate::error::Error;
+use crate::utils::decode_scrapper_url;
 use crate::utils::settings;
 
 pub static COMMON_SCRAPPER_JS: &str = include_str!("./static/common_scrapper.js");
@@ -107,10 +108,24 @@ pub fn register_scrapper(app: &tauri::AppHandle<tauri::Wry>, scrapper: Arc<dyn U
             match event {
                 tauri::webview::PageLoadEvent::Started => {
                     log::info!("Scrapper webview '{}' started loading: {:}", window.label(), payload.url());
-                    let formatted_js = COMMON_SCRAPPER_JS
-                        .replace("{{SCRAPPER_JS}}", &scrapper_js)
-                        .replace("{{SCRAPPER_ID}}", window.label());
-                    window.eval(&formatted_js).unwrap();
+                    let stored_url: String = settings::get_scrapper_property(window.label(), "url").unwrap_or_default();
+                    let str_url = payload.url().to_string();
+
+                    if stored_url.is_empty() {
+                        log::info!("No stored URL for scrapper '{}', skipping navigation check.", window.label());
+                    } else if str_url == stored_url || str_url.starts_with("tauri://") {
+                        log::info!("Navigation to stored URL or tauri scheme allowed for scrapper '{}': {}", window.label(), str_url);
+                        let formatted_js = COMMON_SCRAPPER_JS
+                            .replace("{{SCRAPPER_JS}}", &scrapper_js)
+                            .replace("{{SCRAPPER_ID}}", window.label());
+                        window.eval(&formatted_js).unwrap();
+                    } else {
+                        log::warn!("Blocked navigation attempt in scrapper '{}': {}", window.label(), str_url);
+                        window.eval("window.stop();").unwrap();
+
+                        let idle_url = decode_scrapper_url("about:blank").unwrap();
+                        window.navigate(idle_url).unwrap();
+                    }
                 }
                 tauri::webview::PageLoadEvent::Finished => {
                     log::info!("Scrapper webview '{}' finished loading: {:}", window.label(), payload.url());
