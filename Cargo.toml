@@ -1,6 +1,6 @@
 [package]
 name = "unichat"
-version = "1.4.0-alpha.3"
+version = "1.4.0-alpha.4"
 description = "A cross-platform desktop application for managing YouTube and Twitch chats."
 authors = ["Voguh <voguhofc@protonmail.com>"]
 homepage = "https://github.com/voguh/unichat"
