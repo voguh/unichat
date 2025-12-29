@@ -162,7 +162,6 @@ fn load_plugin(plugin_path: &Path, manifest: &PluginManifestYAML) -> Result<(), 
     }
 
     {
-        log::info!("Loading plugin: {} v{}", plugin.name, plugin.version);
         let mut loaded_plugins = LOADED_PLUGINS.write().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
         if loaded_plugins.contains_key(&plugin.name) {
             return Err(Error::Message(format!("Plugin with name '{}' is already loaded", plugin.name)));

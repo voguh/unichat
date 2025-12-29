@@ -56,3 +56,10 @@ pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Serialize
 
     return Ok(serialized_plugins);
 }
+
+#[tauri::command]
+pub async fn toggle_plugin_state<R: Runtime>(app: AppHandle<R>, plugin_name: String, new_state: bool) -> Result<(), Error> {
+    let plugin = plugins::get_plugin(&plugin_name)?;
+    plugin.toggle_plugin_state(new_state)?;
+    app.restart();
+}

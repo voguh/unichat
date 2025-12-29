@@ -40,6 +40,7 @@ tauri = { version = "2.9.5", features = ["native-tls"] }
 tauri-plugin-dialog = "2.4.2"
 tauri-plugin-log = "2.7.1"
 tauri-plugin-opener = "2.5.2"
+tauri-plugin-process = "2.3.1"
 tauri-plugin-store = "2.4.1"
 thiserror = "2.0.17"
 time = "0.3.44"

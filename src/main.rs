@@ -205,7 +205,8 @@ async fn main() {
             .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir { file_name: Some(CARGO_PKG_NAME.to_string()) }))
             .build()
         )
-        .plugin(tauri_plugin_opener::Builder::default().build())
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             commands::dispatch_clear_chat,
@@ -214,6 +215,7 @@ async fn main() {
             commands::gallery::get_gallery_items,
             commands::gallery::upload_gallery_items,
             commands::plugins::get_plugins,
+            commands::plugins::toggle_plugin_state,
             commands::store::store_get_item,
             commands::tour::get_prev_tour_steps,
             commands::tour::get_tour_steps,

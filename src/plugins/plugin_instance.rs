@@ -103,10 +103,10 @@ impl UniChatPlugin {
         return false;
     }
 
-    pub fn toggle_plugin_state(&self, disable: bool) -> Result<(), Error> {
+    pub fn toggle_plugin_state(&self, new_state: bool) -> Result<(), Error> {
         let disabled_flag = self.plugin_path.join(".disabled");
 
-        if disable {
+        if new_state == false {
             fs::write(disabled_flag, b"")?;
         } else {
             if disabled_flag.exists() {
