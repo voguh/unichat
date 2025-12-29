@@ -1,6 +1,0 @@
-CAP REQ :twitch.tv/tags twitch.tv/commands
-PASS SCHMOOPIIE
-NICK justinfan<RANDOM_NUMBER>
-USER justinfan<RANDOM_NUMBER> 8 *:justinfan<RANDOM_NUMBER>
-JOIN #<CHANNE_USERNAME>
-PART #<CHANNE_USERNAME>
