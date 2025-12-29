@@ -19,7 +19,6 @@ use tauri::WebviewWindowBuilder;
 
 use crate::error::Error;
 use crate::utils::decode_scrapper_url;
-use crate::utils::is_dev;
 use crate::utils::settings;
 
 pub static COMMON_SCRAPPER_JS: &str = include_str!("./static/common_scrapper.js");
@@ -92,12 +91,7 @@ fn on_page_load(scrapper_js: &str, window: &tauri::WebviewWindow, payload: tauri
             let current_url = payload.url();
 
             let is_remote = stored_url.is_some_and(|stored_url| stored_url.scheme() == current_url.scheme() && stored_url.host() == current_url.host() && stored_url.path() == current_url.path());
-            let is_local: bool;
-            if is_dev() {
-                is_local = current_url.scheme() == "http" && current_url.host_str() == Some("localhost") && current_url.port() == Some(1421) && current_url.path() == "/scrapper_idle.html";
-            } else {
-                is_local = current_url.scheme() == "tauri" && current_url.host_str() == Some("localhost") && current_url.path() == "/scrapper_idle.html";
-            }
+            let is_local = matches!(current_url.scheme(), "http" | "tauri") && current_url.host_str() == Some("localhost") && current_url.path() == "/scrapper_idle.html";
 
             if is_local || is_remote {
                 log::info!("Injecting scrapper JS into scrapper '{}'", scrapper_id);
