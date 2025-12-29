@@ -35,6 +35,7 @@ use crate::STATIC_APP_ICON;
 use crate::THIRD_PARTY_LICENSES;
 
 pub mod gallery;
+pub mod plugins;
 pub mod store;
 pub mod tour;
 pub mod scrappers;

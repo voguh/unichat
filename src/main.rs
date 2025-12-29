@@ -213,6 +213,7 @@ async fn main() {
             commands::is_dev,
             commands::gallery::get_gallery_items,
             commands::gallery::upload_gallery_items,
+            commands::plugins::get_plugins,
             commands::store::store_get_item,
             commands::tour::get_prev_tour_steps,
             commands::tour::get_tour_steps,

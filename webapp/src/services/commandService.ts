@@ -10,7 +10,7 @@
 import { ComboboxItemGroup } from "@mantine/core";
 import { invoke } from "@tauri-apps/api/core";
 
-import { AppMetadata, GalleryItem, UniChatScrapper, WidgetFields } from "unichat/types";
+import { AppMetadata, GalleryItem, UniChatPluginMetadata, UniChatScrapper, WidgetFields } from "unichat/types";
 
 export class CommandService {
     public async dispatchClearChat(): Promise<void> {
@@ -33,6 +33,12 @@ export class CommandService {
 
     public async uploadGalleryItems(files: string[]): Promise<void> {
         await invoke("upload_gallery_items", { files });
+    }
+
+    /* ========================================================================================== */
+
+    public async getPlugins(): Promise<UniChatPluginMetadata[]> {
+        return invoke("get_plugins");
     }
 
     /* ========================================================================================== */

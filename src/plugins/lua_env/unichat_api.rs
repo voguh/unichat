@@ -7,12 +7,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use std::collections::HashMap;
 use std::fs;
 use std::io::Write as _;
 use std::sync::Arc;
-use std::sync::LazyLock;
-use std::sync::RwLock;
 
 use mlua::LuaSerdeExt as _;
 
@@ -20,9 +17,10 @@ use crate::CARGO_PKG_VERSION;
 use crate::error::Error;
 use crate::events;
 use crate::plugins::get_app_handle;
-use crate::plugins::get_loaded_plugin;
+use crate::plugins::get_plugin;
 use crate::plugins::get_lua_runtime;
-use crate::plugins::unichat_event::LuaUniChatEvent;
+use crate::plugins::lua_env::SHARED_MODULES;
+use crate::plugins::lua_env::unichat_event::LuaUniChatEvent;
 use crate::scrapper;
 use crate::scrapper::UniChatScrapper;
 use crate::shared_emotes;
@@ -33,8 +31,6 @@ use crate::utils::render_emitter;
 use crate::utils::safe_guard_path;
 use crate::utils::settings;
 use crate::utils::settings::SettingLogEventLevel;
-
-pub(in crate::plugins) static SHARED_MODULES: LazyLock<RwLock<HashMap<String, Arc<mlua::Value>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
 /* ================================================================================================================== */
 
@@ -266,15 +262,16 @@ impl mlua::UserData for UniChatAPI {
 
         methods.add_method("register_scrapper", |_lua, this, (id, name, scrapper_js_path, opts): (String, String, String, mlua::Table)| {
             let app_handle = get_app_handle()?;
-            let manifest = get_loaded_plugin(&this.plugin_name)?;
+            let plugin = get_plugin(&this.plugin_name)?;
 
-            let plugin_data_path = manifest.plugin_path.join("data");
-            let scrapper_js_path = safe_guard_path(&plugin_data_path, &scrapper_js_path).map_err(mlua::Error::runtime)?;
+            let scrapper_js_path = safe_guard_path(&plugin.get_plugin_data_path(), &scrapper_js_path).map_err(mlua::Error::runtime)?;
             let scrapper_js_content = fs::read_to_string(scrapper_js_path).map_err(mlua::Error::external)?;
             let scrapper = LuaUniChatScrapper::new(id, name, scrapper_js_content, opts)?;
 
             let scrapper: Arc<dyn UniChatScrapper + Send + Sync> = Arc::new(scrapper);
+            let scrapper_id = scrapper.id().to_string();
             scrapper::register_scrapper(&app_handle, scrapper).map_err(mlua::Error::runtime)?;
+            plugin.add_message(format!("Registered scrapper '{}'.", scrapper_id));
 
             return Ok(());
         });
@@ -285,6 +282,7 @@ impl mlua::UserData for UniChatAPI {
         });
 
         methods.add_method("expose_module", |_lua, this, (module_name, module_table): (String, mlua::Value)| {
+            let plugin = get_plugin(&this.plugin_name)?;
             let plugin_name = this.plugin_name.clone();
             let key = format!("{}:{}", plugin_name, module_name);
 
@@ -293,7 +291,9 @@ impl mlua::UserData for UniChatAPI {
                 return Err(mlua::Error::runtime(format!("Module '{}' is already exposed by plugin '{}'", module_name, plugin_name)));
             }
 
+            let key_to_print = key.clone();
             shared_modules.insert(key, Arc::new(module_table));
+            plugin.add_message(format!("Exposed shared module '{}'.", key_to_print));
 
             return Ok(());
         });

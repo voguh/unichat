@@ -19,6 +19,7 @@ import semver from "semver";
 import { AboutModal } from "./components/AboutModal";
 import { DashboardHome } from "./components/DashboardHome";
 import { Gallery } from "./components/Gallery";
+import { Plugins } from "./components/Plugins";
 import { Tour } from "./components/Tour";
 import { WidgetEditor } from "./components/WidgetEditor";
 import { AppContext } from "./contexts/AppContext";
@@ -63,6 +64,14 @@ export default function App(): JSX.Element {
             title: "Gallery",
             size: "xl",
             children: <Gallery />
+        });
+    }
+
+    function togglePluginsModal(): void {
+        modals.open({
+            title: "Plugins",
+            size: "xl",
+            children: <Plugins />
         });
     }
 
@@ -184,6 +193,12 @@ export default function App(): JSX.Element {
                                 </Tooltip>
                             )}
                         </div>
+
+                        <Tooltip label="Plugins" position="right" withArrow>
+                            <Button variant="default" onClick={togglePluginsModal} data-tour="plugins-modal-toggle">
+                                <i className="fas fa-cubes" />
+                            </Button>
+                        </Tooltip>
 
                         <Menu position="right">
                             <Menu.Target>

@@ -7,6 +7,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+import { PluginStatus } from "unichat/utils/constants";
+
 export interface Dimensions {
     width: number;
     height: number;
@@ -44,6 +46,22 @@ export interface AppMetadata {
     widgetsDir: string;
 
     thirdPartyLicenses?: ThirdPartyLicenseInfo[];
+}
+
+/* ========================================================================== */
+
+export interface UniChatPluginMetadata {
+    name: string;
+    description?: string;
+    version: string;
+    author?: string;
+    license?: string;
+    homepage?: string;
+    dependencies: string[];
+
+    icon?: number[];
+    status: PluginStatus;
+    messages: string[];
 }
 
 /* ========================================================================== */

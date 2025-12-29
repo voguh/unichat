@@ -10,13 +10,14 @@
 use std::fs;
 use std::sync::Arc;
 
-use crate::plugins::get_loaded_plugin;
-use crate::plugins::unichat_api::SHARED_MODULES;
-use crate::plugins::unichat_json;
-use crate::plugins::unichat_logger;
-use crate::plugins::unichat_strings;
-use crate::plugins::unichat_time;
-use crate::plugins::unichat_yaml;
+use crate::plugins::get_plugin;
+
+use crate::plugins::lua_env::SHARED_MODULES;
+use crate::plugins::lua_env::unichat_json;
+use crate::plugins::lua_env::unichat_logger;
+use crate::plugins::lua_env::unichat_strings;
+use crate::plugins::lua_env::unichat_time;
+use crate::plugins::lua_env::unichat_yaml;
 use crate::utils::safe_guard_path;
 
 pub fn create_print_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Function, mlua::Error> {
@@ -44,7 +45,7 @@ pub fn create_print_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Funct
 pub fn create_require_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Function, mlua::Error> {
     let plugin_name: Arc<String> = Arc::new(plugin_name.to_string());
     let require_fn = lua.create_function(move |lua, module: String| -> mlua::Result<mlua::Value> {
-        let plugin = get_loaded_plugin(&plugin_name)?;
+        let plugin = get_plugin(&plugin_name)?;
         if let Ok(cached_module) = plugin.get_cached_loaded_module(&module) {
             return Ok(cached_module);
         }
@@ -62,7 +63,7 @@ pub fn create_require_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Fun
                 return unichat_yaml::create_module(lua);
             }
 
-            let manifest = get_loaded_plugin(plugin_name)?;
+            let manifest = get_plugin(plugin_name)?;
             let plugin_root = manifest.get_plugin_data_path();
             let mut module_path = module.replace('.', "/");
             if !module_path.ends_with(".lua") {
