@@ -23,6 +23,7 @@ use crate::scrapper::UniChatScrapper;
 use crate::shared_emotes;
 use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
 use crate::utils::is_dev;
+use crate::utils::is_valid_youtube_channel_id;
 use crate::utils::is_valid_youtube_video_id;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -59,6 +60,10 @@ fn dispatch_event(mut payload: Value) -> Result<(), Error> {
 fn handle_ready_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let channel_id = payload.get("channelId").and_then(|v| v.as_str())
         .ok_or(format!("Missing or invalid 'channelId' field in YouTube '{event_type}' payload"))?;
+
+    if !is_valid_youtube_channel_id(channel_id) {
+        return Err(Error::Message(format!("Invalid YouTube channel ID '{}' in '{event_type}' event payload", channel_id)));
+    }
 
     properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))?;
     shared_emotes::fetch_shared_emotes("youtube", channel_id)?;
