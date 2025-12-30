@@ -11,7 +11,7 @@ import styled from "styled-components";
 
 export const PluginOverviewStyledContainer = styled.div`
     position: relative;
-    height: calc(100vh - (60px + 16px));
+    height: calc(100vh - (60px + 18px));
     display: grid;
     grid-template-rows: 208px 1fr;
     gap: 16px;
