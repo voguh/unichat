@@ -11,6 +11,7 @@ use std::fs;
 use std::io::Write as _;
 use std::sync::Arc;
 
+use anyhow::anyhow;
 use anyhow::Error;
 use mlua::LuaSerdeExt as _;
 
@@ -158,9 +159,9 @@ impl UniChatScrapper for LuaUniChatScrapper {
 
     fn on_event(&self, event: serde_json::Value) -> Result<(), Error> {
         let scrapper_id = event.get("scrapperId").and_then(|v| v.as_str())
-            .ok_or(anyhow::anyhow!("Missing or invalid 'scrapperId' field in {} raw event payload", self.id))?;
+            .ok_or(anyhow!("Missing or invalid 'scrapperId' field in {} raw event payload", self.id))?;
         let event_type = event.get("type").and_then(|v| v.as_str())
-            .ok_or(anyhow::anyhow!("Missing or invalid 'type' field in {} raw event payload", self.id))?;
+            .ok_or(anyhow!("Missing or invalid 'type' field in {} raw event payload", self.id))?;
 
         if scrapper_id != self.id {
             return Ok(());

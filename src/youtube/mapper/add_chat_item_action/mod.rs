@@ -7,6 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use anyhow::anyhow;
 use anyhow::Error;
 
 use crate::events::unichat::UniChatEvent;
@@ -18,7 +19,7 @@ mod live_chat_sponsorships_gift_purchase_announcement_renderer;
 mod live_chat_text_message_renderer;
 
 pub fn parse(value: &serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
-    let item = value.get("item").ok_or(anyhow::anyhow!("No item found in value"))?;
+    let item = value.get("item").ok_or(anyhow!("No item found in value"))?;
 
     if let Some(value) = item.get("liveChatMembershipItemRenderer") {
         return live_chat_membership_item_renderer::parse(value.clone());

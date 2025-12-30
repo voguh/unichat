@@ -14,6 +14,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::RwLock;
 
+use anyhow::anyhow;
 use anyhow::Error;
 
 use crate::plugins::get_lua_runtime;
@@ -102,19 +103,19 @@ impl UniChatPlugin {
     /* ============================================================================================================== */
 
     pub(in crate::plugins) fn get_cached_loaded_module(&self, module_name: &str) -> Result<mlua::Value, Error> {
-        let cache = self.loaded_modules_cache.read().map_err(|_| anyhow::anyhow!("Failed to acquire read lock on loaded modules cache"))?;
+        let cache = self.loaded_modules_cache.read().map_err(|_| anyhow!("Failed to acquire read lock on loaded modules cache"))?;
         if let Some(cached_module) = cache.get(module_name) {
             return Ok(cached_module.as_ref().clone());
         }
 
-        return Err(anyhow::anyhow!("Module '{}' is not cached", module_name));
+        return Err(anyhow!("Module '{}' is not cached", module_name));
     }
 
     pub(in crate::plugins) fn set_cached_loaded_module(&self, module_name: &str, module: Arc<mlua::Value>) -> Result<Arc<mlua::Value>, Error> {
-        let mut cache = self.loaded_modules_cache.write().map_err(|_| anyhow::anyhow!("Failed to acquire read lock on loaded modules cache"))?;
+        let mut cache = self.loaded_modules_cache.write().map_err(|_| anyhow!("Failed to acquire read lock on loaded modules cache"))?;
         cache.insert(module_name.to_string(), module);
 
-        let cached_module = cache.get(module_name).ok_or(anyhow::anyhow!("Failed to retrieve cached module '{}'", module_name))?;
+        let cached_module = cache.get(module_name).ok_or(anyhow!("Failed to retrieve cached module '{}'", module_name))?;
         return Ok(cached_module.clone());
     }
 

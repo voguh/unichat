@@ -10,6 +10,7 @@
 use std::sync::Arc;
 use std::sync::OnceLock;
 
+use anyhow::anyhow;
 use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
@@ -46,7 +47,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     let store_path = properties::get_app_path(AppPaths::AppConfig).join("settings.json");
 
     let store = app.store(store_path)?;
-    INSTANCE.set(store).map_err(|_| anyhow::anyhow!("{} was already initialized", ONCE_LOCK_NAME))?;
+    INSTANCE.set(store).map_err(|_| anyhow!("{} was already initialized", ONCE_LOCK_NAME))?;
 
     migrate_store_version()?;
 
@@ -54,7 +55,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
 }
 
 fn migrate_store_version() -> Result<(), Error> {
-    let store = INSTANCE.get().ok_or(anyhow::anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+    let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
     let mut current_version = get_store_version().unwrap_or_default();
     let target_version: u8 = 1;
@@ -153,7 +154,7 @@ fn migrate_store_version() -> Result<(), Error> {
                 current_version = 1;
             }
             _ => {
-                return Err(anyhow::anyhow!("No migration path for version {}", current_version));
+                return Err(anyhow!("No migration path for version {}", current_version));
             }
         }
 
@@ -165,43 +166,43 @@ fn migrate_store_version() -> Result<(), Error> {
 /* ====================================================================== */
 
 pub fn get_store_version() -> Result<u8, Error> {
-    let store = INSTANCE.get().ok_or(anyhow::anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+    let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
     let raw_value = store.get(STORE_VERSION_KEY);
     if let Some(value) = raw_value {
         let version: u8 = serde_json::from_value(value)?;
         return Ok(version);
     } else {
-        return Err(anyhow::anyhow!("Store version not found"));
+        return Err(anyhow!("Store version not found"));
     }
 }
 
 pub fn get_item<R: serde::de::DeserializeOwned>(key: &str) -> Result<R, Error> {
     if key.starts_with("scrapper") {
-        return Err(anyhow::anyhow!("Use get_scrapper_property to get scrapper properties"));
+        return Err(anyhow!("Use get_scrapper_property to get scrapper properties"));
     } else if key.starts_with("store") {
-        return Err(anyhow::anyhow!("Keys starting with 'store' are reserved for internal use"));
+        return Err(anyhow!("Keys starting with 'store' are reserved for internal use"));
     }
 
-    let store = INSTANCE.get().ok_or(anyhow::anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+    let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
     let raw_value = store.get(key);
     if let Some(value) = raw_value {
         let value = serde_json::from_value(value)?;
         return Ok(value);
     } else {
-        return Err(anyhow::anyhow!("Store item for key '{}' not found", key));
+        return Err(anyhow!("Store item for key '{}' not found", key));
     }
 }
 
 pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &V) -> Result<(), Error> {
     if key.starts_with("scrapper") {
-        return Err(anyhow::anyhow!("Use set_scrapper_property to set scrapper properties"));
+        return Err(anyhow!("Use set_scrapper_property to set scrapper properties"));
     } else if key.starts_with("store") {
-        return Err(anyhow::anyhow!("Keys starting with 'store' are reserved for internal use"));
+        return Err(anyhow!("Keys starting with 'store' are reserved for internal use"));
     }
 
-    let store = INSTANCE.get().ok_or(anyhow::anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+    let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
     let raw_value = serde_json::to_value(value)?;
     store.set(key, raw_value);
@@ -212,7 +213,7 @@ pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &V) -> Result<(), Er
 /* ====================================================================== */
 
 pub fn get_scrapper_property<R: serde::de::DeserializeOwned>(scrapper_id: &str, property: &str) -> Result<R, Error> {
-    let store = INSTANCE.get().ok_or(anyhow::anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+    let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
     let key = store_mount_scrapper_key(scrapper_id, property);
     let raw_value = store.get(key);
@@ -221,12 +222,12 @@ pub fn get_scrapper_property<R: serde::de::DeserializeOwned>(scrapper_id: &str, 
         let value = serde_json::from_value(value)?;
         return Ok(value);
     } else {
-        return Err(anyhow::anyhow!("Scrapper property '{}' of '{}' scrapper not found", property, scrapper_id));
+        return Err(anyhow!("Scrapper property '{}' of '{}' scrapper not found", property, scrapper_id));
     }
 }
 
 pub fn set_scrapper_property<V: serde::ser::Serialize>(scrapper_id: &str, property: &str, value: &V) -> Result<(), Error> {
-    let store = INSTANCE.get().ok_or(anyhow::anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+    let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
     let key = store_mount_scrapper_key(scrapper_id, property);
     let raw_value = serde_json::to_value(value)?;

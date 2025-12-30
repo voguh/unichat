@@ -21,6 +21,7 @@ use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::Responder;
 use actix_web::web;
+use anyhow::anyhow;
 use anyhow::Error;
 
 use crate::events;
@@ -80,7 +81,7 @@ fn load_fieldstate(widget_path: &PathBuf) -> Result<HashMap<String, serde_json::
         if let Some(state_value) = fieldstate_map.get(key) {
             final_fieldstate.insert(key.clone(), state_value.clone());
         } else {
-            let obj = value.as_object().ok_or(anyhow::anyhow!("Invalid field definition"))?;
+            let obj = value.as_object().ok_or(anyhow!("Invalid field definition"))?;
             if let Some(default_value) = obj.get("value") {
                 final_fieldstate.insert(key.clone(), default_value.clone());
             }

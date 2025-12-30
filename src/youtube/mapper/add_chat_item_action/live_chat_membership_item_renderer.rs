@@ -10,6 +10,7 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
+use anyhow::anyhow;
 use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
@@ -69,12 +70,12 @@ fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> Result<Option<String>,
     if let Some(simple_text) = &parsed.header_subtext.simple_text {
         tier = Some(simple_text.clone());
     } else if let Some(runs) = &parsed.header_subtext.runs {
-        let run = runs.get(1).ok_or(anyhow::anyhow!("No second run found in header primary text"))?;
+        let run = runs.get(1).ok_or(anyhow!("No second run found in header primary text"))?;
         match run {
             MessageRun::Text { text } => {
                 tier = Some(text.clone());
             }
-            MessageRun::Emoji { .. } => return Err(anyhow::anyhow!("Unexpected emoji in header subtext"))
+            MessageRun::Emoji { .. } => return Err(anyhow!("Unexpected emoji in header subtext"))
         }
     }
 
@@ -97,16 +98,16 @@ fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> Result<u16, Error> {
     if let Some(header_primary_text) = &parsed.header_primary_text {
         let run = header_primary_text.runs.get(1)
             .or_else(|| header_primary_text.runs.get(0))
-            .ok_or(anyhow::anyhow!("No valid run found in header primary text"))?;
+            .ok_or(anyhow!("No valid run found in header primary text"))?;
 
         match run {
             MessageRun::Text { text } => {
                 let value_raw = MONTHS_REGEX.find(text.trim())
-                    .ok_or(anyhow::anyhow!("Failed to find months in header primary text"))?;
+                    .ok_or(anyhow!("Failed to find months in header primary text"))?;
 
                 months = value_raw.as_str().parse()?;
             },
-            MessageRun::Emoji { .. } => return Err(anyhow::anyhow!("Unexpected emoji in header subtext"))
+            MessageRun::Emoji { .. } => return Err(anyhow!("Unexpected emoji in header subtext"))
         }
     } else if let Some(_runs) = &parsed.header_subtext.runs {
         months = 1

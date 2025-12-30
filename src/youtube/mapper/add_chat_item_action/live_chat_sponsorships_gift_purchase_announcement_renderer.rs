@@ -9,6 +9,7 @@
 
 use std::collections::HashMap;
 
+use anyhow::anyhow;
 use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
@@ -72,10 +73,10 @@ struct Run {
 }
 
 fn parse_count(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<u16, Error> {
-    let run = render.primary_text.runs.get(1).ok_or(anyhow::anyhow!("No count run found"))?;
+    let run = render.primary_text.runs.get(1).ok_or(anyhow!("No count run found"))?;
     let raw_count = match run {
         MessageRun::Text { text } => text,
-        MessageRun::Emoji { .. } => return Err(anyhow::anyhow!("Unexpected emoji in count run")),
+        MessageRun::Emoji { .. } => return Err(anyhow!("Unexpected emoji in count run")),
     };
 
     let count: u16 = raw_count.parse()?;

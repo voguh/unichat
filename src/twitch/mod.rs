@@ -17,6 +17,7 @@ use std::sync::RwLock;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
+use anyhow::anyhow;
 use anyhow::Error;
 use serde_json::Value;
 
@@ -49,7 +50,7 @@ pub static TWITCH_BADGES: LazyLock<RwLock<HashMap<String, UniChatBadge>>> = Lazy
 
 fn dispatch_event(mut payload: Value) -> Result<(), Error> {
     if payload.get("type").is_none() {
-        return Err(anyhow::anyhow!("Missing 'type' field in Twitch raw event payload"));
+        return Err(anyhow!("Missing 'type' field in Twitch raw event payload"));
     }
 
     if payload.get("scrapperId").is_none() {
@@ -76,9 +77,9 @@ fn handle_idle_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
 
 fn handle_badges_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let badges_type = payload.get("badgesType").and_then(|v| v.as_str())
-        .ok_or(anyhow::anyhow!("Missing or invalid 'badgesType' field in Twitch '{}' payload", event_type))?;
+        .ok_or(anyhow!("Missing or invalid 'badgesType' field in Twitch '{}' payload", event_type))?;
     let badges = payload.get("badges").and_then(|v| v.as_array()).cloned()
-        .ok_or(anyhow::anyhow!("Missing or invalid 'badges' field in Twitch '{}' payload", event_type))?;
+        .ok_or(anyhow!("Missing or invalid 'badges' field in Twitch '{}' payload", event_type))?;
 
     let twitch_badges: Vec<TwitchRawBadge> = serde_json::from_value(serde_json::Value::Array(badges))?;
 
@@ -100,7 +101,7 @@ fn handle_badges_event(event_type: &str, payload: &Value) -> Result<(), Error> {
 
 fn handle_cheermotes_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let cheermotes = payload.get("cheermotes").and_then(|v| v.as_array()).cloned()
-        .ok_or(anyhow::anyhow!("Missing or invalid 'cheermotes' field in Twitch '{}' payload", event_type))?;
+        .ok_or(anyhow!("Missing or invalid 'cheermotes' field in Twitch '{}' payload", event_type))?;
 
     if let Ok(mut cheermotes_set) = TWITCH_CHEERMOTES.write() {
         for cheer in cheermotes {
@@ -262,7 +263,7 @@ impl UniChatScrapper for TwitchUniChatScrapper {
                     channel_name = Some(channel_name_or_popout);
                 }
             } else {
-                return Err(anyhow::anyhow!("Could not extract channel name from Twitch URL"));
+                return Err(anyhow!("Could not extract channel name from Twitch URL"));
             }
         }
 
@@ -271,7 +272,7 @@ impl UniChatScrapper for TwitchUniChatScrapper {
             return Ok(formatted_url);
         }
 
-        return Err(anyhow::anyhow!("Could not extract channel name from Twitch URL"));
+        return Err(anyhow!("Could not extract channel name from Twitch URL"));
     }
 
     fn scrapper_js(&self) -> &str {
@@ -280,9 +281,9 @@ impl UniChatScrapper for TwitchUniChatScrapper {
 
     fn on_event(&self, event: serde_json::Value) -> Result<(), Error> {
         let scrapper_id = event.get("scrapperId").and_then(|v| v.as_str())
-            .ok_or(anyhow::anyhow!("Missing or invalid 'scrapperId' field in Twitch raw event payload"))?;
+            .ok_or(anyhow!("Missing or invalid 'scrapperId' field in Twitch raw event payload"))?;
         let event_type = event.get("type").and_then(|v| v.as_str())
-            .ok_or(anyhow::anyhow!("Missing or invalid 'type' field in Twitch raw event payload"))?;
+            .ok_or(anyhow!("Missing or invalid 'type' field in Twitch raw event payload"))?;
 
         if scrapper_id != TWITCH_CHAT_WINDOW {
             return Ok(());

@@ -10,6 +10,7 @@
 use std::fs;
 use std::path::Path;
 
+use anyhow::anyhow;
 use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
@@ -35,7 +36,7 @@ pub struct PluginManifestYAML {
 pub fn load_manifest(plugin_path: &Path) -> Result<PluginManifestYAML, Error> {
     let manifest_path = plugin_path.join("manifest.yaml");
     if !manifest_path.exists() || !manifest_path.is_file() {
-        return Err(anyhow::anyhow!("Folder '{:?}' is not a valid plugin: missing or invalid 'manifest.yaml'", plugin_path));
+        return Err(anyhow!("Folder '{:?}' is not a valid plugin: missing or invalid 'manifest.yaml'", plugin_path));
     }
 
     let manifest_content = fs::read_to_string(&manifest_path)?;
@@ -60,7 +61,7 @@ pub fn load_manifest(plugin_path: &Path) -> Result<PluginManifestYAML, Error> {
     }
 
     if let Err(err) = semver::Version::parse(&manifest.version) {
-        return Err(anyhow::anyhow!("Invalid version '{}' for plugin '{}': {:?}", manifest.version, manifest.name, err));
+        return Err(anyhow!("Invalid version '{}' for plugin '{}': {:?}", manifest.version, manifest.name, err));
     }
 
     return Ok(manifest);

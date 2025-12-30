@@ -7,6 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use anyhow::anyhow;
 use anyhow::Error;
 
 use crate::events::unichat::UNICHAT_FLAG_TWITCH_STREAK_DAYS;
@@ -31,34 +32,34 @@ pub fn parse(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let mut text: Option<String> = None;
     if let IRCCommand::Raw(cmd, args) = &message.command {
         if cmd != "USERNOTICE" {
-            return Err(anyhow::anyhow!("Invalid command for USERNOTICE message"));
+            return Err(anyhow!("Invalid command for USERNOTICE message"));
         }
 
         if args.len() < 2 {
-            return Err(anyhow::anyhow!("Insufficient arguments for USERNOTICE message"));
+            return Err(anyhow!("Insufficient arguments for USERNOTICE message"));
         }
 
         channel = Some(args[0].strip_prefix("#").unwrap_or(&args[0]).to_string());
         text = Some(args[1].clone());
     }
 
-    let text = text.ok_or(anyhow::anyhow!("Missing message text"))?;
+    let text = text.ok_or(anyhow!("Missing message text"))?;
 
-    let room_id = tags.get("room-id").and_then(|v| v.to_owned()).ok_or(anyhow::anyhow!("Missing room-id tag"))?;
-    let channel = channel.ok_or(anyhow::anyhow!("Missing channel name"))?;
+    let room_id = tags.get("room-id").and_then(|v| v.to_owned()).ok_or(anyhow!("Missing room-id tag"))?;
+    let channel = channel.ok_or(anyhow!("Missing channel name"))?;
     let mut flags = inject_raw_tags(&tags);
-    let author_id = tags.get("user-id").and_then(|v| v.to_owned()).ok_or(anyhow::anyhow!("Missing user-id tag"))?;
+    let author_id = tags.get("user-id").and_then(|v| v.to_owned()).ok_or(anyhow!("Missing user-id tag"))?;
     let author_username = parse_author_username(&message.prefix)?;
     let author_name = parse_author_name(tags.get("display-name"))?;
     let author_color = parse_author_color(tags.get("color"), &author_username)?;
     let author_badges = parse_author_badges(tags.get("badges"))?;
     let author_type = parse_author_type(&tags)?;
-    let message_id = tags.get("id").and_then(|v| v.to_owned()).ok_or(anyhow::anyhow!("Missing id tag"))?;
+    let message_id = tags.get("id").and_then(|v| v.to_owned()).ok_or(anyhow!("Missing id tag"))?;
     let message = parse_message_string(&text)?;
     let emotes = parse_message_emotes(tags.get("emotes"), &text)?;
     let timestamp_usec = get_current_timestamp()?;
 
-    let streak_days = tags.get("msg-param-value").and_then(|v| v.to_owned()).ok_or(anyhow::anyhow!("Missing msg-param-value tag"))?;
+    let streak_days = tags.get("msg-param-value").and_then(|v| v.to_owned()).ok_or(anyhow!("Missing msg-param-value tag"))?;
     flags.insert(String::from(UNICHAT_FLAG_TWITCH_STREAK_DAYS), Some(streak_days));
 
     let event = UniChatEvent::Message(UniChatMessageEventPayload {

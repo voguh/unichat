@@ -7,6 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use anyhow::anyhow;
 use anyhow::Error;
 
 use crate::events::unichat::UniChatEvent;
@@ -22,7 +23,7 @@ mod watch_streak;
 pub fn parse(channel_name: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let tags = message.tags.clone();
 
-    let msg_id = tags.get("msg-id").and_then(|v| v.to_owned()).ok_or(anyhow::anyhow!("Missing msg-id tag"))?;
+    let msg_id = tags.get("msg-id").and_then(|v| v.to_owned()).ok_or(anyhow!("Missing msg-id tag"))?;
     let msg_category = tags.get("msg-param-category").and_then(|v| v.to_owned()).unwrap_or_default();
 
     if msg_id == "announcement" {

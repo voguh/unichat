@@ -9,6 +9,7 @@
 
 use std::collections::HashMap;
 
+use anyhow::anyhow;
 use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
@@ -52,14 +53,14 @@ pub fn parse_author_username(prefix: &Option<IRCPrefix>) -> Result<Option<String
 pub fn parse_author_username_str(login: Option<&Option<String>>) -> Result<Option<String>, Error> {
     let login = login.and_then(|v| v.as_ref());
 
-    let login = login.ok_or(anyhow::anyhow!("Missing login tag"))?;
+    let login = login.ok_or(anyhow!("Missing login tag"))?;
     return Ok(Some(login.to_owned()));
 }
 
 pub fn parse_author_name(display_name: Option<&Option<String>>) -> Result<String, Error> {
     let display_name = display_name.and_then(|v| v.as_ref());
 
-    let author_name = display_name.ok_or(anyhow::anyhow!("Missing display-name tag"))?;
+    let author_name = display_name.ok_or(anyhow!("Missing display-name tag"))?;
     return Ok(author_name.to_owned());
 }
 
@@ -75,7 +76,7 @@ pub fn parse_author_color(color: Option<&Option<String>>, author_name: &Option<S
     if let Some(color) = color {
         return Ok(color.to_owned());
     } else {
-        let username = author_name.as_ref().ok_or(anyhow::anyhow!("Missing author name"))?;
+        let username = author_name.as_ref().ok_or(anyhow!("Missing author name"))?;
         return random_color_by_seed(&username);
     }
 }

@@ -12,6 +12,7 @@ use std::path::PathBuf;
 use std::sync::OnceLock;
 use std::sync::RwLock;
 
+use anyhow::anyhow;
 use anyhow::Error;
 use tauri::Manager;
 use tauri::path::BaseDirectory;
@@ -97,13 +98,13 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     properties.insert(serialize_key(AppPaths::UniChatLogoIcon), logo_icon_path);
     properties.insert(serialize_key(AppPaths::UniChatLicense), license_path);
 
-    INSTANCE.set(RwLock::new(properties)).map_err(|_| anyhow::anyhow!("{} was already initialized", ONCE_LOCK_NAME))?;
+    INSTANCE.set(RwLock::new(properties)).map_err(|_| anyhow!("{} was already initialized", ONCE_LOCK_NAME))?;
 
     return Ok(());
 }
 
 fn get_item_raw<S: serde::ser::Serialize> (key: S) -> Result<String, Error> {
-    let props = INSTANCE.get().ok_or(anyhow::anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+    let props = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
     if let Ok(props) = props.read() {
         let key = serialize_key(key);
@@ -111,10 +112,10 @@ fn get_item_raw<S: serde::ser::Serialize> (key: S) -> Result<String, Error> {
         if let Some(value) = props.get(&key) {
             return Ok(value.clone());
         } else {
-            return Err(anyhow::anyhow!("Property key '{}' not found", key));
+            return Err(anyhow!("Property key '{}' not found", key));
         }
     } else {
-        return Err(anyhow::anyhow!("Failed to acquire read lock on properties"));
+        return Err(anyhow!("Failed to acquire read lock on properties"));
     }
 }
 
@@ -123,7 +124,7 @@ pub fn get_item(key: PropertiesKey) -> Result<String, Error> {
 }
 
 pub fn set_item(key: PropertiesKey, value: String) -> Result<(), Error> {
-    let props = INSTANCE.get().ok_or(anyhow::anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+    let props = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
     if let Ok(mut props) = props.write() {
         let key = serde_plain::to_string(&key)?;
@@ -131,7 +132,7 @@ pub fn set_item(key: PropertiesKey, value: String) -> Result<(), Error> {
 
         return Ok(());
     } else {
-        return Err(anyhow::anyhow!("Failed to acquire write lock on properties"));
+        return Err(anyhow!("Failed to acquire write lock on properties"));
     }
 }
 

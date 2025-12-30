@@ -9,6 +9,7 @@
 
 use std::collections::HashMap;
 
+use anyhow::anyhow;
 use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
@@ -68,7 +69,7 @@ fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(S
         return Ok((currency.to_string(), value));
     }
 
-    return Err(anyhow::anyhow!("Invalid purchase amount text format"));
+    return Err(anyhow!("Invalid purchase amount text format"));
 }
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
@@ -83,7 +84,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let author_photo = parse_author_photo(&parsed.author_photo)?;
     let author_type = parse_author_type(&parsed.author_badges)?;
     let (purchase_currency, purchase_value) = parse_purchase_amount(&parsed.purchase_amount_text)?;
-    let sticker = parsed.sticker.thumbnails.last().ok_or(anyhow::anyhow!("No thumbnails found in author photo"))?;
+    let sticker = parsed.sticker.thumbnails.last().ok_or(anyhow!("No thumbnails found in author photo"))?;
     let emotes = vec![
         UniChatEmote {
             id: String::from("sticker"),

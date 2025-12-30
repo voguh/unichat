@@ -9,6 +9,7 @@
 
 use std::collections::HashMap;
 
+use anyhow::anyhow;
 use anyhow::Error;
 
 use crate::events::unichat::UniChatEvent;
@@ -23,15 +24,15 @@ use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::utils::get_current_timestamp;
 
 pub fn parse(channel: String, tags: &HashMap<String, Option<String>>) -> Result<Option<UniChatEvent>, Error> {
-    let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing room-id tag"))?;
-    let author_id = tags.get("user-id").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing user-id tag"))?;
+    let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing room-id tag"))?;
+    let author_id = tags.get("user-id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing user-id tag"))?;
     let author_username = parse_author_username_str(tags.get("login"))?;
     let author_name = parse_author_name(tags.get("display-name"))?;
     let author_color = parse_author_color(tags.get("color"), &author_username)?;
     let author_badges = parse_author_badges(tags.get("badges"))?;
     let author_type = parse_author_type(&tags)?;
-    let message_id = tags.get("id").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing id tag"))?;
-    let tier = tags.get("msg-param-sub-plan").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing msg-param-sub-plan tag"))?;
+    let message_id = tags.get("id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing id tag"))?;
+    let tier = tags.get("msg-param-sub-plan").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing msg-param-sub-plan tag"))?;
     let timestamp_usec = get_current_timestamp()?;
 
     let event = UniChatEvent::SponsorGift(UniChatSponsorGiftEventPayload {

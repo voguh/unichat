@@ -9,6 +9,7 @@
 
 use std::collections::HashMap;
 
+use anyhow::anyhow;
 use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
@@ -81,7 +82,7 @@ fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(S
         return Ok((currency.to_string(), value));
     }
 
-    return Err(anyhow::anyhow!("Invalid purchase amount text format"));
+    return Err(anyhow!("Invalid purchase amount text format"));
 }
 
 fn build_option_message(message: &Option<MessageRunsWrapper>) -> Result<Option<String>, Error> {

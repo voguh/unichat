@@ -15,6 +15,7 @@ use std::sync::LazyLock;
 use std::sync::OnceLock;
 use std::sync::RwLock;
 
+use anyhow::anyhow;
 use anyhow::Error;
 
 use crate::plugins::get_lua_runtime;
@@ -109,7 +110,7 @@ pub fn prepare_lua_env() -> Result<(), Error> {
     lua.set_globals(_globals)?;
     log::debug!("LUA runtime configured successfully");
 
-    return LUA_RUNTIME.set(Arc::new(lua)).map_err(|_| anyhow::anyhow!("{} was already initialized", LUA_RUNTIME_ONCE_LOCK_KEY));
+    return LUA_RUNTIME.set(Arc::new(lua)).map_err(|_| anyhow!("{} was already initialized", LUA_RUNTIME_ONCE_LOCK_KEY));
 }
 
 /* ================================================================================================================== */

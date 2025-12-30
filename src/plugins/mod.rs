@@ -16,6 +16,7 @@ use std::sync::LazyLock;
 use std::sync::OnceLock;
 use std::sync::RwLock;
 
+use anyhow::anyhow;
 use anyhow::Error;
 
 use crate::plugins::lua_env::load_plugin_env;
@@ -56,7 +57,7 @@ pub enum PluginStatus {
 /* ============================================================================================== */
 
 pub fn get_plugins() -> Result<Vec<Arc<UniChatPlugin>>, Error> {
-    let envs = LOADED_PLUGINS.read().map_err(|_| anyhow::anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
+    let envs = LOADED_PLUGINS.read().map_err(|_| anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
 
     let mut plugins: Vec<Arc<UniChatPlugin>> = Vec::new();
     for (_name, manifest) in envs.iter() {
@@ -67,18 +68,18 @@ pub fn get_plugins() -> Result<Vec<Arc<UniChatPlugin>>, Error> {
 }
 
 pub fn get_plugin(plugin_name: &str) -> Result<Arc<UniChatPlugin>, Error> {
-    let envs = LOADED_PLUGINS.read().map_err(|_| anyhow::anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
-    let manifest = envs.get(plugin_name).ok_or(anyhow::anyhow!("Plugin '{}' is not loaded", plugin_name))?;
+    let envs = LOADED_PLUGINS.read().map_err(|_| anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
+    let manifest = envs.get(plugin_name).ok_or(anyhow!("Plugin '{}' is not loaded", plugin_name))?;
     return Ok(manifest.clone());
 }
 
 pub(in crate::plugins) fn get_lua_runtime() -> Result<Arc<mlua::Lua>, Error> {
-    let lua = LUA_RUNTIME.get().ok_or(anyhow::anyhow!("{} was not initialized", LUA_RUNTIME_ONCE_LOCK_KEY))?;
+    let lua = LUA_RUNTIME.get().ok_or(anyhow!("{} was not initialized", LUA_RUNTIME_ONCE_LOCK_KEY))?;
     return Ok(lua.clone());
 }
 
 pub(in crate::plugins) fn get_app_handle() -> Result<tauri::AppHandle<tauri::Wry>, Error> {
-    let app_handle = APP_HANDLE.get().ok_or(anyhow::anyhow!("{} was not initialized", APP_HANDLE_ONCE_LOCK_KEY))?;
+    let app_handle = APP_HANDLE.get().ok_or(anyhow!("{} was not initialized", APP_HANDLE_ONCE_LOCK_KEY))?;
     return Ok(app_handle.clone());
 }
 
@@ -91,7 +92,7 @@ fn parse_dependency_version(version: &str) -> Result<semver::VersionReq, Error> 
     let last = v.chars().last();
 
     if matches!(first, Some(INCLUSIVE_START | EXCLUSIVE_START)) && matches!(last, Some(INCLUSIVE_END | EXCLUSIVE_END)) {
-        let (min, max) = v[1..v.len() -1].split_once(',').ok_or(anyhow::anyhow!("Invalid dependency version range: '{}'", version))?;
+        let (min, max) = v[1..v.len() -1].split_once(',').ok_or(anyhow!("Invalid dependency version range: '{}'", version))?;
         let min = min.trim();
         let max = max.trim();
 
@@ -121,7 +122,7 @@ fn parse_dependencies(raw_dependencies: &Vec<String>) -> Result<Vec<(String, sem
     for dep in raw_dependencies {
         let parts: Vec<&str> = dep.splitn(2, '@').collect();
         if parts.len() != 2 {
-            return Err(anyhow::anyhow!("Invalid dependency format: '{}'. Expected format is 'name@version_req'", dep));
+            return Err(anyhow!("Invalid dependency format: '{}'. Expected format is 'name@version_req'", dep));
         }
 
         let name = parts[0].trim().to_string();
@@ -144,7 +145,7 @@ fn load_plugin(plugin_path: &Path, manifest: &PluginManifestYAML) -> Result<(), 
             let unichat_version = semver::Version::parse(UNICHAT_VERSION)?;
             if !version_req.matches(&unichat_version) {
                 plugin.add_message(format!("Required unichat version '{}' does not satisfy the current version '{}'", version_req, unichat_version));
-                return Err(anyhow::anyhow!("Plugin '{}' requires unichat version '{}' which does not satisfy the current version '{}'", manifest.name, version_req, unichat_version));
+                return Err(anyhow!("Plugin '{}' requires unichat version '{}' which does not satisfy the current version '{}'", manifest.name, version_req, unichat_version));
             }
         }
     }
@@ -153,18 +154,18 @@ fn load_plugin(plugin_path: &Path, manifest: &PluginManifestYAML) -> Result<(), 
         let msg = format!("Plugin folder '{:?}' is missing required 'data' directory", plugin_path);
         plugin.add_message(&msg);
         plugin.set_status(PluginStatus::Error);
-        return Err(anyhow::anyhow!("{}", msg));
+        return Err(anyhow!("{}", msg));
     } else if !plugin.get_entrypoint_path().is_file() {
         let msg = format!("Plugin folder '{:?}' is missing required 'data/main.lua' entrypoint file", plugin_path);
         plugin.add_message(&msg);
         plugin.set_status(PluginStatus::Error);
-        return Err(anyhow::anyhow!("{}", msg));
+        return Err(anyhow!("{}", msg));
     }
 
     {
-        let mut loaded_plugins = LOADED_PLUGINS.write().map_err(|_| anyhow::anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
+        let mut loaded_plugins = LOADED_PLUGINS.write().map_err(|_| anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
         if loaded_plugins.contains_key(&plugin.name) {
-            return Err(anyhow::anyhow!("Plugin with name '{}' is already loaded", plugin.name));
+            return Err(anyhow!("Plugin with name '{}' is already loaded", plugin.name));
         }
 
         loaded_plugins.insert(plugin.name.clone(), plugin.clone());
@@ -174,7 +175,7 @@ fn load_plugin(plugin_path: &Path, manifest: &PluginManifestYAML) -> Result<(), 
     if let Err(e) = load_plugin_env(&plugin) {
         plugin.add_message(format!("An error occurred on start plugin: {:?}", e));
         plugin.set_status(PluginStatus::Error);
-        return Err(anyhow::anyhow!("Failed to create LUA environment for plugin '{}': {:?}", plugin.name, e));
+        return Err(anyhow!("Failed to create LUA environment for plugin '{}': {:?}", plugin.name, e));
     }
 
     plugin.set_status(PluginStatus::Active);
@@ -184,7 +185,7 @@ fn load_plugin(plugin_path: &Path, manifest: &PluginManifestYAML) -> Result<(), 
 }
 
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
-    APP_HANDLE.set(app.handle().clone()).map_err(|_| anyhow::anyhow!("{} was already initialized", APP_HANDLE_ONCE_LOCK_KEY))?;
+    APP_HANDLE.set(app.handle().clone()).map_err(|_| anyhow!("{} was already initialized", APP_HANDLE_ONCE_LOCK_KEY))?;
     prepare_lua_env()?;
     return Ok(());
 }

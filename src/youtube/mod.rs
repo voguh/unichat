@@ -14,6 +14,7 @@ use std::sync::LazyLock;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
+use anyhow::anyhow;
 use anyhow::Error;
 use serde_json::Value;
 
@@ -40,7 +41,7 @@ static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
 
 fn dispatch_event(mut payload: Value) -> Result<(), Error> {
     if payload.get("type").is_none() {
-        return Err(anyhow::anyhow!("Missing 'type' field in YouTube raw event payload"));
+        return Err(anyhow!("Missing 'type' field in YouTube raw event payload"));
     }
 
     if payload.get("scrapperId").is_none() {
@@ -59,10 +60,10 @@ fn dispatch_event(mut payload: Value) -> Result<(), Error> {
 
 fn handle_ready_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let channel_id = payload.get("channelId").and_then(|v| v.as_str())
-        .ok_or_else(|| anyhow::anyhow!("Missing or invalid 'channelId' field in YouTube '{event_type}' payload"))?;
+        .ok_or_else(|| anyhow!("Missing or invalid 'channelId' field in YouTube '{event_type}' payload"))?;
 
     if !is_valid_youtube_channel_id(channel_id) {
-        return Err(anyhow::anyhow!("Invalid YouTube channel ID '{}' in '{event_type}' event payload", channel_id));
+        return Err(anyhow!("Invalid YouTube channel ID '{}' in '{event_type}' event payload", channel_id));
     }
 
     properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))?;
@@ -92,7 +93,7 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
 
 fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let actions = payload.get("actions").and_then(|v| v.as_array())
-        .ok_or_else(|| anyhow::anyhow!("Missing or invalid 'actions' field in '{event_type}' event payload"))?;
+        .ok_or_else(|| anyhow!("Missing or invalid 'actions' field in '{event_type}' event payload"))?;
 
     let log_events = settings::get_scrapper_property(YOUTUBE_CHAT_WINDOW, "log_level").unwrap_or(SettingLogEventLevel::OnlyErrors);
 
@@ -186,7 +187,7 @@ impl UniChatScrapper for YouTubeUniChatScrapper {
             parts.next();
             video_id = parts.next();
         } else if url.starts_with("youtube.com/watch") || url.starts_with("youtube.com/live_chat") {
-            let query = url.splitn(2, "?").nth(1).ok_or_else(|| anyhow::anyhow!("Missing query"))?;
+            let query = url.splitn(2, "?").nth(1).ok_or_else(|| anyhow!("Missing query"))?;
             for param in query.split('&') {
                 let mut kv = param.splitn(2, '=');
                 if kv.next() == Some("v") {
@@ -201,7 +202,7 @@ impl UniChatScrapper for YouTubeUniChatScrapper {
             return Ok(formatted_url);
         }
 
-        return Err(anyhow::anyhow!("Could not extract video ID from YouTube URL"));
+        return Err(anyhow!("Could not extract video ID from YouTube URL"));
     }
 
     fn scrapper_js(&self) -> &str {
@@ -210,9 +211,9 @@ impl UniChatScrapper for YouTubeUniChatScrapper {
 
     fn on_event(&self, event: serde_json::Value) -> Result<(), Error> {
         let scrapper_id = event.get("scrapperId").and_then(|v| v.as_str())
-            .ok_or_else(|| anyhow::anyhow!("Missing or invalid 'scrapperId' field in YouTube raw event payload"))?;
+            .ok_or_else(|| anyhow!("Missing or invalid 'scrapperId' field in YouTube raw event payload"))?;
         let event_type = event.get("type").and_then(|v| v.as_str())
-            .ok_or_else(|| anyhow::anyhow!("Missing or invalid 'type' field in YouTube raw event payload"))?;
+            .ok_or_else(|| anyhow!("Missing or invalid 'type' field in YouTube raw event payload"))?;
 
         if scrapper_id != YOUTUBE_CHAT_WINDOW {
             return Ok(());
