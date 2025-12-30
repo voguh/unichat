@@ -100,14 +100,18 @@ export function PluginOverviewHeader(props: Props): React.ReactNode {
     return (
         <PluginOverviewHeaderStyledContainer>
             <span>Plugin Overview</span>
-            {plugin.pluginPath != null && (
-                <div className="left-buttons">
+            <div className="left-buttons">
+                {plugin.pluginPath != null ? (
                     <Button variant="outline" size="xs" onClick={() => revealItemInDir(plugin.pluginPath)}>
                         <i className="fas fa-folder" />
-                        &nbsp; Show in Folder
+                        &nbsp;Show in Folder
                     </Button>
-                </div>
-            )}
+                ) : (
+                    <Button variant="outline" size="xs" disabled>
+                        System Plugin
+                    </Button>
+                )}
+            </div>
         </PluginOverviewHeaderStyledContainer>
     );
 }
