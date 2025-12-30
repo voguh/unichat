@@ -12,10 +12,9 @@ use std::sync::LazyLock;
 use std::sync::OnceLock;
 use std::sync::RwLock;
 
+use anyhow::Error;
 use tokio::sync::broadcast;
 use unichat::UniChatEvent;
-
-use crate::error::Error;
 
 pub mod unichat;
 
@@ -53,7 +52,7 @@ pub fn init(_app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
         }
     });
 
-    INSTANCE.set(tx).map_err(|_| Error::OnceLockAlreadyInitialized(ONCE_LOCK_NAME))?;
+    INSTANCE.set(tx).map_err(|_| anyhow::anyhow!("{} was already initialized", ONCE_LOCK_NAME))?;
     return Ok(());
 }
 
@@ -66,14 +65,14 @@ pub fn latest_events() -> Vec<UniChatEvent> {
 }
 
 pub fn subscribe() -> Result<broadcast::Receiver<UniChatEvent>, Error> {
-    let instance = INSTANCE.get().ok_or(Error::OnceLockNotInitialized(ONCE_LOCK_NAME))?;
+    let instance = INSTANCE.get().ok_or(anyhow::anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
     return Ok(instance.subscribe());
 }
 
 pub fn emit(event: UniChatEvent) -> Result<(), Error> {
-    let instance = INSTANCE.get().ok_or(Error::OnceLockNotInitialized(ONCE_LOCK_NAME))?;
+    let instance = INSTANCE.get().ok_or(anyhow::anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
-    let s = instance.send(event).map_err(|e| Error::TokioSendError { source: Box::from(e) })?;
+    let s = instance.send(event)?;
     log::debug!("Event emitted to {} subscribers", s);
 
     return Ok(());

@@ -7,7 +7,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use crate::error::Error;
+use anyhow::Error;
+
 use crate::events::unichat::UniChatEmote;
 use crate::shared_emotes;
 use crate::twitch::TWITCH_CHEERMOTES;
@@ -47,9 +48,9 @@ pub fn parse_message_emotes(raw_emotes: Option<&Option<String>>, message_text: &
                 continue;
             }
 
-            let (emote_id, positions_raw) = raw_emote.split_once(":").ok_or("Invalid emote format")?;
-            let first_range = positions_raw.split(",").next().ok_or("Invalid emote positions format")?;
-            let (start_str, end_str) = first_range.split_once("-").ok_or("Invalid emote positions format")?;
+            let (emote_id, positions_raw) = raw_emote.split_once(":").ok_or(anyhow::anyhow!("Invalid emote format"))?;
+            let first_range = positions_raw.split(",").next().ok_or(anyhow::anyhow!("Invalid emote positions format"))?;
+            let (start_str, end_str) = first_range.split_once("-").ok_or(anyhow::anyhow!("Invalid emote positions format"))?;
             let (start, end) = parse_delimiter(start_str, end_str)?;
 
             let emote_code: String = message_text.chars().skip(start).take((end - start) + 1).collect();

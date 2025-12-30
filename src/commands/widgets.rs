@@ -9,17 +9,16 @@
 
 use std::fs;
 
-use serde_json::Value;
 use serde_json::json;
+use serde_json::Value;
 use tauri::AppHandle;
 use tauri::Runtime;
 
-use crate::error::Error;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
 #[tauri::command]
-pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, Error> {
+pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, String> {
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     if !user_widgets_dir.is_dir() {
         return Err("User widgets directory does not exist".into());
@@ -30,12 +29,12 @@ pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: St
         return Err("Widget fields file does not exist".into());
     }
 
-    let result = fs::read_to_string(&fields_path)?;
+    let result = fs::read_to_string(&fields_path).map_err(|e| format!("Failed to read widget fields file: {}", e))?;
     return Ok(result);
 }
 
 #[tauri::command]
-pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, Error> {
+pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, String> {
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     if !user_widgets_dir.is_dir() {
         return Err("User widgets directory does not exist".into());
@@ -46,12 +45,12 @@ pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
         return Err("Widget fieldstate file does not exist".into());
     }
 
-    let result = fs::read_to_string(&fieldstate_path)?;
+    let result = fs::read_to_string(&fieldstate_path).map_err(|e| format!("Failed to read widget fieldstate file: {}", e))?;
     return Ok(result);
 }
 
 #[tauri::command]
-pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String, data: String) -> Result<(), Error> {
+pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String, data: String) -> Result<(), String> {
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     if !user_widgets_dir.is_dir() {
         return Err("User widgets directory does not exist".into());
@@ -62,14 +61,14 @@ pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
         return Err("Widget fieldstate path is not a file".into());
     }
 
-    fs::write(&fieldstate_path, data)?;
+    fs::write(&fieldstate_path, data).map_err(|e| format!("Failed to write widget fieldstate file: {}", e))?;
     return Ok(());
 }
 
 /* ================================================================================================================== */
 
 #[tauri::command]
-pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Error> {
+pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, String> {
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     if !user_widgets_dir.is_dir() {
         return Err("An error occurred on iterate over user widgets dir".into());
@@ -81,7 +80,7 @@ pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Error
     }
 
     let mut system_widgets: Vec<String> = Vec::new();
-    let system_widgets_read = fs::read_dir(&system_widgets_dir)?;
+    let system_widgets_read = fs::read_dir(&system_widgets_dir).map_err(|e| format!("An error occurred on read system widgets dir: {}", e))?;
     for entry in system_widgets_read {
         if let Ok(entry) = entry {
             let path = entry.path();
@@ -100,7 +99,7 @@ pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Error
     }
 
     let mut user_widgets: Vec<String> = Vec::new();
-    let user_widgets_read = fs::read_dir(&user_widgets_dir)?;
+    let user_widgets_read = fs::read_dir(&user_widgets_dir).map_err(|e| format!("An error occurred on read user widgets dir: {}", e))?;
     for entry in user_widgets_read {
         if let Ok(entry) = entry {
             let path = entry.path();

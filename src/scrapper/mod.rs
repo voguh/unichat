@@ -13,15 +13,16 @@ use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::RwLock;
 
+use anyhow::Error;
 use tauri::Listener as _;
 use tauri::WebviewWindow;
 use tauri::WebviewWindowBuilder;
 
-use crate::error::Error;
 use crate::utils::decode_scrapper_url;
 use crate::utils::settings;
 
 pub static COMMON_SCRAPPER_JS: &str = include_str!("./static/common_scrapper.js");
+const LAZY_LOCK_NAME: &str = "Scrapper::SCRAPPERS";
 static SCRAPPERS: LazyLock<RwLock<HashMap<String, Arc<dyn UniChatScrapper + Send + Sync>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
 /* ============================================================================================== */
@@ -56,22 +57,22 @@ pub fn serialize_scrapper(scrapper: &Arc<dyn UniChatScrapper + Send + Sync>) -> 
 }
 
 pub fn get_scrappers() -> Result<Vec<Arc<dyn UniChatScrapper + Send + Sync>>, Error> {
-    let scrappers = SCRAPPERS.read().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
+    let scrappers = SCRAPPERS.read().map_err(|_| anyhow::anyhow!("{} lock poisoned", LAZY_LOCK_NAME))?;
     return Ok(scrappers.values().cloned().collect());
 }
 
 pub fn get_scrapper(id: &str) -> Result<Option<Arc<dyn UniChatScrapper + Send + Sync>>, Error> {
-    let scrappers = SCRAPPERS.read().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
+    let scrappers = SCRAPPERS.read().map_err(|_| anyhow::anyhow!("{} lock poisoned", LAZY_LOCK_NAME))?;
     return Ok(scrappers.get(id).cloned());
 }
 
 fn handle_event(payload: &str) -> Result<(), Error> {
     let payload: serde_json::Value = serde_json::from_str(payload)?;
     let scrapper_id = payload.get("scrapperId").and_then(|v| v.as_str())
-        .ok_or("Missing or invalid 'scrapperId' field in Twitch raw event payload")?;
+        .ok_or(anyhow::anyhow!("Missing or invalid 'scrapperId' field in Twitch raw event payload"))?;
 
-    let scrappers = SCRAPPERS.read().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
-    let scrapper = scrappers.get(scrapper_id).ok_or(format!("Scrapper with ID '{}' not found", scrapper_id))?;
+    let scrappers = SCRAPPERS.read().map_err(|_| anyhow::anyhow!("{} lock poisoned", LAZY_LOCK_NAME))?;
+    let scrapper = scrappers.get(scrapper_id).ok_or(anyhow::anyhow!("Scrapper with ID '{}' not found", scrapper_id))?;
     scrapper.on_event(payload)?;
 
     return Ok(());
@@ -118,14 +119,14 @@ fn on_page_load(scrapper_js: &str, window: &tauri::WebviewWindow, payload: tauri
 static SCRAPPER_ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[a-z]+-chat$").unwrap());
 pub fn register_scrapper(app: &tauri::AppHandle<tauri::Wry>, scrapper: Arc<dyn UniChatScrapper + Send + Sync>) -> Result<WebviewWindow, Error> {
     if !SCRAPPER_ID_REGEX.is_match(scrapper.id()) {
-        return Err(Error::Message("Scrapper ID must be a non-empty lowercase string".to_string()));
+        return Err(anyhow::anyhow!("Scrapper ID must be a non-empty lowercase string".to_string()));
     }
 
     /* ========================================================================================== */
 
-    let mut scrappers = SCRAPPERS.write().map_err(|e| Error::LockPoisoned { source: Box::new(e) })?;
+    let mut scrappers = SCRAPPERS.write().map_err(|_| anyhow::anyhow!("{} lock poisoned", LAZY_LOCK_NAME))?;
     if scrappers.contains_key(scrapper.id()) {
-        return Err(Error::Message(format!("Scrapper with ID '{}' is already registered", scrapper.id())));
+        return Err(anyhow::anyhow!("Scrapper with ID '{}' is already registered", scrapper.id()));
     }
 
     /* ========================================================================================== */

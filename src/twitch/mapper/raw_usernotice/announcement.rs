@@ -9,7 +9,8 @@
 
 use std::collections::HashMap;
 
-use crate::error::Error;
+use anyhow::Error;
+
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatMessageEventPayload;
 use crate::events::unichat::UniChatPlatform;
@@ -27,20 +28,20 @@ use crate::twitch::mapper::structs::message::parse_message_string;
 pub fn parse(message: &IRCMessage, tags: &HashMap<String, Option<String>>) -> Result<Option<UniChatEvent>, Error> {
     let (channel, message_text) = match &message.command {
         IRCCommand::Raw(_, payload) => Ok((payload[0].clone(), payload[1].clone())),
-        _ => Err("Invalid message command type")
+        _ => Err(anyhow::anyhow!("Invalid message command type"))
     }?;
 
-    let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or("Missing room-id tag")?;
-    let author_id = tags.get("user-id").and_then(|v| v.as_ref()).ok_or("Missing user-id tag")?;
+    let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing room-id tag"))?;
+    let author_id = tags.get("user-id").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing user-id tag"))?;
     let author_username = parse_author_username_str(tags.get("login"))?;
     let author_name = parse_author_name(tags.get("display-name"))?;
     let author_color = parse_author_color(tags.get("color"), &author_username)?;
     let author_badges = parse_author_badges(tags.get("badges"))?;
     let author_type = parse_author_type(&tags)?;
-    let message_id = tags.get("id").and_then(|v| v.as_ref()).ok_or("Missing id tag")?;
+    let message_id = tags.get("id").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing id tag"))?;
     let message = parse_message_string(&message_text)?;
     let emotes = parse_message_emotes(tags.get("emotes"), &message_text)?;
-    let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or("Missing or invalid tmi-sent-ts tag")?;
+    let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing or invalid tmi-sent-ts tag"))?;
     let timestamp_usec: i64 = timestamp_usec.parse()?;
 
     let event = UniChatEvent::Message(UniChatMessageEventPayload {

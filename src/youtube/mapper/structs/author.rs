@@ -10,11 +10,11 @@
 use std::sync::LazyLock;
 use std::time::Duration;
 
+use anyhow::Error;
 use moka::sync::Cache;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::error::Error;
 use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatBadge;
 use crate::utils::random_color_by_seed;
@@ -116,7 +116,7 @@ pub fn parse_author_name_str(name: String) -> Result<String, Error> {
 }
 
 pub fn parse_author_photo(photo: &AuthorPhotoThumbnailsWrapper) -> Result<String, Error> {
-    let thumbnail = photo.thumbnails.last().ok_or("No thumbnails found in author photo")?;
+    let thumbnail = photo.thumbnails.last().ok_or(anyhow::anyhow!("No thumbnails found in author photo"))?;
 
     return Ok(proxy_youtube_url(&thumbnail.url));
 }
@@ -132,7 +132,7 @@ pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_cont
         for badge in badges {
             match &badge.live_chat_author_badge_renderer {
                 AuthorBadgeRenderer::Custom { custom_thumbnail, .. } => {
-                    let thumbnail = custom_thumbnail.thumbnails.last().ok_or("No thumbnails found in custom thumbnail")?;
+                    let thumbnail = custom_thumbnail.thumbnails.last().ok_or(anyhow::anyhow!("No thumbnails found in custom thumbnail"))?;
                     parsed_badges.push(UniChatBadge {
                         code: String::from("sponsor"),
                         url: proxy_youtube_url(&thumbnail.url)

@@ -11,19 +11,20 @@ use std::fs;
 use std::io::Write as _;
 use std::sync::Arc;
 
+use anyhow::Error;
 use mlua::LuaSerdeExt as _;
 
-use crate::CARGO_PKG_VERSION;
-use crate::error::Error;
 use crate::events;
 use crate::plugins::get_app_handle;
-use crate::plugins::get_plugin;
 use crate::plugins::get_lua_runtime;
+use crate::plugins::get_plugin;
 use crate::plugins::lua_env::SHARED_MODULES;
+use crate::plugins::lua_env::SHARED_MODULES_LAZY_LOCK_KEY;
 use crate::plugins::lua_env::unichat_event::LuaUniChatEvent;
 use crate::scrapper;
 use crate::scrapper::UniChatScrapper;
 use crate::shared_emotes;
+use crate::UNICHAT_VERSION;
 use crate::utils::is_dev;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -31,8 +32,6 @@ use crate::utils::render_emitter;
 use crate::utils::safe_guard_path;
 use crate::utils::settings;
 use crate::utils::settings::SettingLogEventLevel;
-
-/* ================================================================================================================== */
 
 fn get_optional_table_property<R: mlua::FromLua>(table: &mlua::Table, keys: Vec<&str>) -> Result<Option<R>, mlua::Error> {
     for key in keys {
@@ -53,7 +52,7 @@ fn get_table_property<R: mlua::FromLua>(table: &mlua::Table, default_value: Opti
         return Ok(default_value);
     }
 
-    return Err(mlua::Error::runtime(format!("Missing required property '{}' in scrapper options table", first)));
+    return Err(mlua::Error::external(format!("Missing required table property '{}'", first)));
 }
 
 struct LuaUniChatScrapper {
@@ -86,11 +85,11 @@ impl LuaUniChatScrapper {
         let on_error = get_optional_table_property(&opts, vec!["onError", "on_error"])?;
 
         if id.trim().is_empty() || !id.trim().ends_with("-chat") {
-            return Err(mlua::Error::runtime("Scrapper 'id' must be a non-empty string and end with '-chat'"));
+            return Err(mlua::Error::external(format!("Scrapper 'id' must be a non-empty string and end with '-chat'")));
         }
 
         if name.trim().is_empty() {
-            return Err(mlua::Error::runtime("Scrapper 'name' must be a non-empty string"));
+            return Err(mlua::Error::external(format!("Scrapper 'name' must be a non-empty string")));
         }
 
         return Ok(Self {
@@ -159,9 +158,9 @@ impl UniChatScrapper for LuaUniChatScrapper {
 
     fn on_event(&self, event: serde_json::Value) -> Result<(), Error> {
         let scrapper_id = event.get("scrapperId").and_then(|v| v.as_str())
-            .ok_or(format!("Missing or invalid 'scrapperId' field in {} raw event payload", self.id))?;
+            .ok_or(anyhow::anyhow!("Missing or invalid 'scrapperId' field in {} raw event payload", self.id))?;
         let event_type = event.get("type").and_then(|v| v.as_str())
-            .ok_or(format!("Missing or invalid 'type' field in {} raw event payload", self.id))?;
+            .ok_or(anyhow::anyhow!("Missing or invalid 'type' field in {} raw event payload", self.id))?;
 
         if scrapper_id != self.id {
             return Ok(());
@@ -257,38 +256,38 @@ impl UniChatAPI {
 impl mlua::UserData for UniChatAPI {
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("get_version", |_lua, _this, ()| {
-            return Ok(CARGO_PKG_VERSION.to_string());
+            return Ok(UNICHAT_VERSION.to_string());
         });
 
         methods.add_method("register_scrapper", |_lua, this, (id, name, scrapper_js_path, opts): (String, String, String, mlua::Table)| {
-            let app_handle = get_app_handle()?;
-            let plugin = get_plugin(&this.plugin_name)?;
+            let app_handle = get_app_handle().map_err(mlua::Error::external)?;
+            let plugin = get_plugin(&this.plugin_name).map_err(mlua::Error::external)?;
 
-            let scrapper_js_path = safe_guard_path(&plugin.get_plugin_data_path(), &scrapper_js_path).map_err(mlua::Error::runtime)?;
+            let scrapper_js_path = safe_guard_path(&plugin.get_plugin_data_path(), &scrapper_js_path).map_err(mlua::Error::external)?;
             let scrapper_js_content = fs::read_to_string(scrapper_js_path).map_err(mlua::Error::external)?;
-            let scrapper = LuaUniChatScrapper::new(id, name, scrapper_js_content, opts)?;
+            let scrapper = LuaUniChatScrapper::new(id, name, scrapper_js_content, opts).map_err(mlua::Error::external)?;
 
             let scrapper: Arc<dyn UniChatScrapper + Send + Sync> = Arc::new(scrapper);
             let scrapper_id = scrapper.id().to_string();
-            scrapper::register_scrapper(&app_handle, scrapper).map_err(mlua::Error::runtime)?;
+            scrapper::register_scrapper(&app_handle, scrapper).map_err(mlua::Error::external)?;
             plugin.add_message(format!("Registered scrapper '{}'.", scrapper_id));
 
             return Ok(());
         });
 
         methods.add_method("fetch_shared_emotes", |_lua, _this, (platform, channel_id): (String, String)| {
-            shared_emotes::fetch_shared_emotes(&platform, &channel_id).map_err(mlua::Error::runtime)?;
+            shared_emotes::fetch_shared_emotes(&platform, &channel_id).map_err(mlua::Error::external)?;
             return Ok(());
         });
 
         methods.add_method("expose_module", |_lua, this, (module_name, module_table): (String, mlua::Value)| {
-            let plugin = get_plugin(&this.plugin_name)?;
+            let plugin = get_plugin(&this.plugin_name).map_err(mlua::Error::external)?;
             let plugin_name = this.plugin_name.clone();
             let key = format!("{}:{}", plugin_name, module_name);
 
-            let mut shared_modules = SHARED_MODULES.write().map_err(mlua::Error::runtime)?;
+            let mut shared_modules = SHARED_MODULES.write().map_err(|_| mlua::Error::external(format!("{} lock poisoned", SHARED_MODULES_LAZY_LOCK_KEY)))?;
             if shared_modules.contains_key(&key) {
-                return Err(mlua::Error::runtime(format!("Module '{}' is already exposed by plugin '{}'", module_name, plugin_name)));
+                return Err(mlua::Error::external(format!("Module '{}' is already exposed by plugin '{}'", module_name, plugin_name)));
             }
 
             let key_to_print = key.clone();

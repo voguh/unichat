@@ -12,11 +12,11 @@ use std::sync::LazyLock;
 use ureq::config::Config;
 use ureq::http;
 use ureq::http::Uri;
+use ureq::RequestBuilder;
 use ureq::tls::TlsConfig;
 use ureq::tls::TlsProvider;
 use ureq::typestate::WithBody;
 use ureq::typestate::WithoutBody;
-use ureq::RequestBuilder;
 
 static UREQ_AGENT: LazyLock<ureq::Agent> = LazyLock::new(|| {
     let config = Config::builder()

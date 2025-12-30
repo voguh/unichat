@@ -52,15 +52,15 @@ fn generate_resources(target_gen_dir: &Path) -> Result<(), Box<dyn std::error::E
     let (license_name, license_url) = get_license_info(license_code)?;
 
     let metadata = format!(r#"
-        pub const CARGO_PKG_DISPLAY_NAME: &str = "{display_name}";
-        pub const CARGO_PKG_NAME: &str = "{name}";
-        pub const CARGO_PKG_VERSION: &str = "{version}";
-        pub const CARGO_PKG_DESCRIPTION: &str = "{description}";
-        pub const CARGO_PKG_AUTHORS: &str = "{authors}";
-        pub const CARGO_PKG_HOMEPAGE: &str = "{homepage}";
-        pub const CARGO_PKG_LICENSE_CODE: &str = "{license_code}";
-        pub const CARGO_PKG_LICENSE_NAME: &str = "{license_name}";
-        pub const CARGO_PKG_LICENSE_URL: &str = "{license_url}";
+        pub const UNICHAT_DISPLAY_NAME: &str = "{display_name}";
+        pub const UNICHAT_NAME: &str = "{name}";
+        pub const UNICHAT_VERSION: &str = "{version}";
+        pub const UNICHAT_DESCRIPTION: &str = "{description}";
+        pub const UNICHAT_AUTHORS: &str = "{authors}";
+        pub const UNICHAT_HOMEPAGE: &str = "{homepage}";
+        pub const UNICHAT_LICENSE_CODE: &str = "{license_code}";
+        pub const UNICHAT_LICENSE_NAME: &str = "{license_name}";
+        pub const UNICHAT_LICENSE_URL: &str = "{license_url}";
     "#);
 
     fs::write(metadata_file_path, metadata)?;

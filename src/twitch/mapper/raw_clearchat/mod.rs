@@ -7,7 +7,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use crate::error::Error;
+use anyhow::Error;
+
 use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
@@ -18,8 +19,8 @@ pub fn parse(channel: String, message: &IRCMessage) -> Result<Option<UniChatEven
     let event: UniChatEvent;
     let tags = message.tags.clone();
 
-    let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or("Missing room-id tag")?;
-    let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or("Missing or invalid tmi-sent-ts tag")?;
+    let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing room-id tag"))?;
+    let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing or invalid tmi-sent-ts tag"))?;
     let timestamp_usec: i64 = timestamp_usec.parse()?;
 
     if let Some(target_user_id) = tags.get("target-user-id").and_then(|v| v.as_ref()) {

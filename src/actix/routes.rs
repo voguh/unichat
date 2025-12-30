@@ -17,12 +17,12 @@ use actix_web::error::ErrorInternalServerError;
 use actix_web::error::ErrorNotFound;
 use actix_web::get;
 use actix_web::http::StatusCode;
-use actix_web::web;
 use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::Responder;
+use actix_web::web;
+use anyhow::Error;
 
-use crate::error::Error;
 use crate::events;
 use crate::plugins;
 use crate::utils;
@@ -80,7 +80,7 @@ fn load_fieldstate(widget_path: &PathBuf) -> Result<HashMap<String, serde_json::
         if let Some(state_value) = fieldstate_map.get(key) {
             final_fieldstate.insert(key.clone(), state_value.clone());
         } else {
-            let obj = value.as_object().ok_or("Invalid field definition")?;
+            let obj = value.as_object().ok_or(anyhow::anyhow!("Invalid field definition"))?;
             if let Some(default_value) = obj.get("value") {
                 final_fieldstate.insert(key.clone(), default_value.clone());
             }

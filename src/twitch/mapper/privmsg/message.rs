@@ -9,7 +9,8 @@
 
 use std::collections::HashMap;
 
-use crate::error::Error;
+use anyhow::Error;
+
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatMessageEventPayload;
 use crate::events::unichat::UniChatPlatform;
@@ -25,17 +26,17 @@ use crate::twitch::mapper::structs::message::parse_message_emotes;
 use crate::twitch::mapper::structs::message::parse_message_string;
 
 pub fn parse(channel: String, text: String, message: &IRCMessage, tags: HashMap<String, Option<String>>) -> Result<Option<UniChatEvent>, Error> {
-    let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or("Missing room-id tag")?;
-    let author_id = tags.get("user-id").and_then(|v| v.as_ref()).ok_or("Missing user-id tag")?;
+    let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing room-id tag"))?;
+    let author_id = tags.get("user-id").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing user-id tag"))?;
     let author_username = parse_author_username(&message.prefix)?;
     let author_name = parse_author_name(tags.get("display-name"))?;
     let author_color = parse_author_color(tags.get("color"), &author_username)?;
     let author_badges = parse_author_badges(tags.get("badges"))?;
     let author_type = parse_author_type(&tags)?;
-    let message_id = tags.get("id").and_then(|v| v.as_ref()).ok_or("Missing id tag")?;
+    let message_id = tags.get("id").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing id tag"))?;
     let message = parse_message_string(&text)?;
     let emotes = parse_message_emotes(tags.get("emotes"), &text)?;
-    let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or("Missing or invalid tmi-sent-ts tag")?;
+    let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing or invalid tmi-sent-ts tag"))?;
     let timestamp_usec: i64 = timestamp_usec.parse()?;
 
     let event_payload = UniChatMessageEventPayload {

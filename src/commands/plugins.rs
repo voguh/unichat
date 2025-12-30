@@ -12,7 +12,6 @@ use std::path::PathBuf;
 use tauri::AppHandle;
 use tauri::Runtime;
 
-use crate::error::Error;
 use crate::plugins;
 use crate::plugins::PluginStatus;
 use crate::utils::properties;
@@ -35,9 +34,9 @@ pub struct SerializedPluginMetadata {
 }
 
 #[tauri::command]
-pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<SerializedPluginMetadata>, Error> {
+pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<SerializedPluginMetadata>, String> {
     let mut serialized_plugins: Vec<SerializedPluginMetadata> = Vec::new();
-    let plugins = plugins::get_plugins()?;
+    let plugins = plugins::get_plugins().map_err(|e| format!("An error occurred on get plugins: {}", e))?;
 
     for plugin in plugins {
         let manifest = plugin.manifest.clone();
