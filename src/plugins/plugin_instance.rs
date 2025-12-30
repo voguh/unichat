@@ -63,7 +63,7 @@ impl UniChatPlugin {
 
             plugin_path: plugin_path.to_path_buf(),
             plugin_env: arc_env,
-            loaded_modules_cache: RwLock::new(HashMap::new()),
+            loaded_modules_cache: RwLock::new(HashMap::new())
         });
     }
 
@@ -94,31 +94,6 @@ impl UniChatPlugin {
 
     /* ============================================================================================================== */
 
-    pub fn is_disabled(&self) -> bool {
-        let disabled_flag = self.plugin_path.join(".disabled");
-        if let Ok(metadata) = fs::metadata(disabled_flag) {
-            return metadata.is_file();
-        }
-
-        return false;
-    }
-
-    pub fn toggle_plugin_state(&self, new_state: bool) -> Result<(), Error> {
-        let disabled_flag = self.plugin_path.join(".disabled");
-
-        if new_state == false {
-            fs::write(disabled_flag, b"")?;
-        } else {
-            if disabled_flag.exists() {
-                fs::remove_file(disabled_flag)?;
-            }
-        }
-
-        return Ok(());
-    }
-
-    /* ============================================================================================================== */
-
     pub(in crate::plugins) fn get_plugin_env(&self) -> mlua::Result<Arc<mlua::Table>> {
         return Ok(self.plugin_env.clone());
     }
@@ -141,6 +116,10 @@ impl UniChatPlugin {
     }
 
     /* ============================================================================================================== */
+
+    pub fn get_plugin_path(&self) -> PathBuf {
+        return self.plugin_path.clone();
+    }
 
     pub fn get_plugin_assets_path(&self) -> PathBuf {
         return self.plugin_path.join("assets");

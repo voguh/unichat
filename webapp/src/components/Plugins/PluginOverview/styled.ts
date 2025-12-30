@@ -11,35 +11,39 @@ import styled from "styled-components";
 
 export const PluginOverviewStyledContainer = styled.div`
     position: relative;
-    height: calc(100vh - (60px + 36px + 16px + 16px));
+    height: calc(100vh - (60px + 16px));
     display: grid;
-    grid-template-rows: 200px 1fr;
+    grid-template-rows: 208px 1fr;
     gap: 16px;
 
     > .plugin-details {
         border: 1px solid var(--mantine-color-dark-4);
+        border-radius: 8px;
         display: grid;
-        grid-template-columns: 198px 1fr;
+        grid-template-columns: 190px 1fr;
         gap: 16px;
+        overflow: hidden;
+        padding: 8px;
 
         > .plugin-icon {
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 198px;
-            height: 198px;
+            width: 190px;
+            height: 190px;
 
             > img {
                 width: 100%;
                 height: 100%;
                 object-fit: contain;
+                border-radius: 8px;
             }
         }
 
         > .plugin-meta {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
-            grid-template-rows: 42px 42px 1fr;
+            grid-template-rows: 42px 42px calc(42px + (24px * 2));
             grid-template-areas:
                 "PN PN PN PN PN PN PN PV PV PV PS PS"
                 "PA PA PA PA PA PL PL PH PH PH PH PH"
@@ -93,11 +97,24 @@ export const PluginOverviewStyledContainer = styled.div`
 
             > .plugin-description {
                 grid-area: PD;
-                align-self: start;
+
+                > .details-value {
+                    height: calc(24px * 3);
+                    overflow-y: auto;
+                    white-space: normal;
+                    line-clamp: unset;
+                }
             }
         }
     }
 
     > .plugin-messages {
     }
+`;
+
+export const PluginOverviewHeaderStyledContainer = styled.div`
+    width: calc(100vw - (11px + 16px + 28px + 16px));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 `;

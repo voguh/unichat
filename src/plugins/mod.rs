@@ -49,8 +49,7 @@ static LOADED_PLUGINS: LazyLock<RwLock<HashMap<String, Arc<UniChatPlugin>>>> = L
 pub enum PluginStatus {
     Loaded,
     Error,
-    Enabled,
-    Disabled
+    Active
 }
 
 /* ============================================================================================== */
@@ -171,19 +170,13 @@ fn load_plugin(plugin_path: &Path, manifest: &PluginManifestYAML) -> Result<(), 
         plugin.set_status(PluginStatus::Loaded);
     }
 
-    if plugin.is_disabled() {
-        plugin.add_message("Plugin is disabled by user");
-        plugin.set_status(PluginStatus::Disabled);
-        return Ok(());
-    }
-
     if let Err(e) = load_plugin_env(&plugin) {
         plugin.add_message(format!("An error occurred on start plugin: {:?}", e));
         plugin.set_status(PluginStatus::Error);
         return Err(Error::Message(format!("Failed to create LUA environment for plugin '{}': {:?}", plugin.name, e)));
     }
 
-    plugin.set_status(PluginStatus::Enabled);
+    plugin.set_status(PluginStatus::Active);
     log::info!("Loaded plugin: {} v{}", plugin.name, plugin.version);
 
     return Ok(());

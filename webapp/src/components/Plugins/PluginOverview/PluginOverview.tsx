@@ -9,14 +9,14 @@
 
 import React from "react";
 
-import { Badge, Code, Tooltip } from "@mantine/core";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { Badge, Button, Code, Tooltip } from "@mantine/core";
+import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { AppContext } from "unichat/contexts/AppContext";
 import { UniChatPluginMetadata } from "unichat/types";
 import { PLUGIN_STATUS_COLOR } from "unichat/utils/constants";
 
-import { PluginOverviewStyledContainer } from "./styled";
+import { PluginOverviewHeaderStyledContainer, PluginOverviewStyledContainer } from "./styled";
 
 interface Props {
     plugin: UniChatPluginMetadata;
@@ -91,5 +91,23 @@ export function PluginOverview(props: Props): React.ReactNode {
                 {plugin.messages.join("\n")}
             </Code>
         </PluginOverviewStyledContainer>
+    );
+}
+
+export function PluginOverviewHeader(props: Props): React.ReactNode {
+    const { plugin } = props;
+
+    return (
+        <PluginOverviewHeaderStyledContainer>
+            <span>Plugin Overview</span>
+            {plugin.pluginPath != null && (
+                <div className="left-buttons">
+                    <Button variant="outline" size="xs" onClick={() => revealItemInDir(plugin.pluginPath)}>
+                        <i className="fas fa-folder" />
+                        &nbsp; Show in Folder
+                    </Button>
+                </div>
+            )}
+        </PluginOverviewHeaderStyledContainer>
     );
 }

@@ -19,35 +19,28 @@ export const PluginsGridContainer = styled(SimpleGrid).attrs({
     verticalSpacing: "xs"
 })`
     > .plugin-item {
+        cursor: pointer;
         border: 1px solid var(--mantine-color-dark-4);
 
-        > .mantine-Card-section {
-            > .icon-wrapper {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                width: 140px;
-                height: 140px;
+        > div {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 140px;
+            height: 140px;
 
-                > img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: contain;
-                }
+            > img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
             }
-        }
 
-        > .name-wrapper {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-top: var(--card-padding);
-        }
-
-        > .mantine-Badge-root {
-            position: absolute;
-            top: 8px;
-            right: 8px;
+            > .mantine-Badge-root {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+            }
         }
     }
 `;

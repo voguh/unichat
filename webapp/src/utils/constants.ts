@@ -25,13 +25,11 @@ export function scrapperPriority(id: string): number {
 export enum PluginStatus {
     LOADED = "LOADED",
     ERROR = "ERROR",
-    ENABLED = "ENABLED",
-    DISABLED = "DISABLED"
+    ACTIVE = "ACTIVE"
 }
 
 export const PLUGIN_STATUS_COLOR = {
     [PluginStatus.LOADED]: ["var(--mantine-color-blue-5)", "var(--mantine-color-white)"],
     [PluginStatus.ERROR]: ["var(--mantine-color-red-5)", "var(--mantine-color-white)"],
-    [PluginStatus.ENABLED]: ["var(--mantine-color-green-5)", "var(--mantine-color-white)"],
-    [PluginStatus.DISABLED]: ["var(--mantine-color-gray-5)", "var(--mantine-color-black)"]
+    [PluginStatus.ACTIVE]: ["var(--mantine-color-green-5)", "var(--mantine-color-black)"]
 };

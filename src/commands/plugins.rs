@@ -7,12 +7,16 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use std::path::PathBuf;
+
 use tauri::AppHandle;
 use tauri::Runtime;
 
 use crate::error::Error;
 use crate::plugins;
 use crate::plugins::PluginStatus;
+use crate::utils::properties;
+use crate::utils::properties::AppPaths;
 
 #[derive(serde::Serialize)]
 pub struct SerializedPluginMetadata {
@@ -27,6 +31,7 @@ pub struct SerializedPluginMetadata {
     pub icon: Option<Vec<u8>>,
     pub status: PluginStatus,
     pub messages: Vec<String>,
+    pub plugin_path: Option<PathBuf>
 }
 
 #[tauri::command]
@@ -36,6 +41,10 @@ pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Serialize
 
     for plugin in plugins {
         let manifest = plugin.manifest.clone();
+        let mut plugin_path = Some(plugin.get_plugin_path());
+        if plugin.get_plugin_path().starts_with(properties::get_app_path(AppPaths::UniChatSystemPlugins)) {
+            plugin_path = None;
+        }
 
         let metadata = SerializedPluginMetadata {
             name: manifest.name,
@@ -49,17 +58,11 @@ pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Serialize
             icon: plugin.get_icon(),
             status: plugin.get_status(),
             messages: plugin.get_messages(),
+            plugin_path: plugin_path,
         };
 
         serialized_plugins.push(metadata);
     }
 
     return Ok(serialized_plugins);
-}
-
-#[tauri::command]
-pub async fn toggle_plugin_state<R: Runtime>(app: AppHandle<R>, plugin_name: String, new_state: bool) -> Result<(), Error> {
-    let plugin = plugins::get_plugin(&plugin_name)?;
-    plugin.toggle_plugin_state(new_state)?;
-    app.restart();
 }
