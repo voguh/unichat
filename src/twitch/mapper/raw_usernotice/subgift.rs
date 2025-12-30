@@ -19,6 +19,7 @@ use crate::twitch::mapper::structs::author::parse_author_name;
 use crate::twitch::mapper::structs::author::parse_author_type;
 use crate::twitch::mapper::structs::author::parse_author_username_str;
 use crate::twitch::mapper::structs::inject_raw_tags;
+use crate::utils::get_current_timestamp;
 
 pub fn parse(channel: String, tags: &HashMap<String, Option<String>>) -> Result<Option<UniChatEvent>, Error> {
     let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or("Missing room-id tag")?;
@@ -30,8 +31,7 @@ pub fn parse(channel: String, tags: &HashMap<String, Option<String>>) -> Result<
     let author_type = parse_author_type(&tags)?;
     let message_id = tags.get("id").and_then(|v| v.as_ref()).ok_or("Missing id tag")?;
     let tier = tags.get("msg-param-sub-plan").and_then(|v| v.as_ref()).ok_or("Missing msg-param-sub-plan tag")?;
-    let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or("Missing or invalid tmi-sent-ts tag")?;
-    let timestamp_usec: i64 = timestamp_usec.parse()?;
+    let timestamp_usec = get_current_timestamp()?;
 
     let event = UniChatEvent::SponsorGift(UniChatSponsorGiftEventPayload {
         channel_id: room_id.to_owned(),

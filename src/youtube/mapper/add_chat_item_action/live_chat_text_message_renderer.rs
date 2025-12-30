@@ -16,6 +16,7 @@ use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatMessageEventPayload;
 use crate::events::unichat::UniChatPlatform;
+use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::parse_author_badges;
@@ -64,7 +65,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let author_type = parse_author_type(&parsed.author_badges)?;
     let message = parse_message_string(&parsed.message)?;
     let emotes = parse_message_emojis(&parsed.message)?;
-    let timestamp_usec = parsed.timestamp_usec.parse::<i64>()?;
+    let timestamp_usec = get_current_timestamp()?;
 
     let event = UniChatEvent::Message(UniChatMessageEventPayload {
         channel_id: channel_id,

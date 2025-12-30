@@ -23,6 +23,7 @@ use crate::twitch::mapper::structs::author::parse_author_username_str;
 use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::twitch::mapper::structs::message::parse_message_emotes;
 use crate::twitch::mapper::structs::message::parse_message_string;
+use crate::utils::get_current_timestamp;
 
 pub fn parse(message: &IRCMessage, tags: &HashMap<String, Option<String>>) -> Result<Option<UniChatEvent>, Error> {
     let (channel, message_text) = match &message.command {
@@ -40,8 +41,7 @@ pub fn parse(message: &IRCMessage, tags: &HashMap<String, Option<String>>) -> Re
     let message_id = tags.get("id").and_then(|v| v.as_ref()).ok_or("Missing id tag")?;
     let message = parse_message_string(&message_text)?;
     let emotes = parse_message_emotes(tags.get("emotes"), &message_text)?;
-    let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or("Missing or invalid tmi-sent-ts tag")?;
-    let timestamp_usec: i64 = timestamp_usec.parse()?;
+    let timestamp_usec = get_current_timestamp()?;
 
     let event = UniChatEvent::Message(UniChatMessageEventPayload {
         channel_id: room_id.to_owned(),

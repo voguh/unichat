@@ -9,6 +9,8 @@
 
 use std::path;
 use std::sync::LazyLock;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
 
 use url::Url;
 
@@ -22,6 +24,14 @@ pub mod ureq;
 
 pub fn is_dev() -> bool {
     return cfg!(debug_assertions) || tauri::is_dev();
+}
+
+/* ================================================================================================================== */
+
+pub fn get_current_timestamp() -> Result<i64, Error> {
+    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?;
+    let timestamp_sec = timestamp.as_millis() as i64;
+    return Ok(timestamp_sec);
 }
 
 /* ================================================================================================================== */

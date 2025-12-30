@@ -18,6 +18,7 @@ use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPER_STICKER;
+use crate::utils::get_current_timestamp;
 use crate::utils::normalize_value;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
@@ -90,7 +91,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
             url: sticker.url.clone()
         }
     ];
-    let timestamp_usec = parsed.timestamp_usec.parse::<i64>()?;
+    let timestamp_usec = get_current_timestamp()?;
 
     let event = UniChatEvent::Donate(UniChatDonateEventPayload {
         channel_id: channel_id,

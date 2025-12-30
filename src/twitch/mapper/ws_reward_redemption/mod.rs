@@ -9,7 +9,6 @@
 
 use std::collections::HashMap;
 
-use actix_web::cookie::time;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -19,6 +18,7 @@ use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRedemptionEventPayload;
 use crate::twitch::mapper::handle_redemption_event;
 use crate::twitch::mapper::structs::author::parse_author_color;
+use crate::utils::get_current_timestamp;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct WsRewardRedemption {
@@ -66,9 +66,8 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let parsed: WsRewardRedemption = serde_json::from_value(value)?;
 
     let display_color = parse_author_color(None, &Some(parsed.user.login.clone()))?;
-    let offset_date_time = time::OffsetDateTime::parse(&parsed.redeemed_at, &time::format_description::well_known::Rfc3339)?;
     let icon_url = parse_reward_icon_url(&parsed.reward)?;
-    let timestamp_usec = offset_date_time.unix_timestamp();
+    let timestamp_usec = get_current_timestamp()?;
 
     let event_payload = UniChatRedemptionEventPayload {
         channel_id: parsed.channel_id,

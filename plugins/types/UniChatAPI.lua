@@ -238,10 +238,7 @@ UniChatBadge = UniChatBadge or nil;
 
 -- =============================================[ UniChat Time Library ]============================================= --
 ---@class UniChatTime
----@field parse fun(time: string|number): number
 ---@field now fun(): number
----@field format fun(ts: number, fmt: string): string
----@field add_seconds fun(ts: number, seconds: number): number
 -- ===========================================[ End UniChat Time Library ]=========================================== --
 
 -- =============================================[ UniChat YAML Library ]============================================= --

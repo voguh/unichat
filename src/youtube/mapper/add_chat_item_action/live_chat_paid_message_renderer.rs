@@ -23,6 +23,7 @@ use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::utils;
+use crate::utils::get_current_timestamp;
 use crate::utils::normalize_value;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
@@ -155,7 +156,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let (purchase_currency, purchase_value) = parse_purchase_amount(&parsed.purchase_amount_text)?;
     let message = build_option_message(&parsed.message)?;
     let emotes = build_option_emotes(&parsed.message)?;
-    let timestamp_usec = parsed.timestamp_usec.parse::<i64>()?;
+    let timestamp_usec = get_current_timestamp()?;
 
 
     let event = UniChatEvent::Donate(UniChatDonateEventPayload {

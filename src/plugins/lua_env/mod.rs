@@ -27,6 +27,7 @@ use crate::plugins::lua_env::unichat_std::create_print_fn;
 use crate::plugins::lua_env::unichat_std::create_require_fn;
 use crate::plugins::plugin_instance::UniChatPlugin;
 use crate::plugins::utils::table_deep_readonly;
+use crate::utils::get_current_timestamp;
 
 mod unichat_api;
 mod unichat_event;
@@ -167,11 +168,11 @@ pub fn load_plugin_env(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
 
     /* ========================================================================================== */
 
-    let start_ms = (time::OffsetDateTime::now_utc().unix_timestamp_nanos() / 1000000) as i64;
+    let start_ms = get_current_timestamp()?;
     log::info!("Executing plugin entrypoint for plugin: {} v{}", plugin.name, plugin.version);
     let entrypoint_code = fs::read_to_string(plugin.get_entrypoint_path())?;
     lua.load(&entrypoint_code).set_environment(plugin_env.as_ref().clone()).exec()?;
-    let end_ms = (time::OffsetDateTime::now_utc().unix_timestamp_nanos() / 1000000) as i64;
+    let end_ms = get_current_timestamp()?;
     log::info!("Plugin '{}' initialized in {} ms", plugin.name, end_ms - start_ms);
     plugin.add_message(format!("Initialization finished in {}ms", end_ms - start_ms));
 

@@ -41,8 +41,6 @@ pub enum Error {
     #[error("tokio broadcast send error")]
     TokioSendError { #[source] source: Box<dyn std::error::Error> },
     #[error(transparent)]
-    TimeParse(#[from] time::error::Parse),
-    #[error(transparent)]
     Lua(#[from] mlua::Error),
     #[error(transparent)]
     Semver(#[from] semver::Error),

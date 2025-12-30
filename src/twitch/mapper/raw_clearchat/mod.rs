@@ -7,26 +7,30 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use std::collections::HashMap;
+
 use crate::error::Error;
 use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRemoveAuthorEventPayload;
 use crate::irc::IRCMessage;
+use crate::utils::get_current_timestamp;
 
 pub fn parse(channel: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let event: UniChatEvent;
     let tags = message.tags.clone();
 
     let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or("Missing room-id tag")?;
-    let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or("Missing or invalid tmi-sent-ts tag")?;
-    let timestamp_usec: i64 = timestamp_usec.parse()?;
+    let timestamp_usec = get_current_timestamp()?;
 
     if let Some(target_user_id) = tags.get("target-user-id").and_then(|v| v.as_ref()) {
         event = UniChatEvent::RemoveAuthor(UniChatRemoveAuthorEventPayload {
             channel_id: room_id.to_owned(),
             channel_name: Some(channel),
+
             platform: UniChatPlatform::Twitch,
+            flags: HashMap::new(),
 
             author_id: target_user_id.to_owned(),
 
