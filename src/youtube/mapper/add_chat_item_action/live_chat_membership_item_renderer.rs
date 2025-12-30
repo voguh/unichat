@@ -18,6 +18,7 @@ use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatSponsorEventPayload;
+use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
@@ -147,7 +148,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let months = parse_months(&parsed)?;
     let message = optional_build_message(&parsed.message)?;
     let emotes = optional_build_emotes(&parsed.message)?;
-    let timestamp_usec = parsed.timestamp_usec.parse::<i64>()?;
+    let timestamp_usec = get_current_timestamp()?;
 
     let event = UniChatEvent::Sponsor(UniChatSponsorEventPayload {
         channel_id: channel_id,

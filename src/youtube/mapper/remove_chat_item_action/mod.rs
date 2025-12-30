@@ -7,8 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use std::time::SystemTime;
-use std::time::UNIX_EPOCH;
+use std::collections::HashMap;
 
 use anyhow::Error;
 use serde::Deserialize;
@@ -17,6 +16,7 @@ use serde::Serialize;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRemoveMessageEventPayload;
+use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 
@@ -30,16 +30,18 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let parsed: RemoveChatItemAction = serde_json::from_value(value)?;
 
     let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
-    let timestamp_usec = SystemTime::now().duration_since(UNIX_EPOCH)?;
+    let timestamp_usec = get_current_timestamp()?;
 
     let event = UniChatEvent::RemoveMessage(UniChatRemoveMessageEventPayload {
         channel_id: channel_id,
         channel_name: None,
+
         platform: UniChatPlatform::YouTube,
+        flags: HashMap::new(),
 
         message_id: parsed.target_item_id.clone(),
 
-        timestamp: timestamp_usec.as_secs() as i64
+        timestamp: timestamp_usec
     });
 
     return Ok(Some(event));

@@ -157,7 +157,9 @@ pub struct UniChatClearEventPayload {
 pub struct UniChatRemoveMessageEventPayload {
     pub channel_id: String,
     pub channel_name: Option<String>,
+
     pub platform: UniChatPlatform,
+    pub flags: HashMap<String, Option<String>>,
 
     pub message_id: String,
 
@@ -171,7 +173,9 @@ pub struct UniChatRemoveMessageEventPayload {
 pub struct UniChatRemoveAuthorEventPayload {
     pub channel_id: String,
     pub channel_name: Option<String>,
+
     pub platform: UniChatPlatform,
+    pub flags: HashMap<String, Option<String>>,
 
     pub author_id: String,
 

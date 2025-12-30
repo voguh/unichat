@@ -5522,7 +5522,6 @@ dependencies = [
  "tauri-plugin-log",
  "tauri-plugin-opener",
  "tauri-plugin-store",
- "time",
  "tokio",
  "ureq",
  "url",

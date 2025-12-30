@@ -16,6 +16,7 @@ use serde::Serialize;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatSponsorGiftEventPayload;
+use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
@@ -97,7 +98,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let author_photo = parse_author_photo(&render.author_photo)?;
     let author_type = parse_author_type(&render.author_badges)?;
     let count = parse_count(&render)?;
-    let timestamp_usec = parsed.timestamp_usec.parse::<i64>()?;
+    let timestamp_usec = get_current_timestamp()?;
 
     let event = UniChatEvent::SponsorGift(UniChatSponsorGiftEventPayload {
         channel_id: channel_id,

@@ -8,8 +8,6 @@
  ******************************************************************************/
 
 use std::collections::HashMap;
-use std::time::SystemTime;
-use std::time::UNIX_EPOCH;
 
 use anyhow::Error;
 use serde::Deserialize;
@@ -18,6 +16,7 @@ use serde::Serialize;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRaidEventPayload;
+use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
@@ -76,7 +75,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
             let author_name = parse_author_name_str(first_run.text.clone())?;
             let author_color = parse_author_color(&author_name)?;
             let author_photo = renderer.author_photo.thumbnails.last().ok_or(anyhow::anyhow!("No thumbnails found in author photo"))?;
-            let timestamp_usec = SystemTime::now().duration_since(UNIX_EPOCH)?;
+            let timestamp_usec = get_current_timestamp()?;
 
             if first_run.bold.is_some() {
                 event = Some(UniChatEvent::Raid(UniChatRaidEventPayload {
@@ -97,7 +96,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
                     message_id: parsed.action_id,
                     viewer_count: None,
 
-                    timestamp: timestamp_usec.as_secs() as i64
+                    timestamp: timestamp_usec
                 }));
             }
         }

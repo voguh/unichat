@@ -23,6 +23,7 @@ use crate::twitch::mapper::structs::author::parse_author_username;
 use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::twitch::mapper::structs::message::parse_message_emotes;
 use crate::twitch::mapper::structs::message::parse_message_string;
+use crate::utils::get_current_timestamp;
 
 pub fn parse(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let tags = message.tags.clone();
@@ -55,8 +56,7 @@ pub fn parse(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let message_id = tags.get("id").and_then(|v| v.to_owned()).ok_or(anyhow::anyhow!("Missing id tag"))?;
     let message = parse_message_string(&text)?;
     let emotes = parse_message_emotes(tags.get("emotes"), &text)?;
-    let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.to_owned()).ok_or(anyhow::anyhow!("Missing or invalid tmi-sent-ts tag"))?;
-    let timestamp_usec: i64 = timestamp_usec.parse()?;
+    let timestamp_usec = get_current_timestamp()?;
 
     let streak_days = tags.get("msg-param-value").and_then(|v| v.to_owned()).ok_or(anyhow::anyhow!("Missing msg-param-value tag"))?;
     flags.insert(String::from(UNICHAT_FLAG_TWITCH_STREAK_DAYS), Some(streak_days));

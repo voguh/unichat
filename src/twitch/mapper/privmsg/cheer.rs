@@ -23,6 +23,7 @@ use crate::twitch::mapper::structs::author::parse_author_username;
 use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::twitch::mapper::structs::message::parse_message_emotes;
 use crate::twitch::mapper::structs::message::parse_message_string;
+use crate::utils::get_current_timestamp;
 
 pub fn parse(channel: String, text: String, message: &IRCMessage, tags: HashMap<String, Option<String>>) -> Result<Option<UniChatEvent>, Error> {
     let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing room-id tag"))?;
@@ -37,8 +38,7 @@ pub fn parse(channel: String, text: String, message: &IRCMessage, tags: HashMap<
     let message_id = tags.get("id").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing id tag"))?;
     let message = parse_message_string(&text)?;
     let emotes = parse_message_emotes(tags.get("emotes"), &text)?;
-    let timestamp_usec = tags.get("tmi-sent-ts").and_then(|v| v.as_ref()).ok_or(anyhow::anyhow!("Missing or invalid tmi-sent-ts tag"))?;
-    let timestamp_usec: i64 = timestamp_usec.parse()?;
+    let timestamp_usec = get_current_timestamp()?;
 
     let event = UniChatEvent::Donate(UniChatDonateEventPayload {
         channel_id: room_id.to_owned(),

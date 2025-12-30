@@ -130,7 +130,7 @@ local function handle_message_event(data)
         messageText = parse_message_text(data.content),
         emotes = parse_emotes(data.content),
 
-        timestamp = time.parse(data.created_at),
+        timestamp = time.now(),
     });
 
     return event;
