@@ -10,10 +10,11 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
+use anyhow::anyhow;
+use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::error::Error;
 use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
@@ -21,19 +22,19 @@ use crate::events::unichat::UniChatSponsorEventPayload;
 use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
-use crate::youtube::mapper::structs::author::parse_author_badges;
-use crate::youtube::mapper::structs::author::parse_author_color;
-use crate::youtube::mapper::structs::author::parse_author_name;
-use crate::youtube::mapper::structs::author::parse_author_username;
-use crate::youtube::mapper::structs::author::parse_author_photo;
-use crate::youtube::mapper::structs::author::parse_author_type;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
 use crate::youtube::mapper::structs::author::AuthorNameWrapper;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
-use crate::youtube::mapper::structs::message::parse_message_emojis;
-use crate::youtube::mapper::structs::message::parse_message_string;
+use crate::youtube::mapper::structs::author::parse_author_badges;
+use crate::youtube::mapper::structs::author::parse_author_color;
+use crate::youtube::mapper::structs::author::parse_author_name;
+use crate::youtube::mapper::structs::author::parse_author_photo;
+use crate::youtube::mapper::structs::author::parse_author_type;
+use crate::youtube::mapper::structs::author::parse_author_username;
 use crate::youtube::mapper::structs::message::MessageRun;
 use crate::youtube::mapper::structs::message::MessageRunsWrapper;
+use crate::youtube::mapper::structs::message::parse_message_emojis;
+use crate::youtube::mapper::structs::message::parse_message_string;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -69,12 +70,12 @@ fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> Result<Option<String>,
     if let Some(simple_text) = &parsed.header_subtext.simple_text {
         tier = Some(simple_text.clone());
     } else if let Some(runs) = &parsed.header_subtext.runs {
-        let run = runs.get(1).ok_or("No second run found in header primary text")?;
+        let run = runs.get(1).ok_or(anyhow!("No second run found in header primary text"))?;
         match run {
             MessageRun::Text { text } => {
                 tier = Some(text.clone());
             }
-            MessageRun::Emoji { .. } => return Err("Unexpected emoji in header subtext".into())
+            MessageRun::Emoji { .. } => return Err(anyhow!("Unexpected emoji in header subtext"))
         }
     }
 
@@ -97,16 +98,16 @@ fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> Result<u16, Error> {
     if let Some(header_primary_text) = &parsed.header_primary_text {
         let run = header_primary_text.runs.get(1)
             .or_else(|| header_primary_text.runs.get(0))
-            .ok_or("No valid run found in header primary text")?;
+            .ok_or(anyhow!("No valid run found in header primary text"))?;
 
         match run {
             MessageRun::Text { text } => {
                 let value_raw = MONTHS_REGEX.find(text.trim())
-                    .ok_or("Failed to find months in header primary text")?;
+                    .ok_or(anyhow!("Failed to find months in header primary text"))?;
 
                 months = value_raw.as_str().parse()?;
             },
-            MessageRun::Emoji { .. } => return Err("Unexpected emoji in header subtext".into())
+            MessageRun::Emoji { .. } => return Err(anyhow!("Unexpected emoji in header subtext"))
         }
     } else if let Some(_runs) = &parsed.header_subtext.runs {
         months = 1

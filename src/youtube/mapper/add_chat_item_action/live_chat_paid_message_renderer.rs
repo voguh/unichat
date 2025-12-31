@@ -9,10 +9,11 @@
 
 use std::collections::HashMap;
 
+use anyhow::anyhow;
+use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::error::Error;
 use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_PRIMARY_BACKGROUND_COLOR;
 use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_PRIMARY_TEXT_COLOR;
 use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPERCHAT_SECONDARY_BACKGROUND_COLOR;
@@ -27,18 +28,18 @@ use crate::utils::get_current_timestamp;
 use crate::utils::normalize_value;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
-use crate::youtube::mapper::structs::author::parse_author_badges;
-use crate::youtube::mapper::structs::author::parse_author_color;
-use crate::youtube::mapper::structs::author::parse_author_name;
-use crate::youtube::mapper::structs::author::parse_author_username;
-use crate::youtube::mapper::structs::author::parse_author_photo;
-use crate::youtube::mapper::structs::author::parse_author_type;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
 use crate::youtube::mapper::structs::author::AuthorNameWrapper;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
+use crate::youtube::mapper::structs::author::parse_author_badges;
+use crate::youtube::mapper::structs::author::parse_author_color;
+use crate::youtube::mapper::structs::author::parse_author_name;
+use crate::youtube::mapper::structs::author::parse_author_photo;
+use crate::youtube::mapper::structs::author::parse_author_type;
+use crate::youtube::mapper::structs::author::parse_author_username;
+use crate::youtube::mapper::structs::message::MessageRunsWrapper;
 use crate::youtube::mapper::structs::message::parse_message_emojis;
 use crate::youtube::mapper::structs::message::parse_message_string;
-use crate::youtube::mapper::structs::message::MessageRunsWrapper;
 use crate::youtube::mapper::structs::message::parse_super_chat_tier;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -81,7 +82,7 @@ fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(S
         return Ok((currency.to_string(), value));
     }
 
-    return Err("Invalid purchase amount text format".into());
+    return Err(anyhow!("Invalid purchase amount text format"));
 }
 
 fn build_option_message(message: &Option<MessageRunsWrapper>) -> Result<Option<String>, Error> {

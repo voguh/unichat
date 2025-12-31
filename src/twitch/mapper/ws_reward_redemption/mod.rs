@@ -9,10 +9,10 @@
 
 use std::collections::HashMap;
 
+use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRedemptionEventPayload;

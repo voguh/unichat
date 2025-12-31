@@ -9,7 +9,8 @@
 
 use std::collections::HashMap;
 
-use crate::error::Error;
+use anyhow::anyhow;
+use anyhow::Error;
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct IRCMessage {
@@ -37,7 +38,7 @@ pub enum IRCCommand {
 impl IRCMessage {
     pub fn parse(value: Option<&serde_json::Value>) -> Result<Self, Error> {
         if let Some(value) = value {
-            let raw = value.get("raw").and_then(|r| r.as_str()).ok_or("Missing raw IRC message")?;
+            let raw = value.get("raw").and_then(|r| r.as_str()).ok_or(anyhow!("Missing raw IRC message"))?;
             let tags = Self::parse_tags(value.get("tags"))?;
             let prefix = Self::parse_prefix(value.get("prefix"))?;
             let command = Self::parse_command(value.get("command"))?;
@@ -49,7 +50,7 @@ impl IRCMessage {
                 command: command
             });
         } else {
-            return Err("Missing IRC message value".into());
+            return Err(anyhow!("Missing IRC message value"));
         }
     }
 
@@ -71,23 +72,23 @@ impl IRCMessage {
             if prefix_arr.len() == 0 {
                 return Ok(None);
             } else if prefix_arr.len() == 1 {
-                let server_name = prefix_arr[0].as_str().ok_or("Invalid server name in prefix")?;
+                let server_name = prefix_arr[0].as_str().ok_or(anyhow!("Invalid server name in prefix"))?;
                 return Ok(Some(IRCPrefix::Server(server_name.to_string())));
             } else if prefix_arr.len() == 3 {
-                let nick = prefix_arr[0].as_str().ok_or("Invalid nickname in prefix")?;
-                let user = prefix_arr[1].as_str().ok_or("Invalid user in prefix")?;
-                let host = prefix_arr[2].as_str().ok_or("Invalid host in prefix")?;
+                let nick = prefix_arr[0].as_str().ok_or(anyhow!("Invalid nickname in prefix"))?;
+                let user = prefix_arr[1].as_str().ok_or(anyhow!("Invalid user in prefix"))?;
+                let host = prefix_arr[2].as_str().ok_or(anyhow!("Invalid host in prefix"))?;
                 return Ok(Some(IRCPrefix::Nick(nick.to_string(), user.to_string(), host.to_string())));
             }
         }
 
-        return Err(Error::from("Invalid prefix array length"));
+        return Err(anyhow!("Invalid prefix array length"));
     }
 
     fn parse_command(command_obj: Option<&serde_json::Value>) -> Result<IRCCommand, Error> {
         if let Some(command_obj) = command_obj.and_then(|cmd| cmd.as_object()) {
-            let name = command_obj.get("name").and_then(|n| n.as_str()).ok_or("Invalid command name")?;
-            let params = command_obj.get("params").and_then(|params| params.as_array()).ok_or("Invalid command params")?;
+            let name = command_obj.get("name").and_then(|n| n.as_str()).ok_or(anyhow!("Invalid command name"))?;
+            let params = command_obj.get("params").and_then(|params| params.as_array()).ok_or(anyhow!("Invalid command params"))?;
             let params_str: Vec<String> = params.iter().filter_map(|p| p.as_str().map(|s| s.to_string())).collect();
 
             if name == "PRIVMSG" && params_str.len() == 2 {
@@ -97,6 +98,6 @@ impl IRCMessage {
             return Ok(IRCCommand::Raw(name.to_string(), params_str));
         }
 
-        return Err(Error::from("Invalid command object"));
+        return Err(anyhow!("Invalid command object"));
     }
 }

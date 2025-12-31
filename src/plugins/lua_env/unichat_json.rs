@@ -30,7 +30,7 @@ pub fn create_module(lua: &mlua::Lua) -> Result<mlua::Value, mlua::Error> {
 
     let table_name = lua.create_string("unichat:json")?;
     let table_name = mlua::Value::String(table_name);
-    let readonly_module = table_deep_readonly(lua, &table_name, module).map_err(|e| mlua::Error::runtime(e))?;
+    let readonly_module = table_deep_readonly(lua, &table_name, module)?;
 
     return Ok(mlua::Value::Table(readonly_module));
 }

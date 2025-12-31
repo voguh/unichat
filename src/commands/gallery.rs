@@ -10,11 +10,11 @@
 use std::fs;
 use std::path::PathBuf;
 
+use anyhow::Error;
 use tauri::AppHandle;
 use tauri::Runtime;
 use tauri::Url;
 
-use crate::error::Error;
 use crate::utils::constants::BASE_REST_PORT;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -63,12 +63,12 @@ fn get_file_url(file_name: &str) -> Result<Url, Error> {
 }
 
 #[tauri::command]
-pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<GalleryItem>, Error> {
+pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<GalleryItem>, String> {
     let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
 
     let mut gallery_items: Vec<GalleryItem> = Vec::new();
 
-    let gallery_read = fs::read_dir(&gallery_path)?;
+    let gallery_read = fs::read_dir(&gallery_path).map_err(|e| format!("An error occurred on read gallery directory: {:#?}", e))?;
     for entry in gallery_read {
         if let Ok(entry) = entry {
             let path = entry.path();
@@ -76,7 +76,7 @@ pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Gal
                 let title = path.file_name().and_then(|n| n.to_str()).ok_or("An error occurred on parse gallery item title")?;
                 let item_type = choose_file_type_by_path(&path);
 
-                let file_url = get_file_url(title)?;
+                let file_url = get_file_url(title).map_err(|e| format!("An error occurred on generate gallery item URL: {:#?}", e))?;
                 let preview_url = file_url.clone().into();
                 let url = file_url.path().into();
 
@@ -94,17 +94,17 @@ pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Gal
 }
 
 #[tauri::command]
-pub async fn upload_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>, files: Vec<String>) -> Result<(), Error> {
+pub async fn upload_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>, files: Vec<String>) -> Result<(), String> {
     let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
     if !gallery_path.exists() {
-        fs::create_dir_all(&gallery_path)?;
+        fs::create_dir_all(&gallery_path).map_err(|e| format!("An error occurred on create gallery directory: {:#?}", e))?;
     }
 
     for file_path_raw in files {
         let file_path = PathBuf::from(&file_path_raw);
         let file_name = file_path.file_name().and_then(|n| n.to_str()).ok_or("An error occurred on parse gallery item title")?;
         let gallery_file_path = gallery_path.join(file_name);
-        fs::copy(&file_path, &gallery_file_path)?;
+        fs::copy(&file_path, &gallery_file_path).map_err(|e| format!("An error occurred on copy gallery item: {:#?}", e))?;
     }
 
     return Ok(());

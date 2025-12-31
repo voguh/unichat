@@ -104,7 +104,7 @@ pub fn create_module(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Value, 
 
     let table_name = lua.create_string("unichat:logger")?;
     let table_name = mlua::Value::String(table_name);
-    let readonly_module = table_deep_readonly(lua, &table_name, module).map_err(|e| mlua::Error::runtime(e))?;
+    let readonly_module = table_deep_readonly(lua, &table_name, module)?;
 
     return Ok(mlua::Value::Table(readonly_module));
 }

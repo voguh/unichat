@@ -7,7 +7,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use crate::error::Error;
+use anyhow::Error;
+
 use crate::events::unichat::UniChatEvent;
 use crate::irc::IRCMessage;
 

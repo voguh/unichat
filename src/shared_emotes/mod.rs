@@ -11,7 +11,8 @@ use std::collections::HashMap;
 use std::sync::LazyLock;
 use std::sync::RwLock;
 
-use crate::error::Error;
+use anyhow::Error;
+
 use crate::events::unichat::UniChatEmote;
 
 mod betterttv;

@@ -15,7 +15,9 @@ use std::sync::LazyLock;
 use std::sync::OnceLock;
 use std::sync::RwLock;
 
-use crate::error::Error;
+use anyhow::anyhow;
+use anyhow::Error;
+
 use crate::plugins::get_lua_runtime;
 use crate::plugins::lua_env::unichat_api::UniChatAPI;
 use crate::plugins::lua_env::unichat_event::LuaUniChatAuthorTypeFactory;
@@ -50,7 +52,7 @@ const UNICHAT_BADGE_KEY: &str = "UniChatBadge";
 pub const LUA_RUNTIME_ONCE_LOCK_KEY: &str = "Plugins::LUA_RUNTIME";
 pub static LUA_RUNTIME: OnceLock<Arc<mlua::Lua>> = OnceLock::new();
 
-pub const SHARED_MODULES_LOCK_KEY: &str = "Plugins::SHARED_MODULES";
+pub const SHARED_MODULES_LAZY_LOCK_KEY: &str = "Plugins::SHARED_MODULES";
 pub static SHARED_MODULES: LazyLock<RwLock<HashMap<String, Arc<mlua::Value>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
 /* ================================================================================================================== */
@@ -108,7 +110,7 @@ pub fn prepare_lua_env() -> Result<(), Error> {
     lua.set_globals(_globals)?;
     log::debug!("LUA runtime configured successfully");
 
-    return LUA_RUNTIME.set(Arc::new(lua)).map_err(|_| Error::OnceLockAlreadyInitialized(LUA_RUNTIME_ONCE_LOCK_KEY));
+    return LUA_RUNTIME.set(Arc::new(lua)).map_err(|_| anyhow!("{} was already initialized", LUA_RUNTIME_ONCE_LOCK_KEY));
 }
 
 /* ================================================================================================================== */

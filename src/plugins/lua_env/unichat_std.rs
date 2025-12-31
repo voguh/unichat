@@ -13,6 +13,7 @@ use std::sync::Arc;
 use crate::plugins::get_plugin;
 
 use crate::plugins::lua_env::SHARED_MODULES;
+use crate::plugins::lua_env::SHARED_MODULES_LAZY_LOCK_KEY;
 use crate::plugins::lua_env::unichat_json;
 use crate::plugins::lua_env::unichat_logger;
 use crate::plugins::lua_env::unichat_strings;
@@ -45,7 +46,7 @@ pub fn create_print_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Funct
 pub fn create_require_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Function, mlua::Error> {
     let plugin_name: Arc<String> = Arc::new(plugin_name.to_string());
     let require_fn = lua.create_function(move |lua, module: String| -> mlua::Result<mlua::Value> {
-        let plugin = get_plugin(&plugin_name)?;
+        let plugin = get_plugin(&plugin_name).map_err(mlua::Error::external)?;
         if let Ok(cached_module) = plugin.get_cached_loaded_module(&module) {
             return Ok(cached_module);
         }
@@ -63,27 +64,27 @@ pub fn create_require_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Fun
                 return unichat_yaml::create_module(lua);
             }
 
-            let manifest = get_plugin(plugin_name)?;
+            let manifest = get_plugin(plugin_name).map_err(mlua::Error::external)?;
             let plugin_root = manifest.get_plugin_data_path();
             let mut module_path = module.replace('.', "/");
             if !module_path.ends_with(".lua") {
                 module_path.push_str(".lua");
             }
 
-            let path = safe_guard_path(&plugin_root, &module_path).map_err(mlua::Error::runtime)?;
+            let path = safe_guard_path(&plugin_root, &module_path).map_err(mlua::Error::external)?;
             let code = fs::read_to_string(path).map_err(|e| mlua::Error::external(e))?;
             let result: mlua::Value = lua.load(&code).set_environment(plugin_env.clone()).eval()?;
 
             return Ok(result);
         }
 
-        let plugin_env = plugin.get_plugin_env()?;
+        let plugin_env = plugin.get_plugin_env().map_err(mlua::Error::external)?;
         if let Ok(result) = scoped_modules_require(lua, &plugin_env, &plugin_name, &module) {
             let arc_loaded_module = Arc::new(result);
-            let saved_module = plugin.set_cached_loaded_module(&module, arc_loaded_module)?;
+            let saved_module = plugin.set_cached_loaded_module(&module, arc_loaded_module).map_err(mlua::Error::external)?;
             return Ok(saved_module.as_ref().clone());
         } else if module.contains(':') {
-            let shared_modules = SHARED_MODULES.read().map_err(mlua::Error::runtime)?;
+            let shared_modules = SHARED_MODULES.read().map_err(|_| mlua::Error::external(format!("{} lock poisoned", SHARED_MODULES_LAZY_LOCK_KEY)))?;
             if let Some(shared_module) = shared_modules.get(&module) {
                 return Ok(shared_module.as_ref().clone());
             }

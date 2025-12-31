@@ -10,14 +10,15 @@
 use std::fs;
 use std::path::Path;
 
+use anyhow::anyhow;
+use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::CARGO_PKG_AUTHORS;
-use crate::CARGO_PKG_HOMEPAGE;
-use crate::CARGO_PKG_LICENSE_CODE;
-use crate::CARGO_PKG_VERSION;
-use crate::error::Error;
+use crate::UNICHAT_AUTHORS;
+use crate::UNICHAT_HOMEPAGE;
+use crate::UNICHAT_LICENSE_CODE;
+use crate::UNICHAT_VERSION;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
@@ -35,7 +36,7 @@ pub struct PluginManifestYAML {
 pub fn load_manifest(plugin_path: &Path) -> Result<PluginManifestYAML, Error> {
     let manifest_path = plugin_path.join("manifest.yaml");
     if !manifest_path.exists() || !manifest_path.is_file() {
-        return Err(Error::Message(format!("Folder '{:?}' is not a valid plugin: missing or invalid 'manifest.yaml'", plugin_path)));
+        return Err(anyhow!("Folder '{:?}' is not a valid plugin: missing or invalid 'manifest.yaml'", plugin_path));
     }
 
     let manifest_content = fs::read_to_string(&manifest_path)?;
@@ -43,24 +44,24 @@ pub fn load_manifest(plugin_path: &Path) -> Result<PluginManifestYAML, Error> {
 
     if plugin_path.starts_with(properties::get_app_path(AppPaths::UniChatSystemPlugins)) {
         if manifest.version == "${unichat_version}" {
-            manifest.version = String::from(CARGO_PKG_VERSION);
+            manifest.version = String::from(UNICHAT_VERSION);
         }
 
         if manifest.author.as_deref().is_some_and(|a| a == "${unichat_authors}") {
-            manifest.author = Some(String::from(CARGO_PKG_AUTHORS));
+            manifest.author = Some(String::from(UNICHAT_AUTHORS));
         }
 
         if manifest.license.as_deref().is_some_and(|l| l == "${unichat_license}") {
-            manifest.license = Some(String::from(CARGO_PKG_LICENSE_CODE));
+            manifest.license = Some(String::from(UNICHAT_LICENSE_CODE));
         }
 
         if manifest.homepage.as_deref().is_some_and(|h| h == "${unichat_homepage}") {
-            manifest.homepage = Some(String::from(CARGO_PKG_HOMEPAGE));
+            manifest.homepage = Some(String::from(UNICHAT_HOMEPAGE));
         }
     }
 
     if let Err(err) = semver::Version::parse(&manifest.version) {
-        return Err(Error::Message(format!("Invalid version '{}' for plugin '{}': {:?}", manifest.version, manifest.name, err)));
+        return Err(anyhow!("Invalid version '{}' for plugin '{}': {:?}", manifest.version, manifest.name, err));
     }
 
     return Ok(manifest);

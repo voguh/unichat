@@ -9,25 +9,26 @@
 
 use std::collections::HashMap;
 
+use anyhow::anyhow;
+use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::error::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatSponsorGiftEventPayload;
 use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
-use crate::youtube::mapper::structs::author::parse_author_badges;
-use crate::youtube::mapper::structs::author::parse_author_color;
-use crate::youtube::mapper::structs::author::parse_author_name;
-use crate::youtube::mapper::structs::author::parse_author_username;
-use crate::youtube::mapper::structs::author::parse_author_photo;
-use crate::youtube::mapper::structs::author::parse_author_type;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
 use crate::youtube::mapper::structs::author::AuthorNameWrapper;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
+use crate::youtube::mapper::structs::author::parse_author_badges;
+use crate::youtube::mapper::structs::author::parse_author_color;
+use crate::youtube::mapper::structs::author::parse_author_name;
+use crate::youtube::mapper::structs::author::parse_author_photo;
+use crate::youtube::mapper::structs::author::parse_author_type;
+use crate::youtube::mapper::structs::author::parse_author_username;
 use crate::youtube::mapper::structs::message::MessageRun;
 use crate::youtube::mapper::structs::message::MessageRunsWrapper;
 
@@ -72,10 +73,10 @@ struct Run {
 }
 
 fn parse_count(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<u16, Error> {
-    let run = render.primary_text.runs.get(1).ok_or("No count run found")?;
+    let run = render.primary_text.runs.get(1).ok_or(anyhow!("No count run found"))?;
     let raw_count = match run {
         MessageRun::Text { text } => text,
-        MessageRun::Emoji { .. } => return Err("Unexpected emoji in count run".into()),
+        MessageRun::Emoji { .. } => return Err(anyhow!("Unexpected emoji in count run")),
     };
 
     let count: u16 = raw_count.parse()?;

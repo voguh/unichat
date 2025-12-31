@@ -7,12 +7,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use anyhow::anyhow;
+use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::error::Error;
-use crate::shared_emotes;
 use crate::events::unichat::UniChatEmote;
+use crate::shared_emotes;
 use crate::youtube::mapper::structs::proxy_youtube_url;
 use crate::youtube::mapper::structs::ThumbnailsWrapper;
 
@@ -100,8 +101,8 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
                 MessageRun::Emoji { emoji } => {
                     match emoji {
                         Emoji::Custom { emoji_id, image, shortcuts, .. } => {
-                            let shortcut = shortcuts.first().ok_or("No shortcuts found for custom emoji")?;
-                            let last_image = image.thumbnails.last().ok_or("No thumbnails found for font-based emoji")?;
+                            let shortcut = shortcuts.first().ok_or(anyhow!("No shortcuts found for custom emoji"))?;
+                            let last_image = image.thumbnails.last().ok_or(anyhow!("No thumbnails found for font-based emoji"))?;
 
                             emotes.push(UniChatEmote {
                                 id: emoji_id.clone(),
@@ -110,7 +111,7 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
                             });
                         },
                         Emoji::FontBased { emoji_id, image, .. } => {
-                            let last_image = image.thumbnails.last().ok_or("No thumbnails found for font-based emoji")?;
+                            let last_image = image.thumbnails.last().ok_or(anyhow!("No thumbnails found for font-based emoji"))?;
                             emotes.push(UniChatEmote {
                                 id: emoji_id.clone(),
                                 code: emoji_id.clone(),
@@ -137,7 +138,7 @@ pub fn parse_message_string(message_runs: &MessageRunsWrapper) -> Result<String,
             MessageRun::Emoji { emoji } => {
                 match emoji {
                     Emoji::Custom { shortcuts, .. } => {
-                        let shortcut = shortcuts.first().ok_or("No shortcuts found for custom emoji")?;
+                        let shortcut = shortcuts.first().ok_or(anyhow!("No shortcuts found for custom emoji"))?;
                         str_message.push(shortcut.clone());
                     },
                     Emoji::FontBased { emoji_id, .. } => {

@@ -12,9 +12,9 @@ use std::sync::LazyLock;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
+use anyhow::anyhow;
+use anyhow::Error;
 use url::Url;
-
-use crate::error::Error;
 
 pub mod constants;
 pub mod properties;
@@ -147,7 +147,7 @@ pub fn safe_guard_path(base_path: &path::PathBuf, concat_str: &str) -> Result<pa
     let concatenated_path = base_path.join(concat_str);
     let resolved_path = path::absolute(concatenated_path)?;
     if !resolved_path.starts_with(base_path) {
-        return Err(Error::Message(format!("Access to path '{}' is not allowed", resolved_path.display())));
+        return Err(anyhow!("Access to path '{:?}' is not allowed", resolved_path));
     }
 
     return Ok(resolved_path);

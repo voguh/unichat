@@ -11,7 +11,9 @@ use std::collections::HashMap;
 use std::sync::LazyLock;
 use std::sync::Mutex;
 
-use crate::error::Error;
+use anyhow::anyhow;
+use anyhow::Error;
+
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatMessageEventPayload;
 use crate::events::unichat::UniChatRedemptionEventPayload;
@@ -105,7 +107,7 @@ pub fn parse_irc(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
         let channel_name = parse_channel_name(channel);
         return privmsg::parse(channel_name, text.to_owned(), message);
     } else if let IRCCommand::Raw(cmd, payload) = &message.command {
-        let channel = payload.get(0).ok_or("Missing channel name")?;
+        let channel = payload.get(0).ok_or(anyhow!("Missing channel name"))?;
         let channel_name = parse_channel_name(channel);
 
         if cmd == "CLEARCHAT" {

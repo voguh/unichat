@@ -18,9 +18,9 @@ use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
 
-use tauri::Manager;
+use anyhow::Error;
+use tauri::Manager as _;
 
-use crate::error::Error;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
@@ -28,7 +28,6 @@ include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 
 mod actix;
 mod commands;
-mod error;
 mod events;
 mod irc;
 mod plugins;
@@ -202,7 +201,7 @@ async fn main() {
             .level(log_level)
             .clear_targets()
             .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout))
-            .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir { file_name: Some(CARGO_PKG_NAME.to_string()) }))
+            .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir { file_name: Some(UNICHAT_NAME.to_string()) }))
             .build()
         )
         .plugin(tauri_plugin_opener::init())
@@ -233,5 +232,5 @@ async fn main() {
         ])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())
-        .unwrap_or_else(|e| panic!("Failed to run {} v{}!\n{:?}", CARGO_PKG_DISPLAY_NAME, CARGO_PKG_VERSION, e));
+        .unwrap_or_else(|e| panic!("Failed to run {} v{}!\n{:?}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION, e));
 }

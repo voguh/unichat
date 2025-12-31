@@ -7,32 +7,29 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use std::time::SystemTime;
-use std::time::UNIX_EPOCH;
-
 use serde_json::json;
 use serde_json::Value;
 use tauri::AppHandle;
 use tauri::Runtime;
 
-use crate::error::Error;
 use crate::events;
 use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
-use crate::utils;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
-use crate::CARGO_PKG_AUTHORS;
-use crate::CARGO_PKG_DESCRIPTION;
-use crate::CARGO_PKG_DISPLAY_NAME;
-use crate::CARGO_PKG_HOMEPAGE;
-use crate::CARGO_PKG_LICENSE_CODE;
-use crate::CARGO_PKG_LICENSE_NAME;
-use crate::CARGO_PKG_LICENSE_URL;
-use crate::CARGO_PKG_NAME;
-use crate::CARGO_PKG_VERSION;
 use crate::STATIC_APP_ICON;
 use crate::THIRD_PARTY_LICENSES;
+use crate::UNICHAT_AUTHORS;
+use crate::UNICHAT_DESCRIPTION;
+use crate::UNICHAT_DISPLAY_NAME;
+use crate::UNICHAT_HOMEPAGE;
+use crate::UNICHAT_LICENSE_CODE;
+use crate::UNICHAT_LICENSE_NAME;
+use crate::UNICHAT_LICENSE_URL;
+use crate::UNICHAT_NAME;
+use crate::UNICHAT_VERSION;
+use crate::utils;
+use crate::utils::get_current_timestamp;
+use crate::utils::properties;
+use crate::utils::properties::AppPaths;
 
 pub mod gallery;
 pub mod plugins;
@@ -42,18 +39,18 @@ pub mod scrappers;
 pub mod widgets;
 
 #[tauri::command]
-pub async fn get_app_info<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Error> {
+pub async fn get_app_info<R: Runtime>(_app: AppHandle<R>) -> Result<Value, String> {
     let metadata = json!({
-        "displayName": CARGO_PKG_DISPLAY_NAME,
-        "identifier": CARGO_PKG_NAME,
-        "version": CARGO_PKG_VERSION,
-        "description": CARGO_PKG_DESCRIPTION,
-        "authors": CARGO_PKG_AUTHORS,
-        "homepage": CARGO_PKG_HOMEPAGE,
+        "displayName": UNICHAT_DISPLAY_NAME,
+        "identifier": UNICHAT_NAME,
+        "version": UNICHAT_VERSION,
+        "description": UNICHAT_DESCRIPTION,
+        "authors": UNICHAT_AUTHORS,
+        "homepage": UNICHAT_HOMEPAGE,
         "icon": STATIC_APP_ICON,
-        "licenseCode": CARGO_PKG_LICENSE_CODE,
-        "licenseName": CARGO_PKG_LICENSE_NAME,
-        "licenseUrl": CARGO_PKG_LICENSE_URL,
+        "licenseCode": UNICHAT_LICENSE_CODE,
+        "licenseName": UNICHAT_LICENSE_NAME,
+        "licenseUrl": UNICHAT_LICENSE_URL,
 
         "licenseFile": properties::get_app_path(AppPaths::UniChatLicense).to_string_lossy().to_string(),
         "widgetsDir": properties::get_app_path(AppPaths::UniChatUserWidgets).to_string_lossy().to_string(),
@@ -67,23 +64,23 @@ pub async fn get_app_info<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Error
 /* ================================================================================================================== */
 
 #[tauri::command]
-pub async fn is_dev<R: Runtime>(_app: AppHandle<R>) -> Result<bool, Error> {
+pub async fn is_dev<R: Runtime>(_app: AppHandle<R>) -> Result<bool, String> {
     return Ok(utils::is_dev())
 }
 
 /* ================================================================================================================== */
 
 #[tauri::command]
-pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), Error> {
-    let timestamp_usec = SystemTime::now().duration_since(UNIX_EPOCH)?;
+pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), String> {
+    let timestamp_usec = get_current_timestamp().map_err(|e| format!("An error occurred on get current timestamp: {:#?}", e))?;
 
     let event = UniChatEvent::Clear(UniChatClearEventPayload {
         platform: None,
 
-        timestamp: timestamp_usec.as_secs() as i64
+        timestamp: timestamp_usec
     });
 
-    events::emit(event)?;
+    events::emit(event).map_err(|e| format!("An error occurred on emit ClearChat event: {:#?}", e))?;
 
     return Ok(());
 }

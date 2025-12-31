@@ -11,11 +11,10 @@ use serde_json::Value;
 use tauri::AppHandle;
 use tauri::Runtime;
 
-use crate::error::Error;
 use crate::utils::settings;
 
 #[tauri::command]
-pub async fn store_get_item<R: Runtime>(_app: AppHandle<R>, key: &str) -> Result<Value, Error> {
-    let raw_value = settings::get_item(key)?;
+pub async fn store_get_item<R: Runtime>(_app: AppHandle<R>, key: &str) -> Result<Value, String> {
+    let raw_value = settings::get_item(key).map_err(|e| format!("Failed to get item: {:#?}", e))?;
     return Ok(raw_value);
 }
