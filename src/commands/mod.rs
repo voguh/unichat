@@ -7,9 +7,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use std::time::SystemTime;
-use std::time::UNIX_EPOCH;
-
 use serde_json::json;
 use serde_json::Value;
 use tauri::AppHandle;
@@ -30,6 +27,7 @@ use crate::UNICHAT_LICENSE_URL;
 use crate::UNICHAT_NAME;
 use crate::UNICHAT_VERSION;
 use crate::utils;
+use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
@@ -74,15 +72,15 @@ pub async fn is_dev<R: Runtime>(_app: AppHandle<R>) -> Result<bool, String> {
 
 #[tauri::command]
 pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), String> {
-    let timestamp_usec = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| format!("An error occurred on get current timestamp: {}", e))?;
+    let timestamp_usec = get_current_timestamp().map_err(|e| format!("An error occurred on get current timestamp: {:#?}", e))?;
 
     let event = UniChatEvent::Clear(UniChatClearEventPayload {
         platform: None,
 
-        timestamp: timestamp_usec.as_secs() as i64
+        timestamp: timestamp_usec
     });
 
-    events::emit(event).map_err(|e| format!("An error occurred on emit ClearChat event: {}", e))?;
+    events::emit(event).map_err(|e| format!("An error occurred on emit ClearChat event: {:#?}", e))?;
 
     return Ok(());
 }

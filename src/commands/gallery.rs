@@ -68,7 +68,7 @@ pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Gal
 
     let mut gallery_items: Vec<GalleryItem> = Vec::new();
 
-    let gallery_read = fs::read_dir(&gallery_path).map_err(|e| format!("An error occurred on read gallery directory: {}", e))?;
+    let gallery_read = fs::read_dir(&gallery_path).map_err(|e| format!("An error occurred on read gallery directory: {:#?}", e))?;
     for entry in gallery_read {
         if let Ok(entry) = entry {
             let path = entry.path();
@@ -76,7 +76,7 @@ pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Gal
                 let title = path.file_name().and_then(|n| n.to_str()).ok_or("An error occurred on parse gallery item title")?;
                 let item_type = choose_file_type_by_path(&path);
 
-                let file_url = get_file_url(title).map_err(|e| format!("An error occurred on generate gallery item URL: {}", e))?;
+                let file_url = get_file_url(title).map_err(|e| format!("An error occurred on generate gallery item URL: {:#?}", e))?;
                 let preview_url = file_url.clone().into();
                 let url = file_url.path().into();
 
@@ -97,14 +97,14 @@ pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Gal
 pub async fn upload_gallery_items<R: Runtime>(_app: tauri::AppHandle<R>, files: Vec<String>) -> Result<(), String> {
     let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
     if !gallery_path.exists() {
-        fs::create_dir_all(&gallery_path).map_err(|e| format!("An error occurred on create gallery directory: {}", e))?;
+        fs::create_dir_all(&gallery_path).map_err(|e| format!("An error occurred on create gallery directory: {:#?}", e))?;
     }
 
     for file_path_raw in files {
         let file_path = PathBuf::from(&file_path_raw);
         let file_name = file_path.file_name().and_then(|n| n.to_str()).ok_or("An error occurred on parse gallery item title")?;
         let gallery_file_path = gallery_path.join(file_name);
-        fs::copy(&file_path, &gallery_file_path).map_err(|e| format!("An error occurred on copy gallery item: {}", e))?;
+        fs::copy(&file_path, &gallery_file_path).map_err(|e| format!("An error occurred on copy gallery item: {:#?}", e))?;
     }
 
     return Ok(());

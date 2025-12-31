@@ -29,7 +29,7 @@ pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: St
         return Err("Widget fields file does not exist".into());
     }
 
-    let result = fs::read_to_string(&fields_path).map_err(|e| format!("Failed to read widget fields file: {}", e))?;
+    let result = fs::read_to_string(&fields_path).map_err(|e| format!("Failed to read widget fields file: {:#?}", e))?;
     return Ok(result);
 }
 
@@ -45,7 +45,7 @@ pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
         return Err("Widget fieldstate file does not exist".into());
     }
 
-    let result = fs::read_to_string(&fieldstate_path).map_err(|e| format!("Failed to read widget fieldstate file: {}", e))?;
+    let result = fs::read_to_string(&fieldstate_path).map_err(|e| format!("Failed to read widget fieldstate file: {:#?}", e))?;
     return Ok(result);
 }
 
@@ -61,7 +61,7 @@ pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
         return Err("Widget fieldstate path is not a file".into());
     }
 
-    fs::write(&fieldstate_path, data).map_err(|e| format!("Failed to write widget fieldstate file: {}", e))?;
+    fs::write(&fieldstate_path, data).map_err(|e| format!("Failed to write widget fieldstate file: {:#?}", e))?;
     return Ok(());
 }
 
@@ -80,7 +80,7 @@ pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Strin
     }
 
     let mut system_widgets: Vec<String> = Vec::new();
-    let system_widgets_read = fs::read_dir(&system_widgets_dir).map_err(|e| format!("An error occurred on read system widgets dir: {}", e))?;
+    let system_widgets_read = fs::read_dir(&system_widgets_dir).map_err(|e| format!("An error occurred on read system widgets dir: {:#?}", e))?;
     for entry in system_widgets_read {
         if let Ok(entry) = entry {
             let path = entry.path();
@@ -99,7 +99,7 @@ pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Strin
     }
 
     let mut user_widgets: Vec<String> = Vec::new();
-    let user_widgets_read = fs::read_dir(&user_widgets_dir).map_err(|e| format!("An error occurred on read user widgets dir: {}", e))?;
+    let user_widgets_read = fs::read_dir(&user_widgets_dir).map_err(|e| format!("An error occurred on read user widgets dir: {:#?}", e))?;
     for entry in user_widgets_read {
         if let Ok(entry) = entry {
             let path = entry.path();
