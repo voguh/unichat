@@ -36,11 +36,20 @@ export const PluginsGridContainer = styled(SimpleGrid).attrs({
                 object-fit: contain;
             }
 
-            > .mantine-Badge-root {
+            > .badges-wrapper {
                 position: absolute;
                 top: 8px;
                 right: 8px;
+                display: flex;
+                gap: 4px;
             }
         }
     }
+`;
+
+export const PluginsHeaderStyledContainer = styled.div`
+    width: calc(780px - (16px + 11px + 11px + 28px));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 `;

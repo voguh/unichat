@@ -44,6 +44,7 @@ export interface AppMetadata {
 
     licenseFile: string;
     widgetsDir: string;
+    pluginsDir: string;
 
     thirdPartyLicenses?: ThirdPartyLicenseInfo[];
 }

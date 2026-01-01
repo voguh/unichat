@@ -9,9 +9,10 @@
 
 import React from "react";
 
-import { Badge, Card, Tooltip } from "@mantine/core";
+import { Badge, Button, Card, Tooltip } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
+import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { AppContext } from "unichat/contexts/AppContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
@@ -20,7 +21,7 @@ import { UniChatPluginMetadata } from "unichat/types";
 import { PLUGIN_STATUS_COLOR } from "unichat/utils/constants";
 
 import { PluginOverview, PluginOverviewHeader } from "./PluginOverview";
-import { PluginsGridContainer, PluginsStyledContainer } from "./styled";
+import { PluginsGridContainer, PluginsHeaderStyledContainer, PluginsStyledContainer } from "./styled";
 
 interface Props {
     children?: React.ReactNode;
@@ -84,9 +85,23 @@ export function Plugins(_props: Props): React.ReactNode {
                         <Tooltip key={plugin.name} label={plugin.name} position="bottom">
                             <Card onClick={() => openPluginDetails(plugin)} className="plugin-item">
                                 <Card.Section>
-                                    <Badge radius="xs" style={{ backgroundColor: bgColor, color: fgColor }}>
-                                        {plugin.status}
-                                    </Badge>
+                                    <div className="badges-wrapper">
+                                        {plugin.pluginPath == null ? (
+                                            <Badge
+                                                radius="xs"
+                                                style={{
+                                                    backgroundColor: "var(--mantine-color-gray-5)",
+                                                    color: "var(--mantine-color-black)"
+                                                }}
+                                            >
+                                                System
+                                            </Badge>
+                                        ) : (
+                                            <Badge radius="xs" style={{ backgroundColor: bgColor, color: fgColor }}>
+                                                {plugin.status}
+                                            </Badge>
+                                        )}
+                                    </div>
                                     <img src={getPluginIconDataUrl(plugin)} />
                                 </Card.Section>
                             </Card>
@@ -95,5 +110,21 @@ export function Plugins(_props: Props): React.ReactNode {
                 })}
             </PluginsGridContainer>
         </PluginsStyledContainer>
+    );
+}
+
+export function PluginsHeader(_props: Props): React.ReactNode {
+    const { metadata } = React.useContext(AppContext);
+
+    return (
+        <PluginsHeaderStyledContainer>
+            <span>Plugins</span>
+            <div className="left-buttons">
+                <Button variant="outline" size="xs" onClick={() => revealItemInDir(metadata.pluginsDir)}>
+                    <i className="fas fa-folder" />
+                    &nbsp;Show Plugins Folder
+                </Button>
+            </div>
+        </PluginsHeaderStyledContainer>
     );
 }

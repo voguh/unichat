@@ -19,7 +19,7 @@ import semver from "semver";
 import { AboutModal } from "./components/AboutModal";
 import { DashboardHome } from "./components/DashboardHome";
 import { Gallery } from "./components/Gallery";
-import { Plugins } from "./components/Plugins";
+import { Plugins, PluginsHeader } from "./components/Plugins";
 import { Tour } from "./components/Tour";
 import { WidgetEditor } from "./components/WidgetEditor";
 import { AppContext } from "./contexts/AppContext";
@@ -69,7 +69,7 @@ export default function App(): JSX.Element {
 
     function togglePluginsModal(): void {
         modals.open({
-            title: "Plugins",
+            title: <PluginsHeader />,
             size: "xl",
             children: <Plugins />
         });
