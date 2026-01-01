@@ -58,6 +58,7 @@
 ---@field channelId string
 ---@field channelName? string
 ---@field platform UniChatPlatform
+---@field flags table<string, string|nil>
 ---@field messageId string
 ---@field timestamp number
 
@@ -65,6 +66,7 @@
 ---@field channelId string
 ---@field channelName? string
 ---@field platform UniChatPlatform
+---@field flags table<string, string|nil>
 ---@field authorId string
 ---@field timestamp number
 

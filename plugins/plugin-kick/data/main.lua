@@ -142,6 +142,9 @@ local function handle_delete_message_event(data)
         channelName = nil,
 
         platform = UniChatPlatform:Other("kick"),
+        flags = {
+            ["unichat:experimental"] = nil
+        },
 
         messageId = data.message.id,
 
@@ -157,6 +160,9 @@ local function handle_remove_user_event(data)
         channelName = nil,
 
         platform = UniChatPlatform:Other("kick"),
+        flags = {
+            ["unichat:experimental"] = nil
+        },
 
         authorId = tostring(data.user.id),
 
