@@ -16,6 +16,7 @@ import { AppContext } from "unichat/contexts/AppContext";
 
 import { AboutSettingsTab } from "./AboutSettingsTab";
 import { CheckUpdatesSettingsTab } from "./CheckUpdatesSettingsTab";
+import { DevelopersSettingsTab } from "./DevelopersSettingsTab";
 import { GeneralSettingsTab } from "./GeneralSettingsTab";
 import { SettingsStyledContainer } from "./styled";
 
@@ -35,6 +36,11 @@ const settingsItems: Record<string, SettingsItem> = {
         title: "General",
         icon: "fas fa-cog",
         children: GeneralSettingsTab
+    },
+    developers: {
+        title: "Developers",
+        icon: "fas fa-code",
+        children: DevelopersSettingsTab
     },
     "check-updates": {
         title: "Check for Updates",
