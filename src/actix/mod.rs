@@ -12,23 +12,34 @@ use crate::utils::constants::BASE_REST_PORT;
 mod routes;
 
 pub struct ActixState {
-    pub handle: tauri::async_runtime::JoinHandle<()>
+    handle: tauri::async_runtime::JoinHandle<()>
 }
 
-pub fn new(_app: &tauri::App<tauri::Wry>) -> tauri::async_runtime::JoinHandle<()> {
-    let handler = tauri::async_runtime::spawn(async move {
-        let http_server = actix_web::HttpServer::new(move || {
-            return actix_web::App::new().wrap(actix_web::middleware::Logger::default())
-                .service(routes::ws)
-                .service(routes::ytimg)
-                .service(routes::gallery)
-                .service(routes::get_assets)
-                .service(routes::get_widget_assets)
-                .service(routes::get_widget);
-        }).bind(("127.0.0.1", BASE_REST_PORT)).expect("Failed to bind actix server to port");
+impl ActixState {
+    fn new(_app: &tauri::AppHandle<tauri::Wry>) -> Self {
+        let handle = tauri::async_runtime::spawn(async move {
+            let http_server = actix_web::HttpServer::new(move || {
+                return actix_web::App::new().wrap(actix_web::middleware::Logger::default())
+                    .service(routes::ws)
+                    .service(routes::ytimg)
+                    .service(routes::gallery)
+                    .service(routes::get_assets)
+                    .service(routes::get_widget_assets)
+                    .service(routes::get_widget);
+            }).bind(("127.0.0.1", BASE_REST_PORT)).expect("Failed to bind actix server to port");
 
-        http_server.run().await.expect("An error occurred on run actix server")
-    });
+            http_server.run().await.expect("An error occurred on run actix server")
+        });
 
-    return handler;
+        return Self { handle };
+    }
+
+    pub fn stop(&self) {
+        self.handle.abort();
+    }
+}
+
+pub fn new(app: &tauri::App<tauri::Wry>) -> ActixState {
+    let app_handle = app.handle();
+    return ActixState::new(app_handle);
 }

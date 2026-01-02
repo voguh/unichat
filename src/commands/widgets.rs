@@ -16,25 +16,6 @@ use tauri::Runtime;
 
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
-use crate::utils::settings;
-use crate::utils::settings::SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY;
-
-#[tauri::command]
-pub async fn get_default_preview_widget<R: Runtime>(_app: AppHandle<R>) -> Result<String, String> {
-    let default_preview_widget = settings::get_item(SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY)
-        .map_err(|e| format!("An error occurred on get default preview widget setting: {:#?}", e))?;
-
-    return Ok(default_preview_widget);
-}
-
-#[tauri::command]
-pub async fn set_default_preview_widget<R: Runtime>(_app: AppHandle<R>, widget: String) -> Result<(), String> {
-    settings::set_item(SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY, &widget)
-        .map_err(|e| format!("An error occurred on set default preview widget setting: {:#?}", e))?;
-    return Ok(());
-}
-
-/* ================================================================================================================== */
 
 #[tauri::command]
 pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, String> {

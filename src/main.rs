@@ -21,6 +21,7 @@ use std::path::PathBuf;
 use anyhow::Error;
 use tauri::Manager as _;
 
+use crate::actix::ActixState;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
@@ -144,7 +145,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     /* ========================================================================================== */
 
     let http_server = actix::new(app);
-    app.manage(actix::ActixState{ handle: http_server });
+    app.manage(http_server);
 
     /* ========================================================================================== */
 
@@ -160,8 +161,8 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
 
     if window.label() == "main" {
         if let tauri::WindowEvent::Destroyed = event {
-            let actix = app.state::<actix::ActixState>();
-            actix.handle.abort();
+            let http_server: tauri::State<'_, ActixState> = app.state();
+            http_server.stop();
 
             for (key, window) in app.webview_windows() {
                 if key != "main" {
@@ -213,6 +214,8 @@ async fn main() {
             commands::gallery::get_gallery_items,
             commands::gallery::upload_gallery_items,
             commands::plugins::get_plugins,
+            commands::store::settings_get_item,
+            commands::store::settings_set_item,
             commands::store::store_get_item,
             commands::tour::get_prev_tour_steps,
             commands::tour::get_tour_steps,
@@ -225,8 +228,6 @@ async fn main() {
             commands::scrappers::get_scrapper_webview_url,
             commands::scrappers::set_scrapper_webview_url,
             commands::scrappers::toggle_scrapper_webview,
-            commands::widgets::get_default_preview_widget,
-            commands::widgets::set_default_preview_widget,
             commands::widgets::get_widget_fields,
             commands::widgets::get_widget_fieldstate,
             commands::widgets::list_widgets,

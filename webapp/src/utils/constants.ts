@@ -33,3 +33,11 @@ export const PLUGIN_STATUS_COLOR = {
     [PluginStatus.ERROR]: ["var(--mantine-color-red-5)", "var(--mantine-color-white)"],
     [PluginStatus.ACTIVE]: ["var(--mantine-color-green-5)", "var(--mantine-color-black)"]
 };
+
+export enum UniChatSettings {
+    CREATE_WEBVIEW_HIDDEN = "create-webview-hidden",
+    CURRENT_TOUR_STEPS = "tour-steps",
+    PREVIOUS_TOUR_STEPS = "prev-tour-steps",
+    DEFAULT_PREVIEW_WIDGET = "default-preview-widget",
+    OPEN_TO_LAN = "open-to-lan"
+}

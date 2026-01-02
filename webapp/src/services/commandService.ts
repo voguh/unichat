@@ -11,6 +11,7 @@ import { ComboboxItemGroup } from "@mantine/core";
 import { invoke } from "@tauri-apps/api/core";
 
 import { AppMetadata, GalleryItem, UniChatPluginMetadata, UniChatScrapper, WidgetFields } from "unichat/types";
+import { UniChatSettings } from "unichat/utils/constants";
 
 export class CommandService {
     public async dispatchClearChat(): Promise<void> {
@@ -46,6 +47,14 @@ export class CommandService {
     }
 
     /* ========================================================================================== */
+
+    public async settingsGetItem<T = object>(key: UniChatSettings): Promise<T> {
+        return invoke("settings_get_item", { key });
+    }
+
+    public async settingsSetItem<T = object>(key: UniChatSettings, value: T): Promise<void> {
+        await invoke("settings_set_item", { key, value });
+    }
 
     public async storeGetItem<T = object>(key: string): Promise<T> {
         return invoke("store_get_item", { key });
@@ -100,14 +109,6 @@ export class CommandService {
     }
 
     /* ========================================================================================== */
-
-    public async getDefaultPreviewWidget(): Promise<string> {
-        return invoke("get_default_preview_widget");
-    }
-
-    public async setDefaultPreviewWidget(widget: string): Promise<void> {
-        await invoke("set_default_preview_widget", { widget });
-    }
 
     public async getWidgetFields(widget: string): Promise<Record<string, WidgetFields>> {
         const data = await invoke<string>("get_widget_fields", { widget });
