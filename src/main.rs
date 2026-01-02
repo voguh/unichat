@@ -81,10 +81,11 @@ fn copy_wrapper(src: &PathBuf, dest: &PathBuf) -> Result<(), Error> {
 }
 
 fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
-    events::init(app)?;
-    plugins::init(app)?;
     utils::properties::init(app)?;
     utils::settings::init(app)?;
+
+    events::init(app)?;
+    plugins::init(app)?;
     utils::render_emitter::init(app)?;
 
     /* ========================================================================================== */

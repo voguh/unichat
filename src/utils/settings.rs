@@ -8,6 +8,7 @@
  ******************************************************************************/
 
 use std::sync::Arc;
+use std::sync::LazyLock;
 use std::sync::OnceLock;
 
 use anyhow::anyhow;
@@ -33,8 +34,8 @@ static INSTANCE: OnceLock<Arc<Store<tauri::Wry>>> = OnceLock::new();
 
 pub const STORE_VERSION_KEY: &str = "store:version";
 pub const SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY: &str = "settings:create-webview-hidden";
-pub const SETTINGS_TOUR_CURRENT_STEPS_KEY: &str = "settings:tour-steps";
-pub const SETTINGS_TOUR_PREV_STEPS_KEY: &str = "settings:prev-tour-steps";
+pub const SETTINGS_TOUR_CURRENT_STEPS_KEY: &str = "settings:current-tour-steps";
+pub const SETTINGS_TOUR_PREVIOUS_STEPS_KEY: &str = "settings:previous-tour-steps";
 pub const SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY: &str = "settings:default-preview-widget";
 pub const SETTINGS_OPEN_TO_LAN_KEY: &str = "settings:open-to-lan";
 pub const SETTINGS_LOG_SCRAPPER_EVENTS: &str = "settings:log-scrapper-events";
@@ -57,152 +58,179 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     return Ok(());
 }
 
+static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<(), Error> + Send + Sync>>> = LazyLock::new(|| {
+    return vec![
+        Box::new(|store| {
+            let twitch_url_key = store_mount_scrapper_key("twitch-chat", "url");
+            if let Some(value) = store.get("twitch-channel-name") {
+                log::info!("Migrating legacy 'twitch-channel-name' to new key '{}'", twitch_url_key);
+                let channel_name_str: String = serde_json::from_value(value)?;
+                let value_str = format!("https://www.twitch.tv/popout/{}/chat", channel_name_str);
+                let value_raw = serde_json::to_value(value_str)?;
+                store.set(&twitch_url_key, value_raw);
+                store.delete("twitch-channel-name");
+            } else {
+                log::info!("Setting default value for '{}' setting", twitch_url_key);
+                let raw_value = serde_json::to_value("")?;
+                store.set(&twitch_url_key, raw_value);
+            }
+
+            let youtube_url_key = store_mount_scrapper_key("youtube-chat", "url");
+            if let Some(value) = store.get("youtube-video-id") {
+                log::info!("Migrating legacy 'youtube-video-id' to new key '{}'", youtube_url_key);
+                let video_id_str: String = serde_json::from_value(value)?;
+                let value_str = format!("https://www.youtube.com/live_chat?v={}", video_id_str);
+                let value_raw = serde_json::to_value(value_str)?;
+                store.set(&youtube_url_key, value_raw);
+                store.delete("youtube-video-id");
+            } else {
+                log::info!("Setting default value for '{}' setting", youtube_url_key);
+                let raw_value = serde_json::to_value("")?;
+                store.set(&youtube_url_key, raw_value);
+            }
+
+            /* ================================================================================== */
+
+            let twitch_log_level_key = store_mount_scrapper_key("twitch-chat", "log_level");
+            if let Some(value) = store.get("settings.log-twitch-events") {
+                log::info!("Migrating legacy 'settings.log-twitch-events' to new key '{}'", twitch_log_level_key);
+                store.set(&twitch_log_level_key, value);
+                store.delete("settings.log-twitch-events");
+            } else {
+                log::info!("Setting default value for '{}' setting", twitch_log_level_key);
+                let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
+                store.set(&twitch_log_level_key, raw_value);
+            }
+
+            let youtube_log_level_key = store_mount_scrapper_key("youtube-chat", "log_level");
+            if let Some(value) = store.get("settings.log-youtube-events") {
+                log::info!("Migrating legacy 'settings.log-youtube-events' to new key '{}'", youtube_log_level_key);
+                store.set(&youtube_log_level_key, value);
+                store.delete("settings.log-youtube-events");
+            } else {
+                log::info!("Setting default value for '{}' setting", youtube_log_level_key);
+                let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
+                store.set(&youtube_log_level_key, raw_value);
+            }
+
+            /* ================================================================================== */
+
+            let create_webview_hidden_key = "settings:create-webview-hidden";
+            if let Some(value) = store.get("settings.create-webview-hidden") {
+                log::info!("Migrating legacy 'settings.create-webview-hidden' to new key '{}'", create_webview_hidden_key);
+                store.set(create_webview_hidden_key, value);
+                store.delete("settings.create-webview-hidden");
+            } else {
+                log::info!("Setting default value for '{}' setting", create_webview_hidden_key);
+                let raw_value = serde_json::to_value(true)?;
+                store.set(create_webview_hidden_key, raw_value);
+            }
+
+            /* ================================================================================== */
+
+            let current_tour_steps_key = "settings:tour-steps";
+            if let Some(value) = store.get("settings.tour-steps") {
+                log::info!("Migrating legacy 'settings.tour-steps' to new key '{}'", current_tour_steps_key);
+                store.set(current_tour_steps_key, value);
+                store.delete("settings.tour-steps");
+            } else {
+                log::info!("Setting default value for '{}' setting", current_tour_steps_key);
+                let raw_value = serde_json::to_value(Vec::<String>::new())?;
+                store.set(current_tour_steps_key, raw_value);
+            }
+
+            let previous_tour_steps_key = "settings:prev-tour-steps";
+            if let Some(value) = store.get("settings.prev-tour-steps") {
+                log::info!("Migrating legacy 'settings.prev-tour-steps' to new key '{}'", previous_tour_steps_key);
+                store.set(previous_tour_steps_key, value);
+                store.delete("settings.prev-tour-steps");
+            } else {
+                log::info!("Setting default value for '{}' setting", previous_tour_steps_key);
+                let raw_value = serde_json::to_value(Vec::<String>::new())?;
+                store.set(previous_tour_steps_key, raw_value);
+            }
+
+            /* ================================================================================== */
+
+            return Ok(());
+        }),
+        Box::new(|store| {
+            let default_preview_widget_key = "settings:default-preview-widget";
+            if store.get(default_preview_widget_key).is_none() {
+                log::info!("Setting default value for '{}' setting", default_preview_widget_key);
+                let raw_value = serde_json::to_value("default")?;
+                store.set(default_preview_widget_key, raw_value);
+            }
+
+            /* ================================================================================== */
+
+            let open_to_lan_key = "settings:open-to-lan";
+            if store.get(open_to_lan_key).is_none() {
+                log::info!("Setting default value for '{}' setting", open_to_lan_key);
+                let raw_value = serde_json::to_value(false)?;
+                store.set(open_to_lan_key, raw_value);
+            }
+
+            /* ================================================================================== */
+
+            let log_scrapper_events_key = "settings:log-scrapper-events";
+            if store.get(log_scrapper_events_key).is_none() {
+                log::info!("Setting default value for '{}' setting", log_scrapper_events_key);
+                let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
+                store.set(log_scrapper_events_key, raw_value);
+            }
+
+            let twitch_log_level_key = store_mount_scrapper_key("twitch-chat", "log_level");
+            if store.get(&twitch_log_level_key).is_some() {
+                log::info!("Removing deprecated key '{}'", twitch_log_level_key);
+                store.delete(twitch_log_level_key);
+            }
+
+            let youtube_log_level_key = store_mount_scrapper_key("youtube-chat", "log_level");
+            if store.get(&youtube_log_level_key).is_some() {
+                log::info!("Removing deprecated key '{}'", youtube_log_level_key);
+                store.delete(youtube_log_level_key);
+            }
+
+            /* ================================================================================== */
+
+            let current_tour_steps_key = "settings:current-tour-steps";
+            if let Some(value) = store.get("settings:tour-steps") {
+                log::info!("Migrating deprecated 'settings:tour-steps' to '{}'", current_tour_steps_key);
+                store.set(current_tour_steps_key, value);
+                store.delete("settings:tour-steps");
+            }
+
+            let previous_tour_steps_key = "settings:previous-tour-steps";
+            if let Some(value) = store.get("settings:prev-tour-steps") {
+                log::info!("Migrating deprecated 'settings:prev-tour-steps' to '{}'", previous_tour_steps_key);
+                store.set(previous_tour_steps_key, value);
+                store.delete("settings:prev-tour-steps");
+            }
+
+            return Ok(());
+        })
+    ]
+});
+
 fn migrate_store_version() -> Result<(), Error> {
     let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
-    let mut current_version = get_store_version().unwrap_or_default();
-    let target_version: u8 = 2;
+    let mut current_version = get_store_version().unwrap_or(0);
+    for (idx, migration) in MIGRATIONS.iter().enumerate() {
+        let idx: u8 = idx.try_into()?;
 
-    while current_version < target_version {
-        match current_version {
-            0 => {
-                let twitch_channel_name = store.get("twitch-channel-name");
-                if let Some(value) = twitch_channel_name {
-                    log::info!("Migrating Twitch channel name setting to scrapper property format");
-                    let key = store_mount_scrapper_key("twitch-chat", "url");
-                    let channel_name_str: String = serde_json::from_value(value)?;
-                    let value_str = format!("https://www.twitch.tv/popout/{}/chat", channel_name_str);
-                    let value_raw = serde_json::to_value(value_str)?;
-                    store.set(key, value_raw);
-                    store.delete("twitch-channel-name");
-                }
+        if current_version <= idx {
+            let version = idx + 1;
 
-                let youtube_video_id = store.get("youtube-video-id");
-                if let Some(value) = youtube_video_id {
-                    log::info!("Migrating YouTube video ID setting to scrapper property format");
-                    let key = store_mount_scrapper_key("youtube-chat", "url");
-                    let video_id_str: String = serde_json::from_value(value)?;
-                    let value_str = format!("https://www.youtube.com/live_chat?v={}", video_id_str);
-                    let value_raw = serde_json::to_value(value_str)?;
-                    store.set(key, value_raw);
-                    store.delete("youtube-video-id");
-                }
+            log::info!("Applying store migration for version {}", version);
+            migration(store)?;
+            log::info!("Store migrated to version {}", version);
 
-                /* ============================================================================== */
-
-                let twitch_log_level = store.get("settings.log-twitch-events");
-                if let Some(value) = twitch_log_level {
-                    log::info!("Migrating Twitch log level setting to scrapper property format");
-                    let key = store_mount_scrapper_key("twitch-chat", "log_level");
-                    store.set(key, value);
-                    store.delete("settings.log-twitch-events");
-                } else {
-                    log::info!("Setting default log level for Twitch scrapper");
-                    let key = store_mount_scrapper_key("twitch-chat", "log_level");
-                    let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
-                    store.set(key, raw_value);
-                }
-
-                let youtube_log_level = store.get("settings.log-youtube-events");
-                if let Some(value) = youtube_log_level {
-                    log::info!("Migrating YouTube log level setting to scrapper property format");
-                    let key = store_mount_scrapper_key("youtube-chat", "log_level");
-                    store.set(key, value);
-                    store.delete("settings.log-youtube-events");
-                } else {
-                    log::info!("Setting default log level for YouTube scrapper");
-                    let key = store_mount_scrapper_key("youtube-chat", "log_level");
-                    let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
-                    store.set(key, raw_value);
-                }
-
-                /* ============================================================================== */
-
-                if let Some(value) = store.get("settings.create-webview-hidden") {
-                    log::info!("Migrating legacy 'settings.create-webview-hidden' to new key '{}'", SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY);
-                    store.set(SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY, value);
-                    store.delete("settings.create-webview-hidden");
-                } else {
-                    log::info!("Setting default value for {} setting", SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY);
-                    let raw_value = serde_json::to_value(true)?;
-                    store.set(SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY, raw_value);
-                }
-
-                /* ============================================================================== */
-
-                if let Some(value) = store.get("settings.tour-steps") {
-                    log::info!("Migrating legacy 'settings.tour-steps' to new key '{}'", SETTINGS_TOUR_CURRENT_STEPS_KEY);
-                    store.set(SETTINGS_TOUR_CURRENT_STEPS_KEY, value);
-                    store.delete("settings.tour-steps");
-                } else {
-                    log::info!("Setting default value for {} setting", SETTINGS_TOUR_CURRENT_STEPS_KEY);
-                    let raw_value = serde_json::to_value(Vec::<String>::new())?;
-                    store.set(SETTINGS_TOUR_CURRENT_STEPS_KEY, raw_value);
-                }
-
-                if let Some(value) = store.get("settings.prev-tour-steps") {
-                    log::info!("Migrating legacy 'settings.prev-tour-steps' to new key '{}'", SETTINGS_TOUR_PREV_STEPS_KEY);
-                    store.set(SETTINGS_TOUR_PREV_STEPS_KEY, value);
-                    store.delete("settings.prev-tour-steps");
-                } else {
-                    log::info!("Setting default value for {} setting", SETTINGS_TOUR_PREV_STEPS_KEY);
-                    let raw_value = serde_json::to_value(Vec::<String>::new())?;
-                    store.set(SETTINGS_TOUR_PREV_STEPS_KEY, raw_value);
-                }
-
-                /* ============================================================================== */
-
-                let raw_value = serde_json::to_value(1)?;
-                store.set(STORE_VERSION_KEY, raw_value);
-                current_version = 1;
-            }
-            1 => {
-                if let None = store.get(SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY) {
-                    log::info!("Setting default value for {} setting", SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY);
-                    let raw_value = serde_json::to_value("default")?;
-                    store.set(SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY, raw_value);
-                }
-
-                /* ============================================================================== */
-
-                let raw_value = serde_json::to_value(2)?;
-                store.set(STORE_VERSION_KEY, raw_value);
-                current_version = 2;
-            }
-            2 => {
-                if let None = store.get(SETTINGS_OPEN_TO_LAN_KEY) {
-                    log::info!("Setting default value for {} setting", SETTINGS_OPEN_TO_LAN_KEY);
-                    let raw_value = serde_json::to_value(false)?;
-                    store.set(SETTINGS_OPEN_TO_LAN_KEY, raw_value);
-                }
-
-                if let None = store.get(SETTINGS_LOG_SCRAPPER_EVENTS) {
-                    log::info!("Setting default value for {} setting", SETTINGS_LOG_SCRAPPER_EVENTS);
-                    let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
-                    store.set(SETTINGS_LOG_SCRAPPER_EVENTS, raw_value);
-                }
-
-                if let Some(_) = store.get(store_mount_scrapper_key("twitch-chat", "log_level")) {
-                    log::info!("Removing deprecated scrapper property 'log_level' from 'twitch' scrapper");
-                    store.delete(store_mount_scrapper_key("twitch-chat", "log_level"));
-                }
-
-                if let Some(_) = store.get(store_mount_scrapper_key("youtube-chat", "log_level")) {
-                    log::info!("Removing deprecated scrapper property 'log_level' from 'youtube' scrapper");
-                    store.delete(store_mount_scrapper_key("youtube-chat", "log_level"));
-                }
-
-                /* ============================================================================== */
-
-                let raw_value = serde_json::to_value(3)?;
-                store.set(STORE_VERSION_KEY, raw_value);
-                current_version = 3;
-            }
-            _ => {
-                return Err(anyhow!("No migration path for version {}", current_version));
-            }
+            let raw_value = serde_json::to_value(version)?;
+            store.set(STORE_VERSION_KEY, raw_value);
+            current_version += version;
         }
-
     }
 
     return Ok(());
