@@ -110,6 +110,7 @@ export default function App(): JSX.Element {
                                     size="sm"
                                     onClick={() => setSelectedTab("widgetEditor")}
                                     variant={selectedTab === "widgetEditor" ? "filled" : "default"}
+                                    data-tour="widget-editor"
                                     color="green"
                                 >
                                     <i className="fas fa-pencil-ruler" />
@@ -164,7 +165,11 @@ export default function App(): JSX.Element {
                         </Tooltip>
 
                         <Tooltip label="Settings" position="right" withArrow>
-                            <Button variant="default" onClick={() => setSettingsModalOpen(true)} data-tour="settings">
+                            <Button
+                                variant="default"
+                                onClick={() => setSettingsModalOpen(true)}
+                                data-tour="settings-modal-toggle"
+                            >
                                 <i className="fas fa-sliders-h" />
                             </Button>
                         </Tooltip>

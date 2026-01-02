@@ -16,7 +16,6 @@ import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter"
 import { Dimensions } from "unichat/types";
 
 import { stageBuilder } from "./stages/genericStageBuilder";
-import { settingsStageBuilder } from "./stages/settingsStageBuilder";
 import { widgetsSelectorBuilder } from "./stages/widgetsSelectorBuilder";
 import { TourStyledContainer } from "./styled";
 
@@ -84,18 +83,6 @@ const steps: TourStep[] = [
         builder: stageBuilder("preview-open-in-browser", "Open preview in browser", null, 50, -300)
     },
     {
-        id: "fd2ac461-b46c-45db-8cd9-8737d7e64f40",
-        builder: stageBuilder("settings", "Settings", null, -50, 200)
-    },
-    {
-        id: "e4600e88-23a2-4545-a79f-b20bba52d46b",
-        builder: settingsStageBuilder("settings-check-for-updates", "Check for updates", null, -50, 200)
-    },
-    {
-        id: "78a4249a-143d-4ca0-a312-92c588c6c8dc",
-        builder: settingsStageBuilder("settings-about", "Unichat about", null, -50, 200)
-    },
-    {
         id: "908b35ad-0127-49af-b37a-d3ec625f1d0e",
         builder: stageBuilder(
             "youtube-chat--url-input",
@@ -113,6 +100,38 @@ const steps: TourStep[] = [
             "Also you can paste normal twitch url or direct channel name",
             50,
             300
+        )
+    },
+
+    {
+        id: "21fe0e64-d83f-460e-94f3-519ef3843929a",
+        builder: stageBuilder(
+            "widget-editor",
+            "Widget Editor",
+            "Here you can edit your created/downloaded widgets (System widgets aren't editable)",
+            50,
+            400
+        )
+    },
+
+    {
+        id: "fd2ac461-b46c-45db-8cd9-8737d7e64f40",
+        builder: stageBuilder(
+            "settings-modal-toggle",
+            "Settings",
+            "Manage application settings, check for updates and more",
+            -50,
+            400
+        )
+    },
+    {
+        id: "d4ea3587-6b7d-4ae9-9717-53c7253037aa",
+        builder: stageBuilder(
+            "plugins-modal-toggle",
+            "Plugins",
+            "Here you can see all installed plugins and view more information about them",
+            -50,
+            400
         )
     }
 ];
