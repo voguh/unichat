@@ -25,13 +25,10 @@ interface Props {
 export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
     const [widgets, setWidgets] = React.useState<ComboboxData>([]);
     const [settings, setSettings] = React.useState<Record<string, unknown>>({});
-    const [oldSettings, setOldSettings] = React.useState<Record<string, unknown>>({});
 
-    const { metadata } = React.useContext(AppContext);
+    const { metadata, requiresRestart, setRequiresRestart } = React.useContext(AppContext);
 
     async function updateSetting<T>(key: string, value: T): Promise<void> {
-        setOldSettings((prev) => ({ ...prev, [key]: settings[key] }));
-
         const settingsCopy = { ...settings };
         if (settingsCopy[key] == null) {
             throw new Error(`Setting with key "${key}" does not exist.`);
@@ -67,7 +64,6 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
             const newSettings = { ...settings };
             newSettings[UniChatSettings.DEFAULT_PREVIEW_WIDGET] = defaultPreviewWidget;
             newSettings[UniChatSettings.OPEN_TO_LAN] = lanStatus;
-            setOldSettings(newSettings);
             setSettings(newSettings);
         }
 
@@ -91,10 +87,12 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
                     label="Open to LAN"
                     description="Allow other devices on your local network view widgets."
                     checked={settings[UniChatSettings.OPEN_TO_LAN] as boolean}
-                    onChange={(event) => updateSetting(UniChatSettings.OPEN_TO_LAN, event.currentTarget.checked)}
+                    onChange={(evt) =>
+                        updateSetting(UniChatSettings.OPEN_TO_LAN, evt.currentTarget.checked).then(setRequiresRestart)
+                    }
                 />
 
-                {oldSettings[UniChatSettings.OPEN_TO_LAN] !== settings[UniChatSettings.OPEN_TO_LAN] && (
+                {requiresRestart && (
                     <Alert variant="light" color="blue" icon={<i className="fas fa-info-circle" />}>
                         <span>
                             <strong>{metadata.displayName}</strong> must be restarted for this setting to take effect.

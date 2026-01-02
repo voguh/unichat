@@ -20,6 +20,8 @@ import { UniChatRelease } from "unichat/types/unichatApi";
 export interface AppContextProps {
     metadata: AppMetadata;
     releases: UniChatRelease[];
+    requiresRestart: boolean;
+    setRequiresRestart: () => void;
     showWidgetPreview: boolean;
     setShowWidgetPreview: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -36,6 +38,7 @@ export function AppContextProvider({ children }: Props): React.ReactNode {
     const [metadata, setMetadata] = React.useState<AppMetadata>(null);
     const [releases, setReleases] = React.useState<UniChatRelease[]>([]);
     const [showWidgetPreview, setShowWidgetPreview] = React.useState(true);
+    const [requiresRestart, setRequiresRestart] = React.useState(false);
     const [error, setError] = React.useState(false);
 
     const isMounted = React.useRef(false);
@@ -118,7 +121,16 @@ export function AppContextProvider({ children }: Props): React.ReactNode {
     }
 
     return (
-        <AppContext.Provider value={{ metadata, releases, setShowWidgetPreview, showWidgetPreview }}>
+        <AppContext.Provider
+            value={{
+                metadata,
+                releases,
+                requiresRestart,
+                setRequiresRestart: () => setRequiresRestart(true),
+                showWidgetPreview,
+                setShowWidgetPreview
+            }}
+        >
             {children}
         </AppContext.Provider>
     );
