@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -16,14 +16,14 @@ import clsx from "clsx";
 
 import { AppContext } from "unichat/contexts/AppContext";
 
-import { AboutModalStyledContainer } from "./styled";
+import { AboutSettingsTabStyledContainer } from "./styled";
 import { ThirdPartyLicenses } from "./ThirdPartyLicenses";
 
 interface Props {
     children?: React.ReactNode;
 }
 
-export function AboutModal(_props: Props): React.ReactNode {
+export function AboutSettingsTab(_props: Props): React.ReactNode {
     const [isCreditsOpen, setIsCreditsOpen] = React.useState(false);
     const [url, setUrl] = React.useState<string>("");
 
@@ -45,7 +45,7 @@ export function AboutModal(_props: Props): React.ReactNode {
     }, []);
 
     return (
-        <AboutModalStyledContainer>
+        <AboutSettingsTabStyledContainer>
             <div className="app-image">
                 <img src={url} />
             </div>
@@ -87,6 +87,6 @@ export function AboutModal(_props: Props): React.ReactNode {
                     </Button>
                 </div>
             </div>
-        </AboutModalStyledContainer>
+        </AboutSettingsTabStyledContainer>
     );
 }

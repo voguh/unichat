@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -9,13 +9,14 @@
 
 import styled from "styled-components";
 
-export const AboutModalStyledContainer = styled.div`
+export const AboutSettingsTabStyledContainer = styled.div`
     position: relative;
+    height: 100%;
     overflow: hidden;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
 
     > div {
         > span {
@@ -52,8 +53,10 @@ export const AboutModalStyledContainer = styled.div`
     }
 
     > .app-footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
         width: 100%;
-        margin-top: 32px;
         display: flex;
         justify-content: space-between;
     }

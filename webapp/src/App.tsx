@@ -9,24 +9,21 @@
 
 import React from "react";
 
-import { createTheme, MantineProvider, Badge, Button, Card, Divider, Menu, Tooltip } from "@mantine/core";
+import { createTheme, MantineProvider, Button, Card, Tooltip, Modal } from "@mantine/core";
 import { ModalsProvider, modals } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
-import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
-import { marked } from "marked";
+import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import semver from "semver";
 
-import { AboutModal } from "./components/AboutModal";
 import { DashboardHome } from "./components/DashboardHome";
 import { Gallery } from "./components/Gallery";
 import { Plugins, PluginsHeader } from "./components/Plugins";
+import { SettingsModal } from "./components/SettingsModal";
 import { Tour } from "./components/Tour";
 import { WidgetEditor } from "./components/WidgetEditor";
 import { AppContext } from "./contexts/AppContext";
 import { commandService } from "./services/commandService";
-import { eventEmitter } from "./services/eventEmitter";
-import { loggerService } from "./services/loggerService";
-import { DashboardStyledContainer, ReleaseNotesWrapper } from "./styles/DashboardStyled";
+import { DashboardStyledContainer } from "./styles/DashboardStyled";
 
 const theme = createTheme({
     fontFamily: "Roboto, sans-serif",
@@ -45,18 +42,15 @@ const tabs = {
 };
 
 export default function App(): JSX.Element {
-    const [hasUpdate, setHasUpdate] = React.useState(false);
-    const [hasNewsTour, setHasNewsTour] = React.useState(false);
     const [selectedTab, setSelectedTab] = React.useState<keyof typeof tabs>("dashboard");
+    const [settingsModalOpen, setSettingsModalOpen] = React.useState<boolean | string>(false);
 
-    const { metadata, setShowWidgetPreview, showWidgetPreview } = React.useContext(AppContext);
+    const { metadata, releases, setShowWidgetPreview, showWidgetPreview } = React.useContext(AppContext);
+
+    const isMounted = React.useRef(false);
 
     async function handleClearChat(): Promise<void> {
         await commandService.dispatchClearChat();
-    }
-
-    function toggleAboutModal(): void {
-        modals.open({ title: `About ${metadata.displayName}`, children: <AboutModal /> });
     }
 
     function toggleGallery(): void {
@@ -75,54 +69,23 @@ export default function App(): JSX.Element {
         });
     }
 
-    async function checkForUpdates(): Promise<void> {
-        const latestRelease = `${metadata.homepage.replace("https://github.com", "https://api.github.com/repos")}/releases/latest`;
-        const response = await fetch(latestRelease, { method: "GET", cache: "no-cache" });
-        if (!response.ok) {
-            loggerService.error("Failed to fetch latest release information.");
+    function checkForUpdates(): void {
+        const currentVersion = metadata.version;
+        const latestRelease = releases.find((release) => !release.prerelease);
 
-            return;
-        }
-
-        const data = await response.json();
-        const body = data.body ?? "";
-        const latestVersion = data.tag_name;
-        if (semver.gt(latestVersion, metadata.version)) {
-            const parsedBody = { __html: marked.parse(body) };
-            setHasUpdate(true);
-            modals.openConfirmModal({
-                title: `A new version of ${metadata.displayName} is available!`,
-                size: "lg",
-                children: (
-                    <ReleaseNotesWrapper>
-                        <h2>
-                            {latestVersion}
-                            <Badge variant="outline" size="xs" color="green">
-                                Latest
-                            </Badge>
-                        </h2>
-                        <Divider />
-                        <div className="release-notes" dangerouslySetInnerHTML={parsedBody} />
-                    </ReleaseNotesWrapper>
-                ),
-                labels: { confirm: "Download Update", cancel: "Close" },
-                groupProps: { justify: "center" },
-                cancelProps: { display: "none" },
-                onConfirm: () => openUrl(data.html_url)
-            });
+        if (latestRelease && semver.gt(latestRelease.name, currentVersion)) {
+            setSettingsModalOpen("check-updates");
         }
     }
 
     React.useEffect(() => {
-        commandService.tourStepsHasNew().then((hasNew) => setHasNewsTour(hasNew));
-        commandService
-            .isDev()
-            .then(
-                (isDev) =>
-                    !isDev &&
-                    checkForUpdates().catch((err) => loggerService.error("Failed to check for updates: {}", err))
-            );
-    }, []);
+        if (isMounted.current) {
+            return;
+        }
+
+        isMounted.current = true;
+        checkForUpdates();
+    });
 
     return (
         <MantineProvider defaultColorScheme="dark" theme={theme}>
@@ -200,55 +163,11 @@ export default function App(): JSX.Element {
                             </Button>
                         </Tooltip>
 
-                        <Menu position="right">
-                            <Menu.Target>
-                                <Button variant="default" data-tour="settings">
-                                    <i className="fas fa-sliders-h" />
-                                </Button>
-                            </Menu.Target>
-                            <Menu.Dropdown>
-                                <Menu.Sub>
-                                    <Menu.Sub.Target>
-                                        <Menu.Sub.Item leftSection={<i className="fas fa-compass" />}>
-                                            Tour
-                                        </Menu.Sub.Item>
-                                    </Menu.Sub.Target>
-                                    <Menu.Sub.Dropdown>
-                                        <Menu.Item
-                                            leftSection={<i className="fas fa-map" />}
-                                            onClick={() => eventEmitter.emit("tour:start", { type: "full" })}
-                                        >
-                                            Full tour
-                                        </Menu.Item>
-                                        {hasNewsTour && (
-                                            <Menu.Item
-                                                leftSection={<i className="fas fa-sparkles" />}
-                                                color="green"
-                                                onClick={() => eventEmitter.emit("tour:start", { type: "whats-new" })}
-                                            >
-                                                What is new?
-                                            </Menu.Item>
-                                        )}
-                                    </Menu.Sub.Dropdown>
-                                </Menu.Sub>
-                                <Menu.Item
-                                    leftSection={<i className="fas fa-sync" />}
-                                    color={hasUpdate ? "green" : null}
-                                    onClick={checkForUpdates}
-                                    data-tour="settings-check-for-updates"
-                                >
-                                    {hasUpdate ? "A new version is available!" : "Check for updates"}
-                                </Menu.Item>
-                                <Menu.Divider />
-                                <Menu.Item
-                                    leftSection={<i className="fas fa-info-circle" />}
-                                    onClick={toggleAboutModal}
-                                    data-tour="settings-about"
-                                >
-                                    About
-                                </Menu.Item>
-                            </Menu.Dropdown>
-                        </Menu>
+                        <Tooltip label="Settings" position="right" withArrow>
+                            <Button variant="default" onClick={() => setSettingsModalOpen(true)} data-tour="settings">
+                                <i className="fas fa-sliders-h" />
+                            </Button>
+                        </Tooltip>
                     </Card>
                     <div className="content">
                         {tabs[selectedTab] && React.createElement(tabs[selectedTab].component)}
@@ -256,6 +175,17 @@ export default function App(): JSX.Element {
                 </DashboardStyledContainer>
 
                 <Tour />
+                <Modal
+                    opened={settingsModalOpen != null && settingsModalOpen !== false}
+                    size="100%"
+                    withCloseButton={false}
+                    onClose={() => setSettingsModalOpen(false)}
+                >
+                    <SettingsModal
+                        onClose={() => setSettingsModalOpen(false)}
+                        startupTab={typeof settingsModalOpen === "string" ? settingsModalOpen : null}
+                    />
+                </Modal>
             </ModalsProvider>
         </MantineProvider>
     );
