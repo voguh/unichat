@@ -29,7 +29,6 @@ use crate::scrapper;
 use crate::scrapper::UniChatScrapper;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
-use crate::utils::constants::TWITCH_CHAT_WINDOW;
 use crate::utils::is_dev;
 use crate::utils::is_valid_twitch_channel_name;
 use crate::utils::properties;
@@ -41,6 +40,7 @@ use crate::utils::settings::SettingLogEventLevel;
 
 mod mapper;
 
+pub const SCRAPPER_ID: &str = "twitch-chat";
 static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
 
 pub static TWITCH_CHEERMOTES: LazyLock<RwLock<HashSet<String>>> = LazyLock::new(|| RwLock::new(HashSet::new()));
@@ -54,7 +54,7 @@ fn dispatch_event(mut payload: Value) -> Result<(), Error> {
     }
 
     if payload.get("scrapperId").is_none() {
-        payload["scrapperId"] = serde_json::json!(TWITCH_CHAT_WINDOW);
+        payload["scrapperId"] = serde_json::json!(SCRAPPER_ID);
     }
 
     if payload.get("timestamp").is_none() {
@@ -118,7 +118,7 @@ fn handle_cheermotes_event(event_type: &str, payload: &Value) -> Result<(), Erro
 
 fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     let app_log_dir = properties::get_app_path(AppPaths::AppLog);
-    let twitch_log_dir = app_log_dir.join("twitch");
+    let twitch_log_dir = app_log_dir.join(SCRAPPER_ID);
     if !twitch_log_dir.exists() {
         fs::create_dir_all(&twitch_log_dir).unwrap();
     }
@@ -129,7 +129,7 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
 }
 
 fn handle_ws_event(_event_type: &str, message: &Value) -> Result<(), Error> {
-    let log_events = settings::get_scrapper_property(TWITCH_CHAT_WINDOW, "log_level").unwrap_or(SettingLogEventLevel::OnlyErrors);
+    let log_events = settings::get_scrapper_events_log_level();
 
     if is_dev() || log_events == SettingLogEventLevel::AllEvents {
         log_action("events-raw.log", &format!("{:?}", message));
@@ -162,7 +162,7 @@ fn handle_ws_event(_event_type: &str, message: &Value) -> Result<(), Error> {
 
 fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
     let message = IRCMessage::parse(payload.get("message"))?;
-    let log_events = settings::get_scrapper_property(TWITCH_CHAT_WINDOW, "log_level").unwrap_or(SettingLogEventLevel::OnlyErrors);
+    let log_events = settings::get_scrapper_events_log_level();
 
     if is_dev() || log_events == SettingLogEventLevel::AllEvents {
         log_action("events-raw.log", &format!("{:?}", message));
@@ -217,7 +217,7 @@ struct TwitchUniChatScrapper;
 
 impl UniChatScrapper for TwitchUniChatScrapper {
     fn id(&self) -> &str {
-        return TWITCH_CHAT_WINDOW;
+        return SCRAPPER_ID;
     }
 
     fn name(&self) -> &str {
@@ -285,7 +285,7 @@ impl UniChatScrapper for TwitchUniChatScrapper {
         let event_type = event.get("type").and_then(|v| v.as_str())
             .ok_or(anyhow!("Missing or invalid 'type' field in Twitch raw event payload"))?;
 
-        if scrapper_id != TWITCH_CHAT_WINDOW {
+        if scrapper_id != SCRAPPER_ID {
             return Ok(());
         }
 

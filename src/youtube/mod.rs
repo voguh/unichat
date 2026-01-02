@@ -22,7 +22,6 @@ use crate::events;
 use crate::scrapper;
 use crate::scrapper::UniChatScrapper;
 use crate::shared_emotes;
-use crate::utils::constants::YOUTUBE_CHAT_WINDOW;
 use crate::utils::is_dev;
 use crate::utils::is_valid_youtube_channel_id;
 use crate::utils::is_valid_youtube_video_id;
@@ -35,6 +34,7 @@ use crate::utils::settings::SettingLogEventLevel;
 
 mod mapper;
 
+pub const SCRAPPER_ID: &str = "youtube-chat";
 static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
 
 /* ================================================================================================================== */
@@ -45,7 +45,7 @@ fn dispatch_event(mut payload: Value) -> Result<(), Error> {
     }
 
     if payload.get("scrapperId").is_none() {
-        payload["scrapperId"] = serde_json::json!(YOUTUBE_CHAT_WINDOW);
+        payload["scrapperId"] = serde_json::json!(SCRAPPER_ID);
     }
 
     if payload.get("timestamp").is_none() {
@@ -81,7 +81,7 @@ fn handle_idle_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
 
 fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     let app_log_dir = properties::get_app_path(AppPaths::AppLog);
-    let youtube_log_dir = app_log_dir.join("youtube");
+    let youtube_log_dir = app_log_dir.join(SCRAPPER_ID);
     if !youtube_log_dir.exists() {
         fs::create_dir_all(&youtube_log_dir).unwrap();
     }
@@ -95,7 +95,7 @@ fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> 
     let actions = payload.get("actions").and_then(|v| v.as_array())
         .ok_or_else(|| anyhow!("Missing or invalid 'actions' field in '{event_type}' event payload"))?;
 
-    let log_events = settings::get_scrapper_property(YOUTUBE_CHAT_WINDOW, "log_level").unwrap_or(SettingLogEventLevel::OnlyErrors);
+    let log_events = settings::get_scrapper_events_log_level();
 
     for action in actions {
         if is_dev() || log_events == SettingLogEventLevel::AllEvents {
@@ -143,7 +143,7 @@ struct YouTubeUniChatScrapper;
 
 impl UniChatScrapper for YouTubeUniChatScrapper {
     fn id(&self) -> &str {
-        return YOUTUBE_CHAT_WINDOW;
+        return SCRAPPER_ID;
     }
 
     fn name(&self) -> &str {
@@ -215,7 +215,7 @@ impl UniChatScrapper for YouTubeUniChatScrapper {
         let event_type = event.get("type").and_then(|v| v.as_str())
             .ok_or_else(|| anyhow!("Missing or invalid 'type' field in YouTube raw event payload"))?;
 
-        if scrapper_id != YOUTUBE_CHAT_WINDOW {
+        if scrapper_id != SCRAPPER_ID {
             return Ok(());
         }
 

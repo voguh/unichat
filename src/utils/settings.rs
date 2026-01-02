@@ -37,6 +37,7 @@ pub const SETTINGS_TOUR_CURRENT_STEPS_KEY: &str = "settings:tour-steps";
 pub const SETTINGS_TOUR_PREV_STEPS_KEY: &str = "settings:prev-tour-steps";
 pub const SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY: &str = "settings:default-preview-widget";
 pub const SETTINGS_OPEN_TO_LAN_KEY: &str = "settings:open-to-lan";
+pub const SETTINGS_LOG_SCRAPPER_EVENTS: &str = "settings:log-scrapper-events";
 
 const SCRAPPER_KEY_TEMPLATE: &str = "scrapper:{}:{}";
 fn store_mount_scrapper_key(scrapper_id: &str, key: &str) -> String {
@@ -60,7 +61,7 @@ fn migrate_store_version() -> Result<(), Error> {
     let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
     let mut current_version = get_store_version().unwrap_or_default();
-    let target_version: u8 = 3;
+    let target_version: u8 = 2;
 
     while current_version < target_version {
         match current_version {
@@ -175,6 +176,22 @@ fn migrate_store_version() -> Result<(), Error> {
                     store.set(SETTINGS_OPEN_TO_LAN_KEY, raw_value);
                 }
 
+                if let None = store.get(SETTINGS_LOG_SCRAPPER_EVENTS) {
+                    log::info!("Setting default value for {} setting", SETTINGS_LOG_SCRAPPER_EVENTS);
+                    let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
+                    store.set(SETTINGS_LOG_SCRAPPER_EVENTS, raw_value);
+                }
+
+                if let Some(_) = store.get(store_mount_scrapper_key("twitch-chat", "log_level")) {
+                    log::info!("Removing deprecated scrapper property 'log_level' from 'twitch' scrapper");
+                    store.delete(store_mount_scrapper_key("twitch-chat", "log_level"));
+                }
+
+                if let Some(_) = store.get(store_mount_scrapper_key("youtube-chat", "log_level")) {
+                    log::info!("Removing deprecated scrapper property 'log_level' from 'youtube' scrapper");
+                    store.delete(store_mount_scrapper_key("youtube-chat", "log_level"));
+                }
+
                 /* ============================================================================== */
 
                 let raw_value = serde_json::to_value(3)?;
@@ -262,4 +279,12 @@ pub fn set_scrapper_property<V: serde::ser::Serialize>(scrapper_id: &str, proper
     store.set(key, raw_value);
 
     return Ok(());
+}
+
+pub fn get_scrapper_events_log_level() -> SettingLogEventLevel {
+    if let Ok(level) = get_item(SETTINGS_LOG_SCRAPPER_EVENTS) {
+        return level;
+    } else {
+        return SettingLogEventLevel::OnlyErrors;
+    }
 }

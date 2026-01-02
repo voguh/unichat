@@ -202,7 +202,7 @@ impl UniChatScrapper for LuaUniChatScrapper {
             }
         } else {
             let lua = get_lua_runtime()?;
-            let log_events = settings::get_scrapper_property(&self.id, "log_level").unwrap_or(SettingLogEventLevel::OnlyErrors);
+            let log_events = settings::get_scrapper_events_log_level();
 
             if is_dev() || log_events == SettingLogEventLevel::AllEvents {
                 self.log_action("events-raw.log", &event);
