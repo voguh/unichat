@@ -14,8 +14,8 @@ export const AboutSettingsTabStyledContainer = styled.div`
     height: 100%;
     overflow: hidden;
     display: flex;
+    justify-content: flex-start;
     align-items: center;
-    justify-content: center;
     flex-direction: column;
 
     > div {
