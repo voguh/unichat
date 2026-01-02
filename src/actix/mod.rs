@@ -8,6 +8,8 @@
  ******************************************************************************/
 
 use crate::utils::constants::BASE_REST_PORT;
+use crate::utils::settings;
+use crate::utils::settings::SETTINGS_OPEN_TO_LAN_KEY;
 
 mod routes;
 
@@ -18,6 +20,11 @@ pub struct ActixState {
 impl ActixState {
     fn new(_app: &tauri::AppHandle<tauri::Wry>) -> Self {
         let handle = tauri::async_runtime::spawn(async move {
+            let mut host = "127.0.0.1";
+            if settings::get_item(SETTINGS_OPEN_TO_LAN_KEY).is_ok_and(|v: bool| v == true) {
+                host = "0.0.0.0";
+            }
+
             let http_server = actix_web::HttpServer::new(move || {
                 return actix_web::App::new().wrap(actix_web::middleware::Logger::default())
                     .service(routes::ws)
@@ -26,7 +33,7 @@ impl ActixState {
                     .service(routes::get_assets)
                     .service(routes::get_widget_assets)
                     .service(routes::get_widget);
-            }).bind(("127.0.0.1", BASE_REST_PORT)).expect("Failed to bind actix server to port");
+            }).bind((host, BASE_REST_PORT)).expect("Failed to bind actix server to port");
 
             http_server.run().await.expect("An error occurred on run actix server")
         });

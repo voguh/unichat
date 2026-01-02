@@ -11,7 +11,7 @@ import React from "react";
 
 import { createTheme, MantineProvider, Button, Card, Tooltip, Modal } from "@mantine/core";
 import { ModalsProvider, modals } from "@mantine/modals";
-import { Notifications } from "@mantine/notifications";
+import { notifications, Notifications } from "@mantine/notifications";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import semver from "semver";
 
@@ -24,6 +24,7 @@ import { WidgetEditor } from "./components/WidgetEditor";
 import { AppContext } from "./contexts/AppContext";
 import { commandService } from "./services/commandService";
 import { DashboardStyledContainer } from "./styles/DashboardStyled";
+import { UniChatSettings } from "./utils/constants";
 
 const theme = createTheme({
     fontFamily: "Roboto, sans-serif",
@@ -69,7 +70,19 @@ export default function App(): JSX.Element {
         });
     }
 
-    function checkForUpdates(): void {
+    async function init(): Promise<void> {
+        const isOpenToLan = await commandService.settingsGetItem(UniChatSettings.OPEN_TO_LAN);
+
+        if (isOpenToLan) {
+            notifications.show({
+                title: "UniChat is open to LAN",
+                message: "Your UniChat instance is accessible on your local network.",
+                color: "yellow"
+            });
+        }
+
+        /* ====================================================================================== */
+
         const currentVersion = metadata.version;
         const latestRelease = releases.find((release) => !release.prerelease);
 
@@ -84,7 +97,7 @@ export default function App(): JSX.Element {
         }
 
         isMounted.current = true;
-        checkForUpdates();
+        init();
     });
 
     return (
