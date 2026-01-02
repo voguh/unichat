@@ -223,7 +223,10 @@ pub fn get_store_version() -> Result<u8, Error> {
 }
 
 pub fn get_item<R: serde::de::DeserializeOwned>(key: &str) -> Result<R, Error> {
-    if key.starts_with("scrapper") {
+    let key = key.trim();
+    if key.is_empty() {
+        return Err(anyhow!("Store key cannot be empty"));
+    } else if key.starts_with("scrapper") {
         return Err(anyhow!("Use get_scrapper_property to get scrapper properties"));
     } else if key.starts_with("store") {
         return Err(anyhow!("Keys starting with 'store' are reserved for internal use"));
@@ -241,7 +244,10 @@ pub fn get_item<R: serde::de::DeserializeOwned>(key: &str) -> Result<R, Error> {
 }
 
 pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &V) -> Result<(), Error> {
-    if key.starts_with("scrapper") {
+    let key = key.trim();
+    if key.is_empty() {
+        return Err(anyhow!("Store key cannot be empty"));
+    } else if key.starts_with("scrapper") {
         return Err(anyhow!("Use set_scrapper_property to set scrapper properties"));
     } else if key.starts_with("store") {
         return Err(anyhow!("Keys starting with 'store' are reserved for internal use"));
@@ -258,6 +264,18 @@ pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &V) -> Result<(), Er
 /* ====================================================================== */
 
 pub fn get_scrapper_property<R: serde::de::DeserializeOwned>(scrapper_id: &str, property: &str) -> Result<R, Error> {
+    let scrapper_id = scrapper_id.trim();
+    if scrapper_id.is_empty() {
+        return Err(anyhow!("Scrapper ID cannot be empty"));
+    } else if !scrapper_id.ends_with("-chat") {
+        return Err(anyhow!("Invalid scrapper ID '{}'", scrapper_id));
+    }
+
+    let property = property.trim();
+    if property.is_empty() {
+        return Err(anyhow!("Scrapper property cannot be empty"));
+    }
+
     let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
     let key = store_mount_scrapper_key(scrapper_id, property);
@@ -272,6 +290,18 @@ pub fn get_scrapper_property<R: serde::de::DeserializeOwned>(scrapper_id: &str, 
 }
 
 pub fn set_scrapper_property<V: serde::ser::Serialize>(scrapper_id: &str, property: &str, value: &V) -> Result<(), Error> {
+    let scrapper_id = scrapper_id.trim();
+    if scrapper_id.is_empty() {
+        return Err(anyhow!("Scrapper ID cannot be empty"));
+    } else if !scrapper_id.ends_with("-chat") {
+        return Err(anyhow!("Invalid scrapper ID '{}'", scrapper_id));
+    }
+
+    let property = property.trim();
+    if property.is_empty() {
+        return Err(anyhow!("Scrapper property cannot be empty"));
+    }
+
     let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
     let key = store_mount_scrapper_key(scrapper_id, property);
