@@ -19,6 +19,7 @@ export const CheckUpdatesSettingsTabStyledContainer = styled.div`
         transform: translate(-50%, -50%);
         font-family: "Roboto Mono", monospace;
         font-size: 14px;
+        text-align: center;
         margin-top: var(--mantine-spacing-md);
     }
 

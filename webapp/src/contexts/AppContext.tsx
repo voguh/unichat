@@ -45,6 +45,14 @@ export function AppContextProvider({ children }: Props): React.ReactNode {
             const appMetadata = await commandService.getAppInfo();
             setMetadata(appMetadata);
 
+            const isDev = await commandService.isDev();
+            if (isDev) {
+                _logger.info("App is running in developer mode; skipping release fetch.");
+                setLoading(false);
+
+                return;
+            }
+
             const apiUrl = `${appMetadata.homepage.replace("https://github.com", "https://api.github.com/repos")}/releases`;
             const response = await fetch(apiUrl, { method: "GET" });
             if (!response.ok) {
