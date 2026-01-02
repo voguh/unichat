@@ -29,7 +29,6 @@ use crate::scrapper;
 use crate::scrapper::UniChatScrapper;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
-use crate::utils::is_dev;
 use crate::utils::is_valid_twitch_channel_name;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -131,13 +130,13 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
 fn handle_ws_event(_event_type: &str, message: &Value) -> Result<(), Error> {
     let log_events = settings::get_scrapper_events_log_level();
 
-    if is_dev() || log_events == SettingLogEventLevel::AllEvents {
+    if log_events == SettingLogEventLevel::AllEvents {
         log_action("events-raw.log", &format!("{:?}", message));
     }
 
     match mapper::parse_ws(message) {
         Ok(Some(parsed)) => {
-            if is_dev() || log_events == SettingLogEventLevel::AllEvents {
+            if log_events == SettingLogEventLevel::AllEvents {
                 log_action("events-parsed.log", &serde_json::to_string(&parsed).unwrap());
             }
 
@@ -147,7 +146,7 @@ fn handle_ws_event(_event_type: &str, message: &Value) -> Result<(), Error> {
         }
 
         Ok(None) => {
-            if is_dev() || [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
+            if [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
                 log_action("events-unknown.log", &format!("{:?}", message));
             }
         }
@@ -164,7 +163,7 @@ fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error>
     let message = IRCMessage::parse(payload.get("message"))?;
     let log_events = settings::get_scrapper_events_log_level();
 
-    if is_dev() || log_events == SettingLogEventLevel::AllEvents {
+    if log_events == SettingLogEventLevel::AllEvents {
         log_action("events-raw.log", &format!("{:?}", message));
     }
 
@@ -182,7 +181,7 @@ fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error>
 
     match mapper::parse_irc(&message) {
         Ok(Some(parsed)) => {
-            if is_dev() || log_events == SettingLogEventLevel::AllEvents {
+            if log_events == SettingLogEventLevel::AllEvents {
                 log_action("events-parsed.log", &serde_json::to_string(&parsed).unwrap());
             }
 
@@ -192,7 +191,7 @@ fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error>
         }
 
         Ok(None) => {
-            if is_dev() || [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
+            if [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
                 log_action("events-unknown.log", &format!("{:?}", message));
             }
         }

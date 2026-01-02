@@ -26,7 +26,6 @@ use crate::scrapper;
 use crate::scrapper::UniChatScrapper;
 use crate::shared_emotes;
 use crate::UNICHAT_VERSION;
-use crate::utils::is_dev;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::render_emitter;
@@ -204,7 +203,7 @@ impl UniChatScrapper for LuaUniChatScrapper {
             let lua = get_lua_runtime()?;
             let log_events = settings::get_scrapper_events_log_level();
 
-            if is_dev() || log_events == SettingLogEventLevel::AllEvents {
+            if log_events == SettingLogEventLevel::AllEvents {
                 self.log_action("events-raw.log", &event);
             }
 
@@ -213,7 +212,7 @@ impl UniChatScrapper for LuaUniChatScrapper {
             match self.on_event.call::<Option<LuaUniChatEvent>>(table) {
                 Ok(Some(event)) => {
                     let parsed = event.inner;
-                    if is_dev() || log_events == SettingLogEventLevel::AllEvents {
+                    if log_events == SettingLogEventLevel::AllEvents {
                         let str = serde_json::to_string(&parsed)?;
                         self.log_action("events-parsed.log", &str);
                     }
@@ -223,7 +222,7 @@ impl UniChatScrapper for LuaUniChatScrapper {
                     }
                 },
                 Ok(None) => {
-                    if is_dev() || [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
+                    if [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
                         self.log_action("events-unknown.log", &event);
                     }
                 },

@@ -22,7 +22,6 @@ use crate::events;
 use crate::scrapper;
 use crate::scrapper::UniChatScrapper;
 use crate::shared_emotes;
-use crate::utils::is_dev;
 use crate::utils::is_valid_youtube_channel_id;
 use crate::utils::is_valid_youtube_video_id;
 use crate::utils::properties;
@@ -98,13 +97,13 @@ fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> 
     let log_events = settings::get_scrapper_events_log_level();
 
     for action in actions {
-        if is_dev() || log_events == SettingLogEventLevel::AllEvents {
+        if log_events == SettingLogEventLevel::AllEvents {
             log_action("events-raw.log", &action);
         }
 
         match mapper::parse(action) {
             Ok(Some(parsed)) => {
-                if is_dev() || log_events == SettingLogEventLevel::AllEvents {
+                if log_events == SettingLogEventLevel::AllEvents {
                     log_action("events-parsed.log", &serde_json::to_string(&parsed).unwrap());
                 }
 
@@ -114,7 +113,7 @@ fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> 
             }
 
             Ok(None) => {
-                if is_dev() || [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
+                if [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
                     log_action("events-unknown.log", &action);
                 }
             }

@@ -18,6 +18,7 @@ use serde::Serialize;
 use tauri_plugin_store::Store;
 use tauri_plugin_store::StoreExt;
 
+use crate::utils::is_dev;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
@@ -340,6 +341,10 @@ pub fn set_scrapper_property<V: serde::ser::Serialize>(scrapper_id: &str, proper
 }
 
 pub fn get_scrapper_events_log_level() -> SettingLogEventLevel {
+    if is_dev() {
+        return SettingLogEventLevel::AllEvents;
+    }
+
     if let Ok(level) = get_item(SETTINGS_LOG_SCRAPPER_EVENTS) {
         return level;
     } else {
