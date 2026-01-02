@@ -23,6 +23,13 @@ interface Props {
 
 export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
     const [widgets, setWidgets] = React.useState<ComboboxData>([]);
+    const [defaultPreviewWidget, setDefaultPreviewWidget] = React.useState<string>(`${WIDGET_URL_PREFIX}/default`);
+
+    async function onChangeDefaultPreviewWidget(value: string): Promise<void> {
+        const widgetName = value.replace(`${WIDGET_URL_PREFIX}/`, "");
+        setDefaultPreviewWidget(value);
+        await commandService.setDefaultPreviewWidget(widgetName);
+    }
 
     function dispatchTour(type: EventEmitterEvents["tour:start"]["type"]): void {
         onClose();
@@ -40,6 +47,9 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
                     .sort((a, b) => a.localeCompare(b))
             }));
             setWidgets(sortedWidgets);
+
+            const defaultPreviewWidget = await commandService.getDefaultPreviewWidget();
+            setDefaultPreviewWidget(`${WIDGET_URL_PREFIX}/${defaultPreviewWidget}`);
         }
 
         init();
@@ -47,7 +57,12 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
 
     return (
         <GeneralSettingsTabStyledContainer>
-            <Select label="Default preview widget" data={widgets} />
+            <Select
+                label="Default preview widget"
+                data={widgets}
+                value={defaultPreviewWidget}
+                onChange={onChangeDefaultPreviewWidget}
+            />
             <Divider my="md" />
             <div className="tour-section">
                 <Text size="sm">Tour</Text>

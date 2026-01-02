@@ -31,12 +31,13 @@ pub enum SettingLogEventLevel {
 const ONCE_LOCK_NAME: &str = "Settings::INSTANCE";
 static INSTANCE: OnceLock<Arc<Store<tauri::Wry>>> = OnceLock::new();
 
-const SCRAPPER_KEY_TEMPLATE: &str = "scrapper:{}:{}";
 pub const STORE_VERSION_KEY: &str = "store:version";
 pub const SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY: &str = "settings:create-webview-hidden";
 pub const SETTINGS_TOUR_CURRENT_STEPS_KEY: &str = "settings:tour-steps";
 pub const SETTINGS_TOUR_PREV_STEPS_KEY: &str = "settings:prev-tour-steps";
+pub const SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY: &str = "settings:default-preview-widget";
 
+const SCRAPPER_KEY_TEMPLATE: &str = "scrapper:{}:{}";
 fn store_mount_scrapper_key(scrapper_id: &str, key: &str) -> String {
     return SCRAPPER_KEY_TEMPLATE.replacen("{}", scrapper_id, 1).replacen("{}", key, 1);
 }
@@ -58,7 +59,7 @@ fn migrate_store_version() -> Result<(), Error> {
     let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
     let mut current_version = get_store_version().unwrap_or_default();
-    let target_version: u8 = 1;
+    let target_version: u8 = 2;
 
     while current_version < target_version {
         match current_version {
@@ -152,6 +153,19 @@ fn migrate_store_version() -> Result<(), Error> {
                 let raw_value = serde_json::to_value(1)?;
                 store.set(STORE_VERSION_KEY, raw_value);
                 current_version = 1;
+            }
+            1 => {
+                if let None = store.get(SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY) {
+                    log::info!("Setting default value for {} setting", SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY);
+                    let raw_value = serde_json::to_value("default")?;
+                    store.set(SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY, raw_value);
+                }
+
+                /* ============================================================================== */
+
+                let raw_value = serde_json::to_value(2)?;
+                store.set(STORE_VERSION_KEY, raw_value);
+                current_version = 2;
             }
             _ => {
                 return Err(anyhow!("No migration path for version {}", current_version));

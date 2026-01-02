@@ -101,6 +101,14 @@ export class CommandService {
 
     /* ========================================================================================== */
 
+    public async getDefaultPreviewWidget(): Promise<string> {
+        return invoke("get_default_preview_widget");
+    }
+
+    public async setDefaultPreviewWidget(widget: string): Promise<void> {
+        await invoke("set_default_preview_widget", { widget });
+    }
+
     public async getWidgetFields(widget: string): Promise<Record<string, WidgetFields>> {
         const data = await invoke<string>("get_widget_fields", { widget });
 

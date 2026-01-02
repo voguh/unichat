@@ -225,6 +225,8 @@ async fn main() {
             commands::scrappers::get_scrapper_webview_url,
             commands::scrappers::set_scrapper_webview_url,
             commands::scrappers::toggle_scrapper_webview,
+            commands::widgets::get_default_preview_widget,
+            commands::widgets::set_default_preview_widget,
             commands::widgets::get_widget_fields,
             commands::widgets::get_widget_fieldstate,
             commands::widgets::list_widgets,

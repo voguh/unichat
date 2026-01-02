@@ -73,6 +73,9 @@ export function DashboardHome(): React.ReactNode {
             const widgets = await handleFetchWidgets();
             setWidgets(widgets);
 
+            const defaultPreviewWidget = await commandService.getDefaultPreviewWidget();
+            setSelectedWidgetUrl(`${WIDGET_URL_PREFIX}/${defaultPreviewWidget}`);
+
             const scrappers = await commandService.getScrappers();
             const sortedScrappers = scrappers.sort((a, b) => {
                 const pa = scrapperPriority(a.id);
