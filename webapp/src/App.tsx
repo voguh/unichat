@@ -75,8 +75,8 @@ export default function App(): JSX.Element {
 
         if (isOpenToLan) {
             notifications.show({
-                title: "UniChat is open to LAN",
-                message: "Your UniChat widgets are accessible by other devices on the same local network.",
+                title: `${metadata.displayName} is open to LAN`,
+                message: "Your widgets are accessible by other devices on the same local network.",
                 color: "yellow"
             });
         }
