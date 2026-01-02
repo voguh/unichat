@@ -25,10 +25,13 @@ interface Props {
 export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
     const [widgets, setWidgets] = React.useState<ComboboxData>([]);
     const [settings, setSettings] = React.useState<Record<string, unknown>>({});
+    const [oldSettings, setOldSettings] = React.useState<Record<string, unknown>>({});
 
     const { metadata } = React.useContext(AppContext);
 
     async function updateSetting<T>(key: string, value: T): Promise<void> {
+        setOldSettings((prev) => ({ ...prev, [key]: settings[key] }));
+
         const settingsCopy = { ...settings };
         if (settingsCopy[key] == null) {
             throw new Error(`Setting with key "${key}" does not exist.`);
@@ -61,11 +64,11 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
 
             /* ================================================================================== */
 
-            setSettings((prev) => ({
-                ...prev,
-                [UniChatSettings.DEFAULT_PREVIEW_WIDGET]: defaultPreviewWidget,
-                [UniChatSettings.OPEN_TO_LAN]: lanStatus
-            }));
+            const newSettings = { ...settings };
+            newSettings[UniChatSettings.DEFAULT_PREVIEW_WIDGET] = defaultPreviewWidget;
+            newSettings[UniChatSettings.OPEN_TO_LAN] = lanStatus;
+            setOldSettings(newSettings);
+            setSettings(newSettings);
         }
 
         init();
@@ -91,16 +94,20 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
                     onChange={(event) => updateSetting(UniChatSettings.OPEN_TO_LAN, event.currentTarget.checked)}
                 />
 
-                <Alert variant="light" color="blue" icon={<i className="fas fa-info-circle" />}>
-                    <span>
-                        <strong>{metadata.displayName}</strong> must be restarted for this setting to take effect.
-                    </span>
-                    {(settings[UniChatSettings.OPEN_TO_LAN] as boolean) && (
+                {oldSettings[UniChatSettings.OPEN_TO_LAN] !== settings[UniChatSettings.OPEN_TO_LAN] && (
+                    <Alert variant="light" color="blue" icon={<i className="fas fa-info-circle" />}>
+                        <span>
+                            <strong>{metadata.displayName}</strong> must be restarted for this setting to take effect.
+                        </span>
+                    </Alert>
+                )}
+                {(settings[UniChatSettings.OPEN_TO_LAN] as boolean) && (
+                    <Alert variant="light" color="yellow" icon={<i className="fas fa-info-circle" />}>
                         <span>
                             Make sure your firewall allows incoming connections on port <strong>9527</strong>.
                         </span>
-                    )}
-                </Alert>
+                    </Alert>
+                )}
             </OpenToLANSettingWrapper>
 
             <Divider my="md" />
