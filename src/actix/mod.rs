@@ -25,6 +25,10 @@ impl ActixState {
                 host = "0.0.0.0";
             }
 
+            if host != "127.0.0.1" {
+                log::warn!("UniChat is running in 'Open to LAN' mode. Make sure your firewall allows incoming connections on port {}.", BASE_REST_PORT);
+            }
+
             let http_server = actix_web::HttpServer::new(move || {
                 return actix_web::App::new().wrap(actix_web::middleware::Logger::default())
                     .service(routes::ws)
