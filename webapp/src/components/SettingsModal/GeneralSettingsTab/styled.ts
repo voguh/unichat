@@ -22,3 +22,42 @@ export const GeneralSettingsTabStyledContainer = styled.div`
         }
     }
 `;
+
+export const OpenToLANSettingWrapper = styled.div`
+    > .mantine-Switch-root {
+        > .mantine-Switch-body {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+
+            > .mantine-Switch-track {
+                > .mantine-Switch-thumb {
+                    &::before {
+                        display: none;
+                    }
+                }
+            }
+        }
+    }
+
+    > .mantine-Alert-root {
+        margin-top: 16px;
+
+        > .mantine-Alert-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            > .mantine-Alert-icon {
+            }
+
+            > .mantine-Alert-body {
+                > .mantine-Alert-message {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                }
+            }
+        }
+    }
+`;

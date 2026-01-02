@@ -9,13 +9,14 @@
 
 import React from "react";
 
-import { Button, ComboboxData, Divider, Select, Text } from "@mantine/core";
+import { Alert, Button, ComboboxData, Divider, Select, Switch, Text } from "@mantine/core";
 
+import { AppContext } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
 import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
-import { WIDGET_URL_PREFIX } from "unichat/utils/constants";
+import { UniChatSettings } from "unichat/utils/constants";
 
-import { GeneralSettingsTabStyledContainer } from "./styled";
+import { GeneralSettingsTabStyledContainer, OpenToLANSettingWrapper } from "./styled";
 
 interface Props {
     onClose: () => void;
@@ -23,12 +24,19 @@ interface Props {
 
 export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
     const [widgets, setWidgets] = React.useState<ComboboxData>([]);
-    const [defaultPreviewWidget, setDefaultPreviewWidget] = React.useState<string>(`${WIDGET_URL_PREFIX}/default`);
+    const [settings, setSettings] = React.useState<Record<string, unknown>>({});
 
-    async function onChangeDefaultPreviewWidget(value: string): Promise<void> {
-        const widgetName = value.replace(`${WIDGET_URL_PREFIX}/`, "");
-        setDefaultPreviewWidget(value);
-        await commandService.setDefaultPreviewWidget(widgetName);
+    const { metadata } = React.useContext(AppContext);
+
+    async function updateSetting<T>(key: string, value: T): Promise<void> {
+        const settingsCopy = { ...settings };
+        if (settingsCopy[key] == null) {
+            throw new Error(`Setting with key "${key}" does not exist.`);
+        }
+
+        settingsCopy[key] = value;
+        setSettings(settingsCopy);
+        await commandService.settingsSetItem(key as UniChatSettings, value);
     }
 
     function dispatchTour(type: EventEmitterEvents["tour:start"]["type"]): void {
@@ -41,15 +49,23 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
             const widgets = await commandService.listWidgets();
             const sortedWidgets = widgets.map((groupItem) => ({
                 group: groupItem.group,
-                items: groupItem.items
-                    .filter((item) => item !== "example")
-                    .map((item) => `${WIDGET_URL_PREFIX}/${item}`)
-                    .sort((a, b) => a.localeCompare(b))
+                items: groupItem.items.filter((item) => item !== "example").sort((a, b) => a.localeCompare(b))
             }));
             setWidgets(sortedWidgets);
 
-            const defaultPreviewWidget = await commandService.getDefaultPreviewWidget();
-            setDefaultPreviewWidget(`${WIDGET_URL_PREFIX}/${defaultPreviewWidget}`);
+            const defaultPreviewWidget = await commandService.settingsGetItem(UniChatSettings.DEFAULT_PREVIEW_WIDGET);
+
+            /* ================================================================================== */
+
+            const lanStatus = await commandService.settingsGetItem(UniChatSettings.OPEN_TO_LAN);
+
+            /* ================================================================================== */
+
+            setSettings((prev) => ({
+                ...prev,
+                [UniChatSettings.DEFAULT_PREVIEW_WIDGET]: defaultPreviewWidget,
+                [UniChatSettings.OPEN_TO_LAN]: lanStatus
+            }));
         }
 
         init();
@@ -59,10 +75,34 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
         <GeneralSettingsTabStyledContainer>
             <Select
                 label="Default preview widget"
+                description="Select the default widget to be used in preview panels"
                 data={widgets}
-                value={defaultPreviewWidget}
-                onChange={onChangeDefaultPreviewWidget}
+                value={settings[UniChatSettings.DEFAULT_PREVIEW_WIDGET] as string}
+                onChange={(value) => updateSetting(UniChatSettings.DEFAULT_PREVIEW_WIDGET, value)}
             />
+
+            <Divider my="md" />
+
+            <OpenToLANSettingWrapper>
+                <Switch
+                    label="Open to LAN"
+                    description="Allow other devices on your local network view widgets."
+                    checked={settings[UniChatSettings.OPEN_TO_LAN] as boolean}
+                    onChange={(event) => updateSetting(UniChatSettings.OPEN_TO_LAN, event.currentTarget.checked)}
+                />
+
+                <Alert variant="light" color="blue" icon={<i className="fas fa-info-circle" />}>
+                    <span>
+                        <strong>{metadata.displayName}</strong> must be restarted for this setting to take effect.
+                    </span>
+                    {(settings[UniChatSettings.OPEN_TO_LAN] as boolean) && (
+                        <span>
+                            Make sure your firewall allows incoming connections on port <strong>9527</strong>.
+                        </span>
+                    )}
+                </Alert>
+            </OpenToLANSettingWrapper>
+
             <Divider my="md" />
             <div className="tour-section">
                 <Text size="sm">Tour</Text>
