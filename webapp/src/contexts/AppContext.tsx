@@ -9,7 +9,6 @@
 
 import React from "react";
 
-import { notifications } from "@mantine/notifications";
 import semver from "semver";
 
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
@@ -48,28 +47,7 @@ export function AppContextProvider({ children }: Props): React.ReactNode {
             const appMetadata = await commandService.getAppInfo();
             setMetadata(appMetadata);
 
-            const isDev = await commandService.isDev();
-            if (isDev) {
-                _logger.info("App is running in developer mode; skipping release fetch.");
-                setLoading(false);
-
-                return;
-            }
-
-            const apiUrl = `${appMetadata.homepage.replace("https://github.com", "https://api.github.com/repos")}/releases`;
-            const response = await fetch(apiUrl, { method: "GET" });
-            if (!response.ok) {
-                _logger.error("Failed to fetch latest release information.");
-                notifications.show({
-                    title: "Update Check Failed",
-                    message: "Could not fetch the latest release information from GitHub.",
-                    color: "red"
-                });
-
-                return;
-            }
-
-            const data = await response.json();
+            const data = await commandService.getReleases();
             const releases: UniChatRelease[] = data.map((release) => ({
                 id: release.id,
                 name: release.name || release.tag_name,
@@ -78,17 +56,6 @@ export function AppContextProvider({ children }: Props): React.ReactNode {
                 draft: release.draft,
                 immutable: release.immutable,
                 prerelease: release.prerelease,
-
-                assets: (release.assets ?? []).map((asset) => ({
-                    id: asset.id,
-                    name: asset.name,
-                    size: asset.size,
-                    contentType: asset.content_type,
-                    digest: asset.digest,
-                    url: asset.browser_download_url,
-                    createdAt: asset.created_at,
-                    updatedAt: asset.updated_at
-                })),
 
                 createdAt: release.created_at,
                 updatedAt: release.updated_at,

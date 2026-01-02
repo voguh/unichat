@@ -15,7 +15,6 @@ import { marked } from "marked";
 import semver from "semver";
 
 import { AppContext } from "unichat/contexts/AppContext";
-import { commandService } from "unichat/services/commandService";
 import { UniChatRelease } from "unichat/types/unichatApi";
 
 import { CheckUpdatesSettingsTabStyledContainer, ReleaseNotesWrapper } from "./styled";
@@ -25,7 +24,6 @@ interface Props {
 }
 
 export function CheckUpdatesSettingsTab(_props: Props): React.ReactNode {
-    const [isDev, setIsDev] = React.useState(false);
     const [latestStable, setLatestStable] = React.useState<UniChatRelease>(null);
     const [latestBeta, setLatestBeta] = React.useState<UniChatRelease>(null);
 
@@ -33,11 +31,6 @@ export function CheckUpdatesSettingsTab(_props: Props): React.ReactNode {
     const isMounted = React.useRef(false);
 
     async function init(): Promise<void> {
-        const isDev = await commandService.isDev();
-        setIsDev(isDev);
-
-        /* ================================================================== */
-
         const stableRelease = releases.find((release) => !release.prerelease);
         const betaRelease = releases.find((release) => release.prerelease);
 
@@ -59,11 +52,7 @@ export function CheckUpdatesSettingsTab(_props: Props): React.ReactNode {
     if (!latestStable && !latestBeta) {
         return (
             <CheckUpdatesSettingsTabStyledContainer>
-                <div className="no-versions-available">
-                    {isDev
-                        ? "App is running in developer mode. Skipping release fetch."
-                        : "No version information available."}
-                </div>
+                <div className="no-versions-available">No version information available.</div>
             </CheckUpdatesSettingsTabStyledContainer>
         );
     }

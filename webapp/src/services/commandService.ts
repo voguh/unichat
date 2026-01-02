@@ -22,6 +22,10 @@ export class CommandService {
         return invoke("get_app_info");
     }
 
+    public async getReleases(): Promise<Record<string, any>[]> {
+        return invoke("get_releases");
+    }
+
     public async getSystemHosts(): Promise<string[]> {
         return invoke("get_system_hosts");
     }
