@@ -45,7 +45,8 @@ export function AppContextProvider({ children }: Props): React.ReactNode {
             const appMetadata = await commandService.getAppInfo();
             setMetadata(appMetadata);
 
-            const response = await fetch("https://unichat.voguh.me/api/v1/unichat-releases", { method: "GET" });
+            const apiUrl = `${appMetadata.homepage.replace("https://github.com", "https://api.github.com/repos")}/releases`;
+            const response = await fetch(apiUrl, { method: "GET" });
             if (!response.ok) {
                 _logger.error("Failed to fetch latest release information.");
                 notifications.show({
@@ -57,7 +58,32 @@ export function AppContextProvider({ children }: Props): React.ReactNode {
                 return;
             }
 
-            const releases: UniChatRelease[] = await response.json();
+            const data = await response.json();
+            const releases: UniChatRelease[] = data.map((release) => ({
+                id: release.id,
+                name: release.name || release.tag_name,
+                description: release.body,
+                url: release.html_url,
+                draft: release.draft,
+                immutable: release.immutable,
+                prerelease: release.prerelease,
+
+                assets: (release.assets ?? []).map((asset) => ({
+                    id: asset.id,
+                    name: asset.name,
+                    size: asset.size,
+                    contentType: asset.content_type,
+                    digest: asset.digest,
+                    url: asset.browser_download_url,
+                    createdAt: asset.created_at,
+                    updatedAt: asset.updated_at
+                })),
+
+                createdAt: release.created_at,
+                updatedAt: release.updated_at,
+                publishedAt: release.published_at
+            }));
+
             const sortedReleases = releases.sort((a, b) => semver.rcompare(a.name, b.name));
             setReleases(sortedReleases);
         } catch (error) {
