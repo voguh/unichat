@@ -20,7 +20,7 @@ import { AboutSettingsTabStyledContainer } from "./styled";
 import { ThirdPartyLicenses } from "./ThirdPartyLicenses";
 
 interface Props {
-    children?: React.ReactNode;
+    onClose: () => void;
 }
 
 export function AboutSettingsTab(_props: Props): React.ReactNode {

@@ -12,17 +12,22 @@ import React from "react";
 import { Button, ComboboxData, Divider, Select, Text } from "@mantine/core";
 
 import { commandService } from "unichat/services/commandService";
-import { eventEmitter } from "unichat/services/eventEmitter";
+import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
 import { WIDGET_URL_PREFIX } from "unichat/utils/constants";
 
 import { GeneralSettingsTabStyledContainer } from "./styled";
 
 interface Props {
-    children?: React.ReactNode;
+    onClose: () => void;
 }
 
-export function GeneralSettingsTab(_props: Props): React.ReactNode {
+export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
     const [widgets, setWidgets] = React.useState<ComboboxData>([]);
+
+    function dispatchTour(type: EventEmitterEvents["tour:start"]["type"]): void {
+        onClose();
+        eventEmitter.emit("tour:start", { type });
+    }
 
     React.useEffect(() => {
         async function init(): Promise<void> {
@@ -50,14 +55,14 @@ export function GeneralSettingsTab(_props: Props): React.ReactNode {
                     <Button
                         variant="default"
                         leftSection={<i className="fas fa-compass" />}
-                        onClick={() => eventEmitter.emit("tour:start", { type: "full" })}
+                        onClick={() => dispatchTour("full")}
                     >
                         View Tour
                     </Button>
                     <Button
                         variant="default"
                         leftSection={<i className="fas fa-map" />}
-                        onClick={() => eventEmitter.emit("tour:start", { type: "whats-new" })}
+                        onClick={() => dispatchTour("whats-new")}
                     >
                         What&apos;s New?
                     </Button>

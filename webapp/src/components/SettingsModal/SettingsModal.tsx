@@ -24,21 +24,27 @@ interface Props {
     startupTab?: string | null;
 }
 
-const settingsItems = {
+interface SettingsItem {
+    title: string;
+    icon: string;
+    children: React.ComponentType<{ onClose: () => void }>;
+}
+
+const settingsItems: Record<string, SettingsItem> = {
     general: {
         title: "General",
         icon: "fas fa-cog",
-        children: <GeneralSettingsTab />
+        children: GeneralSettingsTab
     },
     "check-updates": {
         title: "Check for Updates",
         icon: "fas fa-download",
-        children: <CheckUpdatesSettingsTab />
+        children: CheckUpdatesSettingsTab
     },
     about: {
         title: "About",
         icon: "fas fa-info-circle",
-        children: <AboutSettingsTab />
+        children: AboutSettingsTab
     }
 };
 
@@ -84,7 +90,9 @@ export function SettingsModal({ onClose, startupTab }: Props): React.ReactNode {
                             </Button>
                         </div>
                     </div>
-                    <div className="settings-content-body">{settingsItems[selectedItem].children}</div>
+                    <div className="settings-content-body">
+                        {React.createElement(settingsItems[selectedItem].children, { onClose })}
+                    </div>
                 </div>
             )}
         </SettingsStyledContainer>

@@ -20,7 +20,7 @@ import { UniChatRelease } from "unichat/types/unichatApi";
 import { CheckUpdatesSettingsTabStyledContainer, ReleaseNotesWrapper } from "./styled";
 
 interface Props {
-    children?: React.ReactNode;
+    onClose: () => void;
 }
 
 export function CheckUpdatesSettingsTab(_props: Props): React.ReactNode {
