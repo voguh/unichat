@@ -7,7 +7,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-export type UniChatAuthorType = "VIEWER" | "SPONSOR" | "VIP" | "MODERATOR" | "BROADCASTER";
+export type UniChatPlatform = "twitch" | "youtube" | (string & {});
+export type UniChatAuthorType = "VIEWER" | "SPONSOR" | "VIP" | "MODERATOR" | "BROADCASTER" | (string & {});
 
 export interface UniChatEmote {
     id: string;
@@ -42,7 +43,7 @@ export interface UniChatEventRemoveMessage {
         channelId: string;
         /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
-        platform: string;
+        platform: UniChatPlatform;
 
         messageId: string;
 
@@ -59,7 +60,7 @@ export interface UniChatEventRemoveAuthor {
         /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
 
-        platform: string;
+        platform: UniChatPlatform;
         flags: Record<string, string | null>;
 
         authorId: string;
@@ -77,7 +78,7 @@ export interface UniChatEventMessage {
         /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
 
-        platform: string;
+        platform: UniChatPlatform;
         flags: Record<string, string | null>;
 
         authorId: string;
@@ -107,7 +108,7 @@ export interface UniChatEventDonate {
         /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
 
-        platform: string;
+        platform: UniChatPlatform;
         flags: Record<string, string | null>;
 
         authorId: string;
@@ -140,7 +141,7 @@ export interface UniChatEventSponsor {
         /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
 
-        platform: string;
+        platform: UniChatPlatform;
         flags: Record<string, string | null>;
 
         authorId: string;
@@ -174,7 +175,7 @@ export interface UniChatEventSponsorGift {
         /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
 
-        platform: string;
+        platform: UniChatPlatform;
         flags: Record<string, string | null>;
 
         authorId: string;
@@ -205,7 +206,7 @@ export interface UniChatEventRaid {
         /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
 
-        platform: string;
+        platform: UniChatPlatform;
         flags: Record<string, string | null>;
 
         /** **Disclaimer:** On YouTube, this field is always null. */
@@ -238,7 +239,7 @@ export interface UniChatEventRedemption {
         /** **Disclaimer:** This field is always null. */
         channelName: string | null;
 
-        platform: string;
+        platform: UniChatPlatform;
         flags: Record<string, string | null>;
 
         authorId: string;
