@@ -35,9 +35,12 @@ export const PLUGIN_STATUS_COLOR = {
 };
 
 export enum UniChatSettings {
-    CREATE_WEBVIEW_HIDDEN = "create-webview-hidden",
-    CURRENT_TOUR_STEPS = "tour-steps",
-    PREVIOUS_TOUR_STEPS = "prev-tour-steps",
+    CURRENT_TOUR_STEPS = "current-tour-steps",
+    PREVIOUS_TOUR_STEPS = "previous-tour-steps",
     DEFAULT_PREVIEW_WIDGET = "default-preview-widget",
-    OPEN_TO_LAN = "open-to-lan"
+    OPEN_TO_LAN = "open-to-lan",
+
+    /* Developers settings */
+    CREATE_WEBVIEW_HIDDEN = "create-webview-hidden",
+    LOG_SCRAPPER_EVENTS = "log-scrapper-events"
 }
