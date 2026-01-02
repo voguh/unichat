@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2024-2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2024-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -9,7 +9,8 @@
 
 import React from "react";
 
-import { Badge, Button, Card, ComboboxData, List, Select, Tooltip } from "@mantine/core";
+import { Badge, Button, Card, ComboboxData, List, Menu, Select, Tooltip } from "@mantine/core";
+import { modals } from "@mantine/modals";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { AppContext } from "unichat/contexts/AppContext";
@@ -17,6 +18,7 @@ import { commandService } from "unichat/services/commandService";
 import { UniChatScrapper } from "unichat/types";
 import { scrapperPriority, UniChatSettings, WIDGET_URL_PREFIX } from "unichat/utils/constants";
 
+import { QRCodeModal } from "./QRCodeModal";
 import { ScrapperCard } from "./ScrapperCard";
 import { DashboardHomeStyledContainer } from "./styled";
 
@@ -24,9 +26,10 @@ export function DashboardHome(): React.ReactNode {
     const [selectedWidgetUrl, setSelectedWidgetUrl] = React.useState(`${WIDGET_URL_PREFIX}/default`);
     const [widgets, setWidgets] = React.useState<ComboboxData>([]);
     const [scrappers, setScrappers] = React.useState<UniChatScrapper[]>([]);
+    const [isOpenToLan, setIsOpenToLan] = React.useState(false);
 
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
-    const { showWidgetPreview } = React.useContext(AppContext);
+    const { requiresRestart, showWidgetPreview } = React.useContext(AppContext);
 
     function mountEditingTooltip(message: string, availableUrls: string[]): React.ReactNode {
         // prettier-ignore
@@ -43,6 +46,15 @@ export function DashboardHome(): React.ReactNode {
                 You can also include or omit the <Badge size="xs" radius="xs" color="green">https://</Badge> or <Badge size="xs" radius="xs" color="red">http://</Badge> prefix.
             </>
         );
+    }
+
+    /* ====================================================================== */
+
+    async function openQrCodeModal(url: string): Promise<void> {
+        modals.open({
+            title: "Open on device",
+            children: <QRCodeModal baseUrl={url} />
+        });
     }
 
     /* ====================================================================== */
@@ -88,6 +100,9 @@ export function DashboardHome(): React.ReactNode {
                 return a.name.localeCompare(b.name);
             });
             setScrappers(sortedScrappers);
+
+            const isOpenToLan: boolean = await commandService.settingsGetItem(UniChatSettings.OPEN_TO_LAN);
+            setIsOpenToLan(isOpenToLan);
         }
 
         init();
@@ -124,11 +139,41 @@ export function DashboardHome(): React.ReactNode {
                                 </Button>
                             </Tooltip>
 
-                            <Tooltip label="Open in browser" position="left" withArrow>
-                                <Button onClick={() => openUrl(selectedWidgetUrl)} data-tour="preview-open-in-browser">
-                                    <i className="fas fa-globe" />
-                                </Button>
-                            </Tooltip>
+                            {isOpenToLan && !requiresRestart ? (
+                                <Menu>
+                                    <Menu.Target>
+                                        <Tooltip label="Open in device" position="left" withArrow>
+                                            <Button data-tour="preview-open-in-browser">
+                                                <i className="fas fa-globe" />
+                                            </Button>
+                                        </Tooltip>
+                                    </Menu.Target>
+
+                                    <Menu.Dropdown>
+                                        <Menu.Item
+                                            leftSection={<i className="fas fa-globe" />}
+                                            onClick={() => openUrl(selectedWidgetUrl)}
+                                        >
+                                            Open in browser
+                                        </Menu.Item>
+                                        <Menu.Item
+                                            leftSection={<i className="fas fa-mobile-alt" />}
+                                            onClick={() => openQrCodeModal(selectedWidgetUrl)}
+                                        >
+                                            Open on device
+                                        </Menu.Item>
+                                    </Menu.Dropdown>
+                                </Menu>
+                            ) : (
+                                <Tooltip label="Open in browser" position="left" withArrow>
+                                    <Button
+                                        onClick={() => openUrl(selectedWidgetUrl)}
+                                        data-tour="preview-open-in-browser"
+                                    >
+                                        <i className="fas fa-globe" />
+                                    </Button>
+                                </Tooltip>
+                            )}
                         </Card>
                         <div className="iframe-wrapper">
                             <iframe ref={iframeRef} src={selectedWidgetUrl} sandbox="allow-scripts" />

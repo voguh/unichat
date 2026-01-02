@@ -22,6 +22,10 @@ export class CommandService {
         return invoke("get_app_info");
     }
 
+    public async getSystemHosts(): Promise<string[]> {
+        return invoke("get_system_hosts");
+    }
+
     public async isDev(): Promise<boolean> {
         return invoke("is_dev");
     }

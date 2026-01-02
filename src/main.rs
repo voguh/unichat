@@ -211,6 +211,7 @@ async fn main() {
         .invoke_handler(tauri::generate_handler![
             commands::dispatch_clear_chat,
             commands::get_app_info,
+            commands::get_system_hosts,
             commands::is_dev,
             commands::gallery::get_gallery_items,
             commands::gallery::upload_gallery_items,

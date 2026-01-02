@@ -7,6 +7,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use std::net::Ipv4Addr;
+
+use if_addrs::IfAddr;
+use if_addrs::get_if_addrs;
 use serde_json::json;
 use serde_json::Value;
 use tauri::AppHandle;
@@ -60,6 +64,57 @@ pub async fn get_app_info<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Strin
     });
 
     return Ok(metadata);
+}
+
+/* ================================================================================================================== */
+
+fn is_virtual_interface(name: &str) -> bool {
+    let name = name.to_lowercase();
+
+    let blocked = [
+        "docker",
+        "br-",
+        "veth",
+        "virbr",
+        "tun",
+        "tap",
+        "wg",
+        "lxc",
+        "vethernet",
+        "hyper-v",
+        "wsl",
+        "dockernat",
+        "virtualbox",
+        "vmware"
+    ];
+
+    blocked.iter().any(|b| name.contains(b))
+}
+
+#[tauri::command]
+pub async fn get_system_hosts<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<String>, String> {
+    let ifaces = get_if_addrs().map_err(|e| format!("An error occurred on get network interfaces: {:#?}", e))?;
+
+    let mut lan_ips: Vec<String> = Vec::new();
+    for iface in ifaces {
+        if iface.is_loopback() || is_virtual_interface(&iface.name) {
+            continue;
+        }
+
+        if let IfAddr::V4(v4) = iface.addr {
+            let ip: Ipv4Addr = v4.ip;
+            if ip.is_private() && !ip.is_loopback() && !ip.is_link_local() {
+                lan_ips.push(ip.to_string());
+            }
+        } else if let IfAddr::V6(v6) = iface.addr {
+            let ip = v6.ip;
+            if ip.is_unique_local() {
+                lan_ips.push(ip.to_string());
+            }
+        }
+    }
+
+    return Ok(lan_ips);
 }
 
 /* ================================================================================================================== */
