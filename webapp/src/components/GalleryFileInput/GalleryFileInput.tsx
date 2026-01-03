@@ -12,6 +12,8 @@ import React from "react";
 import { TextInput, TextInputProps } from "@mantine/core";
 import { modals } from "@mantine/modals";
 
+import { modalService } from "unichat/services/modalService";
+
 import { Gallery, GalleryTabs } from "../Gallery/Gallery";
 
 interface Props extends Omit<TextInputProps, "ref"> {
@@ -41,9 +43,9 @@ export const GalleryFileInput = React.forwardRef<HTMLInputElement, Props>(functi
             wrappedSelectedTab = (_showTabs ?? [])[0] ?? "image";
         }
 
-        modals.open({
-            title: "Gallery",
+        modalService.openModal({
             size: "xl",
+            title: "Gallery",
             children: (
                 <Gallery
                     showTabs={_showTabs}

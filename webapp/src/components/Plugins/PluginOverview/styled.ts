@@ -11,19 +11,19 @@ import styled from "styled-components";
 
 export const PluginOverviewStyledContainer = styled.div`
     position: relative;
-    height: calc(100vh - (60px + 18px));
+    height: var(--modal-wrapper-body-inner-max-height);
     display: grid;
     grid-template-rows: 208px 1fr;
-    gap: 16px;
+    gap: 8px;
 
     > .plugin-details {
-        border: 1px solid var(--mantine-color-dark-4);
-        border-radius: 8px;
+        border-radius: 4px;
         display: grid;
         grid-template-columns: 190px 1fr;
         gap: 16px;
         overflow: hidden;
         padding: 8px;
+        background: var(--mantine-color-dark-4);
 
         > .plugin-icon {
             display: flex;
@@ -36,7 +36,7 @@ export const PluginOverviewStyledContainer = styled.div`
                 width: 100%;
                 height: 100%;
                 object-fit: contain;
-                border-radius: 8px;
+                border-radius: 4px;
             }
         }
 
@@ -55,7 +55,7 @@ export const PluginOverviewStyledContainer = styled.div`
 
                 > .details-label {
                     font-size: 12px;
-                    color: var(--mantine-color-dark-3);
+                    opacity: 0.75;
                 }
 
                 > .details-value {
@@ -109,12 +109,6 @@ export const PluginOverviewStyledContainer = styled.div`
     }
 
     > .plugin-messages {
+        background: var(--mantine-color-dark-7);
     }
-`;
-
-export const PluginOverviewHeaderStyledContainer = styled.div`
-    width: calc(100vw - (11px + 16px + 28px + 16px));
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 `;

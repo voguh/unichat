@@ -10,19 +10,21 @@
 import React from "react";
 
 import { createTheme, MantineProvider, Button, Card, Tooltip, Modal } from "@mantine/core";
-import { ModalsProvider, modals } from "@mantine/modals";
+import { ModalsProvider } from "@mantine/modals";
 import { notifications, Notifications } from "@mantine/notifications";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import semver from "semver";
 
 import { DashboardHome } from "./components/DashboardHome";
 import { Gallery } from "./components/Gallery";
-import { Plugins, PluginsHeader } from "./components/Plugins";
-import { SettingsModal } from "./components/SettingsModal";
+import { ModalWrapper } from "./components/ModalWrapper";
+import { Plugins, PluginsActions } from "./components/Plugins";
+import { settingsItems, SettingsModal } from "./components/SettingsModal";
 import { Tour } from "./components/Tour";
 import { WidgetEditor } from "./components/WidgetEditor";
 import { AppContext } from "./contexts/AppContext";
 import { commandService } from "./services/commandService";
+import { modalService } from "./services/modalService";
 import { DashboardStyledContainer } from "./styles/DashboardStyled";
 import { UniChatSettings } from "./utils/constants";
 
@@ -55,17 +57,18 @@ export default function App(): JSX.Element {
     }
 
     function toggleGallery(): void {
-        modals.open({
-            title: "Gallery",
+        modalService.openModal({
             size: "xl",
+            title: "Gallery",
             children: <Gallery />
         });
     }
 
     function togglePluginsModal(): void {
-        modals.open({
-            title: <PluginsHeader />,
+        modalService.openModal({
             size: "xl",
+            title: "Plugins",
+            actions: <PluginsActions />,
             children: <Plugins />
         });
     }
@@ -102,7 +105,7 @@ export default function App(): JSX.Element {
 
     return (
         <MantineProvider defaultColorScheme="dark" theme={theme}>
-            <ModalsProvider modalProps={{ centered: true }}>
+            <ModalsProvider modals={{ unichat: ModalWrapper }}>
                 <Notifications position="bottom-center" />
 
                 <DashboardStyledContainer>

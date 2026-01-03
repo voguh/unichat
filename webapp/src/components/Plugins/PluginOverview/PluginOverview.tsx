@@ -16,7 +16,7 @@ import { AppContext } from "unichat/contexts/AppContext";
 import { UniChatPluginMetadata } from "unichat/types";
 import { PLUGIN_STATUS_COLOR } from "unichat/utils/constants";
 
-import { PluginOverviewHeaderStyledContainer, PluginOverviewStyledContainer } from "./styled";
+import { PluginOverviewStyledContainer } from "./styled";
 
 interface Props {
     plugin: UniChatPluginMetadata;
@@ -94,24 +94,21 @@ export function PluginOverview(props: Props): React.ReactNode {
     );
 }
 
-export function PluginOverviewHeader(props: Props): React.ReactNode {
+export function PluginOverviewActions(props: Props): React.ReactNode {
     const { plugin } = props;
 
     return (
-        <PluginOverviewHeaderStyledContainer>
-            <span>Plugin Overview</span>
-            <div className="left-buttons">
-                {plugin.pluginPath != null ? (
-                    <Button variant="outline" size="xs" onClick={() => revealItemInDir(plugin.pluginPath)}>
-                        <i className="fas fa-folder" />
-                        &nbsp;Show in Folder
-                    </Button>
-                ) : (
-                    <Button variant="outline" size="xs" disabled>
-                        System Plugin
-                    </Button>
-                )}
-            </div>
-        </PluginOverviewHeaderStyledContainer>
+        <>
+            {plugin.pluginPath != null ? (
+                <Button variant="outline" size="xs" onClick={() => revealItemInDir(plugin.pluginPath)}>
+                    <i className="fas fa-folder" />
+                    &nbsp;Show in Folder
+                </Button>
+            ) : (
+                <Button variant="outline" size="xs" disabled>
+                    System Plugin
+                </Button>
+            )}
+        </>
     );
 }

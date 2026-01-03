@@ -46,10 +46,3 @@ export const PluginsGridContainer = styled(SimpleGrid).attrs({
         }
     }
 `;
-
-export const PluginsHeaderStyledContainer = styled.div`
-    width: calc(780px - (16px + 11px + 11px + 28px));
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-`;

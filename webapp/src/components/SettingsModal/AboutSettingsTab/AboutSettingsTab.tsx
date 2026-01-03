@@ -10,11 +10,11 @@
 import React from "react";
 
 import { Button } from "@mantine/core";
-import { modals } from "@mantine/modals";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import clsx from "clsx";
 
 import { AppContext } from "unichat/contexts/AppContext";
+import { modalService } from "unichat/services/modalService";
 
 import { AboutSettingsTabStyledContainer } from "./styled";
 import { ThirdPartyLicenses } from "./ThirdPartyLicenses";
@@ -30,7 +30,11 @@ export function AboutSettingsTab(_props: Props): React.ReactNode {
     const { metadata } = React.useContext(AppContext);
 
     function handleOpenThirdPartyLicenses(): void {
-        modals.open({ title: "Third Party Licenses", children: <ThirdPartyLicenses />, size: "xl" });
+        modalService.openModal({
+            size: "xl",
+            children: <ThirdPartyLicenses />,
+            title: "Third Party Licenses"
+        });
     }
 
     React.useEffect(() => {

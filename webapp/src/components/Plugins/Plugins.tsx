@@ -10,18 +10,18 @@
 import React from "react";
 
 import { Badge, Button, Card, Tooltip } from "@mantine/core";
-import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { AppContext } from "unichat/contexts/AppContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
+import { modalService } from "unichat/services/modalService";
 import { UniChatPluginMetadata } from "unichat/types";
 import { PLUGIN_STATUS_COLOR } from "unichat/utils/constants";
 
-import { PluginOverview, PluginOverviewHeader } from "./PluginOverview";
-import { PluginsGridContainer, PluginsHeaderStyledContainer, PluginsStyledContainer } from "./styled";
+import { PluginOverview, PluginOverviewActions } from "./PluginOverview";
+import { PluginsGridContainer, PluginsStyledContainer } from "./styled";
 
 interface Props {
     children?: React.ReactNode;
@@ -34,10 +34,11 @@ export function Plugins(_props: Props): React.ReactNode {
     const { metadata } = React.useContext(AppContext);
 
     function openPluginDetails(plugin: UniChatPluginMetadata): void {
-        modals.open({
-            title: <PluginOverviewHeader plugin={plugin} />,
-            children: <PluginOverview plugin={plugin} />,
-            fullScreen: true
+        modalService.openModal({
+            fullScreen: true,
+            title: "Plugin Overview",
+            actions: <PluginOverviewActions plugin={plugin} />,
+            children: <PluginOverview plugin={plugin} />
         });
     }
 
@@ -113,18 +114,13 @@ export function Plugins(_props: Props): React.ReactNode {
     );
 }
 
-export function PluginsHeader(_props: Props): React.ReactNode {
+export function PluginsActions(_props: Props): React.ReactNode {
     const { metadata } = React.useContext(AppContext);
 
     return (
-        <PluginsHeaderStyledContainer>
-            <span>Plugins</span>
-            <div className="left-buttons">
-                <Button variant="outline" size="xs" onClick={() => revealItemInDir(metadata.pluginsDir)}>
-                    <i className="fas fa-folder" />
-                    &nbsp;Show Plugins Folder
-                </Button>
-            </div>
-        </PluginsHeaderStyledContainer>
+        <Button variant="outline" size="xs" onClick={() => revealItemInDir(metadata.pluginsDir)}>
+            <i className="fas fa-folder" />
+            &nbsp;Show Plugins Folder
+        </Button>
     );
 }

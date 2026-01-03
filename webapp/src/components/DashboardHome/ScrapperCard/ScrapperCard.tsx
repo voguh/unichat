@@ -10,12 +10,12 @@
 import React from "react";
 
 import { Badge, Button, Card, TextInput, Tooltip } from "@mantine/core";
-import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import * as eventService from "@tauri-apps/api/event";
 
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
+import { modalService } from "unichat/services/modalService";
 import { UniChatScrapper } from "unichat/types";
 import { IPCEvents, IPCStatusEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
@@ -134,9 +134,9 @@ export function ScrapperCard(props: Props): React.ReactNode {
                 setEvent(payload);
             } else if (payload.type === "fatal") {
                 setEvent({ ...DEFAULT_STATUS_EVENT, scrapperId: scrapper.id });
-                modals.open({
-                    title: `An error occurred in the ${scrapper.name} scrapper initialization!`,
+                modalService.openModal({
                     size: "lg",
+                    title: `An error occurred in the ${scrapper.name} scrapper initialization!`,
                     children: (
                         <div>
                             <pre>

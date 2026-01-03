@@ -31,7 +31,7 @@ interface SettingsItem {
     children: React.ComponentType<{ onClose: () => void }>;
 }
 
-const settingsItems: Record<string, SettingsItem> = {
+export const settingsItems: Record<string, SettingsItem> = {
     general: {
         title: "General",
         icon: "fas fa-cog",
@@ -96,9 +96,7 @@ export function SettingsModal({ onClose, startupTab }: Props): React.ReactNode {
                             </Button>
                         </div>
                     </div>
-                    <div className="settings-content-body">
-                        {React.createElement(settingsItems[selectedItem].children, { onClose })}
-                    </div>
+                    <div className="settings-content-body"></div>
                 </div>
             )}
         </SettingsStyledContainer>

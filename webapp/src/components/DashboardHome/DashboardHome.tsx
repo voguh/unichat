@@ -10,11 +10,11 @@
 import React from "react";
 
 import { Badge, Button, Card, ComboboxData, List, Menu, Select, Tooltip } from "@mantine/core";
-import { modals } from "@mantine/modals";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { AppContext } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
+import { modalService } from "unichat/services/modalService";
 import { UniChatScrapper } from "unichat/types";
 import { scrapperPriority, UniChatSettings, WIDGET_URL_PREFIX } from "unichat/utils/constants";
 
@@ -51,7 +51,7 @@ export function DashboardHome(): React.ReactNode {
     /* ====================================================================== */
 
     async function openQrCodeModal(url: string): Promise<void> {
-        modals.open({
+        modalService.openModal({
             title: "Open on device",
             children: <QRCodeModal baseUrl={url} />
         });
