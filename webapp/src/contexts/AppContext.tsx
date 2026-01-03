@@ -47,7 +47,15 @@ export function AppContextProvider({ children }: Props): React.ReactNode {
             const appMetadata = await commandService.getAppInfo();
             setMetadata(appMetadata);
 
-            const data = await commandService.getReleases();
+            const data = await new Promise<Record<string, any>[]>((resolve) => {
+                commandService
+                    .getReleases()
+                    .then((releases) => resolve(releases))
+                    .catch((err) => {
+                        _logger.error("An error occurred while fetching releases", err);
+                        resolve([]);
+                    });
+            });
             const releases: UniChatRelease[] = data.map((release) => ({
                 id: release.id,
                 name: release.name || release.tag_name,
