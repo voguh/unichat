@@ -31,7 +31,7 @@ interface SettingsItem {
     children: React.ComponentType<{ onClose: () => void }>;
 }
 
-export const settingsItems: Record<string, SettingsItem> = {
+const settingsItems: Record<string, SettingsItem> = {
     general: {
         title: "General",
         icon: "fas fa-cog",

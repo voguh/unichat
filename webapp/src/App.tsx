@@ -19,7 +19,7 @@ import { DashboardHome } from "./components/DashboardHome";
 import { Gallery } from "./components/Gallery";
 import { ModalWrapper } from "./components/ModalWrapper";
 import { Plugins, PluginsActions } from "./components/Plugins";
-import { settingsItems, SettingsModal } from "./components/SettingsModal";
+import { SettingsModal } from "./components/SettingsModal";
 import { Tour } from "./components/Tour";
 import { WidgetEditor } from "./components/WidgetEditor";
 import { AppContext } from "./contexts/AppContext";
