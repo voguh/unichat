@@ -24,6 +24,18 @@ interface Props {
 export function ThirdPartyLicenses(_props: Props): React.ReactNode {
     const { metadata } = React.useContext(AppContext);
 
+    function formatLicenses(expr: string): string[] {
+        const ids = expr
+            .replace(/[()]/g, " ")
+            .split(/\s+/)
+            .filter((t) => t !== "AND" && t !== "OR" && t !== "WITH")
+            .flatMap((t) => t.split("/"))
+            .map((t) => t.trim())
+            .filter((t) => t.length > 0);
+
+        return Array.from(new Set(ids)).sort();
+    }
+
     return (
         <ThirdPartyLicensesStyledContainer>
             <Table stickyHeader>
@@ -51,18 +63,16 @@ export function ThirdPartyLicenses(_props: Props): React.ReactNode {
                                     </div>
                                 </Table.Td>
                                 <Table.Td style={{ display: "flex", gap: "4px" }}>
-                                    {pkg.licenses
-                                        .sort((a, b) => a.localeCompare(b))
-                                        .map((l) => (
-                                            <Badge
-                                                key={l}
-                                                radius="xs"
-                                                color="green"
-                                                onClick={() => openUrl(`https://opensource.org/license/${l}`)}
-                                            >
-                                                {l}
-                                            </Badge>
-                                        ))}
+                                    {formatLicenses(pkg.licenses).map((l) => (
+                                        <Badge
+                                            key={l}
+                                            radius="xs"
+                                            color="green"
+                                            onClick={() => openUrl(`https://opensource.org/license/${l}`)}
+                                        >
+                                            {l}
+                                        </Badge>
+                                    ))}
                                 </Table.Td>
                             </Table.Tr>
                         ))}

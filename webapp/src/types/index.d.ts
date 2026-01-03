@@ -20,7 +20,7 @@ export interface ThirdPartyLicenseInfo {
     version: string;
     authors?: string[];
     repository?: string;
-    licenses: string[];
+    licenses: string;
 }
 
 export interface GalleryItem {

@@ -77,7 +77,7 @@ struct FinalLicenseInfo {
     version: String,
     authors: HashSet<String>,
     repository: String,
-    licenses: HashSet<String>
+    licenses: String
 }
 
 fn generate_crate_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::error::Error>> {
@@ -114,7 +114,6 @@ fn generate_crate_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::
             let authors: HashSet<String> = serde_json::from_value(package["authors"].clone())?;
             let repository = format!("https://crates.io/crates/{}/{}", &name, &version);
             let license = package["license"].as_str().ok_or("missing package.license")?;
-            let licenses: HashSet<String> = license.split("OR").map(|s| s.trim().to_string()).collect();
 
             final_licenses.push(FinalLicenseInfo {
                 source: String::from("crate"),
@@ -122,7 +121,7 @@ fn generate_crate_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::
                 version: String::from(version),
                 authors: authors,
                 repository: repository,
-                licenses: licenses
+                licenses: String::from(license)
             });
         }
     }
@@ -221,7 +220,6 @@ fn generate_npm_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::er
         let authors: HashSet<String> = generate_npm_authors(package.clone())?;
         let repository = format!("https://www.npmjs.com/package/{}/v/{}", &name, &version);
         let license = package["license"].as_str().ok_or("missing package.license")?;
-        let licenses: HashSet<String> = license.split("OR").map(|s| s.trim().to_string()).collect();
 
         final_licenses.push(FinalLicenseInfo {
             source: String::from("npm"),
@@ -229,7 +227,7 @@ fn generate_npm_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::er
             version: String::from(version),
             authors: authors,
             repository: repository,
-            licenses: licenses
+            licenses: String::from(license)
         });
     }
 
