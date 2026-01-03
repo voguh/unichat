@@ -65,7 +65,7 @@ export function DevelopersSettingsTab(_props: Props): React.ReactNode {
             <div className="create-webview-hidden-section">
                 <Switch
                     label="Create webviews silent"
-                    description="On startup, webviews will be created in background and only shown when needed."
+                    description="On startup, webviews will be created in background and only shown when requested."
                     checked={settings[UniChatSettings.CREATE_WEBVIEW_HIDDEN] as boolean}
                     onChange={(evt) => updateSetting(UniChatSettings.CREATE_WEBVIEW_HIDDEN, evt.currentTarget.checked)}
                 />
