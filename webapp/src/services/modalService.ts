@@ -11,16 +11,17 @@ import { modals } from "@mantine/modals";
 import { OpenContextModal } from "node_modules/@mantine/modals/lib/context";
 
 export interface OpenModalProps extends Omit<OpenContextModal, "modal" | "innerProps"> {
-    title: string;
-    leftSectionTitle?: string;
-    leftSection?: React.ReactNode;
     actions?: React.ReactNode;
     children: React.ReactNode;
+    leftSection?: React.ReactNode;
+    leftSectionTitle?: string;
+    sharedStoreInitialState?: Record<string, any>;
+    title: string;
 }
 
 export class ModalService {
     openModal(opts: OpenModalProps): string {
-        const { title, leftSection, leftSectionTitle, actions, children, ...modalProps } = opts;
+        const { actions, children, leftSection, leftSectionTitle, sharedStoreInitialState, title, ...rest } = opts;
         if ("modal" in opts) {
             delete opts.modal;
         }
@@ -30,11 +31,19 @@ export class ModalService {
         }
 
         return modals.openContextModal({
-            ...modalProps,
+            ...rest,
             modal: "unichat",
             withCloseButton: false,
             centered: true,
-            innerProps: { actions, children, leftSection, leftSectionTitle, modalProps, title }
+            innerProps: {
+                actions: actions,
+                children: children,
+                leftSection: leftSection,
+                leftSectionTitle: leftSectionTitle,
+                modalProps: rest,
+                sharedStoreInitialState: sharedStoreInitialState,
+                title: title
+            }
         });
     }
 }
