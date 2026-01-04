@@ -96,7 +96,9 @@ export function SettingsModal({ onClose, startupTab }: Props): React.ReactNode {
                             </Button>
                         </div>
                     </div>
-                    <div className="settings-content-body"></div>
+                    <div className="settings-content-body">
+                        {React.createElement(settingsItems[selectedItem].children, { onClose })}
+                    </div>
                 </div>
             )}
         </SettingsStyledContainer>
