@@ -10,15 +10,15 @@
 import styled from "styled-components";
 
 export const ModalWrapperStyledContainer = styled.div`
-    --modal-wrapper-max-height: calc(100vh - 58px);
-    --modal-wrapper-header-height: 45px;
+    --modal-max-height: calc(100vh - 58px);
+    --modal-header-height: 45px;
 
     &.is-fullscreen {
-        --modal-wrapper-max-height: calc(100vh);
+        --modal-max-height: calc(100vh);
     }
 
     position: relative;
-    max-height: var(--modal-wrapper-max-height);
+    max-height: var(--modal-max-height);
     margin: -16px;
 
     &.with-sidebar {
@@ -34,7 +34,7 @@ export const ModalWrapperStyledContainer = styled.div`
             border-right: 1px solid var(--mantine-color-dark-4);
 
             > .modal-wrapper-sidebar-header {
-                height: var(--modal-wrapper-header-height);
+                height: var(--modal-header-height);
                 border-bottom: 1px solid var(--mantine-color-dark-4);
                 display: flex;
                 justify-content: center;
@@ -43,7 +43,9 @@ export const ModalWrapperStyledContainer = styled.div`
             }
 
             > .modal-wrapper-sidebar-content {
-                max-height: calc(var(--modal-wrapper-max-height) - var(--modal-wrapper-header-height));
+                --modal-sidebar-content-max-height: calc(var(--modal-max-height) - var(--modal-header-height));
+                --modal-sidebar-content-inner-max-height: var(--modal-sidebar-content-max-height);
+                max-height: var(--modal-sidebar-content-max-height);
                 overflow-y: auto;
             }
         }
@@ -54,7 +56,7 @@ export const ModalWrapperStyledContainer = styled.div`
         background: var(--mantine-color-dark-6);
 
         > .modal-wrapper-header {
-            height: var(--modal-wrapper-header-height);
+            height: var(--modal-header-height);
             border-bottom: 1px solid var(--mantine-color-dark-4);
             display: flex;
             justify-content: space-between;
@@ -81,9 +83,9 @@ export const ModalWrapperStyledContainer = styled.div`
         }
 
         > .modal-wrapper-body {
-            --modal-wrapper-body-max-height: calc(var(--modal-wrapper-max-height) - var(--modal-wrapper-header-height));
-            --modal-wrapper-body-inner-max-height: calc(var(--modal-wrapper-body-max-height) - 32px);
-            max-height: var(--modal-wrapper-body-max-height);
+            --modal-body-max-height: calc(var(--modal-max-height) - var(--modal-header-height));
+            --modal-body-inner-max-height: calc(var(--modal-body-max-height) - 32px);
+            max-height: var(--modal-body-max-height);
             overflow-y: auto;
             padding: 16px;
         }
