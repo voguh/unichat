@@ -13,8 +13,8 @@ import { Button, LoadingOverlay, Tabs } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import * as dialog from "@tauri-apps/plugin-dialog";
 
+import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
-import { loggerService } from "unichat/services/loggerService";
 import { GalleryItem } from "unichat/types";
 
 import { GalleryItemDisplay } from "./GalleryItemDisplay";
@@ -31,6 +31,7 @@ interface Props {
     onSelectItem?: (url: string) => void;
 }
 
+const _logger = LoggerFactory.getLogger(import.meta.url);
 export function Gallery(props: Props): React.ReactNode {
     const { onSelectItem, selectedItem = "", showTabs = ["image", "video", "audio", "file"], startSelectedTab } = props;
 
@@ -64,8 +65,7 @@ export function Gallery(props: Props): React.ReactNode {
             const items = await commandService.getGalleryItems();
             setGalleryItems(items);
         } catch (error) {
-            console.log(error);
-            loggerService.error("An error occurred on fetch gallery items", error);
+            _logger.error("An error occurred on fetch gallery items", error);
 
             notifications.show({
                 title: "Fetch Error",
@@ -82,8 +82,7 @@ export function Gallery(props: Props): React.ReactNode {
             const response = await dialog.open({ multiple: true, directory: false });
             commandService.uploadGalleryItems(response);
         } catch (error) {
-            console.log(error);
-            loggerService.error("An error occurred on upload gallery items", error);
+            _logger.error("An error occurred on upload gallery items", error);
 
             notifications.show({
                 title: "Upload Error",
