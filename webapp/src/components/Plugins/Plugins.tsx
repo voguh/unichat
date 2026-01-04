@@ -57,10 +57,8 @@ export function Plugins(_props: Props): React.ReactNode {
     async function handleFetchPlugins(): Promise<void> {
         try {
             const items = await commandService.getPlugins();
-            console.log("Fetched plugins:", items);
             setPlugins(items);
         } catch (error) {
-            console.log(error);
             _logger.error("An error occurred on fetch plugins", error);
 
             notifications.show({
