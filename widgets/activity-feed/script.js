@@ -120,7 +120,6 @@ if (timeagoUpdateInterval == null) {
 
 function toggleEventTypeView(btnElement, type) {
     const newValue = !btnElement.classList.contains("toggle-btn-active");
-    console.log(newValue);
     const items = FEED_ITEMS_CONTAINER.querySelectorAll(`.feed-item[data-event-type="${type}"]`);
 
     for (const item of items) {

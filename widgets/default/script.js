@@ -70,7 +70,6 @@ function enrichMessage(text, data) {
             enrichedText = enrichedText.replaceAll(snakeKey, value);
             enrichedText = enrichedText.replace(platformConditionalRegExp, (match, platforms, option1, option2) => {
                 const [platform1, platform2] = platforms.split(',').map(p => p.trim());
-                console.log(match, platforms, option1, option2);
                 if (value === platform1.trim()) {
                     return option1;
                 } else if (value === platform2.trim()) {

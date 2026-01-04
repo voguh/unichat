@@ -195,8 +195,6 @@ async function uniChatPreInit() {
             return;
         }
 
-        console.log("UniChat Scrapper JS Version: {{SCRAPPER_JS_VERSION}}");
-
         uniChatLogger.info("UniChat scrapper initializing...")
         const style = document.createElement("style");
         style.textContent = `

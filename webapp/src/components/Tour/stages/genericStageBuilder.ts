@@ -22,7 +22,6 @@ export function stageBuilder(
     return async function (svg, dimensions) {
         svg.innerHTML = "";
 
-        console.log(selector, ignorePrefix);
         const dataTourItem = document.querySelector(ignorePrefix ? selector : `[data-tour='${selector}']`);
         if (!dataTourItem) {
             return;

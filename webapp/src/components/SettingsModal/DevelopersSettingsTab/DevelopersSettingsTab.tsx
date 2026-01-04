@@ -47,10 +47,6 @@ export function DevelopersSettingsTab(_props: Props): React.ReactNode {
             );
             const logEvents: string = await commandService.settingsGetItem(UniChatSettings.LOG_SCRAPPER_EVENTS);
 
-            console.log("Fetched developer settings:", {
-                createWebviewsHidden,
-                logEvents
-            });
             setSettings({
                 [UniChatSettings.CREATE_WEBVIEW_HIDDEN]: createWebviewsHidden,
                 [UniChatSettings.LOG_SCRAPPER_EVENTS]: logEvents
