@@ -9,6 +9,8 @@
 
 use std::fs;
 use std::net::Ipv4Addr;
+use std::time::Duration;
+use std::time::SystemTime;
 
 use if_addrs::IfAddr;
 use if_addrs::get_if_addrs;
@@ -74,11 +76,12 @@ pub async fn get_app_info<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Strin
 pub async fn get_releases<R: Runtime>(_app: AppHandle<R>) -> Result<Value, String> {
     let cached_releases_path = properties::get_app_path(AppPaths::AppCache).join("cached_releases.json");
     if let Ok(metadata) = fs::metadata(&cached_releases_path) {
-        let created_at = metadata.created().map_err(|e| format!("An error occurred on get cached releases file created at: {:#?}", e))?;
-        let now = std::time::SystemTime::now();
-        let duration = now.duration_since(created_at).map_err(|e| format!("An error occurred on calculate duration since created at: {:#?}", e))?;
+        let modified_at = metadata.modified().map_err(|e| format!("An error occurred on get cached releases file created at: {:#?}", e))?;
+        let now = SystemTime::now();
+        let duration = now.duration_since(modified_at).map_err(|e| format!("An error occurred on calculate duration since created at: {:#?}", e))?;
 
-        if duration.as_secs() < 3600 {
+        if duration < Duration::from_secs(3600) {
+            log::info!("Using cached releases file (age: {} seconds)", duration.as_secs());
             let data = fs::read_to_string(&cached_releases_path).map_err(|e| format!("An error occurred on read cached releases file: {:#?}", e))?;
             let json_data = serde_json::from_str(&data).map_err(|e| format!("An error occurred on parse cached releases file content: {:#?}", e))?;
 
@@ -86,6 +89,7 @@ pub async fn get_releases<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Strin
         }
     }
 
+    log::info!("Fetching releases from GitHub API...");
     let url = UNICHAT_HOMEPAGE.replace("https://github.com", "https://api.github.com/repos") + "/releases";
     let mut releases = ureq::get(&url).call().map_err(|e| format!("An error occurred on fetch releases from GitHub API: {:#?}", e))?;
     let releases_json: Value = releases.body_mut().read_json().map_err(|e| format!("An error occurred on read releases body as json: {:#?}", e))?;
