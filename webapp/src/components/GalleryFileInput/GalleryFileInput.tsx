@@ -14,7 +14,7 @@ import { modals } from "@mantine/modals";
 
 import { modalService } from "unichat/services/modalService";
 
-import { Gallery, GalleryTabs } from "../Gallery/Gallery";
+import { Gallery, GalleryActions, GalleryTabs } from "../Gallery/Gallery";
 
 interface Props extends Omit<TextInputProps, "ref"> {
     showTabs?: GalleryTabs[];
@@ -46,6 +46,7 @@ export const GalleryFileInput = React.forwardRef<HTMLInputElement, Props>(functi
         modalService.openModal({
             size: "xl",
             title: "Gallery",
+            actions: <GalleryActions />,
             children: (
                 <Gallery
                     showTabs={_showTabs}

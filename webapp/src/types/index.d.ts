@@ -42,9 +42,10 @@ export interface AppMetadata {
     licenseName: string;
     licenseUrl: string;
 
+    galleryDir: string;
     licenseFile: string;
-    widgetsDir: string;
     pluginsDir: string;
+    widgetsDir: string;
 
     thirdPartyLicenses?: ThirdPartyLicenseInfo[];
 }

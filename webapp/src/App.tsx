@@ -16,7 +16,7 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import semver from "semver";
 
 import { DashboardHome } from "./components/DashboardHome";
-import { Gallery } from "./components/Gallery";
+import { Gallery, GalleryActions } from "./components/Gallery";
 import { ModalWrapper } from "./components/ModalWrapper";
 import { Plugins, PluginsActions } from "./components/Plugins";
 import { SettingsModal } from "./components/SettingsModal";
@@ -60,6 +60,7 @@ export default function App(): JSX.Element {
         modalService.openModal({
             size: "xl",
             title: "Gallery",
+            actions: <GalleryActions />,
             children: <Gallery />
         });
     }

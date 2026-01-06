@@ -60,9 +60,10 @@ pub async fn get_app_info<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Strin
         "licenseName": UNICHAT_LICENSE_NAME,
         "licenseUrl": UNICHAT_LICENSE_URL,
 
+        "galleryDir": properties::get_app_path(AppPaths::UniChatGallery).to_string_lossy().to_string(),
         "licenseFile": properties::get_app_path(AppPaths::UniChatLicense).to_string_lossy().to_string(),
-        "widgetsDir": properties::get_app_path(AppPaths::UniChatUserWidgets).to_string_lossy().to_string(),
         "pluginsDir": properties::get_app_path(AppPaths::UniChatUserPlugins).to_string_lossy().to_string(),
+        "widgetsDir": properties::get_app_path(AppPaths::UniChatUserWidgets).to_string_lossy().to_string(),
 
         "thirdPartyLicenses": serde_json::from_str::<Value>(THIRD_PARTY_LICENSES).unwrap_or(Value::Array(vec![]))
     });
