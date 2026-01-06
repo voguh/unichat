@@ -8,8 +8,8 @@
  ******************************************************************************/
 
 class UniChatLogger {
-    get scrapperId() {
-        return "{{SCRAPPER_ID}}";
+    get scraperId() {
+        return "{{SCRAPER_ID}}";
     }
 
     trace(message, ...args) {
@@ -67,12 +67,12 @@ class UniChatLogger {
             level = "info";
         }
 
-        __TAURI_PLUGIN_LOG__[level](`[UniChat Scrapper - ${this.scrapperId}] ${message}`).catch(console.error);
+        __TAURI_PLUGIN_LOG__[level](`[UniChat Scraper - ${this.scraperId}] ${message}`).catch(console.error);
         console[level](message);
     }
 
     #dispatchThrowable(throwable) {
-        __TAURI_PLUGIN_LOG__.error(`[UniChat Scrapper - ${this.scrapperId}] ${throwable.stack}`).catch(console.error);
+        __TAURI_PLUGIN_LOG__.error(`[UniChat Scraper - ${this.scraperId}] ${throwable.stack}`).catch(console.error);
         console.error(throwable);
     }
 
@@ -100,8 +100,8 @@ globalThis.uniChatLogger = globalThis.uniChatLogger || new UniChatLogger();
 /* ================================================================================================================== */
 
 class UniChat {
-    get scrapperId() {
-        return "{{SCRAPPER_ID}}";
+    get scraperId() {
+        return "{{SCRAPER_ID}}";
     }
 
     async dispatchEvent(payload) {
@@ -113,11 +113,11 @@ class UniChat {
             throw new Error("Payload must have a non-empty string 'type' property.");
         }
 
-        payload.scrapperId = this.scrapperId;
+        payload.scraperId = this.scraperId;
         payload.timestamp = Math.floor(Date.now() / 1000);
 
         uniChatLogger.debug("Dispatching event of type '{}'", payload.type);
-        await __TAURI__.event.emitTo(this.scrapperId, "unichat://scrapper_event", payload)
+        await __TAURI__.event.emitTo(this.scraperId, "unichat://scraper_event", payload)
             .then(() => uniChatLogger.debug("Event of type '{}' dispatched successfully", payload.type))
             .catch((err) => uniChatLogger.error(err.message, err));
     }
@@ -183,19 +183,19 @@ if (window.fetch.__WRAPPED__ !== true) {
 
 /* ================================================================================================================== */
 
-{{SCRAPPER_JS}}
+{{SCRAPER_JS}}
 
 /* ================================================================================================================== */
 
 async function uniChatPreInit() {
     try {
         if (window.location.href.startsWith("tauri://") || window.location.href.startsWith("http://localhost")) {
-            uniChatLogger.info("Scrapper is not running, setting up idle dispatch.");
+            uniChatLogger.info("Scraper is not running, setting up idle dispatch.");
             registerIntermittentEventDispatcher("idle");
             return;
         }
 
-        uniChatLogger.info("UniChat scrapper initializing...")
+        uniChatLogger.info("UniChat scraper initializing...")
         const style = document.createElement("style");
         style.textContent = `
             html::before {
@@ -224,14 +224,14 @@ async function uniChatPreInit() {
         });
 
         if (typeof uniChatInit !== "function") {
-            throw new Error("UniChat scrapper initialization function not found.");
+            throw new Error("UniChat scraper initialization function not found.");
         }
 
         uniChatLogger.info("Calling uniChatInit...");
         const payload = await uniChatInit();
 
         uniChat.dispatchEvent({ type: "ready", url: window.location.href, ...payload });
-        uniChatLogger.info("UniChat scrapper initialized.");
+        uniChatLogger.info("UniChat scraper initialized.");
 
         registerIntermittentEventDispatcher("ping");
     } catch (err) {

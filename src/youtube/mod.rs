@@ -19,8 +19,8 @@ use anyhow::Error;
 use serde_json::Value;
 
 use crate::events;
-use crate::scrapper;
-use crate::scrapper::UniChatScrapper;
+use crate::scraper;
+use crate::scraper::UniChatScraper;
 use crate::shared_emotes;
 use crate::utils::is_valid_youtube_channel_id;
 use crate::utils::is_valid_youtube_video_id;
@@ -33,8 +33,8 @@ use crate::utils::settings::SettingLogEventLevel;
 
 mod mapper;
 
-pub const SCRAPPER_ID: &str = "youtube-chat";
-static SCRAPPER_JS: &str = include_str!("./static/scrapper.js");
+pub const SCRAPER_ID: &str = "youtube-chat";
+static SCRAPER_JS: &str = include_str!("./static/scraper.js");
 
 /* ================================================================================================================== */
 
@@ -43,8 +43,8 @@ fn dispatch_event(mut payload: Value) -> Result<(), Error> {
         return Err(anyhow!("Missing 'type' field in YouTube raw event payload"));
     }
 
-    if payload.get("scrapperId").is_none() {
-        payload["scrapperId"] = serde_json::json!(SCRAPPER_ID);
+    if payload.get("scraperId").is_none() {
+        payload["scraperId"] = serde_json::json!(SCRAPER_ID);
     }
 
     if payload.get("timestamp").is_none() {
@@ -80,7 +80,7 @@ fn handle_idle_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
 
 fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     let app_log_dir = properties::get_app_path(AppPaths::AppLog);
-    let youtube_log_dir = app_log_dir.join(SCRAPPER_ID);
+    let youtube_log_dir = app_log_dir.join(SCRAPER_ID);
     if !youtube_log_dir.exists() {
         fs::create_dir_all(&youtube_log_dir).unwrap();
     }
@@ -94,7 +94,7 @@ fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> 
     let actions = payload.get("actions").and_then(|v| v.as_array())
         .ok_or_else(|| anyhow!("Missing or invalid 'actions' field in '{event_type}' event payload"))?;
 
-    let log_events = settings::get_scrapper_events_log_level();
+    let log_events = settings::get_scraper_events_log_level();
 
     for action in actions {
         if log_events == SettingLogEventLevel::AllEvents {
@@ -138,11 +138,11 @@ static YOUTUBE_VALID_URLS: LazyLock<Vec<String>> = LazyLock::new(|| vec![
 ]);
 
 #[derive(Default)]
-struct YouTubeUniChatScrapper;
+struct YouTubeUniChatScraper;
 
-impl UniChatScrapper for YouTubeUniChatScrapper {
+impl UniChatScraper for YouTubeUniChatScraper {
     fn id(&self) -> &str {
-        return SCRAPPER_ID;
+        return SCRAPER_ID;
     }
 
     fn name(&self) -> &str {
@@ -204,17 +204,17 @@ impl UniChatScrapper for YouTubeUniChatScrapper {
         return Err(anyhow!("Could not extract video ID from YouTube URL"));
     }
 
-    fn scrapper_js(&self) -> &str {
-        return SCRAPPER_JS;
+    fn scraper_js(&self) -> &str {
+        return SCRAPER_JS;
     }
 
     fn on_event(&self, event: serde_json::Value) -> Result<(), Error> {
-        let scrapper_id = event.get("scrapperId").and_then(|v| v.as_str())
-            .ok_or_else(|| anyhow!("Missing or invalid 'scrapperId' field in YouTube raw event payload"))?;
+        let scraper_id = event.get("scraperId").and_then(|v| v.as_str())
+            .ok_or_else(|| anyhow!("Missing or invalid 'scraperId' field in YouTube raw event payload"))?;
         let event_type = event.get("type").and_then(|v| v.as_str())
             .ok_or_else(|| anyhow!("Missing or invalid 'type' field in YouTube raw event payload"))?;
 
-        if scrapper_id != SCRAPPER_ID {
+        if scraper_id != SCRAPER_ID {
             return Ok(());
         }
 
@@ -228,9 +228,9 @@ impl UniChatScrapper for YouTubeUniChatScrapper {
 }
 
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
-    let scrapper_data = YouTubeUniChatScrapper::default();
-    let scrapper: Arc<dyn UniChatScrapper + Send + Sync> = Arc::new(scrapper_data);
-    scrapper::register_scrapper(app.handle(), scrapper)?;
+    let scraper_data = YouTubeUniChatScraper::default();
+    let scraper: Arc<dyn UniChatScraper + Send + Sync> = Arc::new(scraper_data);
+    scraper::register_scraper(app.handle(), scraper)?;
 
     return Ok(());
 }

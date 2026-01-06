@@ -30,7 +30,7 @@ export const DevelopersSettingsTabStyledContainer = styled.div`
         }
     }
 
-    > .scrapper-logging-section {
+    > .scraper-logging-section {
         > .mantine-ButtonGroup-group {
             width: 100%;
 

@@ -9,13 +9,13 @@
 
 async function uniChatInit() {
     if (!window.location.href.startsWith("https://kick.com/")) {
-        throw new Error("This scrapper can only be initialized on Kick pages.");
+        throw new Error("This scraper can only be initialized on Kick pages.");
     }
 
     /* ====================================================================================================== */
 
     const waitForSetup = new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error("Timeout waiting for Kick scrapper setup.")), 5000);
+        const timeout = setTimeout(() => reject(new Error("Timeout waiting for Kick scraper setup.")), 5000);
         uniChat.onWebSocketMessage = async function(event, { wsInstance, url, protocols }) {
             try {
                 const payload = JSON.parse(event.data);

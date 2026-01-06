@@ -13,25 +13,25 @@ export enum IPCEvents {
 
 export interface IPCStatusIdleEvent {
     type: "idle";
-    scrapperId: string;
+    scraperId: string;
     timestamp: number;
 }
 
 export interface IPCStatusReadyEvent {
     type: "ready";
-    scrapperId: string;
+    scraperId: string;
     timestamp: number;
 }
 
 export interface IPCStatusPingEvent {
     type: "ping";
-    scrapperId: string;
+    scraperId: string;
     timestamp: number;
 }
 
 export interface IPCStatusErrorEvent {
     type: "error" | "fatal";
-    scrapperId: string;
+    scraperId: string;
     timestamp: number;
 
     message: string;

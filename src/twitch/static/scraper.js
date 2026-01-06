@@ -66,7 +66,7 @@ async function uniChatHandleGraphQLResponse(res) {
 
 function uniChatInit() {
     if (!window.location.href.startsWith("https://www.twitch.tv/")) {
-        throw new Error("This scrapper can only be initialized on Twitch pages.");
+        throw new Error("This scraper can only be initialized on Twitch pages.");
     }
 
     /* ====================================================================================================== */

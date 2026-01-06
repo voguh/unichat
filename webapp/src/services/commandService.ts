@@ -10,7 +10,7 @@
 import { ComboboxItemGroup } from "@mantine/core";
 import { invoke } from "@tauri-apps/api/core";
 
-import { AppMetadata, GalleryItem, UniChatPluginMetadata, UniChatScrapper, WidgetFields } from "unichat/types";
+import { AppMetadata, GalleryItem, UniChatPluginMetadata, UniChatScraper, WidgetFields } from "unichat/types";
 import { UniChatSettings } from "unichat/utils/constants";
 
 export class CommandService {
@@ -88,32 +88,32 @@ export class CommandService {
 
     /* ========================================================================================== */
 
-    public async getScrappers(): Promise<UniChatScrapper[]> {
-        return invoke("get_scrappers");
+    public async getScrapers(): Promise<UniChatScraper[]> {
+        return invoke("get_scrapers");
     }
 
-    public async getScrapper(scrapperId: string): Promise<UniChatScrapper> {
-        return invoke("get_scrapper", { scrapperId });
+    public async getScraper(scraperId: string): Promise<UniChatScraper> {
+        return invoke("get_scraper", { scraperId });
     }
 
-    public async validateScrapperUrl(scrapperId: string, url: string): Promise<string> {
-        return invoke("validate_scrapper_url", { scrapperId, url });
+    public async validateScraperUrl(scraperId: string, url: string): Promise<string> {
+        return invoke("validate_scraper_url", { scraperId, url });
     }
 
-    public async getScrapperStoredUrl(scrapperId: string): Promise<string | null> {
-        return invoke("get_scrapper_stored_url", { scrapperId });
+    public async getScraperStoredUrl(scraperId: string): Promise<string | null> {
+        return invoke("get_scraper_stored_url", { scraperId });
     }
 
-    public async getScrapperWebviewUrl(scrapperId: string): Promise<string> {
-        return invoke("get_scrapper_webview_url", { scrapperId });
+    public async getScraperWebviewUrl(scraperId: string): Promise<string> {
+        return invoke("get_scraper_webview_url", { scraperId });
     }
 
-    public async setScrapperWebviewUrl(scrapperId: string, url: string): Promise<void> {
-        await invoke("set_scrapper_webview_url", { scrapperId, url });
+    public async setScraperWebviewUrl(scraperId: string, url: string): Promise<void> {
+        await invoke("set_scraper_webview_url", { scraperId, url });
     }
 
-    public async toggleScrapperWebview(scrapperId: string): Promise<boolean> {
-        return invoke("toggle_scrapper_webview", { scrapperId });
+    public async toggleScraperWebview(scraperId: string): Promise<boolean> {
+        return invoke("toggle_scraper_webview", { scraperId });
     }
 
     /* ========================================================================================== */

@@ -45,11 +45,11 @@ export function DevelopersSettingsTab(_props: Props): React.ReactNode {
             const createWebviewsHidden: boolean = await commandService.settingsGetItem(
                 UniChatSettings.CREATE_WEBVIEW_HIDDEN
             );
-            const logEvents: string = await commandService.settingsGetItem(UniChatSettings.LOG_SCRAPPER_EVENTS);
+            const logEvents: string = await commandService.settingsGetItem(UniChatSettings.LOG_SCRAPER_EVENTS);
 
             setSettings({
                 [UniChatSettings.CREATE_WEBVIEW_HIDDEN]: createWebviewsHidden,
-                [UniChatSettings.LOG_SCRAPPER_EVENTS]: logEvents
+                [UniChatSettings.LOG_SCRAPER_EVENTS]: logEvents
             });
         }
 
@@ -68,33 +68,33 @@ export function DevelopersSettingsTab(_props: Props): React.ReactNode {
             </div>
             <Divider my="md" />
 
-            <div className="scrapper-logging-section">
-                <Text size="sm">Scrapper log events</Text>
+            <div className="scraper-logging-section">
+                <Text size="sm">Scraper log events</Text>
                 <Text size="xs" c="dimmed" mb="xs">
-                    Choose the level of detail for scrapper logging{" "}
+                    Choose the level of detail for scraper logging{" "}
                     {isDev && "(Developer mode is enabled, so all events will be logged)"}.
                 </Text>
                 <Button.Group>
                     <Button
-                        variant={settings[UniChatSettings.LOG_SCRAPPER_EVENTS] === "ONLY_ERRORS" ? "filled" : "default"}
-                        disabled={isDev || settings[UniChatSettings.LOG_SCRAPPER_EVENTS] === "ONLY_ERRORS"}
-                        onClick={() => updateSetting(UniChatSettings.LOG_SCRAPPER_EVENTS, "ONLY_ERRORS")}
+                        variant={settings[UniChatSettings.LOG_SCRAPER_EVENTS] === "ONLY_ERRORS" ? "filled" : "default"}
+                        disabled={isDev || settings[UniChatSettings.LOG_SCRAPER_EVENTS] === "ONLY_ERRORS"}
+                        onClick={() => updateSetting(UniChatSettings.LOG_SCRAPER_EVENTS, "ONLY_ERRORS")}
                     >
                         Only Errors
                     </Button>
                     <Button
                         variant={
-                            settings[UniChatSettings.LOG_SCRAPPER_EVENTS] === "UNKNOWN_EVENTS" ? "filled" : "default"
+                            settings[UniChatSettings.LOG_SCRAPER_EVENTS] === "UNKNOWN_EVENTS" ? "filled" : "default"
                         }
-                        disabled={isDev || settings[UniChatSettings.LOG_SCRAPPER_EVENTS] === "UNKNOWN_EVENTS"}
-                        onClick={() => updateSetting(UniChatSettings.LOG_SCRAPPER_EVENTS, "UNKNOWN_EVENTS")}
+                        disabled={isDev || settings[UniChatSettings.LOG_SCRAPER_EVENTS] === "UNKNOWN_EVENTS"}
+                        onClick={() => updateSetting(UniChatSettings.LOG_SCRAPER_EVENTS, "UNKNOWN_EVENTS")}
                     >
                         Errors + Unknown Events
                     </Button>
                     <Button
-                        variant={settings[UniChatSettings.LOG_SCRAPPER_EVENTS] === "ALL_EVENTS" ? "filled" : "default"}
-                        disabled={isDev || settings[UniChatSettings.LOG_SCRAPPER_EVENTS] === "ALL_EVENTS"}
-                        onClick={() => updateSetting(UniChatSettings.LOG_SCRAPPER_EVENTS, "ALL_EVENTS")}
+                        variant={settings[UniChatSettings.LOG_SCRAPER_EVENTS] === "ALL_EVENTS" ? "filled" : "default"}
+                        disabled={isDev || settings[UniChatSettings.LOG_SCRAPER_EVENTS] === "ALL_EVENTS"}
+                        onClick={() => updateSetting(UniChatSettings.LOG_SCRAPER_EVENTS, "ALL_EVENTS")}
                     >
                         Errors + All Events
                     </Button>

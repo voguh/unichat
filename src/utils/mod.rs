@@ -36,10 +36,10 @@ pub fn get_current_timestamp() -> Result<i64, Error> {
 
 /* ================================================================================================================== */
 
-pub fn decode_scrapper_url(url: &str) -> Result<Url, Error> {
+pub fn decode_scraper_url(url: &str) -> Result<Url, Error> {
     let mut url = url;
     if url.trim().is_empty() || url == "about:blank" || !url.starts_with("https://") {
-        url = "tauri://localhost/scrapper_idle.html";
+        url = "tauri://localhost/scraper_idle.html";
     }
 
     let url = Url::parse(url)?;

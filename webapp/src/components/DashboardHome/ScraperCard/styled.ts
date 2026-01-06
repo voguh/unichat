@@ -9,7 +9,7 @@
 
 import styled from "styled-components";
 
-export const ScrapperCardStyledContainer = styled.div`
+export const ScraperCardStyledContainer = styled.div`
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -26,7 +26,7 @@ export const ScrapperCardStyledContainer = styled.div`
     }
 `;
 
-export const ScrapperBadgesWrapper = styled.div`
+export const ScraperBadgesWrapper = styled.div`
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;

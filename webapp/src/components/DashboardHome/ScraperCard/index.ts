@@ -7,4 +7,4 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-export * from "./ScrapperCard";
+export * from "./ScraperCard";

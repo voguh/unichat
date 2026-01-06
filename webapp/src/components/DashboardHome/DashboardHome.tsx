@@ -15,17 +15,17 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { AppContext } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
-import { UniChatScrapper } from "unichat/types";
-import { scrapperPriority, UniChatSettings, WIDGET_URL_PREFIX } from "unichat/utils/constants";
+import { UniChatScraper } from "unichat/types";
+import { scraperPriority, UniChatSettings, WIDGET_URL_PREFIX } from "unichat/utils/constants";
 
 import { QRCodeModal } from "./QRCodeModal";
-import { ScrapperCard } from "./ScrapperCard";
+import { ScraperCard } from "./ScraperCard";
 import { DashboardHomeStyledContainer } from "./styled";
 
 export function DashboardHome(): React.ReactNode {
     const [selectedWidgetUrl, setSelectedWidgetUrl] = React.useState(`${WIDGET_URL_PREFIX}/default`);
     const [widgets, setWidgets] = React.useState<ComboboxData>([]);
-    const [scrappers, setScrappers] = React.useState<UniChatScrapper[]>([]);
+    const [scrapers, setScrapers] = React.useState<UniChatScraper[]>([]);
     const [isOpenToLan, setIsOpenToLan] = React.useState(false);
 
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
@@ -88,10 +88,10 @@ export function DashboardHome(): React.ReactNode {
             const defaultPreviewWidget = await commandService.settingsGetItem(UniChatSettings.DEFAULT_PREVIEW_WIDGET);
             setSelectedWidgetUrl(`${WIDGET_URL_PREFIX}/${defaultPreviewWidget}`);
 
-            const scrappers = await commandService.getScrappers();
-            const sortedScrappers = scrappers.sort((a, b) => {
-                const pa = scrapperPriority(a.id);
-                const pb = scrapperPriority(b.id);
+            const scrapers = await commandService.getScrapers();
+            const sortedScrapers = scrapers.sort((a, b) => {
+                const pa = scraperPriority(a.id);
+                const pb = scraperPriority(b.id);
 
                 if (pa !== pb) {
                     return pa - pb;
@@ -99,7 +99,7 @@ export function DashboardHome(): React.ReactNode {
 
                 return a.name.localeCompare(b.name);
             });
-            setScrappers(sortedScrappers);
+            setScrapers(sortedScrapers);
 
             const isOpenToLan: boolean = await commandService.settingsGetItem(UniChatSettings.OPEN_TO_LAN);
             setIsOpenToLan(isOpenToLan);
@@ -111,12 +111,12 @@ export function DashboardHome(): React.ReactNode {
     return (
         <DashboardHomeStyledContainer>
             <div className="fields">
-                {scrappers.map((s) => (
-                    <ScrapperCard
+                {scrapers.map((s) => (
+                    <ScraperCard
                         key={s.id}
                         editingTooltip={mountEditingTooltip(s.editingTooltipMessage, s.editingTooltipUrls)}
-                        validateUrl={(value) => commandService.validateScrapperUrl(s.id, value)}
-                        scrapper={s}
+                        validateUrl={(value) => commandService.validateScraperUrl(s.id, value)}
+                        scraper={s}
                     />
                 ))}
             </div>

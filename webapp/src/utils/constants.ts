@@ -9,13 +9,13 @@
 
 export const WIDGET_URL_PREFIX = "http://localhost:9527/widget";
 
-export const TWITCH_SCRAPPER_ID = "twitch-chat";
-export const YOUTUBE_SCRAPPER_ID = "youtube-chat";
+export const TWITCH_SCRAPER_ID = "twitch-chat";
+export const YOUTUBE_SCRAPER_ID = "youtube-chat";
 
-export function scrapperPriority(id: string): number {
-    if (id === YOUTUBE_SCRAPPER_ID) {
+export function scraperPriority(id: string): number {
+    if (id === YOUTUBE_SCRAPER_ID) {
         return 0;
-    } else if (id === TWITCH_SCRAPPER_ID) {
+    } else if (id === TWITCH_SCRAPER_ID) {
         return 1;
     } else {
         return 2;
@@ -42,5 +42,5 @@ export enum UniChatSettings {
 
     /* Developers settings */
     CREATE_WEBVIEW_HIDDEN = "create-webview-hidden",
-    LOG_SCRAPPER_EVENTS = "log-scrapper-events"
+    LOG_SCRAPER_EVENTS = "log-scraper-events"
 }

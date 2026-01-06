@@ -58,7 +58,7 @@ function uniChatInit() {
     /* ====================================================================================================== */
 
     if (!window.location.href.startsWith("https://www.youtube.com/live_chat")) {
-        throw new Error("This scrapper can only be initialized on YouTube live chat pages.");
+        throw new Error("This scraper can only be initialized on YouTube live chat pages.");
     }
 
     /* ====================================================================================================== */

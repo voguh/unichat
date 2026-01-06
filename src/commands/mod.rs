@@ -43,7 +43,7 @@ pub mod gallery;
 pub mod plugins;
 pub mod store;
 pub mod tour;
-pub mod scrappers;
+pub mod scrapers;
 pub mod widgets;
 
 #[tauri::command]

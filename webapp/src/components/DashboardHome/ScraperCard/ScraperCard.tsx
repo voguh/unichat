@@ -16,33 +16,33 @@ import * as eventService from "@tauri-apps/api/event";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
-import { UniChatScrapper } from "unichat/types";
+import { UniChatScraper } from "unichat/types";
 import { IPCEvents, IPCStatusEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
 
-import { ScrapperBadgesWrapper, ScrapperCardStyledContainer } from "./styled";
+import { ScraperBadgesWrapper, ScraperCardStyledContainer } from "./styled";
 
 interface Props {
     editingTooltip: React.ReactNode;
-    scrapper: UniChatScrapper;
+    scraper: UniChatScraper;
     validateUrl: (url: string) => Promise<string>;
 }
 
 const DEFAULT_STATUS_EVENT: IPCStatusEvent = {
     type: "idle",
-    scrapperId: "youtube-chat",
+    scraperId: "youtube-chat",
     timestamp: Date.now()
 };
 
 const _logger = LoggerFactory.getLogger(import.meta.url);
-export function ScrapperCard(props: Props): React.ReactNode {
-    const { editingTooltip, scrapper, validateUrl } = props;
+export function ScraperCard(props: Props): React.ReactNode {
+    const { editingTooltip, scraper, validateUrl } = props;
 
     const [loading, setLoading] = React.useState(false);
-    const [event, setEvent] = React.useState<IPCStatusEvent>({ ...DEFAULT_STATUS_EVENT, scrapperId: scrapper.id });
+    const [event, setEvent] = React.useState<IPCStatusEvent>({ ...DEFAULT_STATUS_EVENT, scraperId: scraper.id });
 
-    const scrapperIsRunning = React.useMemo(() => event != null && ["ready", "ping"].includes(event.type), [event]);
-    const scrapperIsStarting = React.useMemo(() => event == null, [event]);
+    const scraperIsRunning = React.useMemo(() => event != null && ["ready", "ping"].includes(event.type), [event]);
+    const scraperIsStarting = React.useMemo(() => event == null, [event]);
 
     const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -52,10 +52,10 @@ export function ScrapperCard(props: Props): React.ReactNode {
             const inputValue = await validateUrl(inputRef.current?.value ?? "");
             inputRef.current.value = inputValue;
 
-            await commandService.setScrapperWebviewUrl(scrapper.id, inputValue);
-            setEvent({ type: "ready", scrapperId: scrapper.id, timestamp: Date.now() });
+            await commandService.setScraperWebviewUrl(scraper.id, inputValue);
+            setEvent({ type: "ready", scraperId: scraper.id, timestamp: Date.now() });
         } catch (err) {
-            _logger.error(`An error occurred while starting the ${scrapper.name} chat scrapper: {}`, err);
+            _logger.error(`An error occurred while starting the ${scraper.name} chat scraper: {}`, err);
         } finally {
             setLoading(false);
         }
@@ -64,34 +64,34 @@ export function ScrapperCard(props: Props): React.ReactNode {
     async function handleStop(): Promise<void> {
         try {
             setLoading(true);
-            await commandService.setScrapperWebviewUrl(scrapper.id, "about:blank");
-            setEvent({ ...DEFAULT_STATUS_EVENT, scrapperId: scrapper.id });
+            await commandService.setScraperWebviewUrl(scraper.id, "about:blank");
+            setEvent({ ...DEFAULT_STATUS_EVENT, scraperId: scraper.id });
         } catch (err) {
-            _logger.error(`An error occurred while stopping the ${scrapper.name} chat scrapper: {}`, err);
+            _logger.error(`An error occurred while stopping the ${scraper.name} chat scraper: {}`, err);
         } finally {
             setLoading(false);
         }
     }
 
-    async function handleOpenScrapperWindow(): Promise<void> {
-        await commandService.toggleScrapperWebview(scrapper.id);
+    async function handleOpenScraperWindow(): Promise<void> {
+        await commandService.toggleScraperWebview(scraper.id);
     }
 
     /* ============================================================================================================== */
 
     function handleStatusLabel(): string {
-        if (loading || scrapperIsStarting) {
+        if (loading || scraperIsStarting) {
             return "Starting";
         } else {
-            return scrapperIsRunning ? "Stop" : "Start";
+            return scraperIsRunning ? "Stop" : "Start";
         }
     }
 
     function handleStatusIcon(): React.ReactNode {
-        if (loading || scrapperIsStarting) {
+        if (loading || scraperIsStarting) {
             return <i className="fas fa-spinner fa-spin" />;
         } else {
-            return scrapperIsRunning ? <i className="fas fa-stop" /> : <i className="fas fa-play" />;
+            return scraperIsRunning ? <i className="fas fa-stop" /> : <i className="fas fa-play" />;
         }
     }
 
@@ -100,13 +100,13 @@ export function ScrapperCard(props: Props): React.ReactNode {
             setLoading(true);
 
             try {
-                const scrapperStoredUrl = await commandService.getScrapperStoredUrl(scrapper.id);
+                const scraperStoredUrl = await commandService.getScraperStoredUrl(scraper.id);
 
-                if (inputRef.current && !Strings.isNullOrEmpty(scrapperStoredUrl)) {
-                    inputRef.current.value = scrapperStoredUrl;
+                if (inputRef.current && !Strings.isNullOrEmpty(scraperStoredUrl)) {
+                    inputRef.current.value = scraperStoredUrl;
                 }
             } catch (err) {
-                _logger.error("An error occurred while initializing the scrapper '{}' card", scrapper.id, err);
+                _logger.error("An error occurred while initializing the scraper '{}' card", scraper.id, err);
             } finally {
                 setLoading(false);
             }
@@ -117,14 +117,14 @@ export function ScrapperCard(props: Props): React.ReactNode {
 
     React.useEffect(() => {
         const unListen = eventService.listen<IPCStatusEvent>(IPCEvents.STATUS_EVENT, ({ payload }) => {
-            if (payload.scrapperId !== scrapper.id) {
+            if (payload.scraperId !== scraper.id) {
                 return;
             }
 
             if (payload.type === "error") {
                 notifications.show({
-                    title: `Error on ${scrapper.name} scrapper execution`,
-                    message: payload.message ?? "An unknown error occurred in the scrapper.",
+                    title: `Error on ${scraper.name} scraper execution`,
+                    message: payload.message ?? "An unknown error occurred in the scraper.",
                     color: "red",
                     icon: <i className="fas fa-times" />
                 });
@@ -133,10 +133,10 @@ export function ScrapperCard(props: Props): React.ReactNode {
             if (["idle", "ready", "ping"].includes(payload.type)) {
                 setEvent(payload);
             } else if (payload.type === "fatal") {
-                setEvent({ ...DEFAULT_STATUS_EVENT, scrapperId: scrapper.id });
+                setEvent({ ...DEFAULT_STATUS_EVENT, scraperId: scraper.id });
                 modalService.openModal({
                     size: "lg",
-                    title: `An error occurred in the ${scrapper.name} scrapper initialization!`,
+                    title: `An error occurred in the ${scraper.name} scraper initialization!`,
                     children: (
                         <div>
                             <pre>
@@ -157,14 +157,14 @@ export function ScrapperCard(props: Props): React.ReactNode {
 
     return (
         <Card withBorder shadow="xs" style={{ position: "relative" }}>
-            <ScrapperBadgesWrapper>
-                {scrapper.badges.map((badge, idx) => (
+            <ScraperBadgesWrapper>
+                {scraper.badges.map((badge, idx) => (
                     <Badge key={idx} radius="xs" size="xs" style={{ marginRight: "4px" }}>
                         {badge}
                     </Badge>
                 ))}
-            </ScrapperBadgesWrapper>
-            <ScrapperCardStyledContainer>
+            </ScraperBadgesWrapper>
+            <ScraperCardStyledContainer>
                 <Tooltip
                     label={editingTooltip}
                     position="bottom-start"
@@ -174,28 +174,28 @@ export function ScrapperCard(props: Props): React.ReactNode {
                 >
                     <TextInput
                         size="sm"
-                        label={`Scrapper: ${scrapper.name} chat URL`}
-                        placeholder={scrapper.placeholderText}
+                        label={`${scraper.name} chat URL`}
+                        placeholder={scraper.placeholderText}
                         ref={inputRef}
-                        disabled={loading || scrapperIsRunning}
-                        data-tour={`${scrapper.id}--url-input`}
+                        disabled={loading || scraperIsRunning}
+                        data-tour={`${scraper.id}--url-input`}
                     />
                 </Tooltip>
                 <Button
                     size="sm"
                     color="gray"
                     leftSection={handleStatusIcon()}
-                    onClick={scrapperIsRunning ? handleStop : handleStart}
+                    onClick={scraperIsRunning ? handleStop : handleStart}
                     disabled={loading}
                 >
                     {handleStatusLabel()}
                 </Button>
-                {scrapperIsRunning && (
-                    <Button size="sm" onClick={handleOpenScrapperWindow}>
-                        <i className={scrapper.icon || "fas fa-square"} />
+                {scraperIsRunning && (
+                    <Button size="sm" onClick={handleOpenScraperWindow}>
+                        <i className={Strings.isNullOrEmpty(scraper.icon) ? "fas fa-square" : scraper.icon} />
                     </Button>
                 )}
-            </ScrapperCardStyledContainer>
+            </ScraperCardStyledContainer>
         </Card>
     );
 }

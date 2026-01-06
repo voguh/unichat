@@ -178,7 +178,7 @@ end
 
 local function on_kick_event(event)
     if channel_id == nil then
-        logger.warn("Kick scrapper received an event before being ready. Ignoring event.");
+        logger.warn("Kick scraper received an event before being ready. Ignoring event.");
         return nil;
     end
 
@@ -210,4 +210,4 @@ local opts = {
     on_ready = on_kick_ready
 }
 
-UniChatAPI:register_scrapper("kick-chat", "Kick", "static/scrapper.js", opts);
+UniChatAPI:register_scraper("kick-chat", "Kick", "static/scraper.js", opts);

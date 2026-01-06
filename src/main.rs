@@ -32,7 +32,7 @@ mod commands;
 mod events;
 mod irc;
 mod plugins;
-mod scrapper;
+mod scraper;
 mod shared_emotes;
 mod twitch;
 mod utils;
@@ -224,13 +224,13 @@ async fn main() {
             commands::tour::get_tour_steps,
             commands::tour::set_tour_steps,
             commands::tour::tour_steps_has_new,
-            commands::scrappers::get_scrappers,
-            commands::scrappers::get_scrapper,
-            commands::scrappers::validate_scrapper_url,
-            commands::scrappers::get_scrapper_stored_url,
-            commands::scrappers::get_scrapper_webview_url,
-            commands::scrappers::set_scrapper_webview_url,
-            commands::scrappers::toggle_scrapper_webview,
+            commands::scrapers::get_scrapers,
+            commands::scrapers::get_scraper,
+            commands::scrapers::validate_scraper_url,
+            commands::scrapers::get_scraper_stored_url,
+            commands::scrapers::get_scraper_webview_url,
+            commands::scrapers::set_scraper_webview_url,
+            commands::scrapers::toggle_scraper_webview,
             commands::widgets::get_widget_fields,
             commands::widgets::get_widget_fieldstate,
             commands::widgets::list_widgets,

@@ -69,7 +69,7 @@ export interface UniChatPluginMetadata {
 
 /* ========================================================================== */
 
-export interface UniChatScrapper {
+export interface UniChatScraper {
     id: string;
     name: string;
     editingTooltipMessage: string;

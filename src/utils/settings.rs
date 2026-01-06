@@ -39,11 +39,11 @@ pub const SETTINGS_TOUR_CURRENT_STEPS_KEY: &str = "settings:current-tour-steps";
 pub const SETTINGS_TOUR_PREVIOUS_STEPS_KEY: &str = "settings:previous-tour-steps";
 pub const SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY: &str = "settings:default-preview-widget";
 pub const SETTINGS_OPEN_TO_LAN_KEY: &str = "settings:open-to-lan";
-pub const SETTINGS_LOG_SCRAPPER_EVENTS: &str = "settings:log-scrapper-events";
+pub const SETTINGS_LOG_SCRAPER_EVENTS: &str = "settings:log-scraper-events";
 
-const SCRAPPER_KEY_TEMPLATE: &str = "scrapper:{}:{}";
-fn store_mount_scrapper_key(scrapper_id: &str, key: &str) -> String {
-    return SCRAPPER_KEY_TEMPLATE.replacen("{}", scrapper_id, 1).replacen("{}", key, 1);
+const SCRAPER_KEY_TEMPLATE: &str = "scraper:{}:{}";
+fn store_mount_scraper_key(scraper_id: &str, key: &str) -> String {
+    return SCRAPER_KEY_TEMPLATE.replacen("{}", scraper_id, 1).replacen("{}", key, 1);
 }
 
 /* ================================================================================================================== */
@@ -62,7 +62,7 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
 static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<(), Error> + Send + Sync>>> = LazyLock::new(|| {
     return vec![
         Box::new(|store| {
-            let twitch_url_key = store_mount_scrapper_key("twitch-chat", "url");
+            let twitch_url_key = store_mount_scraper_key("twitch-chat", "url");
             if let Some(value) = store.get("twitch-channel-name") {
                 log::info!("Migrating legacy 'twitch-channel-name' to new key '{}'", twitch_url_key);
                 let channel_name_str: String = serde_json::from_value(value)?;
@@ -76,7 +76,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.set(&twitch_url_key, raw_value);
             }
 
-            let youtube_url_key = store_mount_scrapper_key("youtube-chat", "url");
+            let youtube_url_key = store_mount_scraper_key("youtube-chat", "url");
             if let Some(value) = store.get("youtube-video-id") {
                 log::info!("Migrating legacy 'youtube-video-id' to new key '{}'", youtube_url_key);
                 let video_id_str: String = serde_json::from_value(value)?;
@@ -92,7 +92,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
 
             /* ================================================================================== */
 
-            let twitch_log_level_key = store_mount_scrapper_key("twitch-chat", "log_level");
+            let twitch_log_level_key = store_mount_scraper_key("twitch-chat", "log_level");
             if let Some(value) = store.get("settings.log-twitch-events") {
                 log::info!("Migrating legacy 'settings.log-twitch-events' to new key '{}'", twitch_log_level_key);
                 store.set(&twitch_log_level_key, value);
@@ -103,7 +103,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.set(&twitch_log_level_key, raw_value);
             }
 
-            let youtube_log_level_key = store_mount_scrapper_key("youtube-chat", "log_level");
+            let youtube_log_level_key = store_mount_scraper_key("youtube-chat", "log_level");
             if let Some(value) = store.get("settings.log-youtube-events") {
                 log::info!("Migrating legacy 'settings.log-youtube-events' to new key '{}'", youtube_log_level_key);
                 store.set(&youtube_log_level_key, value);
@@ -174,20 +174,20 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
 
             /* ================================================================================== */
 
-            let log_scrapper_events_key = "settings:log-scrapper-events";
-            if store.get(log_scrapper_events_key).is_none() {
-                log::info!("Setting default value for '{}' setting", log_scrapper_events_key);
+            let log_scraper_events_key = "settings:log-scraper-events";
+            if store.get(log_scraper_events_key).is_none() {
+                log::info!("Setting default value for '{}' setting", log_scraper_events_key);
                 let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
-                store.set(log_scrapper_events_key, raw_value);
+                store.set(log_scraper_events_key, raw_value);
             }
 
-            let twitch_log_level_key = store_mount_scrapper_key("twitch-chat", "log_level");
+            let twitch_log_level_key = store_mount_scraper_key("twitch-chat", "log_level");
             if store.get(&twitch_log_level_key).is_some() {
                 log::info!("Removing deprecated key '{}'", twitch_log_level_key);
                 store.delete(twitch_log_level_key);
             }
 
-            let youtube_log_level_key = store_mount_scrapper_key("youtube-chat", "log_level");
+            let youtube_log_level_key = store_mount_scraper_key("youtube-chat", "log_level");
             if store.get(&youtube_log_level_key).is_some() {
                 log::info!("Removing deprecated key '{}'", youtube_log_level_key);
                 store.delete(youtube_log_level_key);
@@ -255,8 +255,8 @@ pub fn get_item<R: serde::de::DeserializeOwned>(key: &str) -> Result<R, Error> {
     let key = key.trim();
     if key.is_empty() {
         return Err(anyhow!("Store key cannot be empty"));
-    } else if key.starts_with("scrapper") {
-        return Err(anyhow!("Use get_scrapper_property to get scrapper properties"));
+    } else if key.starts_with("scraper") {
+        return Err(anyhow!("Use get_scraper_property to get scraper properties"));
     } else if key.starts_with("store") {
         return Err(anyhow!("Keys starting with 'store' are reserved for internal use"));
     }
@@ -276,8 +276,8 @@ pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &V) -> Result<(), Er
     let key = key.trim();
     if key.is_empty() {
         return Err(anyhow!("Store key cannot be empty"));
-    } else if key.starts_with("scrapper") {
-        return Err(anyhow!("Use set_scrapper_property to set scrapper properties"));
+    } else if key.starts_with("scraper") {
+        return Err(anyhow!("Use set_scraper_property to set scraper properties"));
     } else if key.starts_with("store") {
         return Err(anyhow!("Keys starting with 'store' are reserved for internal use"));
     }
@@ -292,60 +292,60 @@ pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &V) -> Result<(), Er
 
 /* ====================================================================== */
 
-pub fn get_scrapper_property<R: serde::de::DeserializeOwned>(scrapper_id: &str, property: &str) -> Result<R, Error> {
-    let scrapper_id = scrapper_id.trim();
-    if scrapper_id.is_empty() {
-        return Err(anyhow!("Scrapper ID cannot be empty"));
-    } else if !scrapper_id.ends_with("-chat") {
-        return Err(anyhow!("Invalid scrapper ID '{}'", scrapper_id));
+pub fn get_scraper_property<R: serde::de::DeserializeOwned>(scraper_id: &str, property: &str) -> Result<R, Error> {
+    let scraper_id = scraper_id.trim();
+    if scraper_id.is_empty() {
+        return Err(anyhow!("Scraper ID cannot be empty"));
+    } else if !scraper_id.ends_with("-chat") {
+        return Err(anyhow!("Invalid scraper ID '{}'", scraper_id));
     }
 
     let property = property.trim();
     if property.is_empty() {
-        return Err(anyhow!("Scrapper property cannot be empty"));
+        return Err(anyhow!("Scraper property cannot be empty"));
     }
 
     let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
-    let key = store_mount_scrapper_key(scrapper_id, property);
+    let key = store_mount_scraper_key(scraper_id, property);
     let raw_value = store.get(key);
 
     if let Some(value) = raw_value {
         let value = serde_json::from_value(value)?;
         return Ok(value);
     } else {
-        return Err(anyhow!("Scrapper property '{}' of '{}' scrapper not found", property, scrapper_id));
+        return Err(anyhow!("Scraper property '{}' of '{}' scraper not found", property, scraper_id));
     }
 }
 
-pub fn set_scrapper_property<V: serde::ser::Serialize>(scrapper_id: &str, property: &str, value: &V) -> Result<(), Error> {
-    let scrapper_id = scrapper_id.trim();
-    if scrapper_id.is_empty() {
-        return Err(anyhow!("Scrapper ID cannot be empty"));
-    } else if !scrapper_id.ends_with("-chat") {
-        return Err(anyhow!("Invalid scrapper ID '{}'", scrapper_id));
+pub fn set_scraper_property<V: serde::ser::Serialize>(scraper_id: &str, property: &str, value: &V) -> Result<(), Error> {
+    let scraper_id = scraper_id.trim();
+    if scraper_id.is_empty() {
+        return Err(anyhow!("Scraper ID cannot be empty"));
+    } else if !scraper_id.ends_with("-chat") {
+        return Err(anyhow!("Invalid scraper ID '{}'", scraper_id));
     }
 
     let property = property.trim();
     if property.is_empty() {
-        return Err(anyhow!("Scrapper property cannot be empty"));
+        return Err(anyhow!("Scraper property cannot be empty"));
     }
 
     let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
-    let key = store_mount_scrapper_key(scrapper_id, property);
+    let key = store_mount_scraper_key(scraper_id, property);
     let raw_value = serde_json::to_value(value)?;
     store.set(key, raw_value);
 
     return Ok(());
 }
 
-pub fn get_scrapper_events_log_level() -> SettingLogEventLevel {
+pub fn get_scraper_events_log_level() -> SettingLogEventLevel {
     if is_dev() {
         return SettingLogEventLevel::AllEvents;
     }
 
-    if let Ok(level) = get_item(SETTINGS_LOG_SCRAPPER_EVENTS) {
+    if let Ok(level) = get_item(SETTINGS_LOG_SCRAPER_EVENTS) {
         return level;
     } else {
         return SettingLogEventLevel::OnlyErrors;
