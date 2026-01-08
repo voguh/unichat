@@ -18,6 +18,7 @@ use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
 #[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SerializedPluginMetadata {
     pub name: String,
     pub description: Option<String>,
