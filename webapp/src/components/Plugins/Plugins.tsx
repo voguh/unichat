@@ -77,36 +77,38 @@ export function Plugins(_props: Props): React.ReactNode {
     return (
         <PluginsStyledContainer>
             <PluginsGridContainer cols={5}>
-                {plugins.map((plugin) => {
-                    const [bgColor, fgColor] = PLUGIN_STATUS_COLOR[plugin.status];
+                {plugins
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((plugin) => {
+                        const [bgColor, fgColor] = PLUGIN_STATUS_COLOR[plugin.status];
 
-                    return (
-                        <Tooltip key={plugin.name} label={plugin.name} position="bottom">
-                            <Card onClick={() => openPluginDetails(plugin)} className="plugin-item">
-                                <Card.Section>
-                                    <div className="badges-wrapper">
-                                        {plugin.pluginPath == null ? (
-                                            <Badge
-                                                radius="xs"
-                                                style={{
-                                                    backgroundColor: "var(--mantine-color-gray-5)",
-                                                    color: "var(--mantine-color-black)"
-                                                }}
-                                            >
-                                                System
-                                            </Badge>
-                                        ) : (
-                                            <Badge radius="xs" style={{ backgroundColor: bgColor, color: fgColor }}>
-                                                {plugin.status}
-                                            </Badge>
-                                        )}
-                                    </div>
-                                    <img src={getPluginIconDataUrl(plugin)} />
-                                </Card.Section>
-                            </Card>
-                        </Tooltip>
-                    );
-                })}
+                        return (
+                            <Tooltip key={plugin.name} label={plugin.name} position="bottom">
+                                <Card onClick={() => openPluginDetails(plugin)} className="plugin-item">
+                                    <Card.Section>
+                                        <div className="badges-wrapper">
+                                            {plugin.pluginPath == null ? (
+                                                <Badge
+                                                    radius="xs"
+                                                    style={{
+                                                        backgroundColor: "var(--mantine-color-gray-5)",
+                                                        color: "var(--mantine-color-black)"
+                                                    }}
+                                                >
+                                                    System
+                                                </Badge>
+                                            ) : (
+                                                <Badge radius="xs" style={{ backgroundColor: bgColor, color: fgColor }}>
+                                                    {plugin.status}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                        <img src={getPluginIconDataUrl(plugin)} />
+                                    </Card.Section>
+                                </Card>
+                            </Tooltip>
+                        );
+                    })}
             </PluginsGridContainer>
         </PluginsStyledContainer>
     );
