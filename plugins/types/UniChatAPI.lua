@@ -209,49 +209,49 @@ UniChatBadge = UniChatBadge or nil;
 
 -- =============================================[ UniChat JSON Library ]============================================= --
 ---@class UniChatJson
----@field encode fun(data: table): string
----@field decode fun(json: string): table
+---@field encode fun(self: UniChatJson, data: table): string
+---@field decode fun(self: UniChatJson, json: string): table
 -- ===========================================[ End UniChat JSON Library ]=========================================== --
 
 -- ============================================[ UniChat Logger Library ]============================================ --
 ---@class UniChatLogger
----@field debug fun(template: string, ...: unknown)
----@field info fun(template: string, ...: unknown)
----@field warn fun(template: string, ...: unknown)
----@field error fun(template: string, ...: unknown)
+---@field debug fun(self: UniChatLogger, template: string, ...: unknown)
+---@field info fun(self: UniChatLogger, template: string, ...: unknown)
+---@field warn fun(self: UniChatLogger, template: string, ...: unknown)
+---@field error fun(self: UniChatLogger, template: string, ...: unknown)
 -- ==========================================[ End UniChat Logger Library ]========================================== --
 
 -- ============================================[ UniChat String Library ]============================================ --
 ---@class UniChatStrings
----@field to_upper fun(str: string): string
----@field to_lower fun(str: string): string
----@field strip_prefix fun(str: string, prefix: string): string
----@field strip_suffix fun(str: string, suffix: string): string
----@field starts_with fun(str: string, prefix: string): boolean
----@field ends_with fun(str: string, suffix: string): boolean
----@field find fun(str: string, substring: string): number?
----@field rfind fun(str: string, substring: string): number?
----@field is_empty fun(str: string): boolean
----@field trim fun(str: string): string
----@field trim_start fun(str: string): string
----@field trim_end fun(str: string): string
----@field to_bytes fun(str: string): number[]
----@field from_bytes fun(bytes: number[]): string
----@field chars fun(str: string): string[]
----@field length fun(str: string): number
----@field replace fun(str: string, from: string, to: string, count?: number): string
----@field contains fun(str: string, substring: string): boolean
----@field split fun(str: string, delimiter: string): string[]
+---@field to_upper fun(self: UniChatStrings, str: string): string
+---@field to_lower fun(self: UniChatStrings, str: string): string
+---@field strip_prefix fun(self: UniChatStrings, str: string, prefix: string): string
+---@field strip_suffix fun(self: UniChatStrings, str: string, suffix: string): string
+---@field starts_with fun(self: UniChatStrings, str: string, prefix: string): boolean
+---@field ends_with fun(self: UniChatStrings, str: string, suffix: string): boolean
+---@field find fun(self: UniChatStrings, str: string, substring: string): number?
+---@field rfind fun(self: UniChatStrings, str: string, substring: string): number?
+---@field is_empty fun(self: UniChatStrings, str: string): boolean
+---@field trim fun(self: UniChatStrings, str: string): string
+---@field trim_start fun(self: UniChatStrings, str: string): string
+---@field trim_end fun(self: UniChatStrings, str: string): string
+---@field to_bytes fun(self: UniChatStrings, str: string): number[]
+---@field from_bytes fun(self: UniChatStrings, bytes: number[]): string
+---@field chars fun(self: UniChatStrings, str: string): string[]
+---@field length fun(self: UniChatStrings, str: string): number
+---@field replace fun(self: UniChatStrings, str: string, from: string, to: string, count?: number): string
+---@field contains fun(self: UniChatStrings, str: string, substring: string): boolean
+---@field split fun(self: UniChatStrings, str: string, delimiter: string): string[]
 -- ==========================================[ End UniChat String Library ]========================================== --
 
 -- =============================================[ UniChat Time Library ]============================================= --
 ---@class UniChatTime
----@field now fun(): number
+---@field now fun(self: UniChatTime): number
 -- ===========================================[ End UniChat Time Library ]=========================================== --
 
 -- =============================================[ UniChat YAML Library ]============================================= --
 ---@class UniChatYaml
----@field encode fun(data: table): string
----@field decode fun(yaml: string): table
+---@field encode fun(self: UniChatYaml, data: table): string
+---@field decode fun(self: UniChatYaml, yaml: string): table
 -- ===========================================[ End UniChat YAML Library ]=========================================== --
 

@@ -6,13 +6,13 @@ local strings = require("unichat:strings");
 local time = require("unichat:time");
 
 local function validate_kick_url(url)
-    url = strings.trim(url);
-    url = strings.strip_prefix(url, "http://") or strings.strip_prefix(url, "https://") or url;
-    url = strings.strip_prefix(url, "www.") or url;
+    url = strings:trim(url);
+    url = strings:strip_prefix(url, "http://") or strings:strip_prefix(url, "https://") or url;
+    url = strings:strip_prefix(url, "www.") or url;
 
     local channel_name = nil;
-    if strings.starts_with(url, "kick.com/") then
-        local parts = strings.split(url, "/");
+    if strings:starts_with(url, "kick.com/") then
+        local parts = strings:split(url, "/");
         table.remove(parts, 1);
 
         local channel_name_or_popout = parts[1] or "";
@@ -121,7 +121,7 @@ local function handle_message_event(data)
         messageText = parse_message_text(data.content),
         emotes = parse_emotes(data.content),
 
-        timestamp = time.now(),
+        timestamp = time:now(),
     });
 
     return event;
@@ -139,7 +139,7 @@ local function handle_delete_message_event(data)
 
         messageId = data.message.id,
 
-        timestamp = time.now()
+        timestamp = time:now()
     })
 
     return event;
@@ -157,7 +157,7 @@ local function handle_remove_user_event(data)
 
         authorId = tostring(data.user.id),
 
-        timestamp = time.now()
+        timestamp = time:now()
     })
 
     return event;
@@ -169,7 +169,7 @@ end
 
 local function on_kick_event(event)
     if channel_id == nil then
-        logger.warn("Kick scraper received an event before being ready. Ignoring event.");
+        logger:warn("Kick scraper received an event before being ready. Ignoring event.");
         return nil;
     end
 

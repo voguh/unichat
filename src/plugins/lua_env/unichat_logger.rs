@@ -1,17 +1,13 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2025-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use std::sync::Arc;
-
 use mlua::LuaSerdeExt as _;
-
-use crate::plugins::utils::table_deep_readonly;
 
 fn format_str(lua: &mlua::Lua, args: mlua::Variadic<mlua::Value>) -> Result<(String, Option<mlua::Error>), mlua::Error> {
     if args.is_empty() {
@@ -46,65 +42,61 @@ fn format_str(lua: &mlua::Lua, args: mlua::Variadic<mlua::Value>) -> Result<(Str
     return Ok((msg, error.map(|e| *e)));
 }
 
-pub fn create_module(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Value, mlua::Error> {
-    let target: Arc<str> = format!("plugin:{}", plugin_name).into();
-    let module = lua.create_table()?;
+pub struct UniChatLoggerModule {
+    plugin_name: String,
+}
 
-    let debug_target = target.clone();
-    let debug_func = lua.create_function(move |lua, args: mlua::Variadic<mlua::Value>| {
-        let (msg, err) = format_str(lua, args)?;
+impl UniChatLoggerModule {
+    pub fn new(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Value, mlua::Error> {
+        let userdata = lua.create_userdata(UniChatLoggerModule { plugin_name: plugin_name.to_string() })?;
+        return Ok(mlua::Value::UserData(userdata));
+    }
+}
 
-        log::debug!(target: &debug_target, "{}", msg);
-        if let Some(err) = err {
-            log::error!(target: &debug_target, "{:?}", err);
-        }
+impl mlua::UserData for UniChatLoggerModule {
+    fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("debug", move |lua, this, args: mlua::Variadic<mlua::Value>| {
+            let (msg, err) = format_str(lua, args)?;
 
-        return Ok(());
-    })?;
-    module.set("debug", debug_func)?;
+            log::debug!(target: &this.plugin_name, "{}", msg);
+            if let Some(err) = err {
+                log::error!(target: &this.plugin_name, "{:?}", err);
+            }
 
-    let info_target = target.clone();
-    let info_func = lua.create_function(move |lua, args: mlua::Variadic<mlua::Value>| {
-        let (msg, err) = format_str(lua, args)?;
+            return Ok(());
+        });
 
-        log::info!(target: &info_target, "{}", msg);
-        if let Some(err) = err {
-            log::error!(target: &info_target, "{:?}", err);
-        }
+        methods.add_method("info", move |lua, this, args: mlua::Variadic<mlua::Value>| {
+            let (msg, err) = format_str(lua, args)?;
 
-        return Ok(());
-    })?;
-    module.set("info", info_func)?;
+            log::info!(target: &this.plugin_name, "{}", msg);
+            if let Some(err) = err {
+                log::error!(target: &this.plugin_name, "{:?}", err);
+            }
 
-    let warn_target = target.clone();
-    let warn_func = lua.create_function(move |lua, args: mlua::Variadic<mlua::Value>| {
-        let (msg, err) = format_str(lua, args)?;
+            return Ok(());
+        });
 
-        log::warn!(target: &warn_target, "{}", msg);
-        if let Some(err) = err {
-            log::error!(target: &warn_target, "{:?}", err);
-        }
+        methods.add_method("warn", move |lua, this, args: mlua::Variadic<mlua::Value>| {
+            let (msg, err) = format_str(lua, args)?;
 
-        return Ok(());
-    })?;
-    module.set("warn", warn_func)?;
+            log::warn!(target: &this.plugin_name, "{}", msg);
+            if let Some(err) = err {
+                log::error!(target: &this.plugin_name, "{:?}", err);
+            }
 
-    let error_target = target.clone();
-    let error_func = lua.create_function(move |lua, args: mlua::Variadic<mlua::Value>| {
-        let (msg, err) = format_str(lua, args)?;
+            return Ok(());
+        });
 
-        log::error!(target: &error_target, "{}", msg);
-        if let Some(err) = err {
-            log::error!(target: &error_target, "{:?}", err);
-        }
+        methods.add_method("error", move |lua, this, args: mlua::Variadic<mlua::Value>| {
+            let (msg, err) = format_str(lua, args)?;
 
-        return Ok(());
-    })?;
-    module.set("error", error_func)?;
+            log::error!(target: &this.plugin_name, "{}", msg);
+            if let Some(err) = err {
+                log::error!(target: &this.plugin_name, "{:?}", err);
+            }
 
-    let table_name = lua.create_string("unichat:logger")?;
-    let table_name = mlua::Value::String(table_name);
-    let readonly_module = table_deep_readonly(lua, &table_name, module)?;
-
-    return Ok(mlua::Value::Table(readonly_module));
+            return Ok(());
+        });
+    }
 }

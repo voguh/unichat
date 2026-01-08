@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2025-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -14,11 +14,11 @@ use crate::plugins::get_plugin;
 
 use crate::plugins::lua_env::SHARED_MODULES;
 use crate::plugins::lua_env::SHARED_MODULES_LAZY_LOCK_KEY;
-use crate::plugins::lua_env::unichat_json;
-use crate::plugins::lua_env::unichat_logger;
-use crate::plugins::lua_env::unichat_strings;
-use crate::plugins::lua_env::unichat_time;
-use crate::plugins::lua_env::unichat_yaml;
+use crate::plugins::lua_env::unichat_json::UniChatJsonModule;
+use crate::plugins::lua_env::unichat_logger::UniChatLoggerModule;
+use crate::plugins::lua_env::unichat_strings::UniChatStringsModule;
+use crate::plugins::lua_env::unichat_time::UniChatTimeModule;
+use crate::plugins::lua_env::unichat_yaml::UniChatYamlModule;
 use crate::utils::safe_guard_path;
 
 pub fn create_print_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Function, mlua::Error> {
@@ -53,15 +53,15 @@ pub fn create_require_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Fun
 
         fn scoped_modules_require(lua: &mlua::Lua, plugin_env: &mlua::Table, plugin_name: &str, module: &str) -> mlua::Result<mlua::Value> {
             if module == "unichat:json" {
-                return unichat_json::create_module(lua);
+                return UniChatJsonModule::new(lua);
             } else if module == "unichat:logger" {
-                return unichat_logger::create_module(lua, plugin_name);
+                return UniChatLoggerModule::new(lua, plugin_name);
             } else if module == "unichat:strings" {
-                return unichat_strings::create_module(lua);
+                return UniChatStringsModule::new(lua);
             } else if module == "unichat:time" {
-                return unichat_time::create_module(lua);
+                return UniChatTimeModule::new(lua);
             } else if module == "unichat:yaml" {
-                return unichat_yaml::create_module(lua);
+                return UniChatYamlModule::new(lua);
             }
 
             let manifest = get_plugin(plugin_name).map_err(mlua::Error::external)?;
