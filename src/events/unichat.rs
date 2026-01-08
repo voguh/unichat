@@ -33,6 +33,8 @@ pub enum UniChatEvent {
     Raid(UniChatRaidEventPayload),
     #[serde(rename = "unichat:redemption")]
     Redemption(UniChatRedemptionEventPayload),
+    #[serde(rename = "unichat:user_store_update")]
+    UserStoreUpdate(UniChatUserStoreUpdateEventPayload),
     #[serde(rename = "unichat:custom")]
     Custom(serde_json::Value)
 }
@@ -347,4 +349,22 @@ pub struct UniChatRedemptionEventPayload {
     pub emotes: Vec<UniChatEmote>,
 
     pub timestamp: i64
+}
+
+/* <============================================================================================> */
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UniChatUserStoreUpdateEventPayload {
+    pub key: String,
+    pub value: String
+}
+
+impl UniChatEvent {
+    pub fn user_store_update(key: &str, value: &str) -> UniChatEvent {
+        return UniChatEvent::UserStoreUpdate(UniChatUserStoreUpdateEventPayload {
+            key: key.to_string(),
+            value: value.to_string()
+        });
+    }
 }

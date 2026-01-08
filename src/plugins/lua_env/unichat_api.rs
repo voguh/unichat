@@ -10,6 +10,9 @@
 use std::fs;
 use std::io::Write as _;
 use std::sync::Arc;
+use std::sync::RwLock;
+use std::sync::atomic::AtomicU64;
+use std::sync::atomic::Ordering;
 
 use anyhow::anyhow;
 use anyhow::Error;
@@ -32,6 +35,7 @@ use crate::utils::render_emitter;
 use crate::utils::safe_guard_path;
 use crate::utils::settings;
 use crate::utils::settings::SettingLogEventLevel;
+use crate::utils::userstore;
 
 fn get_optional_table_property<R: mlua::FromLua>(table: &mlua::Table, keys: Vec<&str>) -> Result<Option<R>, mlua::Error> {
     for key in keys {
@@ -244,12 +248,58 @@ impl UniChatScraper for LuaUniChatScraper {
 /* ================================================================================================================== */
 
 pub struct UniChatAPI {
-    plugin_name: String
+    plugin_name: String,
+    event_listeners: Arc<RwLock<Vec<(u64, mlua::Function)>>>,
+    next_listener_id: Arc<AtomicU64>
 }
 
 impl UniChatAPI {
     pub fn new(plugin_name: &str) -> Self {
-        return Self { plugin_name: plugin_name.to_string() };
+        let name = plugin_name.to_string();
+        let listeners: Arc<RwLock<Vec<(u64, mlua::Function)>>> = Arc::new(RwLock::new(Vec::new()));
+        let next_id = Arc::new(AtomicU64::new(0));
+
+        let listeners_clone = listeners.clone();
+        tauri::async_runtime::spawn(async move {
+            let mut rx = events::subscribe().unwrap();
+
+            loop {
+                let received = rx.recv().await;
+
+                match received {
+                    Ok(event) => {
+                        let callbacks: Vec<mlua::Function>;
+                        if let Ok(listeners) = listeners_clone.read() {
+                            callbacks = listeners.clone().iter().map(|(_id, function)| function.clone()).collect();
+                        } else {
+                            callbacks = Vec::new();
+                        }
+
+                        let lua = get_lua_runtime().unwrap();
+                        let table = lua.to_value(&event).unwrap();
+
+                        for callback in callbacks.iter() {
+                            if let Err(err) = callback.call::<()>(table.clone()) {
+                                log::error!("An error occurred on UniChatAPI event listener callback: {}", err);
+                            }
+                        }
+                    }
+                    Err(tokio::sync::broadcast::error::RecvError::Lagged(skipped)) => {
+                        log::warn!("EventEmitter lagged, skipped {} events", skipped);
+                    }
+                    Err(tokio::sync::broadcast::error::RecvError::Closed) => {
+                        log::warn!("EventEmitter channel closed, exiting event loop");
+                        break; // Exit the loop if the channel is closed
+                    }
+                }
+            }
+        });
+
+        return Self {
+            plugin_name: name,
+            event_listeners: listeners,
+            next_listener_id: next_id
+        };
     }
 }
 
@@ -294,6 +344,41 @@ impl mlua::UserData for UniChatAPI {
             shared_modules.insert(key, Arc::new(module_table));
             plugin.add_message(format!("Exposed shared module '{}'.", key_to_print));
 
+            return Ok(());
+        });
+
+        methods.add_method("add_event_listener", |_lua, this, callback: mlua::Function| {
+            let plugin = get_plugin(&this.plugin_name).map_err(mlua::Error::external)?;
+
+            let id = this.next_listener_id.fetch_add(1, Ordering::SeqCst);
+            let mut listeners = this.event_listeners.write().map_err(|_| mlua::Error::external("event_listeners lock poisoned"))?;
+            listeners.push((id.clone(), callback));
+
+            plugin.add_message(format!("Added event listener '{:?}'.", id));
+
+            return Ok(id);
+        });
+
+        methods.add_method("remove_event_listener", |_lua, this, listener_id: u64| {
+            let plugin = get_plugin(&this.plugin_name).map_err(mlua::Error::external)?;
+
+            let mut listeners = this.event_listeners.write().map_err(|_| mlua::Error::external("event_listeners lock poisoned"))?;
+            listeners.retain(|(id, _)| *id != listener_id);
+
+            plugin.add_message(format!("Removed event listener '{:?}'.", listener_id));
+
+            return Ok(());
+        });
+
+        methods.add_method("get_userstore_item", |_lua, this, key: String| {
+            let key = format!("{}:{}", this.plugin_name, key);
+            let item: Option<String> = userstore::get_item(&key).map_err(mlua::Error::external)?;
+            return Ok(item);
+        });
+
+        methods.add_method("set_userstore_item", |_lua, this, (key, value): (String, String)| {
+            let key = format!("{}:{}", this.plugin_name, key);
+            userstore::set_item(&key, &value).map_err(mlua::Error::external)?;
             return Ok(());
         });
     }

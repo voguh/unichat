@@ -87,6 +87,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     events::init(app)?;
     plugins::init(app)?;
     utils::render_emitter::init(app)?;
+    utils::userstore::init(app)?;
 
     /* ========================================================================================== */
 

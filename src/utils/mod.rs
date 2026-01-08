@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2025-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -21,6 +21,7 @@ pub mod properties;
 pub mod render_emitter;
 pub mod settings;
 pub mod ureq;
+pub mod userstore;
 
 pub fn is_dev() -> bool {
     return cfg!(debug_assertions) || tauri::is_dev();

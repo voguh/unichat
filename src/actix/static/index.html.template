@@ -41,6 +41,8 @@
                             for (const cachedEvent of event.data) {
                                 window.dispatchEvent(new CustomEvent("unichat:event", { detail: cachedEvent }));
                             }
+                        } else if (event.type === "unichat:user_store_update") {
+                            window.dispatchEvent(new CustomEvent("unichat:user_store_update", { detail: event.data }));
                         } else {
                             window.dispatchEvent(new CustomEvent("unichat:event", { detail: event }));
                         }

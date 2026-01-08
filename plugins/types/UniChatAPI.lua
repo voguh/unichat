@@ -1,6 +1,6 @@
 --[[
  * UniChat
- * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2025-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -13,6 +13,10 @@
 ---@field register_scraper fun(self: UniChatAPI, id: string, name: string, scraper_js_path: string, opts?: table)
 ---@field fetch_shared_emotes fun(self: UniChatAPI, platform: string, channel_id: string)
 ---@field expose_module fun(self: UniChatAPI, module_name: string, module_table: table)
+---@field add_event_listener fun(self: UniChatAPI, callback: function): number
+---@field remove_event_listener fun(self: UniChatAPI, listener_id: number)
+---@field get_userstore_item fun(self: UniChatAPI, key: string): string?
+---@field set_userstore_item fun(self: UniChatAPI, key: string, value: string)
 
 ---@class UniChatBadge
 ---@class UniChatBadgeFactory
@@ -38,6 +42,8 @@
 ---@field Other fun(self: UniChatAuthorTypeFactory, type_name: string): UniChatAuthorType
 
 ---@class UniChatEvent
+---@field type string
+---@field data table
 ---@class UniChatEventFactory
 ---@field Clear fun(self: UniChatEventFactory, data: UniChatClearEventPayload): UniChatEvent
 ---@field RemoveMessage fun(self: UniChatEventFactory, data: UniChatRemoveMessageEventPayload): UniChatEvent
