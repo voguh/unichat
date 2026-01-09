@@ -42,6 +42,8 @@ For users who wish to compile from the source code, instructions are available i
 
 Interested in contributing? Great! Here's the information you need to get started.
 
+Widget and Plugin development documentation can be found in the [here](https://voguh.github.io/unichat/#/).
+
 ### App Directories
 
 | Directory Type       | Location on Linux             | Location on Windows           |
