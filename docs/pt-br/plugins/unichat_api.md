@@ -60,6 +60,8 @@ No ambiente Lua, você terá acesso à API do UniChat através do objeto global 
   | platform   | `string` | SIM         | ID do canal para buscar os emotes compartilhados. |
   | channel_id | `string` | SIM         | Função de callback que recebe os emotes.          |
 
+- `UniChatAPI:get_shared_emotes()`: Esta função retorna uma tabela onde as chaves são os códigos dos emotes e os valores são tabelas do tipo [`UniChatEmote`](/pt-br/widgets/events?id=unichatemote).
+
 - `UniChatAPI:expose_module(name, module)`: Expõe um módulo para outros plugins utilizarem.
   | Argumento | Tipo     | Obrigatório | Descrição                                                                     |
   |-----------|----------|-------------|-------------------------------------------------------------------------------|

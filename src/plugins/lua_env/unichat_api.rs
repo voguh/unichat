@@ -25,6 +25,7 @@ use crate::plugins::get_plugin;
 use crate::plugins::lua_env::SHARED_MODULES;
 use crate::plugins::lua_env::SHARED_MODULES_LAZY_LOCK_KEY;
 use crate::plugins::lua_env::unichat_event::LuaUniChatEvent;
+use crate::plugins::utils::table_deep_readonly;
 use crate::scraper;
 use crate::scraper::UniChatScraper;
 use crate::shared_emotes;
@@ -327,6 +328,24 @@ impl mlua::UserData for UniChatAPI {
         methods.add_method("fetch_shared_emotes", |_lua, _this, (platform, channel_id): (String, String)| {
             shared_emotes::fetch_shared_emotes(&platform, &channel_id).map_err(mlua::Error::external)?;
             return Ok(());
+        });
+
+        methods.add_method("get_shared_emotes", |lua, _this, ()| {
+            let emotes_table = lua.create_table()?;
+            if let Ok(custom_emotes) = shared_emotes::EMOTES_HASHSET.read() {
+                for (code, emote) in custom_emotes.iter() {
+                    let emote_table = lua.create_table()?;
+                    emote_table.set("id", emote.id.clone())?;
+                    emote_table.set("code", emote.code.clone())?;
+                    emote_table.set("url", emote.url.clone())?;
+
+                    let table_name = lua.create_string("UniChatEmote")?;
+                    let locked_emote = table_deep_readonly(lua, &mlua::Value::String(table_name), emote_table)?;
+                    emotes_table.set(code.clone(), locked_emote)?;
+                }
+            }
+
+            return Ok(emotes_table);
         });
 
         methods.add_method("expose_module", |_lua, this, (module_name, module_table): (String, mlua::Value)| {

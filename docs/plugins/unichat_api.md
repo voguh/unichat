@@ -60,6 +60,8 @@ In the Lua environment, you will have access to the **UniChat** API through the 
   | platform  | `string` | YES      | Channel ID to fetch the shared emotes for.  |
   | channel_id| `string` | YES      | Callback function that receives the emotes. |
 
+- `UniChatAPI:get_shared_emotes()`: This function returns a table where the keys are the emote codes and the values are tables of type [`UniChatEmote`](/widgets/events?id=unichatemote).
+
 - `UniChatAPI:expose_module(name, module)`: Exposes a module for other plugins to use.
   | Argument | Type     | Required | Description                                                                         |
   |----------|----------|----------|-------------------------------------------------------------------------------------|

@@ -12,6 +12,7 @@
 ---@field get_version fun(self: UniChatAPI): string
 ---@field register_scraper fun(self: UniChatAPI, id: string, name: string, scraper_js_path: string, on_event: function, opts?: table)
 ---@field fetch_shared_emotes fun(self: UniChatAPI, platform: string, channel_id: string)
+---@field get_shared_emotes fun(self: UniChatAPI): table<string, UniChatEmote>
 ---@field expose_module fun(self: UniChatAPI, module_name: string, module_table: table)
 ---@field add_event_listener fun(self: UniChatAPI, callback: function): number
 ---@field remove_event_listener fun(self: UniChatAPI, listener_id: number)
