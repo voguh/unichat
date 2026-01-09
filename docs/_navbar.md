@@ -1,0 +1,2 @@
+- [:us: English](/)
+- [:brazil: Português](/pt-br/)
