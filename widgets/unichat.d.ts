@@ -43,7 +43,9 @@ export interface UniChatEventRemoveMessage {
         channelId: string;
         /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
+
         platform: UniChatPlatform;
+        flags: Record<string, string | null>;
 
         messageId: string;
 
@@ -188,10 +190,11 @@ export interface UniChatEventSponsorGift {
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
 
-        messageId: string;
         /** **Disclaimer:** On YouTube, this field could be null. */
         tier: string | null;
         count: number;
+
+        messageId: string;
 
         timestamp: number;
     };
