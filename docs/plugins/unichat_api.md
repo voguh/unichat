@@ -4,7 +4,7 @@ In the Lua environment, you will have access to the **UniChat** API through the 
 
 #### Functions
 
-- `UniChatAPI:register_scraper`: Registers a new scraper for **UniChat**.
+- `UniChatAPI:register_scraper(id, name, scrapper_js_path, on_event, opts)`: Registers a new scraper for **UniChat**.
   | Argument                                                     | Type       | Required | Description                                                                                                                                                                           |
   |--------------------------------------------------------------|------------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
   | id                                                           | `string`   | YES      | Unique identifier of the scraper. Must contain only ASCII alphanumeric characters, hyphens, or underscores and must end with `-chat`.                                                 |

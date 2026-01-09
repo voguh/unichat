@@ -4,7 +4,7 @@ No ambiente Lua, você terá acesso à API do UniChat através do objeto global 
 
 #### Funções
 
-- `UniChatAPI:register_scraper`: Registra um novo scraper para o UniChat.
+- `UniChatAPI:register_scraper(id, name, scrapper_js_path, on_event, opts)`: Registra um novo scraper para o UniChat.
   | Argumento                                                   | Tipo       | Obrigatório | Descrição                                                                                                                                                                        |
   |-------------------------------------------------------------|------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
   | id                                                          | `string`   | SIM         | Identificador único do scraper. Deve conter apenas caracteres ASCII alfanuméricos, hífens ou underscores e deve terminar com `-chat`.                                            |
