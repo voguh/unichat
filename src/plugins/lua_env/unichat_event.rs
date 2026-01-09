@@ -12,6 +12,7 @@ use mlua::LuaSerdeExt as _;
 use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
+use crate::plugins::utils::table_deep_readonly;
 
 pub struct LuaUniChatEvent {
     pub inner: UniChatEvent
@@ -117,7 +118,11 @@ impl mlua::UserData for LuaUniChatEmoteFactory {
             table.set("id", id)?;
             table.set("code", code)?;
             table.set("url", url)?;
-            return Ok(table);
+
+            let table_name = lua.create_string("UniChatEmote")?;
+            let locked_table = table_deep_readonly(lua, &mlua::Value::String(table_name), table)?;
+
+            return Ok(locked_table);
         });
     }
 }
@@ -132,7 +137,11 @@ impl mlua::UserData for LuaUniChatBadgeFactory {
             let table = lua.create_table()?;
             table.set("code", code)?;
             table.set("url", url)?;
-            return Ok(table);
+
+            let table_name = lua.create_string("UniChatBadge")?;
+            let locked_table = table_deep_readonly(lua, &mlua::Value::String(table_name), table)?;
+
+            return Ok(locked_table);
         });
     }
 }
