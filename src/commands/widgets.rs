@@ -14,113 +14,85 @@ use serde_json::Value;
 use tauri::AppHandle;
 use tauri::Runtime;
 
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::widgets::WidgetSource;
+use crate::widgets::get_widget_from_rest_path;
+use crate::widgets::get_widgets;
 
 #[tauri::command]
 pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, String> {
-    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
-    if !user_widgets_dir.is_dir() {
-        return Err("User widgets directory does not exist".into());
+    let widget = get_widget_from_rest_path(&widget).map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
+    if let WidgetSource::User = widget.widget_source {
+        let fields_path = widget.fields_path();
+        if !fields_path.is_file() {
+            return Err("Widget 'fields.json' file does not exist".into());
+        }
+
+        let result = fs::read_to_string(&fields_path).map_err(|e| format!("Failed to read widget '{}' fields file: {:#?}", widget.name, e))?;
+        return Ok(result);
     }
 
-    let fields_path = user_widgets_dir.join(&widget).join("fields.json");
-    if !fields_path.is_file() {
-        return Err("Widget fields file does not exist".into());
-    }
-
-    let result = fs::read_to_string(&fields_path).map_err(|e| format!("Failed to read widget fields file: {:#?}", e))?;
-    return Ok(result);
+    return Err("Cannot get fields of system or plugin widgets".into());
 }
 
 #[tauri::command]
 pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, String> {
-    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
-    if !user_widgets_dir.is_dir() {
-        return Err("User widgets directory does not exist".into());
+    let widget = get_widget_from_rest_path(&widget).map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
+    if let WidgetSource::User = widget.widget_source {
+        let fieldstate_path = widget.fieldstate_path();
+        if !fieldstate_path.is_file() {
+            return Err("Widget 'fieldstate.json' file does not exist".into());
+        }
+
+        let result = fs::read_to_string(&fieldstate_path).map_err(|e| format!("Failed to read widget '{}' fieldstate file: {:#?}", widget.name, e))?;
+        return Ok(result);
     }
 
-    let fieldstate_path = user_widgets_dir.join(&widget).join("fieldstate.json");
-    if !fieldstate_path.is_file() {
-        return Err("Widget fieldstate file does not exist".into());
-    }
-
-    let result = fs::read_to_string(&fieldstate_path).map_err(|e| format!("Failed to read widget fieldstate file: {:#?}", e))?;
-    return Ok(result);
+    return Err("Cannot get fieldstate of system or plugin widgets".into());
 }
 
 #[tauri::command]
 pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String, data: String) -> Result<(), String> {
-    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
-    if !user_widgets_dir.is_dir() {
-        return Err("User widgets directory does not exist".into());
+    let widget = get_widget_from_rest_path(&widget).map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
+    if let WidgetSource::User = widget.widget_source {
+        let fieldstate_path = widget.fieldstate_path();
+        if !fieldstate_path.is_file() {
+            return Err("Widget 'fieldstate.json' file does not exist".into());
+        }
+
+        fs::write(&fieldstate_path, data).map_err(|e| format!("Failed to write widget '{}' fieldstate file: {:#?}", widget.name, e))?;
+        return Ok(());
     }
 
-    let fieldstate_path = user_widgets_dir.join(&widget).join("fieldstate.json");
-    if fieldstate_path.exists() && !fieldstate_path.is_file() {
-        return Err("Widget fieldstate path is not a file".into());
-    }
-
-    fs::write(&fieldstate_path, data).map_err(|e| format!("Failed to write widget fieldstate file: {:#?}", e))?;
-    return Ok(());
+    return Err("Cannot set fieldstate of system or plugin widgets".into());
 }
 
 /* ================================================================================================================== */
 
 #[tauri::command]
 pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, String> {
-    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
-    if !user_widgets_dir.is_dir() {
-        return Err("An error occurred on iterate over user widgets dir".into());
-    }
-
-    let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidgets);
-    if !system_widgets_dir.is_dir() {
-        return Err("An error occurred on iterate over system widgets dir".into());
-    }
+    let widgets = get_widgets().map_err(|e| format!("Failed to get widgets list: {:#?}", e))?;
 
     let mut system_widgets: Vec<String> = Vec::new();
-    let system_widgets_read = fs::read_dir(&system_widgets_dir).map_err(|e| format!("An error occurred on read system widgets dir: {:#?}", e))?;
-    for entry in system_widgets_read {
-        if let Ok(entry) = entry {
-            let path = entry.path();
-            if path.is_dir() {
-                if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-                    if name.starts_with(".") {
-                        continue; // Skip hidden folders
-                    }
-
-                    system_widgets.push(name.to_string());
-                }
-            }
-        } else {
-            log::error!("An error occurred on read user widgets dir: {:?}", entry);
-        }
-    }
-
     let mut user_widgets: Vec<String> = Vec::new();
-    let user_widgets_read = fs::read_dir(&user_widgets_dir).map_err(|e| format!("An error occurred on read user widgets dir: {:#?}", e))?;
-    for entry in user_widgets_read {
-        if let Ok(entry) = entry {
-            let path = entry.path();
-            if path.is_dir() {
-                if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-                    if name.starts_with(".") {
-                        continue; // Skip hidden folders
-                    }
+    let mut plugins_widgets: Vec<String> = Vec::new();
 
-                    if !system_widgets.iter().any(|w| w == name) {
-                        user_widgets.push(name.to_string());
-                    }
-                }
+    for widget in widgets.iter() {
+        match widget.widget_source {
+            WidgetSource::System => {
+                system_widgets.push(widget.rest_path.clone());
             }
-        } else {
-            log::error!("An error occurred on read user widgets dir: {:?}", entry);
+            WidgetSource::User => {
+                user_widgets.push(widget.rest_path.clone());
+            }
+            WidgetSource::Plugin(_) => {
+                plugins_widgets.push(widget.rest_path.clone());
+            }
         }
     }
 
     return Ok(json!([
         { "group": "System Widgets", "items": system_widgets },
-        { "group": "User Widgets", "items": user_widgets }
+        { "group": "User Widgets", "items": user_widgets },
+        { "group": "Plugin Widgets", "items": plugins_widgets }
     ]));
 }

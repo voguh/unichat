@@ -55,7 +55,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
 
     const [fields, setFields] = React.useState<Record<string, WidgetFields>>({});
     const [fieldState, setFieldState] = React.useState<Record<string, any>>({});
-    const [selectedWidgetUrl, setSelectedWidgetUrl] = React.useState("");
+    const [selectedWidget, setSelectedWidget] = React.useState("");
     const [widgets, setWidgets] = React.useState<string[]>([]);
 
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
@@ -223,7 +223,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
     }
 
     async function handleFetchWidgetData(): Promise<void> {
-        const widgetName = (selectedWidgetUrl ?? "").replace(`${WIDGET_URL_PREFIX}/`, "");
+        const widgetName = (selectedWidget ?? "").replace(`${WIDGET_URL_PREFIX}/`, "");
 
         if (!Strings.isNullOrEmpty(widgetName)) {
             const fields = await commandService.getWidgetFields(widgetName).catch(() => ({}));
@@ -244,7 +244,6 @@ export function WidgetEditor(_props: Props): React.ReactNode {
             .filter((itemGroup) => itemGroup.group === "User Widgets")
             .flatMap((itemGroup) => itemGroup.items)
             .filter((item) => item !== "example")
-            .map((item) => `${WIDGET_URL_PREFIX}/${item}`)
             .sort((a, b) => a.localeCompare(b));
     }
 
@@ -253,14 +252,14 @@ export function WidgetEditor(_props: Props): React.ReactNode {
         setWidgets(widgets);
 
         if (iframeRef.current) {
-            iframeRef.current.src = selectedWidgetUrl;
+            iframeRef.current.src = `${WIDGET_URL_PREFIX}/${selectedWidget}`;
             handleFetchWidgetData();
         }
     }
 
     async function handleReset(): Promise<void> {
         try {
-            const widgetName = (selectedWidgetUrl ?? "").replace(`${WIDGET_URL_PREFIX}/`, "");
+            const widgetName = (selectedWidget ?? "").replace(`${WIDGET_URL_PREFIX}/`, "");
 
             if (!Strings.isNullOrEmpty(widgetName)) {
                 await commandService.setWidgetFieldState(widgetName, {});
@@ -285,7 +284,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
 
     async function handleApply(): Promise<void> {
         try {
-            const widgetName = (selectedWidgetUrl ?? "").replace(`${WIDGET_URL_PREFIX}/`, "");
+            const widgetName = (selectedWidget ?? "").replace(`${WIDGET_URL_PREFIX}/`, "");
 
             if (!Strings.isNullOrEmpty(widgetName)) {
                 await commandService.setWidgetFieldState(widgetName, fieldState);
@@ -309,7 +308,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
 
     React.useEffect(() => {
         handleFetchWidgetData();
-    }, [selectedWidgetUrl]);
+    }, [selectedWidget]);
 
     React.useEffect(() => {
         async function init(): Promise<void> {
@@ -317,7 +316,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
             setWidgets(widgets);
 
             if (widgets.length > 0) {
-                setSelectedWidgetUrl(widgets[0]);
+                setSelectedWidget(widgets[0]);
             }
         }
 
@@ -325,18 +324,18 @@ export function WidgetEditor(_props: Props): React.ReactNode {
     }, []);
 
     if (
-        Strings.isNullOrEmpty(selectedWidgetUrl) ||
-        Strings.isNullOrEmpty(selectedWidgetUrl.replace(`${WIDGET_URL_PREFIX}/`, ""))
+        Strings.isNullOrEmpty(selectedWidget) ||
+        Strings.isNullOrEmpty(selectedWidget.replace(`${WIDGET_URL_PREFIX}/`, ""))
     ) {
         return (
             <WidgetEditorEmptyStyledContainer>
                 <Card className="preview-header" withBorder shadow="xs">
                     <div className="preview-header-widget-selector">
                         <Select
-                            value={selectedWidgetUrl}
+                            value={selectedWidget}
                             data={widgets}
                             allowDeselect={false}
-                            onChange={setSelectedWidgetUrl}
+                            onChange={setSelectedWidget}
                         />
                     </div>
 
@@ -357,12 +356,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
         <WidgetEditorStyledContainer>
             <Card className="preview-header" withBorder shadow="xs">
                 <div className="preview-header-widget-selector">
-                    <Select
-                        value={selectedWidgetUrl}
-                        data={widgets}
-                        allowDeselect={false}
-                        onChange={setSelectedWidgetUrl}
-                    />
+                    <Select value={selectedWidget} data={widgets} allowDeselect={false} onChange={setSelectedWidget} />
                 </div>
 
                 <Tooltip label="Reload widget view" position="left" withArrow>
@@ -389,7 +383,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                 <div className="editor-fields">{buildFieldsEditor()}</div>
             </div>
             <div className="preview-area">
-                <iframe ref={iframeRef} src={selectedWidgetUrl} sandbox="allow-scripts" />
+                <iframe ref={iframeRef} src={`${WIDGET_URL_PREFIX}/${selectedWidget}`} sandbox="allow-scripts" />
                 <div />
             </div>
             <div className="emulator-area">

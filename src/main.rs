@@ -36,6 +36,7 @@ mod scraper;
 mod shared_emotes;
 mod twitch;
 mod utils;
+mod widgets;
 mod youtube;
 
 pub static STATIC_APP_ICON: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/icons/icon.png"));
@@ -88,6 +89,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     plugins::init(app)?;
     utils::render_emitter::init(app)?;
     utils::userstore::init(app)?;
+    widgets::init(app)?;
 
     /* ========================================================================================== */
 

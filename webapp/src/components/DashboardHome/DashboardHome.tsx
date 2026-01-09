@@ -23,7 +23,7 @@ import { ScraperCard } from "./ScraperCard";
 import { DashboardHomeStyledContainer } from "./styled";
 
 export function DashboardHome(): React.ReactNode {
-    const [selectedWidgetUrl, setSelectedWidgetUrl] = React.useState(`${WIDGET_URL_PREFIX}/default`);
+    const [selectedWidget, setSelectedWidget] = React.useState("default");
     const [widgets, setWidgets] = React.useState<ComboboxData>([]);
     const [scrapers, setScrapers] = React.useState<UniChatScraper[]>([]);
     const [isOpenToLan, setIsOpenToLan] = React.useState(false);
@@ -64,10 +64,7 @@ export function DashboardHome(): React.ReactNode {
 
         return widgets.map((groupItem) => ({
             group: groupItem.group,
-            items: groupItem.items
-                .filter((item) => item !== "example")
-                .map((item) => `${WIDGET_URL_PREFIX}/${item}`)
-                .sort((a, b) => a.localeCompare(b))
+            items: groupItem.items.filter((item) => item !== "example").sort((a, b) => a.localeCompare(b))
         }));
     }
 
@@ -76,7 +73,7 @@ export function DashboardHome(): React.ReactNode {
         setWidgets(widgets);
 
         if (iframeRef.current) {
-            iframeRef.current.src = selectedWidgetUrl;
+            iframeRef.current.src = `${selectedWidget}/${selectedWidget}`;
         }
     }
 
@@ -85,8 +82,9 @@ export function DashboardHome(): React.ReactNode {
             const widgets = await handleFetchWidgets();
             setWidgets(widgets);
 
-            const defaultPreviewWidget = await commandService.settingsGetItem(UniChatSettings.DEFAULT_PREVIEW_WIDGET);
-            setSelectedWidgetUrl(`${WIDGET_URL_PREFIX}/${defaultPreviewWidget}`);
+            // eslint-disable-next-line prettier/prettier
+            const defaultPreviewWidget: string = await commandService.settingsGetItem(UniChatSettings.DEFAULT_PREVIEW_WIDGET);
+            setSelectedWidget(defaultPreviewWidget);
 
             const scrapers = await commandService.getScrapers();
             const sortedScrapers = scrapers.sort((a, b) => {
@@ -126,9 +124,9 @@ export function DashboardHome(): React.ReactNode {
                         <Card className="preview-header" withBorder shadow="xs">
                             <div className="preview-header-widget-selector">
                                 <Select
-                                    value={selectedWidgetUrl}
+                                    value={selectedWidget}
                                     data={widgets}
-                                    onChange={setSelectedWidgetUrl}
+                                    onChange={setSelectedWidget}
                                     data-tour="widgets-selector"
                                 />
                             </div>
@@ -152,13 +150,13 @@ export function DashboardHome(): React.ReactNode {
                                     <Menu.Dropdown>
                                         <Menu.Item
                                             leftSection={<i className="fas fa-globe" />}
-                                            onClick={() => openUrl(selectedWidgetUrl)}
+                                            onClick={() => openUrl(`${WIDGET_URL_PREFIX}/${selectedWidget}`)}
                                         >
                                             Open in browser
                                         </Menu.Item>
                                         <Menu.Item
                                             leftSection={<i className="fas fa-mobile-alt" />}
-                                            onClick={() => openQrCodeModal(selectedWidgetUrl)}
+                                            onClick={() => openQrCodeModal(`${WIDGET_URL_PREFIX}/${selectedWidget}`)}
                                         >
                                             Open on device
                                         </Menu.Item>
@@ -167,7 +165,7 @@ export function DashboardHome(): React.ReactNode {
                             ) : (
                                 <Tooltip label="Open in browser" position="left" withArrow>
                                     <Button
-                                        onClick={() => openUrl(selectedWidgetUrl)}
+                                        onClick={() => openUrl(`${WIDGET_URL_PREFIX}/${selectedWidget}`)}
                                         data-tour="preview-open-in-browser"
                                     >
                                         <i className="fas fa-globe" />
@@ -176,7 +174,11 @@ export function DashboardHome(): React.ReactNode {
                             )}
                         </Card>
                         <div className="iframe-wrapper">
-                            <iframe ref={iframeRef} src={selectedWidgetUrl} sandbox="allow-scripts" />
+                            <iframe
+                                ref={iframeRef}
+                                src={`${WIDGET_URL_PREFIX}/${selectedWidget}`}
+                                sandbox="allow-scripts"
+                            />
                         </div>
                     </>
                 ) : (

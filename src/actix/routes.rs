@@ -30,46 +30,21 @@ use crate::utils;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::ureq;
+use crate::widgets::WidgetMetadata;
+use crate::widgets::get_widget_from_rest_path;
 
 static WIDGET_TEMPLATE: &str = include_str!("./static/index.html.template");
 
 fn safe_guard_path(base_path: &PathBuf, concat_str: &str) -> Result<PathBuf, actix_web::Error> {
     return utils::safe_guard_path(base_path, concat_str).map_err(|e| {
-        log::error!("{:?}", e);
+        log::error!("{:#?}", e);
         return ErrorInternalServerError("Failed to resolve asset path safely");
     });
 }
 
-fn get_widget_dir(widget_name: &str) -> Option<PathBuf> {
-    let widget_name = widget_name.trim();
-
-    if widget_name.is_empty() || widget_name.starts_with(".") {
-        return None;
-    }
-
-    let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidgets);
-    let system_widget_path = system_widgets_dir.join(widget_name);
-    if system_widget_path.exists() {
-        return Some(system_widget_path);
-    }
-
-    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
-    let user_widget_path = user_widgets_dir.join(widget_name);
-    if user_widget_path.exists() {
-        return Some(user_widget_path);
-    }
-
-    return None;
-}
-
-fn load_fieldstate(widget_path: &PathBuf) -> Result<HashMap<String, serde_json::Value>, Error> {
-    let fields_path = widget_path.join("fields.json");
-    let fields_raw = fs::read_to_string(fields_path).unwrap_or(String::from("{}"));
-    let fields_map: HashMap<String, serde_json::Value> = serde_json::from_str(&fields_raw)?;
-
-    let fieldstate_path = widget_path.join("fieldstate.json");
-    let fieldstate_raw = fs::read_to_string(fieldstate_path).unwrap_or(String::from("{}"));
-    let fieldstate_map: HashMap<String, serde_json::Value> = serde_json::from_str(&fieldstate_raw)?;
+fn load_fieldstate(widget: &WidgetMetadata) -> Result<HashMap<String, serde_json::Value>, Error> {
+    let fields_map = widget.fields();
+    let fieldstate_map = widget.fieldstate();
 
     let mut final_fieldstate: HashMap<String, serde_json::Value> = HashMap::new();
 
@@ -189,14 +164,17 @@ pub async fn get_assets(req: HttpRequest) -> Result<impl Responder, actix_web::E
 #[get("/widget/{name}/assets/{path:.*}")]
 pub async fn get_widget_assets(req: HttpRequest) -> Result<impl Responder, actix_web::Error> {
     let widget_name: String = req.match_info().query("name").parse()?;
+    if widget_name.trim().is_empty() {
+        return Err(ErrorBadRequest("Widget name cannot be empty"));
+    }
 
     let asset_path: String = req.match_info().query("path").parse()?;
     if asset_path.trim().is_empty() {
         return Err(ErrorBadRequest("Asset path cannot be empty"));
     }
 
-    if let Some(widget_path) = get_widget_dir(&widget_name) {
-        let widget_assets_path = widget_path.join("assets");
+    if let Ok(widget) = get_widget_from_rest_path(&widget_name) {
+        let widget_assets_path = widget.assets_path();
 
         let asset_full_path = safe_guard_path(&widget_assets_path, &asset_path)?;
         if !asset_full_path.exists() {
@@ -223,11 +201,14 @@ pub async fn get_widget_assets(req: HttpRequest) -> Result<impl Responder, actix
 #[get("/widget/{name}")]
 pub async fn get_widget(req: HttpRequest) -> Result<impl Responder, actix_web::Error> {
     let widget_name: String = req.match_info().query("name").parse()?;
+    if widget_name.trim().is_empty() {
+        return Err(ErrorBadRequest("Widget name cannot be empty"));
+    }
 
-    if let Some(widget_path) = get_widget_dir(&widget_name) {
-        let html = fs::read_to_string(widget_path.join("main.html")).unwrap_or_default();
-        let js = fs::read_to_string(widget_path.join("script.js")).unwrap_or_default();
-        let css = fs::read_to_string(widget_path.join("style.css")).unwrap_or_default();
+    if let Ok(widget) = get_widget_from_rest_path(&widget_name) {
+        let html = widget.widget_html();
+        let js = widget.widget_js();
+        let css = widget.widget_css();
 
         let mut content = String::from(WIDGET_TEMPLATE);
         content = content.replace("{{WIDGET_STYLE}}", &css);
@@ -238,7 +219,7 @@ pub async fn get_widget(req: HttpRequest) -> Result<impl Responder, actix_web::E
         let base_url = format!("{}://{}/widget/{}/", info.scheme(), info.host(), widget_name);
         content = content.replace("{{WIDGET_BASE_URL}}", &base_url);
 
-        let fieldstate = load_fieldstate(&widget_path).unwrap_or_default();
+        let fieldstate = load_fieldstate(&widget).unwrap_or_default();
         for (key, value) in fieldstate.iter() {
             let value_str = serde_plain::to_string(value).map_err(|e| {
                 log::error!("{:?}", e);

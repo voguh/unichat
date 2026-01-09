@@ -18,6 +18,7 @@ use std::sync::RwLock;
 use anyhow::anyhow;
 use anyhow::Error;
 
+use crate::plugins::UniChatPlugin;
 use crate::plugins::get_lua_runtime;
 use crate::plugins::lua_env::unichat_api::UniChatAPI;
 use crate::plugins::lua_env::unichat_event::LuaUniChatAuthorTypeFactory;
@@ -27,7 +28,6 @@ use crate::plugins::lua_env::unichat_event::LuaUniChatEventFactory;
 use crate::plugins::lua_env::unichat_event::LuaUniChatPlatformFactory;
 use crate::plugins::lua_env::unichat_std::create_print_fn;
 use crate::plugins::lua_env::unichat_std::create_require_fn;
-use crate::plugins::plugin_instance::UniChatPlugin;
 use crate::plugins::utils::table_deep_readonly;
 use crate::utils::get_current_timestamp;
 
