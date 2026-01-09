@@ -117,10 +117,13 @@ fn on_page_load(scraper_js: &str, window: &tauri::WebviewWindow, payload: tauri:
     return Ok(());
 }
 
-static SCRAPER_ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[a-z]+-chat$").unwrap());
 pub fn register_scraper(app: &tauri::AppHandle<tauri::Wry>, scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Result<WebviewWindow, Error> {
-    if !SCRAPER_ID_REGEX.is_match(scraper.id()) {
-        return Err(anyhow!("Scraper ID must be a non-empty lowercase string".to_string()));
+    if scraper.id().chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
+        return Err(anyhow!("Scraper ID '{}' contains invalid characters. Only ASCII alphanumeric characters, underscores, and hyphens are allowed.", scraper.id()));
+    }
+
+    if !scraper.id().ends_with("-chat") {
+        return Err(anyhow!("Scraper ID '{}' is invalid. Scraper IDs must end with the suffix '-chat'.", scraper.id()));
     }
 
     /* ========================================================================================== */
