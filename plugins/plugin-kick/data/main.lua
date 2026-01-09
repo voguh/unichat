@@ -196,9 +196,7 @@ local opts = {
     badges = { "experimental" },
     icon = "fas fa-video",
     validate_url = validate_kick_url,
-    on_event = on_kick_event,
-
     on_ready = on_kick_ready
 }
 
-UniChatAPI:register_scraper("kick-chat", "Kick", "static/scraper.js", opts);
+UniChatAPI:register_scraper("kick-chat", "Kick", "static/scraper.js", on_kick_event, opts);
