@@ -104,10 +104,7 @@ impl mlua::UserData for UniChatStringsModule {
         });
 
         methods.add_method("from_bytes", |_lua, _this, bytes: Vec<u8>| {
-            match String::from_utf8(bytes) {
-                Ok(s) => Ok(Some(s)),
-                Err(_) => Ok(None),
-            }
+            return String::from_utf8(bytes).map_err(mlua::Error::external);
         });
 
         /* ========================================================================================== */
