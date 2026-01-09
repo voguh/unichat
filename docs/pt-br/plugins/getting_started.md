@@ -64,15 +64,15 @@ Este arquivo é opcional e deve ser uma imagem PNG que representa o ícone do pl
 
 Este arquivo é obrigatório e deve conter as seguintes informações:
 
-| Campo        | Tipo     | Obrigatório | Descrição                                           |
-|--------------|----------|-------------|-----------------------------------------------------|
-| name         | string   | SIM         | Nome do plugin                                      |
-| description  | string   | NÃO         | Descrição do plugin                                 |
-| version      | string   | SIM         | Versão do plugin                                    |
-| author       | string   | NÃO         | Autor do plugin                                     |
-| license      | string   | NÃO         | Licença do plugin <sup>[3]</sup>                    |
-| homepage     | string   | NÃO         | URL da página inicial do plugin                     |
-| dependencies | string[] | SIM         | Dependências do plugin <sup>[1]</sup><sup>[2]</sup> |
+| Campo        | Tipo       | Obrigatório | Descrição                                           |
+|--------------|------------|-------------|-----------------------------------------------------|
+| name         | `string`   | SIM         | Nome do plugin                                      |
+| description  | `string`   | NÃO         | Descrição do plugin                                 |
+| version      | `string`   | SIM         | Versão do plugin                                    |
+| author       | `string`   | NÃO         | Autor do plugin                                     |
+| license      | `string`   | NÃO         | Licença do plugin <sup>[3]</sup>                    |
+| homepage     | `string`   | NÃO         | URL da página inicial do plugin                     |
+| dependencies | `string[]` | SIM         | Dependências do plugin <sup>[1]</sup><sup>[2]</sup> |
 
 <sup>[1]</sup> Atualmente a única dependência verificada é `unichat` que informa o range de versão do **UniChat** requerido pelo plugin.
 
@@ -86,3 +86,18 @@ Este arquivo é obrigatório e deve conter as seguintes informações:
 > Sendo os delimitadores `[]` inclusivo e `()` exclusivo.
 
 <sup>[3]</sup> Nenhuma validação é feita atualmente, porém é aconselhável utilizar uma licença válida segundo a [SPDX License List](https://spdx.org/licenses/).
+
+---
+
+### Globais
+
+| Nome              | Tipo       | Descrição                                                                                                                                    |
+|-------------------|------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| __PLUGIN_NAME     | `string`   | Nome do plugin.                                                                                                                              |
+| __PLUGIN_VERSION  | `string`   | Versão do plugin.                                                                                                                            |
+| UniChatAPI        | `userdata` | Instância da API do **UniChat** para o plugin.<br/>Veja [UniChatAPI](/pt-br/plugins/unichat_api) para mais detalhes.                         |
+| UniChatPlatform   | `userdata` | Uma `factory` para preencher o nome da plataforma.<br/>Veja [UniChatPlatform](/pt-br/plugins/modules?id=unichatplatform) para mais detalhes. |
+| UniChatAuthorType | `userdata` | Uma `factory` para preencher o nome do autor.<br/>Veja [UniChatAuthorType](/pt-br/plugins/modules?id=unichatauthortype) para mais detalhes.  |
+| UniChatEvent      | `userdata` | Uma `factory` para preencher o nome do evento.<br/>Veja [UniChatEvent](/pt-br/plugins/modules?id=unichatevent) para mais detalhes.           |
+| UniChatEmote      | `userdata` | Uma `factory` para preencher o nome do emote.<br/>Veja [UniChatEmote](/pt-br/plugins/modules?id=unichatemote) para mais detalhes.            |
+| UniChatBadge      | `userdata` | Uma `factory` para preencher o nome do badge.<br/>Veja [UniChatBadge](/pt-br/plugins/modules?id=unichatbadge) para mais detalhes.            |

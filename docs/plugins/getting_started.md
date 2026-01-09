@@ -64,15 +64,15 @@ This file is optional and must be a PNG image representing the plugin icon. If n
 
 This file is required and must contain the following information:
 
-| Field        | Type     | Required | Description                                      |
-|--------------|----------|----------|--------------------------------------------------|
-| name         | string   | YES      | Plugin name                                      |
-| description  | string   | NO       | Plugin description                               |
-| version      | string   | YES      | Plugin version                                   |
-| author       | string   | NO       | Plugin author                                    |
-| license      | string   | NO       | Plugin license <sup>[3]</sup>                    |
-| homepage     | string   | NO       | Plugin homepage URL                              |
-| dependencies | string[] | YES      | Plugin dependencies <sup>[1]</sup><sup>[2]</sup> |
+| Field        | Type       | Required | Description                                      |
+|--------------|------------|----------|--------------------------------------------------|
+| name         | `string`   | YES      | Plugin name                                      |
+| description  | `string`   | NO       | Plugin description                               |
+| version      | `string`   | YES      | Plugin version                                   |
+| author       | `string`   | NO       | Plugin author                                    |
+| license      | `string`   | NO       | Plugin license <sup>[3]</sup>                    |
+| homepage     | `string`   | NO       | Plugin homepage URL                              |
+| dependencies | `string[]` | YES      | Plugin dependencies <sup>[1]</sup><sup>[2]</sup> |
 
 <sup>[1]</sup> Currently the only verified dependency is `unichat`, which indicates the **UniChat** version range required by the plugin.
 
@@ -86,3 +86,18 @@ This file is required and must contain the following information:
 > Delimiters `[]` are inclusive and `()` are exclusive.
 
 <sup>[3]</sup> No validation is currently performed, but it is advisable to use a valid license according to the [SPDX License List](https://spdx.org/licenses/).
+
+---
+
+### Globals
+
+| Name              | Type       | Description                                                                                                                 |
+|-------------------|------------|-----------------------------------------------------------------------------------------------------------------------------|
+| __PLUGIN_NAME     | `string`   | Plugin name.                                                                                                                |
+| __PLUGIN_VERSION  | `string`   | Plugin version.                                                                                                             |
+| UniChatAPI        | `userdata` | Instance of the UniChat API for the plugin.<br/>See [UniChatAPI](/plugins/unichat_api) for more details.                    |
+| UniChatPlatform   | `userdata` | A factory to populate the platform name.<br/>See [UniChatPlatform](/plugins/modules?id=unichatplatform) for more details.   |
+| UniChatAuthorType | `userdata` | A factory to populate the author name.<br/>See [UniChatAuthorType](/plugins/modules?id=unichatauthortype) for more details. |
+| UniChatEvent      | `userdata` | A factory to populate the event name.<br/>See [UniChatEvent](/plugins/modules?id=unichatevent) for more details.            |
+| UniChatEmote      | `userdata` | A factory to populate the emote name.<br/>See [UniChatEmote](/plugins/modules?id=unichatemote) for more details.            |
+| UniChatBadge      | `userdata` | A factory to populate the badge name.<br/>See [UniChatBadge](/plugins/modules?id=unichatbadge) for more details.            |
