@@ -159,16 +159,16 @@ impl UniChatPlugin {
         return self.plugin_path.clone();
     }
 
-    pub fn get_plugin_assets_path(&self) -> PathBuf {
+    pub fn get_assets_path(&self) -> PathBuf {
         return self.plugin_path.join("assets");
     }
 
-    pub fn get_plugin_data_path(&self) -> PathBuf {
+    pub fn get_data_path(&self) -> PathBuf {
         return self.plugin_path.join("data");
     }
 
     pub fn get_entrypoint_path(&self) -> PathBuf {
-        return self.get_plugin_data_path().join("main.lua");
+        return self.get_data_path().join("main.lua");
     }
 
     pub fn get_widgets_path(&self) -> PathBuf {
@@ -285,7 +285,7 @@ fn load_plugin(plugin_path: &Path, manifest: &PluginManifestYAML) -> Result<(), 
         }
     }
 
-    if !plugin.get_plugin_data_path().is_dir() {
+    if !plugin.get_data_path().is_dir() {
         let msg = format!("Plugin folder '{:?}' is missing required 'data' directory", plugin_path);
         plugin.add_message(&msg);
         plugin.set_status(PluginStatus::Error);

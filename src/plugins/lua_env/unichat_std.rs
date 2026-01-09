@@ -65,7 +65,7 @@ pub fn create_require_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Fun
             }
 
             let manifest = get_plugin(plugin_name).map_err(mlua::Error::external)?;
-            let plugin_root = manifest.get_plugin_data_path();
+            let plugin_root = manifest.get_data_path();
             let mut module_path = module.replace('.', "/");
             if !module_path.ends_with(".lua") {
                 module_path.push_str(".lua");

@@ -313,7 +313,7 @@ impl mlua::UserData for UniChatAPI {
             let app_handle = get_app_handle().map_err(mlua::Error::external)?;
             let plugin = get_plugin(&this.plugin_name).map_err(mlua::Error::external)?;
 
-            let scraper_js_path = safe_guard_path(&plugin.get_plugin_data_path(), &scraper_js_path).map_err(mlua::Error::external)?;
+            let scraper_js_path = safe_guard_path(&plugin.get_data_path(), &scraper_js_path).map_err(mlua::Error::external)?;
             let scraper_js_content = fs::read_to_string(scraper_js_path).map_err(mlua::Error::external)?;
             let scraper = LuaUniChatScraper::new(id, name, scraper_js_content, opts).map_err(mlua::Error::external)?;
 

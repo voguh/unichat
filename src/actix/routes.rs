@@ -130,7 +130,7 @@ pub async fn get_assets(req: HttpRequest) -> Result<impl Responder, actix_web::E
     let first_part = asset_path.split('/').next().unwrap_or("");
     let plugins = plugins::get_plugins().map_err(|e| ErrorInternalServerError(e))?;
     if let Some(plugin) = plugins.iter().find(|p| p.name == first_part) {
-        let plugin_assets_path = plugin.get_plugin_assets_path();
+        let plugin_assets_path = plugin.get_assets_path();
         if !plugin_assets_path.is_dir() {
             return Err(ErrorNotFound(format!("Plugin '{}' does not have an assets directory", plugin.name)));
         }
