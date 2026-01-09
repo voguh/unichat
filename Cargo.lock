@@ -5507,7 +5507,7 @@ checksum = "75b844d17643ee918803943289730bec8aac480150456169e647ed0b576ba539"
 
 [[package]]
 name = "unichat"
-version = "1.4.0-beta.3"
+version = "1.4.0-beta.4"
 dependencies = [
  "actix-web",
  "actix-ws",
