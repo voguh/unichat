@@ -39,3 +39,8 @@ export interface IPCStatusErrorEvent {
 }
 
 export type IPCStatusEvent = IPCStatusIdleEvent | IPCStatusReadyEvent | IPCStatusPingEvent | IPCStatusErrorEvent;
+
+export interface IPCNotificationEvent {
+    title: string;
+    message: string;
+}

@@ -28,6 +28,14 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     return Ok(());
 }
 
+pub fn emit_notification(title:&str, message: &str) -> Result<(), Error> {
+    let app_handle = APP_HANDLE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+
+    let window = app_handle.get_webview_window("main").ok_or(anyhow!("Main window not found"))?;
+    window.emit("unichat://notification", json!({ "title": title, "message": message }))?;
+    return Ok(());
+}
+
 pub fn emit(mut payload: Value) -> Result<(), Error> {
     let app_handle = APP_HANDLE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 

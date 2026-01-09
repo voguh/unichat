@@ -381,5 +381,10 @@ impl mlua::UserData for UniChatAPI {
             userstore::set_item(&key, &value).map_err(mlua::Error::external)?;
             return Ok(());
         });
+
+        methods.add_method("notify", |_lua, this, message: String| {
+            render_emitter::emit_notification(&this.plugin_name, &message).map_err(mlua::Error::external)?;
+            return Ok(());
+        });
     }
 }

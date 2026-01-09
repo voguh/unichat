@@ -12,6 +12,7 @@ import React from "react";
 import { createTheme, MantineProvider, Button, Card, Tooltip, Modal } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import { notifications, Notifications } from "@mantine/notifications";
+import * as eventService from "@tauri-apps/api/event";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import semver from "semver";
 
@@ -27,6 +28,8 @@ import { commandService } from "./services/commandService";
 import { modalService } from "./services/modalService";
 import { DashboardStyledContainer } from "./styles/DashboardStyled";
 import { UniChatSettings } from "./utils/constants";
+import { IPCNotificationEvent } from "./utils/IPCStatusEvent";
+import { Strings } from "./utils/Strings";
 
 const theme = createTheme({
     fontFamily: "Roboto, sans-serif",
@@ -102,6 +105,14 @@ export default function App(): JSX.Element {
 
         isMounted.current = true;
         init();
+
+        eventService.listen<IPCNotificationEvent>("unichat://notification", ({ payload }) => {
+            const title = payload.title || "Notification";
+            const message = payload.message || "";
+            if (Strings.isNullOrEmpty(message)) {
+                notifications.show({ message, title });
+            }
+        });
     }, []);
 
     return (
