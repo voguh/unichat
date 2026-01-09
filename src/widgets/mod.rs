@@ -185,7 +185,7 @@ pub fn add_plugin_widgets(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
     let widgets_path = plugin.get_widgets_path();
 
     let callback = move |metadata: &WidgetMetadata| {
-        plugin.add_message(format!("Loaded widget from plugin '{}' provided as 'http://localhost:{}/widget/{}'", metadata.name, BASE_REST_PORT, metadata.rest_path));
+        plugin.add_message(format!("Registered widget '{}' provided as 'http://localhost:{}/widget/{}'", metadata.name, BASE_REST_PORT, metadata.rest_path));
     };
     load_widgets_from_disk(&widgets_path, WidgetSource::Plugin(plugin.name.clone()), callback)?;
 

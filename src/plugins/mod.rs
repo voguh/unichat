@@ -307,15 +307,15 @@ fn load_plugin(plugin_path: &Path, manifest: &PluginManifestYAML) -> Result<(), 
         plugin.set_status(PluginStatus::Loaded);
     }
 
+    if let Err(e) = widgets::add_plugin_widgets(&plugin) {
+        plugin.add_message(format!("An error occurred while loading plugin widgets: {:?}", e));
+        log::error!("Failed to load widgets for plugin '{}': {:?}", plugin.name, e);
+    }
+
     if let Err(e) = load_plugin_env(&plugin) {
         plugin.add_message(format!("An error occurred on start plugin: {:?}", e));
         plugin.set_status(PluginStatus::Error);
         return Err(anyhow!("Failed to create LUA environment for plugin '{}': {:?}", plugin.name, e));
-    }
-
-    if let Err(e) = widgets::add_plugin_widgets(&plugin) {
-        plugin.add_message(format!("An error occurred while loading plugin widgets: {:?}", e));
-        log::error!("Failed to load widgets for plugin '{}': {:?}", plugin.name, e);
     }
 
     plugin.set_status(PluginStatus::Active);
