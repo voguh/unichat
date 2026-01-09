@@ -109,7 +109,7 @@ export default function App(): JSX.Element {
         eventService.listen<IPCNotificationEvent>("unichat://notification", ({ payload }) => {
             const title = payload.title || "Notification";
             const message = payload.message || "";
-            if (Strings.isNullOrEmpty(message)) {
+            if (!Strings.isNullOrEmpty(message)) {
                 notifications.show({ message, title });
             }
         });
