@@ -67,12 +67,12 @@ fn flush_userstore() -> Result<(), Error> {
 /* ================================================================================================================== */
 
 pub fn init(_app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
-    let store_path = properties::get_app_path(AppPaths::AppData).join("userstore.json");
+    let store_path = USERSTORE_PATH.as_path();
     if !store_path.exists() {
-        fs::write(&store_path, "{}")?;
+        fs::write(store_path, "{}")?;
     }
 
-    let raw_data = fs::read_to_string(&store_path)?;
+    let raw_data = fs::read_to_string(store_path)?;
     let data: HashMap<String, String> = serde_json::from_str(&raw_data)?;
     let mut cache = USERSTORE_CACHE.write().map_err(|_| anyhow!("Failed to acquire UserStore cache write lock"))?;
     *cache = data;
