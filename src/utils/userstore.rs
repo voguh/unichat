@@ -96,15 +96,23 @@ pub fn get_item<R: serde::de::DeserializeOwned>(key: &str) -> Result<Option<R>, 
     let store = USERSTORE_CACHE.read().map_err(|_| anyhow!("{} cache lock poisoned", USERSTORE_INSTANCE_NAME))?;
 
     let raw_value = store.get(key);
-    if let Some(value) = raw_value {
-        let value = serde_json::from_str(value)?;
-        return Ok(value);
+    if let Some(raw_value) = raw_value {
+        let value: R;
+        if let Ok(plain) = serde_plain::from_str(raw_value) {
+            value = plain;
+        } else if let Ok(json) = serde_json::from_str(raw_value) {
+            value = json;
+        } else {
+            return Err(anyhow!("Failed to deserialize UserStore item for key '{}'", key));
+        }
+
+        return Ok(Some(value));
     } else {
         return Ok(None);
     }
 }
 
-pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &V) -> Result<(), Error> {
+pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &Option<V>) -> Result<(), Error> {
     let key = key.trim();
     if key.is_empty() {
         return Err(anyhow!("Store key cannot be empty"));
@@ -112,16 +120,39 @@ pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &V) -> Result<(), Er
 
     let mut store = USERSTORE_CACHE.write().map_err(|_| anyhow!("{} cache lock poisoned", USERSTORE_INSTANCE_NAME))?;
 
-    let raw_value = serde_json::to_string(value)?;
-    store.insert(key.to_string(), raw_value.clone());
+    if let Some(value) = value {
+        let raw_value: String;
+        if let Ok(plain) = serde_plain::to_string(value) {
+            raw_value = plain;
+        } else if let Ok(json) = serde_json::to_string(value) {
+            raw_value = json;
+        } else {
+            return Err(anyhow!("Failed to serialize UserStore item for key '{}'", key));
+        }
 
-    if let Err(err) = events::emit(UniChatEvent::user_store_update(key, &raw_value)) {
-        log::error!("Failed to emit UserStoreUpdate event: {:#?}", err);
+        store.insert(key.to_string(), raw_value.clone());
+
+        let event = UniChatEvent::user_store_update(key.to_string(), Some(raw_value.clone()));
+        if let Err(err) = events::emit(event) {
+            log::error!("Failed to emit UserStoreUpdate event: {:#?}", err);
+        }
+
+        if let Err(err) = USERSTORE_WRITE_TX.send(()) {
+            log::error!("Failed to schedule UserStore flush: {:#?}", err);
+        }
+    } else {
+        store.remove(key);
+
+        let event = UniChatEvent::user_store_update(key.to_string(), None);
+        if let Err(err) = events::emit(event) {
+            log::error!("Failed to emit UserStoreUpdate event: {:#?}", err);
+        }
+
+        if let Err(err) = USERSTORE_WRITE_TX.send(()) {
+            log::error!("Failed to schedule UserStore flush: {:#?}", err);
+        }
     }
 
-    if let Err(err) = USERSTORE_WRITE_TX.send(()) {
-        log::error!("Failed to schedule UserStore flush: {:#?}", err);
-    }
 
     return Ok(());
 }

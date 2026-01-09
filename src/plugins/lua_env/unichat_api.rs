@@ -370,13 +370,18 @@ impl mlua::UserData for UniChatAPI {
             return Ok(());
         });
 
-        methods.add_method("get_userstore_item", |_lua, this, key: String| {
+        methods.add_method("get_userstore_item", |lua, this, key: String| {
             let key = format!("{}:{}", this.plugin_name, key);
             let item: Option<String> = userstore::get_item(&key).map_err(mlua::Error::external)?;
-            return Ok(item);
+            if let Some(item) = item {
+                let lua_string = lua.create_string(item)?;
+                return Ok(mlua::Value::String(lua_string));
+            }
+
+            return Ok(mlua::Value::Nil);
         });
 
-        methods.add_method("set_userstore_item", |_lua, this, (key, value): (String, String)| {
+        methods.add_method("set_userstore_item", |_lua, this, (key, value): (String, Option<String>)| {
             let key = format!("{}:{}", this.plugin_name, key);
             userstore::set_item(&key, &value).map_err(mlua::Error::external)?;
             return Ok(());

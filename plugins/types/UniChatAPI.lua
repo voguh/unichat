@@ -16,7 +16,7 @@
 ---@field add_event_listener fun(self: UniChatAPI, callback: function): number
 ---@field remove_event_listener fun(self: UniChatAPI, listener_id: number)
 ---@field get_userstore_item fun(self: UniChatAPI, key: string): string?
----@field set_userstore_item fun(self: UniChatAPI, key: string, value: string)
+---@field set_userstore_item fun(self: UniChatAPI, key: string, value: string | nil)
 ---@field notify fun(self: UniChatAPI, message: string)
 
 ---@class UniChatBadge

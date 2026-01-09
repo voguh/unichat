@@ -357,14 +357,11 @@ pub struct UniChatRedemptionEventPayload {
 #[serde(rename_all = "camelCase")]
 pub struct UniChatUserStoreUpdateEventPayload {
     pub key: String,
-    pub value: String
+    pub value: Option<String>
 }
 
 impl UniChatEvent {
-    pub fn user_store_update(key: &str, value: &str) -> UniChatEvent {
-        return UniChatEvent::UserStoreUpdate(UniChatUserStoreUpdateEventPayload {
-            key: key.to_string(),
-            value: value.to_string()
-        });
+    pub fn user_store_update(key: String, value: Option<String>) -> Self {
+        return UniChatEvent::UserStoreUpdate(UniChatUserStoreUpdateEventPayload { key, value });
     }
 }
