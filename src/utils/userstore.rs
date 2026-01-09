@@ -82,6 +82,11 @@ pub fn init(_app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
 
 /* ================================================================================================================== */
 
+pub fn get_all_items() -> Result<HashMap<String, String>, Error> {
+    let store = USERSTORE_CACHE.read().map_err(|_| anyhow!("{} cache lock poisoned", USERSTORE_INSTANCE_NAME))?;
+    return Ok(store.clone());
+}
+
 pub fn get_item<R: serde::de::DeserializeOwned>(key: &str) -> Result<Option<R>, Error> {
     let key = key.trim();
     if key.is_empty() {

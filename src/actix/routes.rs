@@ -30,6 +30,7 @@ use crate::utils;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::ureq;
+use crate::utils::userstore;
 use crate::widgets::WidgetMetadata;
 use crate::widgets::get_widget_from_rest_path;
 
@@ -275,14 +276,26 @@ pub async fn ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, 
 
         /* ====================================================================================== */
 
-        let history = events::latest_events();
-        let event = serde_json::json!({ "type": "unichat:history", "data": serde_json::to_value(history).unwrap_or_default() });
-        if let Ok(parsed) = serde_json::to_string(&event) {
+        let history_data = events::latest_events();
+        let history_event = serde_json::json!({ "type": "unichat:history", "data": history_data });
+        if let Ok(parsed) = serde_json::to_string(&history_event) {
             if let Err(err) = session.text(parsed).await {
                 log::error!("Failed to send load event to WebSocket: {}", err);
             }
         } else {
             log::error!("Failed to serialize load event");
+        }
+
+        /* ====================================================================================== */
+
+        let userstore_data = userstore::get_all_items().unwrap_or_default();
+        let userstore_event = serde_json::json!({ "type": "unichat:user_store_loaded", "data": userstore_data });
+        if let Ok(parsed) = serde_json::to_string(&userstore_event) {
+            if let Err(err) = session.text(parsed).await {
+                log::error!("Failed to send UserStore load event to WebSocket: {}", err);
+            }
+        } else {
+            log::error!("Failed to serialize UserStore load event");
         }
 
         /* ====================================================================================== */
