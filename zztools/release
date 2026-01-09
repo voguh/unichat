@@ -19,22 +19,14 @@ current_version="$(cat "$cargo_toml_path" | grep '^version =' | head -n1 | cut -
 
 logger_info "Checking '\033[33mCargo.toml\033[0m' current version...";
 cmp="$(semver_compare "$new_version" "$current_version")";
-if [[ "$cmp" == "-1" ]]; then
+if [[ "$cmp" != "1" ]]; then
     logger_error "New version '$new_version' must be greater than the current version '$current_version'.";
     exit 1;
-elif [[ "$cmp" == "0" ]]; then
-    tag_exists="$(git tag --list "$new_version")";
-    if [[ -n "$tag_exists" ]]; then
-        logger_error "Tag '$new_version' already exists. Please use a different version.";
-        exit 1;
-    fi
 fi
 
-if [[ "$cmp" != "1" ]]; then
-    logger_info "Updating version from '$current_version' to '$new_version'.";
-    sed -i.bak "s/^version = \".*\"/version = \"$new_version\"/" "$cargo_toml_path";
-    rm "${cargo_toml_path}.bak";
-fi
+logger_info "Updating version from '$current_version' to '$new_version'.";
+sed -i.bak "s/^version = \".*\"/version = \"$new_version\"/" "$cargo_toml_path";
+rm "${cargo_toml_path}.bak";
 
 logger_info "Updating '\033[33mREADME.md\033[0m' version references.";
 readme_path="$ROOT_PATH/README.md";
