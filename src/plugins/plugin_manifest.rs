@@ -34,6 +34,11 @@ pub struct PluginManifestYAML {
 }
 
 pub fn load_manifest(plugin_path: &Path) -> Result<PluginManifestYAML, Error> {
+    let plugin_folder_name = plugin_path.file_name().ok_or_else(|| anyhow!("Invalid plugin path: '{:?}'", plugin_path))?.to_string_lossy();
+    if plugin_folder_name.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
+        return Err(anyhow!("Invalid plugin folder name '{}': only alphanumeric characters, underscores and hyphens are allowed", plugin_folder_name));
+    }
+
     let manifest_path = plugin_path.join("manifest.yaml");
     if !manifest_path.exists() || !manifest_path.is_file() {
         return Err(anyhow!("Folder '{:?}' is not a valid plugin: missing or invalid 'manifest.yaml'", plugin_path));
