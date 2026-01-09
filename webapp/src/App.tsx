@@ -102,7 +102,7 @@ export default function App(): JSX.Element {
 
         isMounted.current = true;
         init();
-    });
+    }, []);
 
     return (
         <MantineProvider defaultColorScheme="dark" theme={theme}>
