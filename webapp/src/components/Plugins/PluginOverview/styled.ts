@@ -46,7 +46,7 @@ export const PluginOverviewStyledContainer = styled.div`
             grid-template-rows: 42px 42px calc(42px + (24px * 2));
             grid-template-areas:
                 "PN PN PN PN PN PN PN PV PV PV PS PS"
-                "PA PA PA PA PA PL PL PH PH PH PH PH"
+                "PA PA PA PL PL PH PH PH PH PH PH PH"
                 "PD PD PD PD PD PD PD PD PD PD PD PD";
             gap: 8px;
 
