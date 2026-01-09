@@ -84,7 +84,7 @@ In the Lua environment, you will have access to the **UniChat** API through the 
 - `UniChatAPI:add_event_listener(callback)`: Adds a listener for events emitted by **UniChat**.
   | Argument | Type       | Required | Description                                                                                |
   |----------|------------|----------|--------------------------------------------------------------------------------------------|
-  | callback | `function` | YES      | Callback function that receives a [`UniChatEvent`](widgets/events), should return nothing. |
+  | callback | `function` | YES      | Callback function that receives a [`UniChatEvent`](/widgets/events), should return nothing. |
 
   Usage example:
   ```lua

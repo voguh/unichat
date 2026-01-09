@@ -326,15 +326,15 @@ local event = UniChatEvent:Message({
 ```
 
 #### Functions
-- `UniChatEvent:Clear(data)`: Returns a `userdata` representing the [`unichat:clear`](/pt-br/widgets/events?id=unichatclear) event.
-- `UniChatEvent:RemoveMessage(data)`: Returns a `userdata` representing the [`unichat:removemessage`](/pt-br/widgets/events?id=unichatremovemessage) event.
-- `UniChatEvent:RemoveAuthor(data)`: Returns a `userdata` representing the [`unichat:removeauthor`](/pt-br/widgets/events?id=unichatremoveauthor) event.
-- `UniChatEvent:Message(data)`: Returns a `userdata` representing the [`unichat:message`](/pt-br/widgets/events?id=unichatmessage) event.
-- `UniChatEvent:Donate(data)`: Returns a `userdata` representing the [`unichat:donate`](/pt-br/widgets/events?id=unichatdonate) event.
-- `UniChatEvent:Sponsor(data)`: Returns a `userdata` representing the [`unichat:sponsor`](/pt-br/widgets/events?id=unichatsponsor) event.
-- `UniChatEvent:SponsorGift(data)`: Returns a `userdata` representing the [`unichat:sponsor_gift`](/pt-br/widgets/events?id=unichatsponsor_gift) event.
-- `UniChatEvent:Raid(data)`: Returns a `userdata` representing the [`unichat:raid`](/pt-br/widgets/events?id=unichatraid) event.
-- `UniChatEvent:Redemption(data)`: Returns a `userdata` representing the [`unichat:redemption`](/pt-br/widgets/events?id=unichatredemption) event.
+- `UniChatEvent:Clear(data)`: Returns a `userdata` representing the [`unichat:clear`](/widgets/events?id=unichatclear) event.
+- `UniChatEvent:RemoveMessage(data)`: Returns a `userdata` representing the [`unichat:removemessage`](/widgets/events?id=unichatremovemessage) event.
+- `UniChatEvent:RemoveAuthor(data)`: Returns a `userdata` representing the [`unichat:removeauthor`](/widgets/events?id=unichatremoveauthor) event.
+- `UniChatEvent:Message(data)`: Returns a `userdata` representing the [`unichat:message`](/widgets/events?id=unichatmessage) event.
+- `UniChatEvent:Donate(data)`: Returns a `userdata` representing the [`unichat:donate`](/widgets/events?id=unichatdonate) event.
+- `UniChatEvent:Sponsor(data)`: Returns a `userdata` representing the [`unichat:sponsor`](/widgets/events?id=unichatsponsor) event.
+- `UniChatEvent:SponsorGift(data)`: Returns a `userdata` representing the [`unichat:sponsor_gift`](/widgets/events?id=unichatsponsor_gift) event.
+- `UniChatEvent:Raid(data)`: Returns a `userdata` representing the [`unichat:raid`](/widgets/events?id=unichatraid) event.
+- `UniChatEvent:Redemption(data)`: Returns a `userdata` representing the [`unichat:redemption`](/widgets/events?id=unichatredemption) event.
 - `UniChatEvent:Custom(data)`: Returns a `userdata` representing a custom event (`unichat:custom`).
 
 !> All functions accept a `data` table that must follow the pattern of the respective event.
@@ -352,7 +352,7 @@ local emote = UniChatEmote:new(id, name, url);
 ```
 
 #### Functions
-- `UniChatEmote:new(id, name, url)`: Returns a table following the [`UniChatEmote`](/pt-br/widgets/events?id=unichatemote) pattern.
+- `UniChatEmote:new(id, name, url)`: Returns a table following the [`UniChatEmote`](/widgets/events?id=unichatemote) pattern.
   | Argument | Type     | Required | Description            |
   |----------|----------|----------|------------------------|
   | id       | `string` | YES      | Emote ID.              |
@@ -374,7 +374,7 @@ local badge = UniChatBadge:new(code, url);
 ```
 
 #### Functions
-- `UniChatBadge:new(code, url)`: Returns a table following the [`UniChatBadge`](/pt-br/widgets/events?id=unichatbadge) pattern.
+- `UniChatBadge:new(code, url)`: Returns a table following the [`UniChatBadge`](/widgets/events?id=unichatbadge) pattern.
   | Argument | Type     | Required | Description            |
   |----------|----------|----------|------------------------|
   | code     | `string` | YES      | Badge code.            |
