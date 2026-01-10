@@ -11,7 +11,7 @@ on:
 env:
   NODE_VERSION: '24.10.0'
   PNPM_VERSION: '10.7.1'
-  RUST_VERSION: '1.87.0'
+  RUST_VERSION: '1.92.0'
   TAURI_APP_PATH: ${{ github.workspace }}
   TAURI_FRONTEND_PATH: ${{ github.workspace }}/webapp
 
