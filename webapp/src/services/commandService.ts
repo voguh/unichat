@@ -8,10 +8,22 @@
  ******************************************************************************/
 
 import { ComboboxItemGroup } from "@mantine/core";
-import { invoke } from "@tauri-apps/api/core";
+import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
 import { AppMetadata, GalleryItem, UniChatPluginMetadata, UniChatScraper, WidgetFields } from "unichat/types";
 import { UniChatSettings } from "unichat/utils/constants";
+
+async function invoke<T>(cmd: string, args?: Record<string, any>): Promise<T> {
+    try {
+        return tauriInvoke<T>(cmd, args);
+    } catch (error) {
+        if (error instanceof Error) {
+            throw error;
+        } else {
+            throw new Error(String(error));
+        }
+    }
+}
 
 export class CommandService {
     public async dispatchClearChat(): Promise<void> {
