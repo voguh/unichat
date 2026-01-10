@@ -87,12 +87,18 @@ end
 
 local function parse_emotes(raw_content)
     local emotes = {};
+    local shared_emotes = UniChatAPI:get_shared_emotes();
 
     for word in string.gmatch(raw_content, "%S+") do
         local _, id, name = word:match("^%[(%w+):(%d+):([%w_]+)%]$")
 
         if id ~= nil and name ~= nil then
             table.insert(emotes, UniChatEmote:new(id, ":" .. name .. ":", "https://files.kick.com/emotes/" .. id .. "/fullsize"));
+        else
+            local shared_emote = shared_emotes[word];
+            if shared_emote ~= nil then
+                table.insert(emotes, shared_emote);
+            end
         end
     end
 
@@ -165,6 +171,8 @@ end
 
 local function on_kick_ready(event)
     channel_id = event.channelId;
+
+    UniChatAPI:fetch_shared_emotes("kick", channel_id);
 end
 
 local function on_kick_event(event)
