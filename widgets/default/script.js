@@ -4,9 +4,10 @@ const IS_IN_OBS_DOCK = searchQuery.get("obs_dock") === "true";
 const MAXIMUM_MESSAGES = parseInt(searchQuery.get("max_messages") ?? "50", 10);
 
 const DONATE_TEMPLATE_MESSAGE = `Just {if_platform(youtube,twitch)::tipped::cheered} <span class="value">{value} {currency}</span>!`;
-const SPONSOR_TEMPLATE_MESSAGE = `{if_platform(youtube,twitch)::Become a member::Become a subscriber} for <span>{months}</span> months<br/>with tier <span>{tier}</span>!`;
-const SPONSOR_GIFT_TEMPLATE_MESSAGE = `<span>{author_display_name}</span>, just gifted <span>{count} {if_platform(youtube,twitch)::memberships::subscriptions}</span> with tier {tier}!`;
+const SPONSOR_TEMPLATE_MESSAGE = `{if_platform(youtube,twitch)::Become a member::Become a subscriber} for <span>{months}</span> months<br/>!`;
+const SPONSOR_GIFT_TEMPLATE_MESSAGE = `<span>{author_display_name}</span>, just gifted <span>{count} {if_platform(youtube,twitch)::memberships::subscriptions}</span>!`;
 const RAID_TEMPLATE_MESSAGE = `<span>{author_display_name}</span>&nbsp;is raiding with {viewer_count} viewers!`;
+const REDEMPTION_TEMPLATE_MESSAGE = `Redeemed <span>{reward_title}</span>!`;
 
 /* ================================================================================================================== */
 
@@ -16,6 +17,7 @@ const DONATE_TEMPLATE = document.querySelector("#donate_item").innerHTML;
 const SPONSOR_TEMPLATE = document.querySelector("#sponsor_item").innerHTML;
 const SPONSOR_GIFT_TEMPLATE = document.querySelector("#sponsor-gift_item").innerHTML;
 const RAID_TEMPLATE = document.querySelector("#raid_item").innerHTML;
+const REDEMPTION_TEMPLATE = document.querySelector("#redemption_item").innerHTML;
 
 function buildBadges(badges) {
     let badgeJoin = ''
@@ -51,7 +53,7 @@ function parseTierName(platform, tier) {
         return parseInt(tier, 10) / 1000
     }
 
-    return tier || (platform === "twitch" ? "Subscription" : "Membership");
+    return tier || "sponsorship";
 }
 
 const platformConditionalRegExp = /\{if_platform\(([^)]+)\)::([^:}]*)::([^:{}]*)\}/g;
@@ -103,25 +105,9 @@ function removeChildren() {
     }
 }
 
-function randomId() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
 
 if (IS_IN_OBS_DOCK) {
     MAIN_CONTAINER.style.overflowY = "auto";
-
-    const authorId = randomId();
-    const messageId = randomId();
-    let htmlTemplate = MESSAGE_TEMPLATE.replace("{author_id}", authorId);
-    htmlTemplate = htmlTemplate.replace("{platform}", "unichat");
-    htmlTemplate = htmlTemplate.replace("{message_id}", messageId);
-    htmlTemplate = htmlTemplate.replace("{author_badges}", "");
-    htmlTemplate = htmlTemplate.replace("{author_display_name}", "UniChat - OBS Integration");
-    htmlTemplate = htmlTemplate.replace("{message_text}", "OBS dock enabled! Scroll enabled, maximum messages set to " + MAXIMUM_MESSAGES);
-
-    if (MAIN_CONTAINER.querySelector(`div[data-id="${messageId}"]`) == null) {
-        $(MAIN_CONTAINER).append(htmlTemplate);
-    }
 }
 
 // Dispatch every time when websocket is connected (or reconnected)
@@ -133,7 +119,7 @@ window.addEventListener("unichat:connected", function () {
 window.addEventListener("unichat:event", function ({ detail: event }) {
     const isAtBottom = MAIN_CONTAINER.scrollHeight - MAIN_CONTAINER.scrollTop <= MAIN_CONTAINER.clientHeight + 20;
 
-    if (USE_PLATFORM_BADGES === true && event != null && event.data != null && Array.isArray(event.data.authorBadges)) {
+    if (USE_PLATFORM_BADGES && event != null && event.data != null && Array.isArray(event.data.authorBadges)) {
         let imgUrl;
         if (event.data.platform === "youtube") {
             imgUrl = `${window.location.pathname}/assets/platform_badge_youtube.png`;
@@ -162,7 +148,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
     } else {
         let htmlTemplate;
 
-        if (event.type === "unichat:message" || (event.type === "unichat:redemption" && event.data.messageText != null)) {
+        if (event.type === "unichat:message") {
             /** @type {import("../unichat").UniChatEventMessage['data']} */
             const data = event.data;
 
@@ -191,6 +177,12 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
 
             htmlTemplate = enrichMessage(RAID_TEMPLATE, data);
             htmlTemplate = htmlTemplate.replace("{raid_meta}", enrichMessage(RAID_TEMPLATE_MESSAGE, data));
+        } else if (event.type === "unichat:redemption") {
+            /** @type {import("../unichat").UniChatEventRedemption['data']} */
+            const data = event.data;
+
+            htmlTemplate = enrichMessage(REDEMPTION_TEMPLATE, data);
+            htmlTemplate = htmlTemplate.replace("{redemption_meta}", enrichMessage(REDEMPTION_TEMPLATE_MESSAGE, data));
         }
 
         if (htmlTemplate != null && MAIN_CONTAINER.querySelector(`div[data-id="${event.data.messageId}"]`) == null) {

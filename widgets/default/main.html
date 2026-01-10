@@ -3,7 +3,7 @@
 
 <script type="text/template" id="chatlist_item">
     <div class="message-item" data-from="{author_id}" data-platform="{platform}" data-id="{message_id}">
-        <div class="author-meta" style="color: {author_color}">
+        <div class="author-meta">
             <span class="badges">{author_badges}</span>
             <span class="name">{author_display_name}</span>
         </div>
@@ -14,7 +14,7 @@
 
 <script type="text/template" id="donate_item">
     <div class="donate-item" data-from="{author_id}" data-platform="{platform}" data-id="{message_id}">
-        <div class="author-meta" style="color: {author_color}">
+        <div class="author-meta">
             <span class="badges">{author_badges}</span>
             <span class="name">{author_display_name}</span>
         </div>
@@ -28,7 +28,7 @@
 
 <script type="text/template" id="sponsor_item">
     <div class="sponsor-item" data-from="{author_id}" data-platform="{platform}" data-id="{message_id}">
-        <div class="author-meta" style="color: {author_color}">
+        <div class="author-meta">
             <span class="badges">{author_badges}</span>
             <span class="name">{author_display_name}</span>
         </div>
@@ -51,5 +51,19 @@
 <script type="text/template" id="raid_item">
     <div class="raid-item" data-from="{author_id}" data-platform="{platform}" data-id="{message_id}">
         <div class="message-wrapper">{raid_meta}</div>
+    </div>
+</script>
+
+<script type="text/template" id="redemption_item">
+    <div class="redemption-item" data-from="{author_id}" data-platform="{platform}" data-id="{message_id}">
+        <div class="author-meta">
+            <span class="badges">{author_badges}</span>
+            <span class="name">{author_display_name}</span>
+        </div>
+
+        <div class="message-wrapper">
+            <div class="redemption-meta">{redemption_meta}</div>
+            <div class="message">{message_text}</div>
+        </div>
     </div>
 </script>

@@ -1,5 +1,5 @@
-const RAID_MESSAGE = "Chegou com {viewer_count} espectadores";
-const RAID_SOUND_URL = "assets/alert-sound.mp3";
+const RAID_MESSAGE = "Is arriving with {viewer_count} viewers!";
+const RAID_SOUND_URL = "https://www.myinstants.com/media/sounds/america-ya-hallo.mp3";
 const RAID_DISPLAY_DELAY = 0; // in milliseconds (1 second = 1000 milliseconds)
 const RAID_DISPLAY_DURATION = 8000; // in milliseconds (1 second = 1000 milliseconds)
 const ONLY_FOR_YOUTUBE = true;
@@ -25,7 +25,7 @@ function enrichMessage(message, params) {
             const tierName = parseTierName(params.platform, params.tier);
             richMessage = richMessage.replaceAll(`{${key}}`, tierName).replace(`{${snakeKey}}`, tierName);
         } else if (key === "viewerCount") {
-            const viewerCount = params[key] ?? "seus";
+            const viewerCount = params[key] ?? "their";
             richMessage = richMessage.replaceAll(`{${key}}`, viewerCount).replace(`{${snakeKey}}`, viewerCount);
         } else {
             richMessage = richMessage.replaceAll(`{${key}}`, params[key]).replace(`{${snakeKey}}`, params[key]);
@@ -48,11 +48,18 @@ async function processQueue() {
         idle = false;
         const data = event.data;
 
+        if (data.authorProfilePictureUrl == null && data.platform === "twitch") {
+            const authorProfilePictureUrl = await fetch(`https://decapi.me/twitch/avatar/${data.authorUsername}`);
+            if (authorProfilePictureUrl.ok) {
+                data.authorProfilePictureUrl = await authorProfilePictureUrl.text();
+            }
+        }
+
         let htmlTemplate = RAIDER_INFO_TEMPLATE;
         htmlTemplate = enrichMessage(htmlTemplate, data);
         htmlTemplate = htmlTemplate.replace("{message}", enrichMessage(RAID_MESSAGE, data));
 
-        const sfx = new Audio("https://www.myinstants.com/media/sounds/america-ya-hallo.mp3");
+        const sfx = new Audio(RAID_SOUND_URL);
         sfx.play().catch(console.error);
 
         if (RAID_DISPLAY_DELAY > 0) {

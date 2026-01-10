@@ -1,15 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 
 :root {
-    --maximum-width: 100vw;
+    /* <<== FIELDS TO CSS VARIABLES ==>> */
+    --accent-color: #c92a2a;
+    --base-color: #212529;
+    --message-color: #f8f9fa;
+
+    --username-font-size: 32px;
+    --details-font-size: 24px;
 
     --user-avatar-size: 128px;
     --user-avatar-border-size: 4px;
-    --username-font-size: 32px;
-    --details-font-size: 24px;
-    --accent-color: #ec4467;
-    --base-color: #212529;
-    --message-color: #FFFFFF;
+    --avatar-entry-animation: rotateIn 250ms ease-in;
+    --avatar-exit-animation: rotateOut 250ms ease-out;
+
+    --username-entry-animation: bounceIn 250ms ease-in;
+    --username-exit-animation: bounceOut 250ms ease-out;
+
+    --message-entry-animation: bounceIn 250ms ease-in;
+    --message-exit-animation: bounceOut 250ms ease-out;
+    /* <<== END FIELDS TO CSS VARIABLES ==>> */
 }
 
 html, body {
@@ -36,6 +46,7 @@ html, body {
 #main-container > .raider-info {
     display: flex;
     align-items: center;
+    flex-direction: column;
     gap: 16px;
 }
 
@@ -47,7 +58,7 @@ html, body {
     border: var(--user-avatar-border-size) solid var(--accent-color);
     box-sizing: border-box;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    animation: rotateIn 200ms linear forwards;
+    animation: var(--avatar-entry-animation) forwards;
 }
 
 #main-container > .raider-info > .raider-avatar > img {
@@ -71,7 +82,7 @@ html, body {
     background: var(--base-color);
     padding: 0 16px;
     text-align: center;
-    animation: bounceIn 500ms linear forwards;
+    animation: var(--username-entry-animation) forwards;
     font-weight: bolder;
 }
 
@@ -83,20 +94,20 @@ html, body {
     padding: 0 16px;
     text-align: center;
     transform: scale(0);
-    animation: bounceIn 500ms linear 200ms forwards;
+    animation: var(--message-entry-animation) 200ms forwards;
 }
 
 /* ================================================================================================================== */
 
 #main-container > .raider-info.fade-out > .raider-avatar {
-    animation: rotateOut 500ms linear 200ms forwards;
+    animation: var(--avatar-exit-animation) 200ms forwards;
 }
 
 #main-container > .raider-info.fade-out > .raider-meta-info > .raider-username {
-    animation: bounceOut 500ms linear 200ms forwards;
+    animation: var(--username-exit-animation) 200ms forwards;
 }
 
 #main-container > .raider-info.fade-out > .raider-meta-info > .raider-message {
     transform: scale(1);
-    animation: bounceOut 500ms linear forwards;
+    animation: var(--message-exit-animation) forwards;
 }

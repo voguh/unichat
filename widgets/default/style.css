@@ -2,27 +2,35 @@
 
 :root {
     --maximum-width: 100vw;
-    --author-badge-size: 18px;
-    --emote-size: 18px;
 
-    --general-box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
-    --message-animation: fadeIn 250ms ease-in;
-
-    --author-pill-bg: #343a40;
-    --author-pill-color: #FFFFFF;
-
+    --entry-animation: fadeIn 250ms ease-in;
     --accent-color: #fcc419;
+    --general-box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+    --general-padding: 8px;
+    --general-border-radius: 4px;
 
-    --message-content-bg: #FFFFFF;
-    --message-content-color: #212529;
-    --donate-content-bg: #1971c2;
-    --donate-content-color: #FFFFFF;
-    --sponsor-content-bg: #495057;
-    --sponsor-content-color: #FFFFFF;
-    --spogift-content-bg: #f08c00;
-    --spogift-content-color: #212529;
-    --raid-content-bg: #66a80f;
-    --raid-content-color: #FFFFFF;
+    --author-label-background-color: #343a40;
+    --author-label-text-color: #FFFFFF;
+    --author-badge-size: 18px;
+
+    --emote-size: 18px;
+    --message-content-background-color: #FFFFFF;
+    --message-content-text-color: #212529;
+
+    --donate-background-color: #1971c2;
+    --donate-text-color: #FFFFFF;
+
+    --sponsor-background-color: #495057;
+    --sponsor-text-color: #FFFFFF;
+
+    --sponsor-gift-background-color: #f08c00;
+    --sponsor-gift-text-color: #212529;
+
+    --raid-background-color: #66a80f;
+    --raid-text-color: #FFFFFF;
+
+    --redemption-background-color: #339af0;
+    --redemption-text-color: #FFFFFF;
 }
 
 html, body {
@@ -32,37 +40,42 @@ html, body {
     margin: 0;
 }
 
+/* <================================================[ SHARED STYLE ]================================================> */
 #main-container {
     position: absolute;
     bottom: 0;
     left: 0;
     max-height: calc(100vh - 32px);
     width: calc(var(--maximum-width) - 32px);
-    padding: 16px;
+    padding: var(--general-padding);
     overflow: hidden;
 }
 
-/* <================================================[ SHARED STYLE ]================================================> */
 #main-container > div {
+    --margin-top: calc(((var(--author-badge-size) + var(--general-padding)) / 2) + 8px);
+
     position: relative;
-    animation: var(--message-animation);
+    animation: var(--entry-animation);
+}
+
+#main-container.with-exit-animation > div {
+    animation: var(--entry-animation), var(--exit-animation) var(--exit-delay) forwards;
 }
 
 #main-container > div > .author-meta {
     width: fit-content;
-    max-width: calc(var(--maximum-width) - 64px);
+    max-width: calc(var(--maximum-width)  - (var(--general-padding) * 6));
     position: absolute;
     top: 0;
-    left: 8px;
+    left: var(--general-padding);
     transform: translateY(-50%);
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 8px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    background: var(--author-pill-bg);
-
+    gap: var(--general-padding);
+    padding: calc(var(--general-padding) / 2) var(--general-padding);
+    border-radius: var(--general-border-radius);
+    background: var(--author-label-background-color);
     overflow: hidden;
 }
 
@@ -71,7 +84,7 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 4px;
+    gap: calc(var(--general-padding) / 2);
 }
 
 #main-container > div > .author-meta > .badges:empty {
@@ -81,12 +94,12 @@ html, body {
 #main-container > div > .author-meta > .badges > img {
     width: var(--author-badge-size);
     height: var(--author-badge-size);
-    border-radius: 2px;
+    border-radius: calc(var(--general-border-radius) / 2);
 }
 
 #main-container > div > .author-meta > .name {
     flex: 1 1 auto;
-    color: var(--author-pill-color);
+    color: var(--author-label-text-color);
     font-weight: bold;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -98,15 +111,15 @@ html, body {
 
 /* <============================================[ SIMPLE MESSAGE STYLE ]============================================> */
 #main-container > .message-item {
-    margin-top: calc(((var(--author-badge-size) + 8px) / 2) + 8px);
+    margin-top: var(--margin-top);
     position: relative;
 }
 
 #main-container > .message-item > .message {
-    padding: calc(((var(--author-badge-size) + 8px) / 2) + 8px) 8px 8px 8px;
-    border-radius: 4px;
-    background: var(--message-content-bg);
-    color: var(--message-content-color);
+    padding: var(--margin-top) var(--general-padding) var(--general-padding) var(--general-padding);
+    border-radius: var(--general-border-radius);
+    background: var(--message-content-background-color);
+    color: var(--message-content-text-color);
     box-shadow: var(--general-box-shadow);
     white-space: normal;
     word-break: break-word;
@@ -120,7 +133,7 @@ html, body {
 
 /* <============================================[ DONATE MESSAGE STYLE ]============================================> */
 #main-container > .donate-item {
-    margin-top: calc(((var(--author-badge-size) + 8px) / 2) + 8px);
+    margin-top: var(--margin-top);
     position: relative;
 }
 
@@ -130,10 +143,10 @@ html, body {
 }
 
 #main-container > .donate-item > .message-wrapper {
-    padding: calc(((var(--author-badge-size) + 8px) / 2) + 8px) 8px 8px 8px;
-    border-radius: 4px;
-    background: var(--donate-content-bg);
-    color: var(--donate-content-color);
+    padding: var(--margin-top) var(--general-padding) var(--general-padding) var(--general-padding);
+    border-radius: var(--general-border-radius);
+    background: var(--donate-background-color);
+    color: var(--donate-text-color);
     box-shadow: var(--general-box-shadow);
 }
 
@@ -142,16 +155,16 @@ html, body {
     text-align: center;
 }
 
-#main-container > .donate-item > .message-wrapper > .donate-meta > .value {
+#main-container > .donate-item > .message-wrapper > .donate-meta > span {
     font-weight: bolder;
     color: var(--accent-color);
 }
 
 #main-container > .donate-item > .message-wrapper > .message {
-    margin-top: 8px;
+    margin-top: var(--general-padding);
     background: rgba(0, 0, 0, 0.25);
-    border-radius: 4px;
-    padding: 8px;
+    border-radius: var(--general-border-radius);
+    padding: var(--general-padding);
     text-align: center;
     white-space: normal;
     word-break: break-word;
@@ -169,7 +182,7 @@ html, body {
 
 /* <============================================[ SPONSOR MESSAGE STYLE ]============================================> */
 #main-container > .sponsor-item {
-    margin-top: calc(((var(--author-badge-size) + 8px) / 2) + 8px);
+    margin-top: var(--margin-top);
     position: relative;
 }
 
@@ -179,10 +192,10 @@ html, body {
 }
 
 #main-container > .sponsor-item > .message-wrapper {
-    padding: calc(((var(--author-badge-size) + 8px) / 2) + 8px) 8px 8px 8px;
-    border-radius: 4px;
-    background: var(--sponsor-content-bg);
-    color: var(--sponsor-content-color);
+    padding: var(--margin-top) var(--general-padding) var(--general-padding) var(--general-padding);
+    border-radius: var(--general-border-radius);
+    background: var(--sponsor-background-color);
+    color: var(--sponsor-text-color);
     box-shadow: var(--general-box-shadow);
 }
 
@@ -197,11 +210,11 @@ html, body {
 }
 
 #main-container > .sponsor-item > .message-wrapper > .message {
-    width: calc(var(--maximum-width) - 64px);
-    margin-top: 8px;
+    width: calc(100vw - (var(--general-padding) * 6));
+    margin-top: var(--general-padding);
     background: rgba(0, 0, 0, 0.25);
-    border-radius: 4px;
-    padding: 8px;
+    border-radius: var(--general-border-radius);
+    padding: var(--general-padding);
     text-align: center;
     white-space: normal;
     word-break: break-word;
@@ -219,17 +232,17 @@ html, body {
 
 /* <=========================================[ SPONSOR GIFT MESSAGE STYLE ]=========================================> */
 #main-container > .spogift-item {
-    margin-top: 8px;
+    margin-top: var(--general-padding);
     position: relative;
 }
 
 #main-container > .spogift-item > .message {
     position: relative;
-    padding: 8px;
+    padding: var(--general-padding);
     text-align: center;
-    border-radius: 4px;
-    background: var(--spogift-content-bg);
-    color: var(--spogift-content-color);
+    border-radius: var(--general-border-radius);
+    background: var(--sponsor-gift-background-color);
+    color: var(--sponsor-gift-text-color);
     font-weight: bold;
     box-shadow: var(--general-box-shadow);
     height: 64px;
@@ -243,10 +256,10 @@ html, body {
     font-family: "Font Awesome 5 Free";
     font-weight: 900;
     content: "\f06b";
-    font-size: calc(64px + 16px);
+    font-size: calc(64px + (var(--general-padding) * 2));
     position: absolute;
-    bottom: -8px;
-    right: -8px;
+    bottom: calc((var(--general-padding) * 2) * -1);
+    right: calc((var(--general-padding) * 2) * -1);
     transform: rotate(-45deg);
     color: rgba(255, 255, 255, 0.25);
     z-index: 0;
@@ -265,15 +278,15 @@ html, body {
 
 /* <=============================================[ RAID MESSAGE STYLE ]=============================================> */
 #main-container > .raid-item {
-    margin-top: 8px;
+    margin-top: var(--general-padding);
     position: relative;
 }
 
 #main-container > .raid-item > .message-wrapper {
-    padding: 8px;
-    border-radius: 4px;
-    background: var(--raid-content-bg);
-    color: var(--raid-content-color);
+    padding: var(--general-padding);
+    border-radius: var(--general-border-radius);
+    background: var(--raid-background-color);
+    color: var(--raid-text-color);
     font-weight: bold;
     box-shadow: var(--general-box-shadow);
     height: 64px;
@@ -288,3 +301,53 @@ html, body {
     font-weight: bolder;
 }
 /* <===========================================[ END RAID MESSAGE STYLE ]===========================================> */
+
+/* <==========================================[ REDEMPTION MESSAGE STYLE ]==========================================> */
+#main-container > .redemption-item {
+    margin-top: var(--margin-top);
+    position: relative;
+}
+
+#main-container > .redemption-item > .author-meta {
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#main-container > .redemption-item > .message-wrapper {
+    padding: var(--margin-top) var(--general-padding) var(--general-padding) var(--general-padding);
+    border-radius: var(--general-border-radius);
+    background: var(--redemption-background-color);
+    color: var(--redemption-text-color);
+    box-shadow: var(--general-box-shadow);
+}
+
+#main-container > .redemption-item > .message-wrapper > .redemption-meta {
+    font-weight: bold;
+    text-align: center;
+}
+
+#main-container > .redemption-item > .message-wrapper > .redemption-meta > span {
+    font-weight: bolder;
+    color: var(--accent-color);
+}
+
+#main-container > .redemption-item > .message-wrapper > .message {
+    width: calc(100vw - (var(--general-padding) * 6));
+    margin-top: var(--general-padding);
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: var(--general-border-radius);
+    padding: var(--general-padding);
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+}
+
+#main-container > .redemption-item > .message-wrapper > .message:empty {
+    display: none;
+}
+
+#main-container > .redemption-item > .message-wrapper > .message > img {
+    height: var(--emote-size);
+    vertical-align: middle;
+}
+/* <========================================[ END REDEMPTION MESSAGE STYLE ]========================================> */
