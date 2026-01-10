@@ -2,23 +2,23 @@
 
 :root {
     /* <<== FIELDS TO CSS VARIABLES ==>> */
-    --accent-color: #c92a2a;
-    --base-color: #212529;
-    --message-color: #f8f9fa;
+    --accent-color: {{accentColor}};
+    --base-color: {{textBackgroundColor}};
+    --message-color: {{textColor}};
 
-    --username-font-size: 32px;
-    --details-font-size: 24px;
+    --username-font-size: {{usernameFontSize}}px;
+    --details-font-size: {{messageFontSize}}px;
 
-    --user-avatar-size: 128px;
-    --user-avatar-border-size: 4px;
-    --avatar-entry-animation: rotateIn 250ms ease-in;
-    --avatar-exit-animation: rotateOut 250ms ease-out;
+    --user-avatar-size: {{avatarSize}}px;
+    --user-avatar-border-size: {{avatarBorderSize}}px;
+    --avatar-entry-animation: {{avatarEntryAnimation}};
+    --avatar-exit-animation: {{avatarExitAnimation}};
 
-    --username-entry-animation: bounceIn 250ms ease-in;
-    --username-exit-animation: bounceOut 250ms ease-out;
+    --username-entry-animation: {{usernameEntryAnimation}};
+    --username-exit-animation: {{usernameExitAnimation}};
 
-    --message-entry-animation: bounceIn 250ms ease-in;
-    --message-exit-animation: bounceOut 250ms ease-out;
+    --message-entry-animation: {{messageEntryAnimation}};
+    --message-exit-animation: {{messageExitAnimation}};
     /* <<== END FIELDS TO CSS VARIABLES ==>> */
 }
 

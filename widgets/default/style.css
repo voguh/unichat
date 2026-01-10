@@ -2,35 +2,38 @@
 
 :root {
     --maximum-width: 100vw;
-
-    --entry-animation: fadeIn 250ms ease-in;
-    --accent-color: #fcc419;
     --general-box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
-    --general-padding: 8px;
-    --general-border-radius: 4px;
 
-    --author-label-background-color: #343a40;
-    --author-label-text-color: #FFFFFF;
-    --author-badge-size: 18px;
+    /* <<== FIELDS TO CSS VARIABLES ==>> */
+    --top-fade-effect-size: {{topFadeEffectSize}}px;
+    --entry-animation: {{entryAnimation}} {{entryAnimationDuration}}ms ease-in;
+    --accent-color: {{accentColor}};
+    --general-padding: {{generalSpacing}}px;
+    --general-border-radius: {{generalBorderRadius}}px;
 
-    --emote-size: 18px;
-    --message-content-background-color: #FFFFFF;
-    --message-content-text-color: #212529;
+    --author-label-background-color: {{authorLabelBackgroundColor}};
+    --author-label-text-color: {{authorLabelTextColor}};
+    --author-badge-size: {{authorBadgeSize}}px;
 
-    --donate-background-color: #1971c2;
-    --donate-text-color: #FFFFFF;
+    --emote-size: {{emoteSize}}px;
+    --message-content-background-color: {{messageContentBackgroundColor}};
+    --message-content-text-color: {{messageContentTextColor}};
 
-    --sponsor-background-color: #495057;
-    --sponsor-text-color: #FFFFFF;
+    --donate-background-color: {{donateBackgroundColor}};
+    --donate-text-color: {{donateTextColor}};
 
-    --sponsor-gift-background-color: #f08c00;
-    --sponsor-gift-text-color: #212529;
+    --sponsor-background-color: {{sponsorBackgroundColor}};
+    --sponsor-text-color: {{sponsorTextColor}};
 
-    --raid-background-color: #66a80f;
-    --raid-text-color: #FFFFFF;
+    --sponsor-gift-background-color: {{sponsorGiftBackgroundColor}};
+    --sponsor-gift-text-color: {{sponsorGiftTextColor}};
 
-    --redemption-background-color: #339af0;
-    --redemption-text-color: #FFFFFF;
+    --raid-background-color: {{raidBackgroundColor}};
+    --raid-text-color: {{raidTextColor}};
+
+    --redemption-background-color: {{redemptionBackgroundColor}};
+    --redemption-text-color: {{redemptionTextColor}};
+    /* <<== END FIELDS TO CSS VARIABLES ==>> */
 }
 
 html, body {

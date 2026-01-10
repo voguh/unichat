@@ -1,8 +1,11 @@
-const RAID_MESSAGE = "Is arriving with {viewer_count} viewers!";
-const RAID_SOUND_URL = "https://www.myinstants.com/media/sounds/america-ya-hallo.mp3";
-const RAID_DISPLAY_DELAY = 0; // in milliseconds (1 second = 1000 milliseconds)
-const RAID_DISPLAY_DURATION = 8000; // in milliseconds (1 second = 1000 milliseconds)
-const ONLY_FOR_YOUTUBE = true;
+/* <<==== FIELDS TO JS VARIABLES ====>> */
+const RAID_MESSAGE = "{{messageTemplateText}}";
+const RAID_SFX_URL = "{{sfxUrl}}";
+const RAID_VIEWER_COUNT_MISSING = "{{messageViewerCountMissing}}";
+const SHOW_ON_PLATFORM = "{{showOnPlatform}}";
+const RAID_DISPLAY_DELAY = parseInt("{{contentDisplayDelay}}", 10);
+const RAID_DISPLAY_DURATION = parseInt("{{duration}}", 10);
+/* <<== END FIELDS TO JS VARIABLES ==>> */
 
 /* ================================================================================================================== */
 
@@ -25,7 +28,7 @@ function enrichMessage(message, params) {
             const tierName = parseTierName(params.platform, params.tier);
             richMessage = richMessage.replaceAll(`{${key}}`, tierName).replace(`{${snakeKey}}`, tierName);
         } else if (key === "viewerCount") {
-            const viewerCount = params[key] ?? "their";
+            const viewerCount = params[key] ?? RAID_VIEWER_COUNT_MISSING;
             richMessage = richMessage.replaceAll(`{${key}}`, viewerCount).replace(`{${snakeKey}}`, viewerCount);
         } else {
             richMessage = richMessage.replaceAll(`{${key}}`, params[key]).replace(`{${snakeKey}}`, params[key]);
@@ -59,7 +62,7 @@ async function processQueue() {
         htmlTemplate = enrichMessage(htmlTemplate, data);
         htmlTemplate = htmlTemplate.replace("{message}", enrichMessage(RAID_MESSAGE, data));
 
-        const sfx = new Audio(RAID_SOUND_URL);
+        const sfx = new Audio(RAID_SFX_URL);
         sfx.play().catch(console.error);
 
         if (RAID_DISPLAY_DELAY > 0) {
@@ -93,7 +96,7 @@ window.addEventListener("unichat:connected", async function () {
 });
 
 window.addEventListener("unichat:event", function ({ detail: event }) {
-    if (event.type === "unichat:raid" && (ONLY_FOR_YOUTUBE ? event.data.platform === "youtube" : true)) {
+    if (event.type === "unichat:raid" && (SHOW_ON_PLATFORM === "both" || SHOW_ON_PLATFORM === event.data.platform)) {
         queue.push(event);
         if (queue.length === 1 && idle) {
             requestAnimationFrame(processQueue)

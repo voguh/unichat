@@ -3,13 +3,15 @@ const USE_PLATFORM_BADGES = !(searchQuery.get("use_platform_badges") === "false"
 const IS_IN_OBS_DOCK = searchQuery.get("obs_dock") === "true";
 const MAXIMUM_MESSAGES = parseInt(searchQuery.get("max_messages") ?? "50", 10);
 
-const DONATE_TEMPLATE_MESSAGE = `Just {if_platform(youtube,twitch)::tipped::cheered} <span class="value">{value} {currency}</span>!`;
-const SPONSOR_TEMPLATE_MESSAGE = `{if_platform(youtube,twitch)::Become a member::Become a subscriber} for <span>{months}</span> months<br/>!`;
-const SPONSOR_GIFT_TEMPLATE_MESSAGE = `<span>{author_display_name}</span>, just gifted <span>{count} {if_platform(youtube,twitch)::memberships::subscriptions}</span>!`;
-const RAID_TEMPLATE_MESSAGE = `<span>{author_display_name}</span>&nbsp;is raiding with {viewer_count} viewers!`;
-const REDEMPTION_TEMPLATE_MESSAGE = `Redeemed <span>{reward_title}</span>!`;
-
-/* ================================================================================================================== */
+/* <<==== FIELDS TO JS VARIABLES ====>> */
+const EXIT_DELAY = parseInt("{{exitDelay}}", 10);
+const DONATE_TEMPLATE_MESSAGE = "{{donateTemplateMessage}}";
+const SPONSOR_TEMPLATE_MESSAGE = "{{sponsorTemplateMessage}}";
+const SPONSOR_GIFT_TEMPLATE_MESSAGE = "{{sponsorGiftTemplateMessage}}";
+const RAID_TEMPLATE_MESSAGE = "{{raidTemplateMessage}}";
+const RAID_VIEWERS_DEFAULT_TEXT = "{{raidViewersDefaultText}}";
+const REDEMPTION_TEMPLATE_MESSAGE = "{{redemptionTemplateMessage}}";
+/* <<== END FIELDS TO JS VARIABLES ==>> */
 
 const MAIN_CONTAINER = document.querySelector("#main-container");
 const MESSAGE_TEMPLATE = document.querySelector("#chatlist_item").innerHTML;
@@ -81,8 +83,8 @@ function enrichMessage(text, data) {
                 return match;
             });
         } else if (rawKey === "viewerCount") {
-            enrichedText = enrichedText.replaceAll(key, value > 1 ? value : 'their');
-            enrichedText = enrichedText.replaceAll(snakeKey, value > 1 ? value : 'their');
+            enrichedText = enrichedText.replaceAll(key, value > 1 ? value : RAID_VIEWERS_DEFAULT_TEXT);
+            enrichedText = enrichedText.replaceAll(snakeKey, value > 1 ? value : RAID_VIEWERS_DEFAULT_TEXT);
         } else if (rawKey === "messageText") {
             enrichedText = enrichedText.replaceAll(key, buildMessage(value, data.emotes));
             enrichedText = enrichedText.replaceAll(snakeKey, buildMessage(value, data.emotes));

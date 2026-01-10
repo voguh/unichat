@@ -1,0 +1,182 @@
+{
+    "$schema": "https://cdn.statically.io/gh/voguh/unichat/1.3.0/widgets/fields-schema.json",
+    "showOnPlatform": {
+        "type": "dropdown",
+        "label": "Show on platform",
+        "value": "youtube",
+        "options": {
+            "both": "Both platforms",
+            "twitch": "Twitch only",
+            "youtube": "YouTube only"
+        }
+    },
+    "duration": {
+        "type": "number",
+        "label": "Duration",
+        "description": "Time in milliseconds (1s = 1000ms)",
+        "value": 8000,
+        "min": 0,
+        "max": 10000,
+        "step": 100
+    },
+    "contentDisplayDelay": {
+        "type": "number",
+        "label": "Content display delay",
+        "description": "Time in milliseconds (1s = 1000ms)",
+        "value": 0,
+        "min": 0,
+        "max": 10000,
+        "step": 100
+    },
+    "accentColor": {
+        "type": "colorpicker",
+        "label": "Accent color",
+        "value": "#c92a2a"
+    },
+    "textBackgroundColor": {
+        "type": "colorpicker",
+        "label": "Text background color",
+        "value": "#212529"
+    },
+    "textColor": {
+        "type": "colorpicker",
+        "label": "Text color",
+        "value": "#f8f9fa"
+    },
+    "sfxUrl": {
+        "type": "filepicker",
+        "label": "Sound effect",
+        "value": "https://www.myinstants.com/media/sounds/america-ya-hallo.mp3",
+        "fileType": ["audio"]
+    },
+
+
+
+    "avatarSize": {
+        "type": "number",
+        "group": "Avatar",
+        "label": "Avatar size (pixels)",
+        "value": 128,
+        "min": 32,
+        "max": 512,
+        "step": 8
+    },
+    "avatarBorderSize": {
+        "type": "number",
+        "group": "Avatar",
+        "label": "Avatar border size (pixels)",
+        "value": 4,
+        "min": 0,
+        "max": 32,
+        "step": 1
+    },
+    "avatarEntryAnimation": {
+        "type": "dropdown",
+        "group": "Avatar",
+        "label": "Entry animation",
+        "value": "rotateIn 250ms ease-in",
+        "options": {
+            "bounceIn 250ms ease-in": "Bounce In",
+            "fadeIn 250ms ease-in": "Fade In",
+            "rotateIn 250ms ease-in": "Rotate In",
+            "zoomIn 250ms ease-in": "Zoom In"
+        }
+    },
+    "avatarExitAnimation": {
+        "type": "dropdown",
+        "group": "Avatar",
+        "label": "Exit animation",
+        "value": "rotateOut 250ms ease-out",
+        "options": {
+            "bounceOut 250ms ease-out": "Bounce Out",
+            "fadeOut 250ms ease-out": "Fade Out",
+            "rotateOut 250ms ease-in": "Rotate Out",
+            "zoomOut 250ms ease-in": "Zoom Out"
+        }
+    },
+
+
+
+    "usernameFontSize": {
+        "type": "number",
+        "group": "Username",
+        "label": "Username font size (pixels)",
+        "value": 32,
+        "min": 16,
+        "max": 256,
+        "step": 4
+    },
+    "usernameEntryAnimation": {
+        "type": "dropdown",
+        "group": "Username",
+        "label": "Entry animation",
+        "value": "bounceIn 250ms ease-in",
+        "options": {
+            "bounceIn 250ms ease-in": "Bounce In",
+            "fadeIn 250ms ease-in": "Fade In",
+            "rotateIn 250ms ease-in": "Rotate In",
+            "zoomIn 250ms ease-in": "Zoom In"
+        }
+    },
+    "usernameExitAnimation": {
+        "type": "dropdown",
+        "group": "Username",
+        "label": "Exit animation",
+        "value": "bounceOut 250ms ease-out",
+        "options": {
+            "bounceOut 250ms ease-out": "Bounce Out",
+            "fadeOut 250ms ease-out": "Fade Out",
+            "rotateOut 250ms ease-in": "Rotate Out",
+            "zoomOut 250ms ease-in": "Zoom Out"
+        }
+    },
+
+
+
+    "messageFontSize": {
+        "type": "number",
+        "group": "Message",
+        "label": "Message font size (pixels)",
+        "value": 24,
+        "min": 12,
+        "max": 72,
+        "step": 2
+    },
+    "messageTemplateText": {
+        "type": "textarea",
+        "group": "Message",
+        "label": "Message template text",
+        "value": "Is arriving with {viewer_count} viewers!"
+    },
+    "messageViewerCountMissing": {
+        "type": "text",
+        "group": "Message",
+        "label": "No viewers default text",
+        "description": "Only used when the viewer count is 1 or less.",
+        "value": "their"
+    },
+    "messageEntryAnimation": {
+        "type": "dropdown",
+        "group": "Message",
+        "label": "Entry animation",
+        "value": "bounceIn 250ms ease-in",
+        "options": {
+            "bounceIn 250ms ease-in": "Bounce In",
+            "fadeIn 250ms ease-in": "Fade In",
+            "rotateIn 250ms ease-in": "Rotate In",
+            "zoomIn 250ms ease-in": "Zoom In"
+        }
+    },
+    "messageExitAnimation": {
+        "type": "dropdown",
+        "group": "Message",
+        "label": "Exit animation",
+        "value": "bounceOut 250ms ease-out",
+        "options": {
+            "bounceOut 250ms ease-out": "Bounce Out",
+            "fadeOut 250ms ease-out": "Fade Out",
+            "rotateOut 250ms ease-in": "Rotate Out",
+            "zoomOut 250ms ease-in": "Zoom Out"
+        }
+    }
+}
