@@ -23,7 +23,7 @@ pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: St
     let widget = get_widget_from_rest_path(&widget).map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
     if let WidgetSource::User = widget.widget_source {
         let fields_path = widget.fields_path();
-        if !fields_path.is_file() {
+        if fields_path.exists() && !fields_path.is_file() {
             return Err("Widget 'fields.json' file does not exist".into());
         }
 
@@ -39,7 +39,7 @@ pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
     let widget = get_widget_from_rest_path(&widget).map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
     if let WidgetSource::User = widget.widget_source {
         let fieldstate_path = widget.fieldstate_path();
-        if !fieldstate_path.is_file() {
+        if fieldstate_path.exists() && !fieldstate_path.is_file() {
             return Err("Widget 'fieldstate.json' file does not exist".into());
         }
 
@@ -55,7 +55,7 @@ pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
     let widget = get_widget_from_rest_path(&widget).map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
     if let WidgetSource::User = widget.widget_source {
         let fieldstate_path = widget.fieldstate_path();
-        if !fieldstate_path.is_file() {
+        if fieldstate_path.exists() && !fieldstate_path.is_file() {
             return Err("Widget 'fieldstate.json' file does not exist".into());
         }
 
