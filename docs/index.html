@@ -8,7 +8,9 @@
       <title>UniChat Docs</title>
       <meta name="description" content="UniChat Documentation" />
 
-      <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
+      <!-- <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" /> -->
+      <!-- <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/dark.css" /> -->
+       <link  rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-darklight-theme@latest/dist/style.min.css" />
   </head>
   <body>
       <div id="app"></div>
@@ -18,7 +20,12 @@
           loadSidebar: true,
           loadNavbar: true,
           name: 'UniChat Docs',
-          repo: 'voguh/unichat'
+          repo: 'voguh/unichat',
+
+          darklightTheme: {
+            defaultTheme: "dark",
+            respectPrefersColorScheme: true
+          }
         }
       </script>
 
@@ -26,5 +33,6 @@
       <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
       <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-lua.min.js"></script>
       <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-rust.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/docsify-darklight-theme@latest/dist/index.min.js"></script>
   </body>
 </html>
