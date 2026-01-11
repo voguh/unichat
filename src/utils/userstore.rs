@@ -132,7 +132,7 @@ pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &Option<V>) -> Resul
 
         store.insert(key.to_string(), raw_value.clone());
 
-        let event = UniChatEvent::user_store_update(key.to_string(), Some(raw_value.clone()));
+        let event = UniChatEvent::userstore_update(key.to_string(), Some(raw_value.clone()));
         if let Err(err) = events::emit(event) {
             log::error!("Failed to emit UserStoreUpdate event: {:#?}", err);
         }
@@ -143,7 +143,7 @@ pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &Option<V>) -> Resul
     } else {
         store.remove(key);
 
-        let event = UniChatEvent::user_store_update(key.to_string(), None);
+        let event = UniChatEvent::userstore_update(key.to_string(), None);
         if let Err(err) = events::emit(event) {
             log::error!("Failed to emit UserStoreUpdate event: {:#?}", err);
         }
