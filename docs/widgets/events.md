@@ -1,24 +1,5 @@
 # Events
 
-### Table of Contents
-- [`Introduction`](#introduction)
-- [`unichat:clear`](#unichatclear)
-- [`unichat:remove_message`](#unichatremove_message)
-- [`unichat:remove_author`](#unichatremove_author)
-- [`unichat:message`](#unichatmessage)
-- [`unichat:donate`](#unichatdonate)
-- [`unichat:sponsor`](#unichatsponsor)
-- [`unichat:sponsor_gift`](#unichatsponsor_gift)
-- [`unichat:raid`](#unichatraid)
-- [`unichat:redemption`](#unichatredemption)
-- [`UniChatEmote`](#unichatemote)
-- [`UniChatBadge`](#unichatbadge)
-- [`UniChatAuthorType`](#unichatauthortype)
-
----
-
-## Introduction
-
 Here you will find the documentation for events received via the `unichat:event` listener.
 
 Every event follows the pattern:
@@ -61,6 +42,8 @@ By default, only the Twitch integration fires this event (result of the `/clear`
 }
 ```
 
+---
+
 ## `unichat:remove_message`
 
 This event is fired when a message is removed from the chat by moderation or by the user.
@@ -94,6 +77,12 @@ This event is fired when a message is removed from the chat by moderation or by 
 }
 ```
 
+### Twitch Special Flags
+
+Twitch event receives additional flags in the `flags` object. All IRC tags are mapped to flags and prefixed with `unichat:raw:twitch:`.
+
+---
+
 ## `unichat:remove_author`
 
 This event is fired when a user is removed from the chat by moderation (ban/timeout).
@@ -126,6 +115,12 @@ This event is fired when a user is removed from the chat by moderation (ban/time
     }
 }
 ```
+
+### Twitch Special Flags
+
+Twitch event receives additional flags in the `flags` object. All IRC tags are mapped to flags and prefixed with `unichat:raw:twitch:`.
+
+---
 
 ## `unichat:message`
 
@@ -178,6 +173,18 @@ This event is fired when a new message is received in the chat.
     }
 }
 ```
+
+### Twitch Special Flags
+
+Twitch event receives additional flags in the `flags` object. All IRC tags are mapped to flags and prefixed with `unichat:raw:twitch:`.
+
+Also, the following special flag is available:
+
+| Property                     | Description                                                                                  |
+|------------------------------|----------------------------------------------------------------------------------------------|
+| `unichat:twitch_streak_days` | Indicates if the message is a streak message.<br/>Value is the number of days in the streak. |
+
+---
 
 ## `unichat:donate`
 
@@ -236,6 +243,25 @@ This event is fired when a donation (e.g., superchat on YouTube or bits on Twitc
 }
 ```
 
+### Twitch Special Flags
+
+Twitch event receives additional flags in the `flags` object. All IRC tags are mapped to flags and prefixed with `unichat:raw:twitch:`.
+
+### YouTube Special Flags
+
+YouTube event receives could receive additional flags in the `flags` object.
+
+| Property                                               | Description                                                           |
+|--------------------------------------------------------|-----------------------------------------------------------------------|
+| `unichat:youtube_super_sticker`                        | Indicates if the donation is a super sticker. Value is always `null`. |
+| `unichat:youtube_superchat_tier`                       | Tier of the superchat (e.g.: `"1"`, `"2"`, ..., `"7"` or `null`).     |
+| `unichat:youtube_superchat_primary_background_color`   | Primary background color of the superchat in rgba format.             |
+| `unichat:youtube_superchat_primary_text_color`         | Primary text color of the superchat in rgba format.                   |
+| `unichat:youtube_superchat_secondary_background_color` | Secondary background color of the superchat in rgba format.           |
+| `unichat:youtube_superchat_secondary_text_color`       | Secondary text color of the superchat in rgba format.                 |
+
+---
+
 ## `unichat:sponsor`
 
 This event is fired when a new sponsor (member on YouTube or sub on Twitch, for example) is added to the channel.
@@ -293,6 +319,12 @@ This event is fired when a new sponsor (member on YouTube or sub on Twitch, for 
 }
 ```
 
+### Twitch Special Flags
+
+Twitch event receives additional flags in the `flags` object. All IRC tags are mapped to flags and prefixed with `unichat:raw:twitch:`.
+
+---
+
 ## `unichat:sponsor_gift`
 
 This event is fired when a gift subscription (e.g., Twitch gift sub) is made on the channel.
@@ -346,6 +378,12 @@ This event is fired when a gift subscription (e.g., Twitch gift sub) is made on 
 }
 ```
 
+### Twitch Special Flags
+
+Twitch event receives additional flags in the `flags` object. All IRC tags are mapped to flags and prefixed with `unichat:raw:twitch:`.
+
+---
+
 ## `unichat:raid`
 
 This event is fired when a raid (audience redirect) occurs on the channel.
@@ -396,6 +434,12 @@ This event is fired when a raid (audience redirect) occurs on the channel.
     }
 }
 ```
+
+### Flags Especiais da Twitch
+
+Eventos da twitch recebem flags adicionais no objeto `flags`. Todas as tags do IRC são mapeadas para flags e prefixadas com `unichat:raw:twitch:`;
+
+---
 
 ## `unichat:redemption`
 
@@ -459,6 +503,7 @@ This event is fired when a custom reward is redeemed on the channel.
     }
 }
 ```
+
 ---
 
 ## UniChatEmote
