@@ -14,6 +14,7 @@ use crate::plugins::get_plugin;
 
 use crate::plugins::lua_env::SHARED_MODULES;
 use crate::plugins::lua_env::SHARED_MODULES_LAZY_LOCK_KEY;
+use crate::plugins::lua_env::unichat_http::UniChatHttpModule;
 use crate::plugins::lua_env::unichat_json::UniChatJsonModule;
 use crate::plugins::lua_env::unichat_logger::UniChatLoggerModule;
 use crate::plugins::lua_env::unichat_strings::UniChatStringsModule;
@@ -52,7 +53,9 @@ pub fn create_require_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Fun
         }
 
         fn scoped_modules_require(lua: &mlua::Lua, plugin_env: &mlua::Table, plugin_name: &str, module: &str) -> mlua::Result<mlua::Value> {
-            if module == "unichat:json" {
+            if module == "unichat:http" {
+                return UniChatHttpModule::new(lua);
+            } else if module == "unichat:json" {
                 return UniChatJsonModule::new(lua);
             } else if module == "unichat:logger" {
                 return UniChatLoggerModule::new(lua, plugin_name);

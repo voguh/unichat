@@ -209,6 +209,37 @@ UniChatEmote = UniChatEmote or nil;
 UniChatBadge = UniChatBadge or nil;
 -- =========================================[ End UniChat Standard Library ]========================================= --
 
+-- =============================================[ UniChat HTTP Library ]============================================= --
+---@class UniChatBasicAuth
+---@field username string
+---@field password string
+
+---@class UniChatHttpArgs
+---@field headers table<string, string>?
+---@field query_params table<string, string>?
+---@field content_type string?
+---@field basic_auth UniChatBasicAuth?
+
+---@class UniChatHttpResponse
+---@field ok boolean
+---@field status_code number
+---@field status_text string
+---@field headers table<string, string>
+---@field url string
+---@field header fun(self: UniChatHttpResponse, name: string): string?
+---@field text fun(self: UniChatHttpResponse): string
+---@field json fun(self: UniChatHttpResponse): table
+---@field bytes fun(self: UniChatHttpResponse): number[]
+
+---@class UniChatHttp
+---@field get fun(self: UniChatHttp, uri: string, args?: UniChatHttpArgs): UniChatHttpResponse
+---@field post fun(self: UniChatHttp, uri: string, body: string | table | nil, args?: UniChatHttpArgs): UniChatHttpResponse
+---@field put fun(self: UniChatHttp, uri: string, body: string | table | nil, args?: UniChatHttpArgs): UniChatHttpResponse
+---@field patch fun(self: UniChatHttp, uri: string, body: string | table | nil, args?: UniChatHttpArgs): UniChatHttpResponse
+---@field delete fun(self: UniChatHttp, uri: string, args?: UniChatHttpArgs): UniChatHttpResponse
+---@field head fun(self: UniChatHttp, uri: string): UniChatHttpResponse
+-- ===========================================[ End UniChat HTTP Library ]=========================================== --
+
 -- =============================================[ UniChat JSON Library ]============================================= --
 ---@class UniChatJson
 ---@field encode fun(self: UniChatJson, data: table): string

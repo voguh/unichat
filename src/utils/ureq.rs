@@ -7,16 +7,54 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+#![allow(unused)]
 use std::sync::LazyLock;
 
+pub use ureq::Agent;
+pub use ureq::AsSendBody;
+pub use ureq::Body;
+pub use ureq::BodyBuilder;
+pub use ureq::BodyReader;
+pub use ureq::BodyWithConfig;
+pub use ureq::Error;
+pub use ureq::Proxy;
+pub use ureq::ProxyBuilder;
+pub use ureq::ProxyProtocol;
+pub use ureq::RequestBuilder;
+pub use ureq::RequestExt;
+pub use ureq::ResponseExt;
+pub use ureq::SendBody;
+pub use ureq::Timeout;
 use ureq::config::Config;
-use ureq::http;
 use ureq::http::Uri;
-use ureq::RequestBuilder;
 use ureq::tls::TlsConfig;
 use ureq::tls::TlsProvider;
 use ureq::typestate::WithBody;
 use ureq::typestate::WithoutBody;
+
+pub mod config {
+    pub use ureq::config::*;
+}
+
+pub mod http {
+    pub use ureq::http::*;
+}
+
+pub mod middleware {
+    pub use ureq::middleware::*;
+}
+
+pub mod tls {
+    pub use ureq::tls::*;
+}
+
+pub mod typestate {
+    pub use ureq::typestate::*;
+}
+
+pub mod unversioned {
+    pub use ureq::unversioned::*;
+}
 
 static UREQ_AGENT: LazyLock<ureq::Agent> = LazyLock::new(|| {
     let config = Config::builder()
@@ -50,6 +88,12 @@ pub fn put<T>(uri: T) -> RequestBuilder<WithBody>
 }
 
 #[must_use]
+pub fn patch<T>(uri: T) -> RequestBuilder<WithBody>
+    where Uri: TryFrom<T>, <Uri as TryFrom<T>>::Error: Into<http::Error> {
+    return UREQ_AGENT.patch(uri);
+}
+
+#[must_use]
 pub fn delete<T>(uri: T) -> RequestBuilder<WithoutBody>
     where Uri: TryFrom<T>, <Uri as TryFrom<T>>::Error: Into<http::Error> {
     return UREQ_AGENT.delete(uri);
@@ -71,12 +115,6 @@ pub fn options<T>(uri: T) -> RequestBuilder<WithoutBody>
 pub fn connect<T>(uri: T) -> RequestBuilder<WithoutBody>
     where Uri: TryFrom<T>, <Uri as TryFrom<T>>::Error: Into<http::Error> {
     return UREQ_AGENT.connect(uri);
-}
-
-#[must_use]
-pub fn patch<T>(uri: T) -> RequestBuilder<WithBody>
-    where Uri: TryFrom<T>, <Uri as TryFrom<T>>::Error: Into<http::Error> {
-    return UREQ_AGENT.patch(uri);
 }
 
 #[must_use]

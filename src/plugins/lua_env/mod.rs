@@ -33,6 +33,7 @@ use crate::utils::get_current_timestamp;
 
 mod unichat_api;
 mod unichat_event;
+mod unichat_http;
 mod unichat_json;
 mod unichat_logger;
 mod unichat_std;
