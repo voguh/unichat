@@ -4,7 +4,7 @@ No ambiente Lua, você terá acesso à API do **UniChat** através do objeto glo
 
 ---
 
-### UniChatAPI:register_scraper(id, name, scrapper_js_path, on_event, opts)
+### UniChatAPI:register_scraper(id, name, scraper_js_path, on_event, opts)
 
 Registra um novo scraper para o **UniChat**.
 
