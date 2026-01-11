@@ -138,13 +138,17 @@ export class CommandService {
         return invoke<Record<string, any>>("get_widget_fieldstate", { widget });
     }
 
+    public async setWidgetFieldState(widget: string, fieldstate: Record<string, any>): Promise<void> {
+        const data = JSON.stringify(fieldstate);
+        await invoke("set_widget_fieldstate", { widget, data });
+    }
+
     public async listWidgets(): Promise<ComboboxItemGroup<string>[]> {
         return invoke("list_widgets");
     }
 
-    public async setWidgetFieldState(widget: string, fieldstate: Record<string, any>): Promise<void> {
-        const data = JSON.stringify(fieldstate);
-        await invoke("set_widget_fieldstate", { widget, data });
+    public async reloadWidgets(): Promise<void> {
+        await invoke("reload_widgets");
     }
 }
 

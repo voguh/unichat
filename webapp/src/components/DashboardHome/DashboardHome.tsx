@@ -69,6 +69,7 @@ export function DashboardHome(): React.ReactNode {
     }
 
     async function reloadIframe(): Promise<void> {
+        await commandService.reloadWidgets();
         const widgets = await handleFetchWidgets();
         setWidgets(widgets);
 

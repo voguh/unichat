@@ -24,7 +24,7 @@ use crate::utils::constants::BASE_REST_PORT;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
-#[derive(Serialize, Clone, Debug)]
+#[derive(Serialize, Clone, Debug, Eq, PartialEq)]
 pub enum WidgetSource {
     System,
     Plugin(String),
@@ -128,6 +128,7 @@ fn load_widgets_from_disk(widgets_path: &Path, source_type: WidgetSource, cb: im
     }
 
     let mut widgets = WIDGETS.write().map_err(|_| anyhow!("{} lock poisoned", WIDGETS_LAZY_LOCK_KEY))?;
+    widgets.retain(|_, v| v.widget_source != source_type);
 
     for entry in fs::read_dir(widgets_path)? {
         if let Ok(entry) = entry {
@@ -177,6 +178,13 @@ pub fn get_widget_from_rest_path(rest_path: &str) -> Result<WidgetMetadata, Erro
     }
 
     return Err(anyhow!("Widget not found"));
+}
+
+pub fn reload_user_widgets() -> Result<(), Error> {
+    let user_widgets_path = properties::get_app_path(AppPaths::UniChatUserWidgets);
+    load_widgets_from_disk(&user_widgets_path, WidgetSource::User, |_| {})?;
+
+    return Ok(());
 }
 
 /* ============================================================================================== */

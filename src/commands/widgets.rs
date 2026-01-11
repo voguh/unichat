@@ -18,6 +18,7 @@ use tauri::Runtime;
 use crate::widgets::WidgetSource;
 use crate::widgets::get_widget_from_rest_path;
 use crate::widgets::get_widgets;
+use crate::widgets::reload_user_widgets;
 
 #[tauri::command]
 pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<HashMap<String, Value>, String> {
@@ -88,4 +89,10 @@ pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Strin
         { "group": "User Widgets", "items": user_widgets },
         { "group": "Plugin Widgets", "items": plugins_widgets }
     ]));
+}
+
+#[tauri::command]
+pub async fn reload_widgets<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<(), String> {
+    reload_user_widgets().map_err(|e| format!("Failed to reload user widgets: {:#?}", e))?;
+    return Ok(());
 }

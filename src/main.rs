@@ -237,7 +237,8 @@ async fn main() {
             commands::widgets::get_widget_fields,
             commands::widgets::get_widget_fieldstate,
             commands::widgets::list_widgets,
-            commands::widgets::set_widget_fieldstate
+            commands::widgets::reload_widgets,
+            commands::widgets::set_widget_fieldstate,
         ])
         .on_window_event(on_window_event)
         .run(tauri::generate_context!())

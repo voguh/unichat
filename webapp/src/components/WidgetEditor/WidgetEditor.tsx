@@ -249,6 +249,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
     }
 
     async function reloadIframe(): Promise<void> {
+        await commandService.reloadWidgets();
         const widgets = await handleFetchWidgets();
         setWidgets(widgets);
 
