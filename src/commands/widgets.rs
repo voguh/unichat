@@ -15,6 +15,7 @@ use serde_json::Value;
 use tauri::AppHandle;
 use tauri::Runtime;
 
+use crate::widgets::WidgetMetadata;
 use crate::widgets::WidgetSource;
 use crate::widgets::get_widget_from_rest_path;
 use crate::widgets::get_widgets;
@@ -37,7 +38,6 @@ pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
     let widget = get_widget_from_rest_path(&widget).map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
     if let WidgetSource::User = widget.widget_source {
         let fieldstate = widget.fieldstate();
-
         return Ok(fieldstate);
     }
 
@@ -50,10 +50,10 @@ pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
     if let WidgetSource::User = widget.widget_source {
         let fieldstate_path = widget.fieldstate_path();
         if fieldstate_path.exists() && !fieldstate_path.is_file() {
-            return Err("Widget 'fieldstate.json' file does not exist".into());
+            return Err(format!("Widget '{:?}' exists but is not a file", fieldstate_path));
         }
 
-        fs::write(&fieldstate_path, data).map_err(|e| format!("Failed to write widget '{}' fieldstate file: {:#?}", widget.name, e))?;
+        fs::write(&fieldstate_path, data).map_err(|e| format!("Failed to write widget '{:?}' fieldstate file: {:#?}", fieldstate_path, e))?;
         return Ok(());
     }
 
@@ -61,6 +61,13 @@ pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
 }
 
 /* ================================================================================================================== */
+
+#[tauri::command]
+pub async fn list_detailed_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<WidgetMetadata>, String> {
+    let widgets = get_widgets().map_err(|e| format!("Failed to get widgets list: {:#?}", e))?;
+
+    return Ok(widgets);
+}
 
 #[tauri::command]
 pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, String> {

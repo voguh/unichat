@@ -44,3 +44,8 @@ export enum UniChatSettings {
     CREATE_WEBVIEW_HIDDEN = "create-webview-hidden",
     LOG_SCRAPER_EVENTS = "log-scraper-events"
 }
+
+export enum WidgetSource {
+    SYSTEM = "SYSTEM",
+    USER = "USER"
+}

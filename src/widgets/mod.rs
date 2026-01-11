@@ -25,6 +25,7 @@ use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
 #[derive(Serialize, Clone, Debug, Eq, PartialEq)]
+#[serde(rename_all = "UPPERCASE")]
 pub enum WidgetSource {
     System,
     Plugin(String),
@@ -37,8 +38,7 @@ pub struct WidgetMetadata {
     #[serde(skip_serializing)]
     path: PathBuf,
     pub rest_path: String,
-    pub widget_source: WidgetSource,
-    pub name: String
+    pub widget_source: WidgetSource
 }
 
 impl WidgetMetadata {
@@ -48,6 +48,12 @@ impl WidgetMetadata {
 
     pub fn assets_path(&self) -> PathBuf {
         return self.path.join("assets");
+    }
+
+    /* ====================================================================== */
+
+    pub fn name(&self) -> String {
+        return self.path.file_name().unwrap().to_string_lossy().to_string();
     }
 
     /* ====================================================================== */
@@ -62,7 +68,7 @@ impl WidgetMetadata {
         return match  serde_json::from_str(&raw) {
             Ok(map) => map,
             Err(err) => {
-                log::error!("Failed to parse fields.json for widget '{}': {:#?}", self.name, err);
+                log::error!("Failed to parse fields.json for widget '{:?}': {:#?}", self.path, err);
                 return HashMap::new();
             }
         };
@@ -80,7 +86,7 @@ impl WidgetMetadata {
         return match  serde_json::from_str(&raw) {
             Ok(map) => map,
             Err(err) => {
-                log::error!("Failed to parse fields.json for widget '{}': {:#?}", self.name, err);
+                log::error!("Failed to parse fields.json for widget '{:?}': {:#?}", self.path, err);
                 return HashMap::new();
             }
         };
@@ -145,16 +151,17 @@ fn load_widgets_from_disk(widgets_path: &Path, source_type: WidgetSource, cb: im
                 continue;
             }
 
-            let mut rest_path = widget_name.clone();
+            let rest_path;
             if let WidgetSource::Plugin(plugin_name) = &source_type {
                 rest_path = format!("{}::{}", plugin_name, widget_name);
+            } else {
+                rest_path = widget_name
             }
 
             let metadata = WidgetMetadata {
                 path: widget_path,
                 rest_path: rest_path.clone(),
-                widget_source: source_type.clone(),
-                name: widget_name
+                widget_source: source_type.clone()
             };
             cb(&metadata);
             widgets.insert(rest_path.clone(), metadata);
@@ -193,7 +200,7 @@ pub fn add_plugin_widgets(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
     let widgets_path = plugin.get_widgets_path();
 
     let callback = move |metadata: &WidgetMetadata| {
-        plugin.add_message(format!("Registered widget '{}' provided as 'http://localhost:{}/widget/{}'", metadata.name, BASE_REST_PORT, metadata.rest_path));
+        plugin.add_message(format!("Registered widget '{}' provided as 'http://localhost:{}/widget/{}'", metadata.name(), BASE_REST_PORT, metadata.rest_path));
     };
     load_widgets_from_disk(&widgets_path, WidgetSource::Plugin(plugin.name.clone()), callback)?;
 

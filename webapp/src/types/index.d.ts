@@ -81,6 +81,14 @@ export interface UniChatScraper {
 
 /* ========================================================================== */
 
+export interface UniChatWidget {
+    restPath: string;
+    widgetSource: WidgetSource | (string & {});
+    name: string;
+}
+
+/* ========================================================================== */
+
 export interface WidgetFieldsText {
     type: "text" | "textarea";
     group?: string;

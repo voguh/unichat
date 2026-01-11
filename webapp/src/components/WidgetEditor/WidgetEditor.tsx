@@ -14,6 +14,7 @@ import {
     Button,
     Card,
     Checkbox,
+    ComboboxItemGroup,
     Divider,
     Input,
     NumberInput,
@@ -30,8 +31,8 @@ import type { UniChatEvent, UniChatPlatform } from "unichat-widgets/unichat";
 import { ColorPicker } from "unichat/components/ColorPicker";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
-import { WidgetFields } from "unichat/types";
-import { WIDGET_URL_PREFIX } from "unichat/utils/constants";
+import { UniChatWidget, WidgetFields } from "unichat/types";
+import { WIDGET_URL_PREFIX, WidgetSource } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
 
 import { GalleryFileInput } from "../GalleryFileInput";
@@ -56,8 +57,8 @@ export function WidgetEditor(_props: Props): React.ReactNode {
 
     const [fields, setFields] = React.useState<Record<string, WidgetFields>>({});
     const [fieldState, setFieldState] = React.useState<Record<string, any>>({});
-    const [selectedWidget, setSelectedWidget] = React.useState("");
-    const [widgets, setWidgets] = React.useState<string[]>([]);
+    const [selectedWidget, setSelectedWidget] = React.useState<string>("default");
+    const [widgets, setWidgets] = React.useState<Map<string, UniChatWidget>>(new Map());
 
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
@@ -167,7 +168,9 @@ export function WidgetEditor(_props: Props): React.ReactNode {
     }
 
     function buildFieldsEditor(): React.ReactNode {
-        if (fields == null || Object.keys(fields).length === 0) {
+        if (widgets.get(selectedWidget)?.widgetSource !== WidgetSource.USER) {
+            return <div className="empty-fields">No editable fields for system/plugin widgets.</div>;
+        } else if (fields == null || Object.keys(fields).length === 0) {
             return <div className="empty-fields">No fields defined for this widget.</div>;
         }
 
@@ -207,6 +210,38 @@ export function WidgetEditor(_props: Props): React.ReactNode {
 
     /* ====================================================================== */
 
+    function toOptions(widgets: Map<string, UniChatWidget>): ComboboxItemGroup<string>[] {
+        const systemWidgets = [];
+        const userWidgets = [];
+        const pluginWidgets = [];
+
+        for (const widget of widgets.values()) {
+            if (widget.widgetSource === WidgetSource.SYSTEM) {
+                systemWidgets.push({ value: widget.restPath, label: widget.restPath });
+            } else if (widget.widgetSource === WidgetSource.USER) {
+                userWidgets.push({ value: widget.restPath, label: widget.restPath });
+            } else {
+                pluginWidgets.push({ value: widget.restPath, label: widget.restPath });
+            }
+        }
+
+        const options: ComboboxItemGroup<string>[] = [];
+
+        if (systemWidgets.length > 0) {
+            options.push({ group: "System Widgets", items: systemWidgets });
+        }
+        if (userWidgets.length > 0) {
+            options.push({ group: "User Widgets", items: userWidgets });
+        }
+        if (pluginWidgets.length > 0) {
+            options.push({ group: "Plugin Widgets", items: pluginWidgets });
+        }
+
+        return options;
+    }
+
+    /* ====================================================================== */
+
     function dispatchEmulatedEvent<T extends UniChatEvent>(
         eventType: T["type"],
         requirePlatform?: UniChatPlatform
@@ -224,11 +259,9 @@ export function WidgetEditor(_props: Props): React.ReactNode {
     }
 
     async function handleFetchWidgetData(): Promise<void> {
-        const widgetName = (selectedWidget ?? "").replace(`${WIDGET_URL_PREFIX}/`, "");
-
-        if (!Strings.isNullOrEmpty(widgetName)) {
-            const fields = await commandService.getWidgetFields(widgetName).catch(() => ({}));
-            const fieldstate = await commandService.getWidgetFieldState(widgetName).catch(() => ({}));
+        if (!Strings.isNullOrEmpty(selectedWidget) && widgets.get(selectedWidget)?.widgetSource === WidgetSource.USER) {
+            const fields = await commandService.getWidgetFields(selectedWidget).catch(() => ({}));
+            const fieldstate = await commandService.getWidgetFieldState(selectedWidget).catch(() => ({}));
 
             setFields(fields);
             setFieldState(fieldstate);
@@ -238,20 +271,16 @@ export function WidgetEditor(_props: Props): React.ReactNode {
         }
     }
 
-    async function handleFetchWidgets(): Promise<string[]> {
-        const widgets = await commandService.listWidgets();
+    async function handleFetchWidgets(): Promise<void> {
+        const widgets = await commandService.listDetailedWidgets();
 
-        return widgets
-            .filter((itemGroup) => itemGroup.group === "User Widgets")
-            .flatMap((itemGroup) => itemGroup.items)
-            .filter((item) => item !== "example")
-            .sort((a, b) => a.localeCompare(b));
+        const widgetsMap = new Map(widgets.map((w) => [w.restPath, w]));
+        setWidgets(widgetsMap);
     }
 
     async function reloadIframe(): Promise<void> {
         await commandService.reloadWidgets();
-        const widgets = await handleFetchWidgets();
-        setWidgets(widgets);
+        await handleFetchWidgets();
 
         if (iframeRef.current) {
             iframeRef.current.src = `${WIDGET_URL_PREFIX}/${selectedWidget}`;
@@ -261,10 +290,8 @@ export function WidgetEditor(_props: Props): React.ReactNode {
 
     async function handleReset(): Promise<void> {
         try {
-            const widgetName = (selectedWidget ?? "").replace(`${WIDGET_URL_PREFIX}/`, "");
-
-            if (!Strings.isNullOrEmpty(widgetName)) {
-                await commandService.setWidgetFieldState(widgetName, {});
+            if (!Strings.isNullOrEmpty(selectedWidget)) {
+                await commandService.setWidgetFieldState(selectedWidget, {});
                 setFieldState({});
                 reloadIframe();
                 notifications.show({
@@ -286,10 +313,8 @@ export function WidgetEditor(_props: Props): React.ReactNode {
 
     async function handleApply(): Promise<void> {
         try {
-            const widgetName = (selectedWidget ?? "").replace(`${WIDGET_URL_PREFIX}/`, "");
-
-            if (!Strings.isNullOrEmpty(widgetName)) {
-                await commandService.setWidgetFieldState(widgetName, fieldState);
+            if (!Strings.isNullOrEmpty(selectedWidget)) {
+                await commandService.setWidgetFieldState(selectedWidget, fieldState);
                 reloadIframe();
                 notifications.show({
                     title: "Success",
@@ -314,12 +339,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
 
     React.useEffect(() => {
         async function init(): Promise<void> {
-            const widgets = await handleFetchWidgets();
-            setWidgets(widgets);
-
-            if (widgets.length > 0) {
-                setSelectedWidget(widgets[0]);
-            }
+            await handleFetchWidgets();
         }
 
         init();
@@ -331,11 +351,11 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                 <div className="preview-header-widget-selector">
                     <Select
                         value={selectedWidget}
-                        data={widgets}
+                        data={toOptions(widgets)}
                         allowDeselect={false}
                         onChange={setSelectedWidget}
-                        disabled={widgets.length === 0}
-                        placeholder={widgets.length === 0 ? "No user widgets available" : "Select a widget"}
+                        disabled={widgets.size === 0}
+                        placeholder={widgets.size === 0 ? "No user widgets available" : "Select a widget"}
                     />
                 </div>
 
@@ -421,7 +441,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         </Button>
                         <Button
                             variant="default"
-                            leftSection={<i className="fas fa-stars" />}
+                            leftSection={<i className="fas fa-meteor" />}
                             onClick={() => dispatchEmulatedEvent("unichat:sponsor_gift")}
                         >
                             Sponsor Gift

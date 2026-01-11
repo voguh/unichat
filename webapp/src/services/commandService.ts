@@ -10,7 +10,14 @@
 import { ComboboxItemGroup } from "@mantine/core";
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
-import { AppMetadata, GalleryItem, UniChatPluginMetadata, UniChatScraper, WidgetFields } from "unichat/types";
+import {
+    AppMetadata,
+    GalleryItem,
+    UniChatPluginMetadata,
+    UniChatScraper,
+    UniChatWidget,
+    WidgetFields
+} from "unichat/types";
 import { UniChatSettings } from "unichat/utils/constants";
 
 async function invoke<T>(cmd: string, args?: Record<string, any>): Promise<T> {
@@ -141,6 +148,10 @@ export class CommandService {
     public async setWidgetFieldState(widget: string, fieldstate: Record<string, any>): Promise<void> {
         const data = JSON.stringify(fieldstate);
         await invoke("set_widget_fieldstate", { widget, data });
+    }
+
+    public async listDetailedWidgets(): Promise<UniChatWidget[]> {
+        return invoke<UniChatWidget[]>("list_detailed_widgets");
     }
 
     public async listWidgets(): Promise<ComboboxItemGroup<string>[]> {

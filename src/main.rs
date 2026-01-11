@@ -237,6 +237,7 @@ async fn main() {
             commands::scrapers::toggle_scraper_webview,
             commands::widgets::get_widget_fields,
             commands::widgets::get_widget_fieldstate,
+            commands::widgets::list_detailed_widgets,
             commands::widgets::list_widgets,
             commands::widgets::reload_widgets,
             commands::widgets::set_widget_fieldstate,
