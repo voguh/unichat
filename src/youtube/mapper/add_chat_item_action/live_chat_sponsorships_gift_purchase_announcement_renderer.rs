@@ -60,18 +60,6 @@ struct LiveChatSponsorshipsHeaderRenderer {
     primary_text: MessageRunsWrapper
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-struct RunsWrapper {
-    pub runs: Vec<Run>
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-struct Run {
-    pub text: String
-}
-
 fn parse_count(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<u16, Error> {
     let run = render.primary_text.runs.get(1).ok_or(anyhow!("No count run found"))?;
     let raw_count = match run {
