@@ -85,7 +85,7 @@ local function parse_message_text(raw_content)
         local _kind , id, name = word:match(emote_pattern)
 
         if id ~= nil and name ~= nil then
-            table.insert(message_text, " :" .. name .. ": ");
+            table.insert(message_text, ":" .. name .. ":");
         else
             table.insert(message_text, word);
         end
