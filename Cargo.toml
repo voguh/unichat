@@ -25,6 +25,7 @@ actix-ws = "0.3.0"
 anyhow = { version = "1.0.100", features = ["backtrace"] }
 base64 = "0.22.1"
 futures = "0.3.31"
+if-addrs = "0.14.0"
 infer = "0.19.0"
 log = "0.4.29"
 mime_guess = "2.0.5"
@@ -45,4 +46,3 @@ tauri-plugin-store = "2.4.2"
 tokio = { version = "1.49.0", features = ["full"] }
 ureq = { version = "3.1.4", default-features = false, features = ["json", "native-tls"] }
 url = { version = "2.5.7", features = ["serde"] }
-if-addrs = "0.14.0"
