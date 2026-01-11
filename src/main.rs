@@ -31,6 +31,7 @@ mod actix;
 mod commands;
 mod events;
 mod irc;
+mod jsonrpc;
 mod plugins;
 mod scraper;
 mod shared_emotes;
