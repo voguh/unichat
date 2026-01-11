@@ -6,7 +6,7 @@ async function uniChatInit() {
     /* ====================================================================================================== */
 
     const waitForSetup = new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error("Timeout waiting for Kick scraper setup.")), 5000);
+        const timeout = setTimeout(() => reject(new Error("Timeout waiting for Kick scraper setup.")), 15000);
         uniChat.onWebSocketMessage = async function(event, { wsInstance, url, protocols }) {
             try {
                 const payload = JSON.parse(event.data);
