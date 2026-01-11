@@ -9,44 +9,6 @@
 
 import styled from "styled-components";
 
-export const WidgetEditorEmptyStyledContainer = styled.div`
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-
-    > .preview-header {
-        grid-area: HDR;
-        display: flex;
-        flex-direction: row;
-        gap: 4px;
-        padding: 8px;
-        box-shadow: none;
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
-
-        > .preview-header-widget-selector {
-            width: 100%;
-        }
-
-        > button {
-            flex-shrink: 0;
-            width: 36px;
-            height: 36px;
-            padding: 0;
-        }
-    }
-
-    > .mantine-Card-root:last-child {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-`;
-
 export const WidgetEditorStyledContainer = styled.div`
     position: relative;
     width: 100%;
@@ -106,6 +68,15 @@ export const WidgetEditorStyledContainer = styled.div`
             grid-area: EDF;
             overflow-y: auto;
             height: calc(100vh - (54px + 30px + 32px + 8px));
+            position: relative;
+
+            > .empty-fields {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
 
             > .mantine-Accordion-root {
                 > .mantine-Accordion-item {

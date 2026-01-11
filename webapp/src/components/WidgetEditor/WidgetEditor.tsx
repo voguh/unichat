@@ -28,14 +28,14 @@ import { notifications } from "@mantine/notifications";
 
 import type { UniChatEvent, UniChatPlatform } from "unichat-widgets/unichat";
 import { ColorPicker } from "unichat/components/ColorPicker";
+import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
-import { loggerService } from "unichat/services/loggerService";
 import { WidgetFields } from "unichat/types";
 import { WIDGET_URL_PREFIX } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
 
 import { GalleryFileInput } from "../GalleryFileInput";
-import { WidgetEditorEmptyStyledContainer, WidgetEditorStyledContainer } from "./styled";
+import { WidgetEditorStyledContainer } from "./styled";
 import { buildEmulatedEventData } from "./util/buildEmulatedEventData";
 
 export interface WidgetMetadata {
@@ -50,6 +50,7 @@ interface Props {
     children?: React.ReactNode;
 }
 
+const _logger = LoggerFactory.getLogger("WidgetEditor");
 export function WidgetEditor(_props: Props): React.ReactNode {
     const [emulationMode, setEmulationMode] = React.useState<UniChatPlatform | "mixed">("mixed");
 
@@ -167,7 +168,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
 
     function buildFieldsEditor(): React.ReactNode {
         if (fields == null || Object.keys(fields).length === 0) {
-            return <div>No fields defined for this widget.</div>;
+            return <div className="empty-fields">No fields defined for this widget.</div>;
         }
 
         const groups: Record<string, JSX.Element[]> = {
@@ -273,7 +274,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                 });
             }
         } catch (err) {
-            loggerService.error("An error occurred on save 'fieldstate.json'", err);
+            _logger.error("An error occurred on save 'fieldstate.json'", err);
             notifications.show({
                 title: "Error",
                 message: `Failed to apply widget field state: ${(err as Error).message}`,
@@ -297,7 +298,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                 });
             }
         } catch (err) {
-            loggerService.error("An error occurred on save 'fieldstate.json'", err);
+            _logger.error("An error occurred on save 'fieldstate.json'", err);
             notifications.show({
                 title: "Error",
                 message: `Failed to apply widget field state: ${(err as Error).message}`,
@@ -323,40 +324,18 @@ export function WidgetEditor(_props: Props): React.ReactNode {
         init();
     }, []);
 
-    if (
-        Strings.isNullOrEmpty(selectedWidget) ||
-        Strings.isNullOrEmpty(selectedWidget.replace(`${WIDGET_URL_PREFIX}/`, ""))
-    ) {
-        return (
-            <WidgetEditorEmptyStyledContainer>
-                <Card className="preview-header" withBorder shadow="xs">
-                    <div className="preview-header-widget-selector">
-                        <Select
-                            value={selectedWidget}
-                            data={widgets}
-                            allowDeselect={false}
-                            onChange={setSelectedWidget}
-                        />
-                    </div>
-
-                    <Tooltip label="Reload widget view" position="left" withArrow>
-                        <Button onClick={reloadIframe}>
-                            <i className="fas fa-sync" />
-                        </Button>
-                    </Tooltip>
-                </Card>
-                <Card withBorder shadow="xs">
-                    <Text>Select a widget to edit its fields.</Text>
-                </Card>
-            </WidgetEditorEmptyStyledContainer>
-        );
-    }
-
     return (
         <WidgetEditorStyledContainer>
             <Card className="preview-header" withBorder shadow="xs">
                 <div className="preview-header-widget-selector">
-                    <Select value={selectedWidget} data={widgets} allowDeselect={false} onChange={setSelectedWidget} />
+                    <Select
+                        value={selectedWidget}
+                        data={widgets}
+                        allowDeselect={false}
+                        onChange={setSelectedWidget}
+                        disabled={widgets.length === 0}
+                        placeholder={widgets.length === 0 ? "No user widgets available" : "Select a widget"}
+                    />
                 </div>
 
                 <Tooltip label="Reload widget view" position="left" withArrow>
@@ -368,17 +347,26 @@ export function WidgetEditor(_props: Props): React.ReactNode {
             <div className="editor-area">
                 <div className="editor-area-header">
                     <div>Fields</div>
-                    <Button
-                        size="xs"
-                        variant="default"
-                        leftSection={<i className="fas fa-undo" />}
-                        onClick={handleReset}
-                    >
-                        Reset
-                    </Button>
-                    <Button size="xs" color="green" leftSection={<i className="fas fa-check" />} onClick={handleApply}>
-                        Apply
-                    </Button>
+                    {Object.keys(fields).length > 0 && (
+                        <>
+                            <Button
+                                size="xs"
+                                variant="default"
+                                leftSection={<i className="fas fa-undo" />}
+                                onClick={handleReset}
+                            >
+                                Reset
+                            </Button>
+                            <Button
+                                size="xs"
+                                color="green"
+                                leftSection={<i className="fas fa-check" />}
+                                onClick={handleApply}
+                            >
+                                Apply
+                            </Button>
+                        </>
+                    )}
                 </div>
                 <div className="editor-fields">{buildFieldsEditor()}</div>
             </div>

@@ -131,15 +131,11 @@ export class CommandService {
     /* ========================================================================================== */
 
     public async getWidgetFields(widget: string): Promise<Record<string, WidgetFields>> {
-        const data = await invoke<string>("get_widget_fields", { widget });
-
-        return JSON.parse(data);
+        return invoke<Record<string, WidgetFields>>("get_widget_fields", { widget });
     }
 
     public async getWidgetFieldState(widget: string): Promise<Record<string, any>> {
-        const data = await invoke<string>("get_widget_fieldstate", { widget });
-
-        return JSON.parse(data);
+        return invoke<Record<string, any>>("get_widget_fieldstate", { widget });
     }
 
     public async listWidgets(): Promise<ComboboxItemGroup<string>[]> {

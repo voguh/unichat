@@ -1,12 +1,13 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2025-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use std::collections::HashMap;
 use std::fs;
 
 use serde_json::json;
@@ -19,32 +20,24 @@ use crate::widgets::get_widget_from_rest_path;
 use crate::widgets::get_widgets;
 
 #[tauri::command]
-pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, String> {
+pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<HashMap<String, Value>, String> {
     let widget = get_widget_from_rest_path(&widget).map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
     if let WidgetSource::User = widget.widget_source {
-        let fields_path = widget.fields_path();
-        if fields_path.exists() && !fields_path.is_file() {
-            return Err("Widget 'fields.json' file does not exist".into());
-        }
+        let fields = widget.fields();
 
-        let result = fs::read_to_string(&fields_path).map_err(|e| format!("Failed to read widget '{}' fields file: {:#?}", widget.name, e))?;
-        return Ok(result);
+        return Ok(fields);
     }
 
     return Err("Cannot get fields of system or plugin widgets".into());
 }
 
 #[tauri::command]
-pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<String, String> {
+pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<HashMap<String, Value>, String> {
     let widget = get_widget_from_rest_path(&widget).map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
     if let WidgetSource::User = widget.widget_source {
-        let fieldstate_path = widget.fieldstate_path();
-        if fieldstate_path.exists() && !fieldstate_path.is_file() {
-            return Err("Widget 'fieldstate.json' file does not exist".into());
-        }
+        let fieldstate = widget.fieldstate();
 
-        let result = fs::read_to_string(&fieldstate_path).map_err(|e| format!("Failed to read widget '{}' fieldstate file: {:#?}", widget.name, e))?;
-        return Ok(result);
+        return Ok(fieldstate);
     }
 
     return Err("Cannot get fieldstate of system or plugin widgets".into());
