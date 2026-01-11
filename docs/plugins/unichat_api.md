@@ -34,7 +34,7 @@ All options are optional. If an option is not provided, the default value will b
 | `on_ping`                 | `function?` | Function to be called when the scraper receives a ping.                                                                                                                  |
 | `on_error`                | `function?` | Function to be called when the scraper encounters an error.                                                                                                              |
 
-Usage example:
+Example usage:
 ```lua
 local function validate_kick_url(url)
     -- Logic to validate and possibly transform the chat URL.
@@ -78,7 +78,7 @@ This function does not return anything. Just use it to trigger the fetch process
 | `platform`   | `string` | Channel ID to fetch the shared emotes for.  |
 | `channel_id` | `string` | Callback function that receives the emotes. |
 
-Usage example:
+Example usage:
 ```lua
 UniChatAPI:fetch_shared_emotes("twitch", "12345678");
 ```
@@ -89,7 +89,7 @@ UniChatAPI:fetch_shared_emotes("twitch", "12345678");
 
 This function returns a table where the keys are the emote codes and the values are tables of type [`UniChatEmote`](/widgets/events?id=unichatemote).
 
-Usage example:
+Example usage:
 ```lua
 local emotes = UniChatAPI:get_shared_emotes();
 for code, emote in pairs(emotes) do
@@ -109,7 +109,7 @@ Exposes a module for other plugins to use.
 | `name`   | `string` | Name of the module to be exposed. (It will be prefixed with `<plugin_name>:<name>`) |
 | `module` | `table`  | Table containing the module functions.                                              |
 
-Usage example:
+Example usage:
 ```lua
 local my_module = {
     greet = function(name)
@@ -134,7 +134,7 @@ Adds a listener for events emitted by **UniChat**.
 |------------|------------|---------------------------------------------------------------------------------------------|
 | `callback` | `function` | Callback function that receives a [`UniChatEvent`](/widgets/events), should return nothing. |
 
-Usage example:
+Example usage:
 ```lua
 local function on_event(event)
     -- Handle the event here.
@@ -156,7 +156,7 @@ Removes a previously added event listener.
 |---------------|----------|---------------------------------------------|
 | `listener_id` | `number` | Listener ID returned by add_event_listener. |
 
-Usage example:
+Example usage:
 ```lua
 local function on_event(event)
 end
@@ -178,7 +178,7 @@ This function returns the item value (always of type `string`) or `nil` if the i
 |----------|----------|------------------------------|
 | `key`    | `string` | Key of the item to retrieve. |
 
-Usage example:
+Example usage:
 ```lua
 local value = UniChatAPI:get_userstore_item("my_key");
 if value then
@@ -200,7 +200,7 @@ All keys will be prefixed with `<plugin_name>:` to avoid collisions between plug
 | `key`    | `string`          | Key of the item to set.   |
 | `value`  | `string` \| `nil` | Value of the item to set. |
 
-Usage example:
+Example usage:
 ```lua
 UniChatAPI:set_userstore_item("my_key", "my_value"); -- Now `my_key` is set to `my_value`
 UniChatAPI:set_userstore_item("my_key", nil); -- Now `my_key` is removed from the userstore
@@ -216,7 +216,7 @@ Displays a notification in **UniChat**.
 |------------|----------|-----------------------|
 | `message`  | `string` | Notification message. |
 
-Usage example:
+Example usage:
 ```lua
 UniChatAPI:notify("This is a notification from my plugin!");
 -- A notification will appear in the UniChat UI with title `<plugin_name>` and the provided message.

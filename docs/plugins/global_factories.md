@@ -9,7 +9,7 @@ These are globally available factories to help plugin developers create common o
 This is a global available as `UniChatPlatform`.
 It is a factory to fill in the platform name.
 
-Usage example:
+Example usage:
 ```lua
 local platform = UniChatPlatform:Twitch();
 print(platform);  -- Output: twitch
@@ -33,7 +33,7 @@ print(platform3);  -- Output: kick
 This is a global available as `UniChatAuthorType`.
 It is a factory to fill in the user type.
 
-Usage example:
+Example usage:
 ```lua
 local type1 = UniChatAuthorType:Viewer();
 print(type1);  -- Output: VIEWER
@@ -60,7 +60,7 @@ print(type3);  -- Output: MYCUSTOMTYPE
 This is a global available as `UniChatEvent`.
 It is a factory to create events.
 
-Usage example:
+Example usage:
 ```lua
 local event = UniChatEvent:Message({
   -- event data
@@ -88,7 +88,7 @@ local event = UniChatEvent:Message({
 This is a global available as `UniChatEmote`.
 It is a factory to create emotes.
 
-Usage example:
+Example usage:
 ```lua
 local emote = UniChatEmote:new(id, name, url);
 ```
@@ -110,7 +110,7 @@ local emote = UniChatEmote:new(id, name, url);
 This is a global available as `UniChatBadge`.
 It is a factory to create badges.
 
-Usage example:
+Example usage:
 ```lua
 local badge = UniChatBadge:new(code, url);
 ```

@@ -9,7 +9,7 @@ These modules can be accessed by using the `require` function in Lua.
 
 The **UniChat** HTTP module is available via `require` as `unichat:http`.
 
-Usage example:
+Example usage:
 ```lua
 local http = require("unichat:http");
 
@@ -102,7 +102,7 @@ An userdata object representing the response from an HTTP request.
 
 The **UniChat** JSON module is available via `require` as `unichat:json`.
 
-Usage example:
+Example usage:
 ```lua
 local json = require("unichat:json");
 
@@ -140,7 +140,7 @@ It uses parameterized logging similar to Java’s `slf4j`.
 Each argument replaces `{}` in the message in the order passed.
 If the last argument is an error, it is logged as a stacktrace and is not used for substitution.
 
-Usage example:
+Example usage:
 ```lua
 local logger = require("unichat:logger");
 
@@ -296,7 +296,7 @@ This module provides utility functions for string manipulation.
 The **UniChat** Time module is available via `require` as `unichat:time`.
 This module provides utility functions for handling time and dates.
 
-Usage example:
+Example usage:
 ```lua
 local time = require("unichat:time");
 
@@ -314,7 +314,7 @@ print("Current Timestamp (ms since Unix epoch):", current_timestamp);
 The **UniChat** YAML module is available via `require` as `unichat:yaml`.
 This module provides functions for encoding and decoding YAML data.
 
-Usage example:
+Example usage:
 ```lua
 local yaml = require("unichat:yaml");
 
