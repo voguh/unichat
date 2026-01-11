@@ -2,7 +2,8 @@
 * Plugin Development
   * [Getting Started](/plugins/getting_started.md)
   * [UniChat API](/plugins/unichat_api.md)
-  * [UniChat Auxiliary Modules](/plugins/modules.md)
+  * [Auxiliary Modules](/plugins/auxiliary_modules.md)
+  * [Global Factories](/plugins/global_factories.md)
 
 * Widget Development
   * [Getting Started](/widgets/getting_started.md)

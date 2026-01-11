@@ -6,7 +6,8 @@
 
 ### Extra
 - [UniChat API](/pt-br/plugins/unichat_api)
-- [UniChat Módulos](/pt-br/plugins/modules)
+- [Módulos Auxiliares](/pt-br/plugins/modules)
+- [Factories Globais](/pt-br/plugins/global_factories)
 
 ---
 
@@ -23,7 +24,7 @@ O que um plugin pode fazer?
 
 ---
 
-### Estrutura de um plugin
+## Estrutura de um plugin
 
 Os plugins podem ser instalados na pasta `plugins/` do **UniChat** localizada em:
 - Windows: `%LOCALAPPDATA%\unichat\plugins\`
@@ -89,7 +90,7 @@ Este arquivo é obrigatório e deve conter as seguintes informações:
 
 ---
 
-### Globais
+## Globais
 
 | Nome              | Tipo       | Descrição                                                                                                                                    |
 |-------------------|------------|----------------------------------------------------------------------------------------------------------------------------------------------|

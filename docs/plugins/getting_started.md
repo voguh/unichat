@@ -1,12 +1,13 @@
 # Plugin Development Guide
 
-### Table of Contents
+#### Table of Contents
 - [Introduction](#introduction)
 - [Plugin structure](#plugin-structure)
 
-### Extra
+#### Extra
 - [UniChat API](/plugins/unichat_api)
-- [UniChat Modules](/plugins/modules)
+- [Auxiliary Modules](/plugins/auxiliary_modules)
+- [Global Factories](/plugins/global_factories)
 
 ---
 
@@ -23,7 +24,7 @@ What can a plugin do?
 
 ---
 
-### Plugin structure
+## Plugin structure
 
 Plugins can be installed in the `plugins/` folder of **UniChat** located at:
 - Windows: `%LOCALAPPDATA%\unichat\plugins\`
@@ -77,10 +78,10 @@ This file is required and must contain the following information:
 <sup>[1]</sup> Currently the only verified dependency is `unichat`, which indicates the **UniChat** version range required by the plugin.
 
 <sup>[2]</sup> Dependencies must follow the format `<dependency-name>@<version-range>`, where `<version-range>` follows this pattern:
-> | Example          | Meaning                                            |
-> |------------------|----------------------------------------------------|
-> | `1.2.3`          | Exactly version 1.2.3                              |
-> | `[1.2.3,)`       | Version 1.2.3 or higher                            |
+> | Example          | Meaning                                                 |
+> |------------------|---------------------------------------------------------|
+> | `1.2.3`          | Exactly version 1.2.3                                   |
+> | `[1.2.3,)`       | Version 1.2.3 or higher                                 |
 > | `[1.2.3,2.0.0)`  | Version between 1.2.3 (inclusive) and 2.0.0 (exclusive) |
 >
 > Delimiters `[]` are inclusive and `()` are exclusive.
@@ -89,15 +90,15 @@ This file is required and must contain the following information:
 
 ---
 
-### Globals
+## Globals
 
-| Name              | Type       | Description                                                                                                                 |
-|-------------------|------------|-----------------------------------------------------------------------------------------------------------------------------|
-| __PLUGIN_NAME     | `string`   | Plugin name.                                                                                                                |
-| __PLUGIN_VERSION  | `string`   | Plugin version.                                                                                                             |
-| UniChatAPI        | `userdata` | Instance of the UniChat API for the plugin.<br/>See [UniChatAPI](/plugins/unichat_api) for more details.                    |
-| UniChatPlatform   | `userdata` | A factory to populate the platform name.<br/>See [UniChatPlatform](/plugins/modules?id=unichatplatform) for more details.   |
-| UniChatAuthorType | `userdata` | A factory to populate the author name.<br/>See [UniChatAuthorType](/plugins/modules?id=unichatauthortype) for more details. |
-| UniChatEvent      | `userdata` | A factory to populate the event name.<br/>See [UniChatEvent](/plugins/modules?id=unichatevent) for more details.            |
-| UniChatEmote      | `userdata` | A factory to populate the emote name.<br/>See [UniChatEmote](/plugins/modules?id=unichatemote) for more details.            |
-| UniChatBadge      | `userdata` | A factory to populate the badge name.<br/>See [UniChatBadge](/plugins/modules?id=unichatbadge) for more details.            |
+| Name              | Type       | Description                                                                                                                          |
+|-------------------|------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| __PLUGIN_NAME     | `string`   | Plugin name.                                                                                                                         |
+| __PLUGIN_VERSION  | `string`   | Plugin version.                                                                                                                      |
+| UniChatAPI        | `userdata` | Instance of the UniChat API for the plugin.<br/>See [UniChatAPI](/plugins/unichat_api) for more details.                             |
+| UniChatPlatform   | `userdata` | A factory to populate the platform name.<br/>See [UniChatPlatform](/plugins/global_factories?id=unichatplatform) for more details.   |
+| UniChatAuthorType | `userdata` | A factory to populate the author name.<br/>See [UniChatAuthorType](/plugins/global_factories?id=unichatauthortype) for more details. |
+| UniChatEvent      | `userdata` | A factory to populate the event name.<br/>See [UniChatEvent](/plugins/global_factories?id=unichatevent) for more details.            |
+| UniChatEmote      | `userdata` | A factory to populate the emote name.<br/>See [UniChatEmote](/plugins/global_factories?id=unichatemote) for more details.            |
+| UniChatBadge      | `userdata` | A factory to populate the badge name.<br/>See [UniChatBadge](/plugins/global_factories?id=unichatbadge) for more details.            |
