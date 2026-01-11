@@ -21,7 +21,7 @@ They can provide their own assets, such as images, fonts, and audio.
 
 ---
 
-### Widget structure
+## Widget structure
 
 Widgets can be installed in the `widgets/` folder of **UniChat** located at:
 - Windows: `%LOCALAPPDATA%\unichat\widgets\`
@@ -39,11 +39,15 @@ widget-example
 
 !> The widget folder name must contain only ASCII alphanumeric characters, hyphens, or underscores.
 
-#### `assets/` folder
+---
+
+### `assets/` folder
 
 This folder is optional and is intended to provide static files. They can be accessed via the URL `http://localhost:9527/widget/{widget-name}/assets/{asset-path}`.
 
-#### `fields.json` file
+---
+
+### `fields.json` file
 
 This file is used by the widget editor to enable customizations. It has syntax similar to StreamElements’ `fields`, making it easy to create widgets for those already familiar with that platform.
 
@@ -141,7 +145,9 @@ Example `fields.json` file:
 
 !> When a property is edited in the widget editor, a `fieldstate.json` file is generated in the widget folder containing the current values set by the user.
 
-#### `index.html` file
+---
+
+### `index.html` file
 
 As with custom StreamElements widgets, this file is the entry point for the widget’s graphical part.
 
@@ -149,34 +155,48 @@ As with custom StreamElements widgets, this file is the entry point for the widg
 - It is not necessary to include `<script>` or `<link>` tags for the `script.js` and `style.css` files, as they will be injected automatically.
 - You may use other `<script>` or `<link>` tags to include external libraries, such as fonts.
 
-#### `script.js` file
+---
+
+### `script.js` file
 
 This file is required and must contain the widget’s JavaScript code.
+On this file you can listen to some window events dispatched by UniChat:
 
-Basic example:
-```javascript
-// Dispatched when WebSocket connection is established (or re-established)
-window.addEventListener("unichat:connected", function () {
-    // ...
-});
+- `unichat:connected`: Dispatched when WebSocket connection is established (or re-established).
+  ```javascript
+  window.addEventListener("unichat:connected", function ({ detail: data }) {
+      // ...
+  });
+  ```
 
-// Dispatched when a new event is received from UniChat
-window.addEventListener("unichat:event", function ({ detail: event }) {
-    // ...
-});
+  !> Before **UniChat** v1.4.0, no detail data was passed to the event listener.
 
-// Dispatched on widget load after WebSocket connection is established (or re-established)
-// Since UniChat v1.4.0
-window.addEventListener("unichat:user_store_loaded", function ({ detail: userstore }) {
-    // ...
-});
+  | Property    | Type     | Description                               |
+  |-------------|----------|-------------------------------------------|
+  | `userstore` | `object` | A key-value map of the current userstore. |
 
-// Dispatched when userstore is updated
-// Since UniChat v1.4.0
-window.addEventListener("unichat:user_store_update", function ({ detail: { key, value } }) {
-    // ...
-});
-```
+- `unichat:event`: Dispatched when a new event is received from **UniChat**.
+  ```javascript
+  window.addEventListener("unichat:event", function ({ detail: event }) {
+      // ...
+  });
+  ```
+
+  > Detail of `unichat:event` event, the `event` object is an [UniChatEvent](/widgets/events) object.
+
+- `unichat:userstore_update`: (Since **UniChat** v1.4.0) Dispatched when userstore is updated.
+  ```javascript
+  window.addEventListener("unichat:userstore_update", function ({ detail: { key, value } }) {
+      // ...
+  });
+  ```
+
+  | Property | Type     | Description                                   |
+  |----------|----------|-----------------------------------------------|
+  | `key`    | `string` | The key of the updated userstore entry.       |
+  | `value`  | `string`    | The new value of the updated userstore entry. |
+
+---
 
 ### `style.css` file
 

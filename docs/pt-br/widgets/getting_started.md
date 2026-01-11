@@ -21,7 +21,7 @@ Eles podem prover seus próprios assets, como imagens, fontes, audios.
 
 ---
 
-### Estrutura de um widget
+## Estrutura de um widget
 
 Os widgets podem ser instalados na pasta `widgets/` do **UniChat** localizada em:
 - Windows: `%LOCALAPPDATA%\unichat\widgets\`
@@ -39,11 +39,15 @@ widget-example
 
 !> O nome da pasta do widget deve conter apenas caracteres ASCII alfanuméricos, hífens ou underscores.
 
-#### Pasta `assets/`
+---
+
+### Pasta `assets/`
 
 Esta pasta é opcional e tem o objetivo de prover arquivos estáticos. Eles podem ser acessados via URL `http://localhost:9527/widget/{widget-name}/assets/{asset-path}`.
 
-#### Arquivo `fields.json`
+---
+
+### Arquivo `fields.json`
 
 Este arquivo é utilizado pelo editor de widgets para ativar customizações. Ele possui a sintaxe parecida com o `fields` do StreamElements, facilitando a criação de widgets para quem já está acostumado com aquela plataforma.
 
@@ -142,7 +146,9 @@ Exemplo de arquivo `fields.json`:
 
 !> Quando alguma propriedade é editada no editor de widgets, um arquivo `fieldstate.json` é gerado na pasta do widget contendo os valores atuais definidos pelo usuário.
 
-#### Arquivo `index.html`
+---
+
+### Arquivo `index.html`
 
 Assim como os widgets customizados do StreamElements, este arquivo é o ponto de entrada para a parte grafica do widget.
 
@@ -150,34 +156,48 @@ Assim como os widgets customizados do StreamElements, este arquivo é o ponto de
 - Não é necessário incluir tags `<script>` ou `<link>` para os arquivos `script.js` e `style.css`, eles serão injetados automaticamente.
 - Você pode utilizar outras tags `<script>` ou `<link>` para incluir bibliotecas externas, como o fontes.
 
-#### Arquivo `script.js`
+---
+
+### Arquivo `script.js`
 Este arquivo é obrigatório e deve conter o código JavaScript do widget.
+Nesta arquivo você pode escutar alguns eventos de janela (window) disparados pelo UniChat:
 
-Exemplo básico:
-```javascript
+- `unichat:connected`: Disparado quando a conexão WebSocket é estabelecida (ou restabelecida).
+  ```javascript
+  window.addEventListener("unichat:connected", function ({ detail: data }) {
+      // ...
+  });
+  ```
 
-// Dispatched when WebSocket connection is established (or re-established)
-window.addEventListener("unichat:connected", function () {
-    // ...
-});
+  !> Antes do **UniChat** v1.4.0, nenhum dado de detalhe era passado para o listener do evento.
 
-// Dispatched when an new event is received from UniChat
-window.addEventListener("unichat:event", function ({ detail: event }) {
-    // ...
-});
+  | Propriedade | Tipo     | Descrição                               |
+  |-------------|----------|-----------------------------------------|
+  | `userstore` | `object` | Um mapa chave-valor do userstore atual. |
 
-// Dispatched on widget load after WebSocket connection is established (or re-established)
-// Since UniChat v1.4.0
-window.addEventListener("unichat:user_store_loaded", function ({ detail: userstore }) {
-    // ...
-});
+- `unichat:event`: Disparado quando um novo evento é recebido do **UniChat**.
+  ```javascript
+  window.addEventListener("unichat:event", function ({ detail: event }) {
+      // ...
+  });
+  ```
 
-// Dispatched when userstore is updated
-// Since UniChat v1.4.0
-window.addEventListener("unichat:user_store_update", function ({ detail: { key, value } }) {
-    // ...
-});
-```
+  > Detalhe do evento `unichat:event`, o objeto `event` é um objeto [UniChatEvent](/widgets/events).
+
+- `unichat:userstore_update`: (Desde o **UniChat** v1.4.0) Disparado quando o userstore é atualizado.
+  ```javascript
+  window.addEventListener("unichat:userstore_update", function ({ detail: { key, value } }) {
+      // ...
+  });
+  ```
+
+  | Propriedade | Tipo     | Descrição                                        |
+  |-------------|----------|--------------------------------------------------|
+  | `key`       | `string` | A chave da entrada do userstore atualizada.      |
+  | `value`     | `string` | O novo valor da entrada do userstore atualizada. |
+
+---
+
 ### Arquivo `style.css`
 
 Este arquivo é obrigatório e deve conter o código CSS do widget.

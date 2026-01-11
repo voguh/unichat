@@ -8,4 +8,5 @@
 * Desenvolvimento de Widgets
   * [Começando](/pt-br/widgets/getting_started.md)
   * [`fields.json`](/pt-br/widgets/fields.md)
+  * [UniChat API](/pt-br/widgets/unichat_api.md)
   * [Eventos](/pt-br/widgets/events.md)
