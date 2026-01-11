@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2025-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -73,18 +73,18 @@ export function stageBuilder(
             "d",
             [
                 `M ${bounds.x + (bounds.width / 2 - 1)} ${bounds.y + (vLine < 0 ? -8 : bounds.height + 8)}`,
-                `v ${vLine - 8}`,
-                `a 8 8 0 0 ${hLine < 0 || vLine < 0 ? 1 : 0} ${hLine < 0 ? -8 : 8} ${vLine < 0 ? -8 : 8}`,
-                `h ${hLine - (hLine < 0 ? -8 : 8)}`
+                `v ${vLine}`,
+                `h ${hLine}`
             ].join(" ")
         );
         svg.appendChild(arrowPath);
 
         /* ========================================================================================================== */
 
-        const startX = bounds.x + bounds.width / 2 + (hLine < 0 ? hLine - 2 : 32);
-        const startY = bounds.y + (vLine < 0 ? -(bounds.height - vLine - 7) : bounds.height + vLine + 7);
-        const width = hLine < 0 ? -hLine : hLine - 32;
+        const width = Math.abs(hLine) - 8;
+        const startX = bounds.x + bounds.width / 2 + (hLine < 0 ? -(width + 2 + 4) : 4);
+        const startY = bounds.y + (vLine < 0 ? vLine - 7 : bounds.height + vLine + 8 + 2);
+
         /* ========================================================================================================== */
 
         const titleBody = document.createElement("div");
@@ -104,7 +104,7 @@ export function stageBuilder(
         const titleHeight = 24;
         const titleForeignObject = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
         titleForeignObject.setAttribute("x", `${startX}`);
-        titleForeignObject.setAttribute("y", `${startY - titleHeight}`);
+        titleForeignObject.setAttribute("y", `${startY - (titleHeight + 4) - 4}`);
         titleForeignObject.setAttribute("width", `${width}`);
         titleForeignObject.setAttribute("height", `${titleHeight}`);
         titleForeignObject.appendChild(titleBody);
@@ -128,7 +128,7 @@ export function stageBuilder(
             const subTitleHeight = 100;
             const subTitleForeignObject = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
             subTitleForeignObject.setAttribute("x", `${startX}`);
-            subTitleForeignObject.setAttribute("y", `${startY + 2}`);
+            subTitleForeignObject.setAttribute("y", `${startY + 4}`);
             subTitleForeignObject.setAttribute("width", `${width}`);
             subTitleForeignObject.setAttribute("height", `${subTitleHeight}`);
             subTitleForeignObject.appendChild(subTitleBody);

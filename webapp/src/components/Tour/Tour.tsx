@@ -15,7 +15,8 @@ import { commandService } from "unichat/services/commandService";
 import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
 import { Dimensions } from "unichat/types";
 
-import { stageBuilder } from "./stages/genericStageBuilder";
+import { defaultStageBuilder } from "./stages/defaultStageBuilder";
+import { editorStageBuilder } from "./stages/editorStageBuilder";
 import { widgetsSelectorBuilder } from "./stages/widgetsSelectorBuilder";
 import { TourStyledContainer } from "./styled";
 
@@ -44,11 +45,11 @@ interface TourStep {
 const steps: TourStep[] = [
     {
         id: "73865214-715f-425b-8664-8ddfca448514",
-        builder: stageBuilder("clear-chat", "Clear chat history", null, 50, 200)
+        builder: defaultStageBuilder("clear-chat", "Clear chat history", null, 50, 200)
     },
     {
         id: "25c20d64-e75c-4f0b-84f4-826ccf2fe7e6",
-        builder: stageBuilder(
+        builder: defaultStageBuilder(
             "user-widgets-directory",
             "Open user widgets directory",
             "Open your own custom widgets directory, here you can add your own widgets",
@@ -58,11 +59,11 @@ const steps: TourStep[] = [
     },
     {
         id: "1e255868-930b-4e20-be2b-41b07c8cf97f",
-        builder: stageBuilder("toggle-widget-preview", "Toggle widget preview", null, 50, 300)
+        builder: defaultStageBuilder("toggle-widget-preview", "Toggle widget preview", null, 50, 300)
     },
     {
         id: "94c455c6-5a1f-4131-83dd-aff3c25358ce",
-        builder: stageBuilder("widgets-selector", "Widget selector", null, 50, -200)
+        builder: defaultStageBuilder("widgets-selector", "Widget selector", null, 50, -200)
     },
     {
         id: "830dee0e-c81f-4f3a-8fe4-2567f05ceebd",
@@ -76,15 +77,15 @@ const steps: TourStep[] = [
     },
     {
         id: "fce131f8-3acb-4b27-82da-130f418b70ad",
-        builder: stageBuilder("preview-reload", "Reload preview", null, 50, -200)
+        builder: defaultStageBuilder("preview-reload", "Reload preview", null, 50, -200)
     },
     {
         id: "8df4d19e-ef74-4578-8cd2-895bb55eefaf",
-        builder: stageBuilder("preview-open-in-browser", "Open preview in browser", null, 50, -300)
+        builder: defaultStageBuilder("preview-open-in-browser", "Open preview in browser", null, 50, -300)
     },
     {
         id: "908b35ad-0127-49af-b37a-d3ec625f1d0e",
-        builder: stageBuilder(
+        builder: defaultStageBuilder(
             "youtube-chat--url-input",
             "YouTube Chat URL",
             "Also you can paste normal video, shorts or live urls or direct video id",
@@ -94,7 +95,7 @@ const steps: TourStep[] = [
     },
     {
         id: "44515b23-2a9e-4c73-9c45-96a232d52fc2",
-        builder: stageBuilder(
+        builder: defaultStageBuilder(
             "twitch-chat--url-input",
             "Twitch Chat URL",
             "Also you can paste normal twitch url or direct channel name",
@@ -105,18 +106,38 @@ const steps: TourStep[] = [
 
     {
         id: "21fe0e64-d83f-460e-94f3-519ef3843929a",
-        builder: stageBuilder(
+        builder: defaultStageBuilder(
             "widget-editor",
             "Widget Editor",
-            "Here you can edit your created/downloaded widgets (System widgets aren't editable)",
+            "Here you can edit your created/downloaded widgets (System/Plugin widgets aren't editable)",
             50,
             400
+        )
+    },
+    {
+        id: "4b135c24-eb9a-4960-8ae5-61c486342b78",
+        builder: editorStageBuilder(
+            "gallery-toggle",
+            "Assets Gallery",
+            "Open the assets gallery to view and manage your widget assets like images, sounds and more",
+            50,
+            400
+        )
+    },
+    {
+        id: "e2961d69-f7c0-4c2f-a340-04339e3d75eb",
+        builder: editorStageBuilder(
+            "widget-editor-emulator-events-dispatcher",
+            "Emulator Events Dispatcher",
+            "Here you can emit events to test your widget's event handling functionality",
+            -50,
+            -400
         )
     },
 
     {
         id: "fd2ac461-b46c-45db-8cd9-8737d7e64f40",
-        builder: stageBuilder(
+        builder: defaultStageBuilder(
             "settings-modal-toggle",
             "Settings",
             "Manage application settings, check for updates and more",
@@ -126,7 +147,7 @@ const steps: TourStep[] = [
     },
     {
         id: "d4ea3587-6b7d-4ae9-9717-53c7253037aa",
-        builder: stageBuilder(
+        builder: defaultStageBuilder(
             "plugins-modal-toggle",
             "Plugins",
             "Here you can see all installed plugins and view more information about them",

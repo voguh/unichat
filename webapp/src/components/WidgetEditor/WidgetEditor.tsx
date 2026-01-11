@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2025-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -406,7 +406,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                     </Button>
                 </div>
 
-                <div className="emulator-events-dispatcher">
+                <div className="emulator-events-dispatcher" data-tour="widget-editor-emulator-events-dispatcher">
                     <Text size="sm">Emit Events</Text>
                     <Button.Group orientation="vertical">
                         <Button

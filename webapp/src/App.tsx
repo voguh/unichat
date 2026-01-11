@@ -128,6 +128,7 @@ export default function App(): JSX.Element {
                                     size="sm"
                                     onClick={() => setSelectedTab("dashboard")}
                                     variant={selectedTab === "dashboard" ? "filled" : "default"}
+                                    data-tour="dashboard"
                                     color="green"
                                 >
                                     <i className="fas fa-th-large" />
