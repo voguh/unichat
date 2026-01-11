@@ -42,7 +42,7 @@ export function ScraperCard(props: Props): React.ReactNode {
     const [event, setEvent] = React.useState<IPCStatusEvent>({ ...DEFAULT_STATUS_EVENT, scraperId: scraper.id });
 
     const scraperIsRunning = React.useMemo(() => event != null && ["ready", "ping"].includes(event.type), [event]);
-    const scraperIsStarting = React.useMemo(() => event == null, [event]);
+    const scraperIsLoading = React.useMemo(() => event == null, [event]);
 
     const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -53,7 +53,7 @@ export function ScraperCard(props: Props): React.ReactNode {
             inputRef.current.value = inputValue;
 
             await commandService.setScraperWebviewUrl(scraper.id, inputValue);
-            setEvent({ type: "ready", scraperId: scraper.id, timestamp: Date.now() });
+            setEvent(null);
         } catch (err) {
             _logger.error(`An error occurred while starting the ${scraper.name} chat scraper: {}`, err);
         } finally {
@@ -80,15 +80,15 @@ export function ScraperCard(props: Props): React.ReactNode {
     /* ============================================================================================================== */
 
     function handleStatusLabel(): string {
-        if (loading || scraperIsStarting) {
-            return "Starting";
+        if (loading || scraperIsLoading) {
+            return "Starting...";
         } else {
             return scraperIsRunning ? "Stop" : "Start";
         }
     }
 
     function handleStatusIcon(): React.ReactNode {
-        if (loading || scraperIsStarting) {
+        if (loading || scraperIsLoading) {
             return <i className="fas fa-spinner fa-spin" />;
         } else {
             return scraperIsRunning ? <i className="fas fa-stop" /> : <i className="fas fa-play" />;
@@ -101,6 +101,11 @@ export function ScraperCard(props: Props): React.ReactNode {
 
             try {
                 const scraperStoredUrl = await commandService.getScraperStoredUrl(scraper.id);
+                const scraperWebviewUrl = await commandService.getScraperWebviewUrl(scraper.id);
+
+                if (scraperWebviewUrl === scraperStoredUrl) {
+                    setEvent({ type: "ready", scraperId: scraper.id, timestamp: Date.now() });
+                }
 
                 if (inputRef.current && !Strings.isNullOrEmpty(scraperStoredUrl)) {
                     inputRef.current.value = scraperStoredUrl;
@@ -121,17 +126,24 @@ export function ScraperCard(props: Props): React.ReactNode {
                 return;
             }
 
-            if (payload.type === "error") {
+            if (["idle", "ready", "ping"].includes(payload.type)) {
+                if (payload.type === "ready") {
+                    notifications.show({
+                        title: `${scraper.name} scraper is ready`,
+                        message: "The scraper has started successfully.",
+                        color: "green",
+                        icon: <i className="fas fa-check" />
+                    });
+                }
+
+                setEvent(payload);
+            } else if (payload.type === "error") {
                 notifications.show({
                     title: `Error on ${scraper.name} scraper execution`,
                     message: payload.message ?? "An unknown error occurred in the scraper.",
                     color: "red",
                     icon: <i className="fas fa-times" />
                 });
-            }
-
-            if (["idle", "ready", "ping"].includes(payload.type)) {
-                setEvent(payload);
             } else if (payload.type === "fatal") {
                 setEvent({ ...DEFAULT_STATUS_EVENT, scraperId: scraper.id });
                 modalService.openModal({
@@ -177,7 +189,7 @@ export function ScraperCard(props: Props): React.ReactNode {
                         label={`${scraper.name} chat URL`}
                         placeholder={scraper.placeholderText}
                         ref={inputRef}
-                        disabled={loading || scraperIsRunning}
+                        disabled={loading || scraperIsLoading || scraperIsRunning}
                         data-tour={`${scraper.id}--url-input`}
                     />
                 </Tooltip>
@@ -186,7 +198,7 @@ export function ScraperCard(props: Props): React.ReactNode {
                     color="gray"
                     leftSection={handleStatusIcon()}
                     onClick={scraperIsRunning ? handleStop : handleStart}
-                    disabled={loading}
+                    disabled={loading || scraperIsLoading}
                 >
                     {handleStatusLabel()}
                 </Button>
