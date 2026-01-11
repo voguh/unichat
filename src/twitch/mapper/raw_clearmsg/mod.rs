@@ -7,8 +7,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use std::collections::HashMap;
-
 use anyhow::anyhow;
 use anyhow::Error;
 
@@ -16,6 +14,7 @@ use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRemoveMessageEventPayload;
 use crate::irc::IRCMessage;
+use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::utils::get_current_timestamp;
 
 pub fn parse(channel: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
@@ -30,7 +29,7 @@ pub fn parse(channel: String, message: &IRCMessage) -> Result<Option<UniChatEven
         channel_name: Some(channel),
 
         platform: UniChatPlatform::Twitch,
-        flags: HashMap::new(),
+        flags: inject_raw_tags(&tags),
 
         message_id: target_msg_id.to_owned(),
 
