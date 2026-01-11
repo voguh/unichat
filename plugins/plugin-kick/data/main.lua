@@ -69,28 +69,39 @@ local function parse_author_type(badges)
     return UniChatAuthorType:Viewer();
 end
 
+local emote_pattern = "^%[(%w+):(%d+):([%w_]+)%]$";
+local function preprocess_message_raw(raw_content)
+    raw_content = raw_content:gsub("([^%s])%[", "%1 [");
+    raw_content = raw_content:gsub("%]([^%s])", "] %1");
+    return raw_content;
+end
+
 local function parse_message_text(raw_content)
-    local message_text = "";
+    raw_content = preprocess_message_raw(raw_content);
+
+    local message_text = {};
 
     for word in string.gmatch(raw_content, "%S+") do
-        local _, id, name = word:match("^%[(%w+):(%d+):([%w_]+)%]$")
+        local _kind , id, name = word:match(emote_pattern)
 
         if id ~= nil and name ~= nil then
-            message_text = message_text .. " :" .. name .. ": ";
+            table.insert(message_text, " :" .. name .. ": ");
         else
-            message_text = message_text .. " " .. word .. " ";
+            table.insert(message_text, word);
         end
     end
 
-    return message_text;
+    return table.concat(message_text, " ");
 end
 
 local function parse_emotes(raw_content)
+    raw_content = preprocess_message_raw(raw_content);
+
     local emotes = {};
     local shared_emotes = UniChatAPI:get_shared_emotes();
 
     for word in string.gmatch(raw_content, "%S+") do
-        local _, id, name = word:match("^%[(%w+):(%d+):([%w_]+)%]$")
+        local _kind , id, name = word:match(emote_pattern)
 
         if id ~= nil and name ~= nil then
             table.insert(emotes, UniChatEmote:new(id, ":" .. name .. ":", "https://files.kick.com/emotes/" .. id .. "/fullsize"));
