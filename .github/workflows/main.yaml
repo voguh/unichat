@@ -370,14 +370,14 @@ jobs:
       - name: Move build artifacts
         run: |
           export VERSION="${{ steps.setup_version.outputs.revision }}"
-          mkdir -p dist/appimage dist/deb dist/rpm dist/nsis
-          cp ${{ github.workspace }}/target/linux/appimage/*.AppImage dist/appimage/unichat-$VERSION.AppImage
-          cp ${{ github.workspace }}/target/linux/deb/*.deb dist/deb/unichat-$VERSION.deb
-          cp ${{ github.workspace }}/target/linux/rpm/*.rpm dist/rpm/unichat-$VERSION.rpm
-          cp ${{ github.workspace }}/target/windows/nsis/*.exe dist/nsis/unichat-$VERSION-setup.exe
-          for folder in dist/*; do
-            if [ -d "$folder" ] && [ "$(ls -A "$folder")" ]; then
-              (cd "$folder" && for file in ./*; do sha256sum "$file" > "${file}.sha256"; done)
+          mkdir -p dist
+          cp ${{ github.workspace }}/target/linux/appimage/*.AppImage ${{ github.workspace }}/dist/unichat-$VERSION.AppImage
+          cp ${{ github.workspace }}/target/linux/deb/*.deb ${{ github.workspace }}/dist/unichat-$VERSION.deb
+          cp ${{ github.workspace }}/target/linux/rpm/*.rpm ${{ github.workspace }}/dist/unichat-$VERSION.rpm
+          cp ${{ github.workspace }}/target/windows/nsis/*.exe ${{ github.workspace }}/dist/unichat-$VERSION-setup.exe
+          for file in ${{ github.workspace }}/dist/*; do
+            if [ -f "$file" ]; then
+              sha256sum "$file" > "${file}.sha256"
             fi
           done
 
@@ -390,14 +390,9 @@ jobs:
             echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
             gh release create "$TAG_NAME" --prerelease
             for folder in ${{ github.workspace }}/dist/*; do
-              if [ -d "$folder" ] && [ "$(ls -A "$folder")" ]; then
-                echo "Uploading files from: $folder"
-                for file in $folder/*; do
-                  if [ -f "$file" ]; then
-                    echo "Uploading file: $file"
-                    gh release upload "$TAG_NAME" "$file" || echo "Failed to upload $file to GitHub Release"
-                  fi
-                done
+              if [ -f "$file" ]; then
+                echo "Uploading $file to GitHub Release $TAG_NAME"
+                gh release upload "$TAG_NAME" "$file"
               fi
             done
             echo "All files uploaded to GitHub Release successfully."
