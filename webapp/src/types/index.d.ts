@@ -7,7 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-import { PluginStatus, WidgetSourceType as WidgetSourceType } from "unichat/utils/constants";
+import { PluginStatus, WidgetSourceType } from "unichat/utils/constants";
 
 export interface Dimensions {
     width: number;
