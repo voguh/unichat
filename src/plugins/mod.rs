@@ -330,46 +330,60 @@ pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     return Ok(());
 }
 
+fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, PluginManifestYAML)>, Error> {
+    if !plugins_path.exists() || !plugins_path.is_dir() {
+        return Ok(Vec::new());
+    }
+
+    let mut loaded_manifests: Vec<(PathBuf, PluginManifestYAML)> = Vec::new();
+    for entry in fs::read_dir(plugins_path)? {
+        if let Ok(entry) = entry {
+            let plugin_path = entry.path();
+
+            if plugin_path.is_dir() {
+                let plugin_folder = plugin_path.file_name().unwrap_or_default().to_string_lossy().to_string();
+                if plugin_folder.starts_with(".") {
+                    continue;
+                } else if plugin_folder.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
+                    log::warn!("Skipping plugin with invalid name '{}' from {:?}", plugin_folder, plugin_path);
+                    continue;
+                }
+
+
+                let manifest_path = plugin_path.join("manifest.yaml");
+                if !manifest_path.exists() || !manifest_path.is_file() {
+                    log::warn!("Skipping folder '{:?}' as it does not contain a valid 'manifest.yaml'", plugin_path);
+                    continue;
+                }
+
+                log::info!("Loading plugin manifest from directory: {:?}", plugin_path);
+                match plugin_manifest::load_manifest(&plugin_path) {
+                    Ok(manifest) => {
+                        loaded_manifests.push((plugin_path, manifest));
+                    },
+                    Err(e) => {
+                        log::error!("Failed to load plugin manifest: {:?}", e);
+                    }
+                }
+            }
+        }
+    }
+
+    return Ok(loaded_manifests);
+
+
+}
+
 pub fn load_plugins() -> Result<(), Error> {
     let mut loaded_manifests: Vec<(PathBuf, PluginManifestYAML)> = Vec::new();
 
     let system_plugins_dir = properties::get_app_path(AppPaths::UniChatSystemPlugins);
-    for entry in fs::read_dir(system_plugins_dir)? {
-        if let Ok(entry) = entry {
-            let path = entry.path();
-
-            if path.is_dir() {
-                log::info!("Found system plugin directory: {:?}", path);
-                match plugin_manifest::load_manifest(&path) {
-                    Ok(manifest) => {
-                        loaded_manifests.push((path, manifest));
-                    },
-                    Err(e) => {
-                        log::error!("Failed to load system plugin manifest: {:?}", e);
-                    }
-                }
-            }
-        }
-    }
+    let system_plugins_manifests = load_plugins_from_disk(system_plugins_dir)?;
+    loaded_manifests.extend(system_plugins_manifests);
 
     let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
-    for entry in fs::read_dir(user_plugins_dir)? {
-        if let Ok(entry) = entry {
-            let path = entry.path();
-
-            if path.is_dir() {
-                log::info!("Found user plugin directory: {:?}", path);
-                match plugin_manifest::load_manifest(&path) {
-                    Ok(manifest) => {
-                        loaded_manifests.push((path, manifest));
-                    },
-                    Err(e) => {
-                        log::error!("Failed to load user plugin manifest: {:?}", e);
-                    }
-                }
-            }
-        }
-    }
+    let user_plugins_manifests = load_plugins_from_disk(user_plugins_dir)?;
+    loaded_manifests.extend(user_plugins_manifests);
 
     for (plugin_path, manifest) in loaded_manifests.iter_mut() {
         log::info!("Loading plugin: {} v{}", manifest.name, manifest.version);
