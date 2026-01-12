@@ -403,8 +403,10 @@ impl mlua::UserData for UniChatAPI {
             let str_value: Option<String>;
             if let mlua::Value::String(lua_string) = value {
                 str_value = Some(lua_string.to_string_lossy());
-            } else {
+            } else if let mlua::Value::Nil = value {
                 str_value = None;
+            } else {
+                return Err(mlua::Error::external("Value must be a string or nil"));
             }
 
             let key = format!("{}:{}", this.plugin_name, key);
