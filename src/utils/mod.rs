@@ -38,9 +38,13 @@ pub fn get_current_timestamp() -> Result<i64, Error> {
 /* ================================================================================================================== */
 
 pub fn decode_scraper_url(url: &str) -> Result<Url, Error> {
-    let mut url = url;
-    if url.trim().is_empty() || url == "about:blank" || !url.starts_with("https://") {
-        url = "tauri://localhost/scraper_idle.html";
+    let mut url = url.trim();
+    if url.is_empty() || !url.starts_with("https://") {
+        if is_dev() {
+            url = "http://localhost:1421/scraper_idle.html";
+        } else {
+            url = "tauri://localhost/scraper_idle.html";
+        }
     }
 
     let url = Url::parse(url)?;
