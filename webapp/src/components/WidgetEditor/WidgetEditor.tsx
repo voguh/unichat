@@ -407,7 +407,6 @@ export function WidgetEditor(_props: Props): React.ReactNode {
             </div>
             <div className="preview-area">
                 <iframe ref={iframeRef} src={`${WIDGET_URL_PREFIX}/${selectedWidget}`} sandbox="allow-scripts" />
-                <div />
             </div>
             <div className="emulator-area">
                 <div className="emulator-header">Emulator</div>

@@ -139,11 +139,7 @@ export const WidgetEditorStyledContainer = styled.div`
             width: 100%;
             height: 100%;
             border: none;
-        }
-
-        > div {
-            position: absolute;
-            inset: 0;
+            pointer-events: none;
         }
     }
 
