@@ -228,13 +228,19 @@ export function WidgetEditor(_props: Props): React.ReactNode {
         const options: ComboboxItemGroup<string>[] = [];
 
         if (systemWidgets.length > 0) {
-            options.push({ group: "System Widgets", items: systemWidgets });
+            options.push({
+                group: "System Widgets",
+                items: systemWidgets.sort((a, b) => a.label.localeCompare(b.label))
+            });
         }
         if (userWidgets.length > 0) {
-            options.push({ group: "User Widgets", items: userWidgets });
+            options.push({ group: "User Widgets", items: userWidgets.sort((a, b) => a.label.localeCompare(b.label)) });
         }
         if (pluginWidgets.length > 0) {
-            options.push({ group: "Plugin Widgets", items: pluginWidgets });
+            options.push({
+                group: "Plugin Widgets",
+                items: pluginWidgets.sort((a, b) => a.label.localeCompare(b.label))
+            });
         }
 
         return options;
@@ -274,7 +280,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
     async function handleFetchWidgets(): Promise<void> {
         const widgets = await commandService.listDetailedWidgets();
 
-        const widgetsMap = new Map(widgets.map((w) => [w.restPath, w]));
+        const widgetsMap = new Map(widgets.filter((w) => w.restPath !== "example").map((w) => [w.restPath, w]));
         setWidgets(widgetsMap);
     }
 
