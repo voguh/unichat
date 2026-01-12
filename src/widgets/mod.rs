@@ -26,10 +26,11 @@ use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
 #[derive(Serialize, Clone, Debug, Eq, PartialEq)]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(tag = "type", content = "value", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum WidgetSource {
     System,
-    Plugin(String),
+    SystemPlugin(String),
+    UserPlugin(String),
     User
 }
 
@@ -153,7 +154,9 @@ fn load_widgets_from_disk(widgets_path: &Path, source_type: WidgetSource, cb: im
             }
 
             let rest_path;
-            if let WidgetSource::Plugin(plugin_name) = &source_type {
+            if let WidgetSource::SystemPlugin(plugin_name) = &source_type {
+                rest_path = format!("{}::{}", plugin_name, widget_name);
+            } else if let WidgetSource::UserPlugin(plugin_name) = &source_type {
                 rest_path = format!("{}::{}", plugin_name, widget_name);
             } else {
                 rest_path = widget_name
@@ -203,7 +206,13 @@ pub fn add_plugin_widgets(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
     let callback = move |metadata: &WidgetMetadata| {
         plugin.add_message(format!("Registered widget '{}' provided as 'http://localhost:{}/widget/{}'", metadata.name(), BASE_REST_PORT, metadata.rest_path));
     };
-    load_widgets_from_disk(&widgets_path, WidgetSource::Plugin(plugin.name.clone()), callback)?;
+
+    let system_plugins_path = properties::get_app_path(AppPaths::UniChatSystemPlugins);
+    if plugin.get_plugin_path().starts_with(&system_plugins_path) {
+        load_widgets_from_disk(&widgets_path, WidgetSource::SystemPlugin(plugin.name.clone()), callback)?;
+    } else {
+        load_widgets_from_disk(&widgets_path, WidgetSource::UserPlugin(plugin.name.clone()), callback)?;
+    }
 
     return Ok(());
 }

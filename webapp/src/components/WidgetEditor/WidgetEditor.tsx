@@ -32,8 +32,14 @@ import { ColorPicker } from "unichat/components/ColorPicker";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { UniChatWidget, WidgetFields } from "unichat/types";
-import { WIDGET_URL_PREFIX, WidgetSource } from "unichat/utils/constants";
+import { WIDGET_URL_PREFIX } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
+import {
+    isGeneralUserWidget,
+    isSystemPluginWidget,
+    isSystemWidget,
+    isUserWidget
+} from "unichat/utils/widgetSourceTypeGuards";
 
 import { GalleryFileInput } from "../GalleryFileInput";
 import { WidgetEditorStyledContainer } from "./styled";
@@ -168,8 +174,10 @@ export function WidgetEditor(_props: Props): React.ReactNode {
     }
 
     function buildFieldsEditor(): React.ReactNode {
-        if (widgets.get(selectedWidget)?.widgetSource !== WidgetSource.USER) {
-            return <div className="empty-fields">No editable fields for system/plugin widgets.</div>;
+        if (isSystemWidget(widgets.get(selectedWidget))) {
+            return <div className="empty-fields">No editable fields for system widgets.</div>;
+        } else if (isSystemPluginWidget(widgets.get(selectedWidget))) {
+            return <div className="empty-fields">No editable fields for system plugins widgets.</div>;
         } else if (fields == null || Object.keys(fields).length === 0) {
             return <div className="empty-fields">No fields defined for this widget.</div>;
         }
@@ -216,9 +224,9 @@ export function WidgetEditor(_props: Props): React.ReactNode {
         const pluginWidgets = [];
 
         for (const widget of widgets.values()) {
-            if (widget.widgetSource === WidgetSource.SYSTEM) {
+            if (isSystemWidget(widget)) {
                 systemWidgets.push({ value: widget.restPath, label: widget.restPath });
-            } else if (widget.widgetSource === WidgetSource.USER) {
+            } else if (isUserWidget(widget)) {
                 userWidgets.push({ value: widget.restPath, label: widget.restPath });
             } else {
                 pluginWidgets.push({ value: widget.restPath, label: widget.restPath });
@@ -265,7 +273,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
     }
 
     async function handleFetchWidgetData(): Promise<void> {
-        if (!Strings.isNullOrEmpty(selectedWidget) && widgets.get(selectedWidget)?.widgetSource === WidgetSource.USER) {
+        if (!Strings.isNullOrEmpty(selectedWidget) && isGeneralUserWidget(widgets.get(selectedWidget))) {
             const fields = await commandService.getWidgetFields(selectedWidget).catch(() => ({}));
             const fieldstate = await commandService.getWidgetFieldState(selectedWidget).catch(() => ({}));
 

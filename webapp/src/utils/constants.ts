@@ -45,7 +45,9 @@ export enum UniChatSettings {
     LOG_SCRAPER_EVENTS = "log-scraper-events"
 }
 
-export enum WidgetSource {
+export enum WidgetSourceType {
     SYSTEM = "SYSTEM",
+    SYSTEM_PLUGIN = "SYSTEM_PLUGIN",
+    USER_PLUGIN = "USER_PLUGIN",
     USER = "USER"
 }

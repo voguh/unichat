@@ -86,7 +86,10 @@ pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, Strin
             WidgetSource::User => {
                 user_widgets.push(widget.rest_path.clone());
             }
-            WidgetSource::Plugin(_) => {
+            WidgetSource::SystemPlugin(_) => {
+                plugins_widgets.push(widget.rest_path.clone());
+            }
+            WidgetSource::UserPlugin(_) => {
                 plugins_widgets.push(widget.rest_path.clone());
             }
         }

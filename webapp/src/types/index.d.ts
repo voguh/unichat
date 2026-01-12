@@ -7,7 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-import { PluginStatus } from "unichat/utils/constants";
+import { PluginStatus, WidgetSourceType as WidgetSourceType } from "unichat/utils/constants";
 
 export interface Dimensions {
     width: number;
@@ -83,8 +83,13 @@ export interface UniChatScraper {
 
 export interface UniChatWidget {
     restPath: string;
-    widgetSource: WidgetSource | (string & {});
+    widgetSource: UniChatWidgetSource;
     name: string;
+}
+
+export interface UniChatWidgetSource {
+    type: WidgetSourceType;
+    value?: string;
 }
 
 /* ========================================================================== */
