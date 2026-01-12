@@ -74,7 +74,7 @@ export function DashboardHome(): React.ReactNode {
         setWidgets(widgets);
 
         if (iframeRef.current) {
-            iframeRef.current.src = `${selectedWidget}/${selectedWidget}`;
+            iframeRef.current.src = `${WIDGET_URL_PREFIX}/${selectedWidget}`;
         }
     }
 
