@@ -197,7 +197,8 @@ jobs:
           key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-target-
           path: |
-            target/
+            target/release/deps
+            target/debug/deps
 
       - name: Install dependencies
         if: steps.cache-cargo.outputs.cache-hit != 'true'
@@ -250,7 +251,8 @@ jobs:
           key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-target-
           path: |
-            target/
+            target/release/deps
+            target/debug/deps
 
       - name: Install dependencies
         if: steps.cache-cargo.outputs.cache-hit != 'true'
@@ -304,7 +306,8 @@ jobs:
           key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-target-
           path: |
-            target/
+            target/release/deps
+            target/debug/deps
 
       - name: Install dependencies
         if: steps.cache-cargo.outputs.cache-hit != 'true'
@@ -370,7 +373,7 @@ jobs:
       - name: Move build artifacts
         run: |
           export VERSION="${{ steps.setup_version.outputs.revision }}"
-          mkdir -p dist
+          mkdir -p ${{ github.workspace }}/dist
           cp ${{ github.workspace }}/target/linux/appimage/*.AppImage ${{ github.workspace }}/dist/unichat-$VERSION.AppImage
           cp ${{ github.workspace }}/target/linux/deb/*.deb ${{ github.workspace }}/dist/unichat-$VERSION.deb
           cp ${{ github.workspace }}/target/linux/rpm/*.rpm ${{ github.workspace }}/dist/unichat-$VERSION.rpm
