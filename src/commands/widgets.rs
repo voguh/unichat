@@ -10,6 +10,7 @@
 use std::collections::HashMap;
 use std::fs;
 
+use indexmap::IndexMap;
 use serde_json::json;
 use serde_json::Value;
 use tauri::AppHandle;
@@ -22,7 +23,7 @@ use crate::widgets::get_widgets;
 use crate::widgets::reload_user_widgets;
 
 #[tauri::command]
-pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<HashMap<String, Value>, String> {
+pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<IndexMap<String, Value>, String> {
     let widget = get_widget_from_rest_path(&widget).map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
     if let WidgetSource::User = widget.widget_source {
         let fields = widget.fields();

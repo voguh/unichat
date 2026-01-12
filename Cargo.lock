@@ -5451,6 +5451,7 @@ dependencies = [
  "base64 0.22.1",
  "futures",
  "if-addrs",
+ "indexmap 2.13.0",
  "infer",
  "log",
  "mime_guess",
