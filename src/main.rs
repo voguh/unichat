@@ -15,7 +15,6 @@
 
 use std::env;
 use std::fs;
-use std::io::Write;
 use std::path::PathBuf;
 
 use anyhow::Error;
@@ -43,6 +42,18 @@ mod youtube;
 pub static STATIC_APP_ICON: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/icons/icon.png"));
 pub static THIRD_PARTY_LICENSES: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/third_party_licenses.json"));
 
+fn rm_util(path: &PathBuf) -> Result<(), Error> {
+    if path.exists() {
+        if path.is_dir() {
+            fs::remove_dir_all(path)?;
+        } else {
+            fs::remove_file(path)?;
+        }
+    }
+
+    return Ok(());
+}
+
 fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Error> {
     if !dest.exists() {
         fs::create_dir(dest)?;
@@ -65,13 +76,7 @@ fn copy_folder(src: &PathBuf, dest: &PathBuf) -> Result<(), Error> {
 }
 
 fn copy_wrapper(src: &PathBuf, dest: &PathBuf) -> Result<(), Error> {
-    if dest.exists() {
-        if dest.is_dir() {
-            fs::remove_dir_all(dest)?;
-        } else {
-            fs::remove_file(dest)?;
-        }
-    }
+    rm_util(dest)?;
 
     if src.is_dir() {
         copy_folder(src, dest)?;
@@ -86,23 +91,42 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     utils::properties::init(app)?;
     utils::settings::init(app)?;
 
-    events::init(app)?;
-    plugins::init(app)?;
-    utils::render_emitter::init(app)?;
-    utils::userstore::init(app)?;
-    widgets::init(app)?;
-
     /* ========================================================================================== */
 
+    let system_plugins_dir = properties::get_app_path(AppPaths::UniChatSystemPlugins);
     let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
     if !&user_plugins_dir.exists() {
+        log::info!("Creating user plugins directory at {:?}", &user_plugins_dir);
         fs::create_dir_all(&user_plugins_dir)?;
     }
+
+    let plugin_types_source = system_plugins_dir.join(".types");
+    let plugin_types_dest = user_plugins_dir.join(".types");
+    copy_wrapper(&plugin_types_source, &plugin_types_dest)?;
+
+    let plugin_luarc_source = system_plugins_dir.join(".luarc.json");
+    let plugin_luarc_dest = user_plugins_dir.join(".luarc.json");
+    copy_wrapper(&plugin_luarc_source, &plugin_luarc_dest)?;
+
+    let readme_path = user_plugins_dir.join("README.md");
+    rm_util(&readme_path)?;
+
+    let readme_notice = r#"
+        This directory contains user-added plugins for UniChat. You can add your own plugins here.
+        **DO NOT** delete or modify the `.luarc.json` files and `.types` folder, they always will
+        be replaced/restored to default if missing.
+
+        Note: Folders must contain only ASCII alphanumeric characters, underscores (_) and hyphens (-). Folders starting with a dot (.) are ignored by default.
+    "#;
+
+    let formatted_readme_notice = readme_notice.lines().skip(1).map(|l| l.trim()).collect::<Vec<&str>>();
+    fs::write(readme_path, formatted_readme_notice.join("\n"))?;
 
     /* ========================================================================================== */
 
     let gallery_dir = properties::get_app_path(AppPaths::UniChatGallery);
     if !&gallery_dir.exists() {
+        log::info!("Creating gallery directory at {:?}", &gallery_dir);
         fs::create_dir_all(&gallery_dir)?;
     }
 
@@ -111,6 +135,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidgets);
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     if !&user_widgets_dir.exists() {
+        log::info!("Creating user widgets directory at {:?}", &user_widgets_dir);
         fs::create_dir_all(&user_widgets_dir)?;
     }
 
@@ -127,25 +152,26 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     copy_wrapper(&jsconfig_json_path_source, &jsconfig_json_path_dest)?;
 
     let readme_path = user_widgets_dir.join("README.md");
-    if readme_path.exists() {
-        if readme_path.is_dir() {
-            fs::remove_dir_all(&readme_path)?;
-        } else {
-            fs::remove_file(&readme_path)?;
-        }
-    }
+    rm_util(&readme_path)?;
 
-    let mut readme_file = fs::OpenOptions::new().create(true).append(true).open(readme_path)?;
     let readme_notice = r#"
-        This directory contains user-created widgets for UniChat. You can add your own widgets here.
+        This directory contains user-added widgets for UniChat. You can add your own widgets here.
         **DO NOT** delete or modify the `unichat.d.ts`, `jsconfig.json` files and `example` folder,
         they always will be replaced/restored to default if missing.
 
-        Node: Folders starting with a dot (.) are hidden by default in the widget selector.
+        Note: Folders must contain only ASCII alphanumeric characters, underscores (_) and hyphens (-). Folders starting with a dot (.) are ignored by default.
     "#;
 
     let formatted_readme_notice = readme_notice.lines().skip(1).map(|l| l.trim()).collect::<Vec<&str>>();
-    writeln!(readme_file, "{}", formatted_readme_notice.join("\n"))?;
+    fs::write(readme_path, formatted_readme_notice.join("\n"))?;
+
+    /* ========================================================================================== */
+
+    events::init(app)?;
+    plugins::init(app)?;
+    utils::render_emitter::init(app)?;
+    utils::userstore::init(app)?;
+    widgets::init(app)?;
 
     /* ========================================================================================== */
 
