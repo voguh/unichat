@@ -14,6 +14,7 @@ use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::RwLock;
 use std::time::Duration;
+use std::time::Instant;
 
 use anyhow::anyhow;
 use anyhow::Error;
@@ -31,21 +32,58 @@ static USERSTORE_PATH: LazyLock<path::PathBuf> = LazyLock::new(|| properties::ge
 const USERSTORE_INSTANCE_NAME: &str = "UserStore::CACHE_INSTANCE";
 static USERSTORE_CACHE: LazyLock<Arc<RwLock<HashMap<String, String>>>> = LazyLock::new(|| Arc::new(RwLock::new(HashMap::new())));
 
+fn compute_wait(last_event: Option<Instant>, first_event: Option<Instant>, debounce: Duration, max_wait: Duration) -> Duration {
+    if let (Some(last), Some(first)) = (last_event, first_event) {
+        let since_last = last.elapsed();
+        let since_first = first.elapsed();
+
+        if since_last >= debounce || since_first >= max_wait {
+            return Duration::ZERO;
+        } else {
+            return std::cmp::min(debounce - since_last, max_wait - since_first);
+        }
+    } else {
+        return Duration::from_secs(3600);
+    }
+}
+
 static USERSTORE_WRITE_TX: LazyLock<UnboundedSender<()>> = LazyLock::new(|| {
     let (tx, mut rx) = unbounded_channel();
 
     tauri::async_runtime::spawn(async move {
-        let mut pending = false;
+        let debounce = Duration::from_secs(5);
+        let max_wait = Duration::from_secs(30);
 
-        while let Some(_) = rx.recv().await {
-            if pending {
-                continue;
+        let mut last_event: Option<Instant> = None;
+        let mut first_event: Option<Instant> = None;
+
+        loop {
+            tokio::select! {
+                msg = rx.recv() => {
+                    if msg.is_none() {
+                        break;
+                    }
+
+                    let now = Instant::now();
+
+                    if first_event.is_none() {
+                        first_event = Some(now);
+                    }
+
+                    last_event = Some(now);
+                }
+
+                _ = sleep(compute_wait(last_event, first_event, debounce, max_wait)) => {
+                    if last_event.is_some() {
+                        if let Err(err) = flush_userstore() {
+                            log::error!("Failed to flush userstore to disk: {:#?}", err);
+                        }
+
+                        last_event = None;
+                        first_event = None;
+                    }
+                }
             }
-
-            pending = true;
-            sleep(Duration::from_secs(5)).await;
-            let _ = flush_userstore();
-            pending = false;
         }
     });
 
