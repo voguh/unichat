@@ -116,15 +116,15 @@ jobs:
         working-directory: ${{ env.TAURI_FRONTEND_PATH }}
         run: pnpm install --frozen-lockfile
 
-      - name: Cache webapp dist
-        uses: actions/cache@v4.2.3
-        with:
-          path: ${{ env.TAURI_FRONTEND_PATH }}/dist
-          key: dist-${{ github.run_id }}
-
       - name: Build webapp
         working-directory: ${{ env.TAURI_FRONTEND_PATH }}
         run: pnpm build:ui
+
+      - name: Upload webapp artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: webapp-dist
+          path: ${{ env.TAURI_FRONTEND_PATH }}/dist
 
   rust-install-dependencies:
     runs-on: ${{ matrix.os }}
@@ -163,11 +163,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
 
-      - name: Retrieve webapp dist cache
-        uses: actions/cache@v4.2.3
+      - name: Download webapp artifact
+        uses: actions/download-artifact@v5.0.0
         with:
+          name: webapp-dist
           path: ${{ env.TAURI_FRONTEND_PATH }}/dist
-          key: dist-${{ github.run_id }}
 
       - name: Setup tauri dependencies
         run: |
@@ -216,11 +216,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
 
-      - name: Retrieve webapp dist cache
-        uses: actions/cache@v4.2.3
+      - name: Download webapp artifact
+        uses: actions/download-artifact@v5.0.0
         with:
+          name: webapp-dist
           path: ${{ env.TAURI_FRONTEND_PATH }}/dist
-          key: dist-${{ github.run_id }}
 
       - name: Setup tauri dependencies
         if: matrix.os == 'ubuntu-24.04'
@@ -270,11 +270,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
 
-      - name: Retrieve webapp dist cache
-        uses: actions/cache@v4.2.3
+      - name: Download webapp artifact
+        uses: actions/download-artifact@v5.0.0
         with:
+          name: webapp-dist
           path: ${{ env.TAURI_FRONTEND_PATH }}/dist
-          key: dist-${{ github.run_id }}
 
       - name: Setup tauri dependencies
         if: matrix.os == 'ubuntu-24.04'
@@ -318,6 +318,34 @@ jobs:
       - name: Run build app
         run: tauri build
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: ${{ matrix.os }}-bundles
+          path: ${{ github.workspace }}/target/release/bundle
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-24.04
+    needs: package
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Download windows build artifacts
+        uses: actions/download-artifact@v5.0.0
+        with:
+          name: windows-2022-bundles
+          path: ${{ github.workspace }}/target/windows
+
+      - name: Download linux build artifacts
+        uses: actions/download-artifact@v5.0.0
+        with:
+          name: ubuntu-24.04-bundles
+          path: ${{ github.workspace }}/target/linux
+
       - name: Setup version
         id: setup_version
         run: |
@@ -339,56 +367,19 @@ jobs:
       - name: Print revision
         run: echo "Revision is ${{ steps.setup_version.outputs.revision }}"
 
-      - name: Cache build artifacts
-        uses: actions/cache@v4.2.3
-        with:
-          path: dist/${{  matrix.os }}
-          key: dist-${{ github.run_id }}-${{ matrix.os }}
-
-      - name: Create build artifacts
+      - name: Move build artifacts
         run: |
           export VERSION="${{ steps.setup_version.outputs.revision }}"
-          mkdir -p dist/${{ matrix.os }}
-          if [[ "${{ matrix.os }}" == "windows-2022" ]]; then
-            cp -r target/release/bundle/nsis/*.exe dist/${{ matrix.os }}/unichat-$VERSION-setup.exe
-          else
-            cp -r target/release/bundle/appimage/*.AppImage dist/${{ matrix.os }}/unichat-$VERSION.AppImage
-            cp -r target/release/bundle/deb/*.deb dist/${{ matrix.os }}/unichat-$VERSION.deb
-            cp -r target/release/bundle/rpm/*.rpm dist/${{ matrix.os }}/unichat-$VERSION.rpm
-          fi
+          mkdir -p dist/appimage dist/deb dist/rpm dist/nsis
+          cp ${{ github.workspace }}/target/linux/appimage/*.AppImage dist/appimage/unichat-$VERSION.AppImage
+          cp ${{ github.workspace }}/target/linux/deb/*.deb dist/deb/unichat-$VERSION.deb
+          cp ${{ github.workspace }}/target/linux/rpm/*.rpm dist/rpm/unichat-$VERSION.rpm
+          cp ${{ github.workspace }}/target/windows/nsis/*.exe dist/nsis/unichat-$VERSION-setup.exe
           for folder in dist/*; do
             if [ -d "$folder" ] && [ "$(ls -A "$folder")" ]; then
               (cd "$folder" && for file in ./*; do sha256sum "$file" > "${file}.sha256"; done)
             fi
           done
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: dist-${{ matrix.os }}
-          path: dist/${{ matrix.os }}
-
-  publish:
-    if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-24.04
-    needs: package
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.2.2
-
-      - name: Retrieve ubuntu-24.04 build artifacts
-        uses: actions/cache@v4.2.3
-        with:
-          path: dist/ubuntu-24.04
-          key: dist-${{ github.run_id }}-ubuntu-24.04
-
-      - name: Retrieve windows-2022 build artifacts
-        uses: actions/cache@v4.2.3
-        with:
-          path: dist/windows-2022
-          key: dist-${{ github.run_id }}-windows-2022
 
       - name: Create and upload to GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
@@ -414,4 +405,3 @@ jobs:
             echo "GitHub CLI is not installed. Skipping upload to GitHub Release."
             exit 0
           fi
-
