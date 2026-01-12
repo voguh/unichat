@@ -82,7 +82,8 @@ export function Gallery(props: Props): React.ReactNode {
         try {
             setLoading(true);
             const response = await dialog.open({ multiple: true, directory: false });
-            commandService.uploadGalleryItems(response);
+            await commandService.uploadGalleryItems(response);
+            await handleFetchGalleryItems();
         } catch (error) {
             _logger.error("An error occurred on upload gallery items", error);
 
@@ -106,7 +107,7 @@ export function Gallery(props: Props): React.ReactNode {
         <GalleryStyledContainer>
             <LoadingOverlay visible={loading} />
             <Button className="upload-to-gallery" size="xs" onClick={onFilesUploadClick}>
-                Upload
+                Add to Gallery
             </Button>
             <Tabs variant="outline" defaultValue={(startSelectedTab ?? showTabs[0]) as GalleryTabs}>
                 <Tabs.List>
