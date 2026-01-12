@@ -392,7 +392,7 @@ jobs:
             echo "Creating GitHub Release for tag $TAG_NAME"
             echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
             gh release create "$TAG_NAME" --prerelease
-            for folder in ${{ github.workspace }}/dist/*; do
+            for file in ${{ github.workspace }}/dist/*; do
               if [ -f "$file" ]; then
                 echo "Uploading $file to GitHub Release $TAG_NAME"
                 gh release upload "$TAG_NAME" "$file"
