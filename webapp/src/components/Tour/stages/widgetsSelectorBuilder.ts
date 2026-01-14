@@ -19,13 +19,13 @@ export function widgetsSelectorBuilder(
 ): TourBuilder {
     const builder = stageBuilder(selector, title, subTitle, vLine, hLine, true);
 
-    return async function (svg, dimensions, meta) {
+    return async function (svg, dimensions) {
         const widgetsSelectorDropdown = document.querySelector<HTMLButtonElement>("[data-tour='widgets-selector']");
         if (widgetsSelectorDropdown.getAttribute("aria-expanded") !== "true") {
             widgetsSelectorDropdown.click();
         }
 
         await new Promise((resolve) => setTimeout(resolve, 50));
-        await builder(svg, dimensions, meta);
+        await builder(svg, dimensions);
     };
 }

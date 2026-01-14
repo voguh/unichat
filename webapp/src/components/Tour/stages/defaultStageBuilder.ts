@@ -20,13 +20,13 @@ export function defaultStageBuilder(
 ): TourBuilder {
     const builder = stageBuilder(selector, title, subTitle, vLine, hLine, ignorePrefix);
 
-    return async function (svg, dimensions, meta) {
+    return async function (svg, dimensions) {
         const dashboardButton = document.querySelector<HTMLButtonElement>("[data-tour='dashboard']");
         if (dashboardButton.getAttribute("aria-expanded") !== "true") {
             dashboardButton.click();
         }
 
         await new Promise((resolve) => setTimeout(resolve, 50));
-        await builder(svg, dimensions, meta);
+        await builder(svg, dimensions);
     };
 }

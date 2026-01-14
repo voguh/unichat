@@ -19,13 +19,13 @@ export function editorStageBuilder(
 ): TourBuilder {
     const builder = stageBuilder(selector, title, subTitle, vLine, hLine);
 
-    return async function (svg, dimensions, meta) {
+    return async function (svg, dimensions) {
         const editorButton = document.querySelector<HTMLButtonElement>("[data-tour='widget-editor']");
         if (editorButton.getAttribute("data-variant") !== "filled") {
             editorButton.click();
         }
 
         await new Promise((resolve) => setTimeout(resolve, 50));
-        await builder(svg, dimensions, meta);
+        await builder(svg, dimensions);
     };
 }

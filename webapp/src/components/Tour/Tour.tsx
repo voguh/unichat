@@ -24,21 +24,18 @@ interface Props {
     children?: React.ReactNode;
 }
 
-interface TourBuilderMeta {
-    /** This property returns `false` when tour step `replaces` is not empty and at least one matches */
-    isFirstRun: boolean;
-    /** This property returns `true` when run dispatch only was called by another step that requires it */
-    runOnlyAsPartial: boolean;
-}
-
-export type TourBuilder = (svg: SVGSVGElement, dimensions: Dimensions, meta: TourBuilderMeta) => Promise<void>;
+export type TourBuilder = (svg: SVGSVGElement, dimensions: Dimensions) => Promise<void>;
 
 export const BACKDROP_COLOR = alpha(DEFAULT_THEME.colors.gray[9], 0.95);
 export const INDICATORS_COLOR = DEFAULT_THEME.colors.green[6];
 
 interface TourStep {
     id: string;
-    replaces?: string[];
+    /**
+     * If set, this step will only run if the step with the step id informed was
+     * previously ran in another tour session.
+     */
+    replaces?: string;
     builder: TourBuilder;
 }
 
@@ -52,7 +49,7 @@ const steps: TourStep[] = [
         builder: defaultStageBuilder(
             "user-widgets-directory",
             "Open user widgets directory",
-            "Open your own custom widgets directory, here you can add your own widgets",
+            "Open your own custom widgets directory, here you can add your own widgets.",
             50,
             300
         )
@@ -70,7 +67,7 @@ const steps: TourStep[] = [
         builder: widgetsSelectorBuilder(
             "div.mantine-Select-dropdown",
             "Widgets",
-            "Contains all available widgets provided by default or created by you",
+            "Contains all available widgets provided by default or created by you.",
             50,
             -300
         )
@@ -88,7 +85,7 @@ const steps: TourStep[] = [
         builder: defaultStageBuilder(
             "youtube-chat--url-input",
             "YouTube Chat URL",
-            "Also you can paste normal video, shorts or live urls or direct video id",
+            "Also you can paste normal video, shorts or live urls or direct video id.",
             50,
             300
         )
@@ -98,9 +95,19 @@ const steps: TourStep[] = [
         builder: defaultStageBuilder(
             "twitch-chat--url-input",
             "Twitch Chat URL",
-            "Also you can paste normal twitch url or direct channel name",
+            "Also you can paste normal Twitch url or direct channel name.",
             50,
             300
+        )
+    },
+    {
+        id: "1b19c7f5-eee9-4ef2-bc66-59cbebf06ad7",
+        builder: defaultStageBuilder(
+            "kick-chat--url-input",
+            "Kick Chat URL",
+            "<strong>Note:</strong> Only messages and remove message events are supported for now.",
+            50,
+            500
         )
     },
 
@@ -109,9 +116,9 @@ const steps: TourStep[] = [
         builder: defaultStageBuilder(
             "widget-editor",
             "Widget Editor",
-            "Here you can edit your created/downloaded widgets (System/Plugin widgets aren't editable)",
+            "Here you can edit your created/downloaded widgets (System widgets aren't editable).",
             50,
-            400
+            350
         )
     },
     {
@@ -119,7 +126,7 @@ const steps: TourStep[] = [
         builder: editorStageBuilder(
             "gallery-toggle",
             "Assets Gallery",
-            "Open the assets gallery to view and manage your widget assets like images, sounds and more",
+            "Open the assets gallery to view and manage your widget assets like images, sounds and more.",
             50,
             400
         )
@@ -129,7 +136,7 @@ const steps: TourStep[] = [
         builder: editorStageBuilder(
             "widget-editor-emulator-events-dispatcher",
             "Emulator Events Dispatcher",
-            "Here you can emit events to test your widget's event handling functionality",
+            "Here you can emit events to test your widget's event handling functionality.",
             -50,
             -400
         )
@@ -140,7 +147,7 @@ const steps: TourStep[] = [
         builder: defaultStageBuilder(
             "settings-modal-toggle",
             "Settings",
-            "Manage application settings, check for updates and more",
+            "Manage application settings, check for updates and more.",
             -50,
             400
         )
@@ -150,7 +157,7 @@ const steps: TourStep[] = [
         builder: defaultStageBuilder(
             "plugins-modal-toggle",
             "Plugins",
-            "Here you can see all installed plugins and view more information about them",
+            "Here you can see all installed plugins and view more information about them.",
             -50,
             400
         )
@@ -160,7 +167,6 @@ const steps: TourStep[] = [
 export function Tour(_props: Props): React.ReactNode {
     const [dimensions, setDimensions] = React.useState({ width: window.innerWidth, height: window.innerHeight });
 
-    const [previousStepsRan, setPreviousStepsRan] = React.useState<string[]>([]);
     const [stepsToRun, setStepsToRun] = React.useState<TourStep[]>([]);
     const [currentStep, setCurrentStep] = React.useState(-1);
 
@@ -188,9 +194,7 @@ export function Tour(_props: Props): React.ReactNode {
         if (currentStep > -1 && currentStep < stepsToRun.length) {
             const step = stepsToRun[currentStep];
 
-            const replaces = step.replaces ?? [];
-            const isFirstRun = replaces.length === 0 || previousStepsRan.every((id) => !replaces.includes(id));
-            await step.builder(svgRef.current, dimensions, { isFirstRun, runOnlyAsPartial: false });
+            await step.builder(svgRef.current, dimensions);
         } else if (svgRef.current) {
             svgRef.current.innerHTML = "";
         }
@@ -200,7 +204,8 @@ export function Tour(_props: Props): React.ReactNode {
         const stepsToRun = [];
 
         for (const step of steps) {
-            if (!completedSteps.includes(step.id)) {
+            const replaces = step.replaces;
+            if (!completedSteps.includes(step.id) && (replaces == null || completedSteps.includes(replaces))) {
                 stepsToRun.push(step);
             }
         }
@@ -215,7 +220,6 @@ export function Tour(_props: Props): React.ReactNode {
             completedSteps = await commandService.getPrevTourSteps();
         }
 
-        setPreviousStepsRan(completedSteps);
         init(completedSteps);
     }
 
@@ -228,8 +232,8 @@ export function Tour(_props: Props): React.ReactNode {
             setDimensions({ width: window.innerWidth, height: window.innerHeight });
         }
 
-        commandService.getTourSteps().then((completedSteps) => {
-            setPreviousStepsRan(completedSteps);
+        commandService.getTourSteps().then(async (completedSteps) => {
+            await new Promise((resolve) => setTimeout(resolve, 500));
             init(completedSteps);
         });
         window.addEventListener("resize", handleResize);

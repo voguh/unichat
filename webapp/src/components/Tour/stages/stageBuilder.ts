@@ -99,7 +99,7 @@ export function stageBuilder(
         titleBody.style.display = "flex";
         titleBody.style.justifyContent = hLine < 0 ? "flex-start" : "flex-end";
         titleBody.style.alignItems = "center";
-        titleBody.textContent = title;
+        titleBody.innerHTML = title;
 
         const titleHeight = 24;
         const titleForeignObject = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
@@ -123,7 +123,7 @@ export function stageBuilder(
             subTitleBody.style.fontSize = "14px";
             subTitleBody.style.textAlign = hLine < 0 ? "left" : "right";
             subTitleBody.style.color = INDICATORS_COLOR;
-            subTitleBody.textContent = subTitle;
+            subTitleBody.innerHTML = subTitle;
 
             const subTitleHeight = 100;
             const subTitleForeignObject = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
