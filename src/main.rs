@@ -216,8 +216,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
     let end = Instant::now();
     let duration = end.duration_since(start);
-    log::info!("Setup completed in {:.2?} seconds.", duration);
-    log::info!("Setup completed successfully.");
+    log::info!("Setup completed successfully in {:.2?}ms.", duration);
 
     return Ok(());
 }
