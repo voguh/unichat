@@ -7,7 +7,7 @@ No ambiente do widget, você terá acesso à API do **UniChat** através do obje
 ### UniChatAPI.getUserstoreItem(key)
 
 Obtém um item do userstore.
-Esta função assíncrona retorna o valor do item (sempre do tipo `string`) ou `null` se o item não existir.
+Esta função retorna o valor do item (sempre do tipo `string`) ou `null` se o item não existir.
 
 | Argument | Type     | Description                     |
 |----------|----------|---------------------------------|
@@ -16,7 +16,7 @@ Esta função assíncrona retorna o valor do item (sempre do tipo `string`) ou `
 
 Exemplo de uso:
 ```javascript
-const userPreference = await UniChatAPI.getUserstoreItem('preferenceKey');
+const userPreference = UniChatAPI.getUserstoreItem('preferenceKey');
 if (userPreference !== null) {
     console.log('User preference:', userPreference);
 } else {
