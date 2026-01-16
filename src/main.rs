@@ -16,6 +16,7 @@
 use std::env;
 use std::fs;
 use std::path::PathBuf;
+use std::time::Instant;
 
 use anyhow::Error;
 use tauri::Manager as _;
@@ -88,11 +89,17 @@ fn copy_wrapper(src: &PathBuf, dest: &PathBuf) -> Result<(), Error> {
 }
 
 fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
+    let start = Instant::now();
+    log::info!("Starting {} v{}...", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION);
+
+    log::info!("[01/21] Initializing properties...");
     utils::properties::init(app)?;
+    log::info!("[02/21] Initializing settings...");
     utils::settings::init(app)?;
 
     /* ========================================================================================== */
 
+    log::info!("[03/21] Setting up application plugins directory...");
     let system_plugins_dir = properties::get_app_path(AppPaths::UniChatSystemPlugins);
     let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
     if !&user_plugins_dir.exists() {
@@ -100,14 +107,17 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
         fs::create_dir_all(&user_plugins_dir)?;
     }
 
+    log::info!("[04/21] Copying plugin types to user plugins directory...");
     let plugin_types_source = system_plugins_dir.join(".types");
     let plugin_types_dest = user_plugins_dir.join(".types");
     copy_wrapper(&plugin_types_source, &plugin_types_dest)?;
 
+    log::info!("[05/21] Copying plugin .luarc.json to user plugins directory...");
     let plugin_luarc_source = system_plugins_dir.join(".luarc.json");
     let plugin_luarc_dest = user_plugins_dir.join(".luarc.json");
     copy_wrapper(&plugin_luarc_source, &plugin_luarc_dest)?;
 
+    log::info!("[06/21] Creating README.md in user plugins directory...");
     let readme_path = user_plugins_dir.join("README.md");
     rm_util(&readme_path)?;
 
@@ -124,6 +134,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
     /* ========================================================================================== */
 
+    log::info!("[07/21] Setting up application gallery directory...");
     let gallery_dir = properties::get_app_path(AppPaths::UniChatGallery);
     if !&gallery_dir.exists() {
         log::info!("Creating gallery directory at {:?}", &gallery_dir);
@@ -132,6 +143,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
     /* ========================================================================================== */
 
+    log::info!("[08/21] Setting up application widgets directory...");
     let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidgets);
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     if !&user_widgets_dir.exists() {
@@ -139,18 +151,22 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
         fs::create_dir_all(&user_widgets_dir)?;
     }
 
+    log::info!("[09/21] Copying default widget to user widgets directory...");
     let example_widget_path_source = system_widgets_dir.join("default");
     let example_widget_path_dest = user_widgets_dir.join("example");
     copy_wrapper(&example_widget_path_source, &example_widget_path_dest)?;
 
+    log::info!("[10/21] Copying widget types to user widgets directory...");
     let unichat_d_ts_path_source = system_widgets_dir.join("unichat.d.ts");
     let unichat_d_ts_path_dest = user_widgets_dir.join("unichat.d.ts");
     copy_wrapper(&unichat_d_ts_path_source, &unichat_d_ts_path_dest)?;
 
+    log::info!("[11/21] Copying jsconfig.json to user widgets directory...");
     let jsconfig_json_path_source = system_widgets_dir.join("jsconfig.json");
     let jsconfig_json_path_dest = user_widgets_dir.join("jsconfig.json");
     copy_wrapper(&jsconfig_json_path_source, &jsconfig_json_path_dest)?;
 
+    log::info!("[12/21] Creating README.md in user widgets directory...");
     let readme_path = user_widgets_dir.join("README.md");
     rm_util(&readme_path)?;
 
@@ -167,22 +183,41 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
     /* ========================================================================================== */
 
+    log::info!("[13/21] Initializing events emitter module...");
     events::init(app)?;
+
+    log::info!("[14/21] Initializing plugins module...");
     plugins::init(app)?;
+
+    log::info!("[15/21] Initializing render emitter module...");
     utils::render_emitter::init(app)?;
+
+    log::info!("[16/21] Initializing userstore module...");
     utils::userstore::init(app)?;
+
+    log::info!("[17/21] Initializing widgets module...");
     widgets::init(app)?;
 
     /* ========================================================================================== */
 
+    log::info!("[18/21] Initializing HTTP server...");
     let http_server = actix::new(app);
     app.manage(http_server);
 
     /* ========================================================================================== */
 
-    youtube::init(app)?;
+    log::info!("[19/21] Registering Twitch integration...");
     twitch::init(app)?;
+    log::info!("[20/21] Registering YouTube integration...");
+    youtube::init(app)?;
+
+    log::info!("[21/21] Loading plugins...");
     plugins::load_plugins()?;
+
+    let end = Instant::now();
+    let duration = end.duration_since(start);
+    log::info!("Setup completed in {:.2?} seconds.", duration);
+    log::info!("Setup completed successfully.");
 
     return Ok(());
 }
