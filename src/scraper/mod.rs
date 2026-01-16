@@ -93,7 +93,7 @@ fn on_page_load(scraper_js: &str, window: &tauri::WebviewWindow, payload: tauri:
             let current_url = payload.url();
 
             let is_remote = stored_url.is_some_and(|stored_url| stored_url.scheme() == current_url.scheme() && stored_url.host() == current_url.host() && stored_url.path() == current_url.path());
-            let is_local = matches!(current_url.scheme(), "http" | "tauri") && current_url.host_str() == Some("localhost") && current_url.path() == "/scraper_idle.html";
+            let is_local = matches!(current_url.scheme(), "http" | "tauri") && matches!(current_url.host_str(), Some("localhost") | Some("tauri.localhost")) && current_url.path() == "/scraper_idle.html";
 
             if is_local || is_remote {
                 log::info!("Injecting scraper JS into scraper '{}'", scraper_id);

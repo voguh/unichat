@@ -189,7 +189,10 @@ if (window.fetch.__WRAPPED__ !== true) {
 
 async function uniChatPreInit() {
     try {
-        if (window.location.href.startsWith("tauri://") || window.location.href.startsWith("http://localhost")) {
+        const scheme = window.location.protocol.split(":")[0];
+        const host = window.location.hostname;
+        const path = window.location.pathname;
+        if (["http", "tauri"].includes(scheme) && (["localhost", "tauri.localhost"].includes(host)) && path === "/scraper_idle.html") {
             uniChatLogger.info("Scraper is not running, setting up idle dispatch.");
             registerIntermittentEventDispatcher("idle");
             return;
