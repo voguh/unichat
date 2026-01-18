@@ -23,7 +23,6 @@ use serde_json::Value;
 
 use crate::events;
 use crate::events::unichat::UniChatBadge;
-use crate::irc::IRCCommand;
 use crate::irc::IRCMessage;
 use crate::scraper;
 use crate::scraper::UniChatScraper;
