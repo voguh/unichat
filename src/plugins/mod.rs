@@ -19,24 +19,18 @@ use std::sync::RwLock;
 use anyhow::anyhow;
 use anyhow::Error;
 
-use crate::plugins::lua_env::load_plugin_env;
 use crate::plugins::lua_env::LUA_RUNTIME_ONCE_LOCK_KEY;
 use crate::plugins::lua_env::LUA_RUNTIME;
 use crate::plugins::lua_env::prepare_lua_env;
+use crate::plugins::plugin_instance::load_plugin;
 use crate::plugins::plugin_manifest::PluginManifestYAML;
-use crate::UNICHAT_VERSION;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
-use crate::widgets;
 
 mod lua_env;
+mod plugin_instance;
 mod plugin_manifest;
 mod utils;
-
-const INCLUSIVE_START: char = '[';
-const INCLUSIVE_END: char = ']';
-const EXCLUSIVE_START: char = '(';
-const EXCLUSIVE_END: char = ')';
 
 const APP_HANDLE_ONCE_LOCK_KEY: &str = "Plugins::APP_HANDLE";
 static APP_HANDLE: OnceLock<tauri::AppHandle<tauri::Wry>> = OnceLock::new();
@@ -49,8 +43,9 @@ static LOADED_PLUGINS: LazyLock<RwLock<HashMap<String, Arc<UniChatPlugin>>>> = L
 #[serde(rename_all = "UPPERCASE")]
 pub enum PluginStatus {
     Loaded,
+    Invalid,
+    Active,
     Error,
-    Active
 }
 
 /* ============================================================================================== */
@@ -219,110 +214,6 @@ pub(in crate::plugins) fn get_app_handle() -> Result<tauri::AppHandle<tauri::Wry
 }
 
 /* ================================================================================================================== */
-
-fn parse_dependency_version(version: &str) -> Result<semver::VersionReq, Error> {
-    let v = version.trim();
-
-    let first = v.chars().next();
-    let last = v.chars().last();
-
-    if matches!(first, Some(INCLUSIVE_START | EXCLUSIVE_START)) && matches!(last, Some(INCLUSIVE_END | EXCLUSIVE_END)) {
-        let (min, max) = v[1..v.len() -1].split_once(',').ok_or(anyhow!("Invalid dependency version range: '{}'", version))?;
-        let min = min.trim();
-        let max = max.trim();
-
-        let mut parts = Vec::new();
-        if !min.is_empty() {
-            let min_op = if first == Some(INCLUSIVE_START) { ">=" } else { ">" };
-            parts.push(format!("{} {}", min_op, min));
-        }
-
-        if !max.is_empty() {
-            let max_op = if last == Some(INCLUSIVE_END) { "<=" } else { "<" };
-            parts.push(format!("{} {}", max_op, max));
-        }
-
-        let range_str = parts.join(", ");
-        let version_req = semver::VersionReq::parse(&range_str)?;
-        return Ok(version_req);
-    }
-
-    let version_req = semver::VersionReq::parse(version)?;
-    return Ok(version_req);
-}
-
-fn parse_dependencies(raw_dependencies: &Vec<String>) -> Result<Vec<(String, semver::VersionReq)>, Error> {
-    let mut dependencies: Vec<(String, semver::VersionReq)> = Vec::new();
-
-    for dep in raw_dependencies {
-        let parts: Vec<&str> = dep.splitn(2, '@').collect();
-        if parts.len() != 2 {
-            return Err(anyhow!("Invalid dependency format: '{}'. Expected format is 'name@version_req'", dep));
-        }
-
-        let name = parts[0].trim().to_string();
-        let version = parts[1].trim();
-        let version_req = parse_dependency_version(version)?;
-
-        dependencies.push((name, version_req));
-    }
-
-    return Ok(dependencies);
-}
-
-fn load_plugin(plugin_path: &Path, manifest: &PluginManifestYAML) -> Result<(), Error> {
-    let parsed_dependencies = parse_dependencies(&manifest.dependencies)?;
-    let plugin = UniChatPlugin::new(plugin_path, &manifest, parsed_dependencies)?;
-    let plugin = Arc::new(plugin);
-
-    for (key, version_req) in plugin.dependencies.iter() {
-        if key == "unichat" {
-            let unichat_version = semver::Version::parse(UNICHAT_VERSION)?;
-            if !version_req.matches(&unichat_version) {
-                plugin.add_message(format!("Required unichat version '{}' does not satisfy the current version '{}'", version_req, unichat_version));
-                return Err(anyhow!("Plugin '{}' requires unichat version '{}' which does not satisfy the current version '{}'", manifest.name, version_req, unichat_version));
-            }
-        }
-    }
-
-    if !plugin.get_data_path().is_dir() {
-        let msg = format!("Plugin folder '{:?}' is missing required 'data' directory", plugin_path);
-        plugin.add_message(&msg);
-        plugin.set_status(PluginStatus::Error);
-        return Err(anyhow!("{}", msg));
-    } else if !plugin.get_entrypoint_path().is_file() {
-        let msg = format!("Plugin folder '{:?}' is missing required 'data/main.lua' entrypoint file", plugin_path);
-        plugin.add_message(&msg);
-        plugin.set_status(PluginStatus::Error);
-        return Err(anyhow!("{}", msg));
-    }
-
-    {
-        let mut loaded_plugins = LOADED_PLUGINS.write().map_err(|_| anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
-        if loaded_plugins.contains_key(&plugin.name) {
-            return Err(anyhow!("Plugin with name '{}' is already loaded", plugin.name));
-        }
-
-        loaded_plugins.insert(plugin.name.clone(), plugin.clone());
-        plugin.set_status(PluginStatus::Loaded);
-    }
-
-    if let Err(e) = widgets::add_plugin_widgets(&plugin) {
-        plugin.add_message(format!("An error occurred while loading plugin widgets: {:?}", e));
-        log::error!("Failed to load widgets for plugin '{}': {:?}", plugin.name, e);
-    }
-
-    if let Err(e) = load_plugin_env(&plugin) {
-        plugin.add_message(format!("An error occurred on start plugin: {:?}", e));
-        plugin.set_status(PluginStatus::Error);
-        return Err(anyhow!("Failed to create LUA environment for plugin '{}': {:?}", plugin.name, e));
-    }
-
-    plugin.set_status(PluginStatus::Active);
-    log::info!("Loaded plugin: {} v{}", plugin.name, plugin.version);
-
-    return Ok(());
-}
 
 pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
     APP_HANDLE.set(app.handle().clone()).map_err(|_| anyhow!("{} was already initialized", APP_HANDLE_ONCE_LOCK_KEY))?;
