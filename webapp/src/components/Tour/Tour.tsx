@@ -17,6 +17,7 @@ import { Dimensions } from "unichat/types";
 
 import { defaultStageBuilder } from "./stages/defaultStageBuilder";
 import { editorStageBuilder } from "./stages/editorStageBuilder";
+import { notificationStageBuilder } from "./stages/notificationStageBuilder";
 import { widgetsSelectorBuilder } from "./stages/widgetsSelectorBuilder";
 import { TourStyledContainer } from "./styled";
 
@@ -110,6 +111,14 @@ const steps: TourStep[] = [
             500
         )
     },
+    // {
+    //     id: "14fe744f-ac12-4ef5-91f3-c638e0367f3f",
+    //     replaces: "1b19c7f5-eee9-4ef2-bc66-59cbebf06ad7",
+    //     builder: notificationStageBuilder("Kick Integration was Moved", [
+    //         "To improve kick integration, it was moved to a standalone plugin.",
+    //         'You can find it in <a href="https://unichat.voguh.me/#/plugins/plugin-kick" target="_blank" rel="noopener noreferrer">Community HUB</a> or <a href="https://github.com/unichat-community/plugin-kick" target="_blank" rel="noopener noreferrer">GitHub</a>.'
+    //     ])
+    // },
 
     {
         id: "21fe0e64-d83f-460e-94f3-519ef3843929a",
