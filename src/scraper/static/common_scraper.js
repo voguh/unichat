@@ -262,7 +262,10 @@ async function uniChatPreInit() {
         }
 
         uniChatLogger.info("Calling uniChatInit...");
-        const payload = await uniChatInit();
+        let payload = await uniChatInit();
+        if (payload == null || typeof payload !== "object") {
+            payload = {};
+        }
 
         uniChat.dispatchEvent({ type: "ready", url: window.location.href, ...payload });
         uniChatLogger.info("UniChat scraper initialized.");

@@ -84,7 +84,7 @@ uniChat.dispatchEvent({ type: "custom_event" });
   |-----------|----------|--------------------------------------------|
   | `event`   | `object` | Objeto de evento contendo dados do evento. |
 
-  Esta é a forma de comunicação do scraper script com o código LUA, o dado enviado será processado pela função `on_event` registrada no [`UniChatAPI:register_scraper`](/pt-br/plugins/unichat_api?id=unichatapiregister_scraperid-name-scraper_js_path-on_event-opts).
+  Esta é a forma de comunicação do scraper script com o código Lua, o dado enviado será processado pela função `on_event` registrada no [`UniChatAPI:register_scraper`](/pt-br/plugins/unichat_api?id=unichatapiregister_scraperid-name-scraper_js_path-on_event-opts).
 
 - `uniChat.preWebSocketSend(data, { wsInstance, url, protocols })`: Uma função atribuída que é chamada antes de uma mensagem WebSocket ser enviada.
   | Argumento                        | Tipo                                | Descrição                                                                                                                           |
@@ -134,3 +134,21 @@ uniChat.dispatchEvent({ type: "custom_event" });
 
   Esta função pode ser atribuída pelo seu script scraper para lidar com respostas fetch.
 
+---
+
+### Função `uniChatInit()`
+
+O seu script scraper deve definir uma função global chamada `uniChatInit()`.
+Ela é o ponto de entrada para inicializar qualquer lógica específica do scraper.
+
+Exemplo de uso:
+```javascript
+async function uniChatInit() {
+  return {}
+}
+```
+
+Esta função é chamada uma vez quando o scraper é carregado.
+Ela é uma função assíncrona que deve retornar um objeto. Qualquer outro tipo de retorno será ignorado e um objeto vazio será usado.
+
+O objeto retornado será mesclado com o evento `ready` enviado para o código Lua.
