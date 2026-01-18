@@ -14,7 +14,7 @@ export const TourStyledContainer = styled.div`
         position: fixed;
         top: 0;
         left: 0;
-        z-index: 9998;
+        z-index: 10;
     }
 
     > .actions {
