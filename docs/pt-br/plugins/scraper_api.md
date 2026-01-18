@@ -84,7 +84,7 @@ uniChat.dispatchEvent({ type: "custom_event" });
   |-----------|----------|--------------------------------------------|
   | `event`   | `object` | Objeto de evento contendo dados do evento. |
 
-  Esta é a forma de comunicação do scraper script com o código LUA, o dado enviado será processado pela função `on_event` registrada no [`UniChatAPI:register_scraper`](/pt-br/plugins/unichat_api?id=unichatapiregister_scraperid-name-scraper_js_path-on_event-opts).
+  Esta é a forma de comunicação do scraper script com o código Lua, o dado enviado será processado pela função `on_event` registrada no [`UniChatAPI:register_scraper`](/pt-br/plugins/unichat_api?id=unichatapiregister_scraperid-name-scraper_js_path-on_event-opts).
 
 - `uniChat.preWebSocketSend(data, { wsInstance, url, protocols })`: Uma função atribuída que é chamada antes de uma mensagem WebSocket ser enviada.
   | Argumento                        | Tipo                                | Descrição                                                                                                                           |
