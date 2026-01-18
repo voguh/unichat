@@ -82,7 +82,8 @@
         /* ============================== COMMON ============================== */
         "semi": ["warn", "always"],
 
-        "quotes": ["warn", "double"],
+        /* Disable quotes enforcement due to conflict with prettier */
+        "quotes": "off",
 
         "space-before-function-paren": "off",
 
