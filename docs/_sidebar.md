@@ -2,6 +2,7 @@
 * Plugin Development
   * [Getting Started](/plugins/getting_started.md)
   * [UniChat API](/plugins/unichat_api.md)
+  * [Scraper API](/plugins/scraper_api.md)
   * [Auxiliary Modules](/plugins/auxiliary_modules.md)
   * [Global Factories](/plugins/global_factories.md)
 
