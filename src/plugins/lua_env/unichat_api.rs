@@ -38,26 +38,22 @@ use crate::utils::settings;
 use crate::utils::settings::SettingLogEventLevel;
 use crate::utils::userstore;
 
-fn get_optional_table_property<R: mlua::FromLua>(table: &mlua::Table, keys: Vec<&str>) -> Result<Option<R>, mlua::Error> {
-    for key in keys {
-        if let Ok(value) = table.get(key) {
-            return Ok(Some(value));
-        }
+fn get_optional_table_property<R: mlua::FromLua>(table: &mlua::Table, key: &str) -> Result<Option<R>, mlua::Error> {
+    if let Ok(value) = table.get(key) {
+        return Ok(Some(value));
     }
 
     return Ok(None);
 }
 
-fn get_table_property<R: mlua::FromLua>(table: &mlua::Table, default_value: Option<R>, keys: Vec<&str>) -> Result<R, mlua::Error> {
-    let first = keys.first().copied().unwrap_or("unknown");
-
-    if let Some(value) = get_optional_table_property::<R>(table, keys)? {
+fn get_table_property<R: mlua::FromLua>(table: &mlua::Table, key: &str, default_value: Option<R>) -> Result<R, mlua::Error> {
+    if let Some(value) = get_optional_table_property::<R>(table, key)? {
         return Ok(value);
     } else if let Some(default_value) = default_value {
         return Ok(default_value);
     }
 
-    return Err(mlua::Error::external(format!("Missing required table property '{}'", first)));
+    return Err(mlua::Error::external(format!("Missing required table property '{}'", key)));
 }
 
 struct LuaUniChatScraper {
@@ -71,6 +67,7 @@ struct LuaUniChatScraper {
     validate_url: mlua::Function,
     scraper_js: String,
     on_event: mlua::Function,
+    on_idle: Option<mlua::Function>,
     on_ready: Option<mlua::Function>,
     on_ping: Option<mlua::Function>,
     on_error: Option<mlua::Function>
@@ -78,18 +75,19 @@ struct LuaUniChatScraper {
 
 impl LuaUniChatScraper {
     fn new(id: String, name: String, scraper_js: String, on_event: mlua::Function, opts: mlua::Table) -> Result<Self, mlua::Error> {
-        let editing_tooltip_message = get_table_property(&opts, Some(format!("Enter {} chat url...", name)), vec!["editingTooltipMessage", "editing_tooltip_message"])?;
-        let editing_tooltip_urls = get_table_property(&opts, Some(Vec::new()), vec!["editingTooltipUrls", "editing_tooltip_urls"])?;
-        let placeholder_text = get_table_property(&opts, Some(format!("Enter {} chat url...", name)), vec!["placeholderText", "placeholder_text"])?;
-        let badges = get_table_property(&opts, Some(Vec::new()), vec!["badges"])?;
-        let icon = get_table_property(&opts, Some(String::from("fas fa-video")), vec!["icon"])?;
-        let validate_url = get_table_property(&opts, None, vec!["validateUrl", "validate_url"])?;
-        let on_ready = get_optional_table_property(&opts, vec!["onReady", "on_ready"])?;
-        let on_ping = get_optional_table_property(&opts, vec!["onPing", "on_ping"])?;
-        let on_error = get_optional_table_property(&opts, vec!["onError", "on_error"])?;
+        let editing_tooltip_message = get_table_property(&opts, "editing_tooltip_message", Some(format!("Enter {} chat url...", name)))?;
+        let editing_tooltip_urls = get_table_property(&opts, "editing_tooltip_urls", Some(Vec::new()))?;
+        let placeholder_text = get_table_property(&opts, "placeholder_text", Some(format!("Enter {} chat url...", name)))?;
+        let badges = get_table_property(&opts, "badges", Some(Vec::new()))?;
+        let icon = get_table_property(&opts, "icon", Some(String::from("fas fa-video")))?;
+        let validate_url = get_table_property(&opts, "validate_url", None)?;
+        let on_idle = get_optional_table_property(&opts, "on_idle")?;
+        let on_ready = get_optional_table_property(&opts, "on_ready")?;
+        let on_ping = get_optional_table_property(&opts, "on_ping")?;
+        let on_error = get_optional_table_property(&opts, "on_error")?;
 
-        if id.trim().is_empty() || !id.trim().ends_with("-chat") {
-            return Err(mlua::Error::external(format!("Scraper 'id' must be a non-empty string and end with '-chat'")));
+        if id.trim().is_empty() || id.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') || !id.trim().ends_with("-chat") {
+            return Err(mlua::Error::external(format!("Scraper 'id' must be a non-empty alphanumeric ASCII string and end with '-chat'")));
         }
 
         if name.trim().is_empty() {
@@ -107,6 +105,7 @@ impl LuaUniChatScraper {
             validate_url: validate_url,
             scraper_js: scraper_js,
             on_event: on_event,
+            on_idle: on_idle,
             on_ready: on_ready,
             on_ping: on_ping,
             on_error: on_error
@@ -170,34 +169,34 @@ impl UniChatScraper for LuaUniChatScraper {
             return Ok(());
         }
 
-        if matches!(event_type, "ready" | "ping" | "error") {
+        if matches!(event_type, "idle" | "ready" | "ping" | "error") {
             if let Err(err) = render_emitter::emit(event.clone()) {
                 log::error!("{:?}", err);
             }
 
-            if event_type == "ready" {
-                if let Some(on_ready) = &self.on_ready {
-                    let lua = get_lua_runtime()?;
+            let lua = get_lua_runtime()?;
+            let table = lua.to_value(&event)?;
 
-                    let table = lua.to_value(&event)?;
+            if event_type == "idle" {
+                if let Some(on_idle) = &self.on_idle {
+                    if let Err(err) = on_idle.call::<()>(table) {
+                        log::error!("An error occurred on '{}' scraper 'on_idle' callback: {}", self.id, err);
+                    }
+                }
+            } else if event_type == "ready" {
+                if let Some(on_ready) = &self.on_ready {
                     if let Err(err) = on_ready.call::<()>(table) {
                         log::error!("An error occurred on '{}' scraper 'on_ready' callback: {}", self.id, err);
                     }
                 }
             } else if event_type == "ping" {
                 if let Some(on_ping) = &self.on_ping {
-                    let lua = get_lua_runtime()?;
-
-                    let table = lua.to_value(&event)?;
                     if let Err(err) = on_ping.call::<()>(table) {
                         log::error!("An error occurred on '{}' scraper 'on_ping' callback: {}", self.id, err);
                     }
                 }
             } else if event_type == "error" {
                 if let Some(on_error) = &self.on_error {
-                    let lua = get_lua_runtime()?;
-
-                    let table = lua.to_value(&event)?;
                     if let Err(err) = on_error.call::<()>(table) {
                         log::error!("An error occurred on '{}' scraper 'on_error' callback: {}", self.id, err);
                     }
