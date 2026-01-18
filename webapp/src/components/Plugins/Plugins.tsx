@@ -9,9 +9,9 @@
 
 import React from "react";
 
-import { Badge, Button, Card, Tooltip } from "@mantine/core";
+import { Badge, Button } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { revealItemInDir } from "@tauri-apps/plugin-opener";
+import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { AppContext } from "unichat/contexts/AppContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
@@ -19,9 +19,10 @@ import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
 import { UniChatPluginMetadata } from "unichat/types";
 import { PLUGIN_STATUS_COLOR } from "unichat/utils/constants";
+import { Strings } from "unichat/utils/Strings";
 
 import { PluginOverview, PluginOverviewActions } from "./PluginOverview";
-import { PluginsGridContainer, PluginsStyledContainer } from "./styled";
+import { PluginsStyledContainer } from "./styled";
 
 interface Props {
     children?: React.ReactNode;
@@ -76,40 +77,43 @@ export function Plugins(_props: Props): React.ReactNode {
 
     return (
         <PluginsStyledContainer>
-            <PluginsGridContainer cols={5}>
-                {plugins
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((plugin) => {
-                        const [bgColor, fgColor] = PLUGIN_STATUS_COLOR[plugin.status];
+            <table>
+                <tbody>
+                    {plugins
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map((plugin) => {
+                            const [bgColor, fgColor] = PLUGIN_STATUS_COLOR[plugin.status];
 
-                        return (
-                            <Tooltip key={plugin.name} label={plugin.name} position="bottom">
-                                <Card onClick={() => openPluginDetails(plugin)} className="plugin-item">
-                                    <Card.Section>
-                                        <div className="badges-wrapper">
-                                            {plugin.pluginPath == null ? (
-                                                <Badge
-                                                    radius="xs"
-                                                    style={{
-                                                        backgroundColor: "var(--mantine-color-gray-5)",
-                                                        color: "var(--mantine-color-black)"
-                                                    }}
-                                                >
-                                                    System
-                                                </Badge>
-                                            ) : (
-                                                <Badge radius="xs" style={{ backgroundColor: bgColor, color: fgColor }}>
-                                                    {plugin.status}
+                            return (
+                                <tr key={plugin.name}>
+                                    <td className="plugin-icon">
+                                        <img src={getPluginIconDataUrl(plugin)} />
+                                    </td>
+                                    <td className="plugin-name">
+                                        <span>{plugin.name}</span>
+                                    </td>
+                                    <td className="plugin-badges">
+                                        <span>
+                                            {Strings.isNullOrEmpty(plugin.pluginPath) && (
+                                                <Badge radius="xs" bg="blue">
+                                                    <i className="fas fa-code-branch" /> Built-In
                                                 </Badge>
                                             )}
-                                        </div>
-                                        <img src={getPluginIconDataUrl(plugin)} />
-                                    </Card.Section>
-                                </Card>
-                            </Tooltip>
-                        );
-                    })}
-            </PluginsGridContainer>
+                                            <Badge radius="xs" style={{ backgroundColor: bgColor, color: fgColor }}>
+                                                {plugin.status}
+                                            </Badge>
+                                        </span>
+                                    </td>
+                                    <td className="plugin-actions">
+                                        <Button variant="outline" size="xs" onClick={() => openPluginDetails(plugin)}>
+                                            Details
+                                        </Button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                </tbody>
+            </table>
         </PluginsStyledContainer>
     );
 }
@@ -118,9 +122,24 @@ export function PluginsActions(_props: Props): React.ReactNode {
     const { metadata } = React.useContext(AppContext);
 
     return (
-        <Button variant="outline" size="xs" onClick={() => revealItemInDir(metadata.pluginsDir)}>
-            <i className="fas fa-folder" />
-            &nbsp;Show Plugins Folder
-        </Button>
+        <>
+            <Button
+                variant="outline"
+                color="gray"
+                size="xs"
+                leftSection={<i className="fas fa-book" />}
+                onClick={() => openUrl("https://voguh.github.io/unichat/#/plugins/getting_started")}
+            >
+                Read the Docs
+            </Button>
+            <Button
+                variant="outline"
+                size="xs"
+                leftSection={<i className="fas fa-folder" />}
+                onClick={() => revealItemInDir(metadata.pluginsDir)}
+            >
+                Show Plugins Folder
+            </Button>
+        </>
     );
 }

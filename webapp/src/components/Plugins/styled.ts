@@ -7,41 +7,72 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-import { SimpleGrid } from "@mantine/core";
 import styled from "styled-components";
 
 export const PluginsStyledContainer = styled.div`
     position: relative;
-`;
 
-export const PluginsGridContainer = styled(SimpleGrid).attrs({
-    spacing: "xs",
-    verticalSpacing: "xs"
-})`
-    > .plugin-item {
-        cursor: pointer;
-        border: 1px solid var(--mantine-color-dark-4);
+    > table {
+        --cell-padding-x: 8px;
+        --cell-padding-y: 8px;
+        --cell-inner-min-width: 30px;
+        --cell-inner-height: 30px;
+        --cell-min-width: calc(var(--cell-inner-min-width) + var(--cell-padding-x) * 2);
+        --cell-height: calc(var(--cell-inner-height) + var(--cell-padding-y) * 2);
 
-        > div {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 140px;
-            height: 140px;
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
 
-            > img {
-                width: 100%;
-                height: 100%;
-                object-fit: contain;
-            }
+        > tbody {
+            > tr {
+                &:nth-child(odd) {
+                    background-color: var(--mantine-color-dark-7);
+                }
 
-            > .badges-wrapper {
-                position: absolute;
-                top: 8px;
-                right: 8px;
-                display: flex;
-                gap: 4px;
+                &:nth-child(even) {
+                    background-color: var(--mantine-color-dark-6);
+                }
+
+                > td {
+                    height: var(--cell-height);
+                    min-width: var(--cell-min-width);
+                    padding: var(--cell-padding-y) var(--cell-padding-x);
+                    text-align: left;
+
+                    &.plugin-icon {
+                        width: var(--cell-min-width);
+
+                        > img {
+                            display: block;
+                            width: 30px;
+                            height: 30px;
+                        }
+                    }
+
+                    &.plugin-name {
+                        > span {
+                            font-weight: bolder;
+                            font-size: 14px;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        }
+                    }
+
+                    &.plugin-badges {
+                        > span {
+                            display: flex;
+                            justify-content: flex-end;
+                            gap: 4px;
+                        }
+                    }
+
+                    &.plugin-actions {
+                        width: calc(67px + var(--cell-padding-x) * 2);
+                        text-align: right;
+                    }
+                }
             }
         }
     }

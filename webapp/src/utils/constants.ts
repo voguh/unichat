@@ -22,16 +22,26 @@ export function scraperPriority(id: string): number {
     }
 }
 
+/**
+ * Plugin statuses.
+ *
+ * - LOADED: The plugin is valid and loaded but not yet active.
+ * - INVALID: The plugin is invalid due to missing or incorrect dependencies or structure.
+ * - ACTIVE: The plugin is active and running.
+ * - ERROR: The plugin encountered an error during loading or execution.
+ */
 export enum PluginStatus {
     LOADED = "LOADED",
-    ERROR = "ERROR",
-    ACTIVE = "ACTIVE"
+    INVALID = "INVALID",
+    ACTIVE = "ACTIVE",
+    ERROR = "ERROR"
 }
 
 export const PLUGIN_STATUS_COLOR = {
-    [PluginStatus.LOADED]: ["var(--mantine-color-blue-5)", "var(--mantine-color-white)"],
-    [PluginStatus.ERROR]: ["var(--mantine-color-red-5)", "var(--mantine-color-white)"],
-    [PluginStatus.ACTIVE]: ["var(--mantine-color-green-5)", "var(--mantine-color-black)"]
+    [PluginStatus.LOADED]: ["var(--mantine-color-yellow-5)", "var(--mantine-color-black)"],
+    [PluginStatus.INVALID]: ["var(--mantine-color-red-5)", "var(--mantine-color-black)"],
+    [PluginStatus.ACTIVE]: ["var(--mantine-color-green-5)", "var(--mantine-color-black)"],
+    [PluginStatus.ERROR]: ["var(--mantine-color-red-5)", "var(--mantine-color-black)"]
 };
 
 export enum UniChatSettings {
