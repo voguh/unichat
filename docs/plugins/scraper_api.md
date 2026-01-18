@@ -81,7 +81,7 @@ uniChat.dispatchEvent({ type: "custom_event" });
   |----------|----------|-------------------------------------|
   | `event`  | `object` | Event object containing event data. |
 
-  This is the way for the scraper script to communicate with the LUA code, the data sent will be processed by the `on_event` function registered in [`UniChatAPI:register_scraper`](/plugins/unichat_api?id=unichatapiregister_scraperid-name-scraper_js_path-on_event-opts).
+  This is the way for the scraper script to communicate with the Lua code, the data sent will be processed by the `on_event` function registered in [`UniChatAPI:register_scraper`](/plugins/unichat_api?id=unichatapiregister_scraperid-name-scraper_js_path-on_event-opts).
 
 - `uniChat.onWebSocketMessage(event, { wsInstance, url, protocols })`: Assigned function that is called when a WebSocket message is received.
   | Argument                         | Type           | Description                                                                                                                             |
@@ -130,3 +130,22 @@ uniChat.dispatchEvent({ type: "custom_event" });
   | `args`     | `array`    | The arguments that were passed to `fetch()`.<br/> See [MDN fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch). |
 
   This function can be assigned by your scraper script to handle fetch responses.
+
+---
+
+### `uniChatInit()` function
+
+Your scraper script must define a global function named `uniChatInit()`.
+It's your entry point to initialize any scraper-specific logic.
+
+Example usage:
+```javascript
+async function uniChatInit() {
+  return {}
+}
+```
+
+This function is called once when the scraper is loaded.
+It's a async function that must return an object. If any other type is returned, it will be ignored and an empty object will be used instead.
+
+The returned object will be merged into the `ready` event payload sent to the Lua code.
