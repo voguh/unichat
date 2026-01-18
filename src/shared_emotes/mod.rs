@@ -28,17 +28,29 @@ pub fn fetch_shared_emotes(platform: &str, channel_id: &str) -> Result<(), Error
     let _ = tauri::async_runtime::spawn_blocking(move || {
         let mut shared_emotes = HashMap::new();
 
-        if let Ok(guard) = EMOTES_HASHSET.read() {
-            if guard.is_empty() {
-                shared_emotes.extend(betterttv::fetch_global_emotes());
-                shared_emotes.extend(frankerfacez::fetch_global_emotes());
-                shared_emotes.extend(seventv::fetch_global_emotes());
+        {
+            if let Ok(guard) = EMOTES_HASHSET.read() {
+                if guard.is_empty() {
+                    log::info!("Fetching global shared emotes...");
+                    log::info!("Fetching global BetterTTV emotes...");
+                    shared_emotes.extend(betterttv::fetch_global_emotes());
+                    log::info!("Fetching global FrankerFaceZ emotes...");
+                    shared_emotes.extend(frankerfacez::fetch_global_emotes());
+                    log::info!("Fetching global 7TV emotes...");
+                    shared_emotes.extend(seventv::fetch_global_emotes());
+                }
             }
         }
 
+        log::info!("Fetching channel shared emotes ({}:{})...", platform, channel_id);
+        log::info!("Fetching channel BetterTTV emotes ({}:{})...", platform, channel_id);
         shared_emotes.extend(betterttv::fetch_channel_emotes(&platform, &channel_id));
+        log::info!("Fetching channel FrankerFaceZ emotes ({}:{})...", platform, channel_id);
         shared_emotes.extend(frankerfacez::fetch_channel_emotes(&platform, &channel_id));
+        log::info!("Fetching channel 7TV emotes ({}:{})...", platform, channel_id);
         shared_emotes.extend(seventv::fetch_channel_emotes(&platform, &channel_id));
+
+        log::info!("Fetched {} shared emotes ({}:{})", shared_emotes.len(), platform, channel_id);
 
         if let Ok(mut guard) = EMOTES_HASHSET.write() {
             for (key, value) in shared_emotes {

@@ -65,7 +65,6 @@ pub fn fetch_global_emotes() -> HashMap<String, UniChatEmote> {
 
 pub fn fetch_channel_emotes(platform: &str, channel_id: &str) -> HashMap<String, UniChatEmote> {
     let url = format!("https://7tv.io/v3/users/{}/{}", platform, channel_id);
-
     let parser = |data: Value| -> EmotesParserResult {
         let emote_set = data.get("emote_set").ok_or(anyhow!("Emote set not found"))?;
         let emotes = emote_set.get("emotes").and_then(|v| v.as_array()).cloned().unwrap_or_default();

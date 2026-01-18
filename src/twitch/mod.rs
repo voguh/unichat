@@ -66,7 +66,13 @@ fn dispatch_event(mut payload: Value) -> Result<(), Error> {
 
 /* ================================================================================================================== */
 
-fn handle_ready_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
+fn handle_ready_event(event_type: &str, payload: &Value) -> Result<(), Error> {
+    let channel_id = payload.get("channelId").and_then(|v| v.as_str())
+        .ok_or(anyhow!("Missing or invalid 'channelId' field in Twitch '{}' payload", event_type))?;
+
+    shared_emotes::fetch_shared_emotes("twitch", channel_id)?;
+    properties::set_item(PropertiesKey::TwitchChannelId, String::from(channel_id))?;
+
     return dispatch_event(payload.clone());
 }
 
@@ -165,18 +171,6 @@ fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error>
 
     if log_events == SettingLogEventLevel::AllEvents {
         log_action("events-raw.log", &format!("{:?}", message));
-    }
-
-    if let IRCCommand::Raw(cmd, _args) = &message.command {
-        if cmd == "ROOMSTATE" {
-            let tags = &message.tags.clone();
-            if let Some(channel_id) = tags.get("room-id").and_then(|v| v.as_ref()) {
-                shared_emotes::fetch_shared_emotes("twitch", channel_id)?;
-                properties::set_item(PropertiesKey::TwitchChannelId, channel_id.clone())?;
-            }
-
-            return Ok(());
-        }
     }
 
     match mapper::parse_irc(&message) {

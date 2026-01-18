@@ -61,7 +61,6 @@ pub fn fetch_global_emotes() -> HashMap<String, UniChatEmote> {
 
 pub fn fetch_channel_emotes(platform: &str, channel_id: &str) -> HashMap<String, UniChatEmote> {
     let url = format!("https://api.betterttv.net/3/cached/frankerfacez/users/{}/{}", platform, channel_id);
-
     let parser = |data: Value| -> EmotesParserResult {
         let emotes: Vec<FrankerFaceZEmote> = serde_json::from_value(data)?;
 

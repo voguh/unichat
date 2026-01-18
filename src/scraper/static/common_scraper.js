@@ -132,6 +132,8 @@ function registerIntermittentEventDispatcher(type) {
     async function dispatch() {
         await uniChat.dispatchEvent({ type });
     }
+
+    setInterval(dispatch, 5000);
 }
 
 /* ================================================================================================================== */
@@ -153,6 +155,23 @@ if (window.WebSocket.__WRAPPED__ !== true) {
             }
         });
 
+        const originalSend = wsInstance.send;
+        wsInstance.send = function (data) {
+            if (typeof uniChat.preWebSocketSend === "function") {
+                data = uniChat.preWebSocketSend(data, { wsInstance, url, protocols }) || data;
+            }
+
+            try {
+                if (typeof uniChat.onWebSocketSend === "function") {
+                    uniChat.onWebSocketSend(data, { wsInstance, url, protocols });
+                }
+            } catch (err) {
+                uniChatLogger.error(err.message, err);
+            }
+
+            return originalSend.apply(this, arguments);
+        };
+
         return wsInstance;
     };
 
@@ -169,10 +188,22 @@ if (window.fetch.__WRAPPED__ !== true) {
     const originalFetch = window.fetch;
 
     window.fetch = async function (...args) {
+        if (typeof uniChat.preFetch === "function") {
+            args = await uniChat.preFetch(args) || args;
+        }
+
+        try {
+            if (typeof uniChat.onFetchRequest === "function") {
+                uniChat.onFetchRequest(args);
+            }
+        } catch (err) {
+            uniChatLogger.error(err.message, err);
+        }
+
         const res = await originalFetch.apply(this, args);
 
         if (typeof uniChat.onFetchResponse === "function") {
-            uniChat.onFetchResponse(res.clone(), ...args);
+            uniChat.onFetchResponse(res.clone(), args);
         }
 
         return res;

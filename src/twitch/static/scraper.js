@@ -144,5 +144,30 @@ function uniChatInit() {
         }
     }
 
-    return {};
+    return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error("Twitch scraper initialization timed out.")), 15000);
+
+        uniChat.onWebSocketSend = async function(data, { wsInstance, url, protocols}) {
+            if (url.startsWith("wss://hermes.twitch.tv/v1")) {
+                const dataObj = JSON.parse(data);
+
+                if (dataObj.type === "subscribe") {
+                    const subscribe = dataObj.subscribe;
+
+                    if (subscribe.type === "pubsub") {
+                        const pubsub = subscribe.pubsub;
+
+                        if (pubsub.topic.startsWith("community-points-channel-v1")) {
+                            let splittedTopic = pubsub.topic.split(".");
+                            const topicType = splittedTopic[0];
+                            const channelId = splittedTopic[1];
+
+                            clearTimeout(timeout);
+                            resolve({ channelId });
+                        }
+                    }
+                }
+            }
+        }
+    })
 }
