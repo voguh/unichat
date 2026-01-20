@@ -104,7 +104,7 @@ fn flush_userstore() -> Result<(), Error> {
 
 /* ================================================================================================================== */
 
-pub fn init(_app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
+pub fn init() -> Result<(), Error> {
     let store_path = USERSTORE_PATH.as_path();
     if !store_path.exists() {
         fs::write(store_path, "{}")?;

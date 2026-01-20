@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!--
+/*!******************************************************************************
+ * UniChat
+ * Copyright (C) 2025-2026 Voguh <voguhofc@protonmail.com>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ ******************************************************************************/
+-->
+<html lang="en" data-bs-theme="dark">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+        <title>Voguh's UniChat</title>
+
+        <style>
+            html, body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                box-sizing: border-box;
+            }
+
+            body {
+                position: relative;
+                width: 100vw;
+                height: 100vh;
+                background: url('/assets/UniChatSplashScreen.png') center center / contain no-repeat;
+
+                display: flex;
+                justify-content: center;
+                align-items: flex-end;
+                padding: 16px;
+                color: #ffffff;
+            }
+        </style>
+
+        <script defer>
+            async function init() {
+                await __TAURI__.event.listen("unichat://splashscreen:update", ({ payload }) => {
+                    document.body.textContent = payload;
+                })
+            }
+
+            if (document.readyState === "interactive" || document.readyState === "complete") {
+                init();
+            } else {
+                document.addEventListener("DOMContentLoaded", init);
+            }
+        </script>
+    </head>
+    <body>
+        [21/21] Loading plugins...
+    </body>
+</html>

@@ -7,6 +7,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+#![allow(unused)]
+
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct JsonRPCRequest {
     jsonrpc: String,

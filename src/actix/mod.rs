@@ -18,7 +18,7 @@ pub struct ActixState {
 }
 
 impl ActixState {
-    fn new(_app: &tauri::AppHandle<tauri::Wry>) -> Self {
+    fn new() -> Self {
         let handle = tauri::async_runtime::spawn(async move {
             let mut host = "127.0.0.1";
             if settings::get_item(SETTINGS_OPEN_TO_LAN_KEY).is_ok_and(|v: bool| v == true) {
@@ -50,7 +50,6 @@ impl ActixState {
     }
 }
 
-pub fn new(app: &tauri::App<tauri::Wry>) -> ActixState {
-    let app_handle = app.handle();
-    return ActixState::new(app_handle);
+pub fn new() -> ActixState {
+    return ActixState::new();
 }
