@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2025-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -16,8 +16,8 @@ use serde::Serialize;
 
 use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatBadge;
-use crate::irc::IRCPrefix;
 use crate::twitch::TWITCH_BADGES;
+use crate::utils::irc::IRCPrefix;
 use crate::utils::random_color_by_seed;
 
 #[derive(Serialize, Deserialize, Debug)]

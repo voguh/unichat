@@ -37,8 +37,6 @@ include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 mod actix;
 mod commands;
 mod events;
-mod irc;
-mod jsonrpc;
 mod plugins;
 mod scraper;
 mod shared_emotes;

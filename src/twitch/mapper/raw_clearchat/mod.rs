@@ -14,9 +14,9 @@ use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRemoveAuthorEventPayload;
-use crate::irc::IRCMessage;
 use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::utils::get_current_timestamp;
+use crate::utils::irc::IRCMessage;
 
 pub fn parse(channel: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let event: UniChatEvent;

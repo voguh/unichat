@@ -23,11 +23,11 @@ use serde_json::Value;
 
 use crate::events;
 use crate::events::unichat::UniChatBadge;
-use crate::irc::IRCMessage;
 use crate::scraper;
 use crate::scraper::UniChatScraper;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
+use crate::utils::irc::IRCMessage;
 use crate::utils::is_valid_twitch_channel_name;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;

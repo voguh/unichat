@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2025-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -11,7 +11,7 @@ use anyhow::anyhow;
 use anyhow::Error;
 
 use crate::events::unichat::UniChatEvent;
-use crate::irc::IRCMessage;
+use crate::utils::irc::IRCMessage;
 
 mod announcement;
 mod community_gift;

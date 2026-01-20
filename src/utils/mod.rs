@@ -17,6 +17,8 @@ use anyhow::Error;
 use url::Url;
 
 pub mod constants;
+pub mod irc;
+pub mod jsonrpc;
 pub mod properties;
 pub mod render_emitter;
 pub mod settings;
