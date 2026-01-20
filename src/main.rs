@@ -297,8 +297,10 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
             }
         }
     } else if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-        api.prevent_close();
-        window.hide().unwrap();
+        if window.label().ends_with("-chat") {
+            api.prevent_close();
+            window.hide().unwrap();
+        }
     }
 }
 
