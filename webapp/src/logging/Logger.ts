@@ -8,7 +8,6 @@
  ******************************************************************************/
 
 import { invoke } from "@tauri-apps/api/core";
-import { SourceMapConsumer } from "source-map";
 import StackTrace from "stacktrace-js";
 
 type LogLevel = "trace" | "debug" | "info" | "warn" | "error";
@@ -29,25 +28,6 @@ function logLevelGuard(level: string): level is LogLevel {
     return ["trace", "debug", "info", "warn", "error"].includes(level);
 }
 
-const _sourceMapsCache: Record<string, SourceMapConsumer> = {};
-
-async function getSourceMap(url: string): Promise<SourceMapConsumer | null> {
-    if (_sourceMapsCache[url]) {
-        return _sourceMapsCache[url];
-    }
-
-    try {
-        const sourceMapData = await fetch(url).then((res) => res.json());
-
-        const consumer = await new SourceMapConsumer(sourceMapData);
-        _sourceMapsCache[url] = consumer;
-
-        return consumer;
-    } catch (_err) {
-        return null;
-    }
-}
-
 export class Logger {
     private readonly name: string;
 
@@ -56,89 +36,76 @@ export class Logger {
     }
 
     public trace(message: string, ...args: any[]): void {
-        this._doLog("trace", message, args);
+        this._doLog("trace", null, null, message, ...args);
     }
 
     public debug(message: string, ...args: any[]): void {
-        this._doLog("debug", message, args);
+        this._doLog("debug", null, null, message, ...args);
     }
 
     public info(message: string, ...args: any[]): void {
-        this._doLog("info", message, args);
+        this._doLog("info", null, null, message, ...args);
     }
 
     public warn(message: string, ...args: any[]): void {
-        this._doLog("warn", message, args);
+        this._doLog("warn", null, null, message, ...args);
     }
 
     public error(message: string, ...args: any[]): void {
-        this._doLog("error", message, args);
+        this._doLog("error", null, null, message, ...args);
     }
 
-    private _doLog(level: LogLevel, message: string, args: any[]): void {
+    private _doLog(level: LogLevel, file: string | null, line: number | null, message: string, ...args: any[]): void {
         const [formattedMessage, throwable] = this._formatMessage(message, args);
 
         if (!logLevelGuard(level)) {
             level = "info";
         }
 
-        this._emit(level, formattedMessage);
+        this._emit(level, file, line, formattedMessage);
         console[level](formattedMessage);
 
-        if (throwable) {
-            this._emit("error", throwable);
+        if (throwable != null) {
+            let errorMessage: string;
+            if (throwable.stack != null) {
+                if (throwable.stack.startsWith("Error")) {
+                    errorMessage = throwable.stack;
+                } else {
+                    const stack = throwable.stack.split("\n").map((line) => `\tat ${line}`);
+                    errorMessage = `Error: ${throwable.message}\n${stack.join("\n")}`;
+                }
+            } else {
+                errorMessage = String(throwable);
+            }
+
+            this._emit("error", file, line, errorMessage);
             console.error(throwable);
         }
     }
 
-    private async _emit(level: LogLevel, data: string | Error): Promise<void> {
-        let fileName = this.name;
-        let lineNumber: number | null = null;
+    private async _emit(level: LogLevel, file: string | null, line: number | null, data: string): Promise<void> {
+        let fileName = file || this.name;
+        let lineNumber: number | null = line || null;
 
-        const callStack = StackTrace.getSync();
-        const callSite = callStack[5];
-        if (callSite != null) {
-            const callSiteFileName = callSite.fileName;
-            const _lineNUmber = callSite.lineNumber;
-            const _columnNumber = callSite.columnNumber;
+        if (fileName != null || lineNumber != null) {
+            const callStack = StackTrace.getSync();
+            const callSite = callStack[5];
 
-            if (callSiteFileName != null && _lineNUmber != null && _columnNumber != null) {
-                const sourceMapURL = `${callSiteFileName}.map`;
-                const consumer = await getSourceMap(sourceMapURL);
-                if (consumer != null) {
-                    const pos = consumer.originalPositionFor({ line: _lineNUmber, column: _columnNumber });
+            if (callSite != null) {
+                const _fileName = callSite.fileName;
+                const _lineNumber = callSite.lineNumber;
 
-                    if (pos != null) {
-                        fileName = (pos.source || fileName).replace("../..", "");
-                        lineNumber = pos.line || lineNumber;
-                    }
+                // Only use stack trace info in development mode, otherwise the path contains `/js/` that points to the bundled files.
+                if (_fileName != null && _fileName.includes("/src/")) {
+                    fileName = fileName || _fileName.split("/src/")[1] || this.name;
+                    lineNumber = lineNumber || _lineNumber || null;
                 }
             }
-        }
-
-        if (fileName.startsWith("/src/")) {
-            fileName = fileName.replace("/src/", "");
-        }
-
-        let formattedMessage: string | null = null;
-        if (data instanceof Error) {
-            if (typeof data.stack === "string") {
-                if (data.stack.startsWith("Error")) {
-                    formattedMessage = data.stack;
-                } else {
-                    const stack = data.stack.split("\n").map((line) => `\tat ${line}`);
-                    formattedMessage = `Error: ${data.message}\n${stack.join("\n")}`;
-                }
-            } else {
-                formattedMessage = String(data);
-            }
-        } else {
-            formattedMessage = data;
         }
 
         invoke("plugin:log|log", {
             level: logLevelToNumber(level),
-            message: formattedMessage,
+            message: data,
             location: `${fileName}${lineNumber ? `:${lineNumber}` : ""}`,
             file: fileName,
             line: lineNumber || null,
