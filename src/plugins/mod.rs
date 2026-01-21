@@ -25,6 +25,7 @@ use crate::plugins::plugin_instance::load_plugin;
 use crate::plugins::plugin_manifest::PluginManifestYAML;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
+use crate::utils::semver;
 
 mod lua_env;
 mod plugin_instance;
@@ -57,7 +58,7 @@ pub struct UniChatPlugin {
     pub author: Option<String>,
     pub license: Option<String>,
     pub homepage: Option<String>,
-    pub dependencies: Vec<(String, semver::VersionReq)>,
+    pub dependencies: Vec<(String, semver::VersionRange)>,
 
     status: RwLock<PluginStatus>,
     messages: RwLock<Vec<String>>,
@@ -68,7 +69,7 @@ pub struct UniChatPlugin {
 }
 
 impl UniChatPlugin {
-    pub(in crate::plugins) fn new(plugin_path: &Path, manifest: &PluginManifestYAML, dependencies: Vec<(String, semver::VersionReq)>) -> Result<Self, Error> {
+    pub(in crate::plugins) fn new(plugin_path: &Path, manifest: &PluginManifestYAML, dependencies: Vec<(String, semver::VersionRange)>) -> Result<Self, Error> {
         let version = semver::Version::parse(&manifest.version)?;
 
         let lua = get_lua_runtime()?;

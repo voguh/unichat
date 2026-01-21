@@ -106,10 +106,10 @@ fn log_startup_process<S: Into<String>>(window: &tauri::WebviewWindow, message: 
 
 fn setup_inner() -> Result<(), Error> {
     let app_handle = get_app_handle();
-    log::info!("Starting {} v{}...", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION);
-
     let splash_screen = app_handle.get_webview_window("splash-screen").ok_or(anyhow!("Splash Screen window not found"))?;
     let start = Instant::now();
+
+    log_startup_process(&splash_screen, format!("Starting {} v{}...", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION));
 
     log_startup_process(&splash_screen, "[01/21] Initializing properties...");
     utils::properties::init()?;

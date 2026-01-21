@@ -21,6 +21,8 @@ pub mod irc;
 pub mod jsonrpc;
 pub mod properties;
 pub mod render_emitter;
+#[cfg(test)] mod semver_test;
+pub mod semver;
 pub mod settings;
 pub mod ureq;
 pub mod userstore;
