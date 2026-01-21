@@ -7,6 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+#![allow(unused)]
 use std::fmt::Display;
 
 use anyhow::anyhow;
@@ -157,6 +158,34 @@ impl Version {
             build_metadata: build_metadata.map(|s| s.to_string()),
         });
     }
+
+    /* ====================================================================== */
+
+    pub fn major(&self) -> u32 {
+        return self.major;
+    }
+
+    pub fn minor(&self) -> u32 {
+        return self.minor;
+    }
+
+    pub fn patch(&self) -> u32 {
+        return self.patch;
+    }
+
+    pub fn pre_release(&self) -> Option<&PreReleaseType> {
+        return self.pre_release.as_ref();
+    }
+
+    pub fn pre_release_number(&self) -> Option<u32> {
+        return self.pre_release_number;
+    }
+
+    pub fn build_metadata(&self) -> Option<&String> {
+        return self.build_metadata.as_ref();
+    }
+
+    /* ====================================================================== */
 
     pub fn compare(&self, other: &Version) -> std::cmp::Ordering {
         let self_major = self.major;
@@ -319,6 +348,18 @@ impl VersionRange {
 
         return Ok(Self { min, max });
     }
+
+    /* ====================================================================== */
+
+    pub fn min(&self) -> Option<&(BoundType, Version)> {
+        return self.min.as_ref();
+    }
+
+    pub fn max(&self) -> Option<&(BoundType, Version)> {
+        return self.max.as_ref();
+    }
+
+    /* ====================================================================== */
 
     pub fn matches(&self, version: &Version) -> bool {
         if let (Some((min_bound, min_version)), Some((max_bound, max_version))) = (&self.min, &self.max) {
