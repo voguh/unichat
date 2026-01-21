@@ -33,7 +33,7 @@ interface Props {
     onSelectItem?: (url: string) => void;
 }
 
-const _logger = LoggerFactory.getLogger(import.meta.url);
+const _logger = LoggerFactory.getLogger(__filename);
 export function Gallery(props: Props): React.ReactNode {
     const { onSelectItem, selectedItem = "", showTabs = ["image", "video", "audio", "file"], startSelectedTab } = props;
 

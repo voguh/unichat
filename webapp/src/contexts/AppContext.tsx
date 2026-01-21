@@ -31,7 +31,7 @@ interface Props {
     children?: React.ReactNode;
 }
 
-const _logger = LoggerFactory.getLogger(import.meta.url);
+const _logger = LoggerFactory.getLogger(__filename);
 export function AppContextProvider({ children }: Props): React.ReactNode {
     const [loading, setLoading] = React.useState(true);
     const [metadata, setMetadata] = React.useState<AppMetadata>(null);
