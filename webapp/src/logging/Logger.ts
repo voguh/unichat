@@ -9,6 +9,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { SourceMapConsumer } from "source-map";
+import StackTrace from "stacktrace-js";
 
 const logLevelsMap: Record<string, number> = {
     trace: 1,
@@ -22,14 +23,6 @@ function toLogLevel(level: string): number {
     return logLevelsMap[level] || logLevelsMap.info;
 }
 
-interface CallSite {
-    __raw: string;
-    functionName: string | null;
-    fileName: string | null;
-    lineNumber: number | null;
-    columnNumber: number | null;
-}
-
 function initializeFunctionGuard(obj: any): obj is { initialize: (arg: Record<string, string>) => void } {
     return typeof obj.initialize === "function";
 }
@@ -37,114 +30,6 @@ function initializeFunctionGuard(obj: any): obj is { initialize: (arg: Record<st
 if (initializeFunctionGuard(SourceMapConsumer)) {
     SourceMapConsumer.initialize({ "lib/mappings.wasm": "/source-map/mappings.wasm" });
 }
-
-/* =====================================[ CODE EXTRACTED FROM TAURI PLUGIN LOG ]===================================== */
-// The code below is adapted from the tauri-plugin-log guest-js implementation, the original code can be found here:
-// https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/log/guest-js/index.ts
-
-function getCallSite(): CallSite {
-    const stack = new Error().stack || "";
-    if (!stack) {
-        return;
-    }
-
-    if (stack.startsWith("Error")) {
-        // Assume it's Chromium V8
-        //
-        // Error
-        //     at baz (filename.js:10:15)
-        //     at bar (filename.js:6:3)
-        //     at foo (filename.js:2:3)
-        //     at filename.js:13:1
-
-        const lines = stack.split("\n");
-        // Find the third line (caller's caller of the current location)
-        const callerLine = lines[3]?.trim();
-        if (!callerLine) {
-            return {
-                __raw: "<unknown>",
-                functionName: null,
-                fileName: null,
-                lineNumber: null,
-                columnNumber: null
-            };
-        }
-
-        const regex = /at\s+(?<functionName>.*?)\s+\((?<fileName>.*?):(?<lineNumber>\d+):(?<columnNumber>\d+)\)/;
-        const match = callerLine.match(regex);
-
-        if (match) {
-            const { functionName, fileName: fileNameURL, lineNumber, columnNumber } = match.groups;
-            const fileName = new URL(fileNameURL).pathname;
-
-            return {
-                __raw: callerLine,
-                functionName: functionName || null,
-                fileName: fileName || null,
-                lineNumber: lineNumber != null ? parseInt(lineNumber, 10) : null,
-                columnNumber: columnNumber != null ? parseInt(columnNumber, 10) : null
-            };
-        } else {
-            // Handle cases where the regex does not match (e.g., last line without function name)
-            const regexNoFunction = /at\s+(?<fileName>.*?):(?<lineNumber>\d+):(?<columnNumber>\d+)/;
-            const matchNoFunction = callerLine.match(regexNoFunction);
-            if (matchNoFunction) {
-                const { fileName: fileNameURL, lineNumber, columnNumber } = matchNoFunction.groups;
-                const fileName = new URL(fileNameURL).pathname;
-
-                return {
-                    __raw: callerLine,
-                    functionName: "<anonymous>",
-                    fileName: fileName || null,
-                    lineNumber: lineNumber != null ? parseInt(lineNumber, 10) : null,
-                    columnNumber: columnNumber != null ? parseInt(columnNumber, 10) : null
-                };
-            }
-
-            return {
-                __raw: callerLine,
-                functionName: null,
-                fileName: null,
-                lineNumber: null,
-                columnNumber: null
-            };
-        }
-    } else {
-        // Assume it's Webkit JavaScriptCore, example:
-        //
-        // baz@filename.js:10:24
-        // bar@filename.js:6:6
-        // foo@filename.js:2:6
-        // global code@filename.js:13:4
-
-        const traces = stack.split("\n").map((line) => line.split("@"));
-        const filtered = traces.filter(([name, location]) => name.length > 0 && location !== "[native code]");
-        // Find the third line (caller's caller of the current location)
-
-        const callerLine = filtered[4];
-        if (!callerLine) {
-            return {
-                __raw: "<unknown>",
-                functionName: null,
-                fileName: null,
-                lineNumber: null,
-                columnNumber: null
-            };
-        }
-
-        const location = new URL(callerLine[1]).pathname;
-        const [functionName, fileName, lineNumber, columnNumber] = [callerLine[0], ...location.split(":")];
-
-        return {
-            __raw: callerLine.join("@"),
-            functionName: functionName || null,
-            fileName: fileName || null,
-            lineNumber: lineNumber ? parseInt(lineNumber, 10) : null,
-            columnNumber: columnNumber ? parseInt(columnNumber, 10) : null
-        };
-    }
-}
-/* ===================================[ END CODE EXTRACTED FROM TAURI PLUGIN LOG ]=================================== */
 
 const _sourceMapsCache: Record<string, SourceMapConsumer> = {};
 
@@ -209,12 +94,13 @@ export class Logger {
     }
 
     private async _emit(level: string, data: string | Error): Promise<void> {
-        const callSite = getCallSite();
-        let fileName = callSite.fileName;
+        const callStack = StackTrace.getSync();
+        const callSite = callStack[4];
+        let fileName = callSite.fileName != null ? new URL(callSite.fileName).pathname : this.name;
         let lineNumber = callSite.lineNumber || null;
         let columnNumber = callSite.columnNumber || null;
 
-        if (fileName != null && fileName.includes("assets")) {
+        if (fileName.includes("/js/")) {
             const sourceMapPath = `${callSite.fileName}.map`;
 
             const consumer = await getSourceMap(sourceMapPath);
@@ -229,6 +115,10 @@ export class Logger {
                     columnNumber = pos.column || columnNumber;
                 }
             }
+        }
+
+        if (fileName.startsWith("/src/")) {
+            fileName = fileName.replace("/src/", "");
         }
 
         let formattedMessage: string | null = null;
