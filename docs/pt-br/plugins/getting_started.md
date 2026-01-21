@@ -78,11 +78,14 @@ Este arquivo é obrigatório e deve conter as seguintes informações:
 <sup>[1]</sup> Atualmente a única dependência verificada é `unichat` que informa o range de versão do **UniChat** requerido pelo plugin.
 
 <sup>[2]</sup> As dependências devem seguir o formato `<dependency-name>@<version-range>`, onde `<version-range>` segue o seguinte padrão:
-> | Exemplo         | Significado                                        |
-> |-----------------|----------------------------------------------------|
-> | `1.2.3`         | Exatamente a versão 1.2.3                          |
-> | `[1.2.3,)`      | Versão 1.2.3 ou superior                           |
-> | `[1.2.3,2.0.0)` | Versão entre 1.2.3 (inclusivo) e 2.0.0 (exclusivo) |
+> | Range           | Significado         |
+> |-----------------|---------------------|
+> | `1.0.0`         | x >= 1.0.0          |
+> | `(,1.0.0]`      | x <= 1.0.0          |
+> | `[1.0.0]`       | x == 1.0.0          |
+> | `[1.0.0,)`      | x >= 1.0.0          |
+> | `(1.0.0,2.0.0)` | 1.0.0 < x < 2.0.0   |
+> | `[1.0.0,2.0.0]` | 1.0.0 <= x <= 2.0.0 |
 >
 > Sendo os delimitadores `[]` inclusivo e `()` exclusivo.
 

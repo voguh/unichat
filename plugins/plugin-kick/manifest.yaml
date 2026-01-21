@@ -5,4 +5,4 @@ author: ${unichat_authors}
 license: MIT
 homepage: ${unichat_homepage}
 dependencies:
-  - unichat@[1.4.0-alpha.2,)
+  - unichat@[1.4.0,)
