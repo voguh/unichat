@@ -72,8 +72,8 @@ importers:
         specifier: 7.7.3
         version: 7.7.3
       source-map:
-        specifier: 0.7.6
-        version: 0.7.6
+        specifier: 0.6.1
+        version: 0.6.1
       stacktrace-js:
         specifier: 2.0.2
         version: 2.0.2
@@ -171,9 +171,6 @@ importers:
       vite:
         specifier: 7.3.1
         version: 7.3.1(@types/node@24.10.0)(sass@1.77.6)(sugarss@5.0.0(postcss@8.5.6))
-      vite-plugin-static-copy:
-        specifier: 3.1.5
-        version: 3.1.5(vite@7.3.1(@types/node@24.10.0)(sass@1.77.6)(sugarss@5.0.0(postcss@8.5.6)))
       vitest:
         specifier: 4.0.16
         version: 4.0.16(@types/node@24.10.0)(jsdom@27.4.0)(sass@1.77.6)(sugarss@5.0.0(postcss@8.5.6))
@@ -2219,10 +2216,6 @@ packages:
     resolution: {integrity: sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==}
     engines: {node: '>=10'}
 
-  p-map@7.0.4:
-    resolution: {integrity: sha512-tkAQEw8ysMzmkhgw8k+1U/iPhWNhykKnSk4Rd5zLoPJCuJaGRPo6YposrZgaxHKzDHdDWWZvE/Sk7hsL2X/CpQ==}
-    engines: {node: '>=18'}
-
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
@@ -2578,9 +2571,9 @@ packages:
     resolution: {integrity: sha512-MjZkVp0NHr5+TPihLcadqnlVoGIoWo4IBHptutGh9wI3ttUYvCG26HkSuDi+K6lsZ25syXJXcctwgyVCt//xqA==}
     engines: {node: '>=0.10.0'}
 
-  source-map@0.7.6:
-    resolution: {integrity: sha512-i5uvt8C3ikiWeNZSVZNWcfZPItFQOsYTUAOkcUPGd8DqDy1uOUikjt5dG+uRlwyvR108Fb9DOd4GvXfT0N2/uQ==}
-    engines: {node: '>= 12'}
+  source-map@0.6.1:
+    resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
+    engines: {node: '>=0.10.0'}
 
   stack-generator@2.0.10:
     resolution: {integrity: sha512-mwnua/hkqM6pF4k8SnmZ2zfETsRUpWXREfA/goT8SLCV4iOFa4bzOX2nDipWAZFPTjLvQB82f5yaodMVhK0yJQ==}
@@ -2853,12 +2846,6 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
-
-  vite-plugin-static-copy@3.1.5:
-    resolution: {integrity: sha512-9pbZn9Vb+uUNg/Tr/f2MXmGvfSfLeWjscS4zTA3v+sWqKN+AjJ/ipTFwaqdopJkNkxG5DfgYrZXD80ljbNDxbg==}
-    engines: {node: ^18.0.0 || >=20.0.0}
-    peerDependencies:
-      vite: ^5.0.0 || ^6.0.0 || ^7.0.0
 
   vite@7.3.1:
     resolution: {integrity: sha512-w+N7Hifpc3gRjZ63vYBXA56dvvRlNWRczTdmCBBa+CotUzAPf5b7YMdMR/8CQoeYE5LX3W4wj6RYTgonm1b9DA==}
@@ -3845,6 +3832,7 @@ snapshots:
     dependencies:
       normalize-path: 3.0.0
       picomatch: 2.3.1
+    optional: true
 
   argparse@2.0.1: {}
 
@@ -3964,7 +3952,8 @@ snapshots:
     dependencies:
       require-from-string: 2.0.2
 
-  binary-extensions@2.3.0: {}
+  binary-extensions@2.3.0:
+    optional: true
 
   brace-expansion@1.1.11:
     dependencies:
@@ -4044,6 +4033,7 @@ snapshots:
       readdirp: 3.6.0
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   clsx@2.1.1: {}
 
@@ -4958,6 +4948,7 @@ snapshots:
   is-binary-path@2.1.0:
     dependencies:
       binary-extensions: 2.3.0
+    optional: true
 
   is-boolean-object@1.1.2:
     dependencies:
@@ -5238,7 +5229,8 @@ snapshots:
 
   node-releases@2.0.27: {}
 
-  normalize-path@3.0.0: {}
+  normalize-path@3.0.0:
+    optional: true
 
   object-assign@4.1.1: {}
 
@@ -5319,8 +5311,6 @@ snapshots:
   p-locate@5.0.0:
     dependencies:
       p-limit: 3.1.0
-
-  p-map@7.0.4: {}
 
   parent-module@1.0.1:
     dependencies:
@@ -5500,6 +5490,7 @@ snapshots:
   readdirp@3.6.0:
     dependencies:
       picomatch: 2.3.1
+    optional: true
 
   redent@3.0.0:
     dependencies:
@@ -5722,7 +5713,7 @@ snapshots:
 
   source-map@0.5.6: {}
 
-  source-map@0.7.6: {}
+  source-map@0.6.1: {}
 
   stack-generator@2.0.10:
     dependencies:
@@ -6036,14 +6027,6 @@ snapshots:
       '@types/react': 18.3.18
 
   util-deprecate@1.0.2: {}
-
-  vite-plugin-static-copy@3.1.5(vite@7.3.1(@types/node@24.10.0)(sass@1.77.6)(sugarss@5.0.0(postcss@8.5.6))):
-    dependencies:
-      chokidar: 3.6.0
-      p-map: 7.0.4
-      picocolors: 1.1.1
-      tinyglobby: 0.2.15
-      vite: 7.3.1(@types/node@24.10.0)(sass@1.77.6)(sugarss@5.0.0(postcss@8.5.6))
 
   vite@7.3.1(@types/node@24.10.0)(sass@1.77.6)(sugarss@5.0.0(postcss@8.5.6)):
     dependencies:

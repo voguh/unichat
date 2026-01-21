@@ -11,7 +11,9 @@ import { invoke } from "@tauri-apps/api/core";
 import { SourceMapConsumer } from "source-map";
 import StackTrace from "stacktrace-js";
 
-const logLevelsMap: Record<string, number> = {
+type LogLevel = "trace" | "debug" | "info" | "warn" | "error";
+
+const logLevelsMap: Record<LogLevel, number> = {
     trace: 1,
     debug: 2,
     info: 3,
@@ -19,21 +21,17 @@ const logLevelsMap: Record<string, number> = {
     error: 5
 };
 
-function toLogLevel(level: string): number {
-    return logLevelsMap[level] || logLevelsMap.info;
+function logLevelToNumber(level: LogLevel): number {
+    return logLevelsMap[level as LogLevel] || logLevelsMap.info;
 }
 
-function initializeFunctionGuard(obj: any): obj is { initialize: (arg: Record<string, string>) => void } {
-    return typeof obj.initialize === "function";
-}
-
-if (initializeFunctionGuard(SourceMapConsumer)) {
-    SourceMapConsumer.initialize({ "lib/mappings.wasm": "/source-map/mappings.wasm" });
+function logLevelGuard(level: string): level is LogLevel {
+    return ["trace", "debug", "info", "warn", "error"].includes(level);
 }
 
 const _sourceMapsCache: Record<string, SourceMapConsumer> = {};
 
-async function getSourceMap(url: string): Promise<SourceMapConsumer> {
+async function getSourceMap(url: string): Promise<SourceMapConsumer | null> {
     if (_sourceMapsCache[url]) {
         return _sourceMapsCache[url];
     }
@@ -77,10 +75,10 @@ export class Logger {
         this._doLog("error", message, args);
     }
 
-    private _doLog(level: string, message: string, args: any[]): void {
+    private _doLog(level: LogLevel, message: string, args: any[]): void {
         const [formattedMessage, throwable] = this._formatMessage(message, args);
 
-        if (!["trace", "debug", "info", "warn", "error"].includes(level)) {
+        if (!logLevelGuard(level)) {
             level = "info";
         }
 
@@ -93,26 +91,27 @@ export class Logger {
         }
     }
 
-    private async _emit(level: string, data: string | Error): Promise<void> {
+    private async _emit(level: LogLevel, data: string | Error): Promise<void> {
+        let fileName = this.name;
+        let lineNumber: number | null = null;
+
         const callStack = StackTrace.getSync();
-        const callSite = callStack[4];
-        let fileName = callSite.fileName != null ? new URL(callSite.fileName).pathname : this.name;
-        let lineNumber = callSite.lineNumber || null;
-        let columnNumber = callSite.columnNumber || null;
+        const callSite = callStack[5];
+        if (callSite != null) {
+            const callSiteFileName = callSite.fileName;
+            const _lineNUmber = callSite.lineNumber;
+            const _columnNumber = callSite.columnNumber;
 
-        if (fileName.includes("/js/")) {
-            const sourceMapPath = `${callSite.fileName}.map`;
+            if (callSiteFileName != null && _lineNUmber != null && _columnNumber != null) {
+                const sourceMapURL = `${callSiteFileName}.map`;
+                const consumer = await getSourceMap(sourceMapURL);
+                if (consumer != null) {
+                    const pos = consumer.originalPositionFor({ line: _lineNUmber, column: _columnNumber });
 
-            const consumer = await getSourceMap(sourceMapPath);
-            if (consumer != null) {
-                const pos = consumer.originalPositionFor({ line: lineNumber, column: columnNumber });
-
-                if (pos != null) {
-                    _sourceMapsCache[fileName] = consumer;
-
-                    fileName = (pos.source || fileName).replace("../../src/", "");
-                    lineNumber = pos.line || lineNumber;
-                    columnNumber = pos.column || columnNumber;
+                    if (pos != null) {
+                        fileName = (pos.source || fileName).replace("../..", "");
+                        lineNumber = pos.line || lineNumber;
+                    }
                 }
             }
         }
@@ -123,21 +122,25 @@ export class Logger {
 
         let formattedMessage: string | null = null;
         if (data instanceof Error) {
-            if (data.stack.startsWith("Error")) {
-                formattedMessage = data.stack;
+            if (typeof data.stack === "string") {
+                if (data.stack.startsWith("Error")) {
+                    formattedMessage = data.stack;
+                } else {
+                    const stack = data.stack.split("\n").map((line) => `\tat ${line}`);
+                    formattedMessage = `Error: ${data.message}\n${stack.join("\n")}`;
+                }
             } else {
-                const stack = data.stack.split("\n").map((line) => `\tat ${line}`);
-                formattedMessage = `Error: ${data.message}\n${stack.join("\n")}`;
+                formattedMessage = String(data);
             }
         } else {
             formattedMessage = data;
         }
 
         invoke("plugin:log|log", {
-            level: toLogLevel(level),
+            level: logLevelToNumber(level),
             message: formattedMessage,
-            location: `${fileName || this.name}${lineNumber ? `:${lineNumber}` : ""}`,
-            file: fileName || this.name,
+            location: `${fileName}${lineNumber ? `:${lineNumber}` : ""}`,
+            file: fileName,
             line: lineNumber || null,
             keyValues: null
         });

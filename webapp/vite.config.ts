@@ -1,11 +1,12 @@
 /// <reference types="vite/client" />
 /// <reference types="vitest/config" />
+
+import fs from "node:fs";
 import path from "node:path";
 
 import react from "@vitejs/plugin-react-swc";
 import MagicString from "magic-string";
 import { defineConfig, Plugin } from "vite";
-import { viteStaticCopy } from "vite-plugin-static-copy";
 
 function fullReload(): Plugin {
     return {
@@ -19,9 +20,15 @@ function fullReload(): Plugin {
 }
 
 const SOURCE_DIR = path.resolve(__dirname, "src");
+const DIST_DIR = path.resolve(__dirname, "dist");
 function uniChatBuildTools(): Plugin {
     return {
         name: "@unichat/build-tools",
+        buildStart() {
+            if (fs.existsSync(DIST_DIR)) {
+                fs.rmSync(DIST_DIR, { recursive: true, force: true });
+            }
+        },
         transform(code, id) {
             if (id.includes("node_modules") || !id.match(/\.(ts|tsx|js|jsx)$/)) {
                 return null;
@@ -31,21 +38,37 @@ function uniChatBuildTools(): Plugin {
             const filename = id.replaceAll(path.sep, "/").replace(`${SOURCE_DIR}/`, "");
             const dirname = path.dirname(filename);
 
-            const regex = /\b(__dirname|__filename)\b/g;
+            const regex = /\b(__LINE__|__COLUMN__|__FILE__|__DIR__|__dirname|__filename)\b/g;
 
             let match: RegExpExecArray | null;
-            while ((match = regex.exec(code))) {
+            while ((match = regex.exec(s.toString()))) {
                 const start = match.index;
                 const end = start + match[0].length;
 
                 switch (match[0]) {
-                    case "__filename":
+                    case "__LINE__": {
+                        const line = code.slice(0, start).split("\n").length;
+                        s.overwrite(start, end, String(line));
+                        break;
+                    }
+                    case "__COLUMN__": {
+                        const lineStart = code.lastIndexOf("\n", start - 1) + 1;
+                        const column = start - lineStart + 1;
+                        s.overwrite(start, end, String(column));
+                        break;
+                    }
+
+                    case "__FILE__":
+                    case "__filename": {
                         s.overwrite(start, end, JSON.stringify(filename));
                         break;
+                    }
 
-                    case "__dirname":
+                    case "__DIR__":
+                    case "__dirname": {
                         s.overwrite(start, end, JSON.stringify(dirname));
                         break;
+                    }
                 }
             }
 
@@ -62,23 +85,7 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig({
     root: path.resolve(__dirname),
     publicDir: path.resolve(__dirname, "public"),
-    plugins: [
-        fullReload(),
-        uniChatBuildTools(),
-        react({ plugins: [["@swc/plugin-styled-components", {}]] }),
-        viteStaticCopy({
-            targets: [
-                {
-                    src: "node_modules/source-map/lib/mappings.wasm",
-                    dest: "source-map"
-                },
-                {
-                    src: "node_modules/source-map/LICENSE",
-                    dest: "source-map"
-                }
-            ]
-        })
-    ],
+    plugins: [fullReload(), uniChatBuildTools(), react({ plugins: [["@swc/plugin-styled-components", {}]] })],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
     //
