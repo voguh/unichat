@@ -34,47 +34,49 @@ function uniChatBuildTools(): Plugin {
                 return null;
             }
 
-            const s = new MagicString(code);
+            const ms = new MagicString(code);
             const filename = id.replaceAll(path.sep, "/").replace(`${SOURCE_DIR}/`, "");
             const dirname = path.dirname(filename);
 
             const regex = /\b(__LINE__|__COLUMN__|__FILE__|__DIR__|__dirname|__filename)\b/g;
 
             let match: RegExpExecArray | null;
-            while ((match = regex.exec(s.toString()))) {
+            while ((match = regex.exec(code))) {
                 const start = match.index;
                 const end = start + match[0].length;
 
                 switch (match[0]) {
                     case "__LINE__": {
                         const line = code.slice(0, start).split("\n").length;
-                        s.overwrite(start, end, String(line));
+                        ms.overwrite(start, end, String(line));
                         break;
                     }
                     case "__COLUMN__": {
                         const lineStart = code.lastIndexOf("\n", start - 1) + 1;
                         const column = start - lineStart + 1;
-                        s.overwrite(start, end, String(column));
+                        ms.overwrite(start, end, String(column));
                         break;
                     }
 
                     case "__FILE__":
                     case "__filename": {
-                        s.overwrite(start, end, JSON.stringify(filename));
+                        ms.overwrite(start, end, JSON.stringify(filename));
                         break;
                     }
 
                     case "__DIR__":
                     case "__dirname": {
-                        s.overwrite(start, end, JSON.stringify(dirname));
+                        ms.overwrite(start, end, JSON.stringify(dirname));
                         break;
                     }
                 }
             }
 
+            /* ================================================================================== */
+
             return {
-                code: s.toString(),
-                map: s.generateMap({ source: filename, includeContent: true })
+                code: ms.toString(),
+                map: ms.generateMap({ source: filename, includeContent: true })
             };
         }
     };
