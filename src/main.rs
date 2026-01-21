@@ -283,7 +283,11 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     let app = window.app_handle();
 
-    if window.label() == "main" || window.label() == "splash-screen" {
+    if let tauri::WindowEvent::Destroyed = event {
+        log::info!("Window '{}' destroyed.", window.label());
+    }
+
+    if window.label() == "main" || (window.label() == "splash-screen" && app.get_webview_window("main").is_none()) {
         if let tauri::WindowEvent::Destroyed = event {
             let http_server: tauri::State<'_, ActixState> = app.state();
             http_server.stop();
