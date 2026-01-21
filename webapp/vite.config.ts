@@ -69,11 +69,11 @@ export default defineConfig({
         viteStaticCopy({
             targets: [
                 {
-                    src: path.resolve(__dirname, "node_modules", "source-map", "lib", "mappings.wasm"),
+                    src: "node_modules/source-map/lib/mappings.wasm",
                     dest: "source-map"
                 },
                 {
-                    src: path.resolve(__dirname, "node_modules", "source-map", "LICENSE"),
+                    src: "node_modules/source-map/LICENSE",
                     dest: "source-map"
                 }
             ]
@@ -105,8 +105,6 @@ export default defineConfig({
             output: {
                 entryFileNames: "js/[name]-[hash].js",
                 chunkFileNames: "js/[name]-[hash].js",
-
-                sourcemap: true,
                 plugins: [
                     {
                         name: "sourcemap-path-adjuster",
@@ -121,7 +119,6 @@ export default defineConfig({
                         }
                     }
                 ],
-
                 assetFileNames(chunkInfo) {
                     const ext = path.extname(chunkInfo.name!).slice(1);
                     if (ext === "css") {
