@@ -136,12 +136,14 @@ export default defineConfig({
                     return "assets/[name]-[hash].[ext]";
                 },
                 manualChunks(id) {
-                    if (id.includes("mantine")) {
-                        return "mantine-vendor";
-                    } else if (id.includes("react")) {
-                        return "react-vendor";
-                    } else if (id.includes("node_modules")) {
-                        return "general-vendor";
+                    if (id.includes("node_modules")) {
+                        if (id.includes("mantine")) {
+                            return "mantine-vendor";
+                        } else if (id.includes("react")) {
+                            return "react-vendor";
+                        } else if (id.includes("node_modules")) {
+                            return "general-vendor";
+                        }
                     }
                 }
             }
