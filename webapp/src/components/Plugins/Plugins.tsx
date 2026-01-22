@@ -28,7 +28,7 @@ interface Props {
     children?: React.ReactNode;
 }
 
-const _logger = LoggerFactory.getLogger(import.meta.url);
+const _logger = LoggerFactory.getLogger(__filename);
 export function Plugins(_props: Props): React.ReactNode {
     const [plugins, setPlugins] = React.useState<UniChatPluginMetadata[]>([]);
 

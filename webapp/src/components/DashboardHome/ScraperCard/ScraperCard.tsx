@@ -34,7 +34,7 @@ const DEFAULT_STATUS_EVENT: IPCStatusEvent = {
     timestamp: Date.now()
 };
 
-const _logger = LoggerFactory.getLogger(import.meta.url);
+const _logger = LoggerFactory.getLogger(__filename);
 export function ScraperCard(props: Props): React.ReactNode {
     const { editingTooltip, scraper, validateUrl } = props;
 

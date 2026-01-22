@@ -64,6 +64,7 @@
         "eslint-plugin-react": "7.37.5",
         "eslint-plugin-react-hooks": "7.0.1",
         "eslint-plugin-vitest": "0.5.4",
+        "magic-string": "0.30.21",
         "jsdom": "27.4.0",
         "postcss": "8.5.6",
         "postcss-preset-mantine": "1.18.0",
