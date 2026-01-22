@@ -8,6 +8,7 @@
  ******************************************************************************/
 
 import { invoke } from "@tauri-apps/api/core";
+import { platform } from "@tauri-apps/plugin-os";
 import { SourceMapConsumer } from "source-map";
 import StackTrace from "stacktrace-js";
 
@@ -48,6 +49,7 @@ async function getSourceMap(url: string): Promise<SourceMapConsumer | null> {
     }
 }
 
+const OS_TYPE = platform();
 export class Logger {
     private readonly name: string;
 
@@ -108,7 +110,8 @@ export class Logger {
         let lineNumber: number | null = null;
 
         const callStack = StackTrace.getSync();
-        const callSite = callStack[6];
+        const callSite = callStack[OS_TYPE === "windows" ? 5 : 6];
+
         if (callSite != null) {
             const _fileName = callSite.fileName;
             const _lineNumber = callSite.lineNumber;

@@ -12,6 +12,7 @@ declare global {
     const __TAURI_PLUGIN_DIALOG__: typeof import("@tauri-apps/plugin-dialog");
     const __TAURI_PLUGIN_LOG__: typeof import("@tauri-apps/plugin-log");
     const __TAURI_PLUGIN_OPENER__: typeof import("@tauri-apps/plugin-opener");
+    const __TAURI_PLUGIN_OS__: typeof import("@tauri-apps/plugin-os");
     const __TAURI_PLUGIN_STORE__: typeof import("@tauri-apps/plugin-store");
 
     /** Path of the current file from the source root (literal string in source code) */
@@ -33,6 +34,7 @@ declare global {
         __TAURI_PLUGIN_DIALOG__: typeof import("@tauri-apps/plugin-dialog");
         __TAURI_PLUGIN_LOG__: typeof import("@tauri-apps/plugin-log");
         __TAURI_PLUGIN_OPENER__: typeof import("@tauri-apps/plugin-opener");
+        __TAURI_PLUGIN_OS__: typeof import("@tauri-apps/plugin-os");
         __TAURI_PLUGIN_STORE__: typeof import("@tauri-apps/plugin-store");
     }
 }
