@@ -29,6 +29,15 @@ function uniChatBuildTools(): Plugin {
                 fs.rmSync(DIST_DIR, { recursive: true, force: true });
             }
         },
+        generateBundle(_, bundle) {
+            for (const [fileName, chunk] of Object.entries(bundle)) {
+                const isVendor = fileName.includes("vendor") || chunk.name === "vendor";
+                const isMap = fileName.endsWith(".map");
+                if (isVendor && isMap) {
+                    delete bundle[fileName];
+                }
+            }
+        },
         transform(code, id) {
             if (id.includes("node_modules") || !id.match(/\.(ts|tsx|js|jsx)$/)) {
                 return null;
@@ -117,8 +126,7 @@ function uniChatBuildTools(): Plugin {
 
             return {
                 code: ms.toString(),
-                // map: ms.generateMap({ source: filename, includeContent: true })
-                map: null
+                map: ms.generateMap({ source: filename, includeContent: true })
             };
         }
     };
@@ -151,6 +159,7 @@ export default defineConfig({
     },
 
     build: {
+        sourcemap: true,
         rollupOptions: {
             output: {
                 entryFileNames: "js/[name]-[hash].js",
@@ -173,13 +182,7 @@ export default defineConfig({
                 },
                 manualChunks(id) {
                     if (id.includes("node_modules")) {
-                        if (id.includes("mantine")) {
-                            return "mantine-vendor";
-                        } else if (id.includes("react")) {
-                            return "react-vendor";
-                        } else if (id.includes("node_modules")) {
-                            return "general-vendor";
-                        }
+                        return "vendor";
                     }
                 }
             }

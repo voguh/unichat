@@ -39,15 +39,9 @@ declare global {
     function logger$warn(template: string, ...args: any[]): void;
     function logger$error(template: string, ...args: any[]): void;
 
-    /**
-     * Path of the current file from the source root (literal string in source code)
-     * @deprecated Compatibility only, use __FILE__ instead.
-     */
+    /** Path of the current file from the source root (literal string in source code) */
     const __filename: string;
-    /**
-     * Path of the current file directory from the source root (literal string in source code)
-     * @deprecated Compatibility only, use __DIR__ instead.
-     */
+    /** Path of the current file directory from the source root (literal string in source code) */
     const __dirname: string;
 
     interface Window {
