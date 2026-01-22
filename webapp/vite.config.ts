@@ -138,13 +138,7 @@ export default defineConfig({
                 },
                 manualChunks(id) {
                     if (id.includes("node_modules")) {
-                        if (id.includes("mantine")) {
-                            return "mantine-vendor";
-                        } else if (id.includes("react")) {
-                            return "react-vendor";
-                        } else if (id.includes("node_modules")) {
-                            return "general-vendor";
-                        }
+                        return "vendor";
                     }
                 }
             }
