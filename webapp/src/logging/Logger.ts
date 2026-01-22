@@ -108,7 +108,7 @@ export class Logger {
         let lineNumber: number | null = null;
 
         const callStack = StackTrace.getSync();
-        const callSite = callStack[5];
+        const callSite = callStack[6];
         if (callSite != null) {
             const _fileName = callSite.fileName;
             const _lineNumber = callSite.lineNumber;
