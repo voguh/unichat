@@ -29,6 +29,7 @@ import { notifications } from "@mantine/notifications";
 
 import type { UniChatEvent, UniChatPlatform } from "unichat-widgets/unichat";
 import { ColorPicker } from "unichat/components/ColorPicker";
+import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { UniChatWidget, WidgetFields } from "unichat/types";
 import { WIDGET_URL_PREFIX } from "unichat/utils/constants";
@@ -56,6 +57,7 @@ interface Props {
     children?: React.ReactNode;
 }
 
+const _logger = LoggerFactory.getLogger(__filename);
 export function WidgetEditor(_props: Props): React.ReactNode {
     const [emulationMode, setEmulationMode] = React.useState<UniChatPlatform | "mixed">("mixed");
 
@@ -314,7 +316,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                 });
             }
         } catch (err) {
-            logger$error("An error occurred on save 'fieldstate.json'", err);
+            _logger.error("An error occurred on save 'fieldstate.json'", err);
             notifications.show({
                 title: "Error",
                 message: `Failed to apply widget field state: ${(err as Error).message}`,
@@ -336,7 +338,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                 });
             }
         } catch (err) {
-            logger$error("An error occurred on save 'fieldstate.json'", err);
+            _logger.error("An error occurred on save 'fieldstate.json'", err);
             notifications.show({
                 title: "Error",
                 message: `Failed to apply widget field state: ${(err as Error).message}`,

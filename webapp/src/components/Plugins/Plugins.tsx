@@ -14,6 +14,7 @@ import { notifications } from "@mantine/notifications";
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { AppContext } from "unichat/contexts/AppContext";
+import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
 import { UniChatPluginMetadata } from "unichat/types";
@@ -27,6 +28,7 @@ interface Props {
     children?: React.ReactNode;
 }
 
+const _logger = LoggerFactory.getLogger(__filename);
 export function Plugins(_props: Props): React.ReactNode {
     const [plugins, setPlugins] = React.useState<UniChatPluginMetadata[]>([]);
 
@@ -58,7 +60,7 @@ export function Plugins(_props: Props): React.ReactNode {
             const items = await commandService.getPlugins();
             setPlugins(items);
         } catch (error) {
-            logger$error("An error occurred on fetch plugins", error);
+            _logger.error("An error occurred on fetch plugins", error);
 
             notifications.show({
                 title: "Fetch Error",

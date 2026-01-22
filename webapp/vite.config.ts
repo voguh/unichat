@@ -82,43 +82,6 @@ function uniChatBuildTools(): Plugin {
                 }
             }
 
-            /* ================================================================================== */
-
-            const loggerRegEx = /\b(logger\$trace|logger\$debug|logger\$info|logger\$warn|logger\$error)\b/g;
-
-            let loggerMatch: RegExpExecArray | null;
-            while ((loggerMatch = loggerRegEx.exec(code))) {
-                const start = loggerMatch.index;
-                const end = start + loggerMatch[0].length;
-
-                const line = code.slice(0, start).split("\n").length;
-
-                switch (loggerMatch[0]) {
-                    case "logger$trace": {
-                        replaces.push([start, end, `logger$withLogger("${filename}", ${line}).trace`]);
-                        break;
-                    }
-                    case "logger$debug": {
-                        replaces.push([start, end, `logger$withLogger("${filename}", ${line}).debug`]);
-                        break;
-                    }
-                    case "logger$info": {
-                        replaces.push([start, end, `logger$withLogger("${filename}", ${line}).info`]);
-                        break;
-                    }
-                    case "logger$warn": {
-                        replaces.push([start, end, `logger$withLogger("${filename}", ${line}).warn`]);
-                        break;
-                    }
-                    case "logger$error": {
-                        replaces.push([start, end, `logger$withLogger("${filename}", ${line}).error`]);
-                        break;
-                    }
-                }
-            }
-
-            /* ================================================================================== */
-
             replaces.sort(([startA], [startB]) => startB - startA);
             for (const [start, end, replacement] of replaces) {
                 ms.overwrite(start, end, replacement);

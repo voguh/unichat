@@ -24,6 +24,7 @@ import { SettingsModal } from "./components/SettingsModal";
 import { Tour } from "./components/Tour";
 import { WidgetEditor } from "./components/WidgetEditor";
 import { AppContext } from "./contexts/AppContext";
+import { LoggerFactory } from "./logging/LoggerFactory";
 import { commandService } from "./services/commandService";
 import { modalService } from "./services/modalService";
 import { DashboardStyledContainer } from "./styles/DashboardStyled";
@@ -47,6 +48,7 @@ const tabs = {
     }
 };
 
+const _logger = LoggerFactory.getLogger(__filename);
 export default function App(): JSX.Element {
     const [selectedTab, setSelectedTab] = React.useState<keyof typeof tabs>("dashboard");
     const [settingsModalOpen, setSettingsModalOpen] = React.useState<boolean | string>(false);
@@ -78,7 +80,7 @@ export default function App(): JSX.Element {
     }
 
     async function init(): Promise<void> {
-        logger$info("App mounted.");
+        _logger.info("App mounted.");
         const isOpenToLan = await commandService.settingsGetItem(UniChatSettings.OPEN_TO_LAN);
 
         if (isOpenToLan) {

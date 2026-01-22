@@ -26,34 +26,9 @@ import "@fontsource/roboto-mono/700-italic";
 import React from "react";
 import { createRoot } from "react-dom/client";
 
-import { debug, error, info, trace, warn } from "@tauri-apps/plugin-log";
-
 import App from "unichat/App";
 import { AppContextProvider } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
-
-import { LoggerUtil } from "./logging/LoggerUtil";
-
-/* ============================================================================================== */
-
-globalThis.logger$withLogger = function (file, line) {
-    return {
-        trace: (message, ...args) => LoggerUtil.doLog("trace", file, line, message, ...args),
-        debug: (message, ...args) => LoggerUtil.doLog("debug", file, line, message, ...args),
-        info: (message, ...args) => LoggerUtil.doLog("info", file, line, message, ...args),
-        warn: (message, ...args) => LoggerUtil.doLog("warn", file, line, message, ...args),
-        error: (message, ...args) => LoggerUtil.doLog("error", file, line, message, ...args)
-    };
-};
-
-// Fallback loggers implementation to don't fail if replacement does not happen
-globalThis.logger$trace ??= (...args) => trace(args.map((arg) => String(arg)).join("\t"));
-globalThis.logger$debug ??= (...args) => debug(args.map((arg) => String(arg)).join("\t"));
-globalThis.logger$info ??= (...args) => info(args.map((arg) => String(arg)).join("\t"));
-globalThis.logger$warn ??= (...args) => warn(args.map((arg) => String(arg)).join("\t"));
-globalThis.logger$error ??= (...args) => error(args.map((arg) => String(arg)).join("\t"));
-
-/* ============================================================================================== */
 
 commandService.isDev().then((isDev) => {
     if (!isDev) {
