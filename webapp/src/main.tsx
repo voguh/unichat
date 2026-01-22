@@ -30,6 +30,22 @@ import App from "unichat/App";
 import { AppContextProvider } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
 
+import { LoggerUtil } from "./logging/LoggerUtil";
+
+/* ============================================================================================== */
+
+globalThis.logger$withLogger = function (file, line) {
+    return {
+        trace: (message, ...args) => LoggerUtil.doLog("trace", file, line, message, ...args),
+        debug: (message, ...args) => LoggerUtil.doLog("debug", file, line, message, ...args),
+        info: (message, ...args) => LoggerUtil.doLog("info", file, line, message, ...args),
+        warn: (message, ...args) => LoggerUtil.doLog("warn", file, line, message, ...args),
+        error: (message, ...args) => LoggerUtil.doLog("error", file, line, message, ...args)
+    };
+};
+
+/* ============================================================================================== */
+
 commandService.isDev().then((isDev) => {
     if (!isDev) {
         window.addEventListener("contextmenu", async (event) => {
@@ -38,7 +54,12 @@ commandService.isDev().then((isDev) => {
     }
 });
 
-const root = createRoot(document.querySelector("#root"));
+const documentRoot = document.querySelector("#root");
+if (documentRoot == null) {
+    throw new Error("Root element not found");
+}
+
+const root = createRoot(documentRoot);
 root.render(
     <React.StrictMode>
         <AppContextProvider>

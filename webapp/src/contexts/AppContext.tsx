@@ -11,7 +11,6 @@ import React from "react";
 
 import semver from "semver";
 
-import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { AppMetadata } from "unichat/types";
 import { UniChatRelease } from "unichat/types/unichatApi";
@@ -31,7 +30,6 @@ interface Props {
     children?: React.ReactNode;
 }
 
-const _logger = LoggerFactory.getLogger(__filename);
 export function AppContextProvider({ children }: Props): React.ReactNode {
     const [loading, setLoading] = React.useState(true);
     const [metadata, setMetadata] = React.useState<AppMetadata>(null);

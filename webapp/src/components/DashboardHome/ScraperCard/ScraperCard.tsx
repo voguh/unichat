@@ -13,7 +13,6 @@ import { Badge, Button, Card, TextInput, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import * as eventService from "@tauri-apps/api/event";
 
-import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
 import { UniChatScraper } from "unichat/types";
@@ -34,7 +33,6 @@ const DEFAULT_STATUS_EVENT: IPCStatusEvent = {
     timestamp: Date.now()
 };
 
-const _logger = LoggerFactory.getLogger(__filename);
 export function ScraperCard(props: Props): React.ReactNode {
     const { editingTooltip, scraper, validateUrl } = props;
 
@@ -55,7 +53,7 @@ export function ScraperCard(props: Props): React.ReactNode {
             await commandService.setScraperWebviewUrl(scraper.id, inputValue);
             setEvent(null);
         } catch (err) {
-            _logger.error("An error occurred while starting the '{}' chat scraper: {}", scraper.name, err);
+            logger$error("An error occurred while starting the '{}' chat scraper: {}", scraper.name, err);
         } finally {
             setLoading(false);
         }
@@ -67,7 +65,7 @@ export function ScraperCard(props: Props): React.ReactNode {
             await commandService.setScraperWebviewUrl(scraper.id, "about:blank");
             setEvent({ ...DEFAULT_STATUS_EVENT, scraperId: scraper.id });
         } catch (err) {
-            _logger.error("An error occurred while stopping the '{}' chat scraper: {}", scraper.name, err);
+            logger$error("An error occurred while stopping the '{}' chat scraper: {}", scraper.name, err);
         } finally {
             setLoading(false);
         }
@@ -111,7 +109,7 @@ export function ScraperCard(props: Props): React.ReactNode {
                     inputRef.current.value = scraperStoredUrl;
                 }
             } catch (err) {
-                _logger.error("An error occurred while initializing the scraper '{}' card", scraper.id, err);
+                logger$error("An error occurred while initializing the scraper '{}' card", scraper.id, err);
             } finally {
                 setLoading(false);
             }

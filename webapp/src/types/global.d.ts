@@ -23,6 +23,22 @@ declare global {
     /** Column number of the current line (literal number in source code) */
     const __COLUMN__: number;
 
+    interface Logger {
+        trace(template: string, ...args: any[]): void;
+        debug(template: string, ...args: any[]): void;
+        info(template: string, ...args: any[]): void;
+        warn(template: string, ...args: any[]): void;
+        error(template: string, ...args: any[]): void;
+    }
+
+    function logger$withLogger(file: string, line: number): Logger;
+
+    function logger$trace(template: string, ...args: any[]): void;
+    function logger$debug(template: string, ...args: any[]): void;
+    function logger$info(template: string, ...args: any[]): void;
+    function logger$warn(template: string, ...args: any[]): void;
+    function logger$error(template: string, ...args: any[]): void;
+
     /**
      * Path of the current file from the source root (literal string in source code)
      * @deprecated Compatibility only, use __FILE__ instead.

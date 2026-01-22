@@ -8,7 +8,6 @@
  ******************************************************************************/
 
 import { invoke } from "@tauri-apps/api/core";
-import StackTrace from "stacktrace-js";
 
 type LogLevel = "trace" | "debug" | "info" | "warn" | "error";
 
@@ -28,34 +27,8 @@ function logLevelGuard(level: string): level is LogLevel {
     return ["trace", "debug", "info", "warn", "error"].includes(level);
 }
 
-export class Logger {
-    private readonly name: string;
-
-    constructor(name: string) {
-        this.name = name;
-    }
-
-    public trace(message: string, ...args: any[]): void {
-        this._doLog("trace", null, null, message, ...args);
-    }
-
-    public debug(message: string, ...args: any[]): void {
-        this._doLog("debug", null, null, message, ...args);
-    }
-
-    public info(message: string, ...args: any[]): void {
-        this._doLog("info", null, null, message, ...args);
-    }
-
-    public warn(message: string, ...args: any[]): void {
-        this._doLog("warn", null, null, message, ...args);
-    }
-
-    public error(message: string, ...args: any[]): void {
-        this._doLog("error", null, null, message, ...args);
-    }
-
-    private _doLog(level: LogLevel, file: string | null, line: number | null, message: string, ...args: any[]): void {
+export class LoggerUtil {
+    public static doLog(level: LogLevel, file: string, line: number, message: string, ...args: any[]): void {
         const [formattedMessage, throwable] = this._formatMessage(message, args);
 
         if (!logLevelGuard(level)) {
@@ -83,37 +56,18 @@ export class Logger {
         }
     }
 
-    private async _emit(level: LogLevel, file: string | null, line: number | null, data: string): Promise<void> {
-        let fileName = file || this.name;
-        let lineNumber: number | null = line || null;
-
-        if (fileName != null || lineNumber != null) {
-            const callStack = StackTrace.getSync();
-            const callSite = callStack[5];
-
-            if (callSite != null) {
-                const _fileName = callSite.fileName;
-                const _lineNumber = callSite.lineNumber;
-
-                // Only use stack trace info in development mode, otherwise the path contains `/js/` that points to the bundled files.
-                if (_fileName != null && _fileName.includes("/src/")) {
-                    fileName = fileName || _fileName.split("/src/")[1] || this.name;
-                    lineNumber = lineNumber || _lineNumber || null;
-                }
-            }
-        }
-
+    private static _emit(level: LogLevel, file: string, line: number, data: string): void {
         invoke("plugin:log|log", {
             level: logLevelToNumber(level),
             message: data,
-            location: `${fileName}${lineNumber ? `:${lineNumber}` : ""}`,
-            file: fileName,
-            line: lineNumber || null,
+            location: `${file}${line ? `:${line}` : ""}`,
+            file: file,
+            line: line || null,
             keyValues: null
         });
     }
 
-    private _formatMessage(message: string, args: any[]): [string, Error | null] {
+    private static _formatMessage(message: string, args: any[]): [string, Error | null] {
         let formattedMessage = message;
         let throwable: Error | null = null;
 

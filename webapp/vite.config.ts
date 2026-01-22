@@ -34,39 +34,40 @@ function uniChatBuildTools(): Plugin {
                 return null;
             }
 
+            const replaces: [number, number, string][] = [];
             const ms = new MagicString(code);
             const filename = id.replaceAll(path.sep, "/").replace(`${SOURCE_DIR}/`, "");
             const dirname = path.dirname(filename);
 
-            const regex = /\b(__LINE__|__COLUMN__|__FILE__|__DIR__|__dirname|__filename)\b/g;
+            const regEx = /\b(__LINE__|__COLUMN__|__FILE__|__DIR__|__dirname|__filename)\b/g;
 
             let match: RegExpExecArray | null;
-            while ((match = regex.exec(code))) {
+            while ((match = regEx.exec(code))) {
                 const start = match.index;
                 const end = start + match[0].length;
 
                 switch (match[0]) {
                     case "__LINE__": {
                         const line = code.slice(0, start).split("\n").length;
-                        ms.overwrite(start, end, String(line));
+                        replaces.push([start, end, String(line)]);
                         break;
                     }
                     case "__COLUMN__": {
                         const lineStart = code.lastIndexOf("\n", start - 1) + 1;
                         const column = start - lineStart + 1;
-                        ms.overwrite(start, end, String(column));
+                        replaces.push([start, end, String(column)]);
                         break;
                     }
 
                     case "__FILE__":
                     case "__filename": {
-                        ms.overwrite(start, end, JSON.stringify(filename));
+                        replaces.push([start, end, JSON.stringify(filename)]);
                         break;
                     }
 
                     case "__DIR__":
                     case "__dirname": {
-                        ms.overwrite(start, end, JSON.stringify(dirname));
+                        replaces.push([start, end, JSON.stringify(dirname)]);
                         break;
                     }
                 }
@@ -74,9 +75,50 @@ function uniChatBuildTools(): Plugin {
 
             /* ================================================================================== */
 
+            const loggerRegEx = /\b(logger\$trace|logger\$debug|logger\$info|logger\$warn|logger\$error)\b/g;
+
+            let loggerMatch: RegExpExecArray | null;
+            while ((loggerMatch = loggerRegEx.exec(code))) {
+                const start = loggerMatch.index;
+                const end = start + loggerMatch[0].length;
+
+                const line = code.slice(0, start).split("\n").length;
+
+                switch (loggerMatch[0]) {
+                    case "logger$trace": {
+                        replaces.push([start, end, `logger$withLogger("${filename}", ${line}).trace`]);
+                        break;
+                    }
+                    case "logger$debug": {
+                        replaces.push([start, end, `logger$withLogger("${filename}", ${line}).debug`]);
+                        break;
+                    }
+                    case "logger$info": {
+                        replaces.push([start, end, `logger$withLogger("${filename}", ${line}).info`]);
+                        break;
+                    }
+                    case "logger$warn": {
+                        replaces.push([start, end, `logger$withLogger("${filename}", ${line}).warn`]);
+                        break;
+                    }
+                    case "logger$error": {
+                        replaces.push([start, end, `logger$withLogger("${filename}", ${line}).error`]);
+                        break;
+                    }
+                }
+            }
+
+            /* ================================================================================== */
+
+            replaces.sort(([startA], [startB]) => startB - startA);
+            for (const [start, end, replacement] of replaces) {
+                ms.overwrite(start, end, replacement);
+            }
+
             return {
                 code: ms.toString(),
-                map: ms.generateMap({ source: filename, includeContent: true })
+                // map: ms.generateMap({ source: filename, includeContent: true })
+                map: null
             };
         }
     };
@@ -109,25 +151,10 @@ export default defineConfig({
     },
 
     build: {
-        sourcemap: true,
         rollupOptions: {
             output: {
                 entryFileNames: "js/[name]-[hash].js",
                 chunkFileNames: "js/[name]-[hash].js",
-                plugins: [
-                    {
-                        name: "sourcemap-path-adjuster",
-                        generateBundle(_options, bundle) {
-                            for (const [fileName, file] of Object.entries(bundle)) {
-                                if (fileName.includes("vendor")) {
-                                    if (file.type === "chunk" && file.map) {
-                                        file.map = null;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                ],
                 assetFileNames(chunkInfo) {
                     const ext = path.extname(chunkInfo.name!).slice(1);
                     if (ext === "css") {

@@ -15,7 +15,6 @@ import * as dialog from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { AppContext } from "unichat/contexts/AppContext";
-import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { GalleryItem } from "unichat/types";
 
@@ -33,7 +32,6 @@ interface Props {
     onSelectItem?: (url: string) => void;
 }
 
-const _logger = LoggerFactory.getLogger(__filename);
 export function Gallery(props: Props): React.ReactNode {
     const { onSelectItem, selectedItem = "", showTabs = ["image", "video", "audio", "file"], startSelectedTab } = props;
 
@@ -67,7 +65,7 @@ export function Gallery(props: Props): React.ReactNode {
             const items = await commandService.getGalleryItems();
             setGalleryItems(items);
         } catch (error) {
-            _logger.error("An error occurred on fetch gallery items", error);
+            logger$error("An error occurred on fetch gallery items", error);
 
             notifications.show({
                 title: "Fetch Error",
@@ -85,7 +83,7 @@ export function Gallery(props: Props): React.ReactNode {
             await commandService.uploadGalleryItems(response);
             await handleFetchGalleryItems();
         } catch (error) {
-            _logger.error("An error occurred on upload gallery items", error);
+            logger$error("An error occurred on upload gallery items", error);
 
             notifications.show({
                 title: "Upload Error",
