@@ -21,7 +21,7 @@ ureq = { version = "3.1.4", default-features = false, features = ["json", "nativ
 
 [dependencies]
 actix-web = "4.12.1"
-actix-ws = "0.3.0"
+actix-ws = "0.3.1"
 anyhow = { version = "1.0.100", features = ["backtrace"] }
 base64 = "0.22.1"
 futures = "0.3.31"
@@ -36,9 +36,9 @@ regex = "1.12.2"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.149", features = ["preserve_order"] }
 serde_plain = "1.0.2"
-serde-saphyr = "0.0.14"
+serde-saphyr = "0.0.16"
 tauri = { version = "2.9.5", features = ["native-tls"] }
-tauri-plugin-dialog = "2.5.0"
+tauri-plugin-dialog = "2.6.0"
 tauri-plugin-log = "2.8.0"
 tauri-plugin-opener = "2.5.3"
 tauri-plugin-store = "2.4.2"
