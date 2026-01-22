@@ -26,6 +26,8 @@ import "@fontsource/roboto-mono/700-italic";
 import React from "react";
 import { createRoot } from "react-dom/client";
 
+import { debug, error, info, trace, warn } from "@tauri-apps/plugin-log";
+
 import App from "unichat/App";
 import { AppContextProvider } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
@@ -43,6 +45,13 @@ globalThis.logger$withLogger = function (file, line) {
         error: (message, ...args) => LoggerUtil.doLog("error", file, line, message, ...args)
     };
 };
+
+// Fallback loggers implementation to don't fail if replacement does not happen
+globalThis.logger$trace ??= (...args) => trace(args.map((arg) => String(arg)).join("\t"));
+globalThis.logger$debug ??= (...args) => debug(args.map((arg) => String(arg)).join("\t"));
+globalThis.logger$info ??= (...args) => info(args.map((arg) => String(arg)).join("\t"));
+globalThis.logger$warn ??= (...args) => warn(args.map((arg) => String(arg)).join("\t"));
+globalThis.logger$error ??= (...args) => error(args.map((arg) => String(arg)).join("\t"));
 
 /* ============================================================================================== */
 
