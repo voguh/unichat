@@ -119,13 +119,13 @@ export class Logger {
                     fileName = _fileName.split("/src/")[1] || fileName;
                     lineNumber = _lineNumber;
                 } else if (_columnNumber != null) {
-                    const sourceMapURL = `${callSite.fileName}.map`;
-                    const consumer = await getSourceMap(sourceMapURL);
+                    const consumer = await getSourceMap(`${callSite.fileName}.map`);
+
                     if (consumer != null) {
                         const pos = consumer.originalPositionFor({ line: _lineNumber, column: _columnNumber });
 
                         if (pos != null) {
-                            fileName = (pos.source || fileName).replace("../..", "");
+                            fileName = pos.source.split("/src/")[1] || fileName;
                             lineNumber = pos.line || lineNumber;
                         }
                     }
