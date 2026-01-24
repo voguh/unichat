@@ -44,7 +44,7 @@ pub fn emit(mut payload: Value) -> Result<(), Error> {
     }
 
     if let Some(window) = app_handle.get_webview_window("main") {
-        let _ = window.emit("unichat://scraper:event", payload);
+        let _ = window.emit("unichat://status:event", payload);
     }
 
     return Ok(());
