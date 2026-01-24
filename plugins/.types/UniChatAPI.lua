@@ -126,6 +126,12 @@
 ---@field authorProfilePictureUrl? string
 ---@field authorBadges UniChatBadge[]
 ---@field authorType UniChatAuthorType
+---@field tier? string
+---@field months number
+---@field messageId string
+---@field messageText? string
+---@field emotes UniChatEmote[]
+---@field timestamp number
 
 ---@class UniChatSponsorGiftEventPayload
 ---@field channelId string
