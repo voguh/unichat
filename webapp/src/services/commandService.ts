@@ -10,14 +10,7 @@
 import { ComboboxItemGroup } from "@mantine/core";
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
-import {
-    AppMetadata,
-    GalleryItem,
-    UniChatPluginMetadata,
-    UniChatScraper,
-    UniChatWidget,
-    WidgetFields
-} from "unichat/types";
+import { GalleryItem, UniChatPluginMetadata, UniChatScraper, UniChatWidget, WidgetFields } from "unichat/types";
 import { UniChatSettings } from "unichat/utils/constants";
 
 async function invoke<T>(cmd: string, args?: Record<string, any>): Promise<T> {
@@ -37,20 +30,8 @@ export class CommandService {
         await invoke("dispatch_clear_chat");
     }
 
-    public async getAppInfo(): Promise<AppMetadata> {
-        return invoke("get_app_info");
-    }
-
-    public async getReleases(): Promise<Record<string, any>[]> {
-        return invoke("get_releases");
-    }
-
     public async getSystemHosts(): Promise<string[]> {
         return invoke("get_system_hosts");
-    }
-
-    public async isDev(): Promise<boolean> {
-        return invoke("is_dev");
     }
 
     /* ========================================================================================== */

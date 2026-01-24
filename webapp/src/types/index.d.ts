@@ -23,31 +23,24 @@ export interface ThirdPartyLicenseInfo {
     licenses: string;
 }
 
+export interface ReleaseInfo {
+    id: number;
+    name: string;
+    description: string;
+    url: string;
+    prerelease: boolean;
+    createdAt: string;
+    updatedAt: string;
+    publishedAt: string;
+}
+
+/* ========================================================================== */
+
 export interface GalleryItem {
     title: string;
     type: "image" | "video" | "audio" | "file";
     previewUrl: string;
     url: string;
-}
-
-export interface AppMetadata {
-    displayName: string;
-    identifier: string;
-    version: string;
-    description: string;
-    authors: string;
-    homepage: string;
-    icon: number[];
-    licenseCode: string;
-    licenseName: string;
-    licenseUrl: string;
-
-    galleryDir: string;
-    licenseFile: string;
-    pluginsDir: string;
-    widgetsDir: string;
-
-    thirdPartyLicenses?: ThirdPartyLicenseInfo[];
 }
 
 /* ========================================================================== */
@@ -61,7 +54,7 @@ export interface UniChatPluginMetadata {
     homepage?: string;
     dependencies: string[];
 
-    icon?: number[];
+    icon?: string;
     status: PluginStatus;
     messages: string[];
     pluginPath?: string;

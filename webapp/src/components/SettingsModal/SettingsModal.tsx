@@ -12,8 +12,6 @@ import React from "react";
 import { Button } from "@mantine/core";
 import clsx from "clsx";
 
-import { AppContext } from "unichat/contexts/AppContext";
-
 import { AboutSettingsTab } from "./AboutSettingsTab";
 import { CheckUpdatesSettingsTab } from "./CheckUpdatesSettingsTab";
 import { DevelopersSettingsTab } from "./DevelopersSettingsTab";
@@ -57,8 +55,6 @@ const settingsItems: Record<string, SettingsItem> = {
 export function SettingsModal({ onClose, startupTab }: Props): React.ReactNode {
     const [selectedItem, setSelectedItem] = React.useState(startupTab || "general");
 
-    const { metadata } = React.useContext(AppContext);
-
     return (
         <SettingsStyledContainer>
             <div className="settings-sidebar">
@@ -80,7 +76,7 @@ export function SettingsModal({ onClose, startupTab }: Props): React.ReactNode {
 
                 <div className="settings-sidebar-footer">
                     <span>
-                        <strong>{metadata.displayName}</strong> {metadata.version}
+                        <strong>{UNICHAT_DISPLAY_NAME}</strong> {UNICHAT_VERSION}
                     </span>
                 </div>
             </div>

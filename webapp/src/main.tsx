@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2024-2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2024-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -28,15 +28,12 @@ import { createRoot } from "react-dom/client";
 
 import App from "unichat/App";
 import { AppContextProvider } from "unichat/contexts/AppContext";
-import { commandService } from "unichat/services/commandService";
 
-commandService.isDev().then((isDev) => {
-    if (!isDev) {
-        window.addEventListener("contextmenu", async (event) => {
-            event.preventDefault();
-        });
-    }
-});
+if (!__IS_DEV__) {
+    window.addEventListener("contextmenu", async (event) => {
+        event.preventDefault();
+    });
+}
 
 const documentRoot = document.querySelector("#root");
 if (documentRoot == null) {

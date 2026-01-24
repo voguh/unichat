@@ -29,6 +29,8 @@ use tauri_plugin_dialog::MessageDialogButtons;
 use tauri_plugin_dialog::MessageDialogKind;
 
 use crate::actix::ActixState;
+use crate::utils::base64;
+use crate::utils::get_releases;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
@@ -45,7 +47,7 @@ mod utils;
 mod widgets;
 mod youtube;
 
-pub static STATIC_APP_ICON: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/icons/icon.png"));
+pub static UNICHAT_ICON_BYTES: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/icons/icon.png"));
 pub static THIRD_PARTY_LICENSES: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/third_party_licenses.json"));
 static APP_HANDLE: OnceLock<tauri::AppHandle<tauri::Wry>> = OnceLock::new();
 
@@ -280,6 +282,57 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     return Ok(());
 }
 
+fn on_page_load<R: tauri::Runtime>(webview: &tauri::Webview<R>, payload: &tauri::webview::PageLoadPayload<'_>) {
+    match payload.event() {
+        tauri::webview::PageLoadEvent::Started => {
+            let is_dev = utils::is_dev();
+
+            if matches!(webview.label(), "main" | "splash-screen") {
+                let unichat_icon = format!("data:image/png;base64,{}", base64::encode(UNICHAT_ICON_BYTES));
+                let gallery_dir = properties::get_app_path(AppPaths::UniChatGallery).to_string_lossy().to_string();
+                let license_file = properties::get_app_path(AppPaths::UniChatLicense).to_string_lossy().to_string();
+                let plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins).to_string_lossy().to_string();
+                let widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets).to_string_lossy().to_string();
+
+                let third_party_licenses: serde_json::Value = serde_json::from_str(THIRD_PARTY_LICENSES).unwrap_or(serde_json::Value::Array(vec![]));
+                let releases = get_releases().unwrap_or_default();
+                let releases = serde_json::to_value(&releases).unwrap_or(serde_json::Value::Array(vec![]));
+
+                let _ = webview.eval(format!(r#"
+                    globalThis.__IS_DEV__ = {is_dev};
+
+                    globalThis.UNICHAT_DISPLAY_NAME = "{UNICHAT_DISPLAY_NAME}";
+                    globalThis.UNICHAT_NAME = "{UNICHAT_NAME}";
+                    globalThis.UNICHAT_VERSION = "{UNICHAT_VERSION}";
+                    globalThis.UNICHAT_DESCRIPTION = "{UNICHAT_DESCRIPTION}";
+                    globalThis.UNICHAT_AUTHORS = "{UNICHAT_AUTHORS}";
+                    globalThis.UNICHAT_HOMEPAGE = "{UNICHAT_HOMEPAGE}";
+                    globalThis.UNICHAT_ICON = "{unichat_icon}";
+                    globalThis.UNICHAT_LICENSE_CODE = "{UNICHAT_LICENSE_CODE}";
+                    globalThis.UNICHAT_LICENSE_NAME = "{UNICHAT_LICENSE_NAME}";
+                    globalThis.UNICHAT_LICENSE_URL = "{UNICHAT_LICENSE_URL}";
+
+                    globalThis.UNICHAT_GALLERY_DIR = "{gallery_dir}";
+                    globalThis.UNICHAT_LICENSE_FILE = "{license_file}";
+                    globalThis.UNICHAT_PLUGINS_DIR = "{plugins_dir}";
+                    globalThis.UNICHAT_WIDGETS_DIR = "{widgets_dir}";
+
+                    globalThis.UNICHAT_THIRD_PARTY_LICENSES = {third_party_licenses};
+                    globalThis.UNICHAT_RELEASES = {releases};
+                "#));
+            } else {
+                let _ = webview.eval(format!(r#"
+                    globalThis.__IS_DEV__ = {is_dev};
+
+                    globalThis.UNICHAT_VERSION = "{UNICHAT_VERSION}";
+                "#));
+            }
+        }
+        tauri::webview::PageLoadEvent::Finished => {
+        }
+    }
+}
+
 fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     let app = window.app_handle();
 
@@ -338,12 +391,10 @@ async fn main() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_store::Builder::default().build())
+        .on_page_load(on_page_load)
         .invoke_handler(tauri::generate_handler![
             commands::dispatch_clear_chat,
-            commands::get_app_info,
-            commands::get_releases,
             commands::get_system_hosts,
-            commands::is_dev,
             commands::gallery::get_gallery_items,
             commands::gallery::upload_gallery_items,
             commands::plugins::get_plugins,

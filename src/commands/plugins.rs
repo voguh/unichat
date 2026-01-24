@@ -14,6 +14,7 @@ use tauri::Runtime;
 
 use crate::plugins;
 use crate::plugins::PluginStatus;
+use crate::utils::base64;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
@@ -28,7 +29,7 @@ pub struct SerializedPluginMetadata {
     pub homepage: Option<String>,
     pub dependencies: Vec<String>,
 
-    pub icon: Option<Vec<u8>>,
+    pub icon: Option<String>,
     pub status: PluginStatus,
     pub messages: Vec<String>,
     pub plugin_path: Option<PathBuf>
@@ -55,7 +56,7 @@ pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Serialize
             homepage: manifest.homepage,
             dependencies: manifest.dependencies,
 
-            icon: plugin.get_icon(),
+            icon: plugin.get_icon().map(|bytes| format!("data:image/png;base64,{}", base64::encode(bytes))),
             status: plugin.get_status(),
             messages: plugin.get_messages(),
             plugin_path: plugin_path,

@@ -12,9 +12,9 @@ import React from "react";
 import { Badge, Button, Code, Tooltip } from "@mantine/core";
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 
-import { AppContext } from "unichat/contexts/AppContext";
 import { UniChatPluginMetadata } from "unichat/types";
 import { PLUGIN_STATUS_COLOR } from "unichat/utils/constants";
+import { Strings } from "unichat/utils/Strings";
 
 import { PluginOverviewStyledContainer } from "./styled";
 
@@ -26,18 +26,12 @@ export function PluginOverview(props: Props): React.ReactNode {
     const { plugin } = props;
     const [bgColor, fgColor] = PLUGIN_STATUS_COLOR[plugin.status];
 
-    const { metadata } = React.useContext(AppContext);
-
     function getPluginIconDataUrl(plugin: UniChatPluginMetadata): string {
-        let iconBytes = plugin.icon;
-
-        if (iconBytes == null || iconBytes.length === 0) {
-            iconBytes = metadata.icon;
+        if (Strings.isNullOrEmpty(plugin.icon)) {
+            return UNICHAT_ICON;
+        } else {
+            return plugin.icon;
         }
-
-        const b64Icon = btoa(String.fromCharCode(...(iconBytes ?? [])));
-
-        return `data:image/png;base64,${b64Icon}`;
     }
 
     return (

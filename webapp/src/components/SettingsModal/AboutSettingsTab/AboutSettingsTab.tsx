@@ -13,7 +13,6 @@ import { Button } from "@mantine/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import clsx from "clsx";
 
-import { AppContext } from "unichat/contexts/AppContext";
 import { modalService } from "unichat/services/modalService";
 
 import { AboutSettingsTabStyledContainer } from "./styled";
@@ -25,9 +24,6 @@ interface Props {
 
 export function AboutSettingsTab(_props: Props): React.ReactNode {
     const [isCreditsOpen, setIsCreditsOpen] = React.useState(false);
-    const [url, setUrl] = React.useState<string>("");
-
-    const { metadata } = React.useContext(AppContext);
 
     function handleOpenThirdPartyLicenses(): void {
         modalService.openModal({
@@ -37,31 +33,20 @@ export function AboutSettingsTab(_props: Props): React.ReactNode {
         });
     }
 
-    React.useEffect(() => {
-        const uint8Array = new Uint8Array(metadata.icon);
-        const blob = new Blob([uint8Array], { type: "image/png" });
-        const url = URL.createObjectURL(blob);
-        setUrl(url);
-
-        return () => {
-            URL.revokeObjectURL(url);
-        };
-    }, []);
-
     return (
         <AboutSettingsTabStyledContainer>
             <div className="app-image">
-                <img src={url} />
+                <img src={UNICHAT_ICON} />
             </div>
-            <div className="app-name">{metadata.displayName}</div>
-            <div className="app-version">{metadata.version}</div>
+            <div className="app-name">{UNICHAT_DISPLAY_NAME}</div>
+            <div className="app-version">{UNICHAT_VERSION}</div>
             <div className="app-homepage">
-                <span onClick={() => openUrl(metadata.homepage)}>Website</span>
+                <span onClick={() => openUrl(UNICHAT_HOMEPAGE)}>Website</span>
             </div>
             <div className="app-description">
                 This program comes with absolutely no warranty.
                 <br />
-                See the <span onClick={() => openUrl(metadata.licenseUrl)}>{metadata.licenseName}</span> license for
+                See the <span onClick={() => openUrl(UNICHAT_LICENSE_URL)}>{UNICHAT_LICENSE_NAME}</span> license for
                 details.
             </div>
             <div className="app-footer">
@@ -77,7 +62,7 @@ export function AboutSettingsTab(_props: Props): React.ReactNode {
                     <div>
                         <div className="label">Developed by</div>
                         <div className="values">
-                            {metadata.authors.split(";").map((author, index) => {
+                            {UNICHAT_AUTHORS.split(";").map((author, index) => {
                                 const [name, _email] = author.split("<");
 
                                 return <p key={index}>{name.trim()}</p>;

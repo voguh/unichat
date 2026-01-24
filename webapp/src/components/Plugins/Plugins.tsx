@@ -13,7 +13,6 @@ import { Badge, Button } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 
-import { AppContext } from "unichat/contexts/AppContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
@@ -32,8 +31,6 @@ const _logger = LoggerFactory.getLogger(__filename);
 export function Plugins(_props: Props): React.ReactNode {
     const [plugins, setPlugins] = React.useState<UniChatPluginMetadata[]>([]);
 
-    const { metadata } = React.useContext(AppContext);
-
     function openPluginDetails(plugin: UniChatPluginMetadata): void {
         modalService.openModal({
             fullScreen: true,
@@ -44,15 +41,11 @@ export function Plugins(_props: Props): React.ReactNode {
     }
 
     function getPluginIconDataUrl(plugin: UniChatPluginMetadata): string {
-        let iconBytes = plugin.icon;
-
-        if (iconBytes == null || iconBytes.length === 0) {
-            iconBytes = metadata.icon;
+        if (Strings.isNullOrEmpty(plugin.icon)) {
+            return UNICHAT_ICON;
+        } else {
+            return plugin.icon;
         }
-
-        const b64Icon = btoa(String.fromCharCode(...(iconBytes ?? [])));
-
-        return `data:image/png;base64,${b64Icon}`;
     }
 
     async function handleFetchPlugins(): Promise<void> {
@@ -119,8 +112,6 @@ export function Plugins(_props: Props): React.ReactNode {
 }
 
 export function PluginsActions(_props: Props): React.ReactNode {
-    const { metadata } = React.useContext(AppContext);
-
     return (
         <>
             <Button
@@ -136,7 +127,7 @@ export function PluginsActions(_props: Props): React.ReactNode {
                 variant="outline"
                 size="xs"
                 leftSection={<i className="fas fa-folder" />}
-                onClick={() => revealItemInDir(metadata.pluginsDir)}
+                onClick={() => revealItemInDir(UNICHAT_PLUGINS_DIR)}
             >
                 Show Plugins Folder
             </Button>

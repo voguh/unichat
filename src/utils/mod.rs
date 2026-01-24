@@ -7,8 +7,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
+use std::fs;
 use std::path;
 use std::sync::LazyLock;
+use std::time::Duration;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
@@ -16,6 +18,10 @@ use anyhow::anyhow;
 use anyhow::Error;
 use url::Url;
 
+use crate::UNICHAT_HOMEPAGE;
+use crate::utils::properties::AppPaths;
+
+pub mod base64;
 pub mod constants;
 pub mod irc;
 pub mod jsonrpc;
@@ -29,6 +35,98 @@ pub mod userstore;
 
 pub fn is_dev() -> bool {
     return cfg!(debug_assertions) || tauri::is_dev();
+}
+
+/* ================================================================================================================== */
+
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+struct GitHubRelease {
+    id: u64,
+    name: Option<String>,
+    tag_name: String,
+    body: Option<String>,
+
+    html_url: String,
+    prerelease: bool,
+
+    created_at: String,
+    updated_at: Option<String>,
+    published_at: Option<String>
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UniChatRelease {
+    id: u64,
+    name: String,
+    description: String,
+
+    url: String,
+    prerelease: bool,
+
+    created_at: String,
+    updated_at: String,
+    published_at: Option<String>
+}
+
+fn get_github_releases_inner<T: serde::de::DeserializeOwned>() -> Result<T, Error> {
+    let cached_releases_path = properties::get_app_path(AppPaths::AppCache).join("cached_releases.json");
+    if let Ok(metadata) = fs::metadata(&cached_releases_path) {
+        let modified_at = metadata.modified()?;
+        let now = SystemTime::now();
+        let duration = now.duration_since(modified_at)?;
+
+        if duration < Duration::from_secs(3600) {
+            log::info!("Using cached releases file (age: {} seconds)", duration.as_secs());
+            let data = fs::read_to_string(&cached_releases_path)?;
+            let json_data: T = serde_json::from_str(&data)?;
+
+            return Ok(json_data);
+        }
+    }
+
+    log::info!("Fetching releases from GitHub API...");
+    let url = UNICHAT_HOMEPAGE.replace("https://github.com", "https://api.github.com/repos") + "/releases";
+    let mut releases = ureq::get(&url).call()?;
+    let body = releases.body_mut();
+
+    let releases_string = body.read_to_string()?;
+    fs::write(&cached_releases_path, &releases_string)?;
+
+    let releases_json: T = body.read_json()?;
+
+    return Ok(releases_json);
+}
+
+pub fn get_releases() -> Result<Vec<UniChatRelease>, Error> {
+    let gh_releases: Vec<GitHubRelease> = get_github_releases_inner().unwrap_or_default();
+    let mut unichat_releases: Vec<UniChatRelease> = Vec::new();
+
+    for gh_release in gh_releases {
+        let id = gh_release.id;
+        let name = gh_release.tag_name.clone();
+        let description = gh_release.body.unwrap_or_default();
+        let url = gh_release.html_url;
+        let prerelease = gh_release.prerelease;
+        let created_at = gh_release.created_at.clone();
+        let updated_at = gh_release.updated_at.unwrap_or(gh_release.created_at.clone());
+        let published_at = gh_release.published_at;
+
+        let release = UniChatRelease {
+            id: id,
+            name: name,
+            description: description,
+            url: url,
+            prerelease: prerelease,
+            created_at: created_at,
+            updated_at: updated_at,
+            published_at: published_at
+        };
+
+        unichat_releases.push(release);
+    }
+
+    return Ok(unichat_releases);
 }
 
 /* ================================================================================================================== */
