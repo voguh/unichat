@@ -9,6 +9,7 @@
 
 use std::fs;
 use std::path;
+use std::path::PathBuf;
 use std::sync::LazyLock;
 use std::time::Duration;
 use std::time::SystemTime;
@@ -151,6 +152,12 @@ pub fn decode_scraper_url(url: &str) -> Result<Url, Error> {
 
     let url = Url::parse(url)?;
     return Ok(url);
+}
+
+/* ================================================================================================================== */
+
+pub fn path_to_string(path: &PathBuf) -> String {
+    return path.to_string_lossy().replace('\\', "\\\\");
 }
 
 /* ================================================================================================================== */

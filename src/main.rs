@@ -31,6 +31,7 @@ use tauri_plugin_dialog::MessageDialogKind;
 use crate::actix::ActixState;
 use crate::utils::base64;
 use crate::utils::get_releases;
+use crate::utils::path_to_string;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
@@ -238,6 +239,18 @@ fn setup_inner() -> Result<(), Error> {
 
     /* ========================================================================================== */
 
+    let is_dev = utils::is_dev();
+    let unichat_icon = format!("data:image/png;base64,{}", base64::encode(UNICHAT_ICON_BYTES));
+
+    let gallery_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatGallery));
+    let license_file = path_to_string(&properties::get_app_path(AppPaths::UniChatLicense));
+    let plugins_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatUserPlugins));
+    let widgets_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatUserWidgets));
+
+    let third_party_licenses: serde_json::Value = serde_json::from_str(THIRD_PARTY_LICENSES).unwrap_or(serde_json::Value::Array(vec![]));
+    let releases = get_releases().unwrap_or_default();
+    let releases = serde_json::to_value(&releases).unwrap_or(serde_json::Value::Array(vec![]));
+
     let main_url = tauri::WebviewUrl::App("index.html".into());
     let window = WebviewWindowBuilder::new(app_handle, "main", main_url)
         .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION))
@@ -246,47 +259,28 @@ fn setup_inner() -> Result<(), Error> {
         .max_inner_size(1280.0, 720.0)
         .maximizable(false)
         .center()
-        .on_page_load(|webview, payload| {
-            match payload.event() {
-                tauri::webview::PageLoadEvent::Started => {
-                    let is_dev = utils::is_dev();
-                    let unichat_icon = format!("data:image/png;base64,{}", base64::encode(UNICHAT_ICON_BYTES));
-                    let gallery_dir = properties::get_app_path(AppPaths::UniChatGallery).to_string_lossy().to_string();
-                    let license_file = properties::get_app_path(AppPaths::UniChatLicense).to_string_lossy().to_string();
-                    let plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins).to_string_lossy().to_string();
-                    let widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets).to_string_lossy().to_string();
+        .initialization_script(format!(r#"
+            globalThis.__IS_DEV__ = {is_dev};
 
-                    let third_party_licenses: serde_json::Value = serde_json::from_str(THIRD_PARTY_LICENSES).unwrap_or(serde_json::Value::Array(vec![]));
-                    let releases = get_releases().unwrap_or_default();
-                    let releases = serde_json::to_value(&releases).unwrap_or(serde_json::Value::Array(vec![]));
+            globalThis.UNICHAT_DISPLAY_NAME = "{UNICHAT_DISPLAY_NAME}";
+            globalThis.UNICHAT_NAME = "{UNICHAT_NAME}";
+            globalThis.UNICHAT_VERSION = "{UNICHAT_VERSION}";
+            globalThis.UNICHAT_DESCRIPTION = "{UNICHAT_DESCRIPTION}";
+            globalThis.UNICHAT_AUTHORS = "{UNICHAT_AUTHORS}";
+            globalThis.UNICHAT_HOMEPAGE = "{UNICHAT_HOMEPAGE}";
+            globalThis.UNICHAT_ICON = "{unichat_icon}";
+            globalThis.UNICHAT_LICENSE_CODE = "{UNICHAT_LICENSE_CODE}";
+            globalThis.UNICHAT_LICENSE_NAME = "{UNICHAT_LICENSE_NAME}";
+            globalThis.UNICHAT_LICENSE_URL = "{UNICHAT_LICENSE_URL}";
 
-                    let _ = webview.eval(format!(r#"
-                        globalThis.__IS_DEV__ = {is_dev};
+            globalThis.UNICHAT_GALLERY_DIR = "{gallery_dir}";
+            globalThis.UNICHAT_LICENSE_FILE = "{license_file}";
+            globalThis.UNICHAT_PLUGINS_DIR = "{plugins_dir}";
+            globalThis.UNICHAT_WIDGETS_DIR = "{widgets_dir}";
 
-                        globalThis.UNICHAT_DISPLAY_NAME = "{UNICHAT_DISPLAY_NAME}";
-                        globalThis.UNICHAT_NAME = "{UNICHAT_NAME}";
-                        globalThis.UNICHAT_VERSION = "{UNICHAT_VERSION}";
-                        globalThis.UNICHAT_DESCRIPTION = "{UNICHAT_DESCRIPTION}";
-                        globalThis.UNICHAT_AUTHORS = "{UNICHAT_AUTHORS}";
-                        globalThis.UNICHAT_HOMEPAGE = "{UNICHAT_HOMEPAGE}";
-                        globalThis.UNICHAT_ICON = "{unichat_icon}";
-                        globalThis.UNICHAT_LICENSE_CODE = "{UNICHAT_LICENSE_CODE}";
-                        globalThis.UNICHAT_LICENSE_NAME = "{UNICHAT_LICENSE_NAME}";
-                        globalThis.UNICHAT_LICENSE_URL = "{UNICHAT_LICENSE_URL}";
-
-                        globalThis.UNICHAT_GALLERY_DIR = "{gallery_dir}";
-                        globalThis.UNICHAT_LICENSE_FILE = "{license_file}";
-                        globalThis.UNICHAT_PLUGINS_DIR = "{plugins_dir}";
-                        globalThis.UNICHAT_WIDGETS_DIR = "{widgets_dir}";
-
-                        globalThis.UNICHAT_THIRD_PARTY_LICENSES = {third_party_licenses};
-                        globalThis.UNICHAT_RELEASES = {releases};
-                    "#));
-                }
-                tauri::webview::PageLoadEvent::Finished => {
-                }
-            }
-        })
+            globalThis.UNICHAT_THIRD_PARTY_LICENSES = {third_party_licenses};
+            globalThis.UNICHAT_RELEASES = {releases};
+        "#))
         .build()?;
 
     if !window.is_visible()? {
