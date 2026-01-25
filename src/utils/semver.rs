@@ -180,20 +180,12 @@ impl Version {
 
 impl Ord for Version {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        let self_major = self.major;
-        let self_minor = self.minor;
-        let self_patch = self.patch;
-
-        let other_major = other.major;
-        let other_minor = other.minor;
-        let other_patch = other.patch;
-
-        if self_major != other_major {
-            return self_major.cmp(&other_major);
-        } else if self_minor != other_minor {
-            return self_minor.cmp(&other_minor);
-        } else if self_patch != other_patch {
-            return self_patch.cmp(&other_patch);
+        if self.major != other.major {
+            return self.major.cmp(&other.major);
+        } else if self.minor != other.minor {
+            return self.minor.cmp(&other.minor);
+        } else if self.patch != other.patch {
+            return self.patch.cmp(&other.patch);
         }
 
         let (self_pre_type, self_pre_number) = pre_release_type_to_number(&self.pre_release);
