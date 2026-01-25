@@ -246,6 +246,47 @@ fn setup_inner() -> Result<(), Error> {
         .max_inner_size(1280.0, 720.0)
         .maximizable(false)
         .center()
+        .on_page_load(|webview, payload| {
+            match payload.event() {
+                tauri::webview::PageLoadEvent::Started => {
+                    let is_dev = utils::is_dev();
+                    let unichat_icon = format!("data:image/png;base64,{}", base64::encode(UNICHAT_ICON_BYTES));
+                    let gallery_dir = properties::get_app_path(AppPaths::UniChatGallery).to_string_lossy().to_string();
+                    let license_file = properties::get_app_path(AppPaths::UniChatLicense).to_string_lossy().to_string();
+                    let plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins).to_string_lossy().to_string();
+                    let widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets).to_string_lossy().to_string();
+
+                    let third_party_licenses: serde_json::Value = serde_json::from_str(THIRD_PARTY_LICENSES).unwrap_or(serde_json::Value::Array(vec![]));
+                    let releases = get_releases().unwrap_or_default();
+                    let releases = serde_json::to_value(&releases).unwrap_or(serde_json::Value::Array(vec![]));
+
+                    let _ = webview.eval(format!(r#"
+                        globalThis.__IS_DEV__ = {is_dev};
+
+                        globalThis.UNICHAT_DISPLAY_NAME = "{UNICHAT_DISPLAY_NAME}";
+                        globalThis.UNICHAT_NAME = "{UNICHAT_NAME}";
+                        globalThis.UNICHAT_VERSION = "{UNICHAT_VERSION}";
+                        globalThis.UNICHAT_DESCRIPTION = "{UNICHAT_DESCRIPTION}";
+                        globalThis.UNICHAT_AUTHORS = "{UNICHAT_AUTHORS}";
+                        globalThis.UNICHAT_HOMEPAGE = "{UNICHAT_HOMEPAGE}";
+                        globalThis.UNICHAT_ICON = "{unichat_icon}";
+                        globalThis.UNICHAT_LICENSE_CODE = "{UNICHAT_LICENSE_CODE}";
+                        globalThis.UNICHAT_LICENSE_NAME = "{UNICHAT_LICENSE_NAME}";
+                        globalThis.UNICHAT_LICENSE_URL = "{UNICHAT_LICENSE_URL}";
+
+                        globalThis.UNICHAT_GALLERY_DIR = "{gallery_dir}";
+                        globalThis.UNICHAT_LICENSE_FILE = "{license_file}";
+                        globalThis.UNICHAT_PLUGINS_DIR = "{plugins_dir}";
+                        globalThis.UNICHAT_WIDGETS_DIR = "{widgets_dir}";
+
+                        globalThis.UNICHAT_THIRD_PARTY_LICENSES = {third_party_licenses};
+                        globalThis.UNICHAT_RELEASES = {releases};
+                    "#));
+                }
+                tauri::webview::PageLoadEvent::Finished => {
+                }
+            }
+        })
         .build()?;
 
     if !window.is_visible()? {
@@ -280,57 +321,6 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     });
 
     return Ok(());
-}
-
-fn on_page_load<R: tauri::Runtime>(webview: &tauri::Webview<R>, payload: &tauri::webview::PageLoadPayload<'_>) {
-    match payload.event() {
-        tauri::webview::PageLoadEvent::Started => {
-            let is_dev = utils::is_dev();
-
-            if matches!(webview.label(), "main" | "splash-screen") {
-                let unichat_icon = format!("data:image/png;base64,{}", base64::encode(UNICHAT_ICON_BYTES));
-                let gallery_dir = properties::get_app_path(AppPaths::UniChatGallery).to_string_lossy().to_string();
-                let license_file = properties::get_app_path(AppPaths::UniChatLicense).to_string_lossy().to_string();
-                let plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins).to_string_lossy().to_string();
-                let widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets).to_string_lossy().to_string();
-
-                let third_party_licenses: serde_json::Value = serde_json::from_str(THIRD_PARTY_LICENSES).unwrap_or(serde_json::Value::Array(vec![]));
-                let releases = get_releases().unwrap_or_default();
-                let releases = serde_json::to_value(&releases).unwrap_or(serde_json::Value::Array(vec![]));
-
-                let _ = webview.eval(format!(r#"
-                    globalThis.__IS_DEV__ = {is_dev};
-
-                    globalThis.UNICHAT_DISPLAY_NAME = "{UNICHAT_DISPLAY_NAME}";
-                    globalThis.UNICHAT_NAME = "{UNICHAT_NAME}";
-                    globalThis.UNICHAT_VERSION = "{UNICHAT_VERSION}";
-                    globalThis.UNICHAT_DESCRIPTION = "{UNICHAT_DESCRIPTION}";
-                    globalThis.UNICHAT_AUTHORS = "{UNICHAT_AUTHORS}";
-                    globalThis.UNICHAT_HOMEPAGE = "{UNICHAT_HOMEPAGE}";
-                    globalThis.UNICHAT_ICON = "{unichat_icon}";
-                    globalThis.UNICHAT_LICENSE_CODE = "{UNICHAT_LICENSE_CODE}";
-                    globalThis.UNICHAT_LICENSE_NAME = "{UNICHAT_LICENSE_NAME}";
-                    globalThis.UNICHAT_LICENSE_URL = "{UNICHAT_LICENSE_URL}";
-
-                    globalThis.UNICHAT_GALLERY_DIR = "{gallery_dir}";
-                    globalThis.UNICHAT_LICENSE_FILE = "{license_file}";
-                    globalThis.UNICHAT_PLUGINS_DIR = "{plugins_dir}";
-                    globalThis.UNICHAT_WIDGETS_DIR = "{widgets_dir}";
-
-                    globalThis.UNICHAT_THIRD_PARTY_LICENSES = {third_party_licenses};
-                    globalThis.UNICHAT_RELEASES = {releases};
-                "#));
-            } else {
-                let _ = webview.eval(format!(r#"
-                    globalThis.__IS_DEV__ = {is_dev};
-
-                    globalThis.UNICHAT_VERSION = "{UNICHAT_VERSION}";
-                "#));
-            }
-        }
-        tauri::webview::PageLoadEvent::Finished => {
-        }
-    }
 }
 
 fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
@@ -379,7 +369,7 @@ async fn main() {
         log_level = log::LevelFilter::Info;
     }
 
-    tauri::Builder::default().setup(setup)
+    tauri::Builder::default().setup(setup).on_window_event(on_window_event)
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_log::Builder::default()
             .level(log_level)
@@ -391,7 +381,6 @@ async fn main() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_store::Builder::default().build())
-        .on_page_load(on_page_load)
         .invoke_handler(tauri::generate_handler![
             commands::dispatch_clear_chat,
             commands::get_system_hosts,
@@ -419,7 +408,6 @@ async fn main() {
             commands::widgets::reload_widgets,
             commands::widgets::set_widget_fieldstate,
         ])
-        .on_window_event(on_window_event)
         .run(tauri::generate_context!())
         .unwrap_or_else(|e| panic!("Failed to run {} v{}!\n{:?}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION, e));
 }

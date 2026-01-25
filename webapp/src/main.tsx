@@ -29,22 +29,30 @@ import { createRoot } from "react-dom/client";
 import App from "unichat/App";
 import { AppContextProvider } from "unichat/contexts/AppContext";
 
-if (!__IS_DEV__) {
-    window.addEventListener("contextmenu", async (event) => {
-        event.preventDefault();
-    });
+function init(): void {
+    if (!__IS_DEV__) {
+        window.addEventListener("contextmenu", async (event) => {
+            event.preventDefault();
+        });
+    }
+
+    const documentRoot = document.querySelector("#root");
+    if (documentRoot == null) {
+        throw new Error("Root element not found");
+    }
+
+    const root = createRoot(documentRoot);
+    root.render(
+        <React.StrictMode>
+            <AppContextProvider>
+                <App />
+            </AppContextProvider>
+        </React.StrictMode>
+    );
 }
 
-const documentRoot = document.querySelector("#root");
-if (documentRoot == null) {
-    throw new Error("Root element not found");
+if (document.readyState === "interactive" || document.readyState === "complete") {
+    init();
+} else {
+    document.addEventListener("DOMContentLoaded", init);
 }
-
-const root = createRoot(documentRoot);
-root.render(
-    <React.StrictMode>
-        <AppContextProvider>
-            <App />
-        </AppContextProvider>
-    </React.StrictMode>
-);

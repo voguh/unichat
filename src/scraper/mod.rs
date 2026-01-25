@@ -21,6 +21,7 @@ use tauri::WebviewWindowBuilder;
 
 use crate::get_app_handle;
 use crate::utils::decode_scraper_url;
+use crate::utils::is_dev;
 use crate::utils::settings;
 
 pub static COMMON_SCRAPER_JS: &str = include_str!("./static/common_scraper.js");
@@ -100,6 +101,7 @@ fn on_page_load(scraper_js: &str, window: &tauri::WebviewWindow, payload: tauri:
                 log::info!("Injecting scraper JS into scraper '{}'", scraper_id);
                 let formatted_js = COMMON_SCRAPER_JS
                     .replace("{{SCRAPER_JS}}", &scraper_js)
+                    .replace("{{IS_DEV}}", &is_dev().to_string())
                     .replace("{{SCRAPER_ID}}", scraper_id);
                 window.eval(&formatted_js)?;
             } else {
