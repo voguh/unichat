@@ -29,7 +29,19 @@ import { createRoot } from "react-dom/client";
 import App from "unichat/App";
 import { AppContextProvider } from "unichat/contexts/AppContext";
 
+let initializationAttempts = 0;
 function init(): void {
+    if (typeof __IS_DEV__ !== "boolean") {
+        if (initializationAttempts === 50) {
+            throw new Error("Initialization failed: __IS_DEV__ is not defined");
+        }
+
+        setTimeout(init, 100);
+        initializationAttempts++;
+
+        return;
+    }
+
     if (!__IS_DEV__) {
         window.addEventListener("contextmenu", async (event) => {
             event.preventDefault();
@@ -51,8 +63,4 @@ function init(): void {
     );
 }
 
-if (document.readyState === "interactive" || document.readyState === "complete") {
-    init();
-} else {
-    document.addEventListener("DOMContentLoaded", init);
-}
+init();
