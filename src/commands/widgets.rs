@@ -25,7 +25,7 @@ use crate::widgets::reload_user_widgets;
 #[tauri::command]
 pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<IndexMap<String, Value>, String> {
     let widget = get_widget_from_rest_path(&widget).map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
-    if let WidgetSource::User = widget.widget_source {
+    if matches!(widget.widget_source, WidgetSource::User | WidgetSource::UserPlugin(_)) {
         let fields = widget.fields();
 
         return Ok(fields);
@@ -37,7 +37,7 @@ pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: St
 #[tauri::command]
 pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<HashMap<String, Value>, String> {
     let widget = get_widget_from_rest_path(&widget).map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
-    if let WidgetSource::User = widget.widget_source {
+    if matches!(widget.widget_source, WidgetSource::User | WidgetSource::UserPlugin(_)) {
         let fieldstate = widget.fieldstate();
         return Ok(fieldstate);
     }
@@ -48,7 +48,7 @@ pub async fn get_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
 #[tauri::command]
 pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget: String, data: String) -> Result<(), String> {
     let widget = get_widget_from_rest_path(&widget).map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
-    if let WidgetSource::User = widget.widget_source {
+    if matches!(widget.widget_source, WidgetSource::User | WidgetSource::UserPlugin(_)) {
         let fieldstate_path = widget.fieldstate_path();
         if fieldstate_path.exists() && !fieldstate_path.is_file() {
             return Err(format!("Widget '{:?}' exists but is not a file", fieldstate_path));
