@@ -44,6 +44,10 @@ fn test_version_compare() {
     let v3 = Version::parse("1.5.0").unwrap();
     let v4 = Version::parse("1.5.0").unwrap();
     assert!(v3.eq(&v4));
+
+    let v5 = Version::parse("1.0.0-alpha").unwrap();
+    let v6 = Version::parse("1.0.0-alpha.0").unwrap();
+    assert!(v5.eq(&v6));
 }
 
 #[test]

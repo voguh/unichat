@@ -26,13 +26,21 @@ fn parse_optional_u32(value: Option<&str>) -> Result<Option<u32>, Error> {
     return Ok(None);
 }
 
-fn pre_release_type_to_number(pre: &Option<PreReleaseType>) -> u8 {
-    match pre {
-        Some(PreReleaseType::Alpha) => 1,
-        Some(PreReleaseType::Beta) => 2,
-        Some(PreReleaseType::ReleaseCandidate) => 3,
-        None => 4,
+fn pre_release_type_to_number(pre: &Option<(PreReleaseType, u32)>) -> (u8, u32) {
+    let mut pre_type = 4;
+    let mut pre_number = 0;
+
+    if let Some((pre_release_type, pre_num)) = pre {
+        match pre_release_type {
+            PreReleaseType::Alpha => pre_type = 1,
+            PreReleaseType::Beta => pre_type = 2,
+            PreReleaseType::ReleaseCandidate => pre_type = 3
+        }
+
+        pre_number = *pre_num;
     }
+
+    return (pre_type, pre_number);
 }
 
 /* ================================================================================================================== */
@@ -40,7 +48,7 @@ fn pre_release_type_to_number(pre: &Option<PreReleaseType>) -> u8 {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum BoundType {
     Inclusive,
-    Exclusive,
+    Exclusive
 }
 
 impl BoundType {
@@ -63,7 +71,7 @@ impl BoundType {
 pub enum PreReleaseType {
     Alpha,
     Beta,
-    ReleaseCandidate,
+    ReleaseCandidate
 }
 
 impl PreReleaseType {
@@ -87,7 +95,7 @@ impl Display for PreReleaseType {
         match self {
             PreReleaseType::Alpha => write!(f, "alpha"),
             PreReleaseType::Beta => write!(f, "beta"),
-            PreReleaseType::ReleaseCandidate => write!(f, "rc"),
+            PreReleaseType::ReleaseCandidate => write!(f, "rc")
         }
     }
 }
@@ -99,53 +107,38 @@ pub struct Version {
     major: u32,
     minor: u32,
     patch: u32,
-    pre_release: Option<PreReleaseType>,
-    pre_release_number: Option<u32>,
-    build_metadata: Option<String>,
+    pre_release: Option<(PreReleaseType, u32)>,
+    build_metadata: Option<String>
 }
 
 impl Version {
     pub fn parse(value: &str) -> Result<Self, Error> {
         let mut main_and_meta = value.split('+');
-        let main_part = main_and_meta
-            .next()
-            .ok_or(anyhow!("Invalid version string"))?;
+        let main_part = main_and_meta.next().ok_or(anyhow!("Invalid version string"))?;
         let build_metadata = main_and_meta.next();
 
         let mut main_and_pre = main_part.split('-');
-        let version_numbers = main_and_pre
-            .next()
-            .ok_or(anyhow!("Invalid version string"))?;
+        let version_numbers = main_and_pre.next().ok_or(anyhow!("Invalid version string"))?;
         let pre_release_parts = main_and_pre.next();
 
         /* ================================================================== */
 
         let mut numbers_iter = version_numbers.split('.');
-        let major = numbers_iter
-            .next()
-            .ok_or(anyhow!("Invalid version string"))?;
-        let minor = numbers_iter
-            .next()
-            .ok_or(anyhow!("Invalid version string"))?;
-        let patch = numbers_iter
-            .next()
-            .ok_or(anyhow!("Invalid version string"))?;
+        let major = numbers_iter.next().ok_or(anyhow!("Invalid version string"))?;
+        let minor = numbers_iter.next().ok_or(anyhow!("Invalid version string"))?;
+        let patch = numbers_iter.next().ok_or(anyhow!("Invalid version string"))?;
 
         /* ================================================================== */
 
         let mut pre_release = None;
-        let mut pre_release_number = None;
         if let Some(pre_release_parts) = pre_release_parts {
             let mut pre_release_split = pre_release_parts.split('.');
 
-            pre_release = pre_release_split
-                .next()
-                .map(|s| PreReleaseType::new(s))
-                .transpose()?;
-            pre_release_number = parse_optional_u32(pre_release_split.next())?;
+            let pre_release_type = pre_release_split.next().map(|s| PreReleaseType::new(s)).transpose()?;
+            let pre_release_number = parse_optional_u32(pre_release_split.next())?;
 
-            if pre_release.is_some() && pre_release_number.is_none() {
-                pre_release_number = Some(0);
+            if let Some(pre_release_type) = pre_release_type {
+                pre_release = Some((pre_release_type, pre_release_number.unwrap_or(0)));
             }
         }
 
@@ -154,7 +147,6 @@ impl Version {
             minor: minor.parse()?,
             patch: patch.parse()?,
             pre_release: pre_release,
-            pre_release_number: pre_release_number,
             build_metadata: build_metadata.map(|s| s.to_string()),
         });
     }
@@ -174,20 +166,20 @@ impl Version {
     }
 
     pub fn pre_release(&self) -> Option<&PreReleaseType> {
-        return self.pre_release.as_ref();
+        return self.pre_release.as_ref().map(|(pre_type, _)| pre_type);
     }
 
     pub fn pre_release_number(&self) -> Option<u32> {
-        return self.pre_release_number;
+        return self.pre_release.as_ref().map(|(_, pre_num)| *pre_num);
     }
 
     pub fn build_metadata(&self) -> Option<&String> {
         return self.build_metadata.as_ref();
     }
+}
 
-    /* ====================================================================== */
-
-    pub fn compare(&self, other: &Version) -> std::cmp::Ordering {
+impl Ord for Version {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         let self_major = self.major;
         let self_minor = self.minor;
         let self_patch = self.patch;
@@ -204,27 +196,19 @@ impl Version {
             return self_patch.cmp(&other_patch);
         }
 
-        let self_pre_type = pre_release_type_to_number(&self.pre_release);
-        let other_pre_type = pre_release_type_to_number(&other.pre_release);
+        let (self_pre_type, self_pre_number) = pre_release_type_to_number(&self.pre_release);
+        let (other_pre_type, other_pre_number) = pre_release_type_to_number(&other.pre_release);
         if self_pre_type != other_pre_type {
             return self_pre_type.cmp(&other_pre_type);
-        } else {
-            let self_pre_number = self.pre_release_number.unwrap_or(0);
-            let other_pre_number = other.pre_release_number.unwrap_or(0);
-            return self_pre_number.cmp(&other_pre_number);
         }
-    }
 
-    pub fn gt(&self, other: &Version) -> bool {
-        return self.compare(other) == std::cmp::Ordering::Greater;
+        return self_pre_number.cmp(&other_pre_number);
     }
+}
 
-    pub fn lt(&self, other: &Version) -> bool {
-        return self.compare(other) == std::cmp::Ordering::Less;
-    }
-
-    pub fn eq(&self, other: &Version) -> bool {
-        return self.compare(other) == std::cmp::Ordering::Equal;
+impl PartialOrd for Version {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -232,12 +216,8 @@ impl Display for Version {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}.{}.{}", self.major, self.minor, self.patch)?;
 
-        if let Some(pre) = &self.pre_release {
-            write!(f, "-{}", pre.to_string())?;
-
-            if let Some(pre_num) = &self.pre_release_number {
-                write!(f, ".{}", pre_num)?;
-            }
+        if let Some((pre_type, pre_num)) = &self.pre_release {
+            write!(f, "-{}.{}", pre_type, pre_num)?;
         }
 
         if let Some(build) = &self.build_metadata {
@@ -258,7 +238,7 @@ const EXCLUSIVE_END: &str = ")";
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct VersionRange {
     min: Option<(BoundType, Version)>,
-    max: Option<(BoundType, Version)>,
+    max: Option<(BoundType, Version)>
 }
 
 impl VersionRange {
