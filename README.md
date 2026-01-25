@@ -1,9 +1,5 @@
 # Voguh's UniChat
 
-[![Version](https://img.shields.io/badge/version-v1.4.2--beta.2-blue)](https://github.com/voguh/unichat/releases)
-[![License](https://img.shields.io/badge/license-MPL--2.0-green)](./LICENSE)
-[![Platforms](https://img.shields.io/badge/platform-windows%20%7C%20linux-lightgrey)]()
-
 UniChat is a tool for streamers who broadcast on YouTube and Twitch, providing a chat widget with support for third-party emotes and customization via HTML/CSS/JS.
 
 <p align="center">
