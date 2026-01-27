@@ -1,14 +1,55 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2025-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-import * as tauriLogger from "@tauri-apps/plugin-log";
+import { invoke } from "@tauri-apps/api/core";
+import { platform } from "@tauri-apps/plugin-os";
+import { SourceMapConsumer } from "source-map";
+import StackTrace from "stacktrace-js";
 
+type LogLevel = "trace" | "debug" | "info" | "warn" | "error";
+
+const logLevelsMap: Record<LogLevel, number> = {
+    trace: 1,
+    debug: 2,
+    info: 3,
+    warn: 4,
+    error: 5
+};
+
+function logLevelToNumber(level: LogLevel): number {
+    return logLevelsMap[level as LogLevel] || logLevelsMap.info;
+}
+
+function logLevelGuard(level: string): level is LogLevel {
+    return ["trace", "debug", "info", "warn", "error"].includes(level);
+}
+
+const _sourceMapsCache: Record<string, SourceMapConsumer> = {};
+
+async function getSourceMap(url: string): Promise<SourceMapConsumer | null> {
+    if (_sourceMapsCache[url]) {
+        return _sourceMapsCache[url];
+    }
+
+    try {
+        const sourceMapData = await fetch(url).then((res) => res.json());
+
+        const consumer = new SourceMapConsumer(sourceMapData);
+        _sourceMapsCache[url] = consumer;
+
+        return consumer;
+    } catch (_err) {
+        return null;
+    }
+}
+
+const OS_TYPE = platform();
 export class Logger {
     private readonly name: string;
 
@@ -17,78 +58,106 @@ export class Logger {
     }
 
     public trace(message: string, ...args: any[]): void {
-        const { formatted, throwable } = this._formatMessage(message, args);
-        this._dispatchLog("trace", formatted);
-
-        if (throwable) {
-            this._dispatchThrowable(throwable);
-        }
+        this._doLog("trace", message, ...args);
     }
 
     public debug(message: string, ...args: any[]): void {
-        const { formatted, throwable } = this._formatMessage(message, args);
-        this._dispatchLog("debug", formatted);
-
-        if (throwable) {
-            this._dispatchThrowable(throwable);
-        }
+        this._doLog("debug", message, ...args);
     }
 
     public info(message: string, ...args: any[]): void {
-        const { formatted, throwable } = this._formatMessage(message, args);
-        this._dispatchLog("info", formatted);
-
-        if (throwable) {
-            this._dispatchThrowable(throwable);
-        }
+        this._doLog("info", message, ...args);
     }
 
     public warn(message: string, ...args: any[]): void {
-        const { formatted, throwable } = this._formatMessage(message, args);
-        this._dispatchLog("warn", formatted);
-
-        if (throwable) {
-            this._dispatchThrowable(throwable);
-        }
+        this._doLog("warn", message, ...args);
     }
 
     public error(message: string, ...args: any[]): void {
-        const { formatted, throwable } = this._formatMessage(message, args);
-        this._dispatchLog("error", formatted);
-
-        if (throwable) {
-            this._dispatchThrowable(throwable);
-        }
+        this._doLog("error", message, ...args);
     }
 
-    private _dispatchLog(level: string, message: string): void {
-        if (!["trace", "debug", "info", "warn", "error"].includes(level)) {
+    private _doLog(level: LogLevel, message: string, ...args: any[]): void {
+        const [formattedMessage, throwable] = this._formatMessage(message, args);
+
+        if (!logLevelGuard(level)) {
             level = "info";
         }
 
-        tauriLogger[level](`[${this.name}] ${message}`).catch(console.error);
-        console[level](message);
+        this._emit(level, formattedMessage);
+        console[level](formattedMessage);
+
+        if (throwable != null) {
+            let errorMessage: string;
+            if (throwable.stack != null) {
+                if (throwable.stack.startsWith("Error")) {
+                    errorMessage = throwable.stack;
+                } else {
+                    const stack = throwable.stack.split("\n").map((line) => `\tat ${line}`);
+                    errorMessage = `Error: ${throwable.message}\n${stack.join("\n")}`;
+                }
+            } else {
+                errorMessage = String(throwable);
+            }
+
+            this._emit("error", errorMessage);
+            console.error(throwable);
+        }
     }
 
-    private _dispatchThrowable(throwable: Error): void {
-        tauriLogger.error(`[${this.name}] ${throwable.stack}`).catch(console.error);
-        console.error(throwable);
+    private async _emit(level: LogLevel, data: string): Promise<void> {
+        let fileName = this.name;
+        let lineNumber: number | null = null;
+
+        const callStack = StackTrace.getSync();
+        const callSite = callStack[OS_TYPE === "windows" ? 5 : 6];
+
+        if (callSite != null) {
+            const _fileName = callSite.fileName;
+            const _lineNumber = callSite.lineNumber;
+            const _columnNumber = callSite.columnNumber;
+
+            if (_fileName != null && _lineNumber != null) {
+                if (_fileName.includes("/src/")) {
+                    fileName = _fileName.split("/src/")[1] || fileName;
+                    lineNumber = _lineNumber;
+                } else if (_columnNumber != null) {
+                    const consumer = await getSourceMap(`${callSite.fileName}.map`);
+
+                    if (consumer != null) {
+                        const pos = consumer.originalPositionFor({ line: _lineNumber, column: _columnNumber });
+
+                        if (pos != null) {
+                            fileName = pos.source.split("/src/")[1] || fileName;
+                            lineNumber = pos.line || lineNumber;
+                        }
+                    }
+                }
+            }
+        }
+
+        invoke("plugin:log|log", {
+            level: logLevelToNumber(level),
+            message: data,
+            location: `${fileName}${lineNumber !== null ? `:${lineNumber}` : ""}`,
+            file: fileName,
+            line: lineNumber,
+            keyValues: null
+        });
     }
 
-    private _formatMessage(message: string, args: any[]): { formatted: string; throwable: Error | null } {
+    private _formatMessage(message: string, args: any[]): [string, Error | null] {
+        let formattedMessage = message;
         let throwable: Error | null = null;
-        let usedArgs = args;
 
         if (args.length > 0 && args[args.length - 1] instanceof Error) {
-            throwable = args[args.length - 1];
-            usedArgs = args.slice(0, -1);
+            throwable = args.pop() as Error;
         }
 
-        let formatted = message;
-        for (const arg of usedArgs) {
-            formatted = formatted.replace("{}", String(arg));
+        for (const param of args) {
+            formattedMessage = formattedMessage.replace("{}", String(param));
         }
 
-        return { formatted, throwable };
+        return [formattedMessage, throwable];
     }
 }

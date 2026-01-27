@@ -23,11 +23,11 @@ use serde_json::Value;
 
 use crate::events;
 use crate::events::unichat::UniChatBadge;
-use crate::irc::IRCMessage;
 use crate::scraper;
 use crate::scraper::UniChatScraper;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
+use crate::utils::irc::IRCMessage;
 use crate::utils::is_valid_twitch_channel_name;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -295,11 +295,11 @@ impl UniChatScraper for TwitchUniChatScraper {
 
 /* ================================================================================================================== */
 
-pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
+pub fn init() -> Result<(), Error> {
     let scraper_data = TwitchUniChatScraper::default();
 
     let scraper: Arc<dyn UniChatScraper + Send + Sync> = Arc::new(scraper_data);
-    scraper::register_scraper(app.handle(), scraper)?;
+    scraper::register_scraper(scraper)?;
 
     return Ok(());
 }

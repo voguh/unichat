@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2024-2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2024-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -28,21 +28,43 @@ import { createRoot } from "react-dom/client";
 
 import App from "unichat/App";
 import { AppContextProvider } from "unichat/contexts/AppContext";
-import { commandService } from "unichat/services/commandService";
 
-commandService.isDev().then((isDev) => {
-    if (!isDev) {
+let initializationAttempts = 0;
+function init(): void {
+    if (typeof __IS_DEV__ !== "boolean") {
+        if (initializationAttempts === 50) {
+            throw new Error("Initialization failed: __IS_DEV__ is not defined");
+        }
+
+        setTimeout(init, 100);
+        initializationAttempts++;
+
+        return;
+    }
+
+    if (!__IS_DEV__) {
         window.addEventListener("contextmenu", async (event) => {
             event.preventDefault();
         });
     }
-});
 
-const root = createRoot(document.querySelector("#root"));
-root.render(
-    <React.StrictMode>
-        <AppContextProvider>
-            <App />
-        </AppContextProvider>
-    </React.StrictMode>
-);
+    const documentRoot = document.querySelector("#root");
+    if (documentRoot == null) {
+        throw new Error("Root element not found");
+    }
+
+    const root = createRoot(documentRoot);
+    root.render(
+        <React.StrictMode>
+            <AppContextProvider>
+                <App />
+            </AppContextProvider>
+        </React.StrictMode>
+    );
+}
+
+if (document.readyState === "interactive" || document.readyState === "complete") {
+    init();
+} else {
+    document.addEventListener("DOMContentLoaded", init);
+}

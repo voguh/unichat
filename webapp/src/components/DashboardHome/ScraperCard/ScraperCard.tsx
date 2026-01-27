@@ -34,7 +34,7 @@ const DEFAULT_STATUS_EVENT: IPCStatusEvent = {
     timestamp: Date.now()
 };
 
-const _logger = LoggerFactory.getLogger(import.meta.url);
+const _logger = LoggerFactory.getLogger(__filename);
 export function ScraperCard(props: Props): React.ReactNode {
     const { editingTooltip, scraper, validateUrl } = props;
 
@@ -55,7 +55,7 @@ export function ScraperCard(props: Props): React.ReactNode {
             await commandService.setScraperWebviewUrl(scraper.id, inputValue);
             setEvent(null);
         } catch (err) {
-            _logger.error(`An error occurred while starting the ${scraper.name} chat scraper: {}`, err);
+            _logger.error("An error occurred while starting the '{}' chat scraper: {}", scraper.name, err);
         } finally {
             setLoading(false);
         }
@@ -67,7 +67,7 @@ export function ScraperCard(props: Props): React.ReactNode {
             await commandService.setScraperWebviewUrl(scraper.id, "about:blank");
             setEvent({ ...DEFAULT_STATUS_EVENT, scraperId: scraper.id });
         } catch (err) {
-            _logger.error(`An error occurred while stopping the ${scraper.name} chat scraper: {}`, err);
+            _logger.error("An error occurred while stopping the '{}' chat scraper: {}", scraper.name, err);
         } finally {
             setLoading(false);
         }

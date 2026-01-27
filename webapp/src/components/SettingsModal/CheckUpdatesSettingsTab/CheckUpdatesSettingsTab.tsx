@@ -14,8 +14,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { marked } from "marked";
 import semver from "semver";
 
-import { AppContext } from "unichat/contexts/AppContext";
-import { UniChatRelease } from "unichat/types/unichatApi";
+import { ReleaseInfo } from "unichat/types";
 
 import { CheckUpdatesSettingsTabStyledContainer, ReleaseNotesWrapper } from "./styled";
 
@@ -24,15 +23,14 @@ interface Props {
 }
 
 export function CheckUpdatesSettingsTab(_props: Props): React.ReactNode {
-    const [latestStable, setLatestStable] = React.useState<UniChatRelease>(null);
-    const [latestBeta, setLatestBeta] = React.useState<UniChatRelease>(null);
+    const [latestStable, setLatestStable] = React.useState<ReleaseInfo>(null);
+    const [latestBeta, setLatestBeta] = React.useState<ReleaseInfo>(null);
 
-    const { releases } = React.useContext(AppContext);
     const isMounted = React.useRef(false);
 
     async function init(): Promise<void> {
-        const stableRelease = releases.find((release) => !release.prerelease);
-        const betaRelease = releases.find((release) => release.prerelease);
+        const stableRelease = UNICHAT_RELEASES.find((release) => !release.prerelease);
+        const betaRelease = UNICHAT_RELEASES.find((release) => release.prerelease);
 
         setLatestStable(stableRelease);
         if (betaRelease && semver.gt(betaRelease.name, stableRelease.name)) {

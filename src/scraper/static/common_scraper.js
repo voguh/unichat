@@ -249,13 +249,11 @@ async function uniChatPreInit() {
         `;
         document.head.appendChild(style);
 
-        __TAURI__.core.invoke("is_dev").then((isDev) => {
-            if (!isDev) {
-                window.addEventListener("contextmenu", async (event) => {
-                    event.preventDefault();
-                });
-            }
-        });
+        if ("{{IS_DEV}}" !== "false") {
+            window.addEventListener("contextmenu", async (event) => {
+                event.preventDefault();
+            });
+        }
 
         if (typeof uniChatInit !== "function") {
             throw new Error("UniChat scraper initialization function not found.");

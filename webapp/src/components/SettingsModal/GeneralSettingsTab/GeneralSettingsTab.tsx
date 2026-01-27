@@ -26,7 +26,7 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
     const [widgets, setWidgets] = React.useState<ComboboxData>([]);
     const [settings, setSettings] = React.useState<Record<string, unknown>>({});
 
-    const { metadata, requiresRestart, setRequiresRestart } = React.useContext(AppContext);
+    const { requiresRestart, setRequiresRestart } = React.useContext(AppContext);
 
     async function updateSetting<T>(key: string, value: T): Promise<void> {
         const settingsCopy = { ...settings };
@@ -95,7 +95,7 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
                 {requiresRestart && (
                     <Alert variant="light" color="blue" icon={<i className="fas fa-info-circle" />}>
                         <span>
-                            <strong>{metadata.displayName}</strong> must be restarted for this setting to take effect.
+                            <strong>{UNICHAT_DISPLAY_NAME}</strong> must be restarted for this setting to take effect.
                         </span>
                     </Alert>
                 )}

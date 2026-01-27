@@ -21,6 +21,7 @@ use crate::UNICHAT_LICENSE_CODE;
 use crate::UNICHAT_VERSION;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
+use crate::utils::semver;
 
 #[derive(Serialize, Deserialize, Hash, Clone, Debug)]
 pub struct PluginManifestYAML {

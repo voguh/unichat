@@ -227,10 +227,10 @@ impl UniChatScraper for YouTubeUniChatScraper {
     }
 }
 
-pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
+pub fn init() -> Result<(), Error> {
     let scraper_data = YouTubeUniChatScraper::default();
     let scraper: Arc<dyn UniChatScraper + Send + Sync> = Arc::new(scraper_data);
-    scraper::register_scraper(app.handle(), scraper)?;
+    scraper::register_scraper(scraper)?;
 
     return Ok(());
 }

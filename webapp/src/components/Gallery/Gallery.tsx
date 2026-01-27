@@ -14,7 +14,6 @@ import { notifications } from "@mantine/notifications";
 import * as dialog from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
-import { AppContext } from "unichat/contexts/AppContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { GalleryItem } from "unichat/types";
@@ -33,7 +32,7 @@ interface Props {
     onSelectItem?: (url: string) => void;
 }
 
-const _logger = LoggerFactory.getLogger(import.meta.url);
+const _logger = LoggerFactory.getLogger(__filename);
 export function Gallery(props: Props): React.ReactNode {
     const { onSelectItem, selectedItem = "", showTabs = ["image", "video", "audio", "file"], startSelectedTab } = props;
 
@@ -159,10 +158,8 @@ export function Gallery(props: Props): React.ReactNode {
 }
 
 export function GalleryActions(_props: Props): React.ReactNode {
-    const { metadata } = React.useContext(AppContext);
-
     return (
-        <Button variant="outline" size="xs" onClick={() => revealItemInDir(metadata.galleryDir)}>
+        <Button variant="outline" size="xs" onClick={() => revealItemInDir(UNICHAT_GALLERY_DIR)}>
             <i className="fas fa-folder" />
             &nbsp;Show Gallery Folder
         </Button>

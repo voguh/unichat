@@ -51,7 +51,7 @@ export default function App(): JSX.Element {
     const [selectedTab, setSelectedTab] = React.useState<keyof typeof tabs>("dashboard");
     const [settingsModalOpen, setSettingsModalOpen] = React.useState<boolean | string>(false);
 
-    const { metadata, releases, setShowWidgetPreview, showWidgetPreview } = React.useContext(AppContext);
+    const { setShowWidgetPreview, showWidgetPreview } = React.useContext(AppContext);
 
     const isMounted = React.useRef(false);
 
@@ -78,11 +78,13 @@ export default function App(): JSX.Element {
     }
 
     async function init(): Promise<void> {
+        UNICHAT_RELEASES.sort((a, b) => semver.rcompare(a.name, b.name));
+
         const isOpenToLan = await commandService.settingsGetItem(UniChatSettings.OPEN_TO_LAN);
 
         if (isOpenToLan) {
             notifications.show({
-                title: `${metadata.displayName} is open to LAN`,
+                title: `${UNICHAT_DISPLAY_NAME} is open to LAN`,
                 message: "Your widgets are accessible by other devices on the same local network.",
                 color: "yellow"
             });
@@ -90,8 +92,8 @@ export default function App(): JSX.Element {
 
         /* ====================================================================================== */
 
-        const currentVersion = metadata.version;
-        const latestRelease = releases.find((release) => !release.prerelease);
+        const currentVersion = UNICHAT_VERSION;
+        const latestRelease = UNICHAT_RELEASES.find((release) => !release.prerelease);
 
         if (latestRelease && semver.gt(latestRelease.name, currentVersion)) {
             setSettingsModalOpen("check-updates");
@@ -157,7 +159,7 @@ export default function App(): JSX.Element {
                             )}
                             <Tooltip label="Open user widgets folder" position="right" withArrow>
                                 <Button
-                                    onClick={() => revealItemInDir(metadata.widgetsDir)}
+                                    onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)}
                                     data-tour="user-widgets-directory"
                                 >
                                     <i className="fas fa-folder" />

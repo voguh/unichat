@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2025-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -15,8 +15,6 @@ use anyhow::Error;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatMessageEventPayload;
 use crate::events::unichat::UniChatPlatform;
-use crate::irc::IRCCommand;
-use crate::irc::IRCMessage;
 use crate::twitch::mapper::structs::author::parse_author_badges;
 use crate::twitch::mapper::structs::author::parse_author_color;
 use crate::twitch::mapper::structs::author::parse_author_name;
@@ -26,6 +24,8 @@ use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::twitch::mapper::structs::message::parse_message_emotes;
 use crate::twitch::mapper::structs::message::parse_message_string;
 use crate::utils::get_current_timestamp;
+use crate::utils::irc::IRCCommand;
+use crate::utils::irc::IRCMessage;
 
 pub fn parse(message: &IRCMessage, tags: &HashMap<String, Option<String>>) -> Result<Option<UniChatEvent>, Error> {
     let (channel, message_text) = match &message.command {

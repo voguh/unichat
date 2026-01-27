@@ -10,6 +10,8 @@
 use anyhow::anyhow;
 use anyhow::Error;
 
+use crate::utils::semver;
+
 pub fn table_deep_readonly(lua: &mlua::Lua, table_name: &mlua::Value, table: mlua::Table) -> Result<mlua::Table, mlua::Error> {
     let mt = lua.create_table()?;
 
@@ -37,44 +39,8 @@ pub fn table_deep_readonly(lua: &mlua::Lua, table_name: &mlua::Value, table: mlu
 
 /* ================================================================================================================== */
 
-const INCLUSIVE_START: char = '[';
-const INCLUSIVE_END: char = ']';
-const EXCLUSIVE_START: char = '(';
-const EXCLUSIVE_END: char = ')';
-
-pub fn parse_dependency_version(version: &str) -> Result<semver::VersionReq, Error> {
-    let v = version.trim();
-
-    let first = v.chars().next();
-    let last = v.chars().last();
-
-    if matches!(first, Some(INCLUSIVE_START | EXCLUSIVE_START)) && matches!(last, Some(INCLUSIVE_END | EXCLUSIVE_END)) {
-        let (min, max) = v[1..v.len() -1].split_once(',').ok_or(anyhow!("Invalid dependency version range: '{}'", version))?;
-        let min = min.trim();
-        let max = max.trim();
-
-        let mut parts = Vec::new();
-        if !min.is_empty() {
-            let min_op = if first == Some(INCLUSIVE_START) { ">=" } else { ">" };
-            parts.push(format!("{} {}", min_op, min));
-        }
-
-        if !max.is_empty() {
-            let max_op = if last == Some(INCLUSIVE_END) { "<=" } else { "<" };
-            parts.push(format!("{} {}", max_op, max));
-        }
-
-        let range_str = parts.join(", ");
-        let version_req = semver::VersionReq::parse(&range_str)?;
-        return Ok(version_req);
-    }
-
-    let version_req = semver::VersionReq::parse(version)?;
-    return Ok(version_req);
-}
-
-pub fn parse_dependencies(raw_dependencies: &Vec<String>) -> Result<Vec<(String, semver::VersionReq)>, Error> {
-    let mut dependencies: Vec<(String, semver::VersionReq)> = Vec::new();
+pub fn parse_dependencies(raw_dependencies: &Vec<String>) -> Result<Vec<(String, semver::VersionRange)>, Error> {
+    let mut dependencies: Vec<(String, semver::VersionRange)> = Vec::new();
 
     for dep in raw_dependencies {
         let parts: Vec<&str> = dep.splitn(2, '@').collect();
@@ -84,7 +50,7 @@ pub fn parse_dependencies(raw_dependencies: &Vec<String>) -> Result<Vec<(String,
 
         let name = parts[0].trim().to_string();
         let version = parts[1].trim();
-        let version_req = parse_dependency_version(version)?;
+        let version_req = semver::VersionRange::parse(version)?;
 
         dependencies.push((name, version_req));
     }

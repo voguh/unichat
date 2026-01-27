@@ -22,6 +22,7 @@ use crate::plugins::UniChatPlugin;
 use crate::plugins::lua_env::load_plugin_env;
 use crate::plugins::plugin_manifest::PluginManifestYAML;
 use crate::plugins::utils::parse_dependencies;
+use crate::utils::semver;
 use crate::widgets;
 
 pub fn load_plugin(plugin_path: &Path, manifest: &PluginManifestYAML) -> Result<(), Error> {

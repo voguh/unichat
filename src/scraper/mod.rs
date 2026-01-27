@@ -19,7 +19,9 @@ use tauri::Listener as _;
 use tauri::WebviewWindow;
 use tauri::WebviewWindowBuilder;
 
+use crate::get_app_handle;
 use crate::utils::decode_scraper_url;
+use crate::utils::is_dev;
 use crate::utils::settings;
 
 pub static COMMON_SCRAPER_JS: &str = include_str!("./static/common_scraper.js");
@@ -99,6 +101,7 @@ fn on_page_load(scraper_js: &str, window: &tauri::WebviewWindow, payload: tauri:
                 log::info!("Injecting scraper JS into scraper '{}'", scraper_id);
                 let formatted_js = COMMON_SCRAPER_JS
                     .replace("{{SCRAPER_JS}}", &scraper_js)
+                    .replace("{{IS_DEV}}", &is_dev().to_string())
                     .replace("{{SCRAPER_ID}}", scraper_id);
                 window.eval(&formatted_js)?;
             } else {
@@ -117,7 +120,7 @@ fn on_page_load(scraper_js: &str, window: &tauri::WebviewWindow, payload: tauri:
     return Ok(());
 }
 
-pub fn register_scraper(app: &tauri::AppHandle<tauri::Wry>, scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Result<WebviewWindow, Error> {
+pub fn register_scraper(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Result<WebviewWindow, Error> {
     if scraper.id().chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
         return Err(anyhow!("Scraper ID '{}' contains invalid characters. Only ASCII alphanumeric characters, underscores, and hyphens are allowed.", scraper.id()));
     }
@@ -139,7 +142,8 @@ pub fn register_scraper(app: &tauri::AppHandle<tauri::Wry>, scraper: Arc<dyn Uni
     let webview_url = tauri::WebviewUrl::App(PathBuf::from("scraper_idle.html"));
     let scraper_js = scraper.scraper_js().to_string();
 
-    let window = WebviewWindowBuilder::new(app, scraper.id(), webview_url)
+    let app_handle = get_app_handle();
+    let window = WebviewWindowBuilder::new(app_handle, scraper.id(), webview_url)
         .title(format!("UniChat - Scraper ({})", scraper.name()))
         .inner_size(400.0, 576.0)
         .visible(!start_hidden)

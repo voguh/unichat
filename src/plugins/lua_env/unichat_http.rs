@@ -7,9 +7,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  ******************************************************************************/
 
-use base64::Engine as _;
 use mlua::LuaSerdeExt as _;
 
+use crate::utils::base64;
 use crate::utils::ureq;
 use crate::utils::ureq::http::response::Response;
 use crate::utils::ureq::RequestBuilder;
@@ -118,7 +118,7 @@ fn apply_args<B>(builder: RequestBuilder<B>, args: Option<mlua::Table>) -> Resul
         if let Ok(basic_auth) = args.get::<mlua::Table>("basic_auth") {
             let username: String = basic_auth.get("username")?;
             let password: String = basic_auth.get("password")?;
-            let hash = base64::engine::general_purpose::STANDARD.encode(format!("{}:{}", username, password));
+            let hash = base64::encode(format!("{}:{}", username, password));
             let hash = format!("Basic {}", hash);
             builder = builder.header("Authorization", &hash);
         }

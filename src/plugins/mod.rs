@@ -13,7 +13,6 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::LazyLock;
-use std::sync::OnceLock;
 use std::sync::RwLock;
 
 use anyhow::anyhow;
@@ -26,14 +25,13 @@ use crate::plugins::plugin_instance::load_plugin;
 use crate::plugins::plugin_manifest::PluginManifestYAML;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
+use crate::utils::semver;
 
 mod lua_env;
 mod plugin_instance;
 mod plugin_manifest;
 mod utils;
 
-const APP_HANDLE_ONCE_LOCK_KEY: &str = "Plugins::APP_HANDLE";
-static APP_HANDLE: OnceLock<tauri::AppHandle<tauri::Wry>> = OnceLock::new();
 const LOADED_PLUGINS_LAZY_LOCK_KEY: &str = "Plugins::LOADED_PLUGINS";
 static LOADED_PLUGINS: LazyLock<RwLock<HashMap<String, Arc<UniChatPlugin>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
@@ -60,7 +58,7 @@ pub struct UniChatPlugin {
     pub author: Option<String>,
     pub license: Option<String>,
     pub homepage: Option<String>,
-    pub dependencies: Vec<(String, semver::VersionReq)>,
+    pub dependencies: Vec<(String, semver::VersionRange)>,
 
     status: RwLock<PluginStatus>,
     messages: RwLock<Vec<String>>,
@@ -71,7 +69,7 @@ pub struct UniChatPlugin {
 }
 
 impl UniChatPlugin {
-    pub(in crate::plugins) fn new(plugin_path: &Path, manifest: &PluginManifestYAML, dependencies: Vec<(String, semver::VersionReq)>) -> Result<Self, Error> {
+    pub(in crate::plugins) fn new(plugin_path: &Path, manifest: &PluginManifestYAML, dependencies: Vec<(String, semver::VersionRange)>) -> Result<Self, Error> {
         let version = semver::Version::parse(&manifest.version)?;
 
         let lua = get_lua_runtime()?;
@@ -208,15 +206,9 @@ pub(in crate::plugins) fn get_lua_runtime() -> Result<Arc<mlua::Lua>, Error> {
     return Ok(lua.clone());
 }
 
-pub(in crate::plugins) fn get_app_handle() -> Result<tauri::AppHandle<tauri::Wry>, Error> {
-    let app_handle = APP_HANDLE.get().ok_or(anyhow!("{} was not initialized", APP_HANDLE_ONCE_LOCK_KEY))?;
-    return Ok(app_handle.clone());
-}
-
 /* ================================================================================================================== */
 
-pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
-    APP_HANDLE.set(app.handle().clone()).map_err(|_| anyhow!("{} was already initialized", APP_HANDLE_ONCE_LOCK_KEY))?;
+pub fn init() -> Result<(), Error> {
     prepare_lua_env()?;
     return Ok(());
 }

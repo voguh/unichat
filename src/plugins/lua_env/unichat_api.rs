@@ -19,7 +19,6 @@ use anyhow::Error;
 use mlua::LuaSerdeExt as _;
 
 use crate::events;
-use crate::plugins::get_app_handle;
 use crate::plugins::get_lua_runtime;
 use crate::plugins::get_plugin;
 use crate::plugins::lua_env::SHARED_MODULES;
@@ -309,7 +308,6 @@ impl mlua::UserData for UniChatAPI {
         });
 
         methods.add_method("register_scraper", |_lua, this, (id, name, scraper_js_path, on_event, opts): (String, String, String, mlua::Function, mlua::Table)| {
-            let app_handle = get_app_handle().map_err(mlua::Error::external)?;
             let plugin = get_plugin(&this.plugin_name).map_err(mlua::Error::external)?;
 
             let scraper_js_path = safe_guard_path(&plugin.get_data_path(), &scraper_js_path).map_err(mlua::Error::external)?;
@@ -318,7 +316,7 @@ impl mlua::UserData for UniChatAPI {
 
             let scraper: Arc<dyn UniChatScraper + Send + Sync> = Arc::new(scraper);
             let scraper_id = scraper.id().to_string();
-            scraper::register_scraper(&app_handle, scraper).map_err(mlua::Error::external)?;
+            scraper::register_scraper(scraper).map_err(mlua::Error::external)?;
             plugin.add_message(format!("Registered scraper '{}'.", scraper_id));
 
             return Ok(());

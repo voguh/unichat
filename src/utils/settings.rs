@@ -18,6 +18,7 @@ use serde::Serialize;
 use tauri_plugin_store::Store;
 use tauri_plugin_store::StoreExt;
 
+use crate::get_app_handle;
 use crate::utils::is_dev;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -48,10 +49,12 @@ fn store_mount_scraper_key(scraper_id: &str, key: &str) -> String {
 
 /* ================================================================================================================== */
 
-pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
+pub fn init() -> Result<(), Error> {
+    let app_handle = get_app_handle();
+
     let store_path = properties::get_app_path(AppPaths::AppConfig).join("settings.json");
 
-    let store = app.store(store_path)?;
+    let store = app_handle.store(store_path)?;
     INSTANCE.set(store).map_err(|_| anyhow!("{} was already initialized", ONCE_LOCK_NAME))?;
 
     migrate_store_version()?;

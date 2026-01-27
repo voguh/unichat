@@ -57,7 +57,7 @@ interface Props {
     children?: React.ReactNode;
 }
 
-const _logger = LoggerFactory.getLogger("WidgetEditor");
+const _logger = LoggerFactory.getLogger(__filename);
 export function WidgetEditor(_props: Props): React.ReactNode {
     const [emulationMode, setEmulationMode] = React.useState<UniChatPlatform | "mixed">("mixed");
 

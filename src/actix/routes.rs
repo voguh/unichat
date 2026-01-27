@@ -26,17 +26,17 @@ use anyhow::Error;
 use futures::StreamExt as _;
 
 use crate::events;
-use crate::jsonrpc::JsonRPCError;
-use crate::jsonrpc::JsonRPCRequest;
-use crate::jsonrpc::JsonRPCResponse;
 use crate::plugins;
 use crate::utils;
+use crate::utils::jsonrpc::JsonRPCError;
+use crate::utils::jsonrpc::JsonRPCRequest;
+use crate::utils::jsonrpc::JsonRPCResponse;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::ureq;
 use crate::utils::userstore;
-use crate::widgets::WidgetMetadata;
 use crate::widgets::get_widget_from_rest_path;
+use crate::widgets::WidgetMetadata;
 
 static WIDGET_TEMPLATE: &str = include_str!("./static/index.html.template");
 

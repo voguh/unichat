@@ -219,7 +219,7 @@ pub fn add_plugin_widgets(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
 
 /* ============================================================================================== */
 
-pub fn init(_app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
+pub fn init() -> Result<(), Error> {
     let system_widgets_path = properties::get_app_path(AppPaths::UniChatSystemWidgets);
     load_widgets_from_disk(&system_widgets_path, WidgetSource::System, |_| {})?;
 

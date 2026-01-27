@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2025-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -16,6 +16,8 @@ use anyhow::anyhow;
 use anyhow::Error;
 use tauri::Manager;
 use tauri::path::BaseDirectory;
+
+use crate::get_app_handle;
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -54,20 +56,23 @@ fn serialize_key<S: serde::ser::Serialize>(key: S) -> String {
     }
 }
 
-pub fn init(app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
-    let app_cache_dir = app.path().app_cache_dir()?;
-    let app_config_dir = app.path().app_config_dir()?;
-    let app_data_dir = app.path().app_data_dir()?;
-    let app_local_data_dir = app.path().app_local_data_dir()?;
-    let app_log_dir = app.path().app_log_dir()?;
-    let assets_dir = app.path().resolve("assets", BaseDirectory::Resource)?;
-    let gallery_dir = app.path().resolve("gallery", BaseDirectory::AppData)?;
-    let system_widgets_dir = app.path().resolve("widgets", BaseDirectory::Resource)?;
-    let user_widgets_dir = app.path().resolve("widgets", BaseDirectory::AppData)?;
-    let system_plugins_dir = app.path().resolve("plugins", BaseDirectory::Resource)?;
-    let user_plugins_dir = app.path().resolve("plugins", BaseDirectory::AppData)?;
-    let logo_icon_file = app.path().resolve("icons/icon.png", BaseDirectory::Resource)?;
-    let license_file = app.path().resolve("LICENSE", BaseDirectory::Resource)?;
+pub fn init() -> Result<(), Error> {
+    let app_handle = get_app_handle();
+    let path = app_handle.path();
+
+    let app_cache_dir = path.app_cache_dir()?;
+    let app_config_dir = path.app_config_dir()?;
+    let app_data_dir = path.app_data_dir()?;
+    let app_local_data_dir = path.app_local_data_dir()?;
+    let app_log_dir = path.app_log_dir()?;
+    let assets_dir = path.resolve("assets", BaseDirectory::Resource)?;
+    let gallery_dir = path.resolve("gallery", BaseDirectory::AppData)?;
+    let system_widgets_dir = path.resolve("widgets", BaseDirectory::Resource)?;
+    let user_widgets_dir = path.resolve("widgets", BaseDirectory::AppData)?;
+    let system_plugins_dir = path.resolve("plugins", BaseDirectory::Resource)?;
+    let user_plugins_dir = path.resolve("plugins", BaseDirectory::AppData)?;
+    let logo_icon_file = path.resolve("icons/icon.png", BaseDirectory::Resource)?;
+    let license_file = path.resolve("LICENSE", BaseDirectory::Resource)?;
 
     let app_cache_path = app_cache_dir.to_string_lossy().to_string();
     let app_config_path = app_config_dir.to_string_lossy().to_string();

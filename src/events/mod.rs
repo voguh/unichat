@@ -1,6 +1,6 @@
 /*!******************************************************************************
  * UniChat
- * Copyright (C) 2024-2025 Voguh <voguhofc@protonmail.com>
+ * Copyright (C) 2024-2026 Voguh <voguhofc@protonmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -25,7 +25,7 @@ static INSTANCE: OnceLock<broadcast::Sender<UniChatEvent>> = OnceLock::new();
 const MAX_CAPACITY: usize = 50;
 static LATEST_EVENTS_CACHE: LazyLock<RwLock<VecDeque<UniChatEvent>>> = LazyLock::new(|| RwLock::new(VecDeque::with_capacity(MAX_CAPACITY)));
 
-pub fn init(_app: &mut tauri::App<tauri::Wry>) -> Result<(), Error> {
+pub fn init() -> Result<(), Error> {
     let (tx, mut rx) = broadcast::channel(1000);
 
     tauri::async_runtime::spawn(async move {
