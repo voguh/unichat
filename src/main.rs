@@ -34,6 +34,7 @@ use crate::utils::get_releases;
 use crate::utils::path_to_string;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
+use crate::utils::userstore::flush_userstore;
 
 include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 
@@ -219,19 +220,21 @@ fn setup_inner() -> Result<(), Error> {
 
     /* ========================================================================================== */
 
-    log_startup_process(&splash_screen, "[18/21] Initializing HTTP server...");
+    log_startup_process(&splash_screen, "[18/21] Registering Twitch integration...");
+    twitch::init()?;
+    log_startup_process(&splash_screen, "[29/21] Registering YouTube integration...");
+    youtube::init()?;
+
+    log_startup_process(&splash_screen, "[20/21] Loading plugins...");
+    plugins::load_plugins()?;
+
+    /* ========================================================================================== */
+
+    log_startup_process(&splash_screen, "[21/21] Initializing HTTP server...");
     let http_server = actix::new();
     app_handle.manage(http_server);
 
     /* ========================================================================================== */
-
-    log_startup_process(&splash_screen, "[19/21] Registering Twitch integration...");
-    twitch::init()?;
-    log_startup_process(&splash_screen, "[20/21] Registering YouTube integration...");
-    youtube::init()?;
-
-    log_startup_process(&splash_screen, "[21/21] Loading plugins...");
-    plugins::load_plugins()?;
 
     let end = Instant::now();
     let duration = end.duration_since(start);
@@ -326,19 +329,31 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
 
     if window.label() == "main" || (window.label() == "splash-screen" && app.get_webview_window("main").is_none()) {
         if let tauri::WindowEvent::Destroyed = event {
-            let http_server: tauri::State<'_, ActixState> = app.state();
-            http_server.stop();
+            if let Err(err) = flush_userstore() {
+                log::error!("Failed to flush userstore to disk: {:#?}", err);
+            }
+
+            let http_server: Option<tauri::State<'_, ActixState>> = app.try_state();
+            if let Some(http_server) = http_server {
+                log::info!("Stopping HTTP server...");
+                http_server.stop();
+            }
 
             for (key, window) in app.webview_windows() {
                 if key != "main" {
-                    window.destroy().unwrap();
+                    if let Err(err) = window.destroy() {
+                        log::error!("Failed to destroy window '{}': {:#?}", key, err);
+                    }
                 }
             }
         }
     } else if let tauri::WindowEvent::CloseRequested { api, .. } = event {
         if window.label().ends_with("-chat") {
             api.prevent_close();
-            window.hide().unwrap();
+
+            if let Err(err) = window.hide() {
+                log::error!("Failed to hide chat window '{}': {:#?}", window.label(), err);
+            }
         }
     }
 }

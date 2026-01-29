@@ -11,7 +11,9 @@ import { alpha } from "@mantine/core";
 import styled from "styled-components";
 
 export const ThirdPartyLicensesStyledContainer = styled.div`
-    height: 100%;
+    height: var(--modal-body-inner-max-height);
+    margin: 0 -16px 0 0;
+    padding: 0 16px 0 0;
     overflow-y: scroll;
 
     > table {

@@ -63,7 +63,7 @@ export const AboutSettingsTabStyledContainer = styled.div`
 
     > .app-credits {
         position: absolute;
-        bottom: 0;
+        bottom: -1px;
         left: 0;
         height: 50%;
         width: 100%;
@@ -75,6 +75,7 @@ export const AboutSettingsTabStyledContainer = styled.div`
         padding: 16px;
 
         &.isCreditsOpen {
+            bottom: 0;
             transform: translateY(0);
         }
 

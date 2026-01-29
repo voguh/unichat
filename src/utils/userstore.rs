@@ -92,7 +92,7 @@ static USERSTORE_WRITE_TX: LazyLock<UnboundedSender<()>> = LazyLock::new(|| {
 
 /* ================================================================================================================== */
 
-fn flush_userstore() -> Result<(), Error> {
+pub fn flush_userstore() -> Result<(), Error> {
     if let Ok(store) = USERSTORE_CACHE.read() {
         let store_path = USERSTORE_PATH.as_path();
         let raw_data = serde_json::to_string(&*store)?;
