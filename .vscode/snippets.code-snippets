@@ -3,29 +3,37 @@
         "prefix": ["reactFuncionalComponent", "rfc"],
         "description": "Creates a new react functional component",
         "body": [
-            "import React from \"react\"",
+            "import React from \"react\";",
             "",
-            "import { LoggerFactory } from \"unichat/logging/LoggerFactory\"",
+            "import { LoggerFactory } from \"unichat/logging/LoggerFactory\";",
             "",
             "interface Props {",
-            "    children?: React.ReactNode",
+            "    children?: React.ReactNode;",
             "}",
             "",
-            "const _logger = LoggerFactory.getLogger(__filename);",
+            "const _logger = LoggerFactory.getLogger(\"${TM_DIRECTORY/^.+\\/(.*)$/$1/}\");",
             "export function ${TM_DIRECTORY/^.+\\/(.*)$/$1/}(props: Props): React.ReactNode {",
-            "    return <>${TM_DIRECTORY/^.+\\/(.*)$/$1/} works!</>",
-            "}",
+            "    React.useEffect(() => {",
+            "        _logger.debug(\"${TM_DIRECTORY/^.+\\/(.*)$/$1/} mounted\");",
             "",
-        ],
+            "        return () => {",
+            "            _logger.debug(\"${TM_DIRECTORY/^.+\\/(.*)$/$1/} unmounted\");",
+            "        };",
+            "    }, []);",
+            "",
+            "    return <>${TM_DIRECTORY/^.+\\/(.*)$/$1/} works!</>;",
+            "}",
+            ""
+        ]
     },
     "stypedComponents": {
         "prefix": ["stypedComponents", "styled"],
         "description": "Creates a new styled components content",
         "body": [
-            "import styled from \"styled-components\"",
+            "import styled from \"styled-components\";",
             "",
-            "export const ${TM_DIRECTORY/^.+\\/(.*)$/$1/}StyledContainer = styled.div``",
-            "",
-        ],
+            "export const ${TM_DIRECTORY/^.+\\/(.*)$/$1/}StyledContainer = styled.div``;",
+            ""
+        ]
     }
 }
