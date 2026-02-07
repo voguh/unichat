@@ -249,7 +249,7 @@ async function uniChatPreInit() {
         `;
         document.head.appendChild(style);
 
-        if ("{{IS_DEV}}" !== "false") {
+        if ("{{IS_DEV}}" !== "true") {
             window.addEventListener("contextmenu", async (event) => {
                 event.preventDefault();
             });
