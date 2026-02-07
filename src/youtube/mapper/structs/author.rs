@@ -147,7 +147,7 @@ pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_cont
                         }),
                         "MODERATOR" => parsed_badges.push(UniChatBadge {
                             code: String::from("moderator"),
-                            url: String::from("/assets/youtube/YouTubeModerator.png")
+                            url: String::from("/assets/youtube/YouTubeModeratorV2.png")
                         }),
                         "VERIFIED" => parsed_badges.push(UniChatBadge {
                             code: String::from("verified"),

@@ -57,7 +57,7 @@ export function randomizeBadgeAndAuthorType(
         authorType = "MODERATOR";
         badges.push({
             code: "moderator",
-            url: "/assets/youtube/YouTubeModerator.png"
+            url: "/assets/youtube/YouTubeModeratorV2.png"
         });
     }
 
