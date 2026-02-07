@@ -69,6 +69,18 @@ function uniChatInit() {
         throw new Error("This scraper can only be initialized on Twitch pages.");
     }
 
+    const obs = new MutationObserver(muts => {
+        for (const m of muts) {
+            for (const n of m.addedNodes) {
+                if (n.tagName === "IFRAME" && n.src.includes("amazon-adsystem.com")) {
+                    n.remove();
+                }
+            }
+        }
+    });
+
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+
     /* ====================================================================================================== */
 
     uniChat.onWebSocketMessage = async function(event, { wsInstance, url, protocols }) {
