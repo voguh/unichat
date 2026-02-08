@@ -13,7 +13,7 @@ UniChat is a tool for streamers who broadcast on YouTube and Twitch, providing a
 - **Third-Party Emotes:** Integration with BetterTTV, FrankerFaceZ, and 7TV.
 - **Chat Events:** Full support for messages, donations, subscriptions, raids, and more.
 - **Customizable Widgets:** Create and customize your own chat widgets using web technologies.
-- **Open Source:** Licensed under MPL-2.0, allowing contributions and modifications.
+- **Open Source:** Licensed under EPL-2.0, allowing contributions and modifications.
 
 
 ## 🚀 Installation
@@ -84,8 +84,10 @@ Widget and Plugin development documentation can be found in the [here](https://v
 
 ## 📜 License
 
-This project is licensed under the [Mozilla Public License, Version 2.0](./LICENSE).
+This project is licensed under the [Eclipse Public License, Version 2.0](./LICENSE).
 
-The widgets located in the [`widgets directory`](./widgets/) are licensed under the MIT license.
+> [!IMPORTANT]
+> The widgets located in the [`widgets directory`](./widgets/) are licensed under the MIT license.
 
-The plugins located in the [`plugins directory`](./plugins/) are licensed under their respective licenses, as specified in their manifest/LICENSE files.
+> [!IMPORTANT]
+> The plugins located in the [`plugins directory`](./plugins/) are licensed under their respective licenses, as specified in their manifest/LICENSE files.

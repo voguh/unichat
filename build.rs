@@ -2,9 +2,11 @@
  * UniChat
  * Copyright (C) 2024-2026 Voguh <voguhofc@protonmail.com>
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
 #![allow(clippy::implicit_return)]
@@ -27,7 +29,7 @@ use ureq::tls::TlsProvider;
 // This is a "safe guard" to remember me to change license info if I change the license.
 fn get_license_info(license: &str) -> Result<(String, String), Box<dyn std::error::Error>> {
     let mut licenses: HashMap<&str, (&str, &str)> = HashMap::new();
-    licenses.insert("MPL-2.0", ("Mozilla Public License, Version 2.0", "https://www.mozilla.org/en-US/MPL/2.0/"));
+    licenses.insert("EPL-2.0", ("Eclipse Public License, Version 2.0", "https://www.eclipse.org/legal/epl-2.0/"));
 
     if let Some((name, url)) = licenses.get(license) {
         return Ok((name.to_string(), url.to_string()));
