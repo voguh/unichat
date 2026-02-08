@@ -1,6 +1,5 @@
 /*!******************************************************************************
- * UniChat
- * Copyright (C) 2024-2026 Voguh <voguhofc@protonmail.com>
+ * Copyright (c) 2024-2026 Voguh
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +16,9 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::env;
 use std::fs;
+use std::hash::DefaultHasher;
+use std::hash::Hash;
+use std::hash::Hasher as _;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
@@ -237,8 +239,45 @@ fn generate_npm_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::er
     return Ok(final_licenses);
 }
 
+fn calculate_hash(content: &str) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    content.hash(&mut hasher);
+
+    return hasher.finish();
+}
+
+fn calculate_third_party_licenses_lock(lock_file_path: &Path) -> Result<bool, Box<dyn std::error::Error>> {
+    let cargo_lock_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Cargo.lock");
+    let pnpm_lock_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("webapp").join("pnpm-lock.yaml");
+
+    let cargo_content = fs::read_to_string(&cargo_lock_path)?;
+    let pnpm_content = fs::read_to_string(&pnpm_lock_path)?;
+    let combined_content = cargo_content + &pnpm_content;
+
+    let current_hash = calculate_hash(&combined_content);
+
+    let mut saved_hash = 0;
+    if lock_file_path.exists() {
+        let content = fs::read_to_string(&lock_file_path)?;
+        saved_hash = content.trim().parse().unwrap_or(0);
+    }
+
+    if current_hash == saved_hash {
+        return Ok(true);
+    } else {
+        fs::write(lock_file_path, current_hash.to_string())?;
+        return Ok(false);
+    }
+}
+
 fn generate_third_party_licenses(target_gen_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     let licenses_file_path = target_gen_dir.join("third_party_licenses.json");
+
+    let licenses_lock_file_path = target_gen_dir.join("third_party_licenses.lock");
+    if calculate_third_party_licenses_lock(&licenses_lock_file_path)? {
+        return Ok(());
+    }
+
     if fs::exists(&licenses_file_path)? {
         fs::remove_file(&licenses_file_path)?;
     }
