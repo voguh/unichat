@@ -12,7 +12,7 @@
     "dependencies": {
         "@fontsource/roboto": "5.2.9",
         "@fontsource/roboto-mono": "5.2.8",
-        "@fortawesome/fontawesome-free": "7.1.0",
+        "@tabler/icons-webfont": "3.36.1",
         "@tauri-apps/api": "2.9.1",
         "@tauri-apps/plugin-dialog": "2.6.0",
         "@tauri-apps/plugin-log": "2.8.0",
@@ -29,7 +29,6 @@
         "react-bootstrap": "2.10.10",
         "react-dom": "18.3.1",
         "semver": "7.7.4",
-        "source-map": "0.6.1",
         "stacktrace-js": "2.0.2",
         "styled-components": "6.3.9"
     },

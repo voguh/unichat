@@ -223,7 +223,15 @@ fn generate_npm_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::er
         let version = package["version"].as_str().ok_or("missing package.version")?;
         let authors: HashSet<String> = generate_npm_authors(package.clone())?;
         let repository = format!("https://www.npmjs.com/package/{}/v/{}", &name, &version);
-        let license = package["license"].as_str().ok_or("missing package.license")?;
+
+        let license: &str;
+        if name == "@tabler/icons-webfont" && version == "3.36.1" {
+            // NPM package "@tabler/icons-webfont" doesn't have a license field, but on the npmjs
+            // page it says that the project is under the MIT license.
+            license = "MIT";
+        } else {
+            license = package["license"].as_str().ok_or("missing package.license")?;
+        }
 
         final_licenses.push(FinalLicenseInfo {
             source: String::from("npm"),
