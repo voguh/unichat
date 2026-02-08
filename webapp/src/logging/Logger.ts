@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,7 +10,6 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { platform } from "@tauri-apps/plugin-os";
-import { SourceMapConsumer } from "source-map";
 import StackTrace from "stacktrace-js";
 
 type LogLevel = "trace" | "debug" | "info" | "warn" | "error";
@@ -30,25 +28,6 @@ function logLevelToNumber(level: LogLevel): number {
 
 function logLevelGuard(level: string): level is LogLevel {
     return ["trace", "debug", "info", "warn", "error"].includes(level);
-}
-
-const _sourceMapsCache: Record<string, SourceMapConsumer> = {};
-
-async function getSourceMap(url: string): Promise<SourceMapConsumer | null> {
-    if (_sourceMapsCache[url]) {
-        return _sourceMapsCache[url];
-    }
-
-    try {
-        const sourceMapData = await fetch(url).then((res) => res.json());
-
-        const consumer = new SourceMapConsumer(sourceMapData);
-        _sourceMapsCache[url] = consumer;
-
-        return consumer;
-    } catch (_err) {
-        return null;
-    }
 }
 
 const OS_TYPE = platform();
@@ -111,30 +90,16 @@ export class Logger {
         let fileName = this.name;
         let lineNumber: number | null = null;
 
-        const callStack = StackTrace.getSync();
-        const callSite = callStack[OS_TYPE === "windows" ? 5 : 6];
+        const callStack = await StackTrace.get();
+        const callSite = callStack[OS_TYPE === "windows" ? 7 : 8];
 
         if (callSite != null) {
             const _fileName = callSite.fileName;
             const _lineNumber = callSite.lineNumber;
-            const _columnNumber = callSite.columnNumber;
 
-            if (_fileName != null && _lineNumber != null) {
-                if (_fileName.includes("/src/")) {
-                    fileName = _fileName.split("/src/")[1] || fileName;
-                    lineNumber = _lineNumber;
-                } else if (_columnNumber != null) {
-                    const consumer = await getSourceMap(`${callSite.fileName}.map`);
-
-                    if (consumer != null) {
-                        const pos = consumer.originalPositionFor({ line: _lineNumber, column: _columnNumber });
-
-                        if (pos != null) {
-                            fileName = pos.source.split("/src/")[1] || fileName;
-                            lineNumber = pos.line || lineNumber;
-                        }
-                    }
-                }
+            if (_fileName != null) {
+                fileName = _fileName.split("/src/")[1] || fileName;
+                lineNumber = _lineNumber ?? null;
             }
         }
 
@@ -157,7 +122,12 @@ export class Logger {
         }
 
         for (const param of args) {
-            formattedMessage = formattedMessage.replace("{}", String(param));
+            let strParam = String(param);
+            if (typeof param === "object") {
+                strParam = JSON.stringify(param);
+            }
+
+            formattedMessage = formattedMessage.replace("{}", strParam);
         }
 
         return [formattedMessage, throwable];
