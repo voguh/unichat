@@ -18,6 +18,12 @@ export const GlobalStyle = createGlobalStyle`
         height: 100%;
         overflow: hidden;
         position: relative;
+
+        ${({ theme }) => {
+            return Object.entries(theme)
+                .map(([key, value]) => `--${key}: ${value};`)
+                .join("\n");
+        }}
     }
 
     #root {
@@ -48,7 +54,7 @@ export const GlobalStyle = createGlobalStyle`
                 > .divider {
                     width: 100%;
                     height: 0;
-                    border-bottom: 1px solid var(--mantine-color-gray-1);
+                    border-bottom: 1px solid var(--oc-gray-1);
                     opacity: 0.25;
                     margin: 8px 0;
                 }
@@ -63,6 +69,11 @@ export const GlobalStyle = createGlobalStyle`
                 min-width: 32px;
                 min-height: 32px;
                 padding: 0;
+                color: var(--bs-white);
+
+                > i {
+                    font-size: 20px;
+                }
             }
         }
 
