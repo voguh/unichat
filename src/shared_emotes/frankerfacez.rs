@@ -1,5 +1,5 @@
 /*!******************************************************************************
- * UniChat
+
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made

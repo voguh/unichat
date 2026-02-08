@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # ******************************************************************************
-#  UniChat
-#  Copyright (C) 2026 Voguh <voguhofc@protonmail.com>
+#  Copyright (c) 2026 Voguh
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
