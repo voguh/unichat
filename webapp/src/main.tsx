@@ -9,8 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import "@mantine/core/styles.css";
-import "@mantine/notifications/styles.css";
+import "./styles/bootstrap.scss";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "@fontsource/roboto/400";
 import "@fontsource/roboto/400-italic";
@@ -28,7 +27,6 @@ import "@fontsource/roboto-mono/700-italic";
 import React from "react";
 import { createRoot } from "react-dom/client";
 
-import App from "unichat/App";
 import { AppContextProvider } from "unichat/contexts/AppContext";
 
 let initializationAttempts = 0;
@@ -44,11 +42,9 @@ function init(): void {
         return;
     }
 
-    if (!__IS_DEV__) {
-        window.addEventListener("contextmenu", async (event) => {
-            event.preventDefault();
-        });
-    }
+    window.addEventListener("contextmenu", async (event) => {
+        event.preventDefault();
+    });
 
     const documentRoot = document.querySelector("#root");
     if (documentRoot == null) {
@@ -58,9 +54,7 @@ function init(): void {
     const root = createRoot(documentRoot);
     root.render(
         <React.StrictMode>
-            <AppContextProvider>
-                <App />
-            </AppContextProvider>
+            <AppContextProvider>UniChat works!</AppContextProvider>
         </React.StrictMode>
     );
 }

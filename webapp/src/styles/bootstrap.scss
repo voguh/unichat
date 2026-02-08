@@ -1,0 +1,29 @@
+$white:    #fff;
+$gray-100: #f1f3f5; // Open Color gray-1
+$gray-200: #e9ecef; // Open Color gray-2
+$gray-300: #dee2e6; // Open Color gray-3
+$gray-400: #ced4da; // Open Color gray-4
+$gray-500: #adb5bd; // Open Color gray-5
+$gray-600: #868e96; // Open Color gray-6
+$gray-700: #495057; // Open Color gray-7
+$gray-800: #343a40; // Open Color gray-8
+$gray-900: #212529; // Open Color gray-9
+$black:    #000;
+
+$blue:    #339af0; // Open Color blue-5
+$indigo:  #5c7cfa; // Open Color indigo-5
+$purple:  #845ef7; // Open Color violet-5
+$pink:    #f06595; // Open Color pink-5
+$red:     #ff6b6b; // Open Color red-5;
+$orange:  #ff922b; // Open Color orange-5;
+$yellow:  #fcc419; // Open Color yellow-5;
+$green:   #51cf66; // Open Color green-5
+$teal:    #20c997; // Open Color teal-5
+$cyan:    #22b8cf; // Open Color cyan-5
+
+
+$font-family-sans-serif: "Roboto", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !default;
+$font-family-monospace:  "Roboto Mono", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !default;
+$font-size-root: 14px;
+
+@import '~bootstrap/scss/bootstrap';

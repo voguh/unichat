@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -16,22 +15,6 @@ declare global {
     const __TAURI_PLUGIN_OPENER__: typeof import("@tauri-apps/plugin-opener");
     const __TAURI_PLUGIN_OS__: typeof import("@tauri-apps/plugin-os");
     const __TAURI_PLUGIN_STORE__: typeof import("@tauri-apps/plugin-store");
-
-    /* ====================================================================== */
-
-    /** Path of the current file from the source root (literal string in source code) */
-    const __FILE__: string;
-    /** Path of the current file directory from the source root (literal string in source code) */
-    const __DIR__: string;
-    /** Line number of the current line (literal number in source code) */
-    const __LINE__: number;
-    /** Column number of the current line (literal number in source code) */
-    const __COLUMN__: number;
-
-    /** Path of the current file from the source root (literal string in source code) */
-    const __filename: string;
-    /** Path of the current file directory from the source root (literal string in source code) */
-    const __dirname: string;
 
     /* ====================================================================== */
 
@@ -64,22 +47,6 @@ declare global {
         __TAURI_PLUGIN_OPENER__: typeof import("@tauri-apps/plugin-opener");
         __TAURI_PLUGIN_OS__: typeof import("@tauri-apps/plugin-os");
         __TAURI_PLUGIN_STORE__: typeof import("@tauri-apps/plugin-store");
-
-        /* ================================================================== */
-
-        /** Path of the current file from the source root (literal string in source code) */
-        __FILE__: string;
-        /** Path of the current file directory from the source root (literal string in source code) */
-        __DIR__: string;
-        /** Line number of the current line (literal number in source code) */
-        __LINE__: number;
-        /** Column number of the current line (literal number in source code) */
-        __COLUMN__: number;
-
-        /** Path of the current file from the source root (literal string in source code) */
-        __filename: string;
-        /** Path of the current file directory from the source root (literal string in source code) */
-        __dirname: string;
 
         /* ================================================================== */
 

@@ -1,8 +1,8 @@
 {
     "env": {
-        "es2021": true,
+        "es2023": true,
         "browser": true,
-        "node": true
+        "jest": true
     },
     "extends": [
         "standard",
@@ -12,13 +12,13 @@
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "ecmaVersion": 2021,
+        "ecmaVersion": 2023,
         "sourceType": "module",
         "ecmaFeatures": {
             "jsx": true
         }
     },
-    "plugins": ["import", "@typescript-eslint", "prettier", "react", "react-hooks", "prettier", "eslint-plugin-import-helpers", "vitest"],
+    "plugins": ["import", "@typescript-eslint", "prettier", "react", "react-hooks", "prettier", "eslint-plugin-import-helpers", "jest"],
     "rules": {
         "prettier/prettier": "warn",
 
@@ -73,7 +73,7 @@
             "warn",
             {
                 "newlinesBetween": "always",
-                "groups": [["/^react/", "/^node:/"], "module", ["/^unichat//", "/^unichat-widgets//"], ["parent", "sibling", "index"]],
+                "groups": [["/^react$/", "/^react-dom/", "/^node:/"], "module", ["/^unichat//", "/^unichat-widgets//"], ["parent", "sibling", "index"]],
                 "alphabetize": { "order": "asc", "ignoreCase": true }
             }
         ],
@@ -85,11 +85,14 @@
         /* Disable quotes enforcement due to conflict with prettier */
         "quotes": "off",
 
+
         "space-before-function-paren": "off",
 
+        /* Enable prefer const when possible */
         "prefer-const": "warn",
 
-        "newline-before-return": "warn",
+        /* Enable newline before return */
+        // "newline-before-return": "warn",
 
         "array-callback-return": "off",
 
@@ -112,7 +115,7 @@
         // "class-methods-use-this": "off",
 
         /* Disable need for shorthand object properties */
-        "object-shorthand": ["off"],
+        "object-shorthand": "off",
 
         /* Fix unused vars */
         "no-unused-vars": "off",
@@ -123,7 +126,7 @@
 
         /* Fix use before define */
         "no-use-before-define": "off",
-        "@typescript-eslint/no-use-before-define": "error",
+        "@typescript-eslint/no-use-before-define": ["error", { "functions": false }],
 
         /* Enable empty constructors */
         "no-useless-constructor": "off"
