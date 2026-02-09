@@ -2,7 +2,7 @@
     "name": "unichat",
     "private": true,
     "scripts": {
-        "dev:ui": "webpack serve --config webpack.config.js",
+        "dev:ui": "NODE_ENV=development webpack serve --config webpack.config.js",
         "build:ui": "webpack --config webpack.config.js",
         "build:dev": "babel ./src --out-dir=\"./target\" --config-file=\"./babel.config.js\" --extensions=\".ts,.tsx,.js\" --copy-files --no-copy-ignored",
         "lint": "eslint --ext .ts,.tsx,.js,.jsx ./src",

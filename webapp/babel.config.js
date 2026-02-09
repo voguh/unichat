@@ -14,6 +14,7 @@ const path = require("node:path");
 
 const JSONC = require("jsonc-parser");
 
+const isDev = process.env.NODE_ENV === "development";
 const isWebpack = process.argv.some((arg) => arg.includes("webpack"));
 
 const tsConfigRaw = fs.readFileSync(path.resolve(__dirname, "tsconfig.json"), { encoding: "utf-8" });
@@ -25,7 +26,7 @@ const tsConfigPaths = Object.entries(tsConfig?.compilerOptions?.paths ?? {}).red
     };
 }, {});
 
-const predefinedPlugins = [["styled-components", { ssr: false, displayName: false }]];
+const predefinedPlugins = [["styled-components", { ssr: false, displayName: isDev }]];
 
 if (!isWebpack) {
     predefinedPlugins.push(["module-resolver", { cwd: path.resolve(__dirname), alias: tsConfigPaths }]);
