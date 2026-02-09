@@ -21,7 +21,19 @@ type Props = ReplaceProps<"input", BsPrefixProps<"input"> & FormControlProps> & 
 
 const _logger = LoggerFactory.getLogger("TextInput");
 export const TextInput = React.forwardRef<HTMLInputElement, Props>(function TextInput(props, ref) {
-    const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...rest } = props;
+    const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...unfiltered } = props;
+    const [dataProps, rest] = Object.entries(unfiltered).reduce(
+        (acc, [key, value]) => {
+            if (key.startsWith("data-")) {
+                acc[0][key] = value;
+            } else {
+                acc[1][key] = value;
+            }
+
+            return acc;
+        },
+        [{}, {}] as unknown as [Record<string, any>, Record<string, any>]
+    );
 
     return (
         <FormGroup
@@ -33,6 +45,7 @@ export const TextInput = React.forwardRef<HTMLInputElement, Props>(function Text
             descriptionProps={descriptionProps}
             error={error}
             errorProps={errorProps}
+            {...dataProps}
         >
             <FormControl {...rest} ref={ref} />
         </FormGroup>

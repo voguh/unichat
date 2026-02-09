@@ -28,7 +28,19 @@ type Props = Omit<RSProps<Option, false, GroupBase<Option>>, "isMulti"> & FormGr
 
 const _logger = LoggerFactory.getLogger("Select");
 export const Select = React.forwardRef<ReactSelectInternal, Props>(function Select(props, ref) {
-    const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...rest } = props;
+    const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...unfiltered } = props;
+    const [dataProps, rest] = Object.entries(unfiltered).reduce(
+        (acc, [key, value]) => {
+            if (key.startsWith("data-")) {
+                acc[0][key] = value;
+            } else {
+                acc[1][key] = value;
+            }
+
+            return acc;
+        },
+        [{}, {}] as unknown as [Record<string, any>, Record<string, any>]
+    );
 
     return (
         <FormGroup
@@ -40,6 +52,7 @@ export const Select = React.forwardRef<ReactSelectInternal, Props>(function Sele
             descriptionProps={descriptionProps}
             error={error}
             errorProps={errorProps}
+            {...dataProps}
         >
             <ReactSelect
                 {...rest}

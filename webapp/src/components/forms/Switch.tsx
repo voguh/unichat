@@ -21,7 +21,19 @@ type Props = ReplaceProps<"input", BsPrefixProps<"input"> & FormCheckProps> & Fo
 
 const _logger = LoggerFactory.getLogger("Switch");
 export const Switch = React.forwardRef<HTMLInputElement, Props>(function Switch(props, ref) {
-    const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...rest } = props;
+    const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...unfiltered } = props;
+    const [dataProps, rest] = Object.entries(unfiltered).reduce(
+        (acc, [key, value]) => {
+            if (key.startsWith("data-")) {
+                acc[0][key] = value;
+            } else {
+                acc[1][key] = value;
+            }
+
+            return acc;
+        },
+        [{}, {}] as unknown as [Record<string, any>, Record<string, any>]
+    );
 
     return (
         <FormGroup
@@ -33,6 +45,7 @@ export const Switch = React.forwardRef<HTMLInputElement, Props>(function Switch(
             descriptionProps={descriptionProps}
             error={error}
             errorProps={errorProps}
+            {...dataProps}
         >
             <FormCheck {...rest} type="switch" ref={ref} />
         </FormGroup>
