@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -21,7 +20,6 @@ export const PluginsStyledContainer = styled.div`
         --cell-inner-height: 30px;
         --cell-min-width: calc(var(--cell-inner-min-width) + var(--cell-padding-x) * 2);
         --cell-height: calc(var(--cell-inner-height) + var(--cell-padding-y) * 2);
-
         width: 100%;
         border-collapse: collapse;
         table-layout: fixed;
@@ -29,11 +27,11 @@ export const PluginsStyledContainer = styled.div`
         > tbody {
             > tr {
                 &:nth-child(odd) {
-                    background-color: var(--mantine-color-dark-7);
+                    background-color: var(--oc-dark-5);
                 }
 
                 &:nth-child(even) {
-                    background-color: var(--mantine-color-dark-6);
+                    background-color: var(--oc-dark-4);
                 }
 
                 > td {
@@ -53,6 +51,8 @@ export const PluginsStyledContainer = styled.div`
                     }
 
                     &.plugin-name {
+                        vertical-align: middle;
+
                         > span {
                             font-weight: bolder;
                             font-size: 14px;
@@ -63,16 +63,28 @@ export const PluginsStyledContainer = styled.div`
                     }
 
                     &.plugin-badges {
+                        text-align: center;
+                        vertical-align: middle;
+
                         > span {
                             display: flex;
                             justify-content: flex-end;
+                            align-items: center;
                             gap: 4px;
+
+                            > .badge {
+                                font-size: 12px;
+                            }
                         }
                     }
 
                     &.plugin-actions {
                         width: calc(67px + var(--cell-padding-x) * 2);
                         text-align: right;
+
+                        > button {
+                            height: 30px;
+                        }
                     }
                 }
             }

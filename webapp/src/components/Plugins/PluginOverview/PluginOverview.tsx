@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,9 +10,11 @@
 
 import React from "react";
 
-import { Badge, Button, Code, Tooltip } from "@mantine/core";
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
+import Badge from "react-bootstrap/Badge";
+import Button from "react-bootstrap/Button";
 
+import { Tooltip } from "unichat/components/OverlayTrigger";
 import { UniChatPluginMetadata } from "unichat/types";
 import { PLUGIN_STATUS_COLOR } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
@@ -54,26 +55,26 @@ export function PluginOverview(props: Props): React.ReactNode {
                     <div className="plugin-status">
                         <div className="details-label">Status</div>
                         <div className="details-value">
-                            <Badge radius="xs" style={{ backgroundColor: bgColor, color: fgColor }}>
+                            <Badge bg="default" style={{ backgroundColor: bgColor, color: fgColor }}>
                                 {plugin.status}
                             </Badge>
                         </div>
                     </div>
                     <div className="plugin-authors">
                         <div className="details-label">Authors</div>
-                        <Tooltip label={plugin.author} position="bottom">
+                        <Tooltip content={plugin.author} placement="bottom">
                             <div className="details-value">{plugin.author}</div>
                         </Tooltip>
                     </div>
                     <div className="plugin-license">
                         <div className="details-label">License</div>
-                        <Tooltip label={plugin.license} position="bottom">
+                        <Tooltip content={plugin.license} placement="bottom">
                             <div className="details-value">{plugin.license}</div>
                         </Tooltip>
                     </div>
                     <div className="plugin-homepage">
                         <div className="details-label">Homepage</div>
-                        <div className="details-value" onClick={() => openUrl(plugin.homepage)}>
+                        <div className="details-value" onClick={() => plugin.homepage && openUrl(plugin.homepage)}>
                             {plugin.homepage}
                         </div>
                     </div>
@@ -83,26 +84,26 @@ export function PluginOverview(props: Props): React.ReactNode {
                     </div>
                 </div>
             </div>
-            <Code block className="plugin-messages">
-                {plugin.messages.join("\n")}
-            </Code>
+            <pre className="plugin-messages">{plugin.messages.join("\n")}</pre>
         </PluginOverviewStyledContainer>
     );
 }
 
 export function PluginOverviewActions(props: Props): React.ReactNode {
-    const { plugin } = props;
+    const {
+        plugin: { pluginPath }
+    } = props;
 
     return (
         <>
-            {plugin.pluginPath != null ? (
-                <Button variant="outline" size="xs" onClick={() => revealItemInDir(plugin.pluginPath)}>
-                    <i className="fas fa-folder" />
-                    &nbsp;Show in Folder
+            {Strings.isNullOrEmpty(pluginPath) ? (
+                <Button variant="dark" disabled>
+                    Built-In Plugin
                 </Button>
             ) : (
-                <Button variant="outline" size="xs" disabled>
-                    System Plugin
+                <Button variant="outline-primary" onClick={() => revealItemInDir(pluginPath)}>
+                    <i className="ti ti-folder" />
+                    &nbsp;Show in Folder
                 </Button>
             )}
         </>

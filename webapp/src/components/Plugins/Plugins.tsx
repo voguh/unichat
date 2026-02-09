@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,13 +10,14 @@
 
 import React from "react";
 
-import { Badge, Button } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
+import Badge from "react-bootstrap/Badge";
+import Button from "react-bootstrap/Button";
 
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
+import { notificationService } from "unichat/services/notificationService";
 import { UniChatPluginMetadata } from "unichat/types";
 import { PLUGIN_STATUS_COLOR } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
@@ -29,13 +29,13 @@ interface Props {
     children?: React.ReactNode;
 }
 
-const _logger = LoggerFactory.getLogger(__filename);
+const _logger = LoggerFactory.getLogger("Plugins");
 export function Plugins(_props: Props): React.ReactNode {
     const [plugins, setPlugins] = React.useState<UniChatPluginMetadata[]>([]);
 
     function openPluginDetails(plugin: UniChatPluginMetadata): void {
         modalService.openModal({
-            fullScreen: true,
+            fullscreen: true,
             title: "Plugin Overview",
             actions: <PluginOverviewActions plugin={plugin} />,
             children: <PluginOverview plugin={plugin} />
@@ -57,12 +57,7 @@ export function Plugins(_props: Props): React.ReactNode {
         } catch (error) {
             _logger.error("An error occurred on fetch plugins", error);
 
-            notifications.show({
-                title: "Fetch Error",
-                message: "An error occurred while fetching plugins.",
-                color: "red",
-                icon: <i className="fas fa-times" />
-            });
+            notificationService.error({ title: "Fetch Error", message: "An error occurred while fetching plugins." });
         }
     }
 
@@ -81,7 +76,7 @@ export function Plugins(_props: Props): React.ReactNode {
 
                             return (
                                 <tr key={plugin.name}>
-                                    <td className="plugin-icon">
+                                    <td style={{ width: 44 }} className="plugin-icon">
                                         <img src={getPluginIconDataUrl(plugin)} />
                                     </td>
                                     <td className="plugin-name">
@@ -90,17 +85,17 @@ export function Plugins(_props: Props): React.ReactNode {
                                     <td className="plugin-badges">
                                         <span>
                                             {Strings.isNullOrEmpty(plugin.pluginPath) && (
-                                                <Badge radius="xs" bg="blue">
-                                                    <i className="fas fa-code-branch" /> Built-In
+                                                <Badge>
+                                                    <i className="ti ti-git-branch" /> BUILT-IN
                                                 </Badge>
                                             )}
-                                            <Badge radius="xs" style={{ backgroundColor: bgColor, color: fgColor }}>
+                                            <Badge bg="default" style={{ background: bgColor, color: fgColor }}>
                                                 {plugin.status}
                                             </Badge>
                                         </span>
                                     </td>
-                                    <td className="plugin-actions">
-                                        <Button variant="outline" size="xs" onClick={() => openPluginDetails(plugin)}>
+                                    <td style={{ width: 80 }} className="plugin-actions">
+                                        <Button variant="default" onClick={() => openPluginDetails(plugin)}>
                                             Details
                                         </Button>
                                     </td>
@@ -117,20 +112,14 @@ export function PluginsActions(_props: Props): React.ReactNode {
     return (
         <>
             <Button
-                variant="outline"
-                color="gray"
-                size="xs"
-                leftSection={<i className="fas fa-book" />}
+                variant="default"
                 onClick={() => openUrl("https://voguh.github.io/unichat/#/plugins/getting_started")}
             >
+                <i className="ti ti-book-2" />
                 Read the Docs
             </Button>
-            <Button
-                variant="outline"
-                size="xs"
-                leftSection={<i className="fas fa-folder" />}
-                onClick={() => revealItemInDir(UNICHAT_PLUGINS_DIR)}
-            >
+            <Button variant="outline-primary" onClick={() => revealItemInDir(UNICHAT_PLUGINS_DIR)}>
+                <i className="ti ti-folder" />
                 Show Plugins Folder
             </Button>
         </>

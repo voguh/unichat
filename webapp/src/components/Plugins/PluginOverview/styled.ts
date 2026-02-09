@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -25,7 +24,7 @@ export const PluginOverviewStyledContainer = styled.div`
         gap: 16px;
         overflow: hidden;
         padding: 8px;
-        background: var(--mantine-color-dark-4);
+        background: var(--oc-dark-4);
 
         > .plugin-icon {
             display: flex;
@@ -92,7 +91,7 @@ export const PluginOverviewStyledContainer = styled.div`
                 grid-area: PH;
 
                 > .details-value {
-                    color: var(--mantine-color-blue-6);
+                    color: var(--oc-blue-6);
                     cursor: pointer;
                 }
             }
@@ -111,6 +110,9 @@ export const PluginOverviewStyledContainer = styled.div`
     }
 
     > .plugin-messages {
-        background: var(--mantine-color-dark-7);
+        background: var(--oc-dark-7);
+        padding: 8px;
+        border-radius: 4px;
+        margin-bottom: 0;
     }
 `;
