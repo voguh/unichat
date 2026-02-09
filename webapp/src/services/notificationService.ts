@@ -20,7 +20,7 @@ export class NotificationService {
             data.type = "default";
         }
 
-        eventEmitter.emit("notification", data);
+        eventEmitter.emit("notification:show", data);
     }
 
     public success(data: Omit<NotificationOptions, "type">): void {

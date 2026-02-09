@@ -10,11 +10,13 @@
 
 import mitt from "mitt";
 
+import { OpenModalOptions } from "./modalService";
 import { NotificationOptions } from "./notificationService";
 
 export type EventEmitterEvents = {
     "tour:start": { type: "full" | "whats-new" };
-    notification: NotificationOptions;
+    "notification:show": NotificationOptions;
+    "modal:open": OpenModalOptions;
 };
 
 export const eventEmitter = mitt<EventEmitterEvents>();

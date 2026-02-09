@@ -55,19 +55,16 @@ export function ToastContainer(props: Props): React.ReactNode {
     }
 
     function handleNotification(notification: NotificationOptions): void {
-        queueRef.current.push({
-            ...notification,
-            id: crypto.randomUUID()
-        });
+        queueRef.current.push({ ...notification, id: crypto.randomUUID() });
 
         requestAnimationFrame(processQueue);
     }
 
     React.useEffect(() => {
-        eventEmitter.on("notification", handleNotification);
+        eventEmitter.on("notification:show", handleNotification);
 
         return () => {
-            eventEmitter.off("notification", handleNotification);
+            eventEmitter.off("notification:show", handleNotification);
         };
     }, []);
 

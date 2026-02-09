@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -9,44 +8,27 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { modals } from "@mantine/modals";
-import { OpenContextModal } from "node_modules/@mantine/modals/lib/context";
+import { eventEmitter } from "./eventEmitter";
 
-export interface OpenModalProps extends Omit<OpenContextModal, "modal" | "innerProps"> {
-    actions?: React.ReactNode;
+export interface OpenModalOptions {
+    title: string;
     children: React.ReactNode;
+    actions?: React.ReactNode;
     leftSection?: React.ReactNode;
     leftSectionTitle?: string;
     sharedStoreInitialState?: Record<string, any>;
-    title: string;
+
+    size?: "sm" | "lg" | "xl";
+    fullscreen?: true | string | "sm-down" | "md-down" | "lg-down" | "xl-down" | "xxl-down";
+    centered?: boolean;
+    scrollable?: boolean;
+    style?: React.CSSProperties;
+    backdrop?: true | false | "static";
 }
 
 export class ModalService {
-    openModal(opts: OpenModalProps): string {
-        const { actions, children, leftSection, leftSectionTitle, sharedStoreInitialState, title, ...rest } = opts;
-        if ("modal" in opts) {
-            delete opts.modal;
-        }
-
-        if ("innerProps" in opts) {
-            delete opts.innerProps;
-        }
-
-        return modals.openContextModal({
-            ...rest,
-            modal: "unichat",
-            withCloseButton: false,
-            centered: true,
-            innerProps: {
-                actions: actions,
-                children: children,
-                leftSection: leftSection,
-                leftSectionTitle: leftSectionTitle,
-                modalProps: rest,
-                sharedStoreInitialState: sharedStoreInitialState,
-                title: title
-            }
-        });
+    public openModal(opts: OpenModalOptions): void {
+        eventEmitter.emit("modal:open", opts);
     }
 }
 

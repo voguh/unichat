@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -9,4 +8,5 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+export * from "./ModalContainer";
 export * from "./ModalWrapper";

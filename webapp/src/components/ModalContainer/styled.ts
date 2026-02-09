@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,6 +10,8 @@
 
 import styled from "styled-components";
 
+export const ModalContainerStyledContainer = styled.div``;
+
 export const ModalWrapperStyledContainer = styled.div`
     --modal-max-height: calc(100vh - 58px);
     --modal-header-height: 45px;
@@ -21,7 +22,6 @@ export const ModalWrapperStyledContainer = styled.div`
 
     position: relative;
     max-height: var(--modal-max-height);
-    margin: -16px;
 
     &.with-sidebar {
         display: grid;
@@ -31,13 +31,13 @@ export const ModalWrapperStyledContainer = styled.div`
 
         > .modal-wrapper-sidebar {
             grid-area: SB;
-            background: var(--mantine-color-body);
-            color: var(--mantine-color-text);
-            border-right: 1px solid var(--mantine-color-dark-4);
+            background: var(--oc-oc-dark-7);
+            color: var(--oc-dark-0);
+            border-right: 1px solid var(--oc-dark-4);
 
             > .modal-wrapper-sidebar-header {
                 height: var(--modal-header-height);
-                border-bottom: 1px solid var(--mantine-color-dark-4);
+                border-bottom: 1px solid var(--oc-dark-4);
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -55,11 +55,11 @@ export const ModalWrapperStyledContainer = styled.div`
 
     > .modal-wrapper-content {
         grid-area: CT;
-        background: var(--mantine-color-dark-6);
+        background: var(--oc-dark-6);
 
         > .modal-wrapper-header {
             height: var(--modal-header-height);
-            border-bottom: 1px solid var(--mantine-color-dark-4);
+            border-bottom: 1px solid var(--oc-dark-4);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -73,7 +73,8 @@ export const ModalWrapperStyledContainer = styled.div`
                 display: flex;
                 align-items: center;
                 gap: 8px;
-                > .mantine-Button-root {
+
+                > button {
                     height: 28px;
 
                     &:last-child {
