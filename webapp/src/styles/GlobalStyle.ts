@@ -231,11 +231,14 @@ export const GlobalStyle = createGlobalStyle`
 
         > .form-label {
             color: var(--oc-dark-0);
+            width: 100%;
+            margin-bottom: 0;
         }
 
         > .form-description {
             color: var(--oc-dark-2);
-            font-size: 0.750rem;
+            font-size: 0.875rem;
+            width: 100%;
         }
 
         > .form-control {
