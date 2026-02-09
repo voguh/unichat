@@ -32,7 +32,7 @@ export const Select = React.forwardRef<ReactSelectInternal, Props>(function Sele
     const [dataProps, rest] = Object.entries(unfiltered).reduce(
         (acc, [key, value]) => {
             if (key.startsWith("data-")) {
-                acc[0][key] = value;
+                acc[0][key.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)] = value;
             } else {
                 acc[1][key] = value;
             }
