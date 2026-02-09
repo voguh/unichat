@@ -13,6 +13,7 @@ import styled from "styled-components";
 
 export const GalleyTabEmptyStyledContainer = styled.div`
     width: 100%;
+    height: 217px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -22,19 +23,19 @@ export const GalleyTabEmptyStyledContainer = styled.div`
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 231px;
-        height: 162px;
-        background-color: var(--mantine-color-gray-9);
+        width: 224px;
+        height: 126px;
+        background-color: var(--oc-gray-9);
 
         > img {
-            max-width: 231px;
-            max-height: 162px;
+            max-width: 224px;
+            max-height: 126px;
             object-fit: contain;
         }
 
         > video {
-            max-width: 231px;
-            max-height: 162px;
+            max-width: 224px;
+            max-height: 126px;
             object-fit: contain;
         }
 
@@ -51,7 +52,7 @@ export const GalleyTabEmptyStyledContainer = styled.div`
         gap: 8px;
         margin-top: 12px;
 
-        > .mantine-InputWrapper-root {
+        > .form-group {
             flex: 1;
         }
 

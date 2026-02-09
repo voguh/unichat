@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -13,8 +12,14 @@ import styled from "styled-components";
 
 export const GalleyTabEmptyStyledContainer = styled.div`
     width: 100%;
-    height: 210px;
+    height: 164px;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 24px;
+    font-weight: 600;
+
+    &.with-select {
+        height: 217px;
+    }
 `;

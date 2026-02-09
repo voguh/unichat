@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,12 +10,9 @@
 
 import React from "react";
 
-import { TextInput, TextInputProps } from "@mantine/core";
-import { modals } from "@mantine/modals";
-
+import { Gallery, GalleryActions, GalleryTabs } from "unichat/__internal__/GalleryModal/Gallery";
+import { TextInput, TextInputProps } from "unichat/components/forms/TextInput";
 import { modalService } from "unichat/services/modalService";
-
-import { Gallery, GalleryActions, GalleryTabs } from "../Gallery/Gallery";
 
 interface Props extends Omit<TextInputProps, "ref"> {
     showTabs?: GalleryTabs[];
@@ -40,7 +36,7 @@ export const GalleryFileInput = React.forwardRef<HTMLInputElement, Props>(functi
         event.stopPropagation();
 
         const _showTabs = handleShowTabs();
-        let wrappedSelectedTab: GalleryTabs = inputRef.current?.value.startsWith("http") ? "custom" : undefined;
+        let wrappedSelectedTab: GalleryTabs | null = inputRef.current?.value.startsWith("http") ? "custom" : null;
         if (wrappedSelectedTab == null) {
             wrappedSelectedTab = (_showTabs ?? [])[0] ?? "image";
         }
@@ -54,7 +50,7 @@ export const GalleryFileInput = React.forwardRef<HTMLInputElement, Props>(functi
                     showTabs={_showTabs}
                     startSelectedTab={wrappedSelectedTab}
                     selectedItem={inputRef.current?.value}
-                    onSelectItem={(url) => {
+                    onSelectItem={(url, context) => {
                         if (inputRef.current) {
                             inputRef.current.value = url;
 
@@ -69,7 +65,7 @@ export const GalleryFileInput = React.forwardRef<HTMLInputElement, Props>(functi
                             inputRef.current.dispatchEvent(new Event("input", { bubbles: true }));
                         }
 
-                        modals.closeAll();
+                        context.close();
                     }}
                 />
             )
@@ -90,7 +86,7 @@ export const GalleryFileInput = React.forwardRef<HTMLInputElement, Props>(functi
         <TextInput
             {...rest}
             ref={(node) => {
-                inputRef.current = node;
+                (inputRef as React.MutableRefObject<HTMLInputElement | null>).current = node;
 
                 if (typeof ref === "function") {
                     ref(node);

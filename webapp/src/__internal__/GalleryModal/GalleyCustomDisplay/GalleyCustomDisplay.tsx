@@ -11,15 +11,17 @@
 
 import React from "react";
 
-import { Button, TextInput } from "@mantine/core";
+import Button from "react-bootstrap/Button";
 
+import { TextInput } from "unichat/components/forms/TextInput";
+import { ModalContext } from "unichat/contexts/ModalContext";
 import { GalleryItem } from "unichat/types";
 
 import { GalleyTabEmptyStyledContainer } from "./styled";
 
 interface Props {
     selectedItem?: string;
-    onSelectItem?: (url: string) => void;
+    onSelectItem: (url: string, context: { close: () => void }) => void;
 }
 
 function testImage(url: string): Promise<boolean> {
@@ -73,6 +75,8 @@ export function GalleyCustomDisplay(props: Props): React.ReactNode {
 
     const [tempType, setTempType] = React.useState<GalleryItem["type"]>("image");
     const [tempURL, setTempURL] = React.useState("");
+
+    const { onClose } = React.useContext(ModalContext);
 
     const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -137,11 +141,9 @@ export function GalleyCustomDisplay(props: Props): React.ReactNode {
 
             {(tempURL ?? "").trim().length > 0 && (
                 <Button
-                    mt="md"
-                    variant="light"
                     onClick={() => {
                         if (typeof onSelectItem === "function") {
-                            onSelectItem(tempURL);
+                            onSelectItem(tempURL, { close: onClose });
                         }
                     }}
                 >

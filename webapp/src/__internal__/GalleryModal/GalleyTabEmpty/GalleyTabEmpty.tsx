@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,20 +10,16 @@
 
 import React from "react";
 
-import { Text } from "@mantine/core";
-
 import { GalleyTabEmptyStyledContainer } from "./styled";
 
 interface Props {
-    children?: React.ReactNode;
+    withSelect: boolean;
 }
 
-export function GalleyTabEmpty(_props: Props): React.ReactNode {
+export function GalleyTabEmpty({ withSelect }: Props): React.ReactNode {
     return (
-        <GalleyTabEmptyStyledContainer>
-            <Text fw={500} size="lg" mt="xs">
-                No items to display
-            </Text>
+        <GalleyTabEmptyStyledContainer className={withSelect ? "with-select" : undefined}>
+            No items to display
         </GalleyTabEmptyStyledContainer>
     );
 }

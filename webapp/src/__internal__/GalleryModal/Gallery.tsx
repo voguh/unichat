@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,13 +10,17 @@
 
 import React from "react";
 
-import { Button, LoadingOverlay, Tabs } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import * as dialog from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Tab from "react-bootstrap/Tab";
+import Tabs from "react-bootstrap/Tabs";
 
+import { LoadingOverlay } from "unichat/components/LoadingOverlay";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
+import { notificationService } from "unichat/services/notificationService";
 import { GalleryItem } from "unichat/types";
 
 import { GalleryItemDisplay } from "./GalleryItemDisplay";
@@ -31,10 +34,10 @@ interface Props {
     showTabs?: Omit<GalleryTabs, "custom">[];
     startSelectedTab?: GalleryTabs;
     selectedItem?: string;
-    onSelectItem?: (url: string) => void;
+    onSelectItem?: (url: string, context: { close: () => void }) => void;
 }
 
-const _logger = LoggerFactory.getLogger(__filename);
+const _logger = LoggerFactory.getLogger("Gallery");
 export function Gallery(props: Props): React.ReactNode {
     const { onSelectItem, selectedItem = "", showTabs = ["image", "video", "audio", "file"], startSelectedTab } = props;
 
@@ -50,16 +53,13 @@ export function Gallery(props: Props): React.ReactNode {
     function printGalleryItems(type: GalleryTabs): JSX.Element[] {
         const itemsToPrint = (galleryItems ?? []).filter((item) => item.type === type);
         if (itemsToPrint.length === 0) {
-            return [<GalleyTabEmpty key={crypto.randomUUID()} />];
+            return [<GalleyTabEmpty key={crypto.randomUUID()} withSelect={!!onSelectItem} />];
         }
 
         return itemsToPrint.map((item) => (
-            <GalleryItemDisplay
-                key={item.title}
-                onClick={typeof onSelectItem === "function" ? () => onSelectItem(item.url) : undefined}
-                selected={item.url === selectedItem}
-                {...item}
-            />
+            <Col key={item.title}>
+                <GalleryItemDisplay {...item} onSelectItem={onSelectItem} selected={item.url === selectedItem} />
+            </Col>
         ));
     }
 
@@ -70,11 +70,9 @@ export function Gallery(props: Props): React.ReactNode {
         } catch (error) {
             _logger.error("An error occurred on fetch gallery items", error);
 
-            notifications.show({
+            notificationService.error({
                 title: "Fetch Error",
-                message: "An error occurred while fetching gallery items.",
-                color: "red",
-                icon: <i className="fas fa-times" />
+                message: "An error occurred while fetching gallery items."
             });
         }
     }
@@ -83,16 +81,18 @@ export function Gallery(props: Props): React.ReactNode {
         try {
             setLoading(true);
             const response = await dialog.open({ multiple: true, directory: false });
+            if (response == null || !Array.isArray(response)) {
+                throw new Error("Invalid response from file dialog");
+            }
+
             await commandService.uploadGalleryItems(response);
             await handleFetchGalleryItems();
         } catch (error) {
             _logger.error("An error occurred on upload gallery items", error);
 
-            notifications.show({
+            notificationService.error({
                 title: "Upload Error",
-                message: "An error occurred while uploading gallery items.",
-                color: "red",
-                icon: <i className="fas fa-times" />
+                message: "An error occurred while uploading gallery items."
             });
         } finally {
             setLoading(false);
@@ -107,52 +107,44 @@ export function Gallery(props: Props): React.ReactNode {
     return (
         <GalleryStyledContainer>
             <LoadingOverlay visible={loading} />
-            <Button className="upload-to-gallery" size="xs" onClick={onFilesUploadClick}>
+            <Button className="upload-to-gallery" onClick={onFilesUploadClick}>
                 Add to Gallery
             </Button>
-            <Tabs variant="outline" defaultValue={(startSelectedTab ?? showTabs[0]) as GalleryTabs}>
-                <Tabs.List>
-                    {showTabs.includes("image") && <Tabs.Tab value="image">Images</Tabs.Tab>}
-                    {showTabs.includes("video") && <Tabs.Tab value="video">Videos</Tabs.Tab>}
-                    {showTabs.includes("audio") && <Tabs.Tab value="audio">Audios</Tabs.Tab>}
-                    {showTabs.includes("file") && <Tabs.Tab value="file">Others</Tabs.Tab>}
-                    {typeof onSelectItem === "function" && <Tabs.Tab value="custom">Custom</Tabs.Tab>}
-                </Tabs.List>
-
+            <Tabs defaultActiveKey={(startSelectedTab ?? showTabs[0]) as string}>
                 {showTabs.includes("image") && (
-                    <Tabs.Panel value="image">
-                        <GalleryTabContainer cols={hasItemsInTab("image") ? 3 : 1}>
+                    <Tab eventKey="image" title="Images">
+                        <GalleryTabContainer xs={hasItemsInTab("image") ? 3 : 1}>
                             {printGalleryItems("image")}
                         </GalleryTabContainer>
-                    </Tabs.Panel>
+                    </Tab>
                 )}
                 {showTabs.includes("video") && (
-                    <Tabs.Panel value="video">
-                        <GalleryTabContainer cols={hasItemsInTab("video") ? 3 : 1}>
+                    <Tab eventKey="video" title="Videos">
+                        <GalleryTabContainer xs={hasItemsInTab("video") ? 3 : 1}>
                             {printGalleryItems("video")}
                         </GalleryTabContainer>
-                    </Tabs.Panel>
+                    </Tab>
                 )}
                 {showTabs.includes("audio") && (
-                    <Tabs.Panel value="audio">
-                        <GalleryTabContainer cols={hasItemsInTab("audio") ? 3 : 1}>
+                    <Tab eventKey="audio" title="Audios">
+                        <GalleryTabContainer xs={hasItemsInTab("audio") ? 3 : 1}>
                             {printGalleryItems("audio")}
                         </GalleryTabContainer>
-                    </Tabs.Panel>
+                    </Tab>
                 )}
                 {showTabs.includes("file") && (
-                    <Tabs.Panel value="file">
-                        <GalleryTabContainer cols={hasItemsInTab("file") ? 3 : 1}>
+                    <Tab eventKey="file" title="Others">
+                        <GalleryTabContainer xs={hasItemsInTab("file") ? 3 : 1}>
                             {printGalleryItems("file")}
                         </GalleryTabContainer>
-                    </Tabs.Panel>
+                    </Tab>
                 )}
                 {typeof onSelectItem === "function" && (
-                    <Tabs.Panel value="custom">
-                        <GalleryTabContainer cols={1}>
+                    <Tab eventKey="custom" title="Custom">
+                        <GalleryTabContainer xs={1}>
                             <GalleyCustomDisplay selectedItem={selectedItem} onSelectItem={onSelectItem} />
                         </GalleryTabContainer>
-                    </Tabs.Panel>
+                    </Tab>
                 )}
             </Tabs>
         </GalleryStyledContainer>
@@ -161,7 +153,7 @@ export function Gallery(props: Props): React.ReactNode {
 
 export function GalleryActions(_props: Props): React.ReactNode {
     return (
-        <Button variant="outline" size="xs" onClick={() => revealItemInDir(UNICHAT_GALLERY_DIR)}>
+        <Button variant="outline-primary" onClick={() => revealItemInDir(UNICHAT_GALLERY_DIR)}>
             <i className="fas fa-folder" />
             &nbsp;Show Gallery Folder
         </Button>

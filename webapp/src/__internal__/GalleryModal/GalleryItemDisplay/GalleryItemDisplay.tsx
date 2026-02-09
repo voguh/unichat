@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,19 +10,26 @@
 
 import React from "react";
 
-import { Button, Card, Text, Tooltip } from "@mantine/core";
+import Button from "react-bootstrap/Button";
+import CardBody from "react-bootstrap/CardBody";
+import CardFooter from "react-bootstrap/CardFooter";
+import CardHeader from "react-bootstrap/CardHeader";
 
+import { Tooltip } from "unichat/components/OverlayTrigger";
+import { ModalContext } from "unichat/contexts/ModalContext";
 import { GalleryItem } from "unichat/types";
 
 import { GalleryItemDisplayStyledContainer } from "./styled";
 
 interface Props extends GalleryItem {
     selected?: boolean;
-    onClick?: () => void;
+    onSelectItem?: (url: string, context: { close: () => void }) => void;
 }
 
 export function GalleryItemDisplay(props: Props): React.ReactNode {
-    const { previewUrl, title, type, onClick, selected } = props;
+    const { previewUrl, title, type, url, onSelectItem, selected } = props;
+
+    const { onClose } = React.useContext(ModalContext);
 
     function renderPreview(): React.ReactNode {
         if ((previewUrl ?? "").trim().length > 0) {
@@ -41,19 +47,18 @@ export function GalleryItemDisplay(props: Props): React.ReactNode {
 
     return (
         <GalleryItemDisplayStyledContainer>
-            <Card.Section style={{ height: 162 }}>
-                <div className="media-wrapper">{renderPreview()}</div>
-            </Card.Section>
-            <Tooltip label={title} position="top" withArrow>
-                <Text fw={500} mt="xs">
-                    {title}
-                </Text>
-            </Tooltip>
-
-            {!!onClick && (
-                <Button fullWidth mt="md" variant="light" disabled={selected} onClick={onClick}>
-                    Select
-                </Button>
+            <CardHeader>
+                <Tooltip content={title} placement="top">
+                    <span>{title}</span>
+                </Tooltip>
+            </CardHeader>
+            <CardBody>{renderPreview()}</CardBody>
+            {!!onSelectItem && (
+                <CardFooter>
+                    <Button disabled={selected} onClick={() => onSelectItem(url, { close: onClose })}>
+                        Select
+                    </Button>
+                </CardFooter>
             )}
         </GalleryItemDisplayStyledContainer>
     );
