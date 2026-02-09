@@ -12,39 +12,29 @@ import React from "react";
 
 import type { BsPrefixProps, ReplaceProps } from "react-bootstrap/esm/helpers";
 import FormControl, { FormControlProps } from "react-bootstrap/FormControl";
-import FormGroup from "react-bootstrap/FormGroup";
-import FormLabel from "react-bootstrap/FormLabel";
-import FormText from "react-bootstrap/FormText";
 
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 
-interface Props extends ReplaceProps<"input", BsPrefixProps<"input"> & FormControlProps> {
-    label?: React.ReactNode;
-    labelProps?: React.ComponentProps<typeof FormLabel>;
-    description?: React.ReactNode;
-    descriptionProps?: React.ComponentProps<typeof FormText>;
-    error?: React.ReactNode;
-    errorProps?: React.ComponentProps<typeof FormText>;
-}
+import { FormGroup, FormGroupBaseProps } from "./FormGroup";
+
+type Props = ReplaceProps<"input", BsPrefixProps<"input"> & FormControlProps> & FormGroupBaseProps;
 
 const _logger = LoggerFactory.getLogger("TextInput");
 export const TextInput = React.forwardRef<HTMLInputElement, Props>(function TextInput(props, ref) {
-    const { label, labelProps, description, descriptionProps, error, errorProps, ...rest } = props;
+    const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...rest } = props;
 
     return (
-        <FormGroup className="form-group">
-            {label && <FormLabel {...labelProps}>{label}</FormLabel>}
-            {description && (
-                <FormText className="form-description" {...descriptionProps}>
-                    {description}
-                </FormText>
-            )}
+        <FormGroup
+            id={id}
+            className={className}
+            label={label}
+            labelProps={labelProps}
+            description={description}
+            descriptionProps={descriptionProps}
+            error={error}
+            errorProps={errorProps}
+        >
             <FormControl {...rest} ref={ref} />
-            {error && (
-                <FormText className="form-error" {...errorProps}>
-                    {error}
-                </FormText>
-            )}
         </FormGroup>
     );
 });

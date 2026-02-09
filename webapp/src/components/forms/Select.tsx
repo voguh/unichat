@@ -10,13 +10,12 @@
 
 import React from "react";
 
-import FormGroup from "react-bootstrap/FormGroup";
-import FormLabel from "react-bootstrap/FormLabel";
-import FormText from "react-bootstrap/FormText";
 import ReactSelect, { GroupBase as RSGroupBase, Props as RSProps } from "react-select";
 import type ReactSelectSelect from "react-select/dist/declarations/src/Select";
 
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
+
+import { FormGroup, FormGroupBaseProps } from "./FormGroup";
 
 export type GroupBase<OptionType> = RSGroupBase<OptionType>;
 export interface Option {
@@ -25,27 +24,23 @@ export interface Option {
 }
 
 type ReactSelectInternal = ReactSelectSelect<Option, false, GroupBase<Option>>;
-interface Props extends Omit<RSProps<Option, false, GroupBase<Option>>, "isMulti"> {
-    label?: React.ReactNode;
-    labelProps?: React.ComponentProps<typeof FormLabel>;
-    description?: React.ReactNode;
-    descriptionProps?: React.ComponentProps<typeof FormText>;
-    error?: React.ReactNode;
-    errorProps?: React.ComponentProps<typeof FormText>;
-}
+type Props = Omit<RSProps<Option, false, GroupBase<Option>>, "isMulti"> & FormGroupBaseProps;
 
 const _logger = LoggerFactory.getLogger("Select");
 export const Select = React.forwardRef<ReactSelectInternal, Props>(function Select(props, ref) {
-    const { label, labelProps, description, descriptionProps, error, errorProps, ...rest } = props;
+    const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...rest } = props;
 
     return (
-        <FormGroup className="form-group">
-            {label && <FormLabel {...labelProps}>{label}</FormLabel>}
-            {description && (
-                <FormText className="form-description" {...descriptionProps}>
-                    {description}
-                </FormText>
-            )}
+        <FormGroup
+            id={id}
+            className={className}
+            label={label}
+            labelProps={labelProps}
+            description={description}
+            descriptionProps={descriptionProps}
+            error={error}
+            errorProps={errorProps}
+        >
             <ReactSelect
                 {...rest}
                 className="react-select__root"
@@ -53,11 +48,6 @@ export const Select = React.forwardRef<ReactSelectInternal, Props>(function Sele
                 isMulti={false}
                 ref={ref}
             />
-            {error && (
-                <FormText className="form-error" {...errorProps}>
-                    {error}
-                </FormText>
-            )}
         </FormGroup>
     );
 });
