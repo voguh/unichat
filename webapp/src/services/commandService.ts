@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -9,10 +8,16 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { ComboboxItemGroup } from "@mantine/core";
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
-import { GalleryItem, UniChatPluginMetadata, UniChatScraper, UniChatWidget, WidgetFields } from "unichat/types";
+import {
+    GalleryItem,
+    UniChatPluginMetadata,
+    UniChatScraper,
+    UniChatWidget,
+    UniChatWidgetGroup,
+    WidgetFields
+} from "unichat/types";
 import { UniChatSettings } from "unichat/utils/constants";
 
 async function invoke<T>(cmd: string, args?: Record<string, any>): Promise<T> {
@@ -137,7 +142,7 @@ export class CommandService {
         return invoke<UniChatWidget[]>("list_detailed_widgets");
     }
 
-    public async listWidgets(): Promise<ComboboxItemGroup<string>[]> {
+    public async listWidgets(): Promise<UniChatWidgetGroup[]> {
         return invoke("list_widgets");
     }
 

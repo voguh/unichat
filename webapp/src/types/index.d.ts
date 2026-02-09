@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2024-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -43,6 +42,13 @@ export interface GalleryItem {
     type: "image" | "video" | "audio" | "file";
     previewUrl: string;
     url: string;
+}
+
+/* ========================================================================== */
+
+export interface UniChatWidgetGroup {
+    group: string;
+    items: string[];
 }
 
 /* ========================================================================== */
