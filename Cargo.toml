@@ -24,6 +24,7 @@ actix-web = "4.12.1"
 actix-ws = "0.3.1"
 anyhow = { version = "1.0.100", features = ["backtrace"] }
 base64 = "0.22.1"
+ctrlc = "3.5.1"
 futures = "0.3.31"
 if-addrs = "0.14.0"
 indexmap = { version = "2.13.0", features = ["serde"] }

@@ -379,6 +379,11 @@ async fn main() {
         log_level = log::LevelFilter::Info;
     }
 
+    let _ = ctrlc::set_handler(|| {
+        let app_handle = get_app_handle();
+        app_handle.exit(0);
+    });
+
     tauri::Builder::default().setup(setup).on_window_event(on_window_event)
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_log::Builder::default()
