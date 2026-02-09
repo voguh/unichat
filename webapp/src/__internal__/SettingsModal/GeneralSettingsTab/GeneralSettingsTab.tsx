@@ -100,7 +100,7 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
                 <Switch
                     label="Open to LAN"
                     description="Allow other devices on your local network view widgets."
-                    checked={settings[UniChatSettingsKeys.OPEN_TO_LAN]}
+                    checked={settings[UniChatSettingsKeys.OPEN_TO_LAN] || false}
                     onChange={(evt) => updateSetting(UniChatSettingsKeys.OPEN_TO_LAN, evt.currentTarget.checked)}
                 />
 
