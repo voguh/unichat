@@ -36,7 +36,7 @@ export function ModalWrapper(props: ModalWrapperProps): React.ReactNode {
     }
 
     return (
-        <BSModal {...rest} data-modalId={modalId} ref={modalRef}>
+        <BSModal {...rest} data-modal-id={modalId} ref={modalRef}>
             <ModalContext.Provider value={{ modalProps: props, onClose, setSharedStore, sharedStore }}>
                 <ModalWrapperStyledContainer
                     className={clsx({ "with-sidebar": !!leftSection, "is-fullscreen": rest.fullscreen })}
