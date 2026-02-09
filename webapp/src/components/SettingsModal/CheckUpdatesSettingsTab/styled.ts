@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -22,18 +21,18 @@ export const CheckUpdatesSettingsTabStyledContainer = styled.div`
         font-family: "Roboto Mono", monospace;
         font-size: 14px;
         text-align: center;
-        margin-top: var(--mantine-spacing-md);
+        margin-top: 16px;
     }
 
-    > .mantine-Tabs-root {
-        > .mantine-Tabs-list {
+    > .nav-tabs {
+        > .nav-item {
         }
+    }
 
-        > .mantine-Tabs-panel {
-            --inner-tab-item-height: calc(var(--inner-setting-tab-item-height) - 34px);
-            height: var(--inner-tab-item-height);
-            overflow-y: auto;
-        }
+    > .tab-content {
+        --inner-tab-item-height: calc(var(--inner-setting-tab-item-height) - 34px);
+        height: var(--inner-tab-item-height);
+        overflow-y: auto;
     }
 `;
 
@@ -46,7 +45,6 @@ export const ReleaseNotesWrapper = styled.div`
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 24px;
         font-weight: 700;
 
         > div:first-child {
@@ -56,13 +54,15 @@ export const ReleaseNotesWrapper = styled.div`
             gap: 8px;
             margin: 0;
             font-family: "Roboto Mono", monospace;
-        }
+            font-size: 24px;
 
-        > div:last-child {
+            > .badge {
+                font-size: 12px;
+            }
         }
     }
 
-    > .mantine-Divider-root {
+    > hr {
         margin: 16px 0;
     }
 
@@ -72,7 +72,7 @@ export const ReleaseNotesWrapper = styled.div`
         border-radius: 4px;
         font-size: 12px;
         font-family: "Roboto Mono", monospace;
-        background: var(--mantine-color-body);
+        background: var(--oc-dark-7);
         height: calc(var(--inner-release-notes-wrapper-height) - (37px + 32px + 1px));
         overflow-y: auto;
 

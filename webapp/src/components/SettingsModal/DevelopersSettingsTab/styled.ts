@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -15,28 +14,13 @@ export const DevelopersSettingsTabStyledContainer = styled.div`
     position: relative;
 
     > .create-webview-hidden-section {
-        > .mantine-Switch-root {
-            > .mantine-Switch-body {
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-
-                > .mantine-Switch-track {
-                    > .mantine-Switch-thumb {
-                        &::before {
-                            display: none;
-                        }
-                    }
-                }
-            }
-        }
     }
 
     > .scraper-logging-section {
-        > .mantine-ButtonGroup-group {
+        > .btn-group {
             width: 100%;
 
-            > .mantine-Button-root {
+            > .btn {
                 flex: 1;
             }
         }

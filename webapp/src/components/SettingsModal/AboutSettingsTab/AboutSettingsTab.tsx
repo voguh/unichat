@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,9 +10,9 @@
 
 import React from "react";
 
-import { Button } from "@mantine/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import clsx from "clsx";
+import Button from "react-bootstrap/Button";
 
 import { modalService } from "unichat/services/modalService";
 

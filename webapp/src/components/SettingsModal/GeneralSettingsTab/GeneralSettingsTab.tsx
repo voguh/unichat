@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,8 +10,12 @@
 
 import React from "react";
 
-import { Alert, Button, ComboboxData, Divider, Select, Switch, Text } from "@mantine/core";
+import Alert from "react-bootstrap/Alert";
+import Button from "react-bootstrap/Button";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 
+import { GroupBase, Option, Select } from "unichat/components/forms/Select";
+import { Switch } from "unichat/components/forms/Switch";
 import { AppContext } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
 import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
@@ -25,7 +28,7 @@ interface Props {
 }
 
 export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
-    const [widgets, setWidgets] = React.useState<ComboboxData>([]);
+    const [widgets, setWidgets] = React.useState<GroupBase<Option>[]>([]);
     const [settings, setSettings] = React.useState<Record<string, unknown>>({});
 
     const { requiresRestart, setRequiresRestart } = React.useContext(AppContext);
@@ -50,8 +53,11 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
         async function init(): Promise<void> {
             const widgets = await commandService.listWidgets();
             const sortedWidgets = widgets.map((groupItem) => ({
-                group: groupItem.group,
-                items: groupItem.items.filter((item) => item !== "example").sort((a, b) => a.localeCompare(b))
+                label: groupItem.group,
+                options: groupItem.items
+                    .filter((item) => item !== "example")
+                    .sort((a, b) => a.localeCompare(b))
+                    .map((item) => ({ value: item, label: item }))
             }));
             setWidgets(sortedWidgets);
 
@@ -77,12 +83,14 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
             <Select
                 label="Default preview widget"
                 description="Select the default widget to be used in preview panels"
-                data={widgets}
-                value={settings[UniChatSettings.DEFAULT_PREVIEW_WIDGET] as string}
-                onChange={(value) => updateSetting(UniChatSettings.DEFAULT_PREVIEW_WIDGET, value)}
+                options={widgets}
+                value={widgets
+                    .flatMap((group) => group.options)
+                    .find((option) => option.value === settings[UniChatSettings.DEFAULT_PREVIEW_WIDGET])}
+                onChange={(option) => updateSetting(UniChatSettings.DEFAULT_PREVIEW_WIDGET, option?.value)}
             />
 
-            <Divider my="md" />
+            <hr />
 
             <OpenToLANSettingWrapper>
                 <Switch
@@ -95,14 +103,20 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
                 />
 
                 {requiresRestart && (
-                    <Alert variant="light" color="blue" icon={<i className="fas fa-info-circle" />}>
+                    <Alert variant="primary">
+                        <div>
+                            <i className="fas fa-info-circle" />
+                        </div>
                         <span>
                             <strong>{UNICHAT_DISPLAY_NAME}</strong> must be restarted for this setting to take effect.
                         </span>
                     </Alert>
                 )}
                 {(settings[UniChatSettings.OPEN_TO_LAN] as boolean) && (
-                    <Alert variant="light" color="yellow" icon={<i className="fas fa-info-circle" />}>
+                    <Alert variant="warning">
+                        <div>
+                            <i className="fas fa-info-circle" />
+                        </div>
                         <span>
                             Make sure your firewall allows incoming connections on port <strong>9527</strong>.
                         </span>
@@ -110,25 +124,20 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
                 )}
             </OpenToLANSettingWrapper>
 
-            <Divider my="md" />
+            <hr />
+
             <div className="tour-section">
-                <Text size="sm">Tour</Text>
-                <Button.Group>
-                    <Button
-                        variant="default"
-                        leftSection={<i className="fas fa-compass" />}
-                        onClick={() => dispatchTour("full")}
-                    >
+                Tour
+                <ButtonGroup>
+                    <Button variant="default" onClick={() => dispatchTour("full")}>
+                        <i className="fas fa-compass" />
                         View Tour
                     </Button>
-                    <Button
-                        variant="default"
-                        leftSection={<i className="fas fa-map" />}
-                        onClick={() => dispatchTour("whats-new")}
-                    >
+                    <Button variant="default" onClick={() => dispatchTour("whats-new")}>
+                        <i className="fas fa-map" />
                         What&apos;s New?
                     </Button>
-                </Button.Group>
+                </ButtonGroup>
             </div>
         </GeneralSettingsTabStyledContainer>
     );

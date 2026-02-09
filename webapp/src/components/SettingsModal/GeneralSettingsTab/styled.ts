@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -15,10 +14,10 @@ export const GeneralSettingsTabStyledContainer = styled.div`
     position: relative;
 
     > .tour-section {
-        > .mantine-ButtonGroup-group {
+        > .btn-group {
             width: 100%;
 
-            > .mantine-Button-root {
+            > .btn {
                 flex: 1;
             }
         }

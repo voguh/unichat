@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,24 +10,29 @@
 
 import React from "react";
 
-import { Button } from "@mantine/core";
 import clsx from "clsx";
+import Button from "react-bootstrap/Button";
 
+import { ErrorBoundary } from "../ErrorBoundary";
+import { ModalContext } from "../ModalContainer";
 import { AboutSettingsTab } from "./AboutSettingsTab";
 import { CheckUpdatesSettingsTab } from "./CheckUpdatesSettingsTab";
 import { DevelopersSettingsTab } from "./DevelopersSettingsTab";
 import { GeneralSettingsTab } from "./GeneralSettingsTab";
-import { SettingsStyledContainer } from "./styled";
+import { SettingsModalStyledContainer, SettingsSidebarStyledFooter, SettingsSidebarStyledItems } from "./styled";
 
 interface Props {
-    onClose: () => void;
-    startupTab?: string | null;
+    children?: React.ReactNode;
+}
+
+interface SelectedItemProps {
+    onClose(): void;
 }
 
 interface SettingsItem {
     title: string;
     icon: string;
-    children: React.ComponentType<{ onClose: () => void }>;
+    children: React.ComponentType<SelectedItemProps>;
 }
 
 const settingsItems: Record<string, SettingsItem> = {
@@ -54,51 +58,67 @@ const settingsItems: Record<string, SettingsItem> = {
     }
 };
 
-export function SettingsModal({ onClose, startupTab }: Props): React.ReactNode {
-    const [selectedItem, setSelectedItem] = React.useState(startupTab || "general");
+export function SettingsModal(_props: Props): React.ReactNode {
+    const { sharedStore, setSharedStore, onClose } = React.useContext(ModalContext);
+
+    const TabContent = React.useCallback(
+        (props: SelectedItemProps) => {
+            const selectedItem = settingsItems[sharedStore.selectedItem];
+            if (selectedItem != null) {
+                if (sharedStore.modalTitle !== selectedItem.title) {
+                    setSharedStore((old) => ({ ...old, modalTitle: selectedItem.title }));
+                }
+
+                const Element = selectedItem.children;
+
+                return <Element {...props} />;
+            }
+
+            throw new Error("Selected item not found in settingsItems");
+        },
+        [sharedStore.selectedItem, sharedStore.modalTitle, setSharedStore]
+    );
 
     return (
-        <SettingsStyledContainer>
-            <div className="settings-sidebar">
-                <div className="settings-sidebar-header">Settings</div>
-                <div className="settings-sidebar-items">
-                    {Object.entries(settingsItems).map(([key, item]) => (
-                        <Button
-                            key={key}
-                            fullWidth
-                            variant={key === selectedItem ? "filled" : "default"}
-                            color="blue"
-                            onClick={() => setSelectedItem(key)}
-                            leftSection={<i className={clsx(item.icon, "fa-fw")} />}
-                        >
-                            {item.title}
-                        </Button>
-                    ))}
-                </div>
-
-                <div className="settings-sidebar-footer">
-                    <span>
-                        <strong>{UNICHAT_DISPLAY_NAME}</strong> {UNICHAT_VERSION}
-                    </span>
-                </div>
-            </div>
-            {settingsItems[selectedItem] && (
-                <div className="settings-content">
-                    <div className="settings-content-header">
-                        <div className="settings-content-header--title">
-                            <span>{settingsItems[selectedItem].title}</span>
-                        </div>
-                        <div className="settings-content-header--actions">
-                            <Button variant="default" onClick={onClose}>
-                                <i className="fas fa-times" />
-                            </Button>
-                        </div>
-                    </div>
-                    <div className="settings-content-body">
-                        {React.createElement(settingsItems[selectedItem].children, { onClose })}
-                    </div>
-                </div>
-            )}
-        </SettingsStyledContainer>
+        <SettingsModalStyledContainer>
+            <ErrorBoundary>
+                <TabContent onClose={onClose} />
+            </ErrorBoundary>
+        </SettingsModalStyledContainer>
     );
 }
+
+export const SettingsActions = (_props: Props): React.ReactNode => {
+    const { sharedStore, setSharedStore } = React.useContext(ModalContext);
+
+    function onSelectTab(tabKey: string, tabItem: SettingsItem): void {
+        setSharedStore((old) => ({
+            ...old,
+            selectedItem: tabKey,
+            modalTitle: tabItem.title
+        }));
+    }
+
+    return (
+        <>
+            <SettingsSidebarStyledItems className="settings-sidebar-items">
+                {Object.entries(settingsItems).map(([key, item]) => (
+                    <Button
+                        key={key}
+                        variant={key === sharedStore.selectedItem ? "primary" : "default"}
+                        onClick={() => onSelectTab(key, item)}
+                    >
+                        <i className={clsx(item.icon, "fa-fw")} />
+                        {item.title}
+                    </Button>
+                ))}
+            </SettingsSidebarStyledItems>
+
+            <SettingsSidebarStyledFooter className="settings-sidebar-footer">
+                <span>
+                    <strong>{UNICHAT_DISPLAY_NAME}</strong> {UNICHAT_VERSION}
+                </span>
+            </SettingsSidebarStyledFooter>
+        </>
+    );
+};

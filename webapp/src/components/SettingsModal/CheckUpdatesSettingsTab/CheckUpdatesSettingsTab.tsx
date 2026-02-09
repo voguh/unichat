@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,9 +10,12 @@
 
 import React from "react";
 
-import { Badge, Button, Divider, Tabs } from "@mantine/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { marked } from "marked";
+import Badge from "react-bootstrap/Badge";
+import Button from "react-bootstrap/Button";
+import Tab from "react-bootstrap/Tab";
+import Tabs from "react-bootstrap/Tabs";
 import semver from "semver";
 
 import { ReleaseInfo } from "unichat/types";
@@ -25,18 +27,18 @@ interface Props {
 }
 
 export function CheckUpdatesSettingsTab(_props: Props): React.ReactNode {
-    const [latestStable, setLatestStable] = React.useState<ReleaseInfo>(null);
-    const [latestBeta, setLatestBeta] = React.useState<ReleaseInfo>(null);
+    const [latestStable, setLatestStable] = React.useState<ReleaseInfo | null>(null);
+    const [latestUnstable, setLatestUnstable] = React.useState<ReleaseInfo | null>(null);
 
     const isMounted = React.useRef(false);
 
     async function init(): Promise<void> {
-        const stableRelease = UNICHAT_RELEASES.find((release) => !release.prerelease);
-        const betaRelease = UNICHAT_RELEASES.find((release) => release.prerelease);
+        const stableRelease = UNICHAT_RELEASES.find((release) => !release.prerelease) || null;
+        const unstableRelease = UNICHAT_RELEASES.find((release) => release.prerelease) || null;
 
         setLatestStable(stableRelease);
-        if (betaRelease && semver.gt(betaRelease.name, stableRelease.name)) {
-            setLatestBeta(betaRelease);
+        if (unstableRelease && stableRelease && semver.gt(unstableRelease.name, stableRelease.name)) {
+            setLatestUnstable(unstableRelease);
         }
     }
 
@@ -49,7 +51,7 @@ export function CheckUpdatesSettingsTab(_props: Props): React.ReactNode {
         init();
     }, []);
 
-    if (!latestStable && !latestBeta) {
+    if (!latestStable && !latestUnstable) {
         return (
             <CheckUpdatesSettingsTabStyledContainer>
                 <div className="no-versions-available">No version information available.</div>
@@ -59,66 +61,52 @@ export function CheckUpdatesSettingsTab(_props: Props): React.ReactNode {
 
     return (
         <CheckUpdatesSettingsTabStyledContainer>
-            <Tabs variant="pills" defaultValue="stable">
-                <Tabs.List>
-                    <Tabs.Tab disabled={latestStable == null} value="stable">
-                        Latest Stable
-                    </Tabs.Tab>
-                    <Tabs.Tab disabled={latestBeta == null} value="pre-release">
-                        Latest Pre-Release
-                    </Tabs.Tab>
-                </Tabs.List>
-
-                <Tabs.Panel value="stable">
+            <Tabs defaultActiveKey="stable">
+                <Tab eventKey="stable" title="Latest Stable">
                     {latestStable && (
                         <ReleaseNotesWrapper>
                             <div className="release-name">
                                 <div>
                                     {latestStable.name}
-                                    <Badge variant="outline" size="xs" color="green">
-                                        Latest
-                                    </Badge>
+                                    <Badge bg="success">Latest</Badge>
                                 </div>
                                 <div>
-                                    <Button size="xs" onClick={() => openUrl(latestStable.url)}>
-                                        Go to Release Page
-                                    </Button>
+                                    <Button onClick={() => openUrl(latestStable.url)}>Go to Release Page</Button>
                                 </div>
                             </div>
-                            <Divider />
+
+                            <hr />
+
                             <div
                                 className="release-notes"
                                 dangerouslySetInnerHTML={{ __html: marked.parse(latestStable.description) }}
                             />
                         </ReleaseNotesWrapper>
                     )}
-                </Tabs.Panel>
-                <Tabs.Panel value="pre-release">
-                    {latestBeta && (
+                </Tab>
+                <Tab eventKey="pre-release" title="Latest Pre-Release">
+                    {latestUnstable && (
                         <ReleaseNotesWrapper>
                             <div className="release-name">
                                 <div>
-                                    {latestBeta.name}
-                                    <Badge variant="outline" size="xs" color="yellow">
+                                    {latestUnstable.name}
+                                    <Badge bg="warning" style={{ color: "var(--oc-dark-9)" }}>
                                         Pre-Release
                                     </Badge>
                                 </div>
                                 <div>
-                                    <Button size="xs" onClick={() => openUrl(latestBeta.url)}>
-                                        Go to Release Page
-                                    </Button>
+                                    <Button onClick={() => openUrl(latestUnstable.url)}>Go to Release Page</Button>
                                 </div>
                             </div>
-                            <Divider my="md" />
+                            <hr />
                             <div
                                 className="release-notes"
-                                dangerouslySetInnerHTML={{ __html: marked.parse(latestBeta.description) }}
+                                dangerouslySetInnerHTML={{ __html: marked.parse(latestUnstable.description) }}
                             />
                         </ReleaseNotesWrapper>
                     )}
-                </Tabs.Panel>
+                </Tab>
             </Tabs>
-            {/*  */}
         </CheckUpdatesSettingsTabStyledContainer>
     );
 }

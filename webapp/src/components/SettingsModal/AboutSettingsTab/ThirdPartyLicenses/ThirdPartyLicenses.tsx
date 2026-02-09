@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,9 +10,10 @@
 
 import React from "react";
 
-import { Badge, Table } from "@mantine/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import clsx from "clsx";
+import Badge from "react-bootstrap/Badge";
+import Table from "react-bootstrap/Table";
 
 import { ThirdPartyLicensesStyledContainer } from "./styled";
 
@@ -36,45 +36,42 @@ export function ThirdPartyLicenses(_props: Props): React.ReactNode {
 
     return (
         <ThirdPartyLicensesStyledContainer>
-            <Table stickyHeader>
-                <Table.Thead>
-                    <Table.Tr>
-                        <Table.Th>Package</Table.Th>
-                        <Table.Th>License(s)</Table.Th>
-                    </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
+            <Table>
+                <thead>
+                    <tr>
+                        <th>Package</th>
+                        <th>License(s)</th>
+                    </tr>
+                </thead>
+                <tbody>
                     {UNICHAT_THIRD_PARTY_LICENSES.sort((a, b) =>
                         `${a.source}:${a.name}`.localeCompare(`${b.source}:${b.name}`)
                     ).map((pkg) => (
-                        <Table.Tr key={pkg.name}>
-                            <Table.Td>
-                                <div
-                                    className={clsx({ withLink: !!pkg.repository })}
-                                    onClick={() => pkg.repository && openUrl(pkg.repository)}
-                                    style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                                >
-                                    <Badge radius="xs" color={pkg.source === "crate" ? "orange" : "blue"}>
+                        <tr key={pkg.name} className={clsx({ withLink: !!pkg.repository })}>
+                            <td onClick={() => pkg.repository && openUrl(pkg.repository)}>
+                                <span>
+                                    <Badge bg="default" data-source={pkg.source}>
                                         {pkg.source}
                                     </Badge>
                                     {pkg.name} v{pkg.version}
-                                </div>
-                            </Table.Td>
-                            <Table.Td style={{ display: "flex", gap: "4px" }}>
-                                {formatLicenses(pkg.licenses).map((l) => (
-                                    <Badge
-                                        key={l}
-                                        radius="xs"
-                                        color="green"
-                                        onClick={() => openUrl(`https://opensource.org/license/${l}`)}
-                                    >
-                                        {l}
-                                    </Badge>
-                                ))}
-                            </Table.Td>
-                        </Table.Tr>
+                                </span>
+                            </td>
+                            <td>
+                                <span>
+                                    {formatLicenses(pkg.licenses).map((l) => (
+                                        <Badge
+                                            key={l}
+                                            bg="success"
+                                            onClick={() => openUrl(`https://opensource.org/license/${l}`)}
+                                        >
+                                            {l}
+                                        </Badge>
+                                    ))}
+                                </span>
+                            </td>
+                        </tr>
                     ))}
-                </Table.Tbody>
+                </tbody>
             </Table>
         </ThirdPartyLicensesStyledContainer>
     );

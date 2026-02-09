@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -24,7 +23,7 @@ export const AboutSettingsTabStyledContainer = styled.div`
         > span {
             text-decoration: underline;
             cursor: pointer;
-            color: var(--mantine-color-anchor);
+            color: var(--oc-blue-4);
         }
     }
 
@@ -42,7 +41,7 @@ export const AboutSettingsTabStyledContainer = styled.div`
     > .app-version {
         font-size: 12px;
         margin-top: 8px;
-        color: var(--mantine-color-dimmed);
+        color: var(--oc-dark-1);
     }
 
     > .app-homepage {
@@ -69,11 +68,11 @@ export const AboutSettingsTabStyledContainer = styled.div`
         left: 0;
         height: 50%;
         width: 100%;
-        background: var(--mantine-color-body);
+        background: var(--oc-dark-7);
         transform: translateY(100%);
         transition: transform 200ms ease;
-        border: 1px solid var(--mantine-color-default-border);
-        border-radius: var(--mantine-radius-xs);
+        border: 1px solid var(--oc-dark-5);
+        border-radius: var(--bs-border-radius);
         padding: 16px;
 
         &.isCreditsOpen {
@@ -100,7 +99,7 @@ export const AboutSettingsTabStyledContainer = styled.div`
                 > div.values {
                     grid-area: RT;
                     text-align: left;
-                    color: var(--mantine-color-dimmed);
+                    color: var(--oc-dark-1);
 
                     > p {
                         margin: 0;

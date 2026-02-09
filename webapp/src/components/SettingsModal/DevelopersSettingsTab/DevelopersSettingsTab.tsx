@@ -11,8 +11,11 @@
 
 import React from "react";
 
-import { Button, Divider, Switch, Text } from "@mantine/core";
+import Button from "react-bootstrap/Button";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 
+import { FormGroup } from "unichat/components/forms/FormGroup";
+import { Switch } from "unichat/components/forms/Switch";
 import { commandService } from "unichat/services/commandService";
 import { UniChatSettings } from "unichat/utils/constants";
 
@@ -62,15 +65,20 @@ export function DevelopersSettingsTab(_props: Props): React.ReactNode {
                     onChange={(evt) => updateSetting(UniChatSettings.CREATE_WEBVIEW_HIDDEN, evt.currentTarget.checked)}
                 />
             </div>
-            <Divider my="md" />
 
-            <div className="scraper-logging-section">
-                <Text size="sm">Scraper log events</Text>
-                <Text size="xs" c="dimmed" mb="xs">
-                    Choose the level of detail for scraper logging{" "}
-                    {__IS_DEV__ && "(Developer mode is enabled, so all events will be logged)"}.
-                </Text>
-                <Button.Group>
+            <hr />
+
+            <FormGroup
+                label="Scraper log events"
+                description={
+                    <>
+                        Choose the level of detail for scraper logging{" "}
+                        {__IS_DEV__ && "(Developer mode is enabled, so all events will be logged)"}.
+                    </>
+                }
+                className="scraper-logging-section"
+            >
+                <ButtonGroup>
                     <Button
                         variant={settings[UniChatSettings.LOG_SCRAPER_EVENTS] === "ONLY_ERRORS" ? "filled" : "default"}
                         disabled={__IS_DEV__ || settings[UniChatSettings.LOG_SCRAPER_EVENTS] === "ONLY_ERRORS"}
@@ -94,8 +102,8 @@ export function DevelopersSettingsTab(_props: Props): React.ReactNode {
                     >
                         Errors + All Events
                     </Button>
-                </Button.Group>
-            </div>
+                </ButtonGroup>
+            </FormGroup>
         </DevelopersSettingsTabStyledContainer>
     );
 }
