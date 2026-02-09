@@ -12,12 +12,15 @@ import React from "react";
 
 import clsx from "clsx";
 import Button from "react-bootstrap/Button";
-import BSModal from "react-bootstrap/Modal";
+import type { BsPrefixProps, ReplaceProps } from "react-bootstrap/esm/helpers";
+import BSModal, { ModalProps } from "react-bootstrap/Modal";
 
 import { ModalWrapperStyledContainer } from "./styled";
 
-type ModalProps = React.ComponentProps<typeof BSModal>;
-export interface ModalWrapperProps extends ModalProps {
+type RichModalProps = React.PropsWithChildren<ReplaceProps<"div", BsPrefixProps<"div"> & ModalProps>>;
+export interface ModalWrapperProps extends RichModalProps {
+    modalId: string;
+
     title: string;
     children: React.ReactNode;
     actions?: React.ReactNode;

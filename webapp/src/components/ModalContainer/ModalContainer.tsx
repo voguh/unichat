@@ -18,7 +18,7 @@ import { ModalWrapper } from "./ModalWrapper";
 import { ModalContainerStyledContainer } from "./styled";
 
 interface RichModalWrapperProps extends OpenModalOptions {
-    id: string;
+    modalId: string;
 }
 
 interface Props {
@@ -32,12 +32,14 @@ const _logger = LoggerFactory.getLogger("ModalContainer");
 export function ModalContainer(defaultProps: Props): React.ReactNode {
     const [openedModals, setOpenedModals] = React.useState<RichModalWrapperProps[]>([]);
 
+    const modalContainerRef = React.useRef<HTMLDivElement>(null);
+
     function requestClose(id: string): void {
-        setOpenedModals((prev) => prev.filter((modal) => modal.id !== id));
+        setOpenedModals((prev) => prev.filter((modal) => modal.modalId !== id));
     }
 
     function handleOpenModal(modalOptions: OpenModalOptions): void {
-        const richModalOptions = { ...modalOptions, id: crypto.randomUUID() };
+        const richModalOptions = { ...modalOptions, modalId: crypto.randomUUID() };
         setOpenedModals((prev) => [...prev, richModalOptions]);
     }
 
@@ -50,14 +52,15 @@ export function ModalContainer(defaultProps: Props): React.ReactNode {
     }, []);
 
     return (
-        <ModalContainerStyledContainer>
+        <ModalContainerStyledContainer className="modal-container" ref={modalContainerRef}>
             {openedModals.map((modalProps) => (
                 <ModalWrapper
-                    key={modalProps.id}
-                    show
-                    onHide={() => requestClose(modalProps.id)}
                     {...defaultProps}
                     {...modalProps}
+                    key={modalProps.modalId}
+                    container={modalContainerRef}
+                    show
+                    onHide={() => requestClose(modalProps.modalId)}
                 />
             ))}
         </ModalContainerStyledContainer>

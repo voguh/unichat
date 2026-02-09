@@ -10,18 +10,26 @@
 
 import styled from "styled-components";
 
-export const ModalContainerStyledContainer = styled.div``;
+export const ModalContainerStyledContainer = styled.div`
+    > .modal {
+        > .modal-dialog {
+            > .modal-content {
+                overflow: hidden;
+            }
+        }
+    }
+`;
 
 export const ModalWrapperStyledContainer = styled.div`
     --modal-max-height: calc(100vh - 58px);
     --modal-header-height: 45px;
 
+    position: relative;
+    max-height: var(--modal-max-height);
+
     &.is-fullscreen {
         --modal-max-height: calc(100vh);
     }
-
-    position: relative;
-    max-height: var(--modal-max-height);
 
     &.with-sidebar {
         display: grid;
