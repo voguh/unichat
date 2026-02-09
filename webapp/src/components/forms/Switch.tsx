@@ -10,22 +10,15 @@
 
 import React from "react";
 
+import type { BsPrefixProps, ReplaceProps } from "react-bootstrap/esm/helpers";
+import FormCheck, { FormCheckProps } from "react-bootstrap/FormCheck";
 import FormGroup from "react-bootstrap/FormGroup";
 import FormLabel from "react-bootstrap/FormLabel";
 import FormText from "react-bootstrap/FormText";
-import ReactSelect, { GroupBase as RSGroupBase, Props as RSProps } from "react-select";
-import type ReactSelectSelect from "react-select/dist/declarations/src/Select";
 
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 
-export type GroupBase<OptionType> = RSGroupBase<OptionType>;
-export interface Option {
-    label: string;
-    value: string;
-}
-
-type ReactSelectInternal = ReactSelectSelect<Option, false, GroupBase<Option>>;
-interface Props extends Omit<RSProps<Option, false, GroupBase<Option>>, "isMulti"> {
+interface Props extends ReplaceProps<"input", BsPrefixProps<"input"> & FormCheckProps> {
     label?: React.ReactNode;
     labelProps?: React.ComponentProps<typeof FormLabel>;
     description?: React.ReactNode;
@@ -34,8 +27,8 @@ interface Props extends Omit<RSProps<Option, false, GroupBase<Option>>, "isMulti
     errorProps?: React.ComponentProps<typeof FormText>;
 }
 
-const _logger = LoggerFactory.getLogger("Select");
-export const Select = React.forwardRef<ReactSelectInternal, Props>(function Select(props, ref) {
+const _logger = LoggerFactory.getLogger("Switch");
+export const Switch = React.forwardRef<HTMLInputElement, Props>(function Switch(props, ref) {
     const { label, labelProps, description, descriptionProps, error, errorProps, ...rest } = props;
 
     return (
@@ -46,13 +39,7 @@ export const Select = React.forwardRef<ReactSelectInternal, Props>(function Sele
                     {description}
                 </FormText>
             )}
-            <ReactSelect
-                {...rest}
-                className="react-select__root"
-                classNamePrefix="react-select"
-                isMulti={false}
-                ref={ref}
-            />
+            <FormCheck {...rest} type="switch" ref={ref} />
             {error && (
                 <FormText className="form-error" {...errorProps}>
                     {error}

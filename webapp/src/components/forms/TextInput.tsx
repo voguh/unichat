@@ -10,14 +10,15 @@
 
 import React from "react";
 
-import FormControl from "react-bootstrap/FormControl";
+import type { BsPrefixProps, ReplaceProps } from "react-bootstrap/esm/helpers";
+import FormControl, { FormControlProps } from "react-bootstrap/FormControl";
 import FormGroup from "react-bootstrap/FormGroup";
 import FormLabel from "react-bootstrap/FormLabel";
 import FormText from "react-bootstrap/FormText";
 
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 
-interface Props extends React.ComponentProps<typeof FormControl> {
+interface Props extends ReplaceProps<"input", BsPrefixProps<"input"> & FormControlProps> {
     label?: React.ReactNode;
     labelProps?: React.ComponentProps<typeof FormLabel>;
     description?: React.ReactNode;
