@@ -17,10 +17,10 @@ import { LoggerFactory } from "unichat/logging/LoggerFactory";
 
 import { FormGroup, FormGroupBaseProps } from "./FormGroup";
 
-type Props = ReplaceProps<"input", BsPrefixProps<"input"> & FormCheckProps> & FormGroupBaseProps;
+export type SwitchProps = ReplaceProps<"input", BsPrefixProps<"input"> & FormCheckProps> & FormGroupBaseProps;
 
 const _logger = LoggerFactory.getLogger("Switch");
-export const Switch = React.forwardRef<HTMLInputElement, Props>(function Switch(props, ref) {
+export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(function Switch(props, ref) {
     const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...unfiltered } = props;
     const [dataProps, rest] = Object.entries(unfiltered).reduce(
         (acc, [key, value]) => {

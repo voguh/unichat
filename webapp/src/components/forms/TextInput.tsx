@@ -17,10 +17,10 @@ import { LoggerFactory } from "unichat/logging/LoggerFactory";
 
 import { FormGroup, FormGroupBaseProps } from "./FormGroup";
 
-type Props = ReplaceProps<"input", BsPrefixProps<"input"> & FormControlProps> & FormGroupBaseProps;
+export type TextInputProps = ReplaceProps<"input", BsPrefixProps<"input"> & FormControlProps> & FormGroupBaseProps;
 
 const _logger = LoggerFactory.getLogger("TextInput");
-export const TextInput = React.forwardRef<HTMLInputElement, Props>(function TextInput(props, ref) {
+export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(function TextInput(props, ref) {
     const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...unfiltered } = props;
     const [dataProps, rest] = Object.entries(unfiltered).reduce(
         (acc, [key, value]) => {

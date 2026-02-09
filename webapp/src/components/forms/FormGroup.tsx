@@ -12,7 +12,7 @@ import React from "react";
 
 import clsx from "clsx";
 import type { BsPrefixProps, ReplaceProps } from "react-bootstrap/esm/helpers";
-import BSFormGroup, { FormGroupProps } from "react-bootstrap/FormGroup";
+import BSFormGroup, { FormGroupProps as BSFormGroupProps } from "react-bootstrap/FormGroup";
 import FormLabel from "react-bootstrap/FormLabel";
 import FormText from "react-bootstrap/FormText";
 
@@ -27,10 +27,13 @@ export interface FormGroupBaseProps {
     errorProps?: React.ComponentProps<typeof FormText>;
 }
 
-type Props = React.PropsWithChildren<ReplaceProps<"div", BsPrefixProps<"div"> & FormGroupProps>> & FormGroupBaseProps;
+// eslint-disable-next-line prettier/prettier
+export interface FormGroupProps extends ReplaceProps<"div", BsPrefixProps<"div"> & BSFormGroupProps>, FormGroupBaseProps {
+    children?: React.ReactNode;
+}
 
 const _logger = LoggerFactory.getLogger("FormGroup");
-export const FormGroup = React.forwardRef<HTMLDivElement, Props>(function FormGroup(props, ref) {
+export const FormGroup = React.forwardRef<HTMLDivElement, FormGroupProps>(function FormGroup(props, ref) {
     const { label, labelProps, description, descriptionProps, error, errorProps, children, ...rest } = props;
 
     return (

@@ -24,10 +24,10 @@ export interface Option {
 }
 
 type ReactSelectInternal = ReactSelectSelect<Option, false, GroupBase<Option>>;
-type Props = Omit<RSProps<Option, false, GroupBase<Option>>, "isMulti"> & FormGroupBaseProps;
+export type SelectProps = Omit<RSProps<Option, false, GroupBase<Option>>, "isMulti"> & FormGroupBaseProps;
 
 const _logger = LoggerFactory.getLogger("Select");
-export const Select = React.forwardRef<ReactSelectInternal, Props>(function Select(props, ref) {
+export const Select = React.forwardRef<ReactSelectInternal, SelectProps>(function Select(props, ref) {
     const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...unfiltered } = props;
     const [dataProps, rest] = Object.entries(unfiltered).reduce(
         (acc, [key, value]) => {
