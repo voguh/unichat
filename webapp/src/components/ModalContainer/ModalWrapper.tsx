@@ -69,7 +69,7 @@ export function ModalWrapper(props: ModalWrapperProps): React.ReactNode {
                             <div className="modal-wrapper-header--actions">
                                 {safeActions}
                                 <Button variant="default" onClick={onClose}>
-                                    <i className="ti ti-x" />
+                                    <i className="fas fa-times" />
                                 </Button>
                             </div>
                         </div>

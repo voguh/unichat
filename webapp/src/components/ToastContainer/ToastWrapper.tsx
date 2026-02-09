@@ -34,11 +34,11 @@ export interface ToastWrapperProps {
 }
 
 const faIcon: Record<ToastTypes, React.ReactNode> = {
-    success: <i className="fa-solid fa-check" />,
-    info: <i className="fa-solid fa-info" />,
-    error: <i className="fa-solid fa-xmark" />,
-    warn: <i className="fa-solid fa-exclamation" />,
-    default: <i className="fa-solid fa-bell" />
+    success: <i className="fas fa-check-circle" />,
+    info: <i className="fas fa-info-circle" />,
+    error: <i className="fas fa-times-circle" />,
+    warn: <i className="fas fa-exclamation-circle" />,
+    default: <i className="fas fa-dot-circle" />
 };
 
 const _logger = LoggerFactory.getLogger("ToastWrapper");

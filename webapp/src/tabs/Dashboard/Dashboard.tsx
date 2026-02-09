@@ -158,7 +158,7 @@ export function Dashboard(_props: Props): React.ReactNode {
 
                             <Tooltip content="Reload widget view" placement="left">
                                 <Button onClick={reloadIframe} data-tour="preview-reload">
-                                    <i className="ti ti-reload" />
+                                    <i className="fas fa-redo" />
                                 </Button>
                             </Tooltip>
 
@@ -166,7 +166,7 @@ export function Dashboard(_props: Props): React.ReactNode {
                                 <Dropdown>
                                     <Tooltip content="Open in device" placement="left">
                                         <Dropdown.Toggle variant="dark">
-                                            <i className="ti ti-world-bolt" />
+                                            <i className="fas fa-globe" />
                                         </Dropdown.Toggle>
                                     </Tooltip>
 
@@ -174,12 +174,12 @@ export function Dashboard(_props: Props): React.ReactNode {
                                         <Dropdown.Item
                                             onClick={() => openUrl(`${WIDGET_URL_PREFIX}/${selectedWidget}`)}
                                         >
-                                            <i className="ti ti-world" /> Open in browser
+                                            <i className="fas fa-globe" /> Open in browser
                                         </Dropdown.Item>
                                         <Dropdown.Item
                                             onClick={() => openQrCodeModal(`${WIDGET_URL_PREFIX}/${selectedWidget}`)}
                                         >
-                                            <i className="ti ti-device-mobile" />
+                                            <i className="fas fa-mobile-alt" />
                                             Open on device
                                         </Dropdown.Item>
                                     </Dropdown.Menu>
@@ -190,7 +190,7 @@ export function Dashboard(_props: Props): React.ReactNode {
                                         onClick={() => openUrl(`${WIDGET_URL_PREFIX}/${selectedWidget}`)}
                                         data-tour="preview-open-in-browser"
                                     >
-                                        <i className="ti ti-world" />
+                                        <i className="fas fa-globe" />
                                     </Button>
                                 </Tooltip>
                             )}
@@ -222,12 +222,12 @@ export function DashboardLeftSection(_props: Props): React.ReactNode {
         <>
             <Tooltip content="Clear chat history" placement="right">
                 <Button size="sm" onClick={handleClearChat} data-tour="clear-chat">
-                    <i className="ti ti-eraser" />
+                    <i className="fas fa-eraser" />
                 </Button>
             </Tooltip>
             <Tooltip content="Open user widgets folder" placement="right">
                 <Button onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)} data-tour="user-widgets-directory">
-                    <i className="ti ti-folder" />
+                    <i className="fas fa-folder" />
                 </Button>
             </Tooltip>
             <Tooltip content="Toggle widget preview" placement="right">
@@ -236,7 +236,7 @@ export function DashboardLeftSection(_props: Props): React.ReactNode {
                     variant={showWidgetPreview ? "primary" : "dark"}
                     data-tour="toggle-widget-preview"
                 >
-                    {showWidgetPreview ? <i className="ti ti-photo" /> : <i className="ti ti-photo-off" />}
+                    {showWidgetPreview ? <i className="fas fa-eye" /> : <i className="fas fa-eye-slash" />}
                 </Button>
             </Tooltip>
         </>

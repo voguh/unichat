@@ -95,9 +95,9 @@ export function ScraperCard(props: Props): React.ReactNode {
 
     function handleStatusIcon(): React.ReactNode {
         if (loading || scraperIsLoading) {
-            return <i className="ti ti-loader" />;
+            return <i className="fas fa-spinner fa-spin" />;
         } else {
-            return <i className={`ti ti-player-${scraperIsRunning ? "stop" : "play"}`} />;
+            return <i className={`fas fa-${scraperIsRunning ? "stop" : "play"}`} />;
         }
     }
 

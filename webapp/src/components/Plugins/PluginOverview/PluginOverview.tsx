@@ -102,7 +102,7 @@ export function PluginOverviewActions(props: Props): React.ReactNode {
                 </Button>
             ) : (
                 <Button variant="outline-primary" onClick={() => revealItemInDir(pluginPath)}>
-                    <i className="ti ti-folder" />
+                    <i className="fas fa-folder" />
                     &nbsp;Show in Folder
                 </Button>
             )}

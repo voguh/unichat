@@ -86,7 +86,7 @@ export function Plugins(_props: Props): React.ReactNode {
                                         <span>
                                             {Strings.isNullOrEmpty(plugin.pluginPath) && (
                                                 <Badge>
-                                                    <i className="ti ti-git-branch" /> BUILT-IN
+                                                    <i className="fas fa-code-branch" /> BUILT-IN
                                                 </Badge>
                                             )}
                                             <Badge bg="default" style={{ background: bgColor, color: fgColor }}>
@@ -115,11 +115,11 @@ export function PluginsActions(_props: Props): React.ReactNode {
                 variant="default"
                 onClick={() => openUrl("https://voguh.github.io/unichat/#/plugins/getting_started")}
             >
-                <i className="ti ti-book-2" />
+                <i className="fas fa-book" />
                 Read the Docs
             </Button>
             <Button variant="outline-primary" onClick={() => revealItemInDir(UNICHAT_PLUGINS_DIR)}>
-                <i className="ti ti-folder" />
+                <i className="fas fa-folder" />
                 Show Plugins Folder
             </Button>
         </>
