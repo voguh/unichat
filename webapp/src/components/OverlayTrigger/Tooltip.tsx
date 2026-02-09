@@ -21,13 +21,18 @@ interface Props extends Omit<OverlayTriggerProps, "children" | "overlay"> {
     content: React.ReactNode;
 
     hasDoneInitialMeasure?: boolean;
+    style?: React.CSSProperties;
 }
 
 const _logger = LoggerFactory.getLogger("Tooltip");
 export function Tooltip(props: Props): React.ReactNode {
-    const { children, content, hasDoneInitialMeasure, ...rest } = props;
+    const { children, content, hasDoneInitialMeasure, style, ...rest } = props;
 
-    const tooltip = <BSTooltip hasDoneInitialMeasure={hasDoneInitialMeasure}>{content}</BSTooltip>;
+    const tooltip = (
+        <BSTooltip style={style} hasDoneInitialMeasure={hasDoneInitialMeasure}>
+            {content}
+        </BSTooltip>
+    );
 
     return (
         <OverlayTrigger {...rest} overlay={tooltip}>

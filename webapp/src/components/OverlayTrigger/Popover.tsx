@@ -22,16 +22,19 @@ interface Props extends Omit<OverlayTriggerProps, "children" | "overlay"> {
     content: React.ReactNode;
 
     hasDoneInitialMeasure?: boolean;
+    style?: React.CSSProperties;
+    headerStyle?: React.CSSProperties;
+    bodyStyle?: React.CSSProperties;
 }
 
 const _logger = LoggerFactory.getLogger("Popover");
 export function Popover(props: Props): React.ReactNode {
-    const { children, content, hasDoneInitialMeasure, title, ...rest } = props;
+    const { children, content, hasDoneInitialMeasure, title, style, headerStyle, bodyStyle, ...rest } = props;
 
     const popover = (
-        <BSPopover hasDoneInitialMeasure={hasDoneInitialMeasure}>
-            <BSPopover.Header>{title}</BSPopover.Header>
-            <BSPopover.Body>{content}</BSPopover.Body>
+        <BSPopover style={style} hasDoneInitialMeasure={hasDoneInitialMeasure}>
+            <BSPopover.Header style={headerStyle}>{title}</BSPopover.Header>
+            <BSPopover.Body style={bodyStyle}>{content}</BSPopover.Body>
         </BSPopover>
     );
 
