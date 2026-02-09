@@ -80,7 +80,7 @@ export function ToastWrapper(props: ToastWrapperProps): React.ReactNode {
                 <div className="toast-title">{title}</div>
                 {closeButton && (
                     <button className="toast-close-btn" onClick={() => handleClose()}>
-                        <i className="fa-solid fa-times" />
+                        <i className="fas fa-times" />
                     </button>
                 )}
             </ToastHeader>
