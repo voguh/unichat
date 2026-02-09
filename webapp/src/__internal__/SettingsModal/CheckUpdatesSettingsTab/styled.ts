@@ -30,7 +30,7 @@ export const CheckUpdatesSettingsTabStyledContainer = styled.div`
     }
 
     > .tab-content {
-        --inner-tab-item-height: calc(var(--inner-setting-tab-item-height) - 34px);
+        --inner-tab-item-height: calc(var(--modal-body-inner-max-height) - 34px);
         height: var(--inner-tab-item-height);
         overflow-y: auto;
     }

@@ -33,8 +33,3 @@ export const SettingsSidebarStyledFooter = styled.div`
         color: var(--oc-dark-2);
     }
 `;
-
-export const SettingsModalStyledContainer = styled.div`
-    --inner-setting-tab-item-height: var(--modal-body-inner-max-height);
-    height: var(--inner-setting-tab-item-height);
-`;

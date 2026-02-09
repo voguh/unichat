@@ -20,7 +20,7 @@ import { AboutSettingsTab } from "./AboutSettingsTab";
 import { CheckUpdatesSettingsTab } from "./CheckUpdatesSettingsTab";
 import { DevelopersSettingsTab } from "./DevelopersSettingsTab";
 import { GeneralSettingsTab } from "./GeneralSettingsTab";
-import { SettingsModalStyledContainer, SettingsSidebarStyledFooter, SettingsSidebarStyledItems } from "./styled";
+import { SettingsSidebarStyledFooter, SettingsSidebarStyledItems } from "./styled";
 
 interface Props {
     children?: React.ReactNode;
@@ -59,46 +59,35 @@ const settingsItems: Record<string, SettingsItem> = {
     }
 };
 
+function TabContent({ selectedItem, ...rest }: { selectedItem: string } & SelectedItemProps): React.ReactNode {
+    if (!(selectedItem in settingsItems)) {
+        throw new Error("Selected item not found in settingsItems");
+    }
+
+    const Element = settingsItems[selectedItem].children;
+
+    return <Element {...rest} />;
+}
+
 export function SettingsModal(_props: Props): React.ReactNode {
     const { sharedStore, setSharedStore, onClose } = React.useContext(ModalContext);
 
-    const TabContent = React.useCallback(
-        (props: SelectedItemProps) => {
-            const selectedItem = settingsItems[sharedStore.selectedItem];
-            if (selectedItem != null) {
-                if (sharedStore.modalTitle !== selectedItem.title) {
-                    setSharedStore((old) => ({ ...old, modalTitle: selectedItem.title }));
-                }
-
-                const Element = selectedItem.children;
-
-                return <Element {...props} />;
-            }
-
-            throw new Error("Selected item not found in settingsItems");
-        },
-        [sharedStore.selectedItem, sharedStore.modalTitle, setSharedStore]
-    );
+    React.useEffect(() => {
+        const selectedItem = settingsItems[sharedStore.selectedItem];
+        if (selectedItem != null) {
+            setSharedStore((old) => ({ ...old, modalTitle: selectedItem.title }));
+        }
+    }, [sharedStore.selectedItem]);
 
     return (
-        <SettingsModalStyledContainer>
-            <ErrorBoundary>
-                <TabContent onClose={onClose} />
-            </ErrorBoundary>
-        </SettingsModalStyledContainer>
+        <ErrorBoundary>
+            <TabContent selectedItem={sharedStore.selectedItem} onClose={onClose} />
+        </ErrorBoundary>
     );
 }
 
 export const SettingsModalLeftSection = (_props: Props): React.ReactNode => {
     const { sharedStore, setSharedStore } = React.useContext(ModalContext);
-
-    function onSelectTab(tabKey: string, tabItem: SettingsItem): void {
-        setSharedStore((old) => ({
-            ...old,
-            selectedItem: tabKey,
-            modalTitle: tabItem.title
-        }));
-    }
 
     return (
         <>
@@ -107,7 +96,7 @@ export const SettingsModalLeftSection = (_props: Props): React.ReactNode => {
                     <Button
                         key={key}
                         variant={key === sharedStore.selectedItem ? "primary" : "default"}
-                        onClick={() => onSelectTab(key, item)}
+                        onClick={() => setSharedStore((old) => ({ ...old, selectedItem: key }))}
                     >
                         <i className={clsx(item.icon, "fa-fw")} />
                         {item.title}
