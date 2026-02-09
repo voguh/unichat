@@ -1,4 +1,5 @@
 onlyBuiltDependencies:
   - '@fortawesome/fontawesome-free'
   - '@parcel/watcher'
-  - unrs-resolver
+  - '@swc/core'
+  - esbuild
