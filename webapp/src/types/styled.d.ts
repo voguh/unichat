@@ -19,6 +19,27 @@ declare module "styled-components" {
         "oc-black": string;
         "oc-black-rgb": string;
 
+        "oc-dark-0": string;
+        "oc-dark-0-rgb": string;
+        "oc-dark-1": string;
+        "oc-dark-1-rgb": string;
+        "oc-dark-2": string;
+        "oc-dark-2-rgb": string;
+        "oc-dark-3": string;
+        "oc-dark-3-rgb": string;
+        "oc-dark-4": string;
+        "oc-dark-4-rgb": string;
+        "oc-dark-5": string;
+        "oc-dark-5-rgb": string;
+        "oc-dark-6": string;
+        "oc-dark-6-rgb": string;
+        "oc-dark-7": string;
+        "oc-dark-7-rgb": string;
+        "oc-dark-8": string;
+        "oc-dark-8-rgb": string;
+        "oc-dark-9": string;
+        "oc-dark-9-rgb": string;
+
         "oc-gray-0": string;
         "oc-gray-0-rgb": string;
         "oc-gray-1": string;

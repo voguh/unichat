@@ -11,6 +11,18 @@
 @import "./open-color.scss";
 
 $white:    $oc-white;
+$black:    $oc-black;
+
+$dark-100: $oc-dark-1;
+$dark-200: $oc-dark-2;
+$dark-300: $oc-dark-3;
+$dark-400: $oc-dark-4;
+$dark-500: $oc-dark-5;
+$dark-600: $oc-dark-6;
+$dark-700: $oc-dark-7;
+$dark-800: $oc-dark-8;
+$dark-900: $oc-dark-9;
+
 $gray-100: $oc-gray-1;
 $gray-200: $oc-gray-2;
 $gray-300: $oc-gray-3;
@@ -20,7 +32,6 @@ $gray-600: $oc-gray-6;
 $gray-700: $oc-gray-7;
 $gray-800: $oc-gray-8;
 $gray-900: $oc-gray-9;
-$black:    $oc-black;
 
 $blue:     $oc-blue-5;
 $blue-100: $oc-blue-1;
@@ -132,17 +143,23 @@ $cyan-700: $oc-cyan-7;
 $cyan-800: $oc-cyan-8;
 $cyan-900: $oc-cyan-9;
 
-$primary:   $blue-800;
-$secondary: $gray-800;
-$success:   $green-800;
-$info:      $cyan-800;
-$warning:   $yellow-800;
-$danger:    $red-800;
+$primary:   $oc-blue-8;
+$secondary: $oc-gray-8;
+$success:   $oc-green-8;
+$info:      $oc-cyan-8;
+$warning:   $oc-yellow-8;
+$danger:    $oc-red-8;
 // $light:     $gray-100 !default;
 // $dark:      $gray-900 !default;
 
 $font-family-sans-serif: "Roboto", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !default;
 $font-family-monospace:  "Roboto Mono", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !default;
 $font-size-root: 14px;
+
+$body-color: $oc-black;
+$body-bg:    $oc-white;
+
+$body-color-dark: $oc-dark-0;
+$body-bg-dark:    $oc-dark-7;
 
 @import '~bootstrap/scss/bootstrap';

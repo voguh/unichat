@@ -69,7 +69,6 @@ export const GlobalStyle = createGlobalStyle`
                 min-width: 32px;
                 min-height: 32px;
                 padding: 0;
-                color: var(--bs-white);
 
                 > i {
                     font-size: 20px;
@@ -99,12 +98,12 @@ export const GlobalStyle = createGlobalStyle`
     .tooltip {
         --bs-tooltip-zindex: 1080;
         --bs-tooltip-max-width: 200px;
-        --bs-tooltip-padding-x: 0.5rem;
-        --bs-tooltip-padding-y: 0.25rem;
+        --bs-tooltip-padding-x: 0.75rem;
+        --bs-tooltip-padding-y: 0.5rem;
         --bs-tooltip-margin: ;
-        --bs-tooltip-font-size: 0.875rem;
-        --bs-tooltip-color: var(--bs-white);
-        --bs-tooltip-bg: var(--bs-body-bg);
+        --bs-tooltip-font-size: 1rem;
+        --bs-tooltip-color: var(--oc-black);
+        --bs-tooltip-bg: var(--oc-gray-0);
         --bs-tooltip-border-radius: var(--bs-border-radius);
         --bs-tooltip-opacity: 1;
         --bs-tooltip-arrow-width: 0.8rem;
@@ -115,17 +114,222 @@ export const GlobalStyle = createGlobalStyle`
         }
     }
 
-    .card {
-        background: var(--bs-gray-dark);
+    /* <=============================[ BUTTON ]=============================> */
+    .btn {
+        height: 36px;
+    }
 
-        > .card-header {
-            > .card-title {
-                margin: 0;
+    .btn-default {
+        color: var(--oc-white);
+        background: var(--oc-dark-6);
+        border-color: var(--oc-dark-4);
+
+        &:hover, &:active, &:focus {
+            color: var(--oc-white) !important;
+            background: var(--oc-dark-5) !important;
+            border-color: var(--oc-dark-4) !important;
+        }
+    }
+
+    .btn-primary {
+        color: var(--oc-white);
+        background: var(--oc-blue-8);
+        border-color: transparent;
+
+        &:hover, &:active, &:focus {
+            color: var(--oc-white) !important;
+            background: var(--oc-blue-9) !important;
+            border-color: transparent !important;
+        }
+    }
+
+    .btn-secondary {
+        color: var(--oc-white);
+        background: var(--oc-gray-8);
+        border-color: transparent;
+
+        &:hover, &:active, &:focus {
+            color: var(--oc-white) !important;
+            background: var(--oc-gray-9) !important;
+            border-color: transparent !important;
+        }
+    }
+
+    .btn-success {
+        color: var(--oc-white);
+        background: var(--oc-green-8);
+        border-color: transparent;
+
+        &:hover, &:active, &:focus {
+            color: var(--oc-white) !important;
+            background: var(--oc-green-9) !important;
+            border-color: transparent !important;
+        }
+    }
+
+    .btn-info {
+        color: var(--oc-white);
+        background: var(--oc-cyan-8);
+        border-color: transparent;
+
+        &:hover, &:active, &:focus {
+            color: var(--oc-white) !important;
+            background: var(--oc-cyan-9) !important;
+            border-color: transparent !important;
+        }
+    }
+
+    .btn-warning {
+        color: var(--oc-white);
+        background: var(--oc-yellow-8);
+        border-color: transparent;
+
+        &:hover, &:active, &:focus {
+            color: var(--oc-white) !important;
+            background: var(--oc-yellow-9) !important;
+            border-color: transparent !important;
+        }
+    }
+
+    .btn-danger {
+        color: var(--oc-white);
+        background: var(--oc-red-8);
+        border-color: transparent;
+
+        &:hover, &:active, &:focus {
+            color: var(--oc-white) !important;
+            background: var(--oc-red-9) !important;
+            border-color: transparent !important;
+        }
+    }
+    /* <===========================[ END BUTTON ]===========================> */
+
+    /* <==============================[ CARD ]==============================> */
+    .card {
+        /* --bs-card-spacer-y: 1rem; */
+        /* --bs-card-spacer-x: 1rem; */
+        /* --bs-card-title-spacer-y: 0.5rem; */
+        /* --bs-card-title-color: ; */
+        /* --bs-card-subtitle-color: ; */
+        /* --bs-card-border-width: var(--bs-border-width); */
+        --bs-card-border-color: var(--oc-dark-4);
+        /* --bs-card-border-radius: var(--bs-border-radius); */
+        /* --bs-card-box-shadow: ; */
+        /* --bs-card-inner-border-radius: calc(var(--bs-border-radius) - (var(--bs-border-width))); */
+        /* --bs-card-cap-padding-y: 0.5rem; */
+        /* --bs-card-cap-padding-x: 1rem; */
+        /* --bs-card-cap-bg: rgba(var(--bs-body-color-rgb), 0.03); */
+        /* --bs-card-cap-color: ; */
+        /* --bs-card-height: ; */
+        --bs-card-color: var(--oc-dark-0);
+        --bs-card-bg: var(--oc-dark-6);
+        /* --bs-card-img-overlay-padding: 1rem; */
+        /* --bs-card-group-margin: 0.75rem; */
+    }
+    /* <============================[ END CARD ]============================> */
+
+    /* <=========================[ END FROM GROUP ]=========================> */
+    .form-group {
+        --input-bg: var(--oc-dark-6);
+        --input-bd: var(--oc-dark-4);
+
+        > .form-label {
+            color: var(--oc-dark-0);
+        }
+
+        > .form-description {
+            color: var(--oc-dark-2);
+            font-size: 0.750rem;
+        }
+
+        > .form-control {
+            height: 36px;
+            background: var(--input-bg);
+            border-color: var(--input-bd);
+
+            &:focus {
+                border-color: var(--oc-blue-8);
             }
         }
 
-        > .card-body {
-            padding: 8px;
+        > .react-select__root {
+            > .react-select__control {
+                min-height: 36px;
+                height: 36px;
+                color: var(--oc-dark-0);
+                background: var(--input-bg);
+                border-color: var(--input-bd);
+
+                &.react-select__control--is-focused {
+                    border-color: var(--oc-blue-8);
+                }
+
+                > .react-select__value-container {
+                    height: 34px;
+
+                    > .react-select__single-value {
+                        color: var(--oc-dark-0);
+                    }
+
+                    > .react-select__input-container {
+                        color: var(--oc-dark-0);
+                    }
+                }
+
+                > .react-select__indicators {
+                    height: 34px;
+
+                    > .react-select__indicator-separator {
+                        background: var(--oc-dark-0);
+                    }
+
+                    > .react-select__indicator {
+                        padding: 7px;
+
+                        > svg {
+                            > path {
+                                fill: var(--oc-dark-0);
+                            }
+                        }
+                    }
+                }
+            }
+
+            > .react-select__menu {
+                background: var(--input-bg);
+
+                > .react-select__menu-list {
+                    padding: 8px;
+
+                    > .react-select__group {
+                        > .react-select__group-heading {
+                            color: var(--oc-dark-2);
+                            position: relative;
+                            font-weight: 600;
+                            font-size: 0.875rem;
+                        }
+                    }
+
+                    .react-select__option {
+                        cursor: pointer;
+                        border-radius: 4px;
+                    }
+
+                    .react-select__option--is-focused {
+                        background: var(--oc-dark-7);
+                    }
+
+                    .react-select__option--is-selected {
+                        background: var(--oc-dark-5);
+                    }
+                }
+            }
+        }
+
+        > .form-error {
+            color: var(--oc-red-8);
+            font-size: 0.750rem;
         }
     }
+    /* <=========================[ END FROM GROUP ]=========================> */
 `;
