@@ -1,6 +1,5 @@
 /*!******************************************************************************
- * UniChat
- * Copyright (c) 2025-2026 Voguh
+ * Copyright (c) 2024-2026 Voguh
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,4 +8,4 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-export * from "./ScraperCard";
+export * from "./Dashboard";

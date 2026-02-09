@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2024-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,7 +10,7 @@
 
 import styled from "styled-components";
 
-export const DashboardHomeStyledContainer = styled.div`
+export const DashboardStyledContainer = styled.div`
     width: 100%;
     height: 100%;
     display: grid;
@@ -49,6 +48,10 @@ export const DashboardHomeStyledContainer = styled.div`
                 width: 36px;
                 height: 36px;
                 padding: 0;
+
+                > i {
+                    font-size: 20px;
+                }
             }
         }
 

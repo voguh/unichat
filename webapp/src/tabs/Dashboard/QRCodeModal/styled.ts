@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -22,18 +21,18 @@ export const QRCodeModalStyledContainer = styled.div`
 
     > .qrcode-label {
         font-size: 1rem;
-        color: var(--mantine-color-dark-0);
+        color: var(--oc-dark-0);
     }
 
     > .fake-text-input {
-        --input-height: calc(2.25rem * var(--mantine-scale));
+        --input-height: 2.25rem;
+
         height: var(--input-height);
-        border: 1px solid var(--mantine-color-dark-4);
-        color: var(--mantine-color-text);
-        border: calc(0.0625rem * var(--mantine-scale)) solid var(--mantine-color-dark-4);
-        background-color: var(--mantine-color-dark-6);
-        border-radius: var(--mantine-radius-default);
-        font-size: var(--mantine-font-size-sm);
+        border: 1px solid var(--oc-dark-4);
+        color: var(--oc-text);
+        border: calc(0.0625rem * var(--mantine-scale)) solid var(--oc-dark-4);
+        background-color: var(--oc-dark-6);
+        border-radius: var(--bs-border-radius);
         display: flex;
         align-items: center;
         padding: 0 calc(var(--input-height) / 3);

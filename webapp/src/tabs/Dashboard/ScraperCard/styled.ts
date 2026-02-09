@@ -18,8 +18,19 @@ export const ScraperCardStyledContainer = styled.div`
     align-items: flex-end;
     gap: 8px;
 
-    > .mantine-TextInput-root {
+    > div {
         flex: 1;
+    }
+
+    > button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+
+        > i {
+            font-size: 20px;
+        }
     }
 
     > button:nth-of-type(2) {

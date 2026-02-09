@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,9 +10,9 @@
 
 import React from "react";
 
-import { Select } from "@mantine/core";
 import { QRCodeSVG } from "qrcode.react";
 
+import { Option, Select } from "unichat/components/forms/Select";
 import { commandService } from "unichat/services/commandService";
 
 import { QRCodeModalStyledContainer } from "./styled";
@@ -23,23 +22,27 @@ interface Props {
 }
 
 export function QRCodeModal({ baseUrl }: Props): React.ReactNode {
-    const [systemHosts, setSystemHosts] = React.useState<string[]>([]);
-    const [selectedHost, setSelectedHost] = React.useState<string>(null);
-    const [selectedHostQrCodeUrl, setSelectedHostQrCodeUrl] = React.useState<string>(null);
+    const [systemHosts, setSystemHosts] = React.useState<Option[]>([]);
+    const [selectedHost, setSelectedHost] = React.useState<Option | null>(null);
+    const [selectedHostQrCodeUrl, setSelectedHostQrCodeUrl] = React.useState<string | null>(null);
 
-    function onSelectHost(value: string): void {
-        setSelectedHost(value);
+    function onSelectHost(option: Option | null): void {
+        if (option == null) {
+            return;
+        }
 
-        const hostUrl = baseUrl.replace("localhost", value);
+        setSelectedHost(option);
+
+        const hostUrl = baseUrl.replace("localhost", option.value);
         setSelectedHostQrCodeUrl(hostUrl);
     }
 
     React.useEffect(() => {
         async function init(): Promise<void> {
             const systemHosts = await commandService.getSystemHosts();
-            setSystemHosts(systemHosts);
+            setSystemHosts(systemHosts.map((host) => ({ label: host, value: host })));
             if (systemHosts.length > 0) {
-                onSelectHost(systemHosts[0]);
+                onSelectHost({ label: systemHosts[0], value: systemHosts[0] });
             }
         }
 
@@ -59,7 +62,7 @@ export function QRCodeModal({ baseUrl }: Props): React.ReactNode {
             {systemHosts.length > 1 && (
                 <Select
                     label="Select Network Interface"
-                    data={systemHosts}
+                    options={systemHosts}
                     value={selectedHost}
                     onChange={onSelectHost}
                 />
