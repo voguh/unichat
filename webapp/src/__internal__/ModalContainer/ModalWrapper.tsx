@@ -19,7 +19,8 @@ import { ModalContext, ModalWrapperProps } from "unichat/contexts/ModalContext";
 import { ModalWrapperStyledContainer } from "./styled";
 
 export function ModalWrapper(props: ModalWrapperProps): React.ReactNode {
-    const { actions, children, leftSection, leftSectionTitle, sharedStoreInitialState, title, ...rest } = props;
+    const { actions, children, leftSection, leftSectionTitle, sharedStoreInitialState, title, modalId, ...rest } =
+        props;
 
     const [sharedStore, setSharedStore] = React.useState<Record<string, any>>(sharedStoreInitialState || {});
     const safeActions = sharedStore.modalActions || actions;
@@ -35,7 +36,7 @@ export function ModalWrapper(props: ModalWrapperProps): React.ReactNode {
     }
 
     return (
-        <BSModal {...rest} ref={modalRef}>
+        <BSModal {...rest} data-modalId={modalId} ref={modalRef}>
             <ModalContext.Provider value={{ modalProps: props, onClose, setSharedStore, sharedStore }}>
                 <ModalWrapperStyledContainer
                     className={clsx({ "with-sidebar": !!leftSection, "is-fullscreen": rest.fullscreen })}
