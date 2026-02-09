@@ -69,10 +69,6 @@ export const GlobalStyle = createGlobalStyle`
                 min-width: 32px;
                 min-height: 32px;
                 padding: 0;
-
-                > i {
-                    font-size: 20px;
-                }
             }
         }
 

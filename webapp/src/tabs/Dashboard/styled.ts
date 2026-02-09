@@ -48,18 +48,14 @@ export const DashboardStyledContainer = styled.div`
                 width: 36px;
                 height: 36px;
                 padding: 0;
-
-                > i {
-                    font-size: 20px;
-                }
             }
         }
 
         > .iframe-wrapper {
             width: 100%;
             height: calc(100% - (36px + 16px + 2px)); // 36px for content, 16px for padding, 2px for border
-            border-bottom-left-radius: var(--mantine-radius-default);
-            border-bottom-right-radius: var(--mantine-radius-default);
+            border-bottom-left-radius: var(--bs-border-radius);
+            border-bottom-right-radius: var(--bs-border-radius);
             overflow: hidden;
 
             > iframe {
@@ -76,9 +72,9 @@ export const DashboardStyledContainer = styled.div`
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: var(--mantine-color-dark-6);
-            border: 1px solid var(--mantine-color-dark-4);
-            border-radius: var(--mantine-radius-default);
+            background-color: var(--oc-dark-6);
+            border: 1px solid var(--oc-dark-4);
+            border-radius: var(--bs-border-radius);
         }
     }
 `;

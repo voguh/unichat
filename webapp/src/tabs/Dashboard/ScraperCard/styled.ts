@@ -27,10 +27,6 @@ export const ScraperCardStyledContainer = styled.div`
         justify-content: center;
         align-items: center;
         gap: 8px;
-
-        > i {
-            font-size: 20px;
-        }
     }
 
     > button:nth-of-type(2) {
