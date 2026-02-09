@@ -40,10 +40,10 @@ export enum PluginStatus {
 }
 
 export const PLUGIN_STATUS_COLOR = {
-    [PluginStatus.LOADED]: ["var(--mantine-color-yellow-5)", "var(--mantine-color-black)"],
-    [PluginStatus.INVALID]: ["var(--mantine-color-red-5)", "var(--mantine-color-black)"],
-    [PluginStatus.ACTIVE]: ["var(--mantine-color-green-5)", "var(--mantine-color-black)"],
-    [PluginStatus.ERROR]: ["var(--mantine-color-red-5)", "var(--mantine-color-black)"]
+    [PluginStatus.LOADED]: ["var(--oc-yellow-8)", "var(--oc-black)"],
+    [PluginStatus.INVALID]: ["var(--oc-red-8)", "var(--oc-black)"],
+    [PluginStatus.ACTIVE]: ["var(--oc-green-8)", "var(--oc-black)"],
+    [PluginStatus.ERROR]: ["var(--oc-red-8)", "var(--oc-black)"]
 };
 
 export enum UniChatSettings {
