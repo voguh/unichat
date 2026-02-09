@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { ToastWrapperProps } from "unichat/components/ToastContainer";
+import { ToastWrapperProps } from "unichat/__internal__/ToastContainer";
 
 import { eventEmitter } from "./eventEmitter";
 

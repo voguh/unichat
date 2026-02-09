@@ -18,7 +18,6 @@ import {
     UniChatWidgetGroup,
     WidgetFields
 } from "unichat/types";
-import { UniChatSettings } from "unichat/utils/constants";
 
 async function invoke<T>(cmd: string, args?: Record<string, any>): Promise<T> {
     try {
@@ -59,20 +58,6 @@ export class CommandService {
 
     public async togglePluginState(pluginName: string, newState: boolean): Promise<void> {
         await invoke("toggle_plugin_state", { pluginName, newState });
-    }
-
-    /* ========================================================================================== */
-
-    public async settingsGetItem<T = object>(key: UniChatSettings): Promise<T> {
-        return invoke("settings_get_item", { key });
-    }
-
-    public async settingsSetItem<T = object>(key: UniChatSettings, value: T): Promise<void> {
-        await invoke("settings_set_item", { key, value });
-    }
-
-    public async storeGetItem<T = object>(key: string): Promise<T> {
-        return invoke("store_get_item", { key });
     }
 
     /* ========================================================================================== */

@@ -13,8 +13,9 @@ import React from "react";
 import clsx from "clsx";
 import Button from "react-bootstrap/Button";
 
-import { ErrorBoundary } from "../ErrorBoundary";
-import { ModalContext } from "../ModalContainer";
+import { ErrorBoundary } from "unichat/components/ErrorBoundary";
+import { ModalContext } from "unichat/contexts/ModalContext";
+
 import { AboutSettingsTab } from "./AboutSettingsTab";
 import { CheckUpdatesSettingsTab } from "./CheckUpdatesSettingsTab";
 import { DevelopersSettingsTab } from "./DevelopersSettingsTab";
@@ -88,7 +89,7 @@ export function SettingsModal(_props: Props): React.ReactNode {
     );
 }
 
-export const SettingsActions = (_props: Props): React.ReactNode => {
+export const SettingsModalLeftSection = (_props: Props): React.ReactNode => {
     const { sharedStore, setSharedStore } = React.useContext(ModalContext);
 
     function onSelectTab(tabKey: string, tabItem: SettingsItem): void {

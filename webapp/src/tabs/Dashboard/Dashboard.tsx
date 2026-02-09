@@ -23,8 +23,9 @@ import { AppContext } from "unichat/contexts/AppContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
+import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
 import { UniChatScraper } from "unichat/types";
-import { scraperPriority, UniChatSettings, WIDGET_URL_PREFIX } from "unichat/utils/constants";
+import { scraperPriority, WIDGET_URL_PREFIX } from "unichat/utils/constants";
 
 import { QRCodeModal } from "./QRCodeModal";
 import { ScraperCard } from "./ScraperCard";
@@ -105,8 +106,7 @@ export function Dashboard(_props: Props): React.ReactNode {
             const widgets = await handleFetchWidgets();
             setWidgets(widgets);
 
-            // eslint-disable-next-line prettier/prettier
-            const defaultPreviewWidget: string = await commandService.settingsGetItem(UniChatSettings.DEFAULT_PREVIEW_WIDGET);
+            const defaultPreviewWidget = await settingsService.getItem(UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET);
             setSelectedWidget(defaultPreviewWidget);
 
             const scrapers = await commandService.getScrapers();
@@ -122,7 +122,7 @@ export function Dashboard(_props: Props): React.ReactNode {
             });
             setScrapers(sortedScrapers);
 
-            const isOpenToLan: boolean = await commandService.settingsGetItem(UniChatSettings.OPEN_TO_LAN);
+            const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
             setIsOpenToLan(isOpenToLan);
         }
 

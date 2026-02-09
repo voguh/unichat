@@ -25,7 +25,7 @@ interface Props {
     plugin: UniChatPluginMetadata;
 }
 
-export function PluginOverview(props: Props): React.ReactNode {
+export function PluginOverviewModal(props: Props): React.ReactNode {
     const { plugin } = props;
     const [bgColor, fgColor] = PLUGIN_STATUS_COLOR[plugin.status];
 
@@ -89,7 +89,7 @@ export function PluginOverview(props: Props): React.ReactNode {
     );
 }
 
-export function PluginOverviewActions(props: Props): React.ReactNode {
+export function PluginOverviewModalActions(props: Props): React.ReactNode {
     const {
         plugin: { pluginPath }
     } = props;

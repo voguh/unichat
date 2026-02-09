@@ -12,31 +12,11 @@ import React from "react";
 
 import clsx from "clsx";
 import Button from "react-bootstrap/Button";
-import type { BsPrefixProps, ReplaceProps } from "react-bootstrap/esm/helpers";
-import BSModal, { ModalProps } from "react-bootstrap/Modal";
+import BSModal from "react-bootstrap/Modal";
+
+import { ModalContext, ModalWrapperProps } from "unichat/contexts/ModalContext";
 
 import { ModalWrapperStyledContainer } from "./styled";
-
-type RichModalProps = React.PropsWithChildren<ReplaceProps<"div", BsPrefixProps<"div"> & ModalProps>>;
-export interface ModalWrapperProps extends RichModalProps {
-    modalId: string;
-
-    title: string;
-    children: React.ReactNode;
-    actions?: React.ReactNode;
-    leftSection?: React.ReactNode;
-    leftSectionTitle?: string;
-    sharedStoreInitialState?: Record<string, any>;
-}
-
-export interface ModalContextType {
-    modalProps: ModalWrapperProps & { modalId?: string };
-    onClose: () => void;
-    setSharedStore: React.Dispatch<React.SetStateAction<Record<string, any>>>;
-    sharedStore: Record<string, any>;
-}
-
-export const ModalContext = React.createContext({} as ModalContextType);
 
 export function ModalWrapper(props: ModalWrapperProps): React.ReactNode {
     const { actions, children, leftSection, leftSectionTitle, sharedStoreInitialState, title, ...rest } = props;

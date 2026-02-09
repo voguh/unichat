@@ -22,7 +22,7 @@ import { UniChatPluginMetadata } from "unichat/types";
 import { PLUGIN_STATUS_COLOR } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
 
-import { PluginOverview, PluginOverviewActions } from "./PluginOverview";
+import { PluginOverviewModal, PluginOverviewModalActions } from "./PluginOverview";
 import { PluginsStyledContainer } from "./styled";
 
 interface Props {
@@ -30,15 +30,15 @@ interface Props {
 }
 
 const _logger = LoggerFactory.getLogger("Plugins");
-export function Plugins(_props: Props): React.ReactNode {
+export function PluginsModal(_props: Props): React.ReactNode {
     const [plugins, setPlugins] = React.useState<UniChatPluginMetadata[]>([]);
 
     function openPluginDetails(plugin: UniChatPluginMetadata): void {
         modalService.openModal({
             fullscreen: true,
             title: "Plugin Overview",
-            actions: <PluginOverviewActions plugin={plugin} />,
-            children: <PluginOverview plugin={plugin} />
+            actions: <PluginOverviewModalActions plugin={plugin} />,
+            children: <PluginOverviewModal plugin={plugin} />
         });
     }
 
@@ -108,7 +108,7 @@ export function Plugins(_props: Props): React.ReactNode {
     );
 }
 
-export function PluginsActions(_props: Props): React.ReactNode {
+export function PluginsModalActions(_props: Props): React.ReactNode {
     return (
         <>
             <Button

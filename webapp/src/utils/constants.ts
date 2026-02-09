@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2024-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -45,17 +44,6 @@ export const PLUGIN_STATUS_COLOR = {
     [PluginStatus.ACTIVE]: ["var(--oc-green-8)", "var(--oc-black)"],
     [PluginStatus.ERROR]: ["var(--oc-red-8)", "var(--oc-black)"]
 };
-
-export enum UniChatSettings {
-    CURRENT_TOUR_STEPS = "current-tour-steps",
-    PREVIOUS_TOUR_STEPS = "previous-tour-steps",
-    DEFAULT_PREVIEW_WIDGET = "default-preview-widget",
-    OPEN_TO_LAN = "open-to-lan",
-
-    /* Developers settings */
-    CREATE_WEBVIEW_HIDDEN = "create-webview-hidden",
-    LOG_SCRAPER_EVENTS = "log-scraper-events"
-}
 
 export enum WidgetSourceType {
     SYSTEM = "SYSTEM",

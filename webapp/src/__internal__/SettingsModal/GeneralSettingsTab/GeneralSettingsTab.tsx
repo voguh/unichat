@@ -19,7 +19,7 @@ import { Switch } from "unichat/components/forms/Switch";
 import { AppContext } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
 import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
-import { UniChatSettings } from "unichat/utils/constants";
+import { settingsService, UniChatSettings, UniChatSettingsKeys } from "unichat/services/settingsService";
 
 import { GeneralSettingsTabStyledContainer, OpenToLANSettingWrapper } from "./styled";
 
@@ -29,11 +29,11 @@ interface Props {
 
 export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
     const [widgets, setWidgets] = React.useState<GroupBase<Option>[]>([]);
-    const [settings, setSettings] = React.useState<Record<string, unknown>>({});
+    const [settings, setSettings] = React.useState({} as UniChatSettings);
 
     const { requiresRestart, setRequiresRestart } = React.useContext(AppContext);
 
-    async function updateSetting<T>(key: string, value: T): Promise<void> {
+    async function updateSetting<K extends keyof UniChatSettings>(key: K, value: UniChatSettings[K]): Promise<void> {
         const settingsCopy = { ...settings };
         if (settingsCopy[key] == null) {
             throw new Error(`Setting with key "${key}" does not exist.`);
@@ -41,7 +41,11 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
 
         settingsCopy[key] = value;
         setSettings(settingsCopy);
-        await commandService.settingsSetItem(key as UniChatSettings, value);
+        await settingsService.setItem(key, value);
+
+        if (key === UniChatSettingsKeys.OPEN_TO_LAN) {
+            setRequiresRestart();
+        }
     }
 
     function dispatchTour(type: EventEmitterEvents["tour:start"]["type"]): void {
@@ -61,17 +65,17 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
             }));
             setWidgets(sortedWidgets);
 
-            const defaultPreviewWidget = await commandService.settingsGetItem(UniChatSettings.DEFAULT_PREVIEW_WIDGET);
+            const defaultPreviewWidget = await settingsService.getItem(UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET);
 
             /* ================================================================================== */
 
-            const lanStatus = await commandService.settingsGetItem(UniChatSettings.OPEN_TO_LAN);
+            const lanStatus = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
 
             /* ================================================================================== */
 
             const newSettings = { ...settings };
-            newSettings[UniChatSettings.DEFAULT_PREVIEW_WIDGET] = defaultPreviewWidget;
-            newSettings[UniChatSettings.OPEN_TO_LAN] = lanStatus;
+            newSettings[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET] = defaultPreviewWidget;
+            newSettings[UniChatSettingsKeys.OPEN_TO_LAN] = lanStatus;
             setSettings(newSettings);
         }
 
@@ -86,8 +90,8 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
                 options={widgets}
                 value={widgets
                     .flatMap((group) => group.options)
-                    .find((option) => option.value === settings[UniChatSettings.DEFAULT_PREVIEW_WIDGET])}
-                onChange={(option) => updateSetting(UniChatSettings.DEFAULT_PREVIEW_WIDGET, option?.value)}
+                    .find((option) => option.value === settings[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET])}
+                onChange={(option) => updateSetting(UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET, option!.value)}
             />
 
             <hr />
@@ -96,10 +100,8 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
                 <Switch
                     label="Open to LAN"
                     description="Allow other devices on your local network view widgets."
-                    checked={settings[UniChatSettings.OPEN_TO_LAN] as boolean}
-                    onChange={(evt) =>
-                        updateSetting(UniChatSettings.OPEN_TO_LAN, evt.currentTarget.checked).then(setRequiresRestart)
-                    }
+                    checked={settings[UniChatSettingsKeys.OPEN_TO_LAN]}
+                    onChange={(evt) => updateSetting(UniChatSettingsKeys.OPEN_TO_LAN, evt.currentTarget.checked)}
                 />
 
                 {requiresRestart && (
@@ -112,7 +114,7 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
                         </span>
                     </Alert>
                 )}
-                {(settings[UniChatSettings.OPEN_TO_LAN] as boolean) && (
+                {settings[UniChatSettingsKeys.OPEN_TO_LAN] && (
                     <Alert variant="warning">
                         <div>
                             <i className="fas fa-info-circle" />
