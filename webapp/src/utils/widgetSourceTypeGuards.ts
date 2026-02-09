@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2024-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -13,7 +12,7 @@ import { UniChatWidget } from "unichat/types";
 
 import { WidgetSourceType } from "./constants";
 
-export function isSystemWidget(widget: UniChatWidget): boolean {
+export function isSystemWidget(widget: UniChatWidget | null | undefined): boolean {
     if (widget == null) {
         return false;
     }
@@ -21,7 +20,7 @@ export function isSystemWidget(widget: UniChatWidget): boolean {
     return widget.widgetSource.type === WidgetSourceType.SYSTEM;
 }
 
-export function isSystemPluginWidget(widget: UniChatWidget): boolean {
+export function isSystemPluginWidget(widget: UniChatWidget | null | undefined): boolean {
     if (widget == null) {
         return false;
     }
@@ -29,7 +28,7 @@ export function isSystemPluginWidget(widget: UniChatWidget): boolean {
     return widget.widgetSource.type === WidgetSourceType.SYSTEM_PLUGIN;
 }
 
-export function isUserPluginWidget(widget: UniChatWidget): boolean {
+export function isUserPluginWidget(widget: UniChatWidget | null | undefined): boolean {
     if (widget == null) {
         return false;
     }
@@ -37,7 +36,7 @@ export function isUserPluginWidget(widget: UniChatWidget): boolean {
     return widget.widgetSource.type === WidgetSourceType.USER_PLUGIN;
 }
 
-export function isUserWidget(widget: UniChatWidget): boolean {
+export function isUserWidget(widget: UniChatWidget | null | undefined): boolean {
     if (widget == null) {
         return false;
     }
@@ -47,7 +46,7 @@ export function isUserWidget(widget: UniChatWidget): boolean {
 
 /* ============================================================================================== */
 
-export function isGeneralSystemWidget(widget: UniChatWidget): boolean {
+export function isGeneralSystemWidget(widget: UniChatWidget | null | undefined): boolean {
     if (widget == null) {
         return false;
     }
@@ -58,7 +57,7 @@ export function isGeneralSystemWidget(widget: UniChatWidget): boolean {
     );
 }
 
-export function isGeneralUserWidget(widget: UniChatWidget): boolean {
+export function isGeneralUserWidget(widget: UniChatWidget | null | undefined): boolean {
     if (widget == null) {
         return false;
     }
@@ -68,7 +67,7 @@ export function isGeneralUserWidget(widget: UniChatWidget): boolean {
     );
 }
 
-export function isGeneralPluginWidget(widget: UniChatWidget): boolean {
+export function isGeneralPluginWidget(widget: UniChatWidget | null | undefined): boolean {
     if (widget == null) {
         return false;
     }
