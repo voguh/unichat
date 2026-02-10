@@ -19,6 +19,7 @@ import { TextInput } from "unichat/components/forms/TextInput";
 import { Tooltip } from "unichat/components/OverlayTrigger";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
+import { modalService } from "unichat/services/modalService";
 import { notificationService } from "unichat/services/notificationService";
 import { UniChatScraper } from "unichat/types";
 import { IPCEvents, IPCStatusEvent } from "unichat/utils/IPCStatusEvent";
@@ -148,19 +149,19 @@ export function ScraperCard(props: Props): React.ReactNode {
                 });
             } else if (payload.type === "fatal") {
                 setEvent({ ...DEFAULT_EVENT, scraperId: scraper.id });
-                // modalService.openModal({
-                //     size: "lg",
-                //     title: `An error occurred in the ${scraper.name} scraper initialization!`,
-                //     children: (
-                //         <div>
-                //             <pre>
-                //                 {payload.message}
-                //                 <br />
-                //                 {payload.stack ?? "No stack trace available."}
-                //             </pre>
-                //         </div>
-                //     )
-                // });
+                modalService.openModal({
+                    size: "lg",
+                    title: `An error occurred in the ${scraper.name} scraper initialization!`,
+                    children: (
+                        <div>
+                            <pre>
+                                {payload.message}
+                                <br />
+                                {payload.stack ?? "No stack trace available."}
+                            </pre>
+                        </div>
+                    )
+                });
             }
         });
 
