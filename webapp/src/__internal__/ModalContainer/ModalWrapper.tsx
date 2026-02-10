@@ -11,9 +11,9 @@
 import React from "react";
 
 import clsx from "clsx";
-import Button from "react-bootstrap/Button";
 import BSModal from "react-bootstrap/Modal";
 
+import { Button } from "unichat/components/Button";
 import { ModalContext, ModalWrapperProps } from "unichat/contexts/ModalContext";
 
 import { ModalWrapperStyledContainer } from "./styled";

@@ -11,6 +11,7 @@
 import styled from "styled-components";
 
 export const DevelopersSettingsTabStyledContainer = styled.div`
+    height: var(--modal-body-inner-max-height);
     position: relative;
 
     > .create-webview-hidden-section {

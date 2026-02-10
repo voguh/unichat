@@ -12,11 +12,11 @@ import React from "react";
 
 import * as dialog from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
-import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 
+import { Button } from "unichat/components/Button";
 import { LoadingOverlay } from "unichat/components/LoadingOverlay";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
@@ -26,7 +26,7 @@ import { GalleryItem } from "unichat/types";
 import { GalleryItemDisplay } from "./GalleryItemDisplay";
 import { GalleyCustomDisplay } from "./GalleyCustomDisplay";
 import { GalleyTabEmpty } from "./GalleyTabEmpty";
-import { GalleryStyledContainer, GalleryTabContainer } from "./styled";
+import { GalleryModalStyledContainer, GalleryTabContainer } from "./styled";
 
 export type GalleryTabs = GalleryItem["type"] | "custom";
 
@@ -38,7 +38,7 @@ interface Props {
 }
 
 const _logger = LoggerFactory.getLogger("Gallery");
-export function Gallery(props: Props): React.ReactNode {
+export function GalleryModal(props: Props): React.ReactNode {
     const { onSelectItem, selectedItem = "", showTabs = ["image", "video", "audio", "file"], startSelectedTab } = props;
 
     const [loading, setLoading] = React.useState<boolean>(false);
@@ -105,7 +105,7 @@ export function Gallery(props: Props): React.ReactNode {
     }, []);
 
     return (
-        <GalleryStyledContainer>
+        <GalleryModalStyledContainer>
             <LoadingOverlay visible={loading} />
             <Button className="upload-to-gallery" onClick={onFilesUploadClick}>
                 Add to Gallery
@@ -147,13 +147,13 @@ export function Gallery(props: Props): React.ReactNode {
                     </Tab>
                 )}
             </Tabs>
-        </GalleryStyledContainer>
+        </GalleryModalStyledContainer>
     );
 }
 
-export function GalleryActions(_props: Props): React.ReactNode {
+export function GalleryModalActions(_props: Props): React.ReactNode {
     return (
-        <Button variant="outline-primary" onClick={() => revealItemInDir(UNICHAT_GALLERY_DIR)}>
+        <Button variant="outline" onClick={() => revealItemInDir(UNICHAT_GALLERY_DIR)}>
             <i className="fas fa-folder" />
             &nbsp;Show Gallery Folder
         </Button>

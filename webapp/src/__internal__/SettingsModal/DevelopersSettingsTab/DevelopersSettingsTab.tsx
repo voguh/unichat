@@ -10,9 +10,9 @@
 
 import React from "react";
 
-import Button from "react-bootstrap/Button";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 
+import { Button } from "unichat/components/Button";
 import { FormGroup } from "unichat/components/forms/FormGroup";
 import { Switch } from "unichat/components/forms/Switch";
 import {

@@ -12,11 +12,11 @@ import React from "react";
 
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 import Badge from "react-bootstrap/Badge";
-import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import Dropdown from "react-bootstrap/Dropdown";
 import ListGroup from "react-bootstrap/ListGroup";
 
+import { Button } from "unichat/components/Button";
 import { Option, Select } from "unichat/components/forms/Select";
 import { Tooltip } from "unichat/components/OverlayTrigger";
 import { AppContext } from "unichat/contexts/AppContext";
@@ -217,7 +217,7 @@ export function DashboardLeftSection(_props: Props): React.ReactNode {
             <Tooltip content="Toggle widget preview" placement="right">
                 <Button
                     onClick={() => setShowWidgetPreview((old) => !old)}
-                    variant={showWidgetPreview ? "primary" : "dark"}
+                    variant={showWidgetPreview ? "filled" : "default"}
                     data-tour="toggle-widget-preview"
                 >
                     {showWidgetPreview ? <i className="fas fa-eye" /> : <i className="fas fa-eye-slash" />}

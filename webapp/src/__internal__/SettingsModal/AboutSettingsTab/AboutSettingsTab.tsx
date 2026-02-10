@@ -12,8 +12,8 @@ import React from "react";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 import clsx from "clsx";
-import Button from "react-bootstrap/Button";
 
+import { Button } from "unichat/components/Button";
 import { modalService } from "unichat/services/modalService";
 
 import { AboutSettingsTabStyledContainer } from "./styled";

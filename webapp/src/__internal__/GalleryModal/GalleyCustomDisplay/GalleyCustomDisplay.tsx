@@ -10,8 +10,7 @@
 
 import React from "react";
 
-import Button from "react-bootstrap/Button";
-
+import { Button } from "unichat/components/Button";
 import { TextInput } from "unichat/components/forms/TextInput";
 import { ModalContext } from "unichat/contexts/ModalContext";
 import { GalleryItem } from "unichat/types";

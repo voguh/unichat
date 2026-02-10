@@ -12,12 +12,12 @@ import React from "react";
 
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import Accordion from "react-bootstrap/Accordion";
-import Button from "react-bootstrap/Button";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Card from "react-bootstrap/Card";
 
 import { UniChatEvent, UniChatPlatform } from "unichat-widgets/unichat";
-import { Gallery, GalleryActions } from "unichat/__internal__/GalleryModal";
+import { GalleryModal, GalleryModalActions } from "unichat/__internal__/GalleryModal";
+import { Button } from "unichat/components/Button";
 import { Checkbox } from "unichat/components/forms/Checkbox";
 import { ColorPicker } from "unichat/components/forms/ColorPicker";
 import { NumberInput } from "unichat/components/forms/NumberInput";
@@ -294,7 +294,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                                 <i className="fas fa-undo" />
                                 Reset
                             </Button>
-                            <Button variant="success" onClick={handleApply}>
+                            <Button color="green" onClick={handleApply}>
                                 <i className="fas fa-check" />
                                 Apply
                             </Button>
@@ -364,8 +364,8 @@ export function WidgetEditorLeftSection(_props: Props): React.ReactNode {
         modalService.openModal({
             size: "xl",
             title: "Gallery",
-            actions: <GalleryActions />,
-            children: <Gallery />
+            actions: <GalleryModalActions />,
+            children: <GalleryModal />
         });
     }
 

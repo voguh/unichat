@@ -11,15 +11,16 @@
 import React from "react";
 
 import Alert from "react-bootstrap/Alert";
-import Button from "react-bootstrap/Button";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 
-import { GroupBase, Option, Select } from "unichat/components/forms/Select";
+import { Button } from "unichat/components/Button";
+import { Select } from "unichat/components/forms/Select";
 import { Switch } from "unichat/components/forms/Switch";
 import { AppContext } from "unichat/contexts/AppContext";
-import { commandService } from "unichat/services/commandService";
+import { useWidgets } from "unichat/hooks/useWidgets";
 import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
 import { settingsService, UniChatSettings, UniChatSettingsKeys } from "unichat/services/settingsService";
+import { toWidgetOptionGroup } from "unichat/utils/toWidgetOptionGroup";
 
 import { GeneralSettingsTabStyledContainer, OpenToLANSettingWrapper } from "./styled";
 
@@ -28,9 +29,9 @@ interface Props {
 }
 
 export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
-    const [widgets, setWidgets] = React.useState<GroupBase<Option>[]>([]);
     const [settings, setSettings] = React.useState({} as UniChatSettings);
 
+    const [widgets, _reloadWidgets] = useWidgets(toWidgetOptionGroup, []);
     const { requiresRestart, setRequiresRestart } = React.useContext(AppContext);
 
     async function updateSetting<K extends keyof UniChatSettings>(key: K, value: UniChatSettings[K]): Promise<void> {
@@ -55,16 +56,6 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
 
     React.useEffect(() => {
         async function init(): Promise<void> {
-            const widgets = await commandService.listWidgets();
-            const sortedWidgets = widgets.map((groupItem) => ({
-                label: groupItem.group,
-                options: groupItem.items
-                    .filter((item) => item !== "example")
-                    .sort((a, b) => a.localeCompare(b))
-                    .map((item) => ({ value: item, label: item }))
-            }));
-            setWidgets(sortedWidgets);
-
             const defaultPreviewWidget = await settingsService.getItem(UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET);
 
             /* ================================================================================== */

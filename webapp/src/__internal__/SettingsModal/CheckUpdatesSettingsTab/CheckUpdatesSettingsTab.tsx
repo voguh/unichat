@@ -13,10 +13,10 @@ import React from "react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { marked } from "marked";
 import Badge from "react-bootstrap/Badge";
-import Button from "react-bootstrap/Button";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 
+import { Button } from "unichat/components/Button";
 import { commandService } from "unichat/services/commandService";
 import { UniChatRelease } from "unichat/types";
 

@@ -10,7 +10,7 @@
 
 import React from "react";
 
-import { Gallery, GalleryActions, GalleryTabs } from "unichat/__internal__/GalleryModal/Gallery";
+import { GalleryModal, GalleryModalActions, GalleryTabs } from "unichat/__internal__/GalleryModal/GalleryModal";
 import { TextInput, TextInputProps } from "unichat/components/forms/TextInput";
 import { modalService } from "unichat/services/modalService";
 
@@ -44,9 +44,9 @@ export const GalleryFileInput = React.forwardRef<HTMLInputElement, Props>(functi
         modalService.openModal({
             size: "xl",
             title: "Gallery",
-            actions: <GalleryActions />,
+            actions: <GalleryModalActions />,
             children: (
-                <Gallery
+                <GalleryModal
                     showTabs={_showTabs}
                     startSelectedTab={wrappedSelectedTab}
                     selectedItem={inputRef.current?.value}

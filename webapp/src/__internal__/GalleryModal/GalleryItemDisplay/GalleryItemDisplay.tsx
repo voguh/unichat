@@ -10,11 +10,11 @@
 
 import React from "react";
 
-import Button from "react-bootstrap/Button";
 import CardBody from "react-bootstrap/CardBody";
 import CardFooter from "react-bootstrap/CardFooter";
 import CardHeader from "react-bootstrap/CardHeader";
 
+import { Button } from "unichat/components/Button";
 import { Tooltip } from "unichat/components/OverlayTrigger";
 import { ModalContext } from "unichat/contexts/ModalContext";
 import { GalleryItem } from "unichat/types";

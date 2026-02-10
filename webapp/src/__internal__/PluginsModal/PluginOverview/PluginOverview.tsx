@@ -12,8 +12,8 @@ import React from "react";
 
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 import Badge from "react-bootstrap/Badge";
-import Button from "react-bootstrap/Button";
 
+import { Button } from "unichat/components/Button";
 import { Tooltip } from "unichat/components/OverlayTrigger";
 import { UniChatPluginMetadata } from "unichat/types";
 import { PLUGIN_STATUS_COLOR } from "unichat/utils/constants";
@@ -97,11 +97,11 @@ export function PluginOverviewModalActions(props: Props): React.ReactNode {
     return (
         <>
             {Strings.isNullOrEmpty(pluginPath) ? (
-                <Button variant="dark" disabled>
+                <Button variant="outline" disabled>
                     Built-In Plugin
                 </Button>
             ) : (
-                <Button variant="outline-primary" onClick={() => revealItemInDir(pluginPath)}>
+                <Button variant="outline" onClick={() => revealItemInDir(pluginPath)}>
                     <i className="fas fa-folder" />
                     &nbsp;Show in Folder
                 </Button>

@@ -12,8 +12,8 @@ import React from "react";
 
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 import Badge from "react-bootstrap/Badge";
-import Button from "react-bootstrap/Button";
 
+import { Button } from "unichat/components/Button";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
@@ -118,7 +118,7 @@ export function PluginsModalActions(_props: Props): React.ReactNode {
                 <i className="fas fa-book" />
                 Read the Docs
             </Button>
-            <Button variant="outline-primary" onClick={() => revealItemInDir(UNICHAT_PLUGINS_DIR)}>
+            <Button variant="outline" onClick={() => revealItemInDir(UNICHAT_PLUGINS_DIR)}>
                 <i className="fas fa-folder" />
                 Show Plugins Folder
             </Button>

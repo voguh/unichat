@@ -10,8 +10,7 @@
 
 import React from "react";
 
-import Button from "react-bootstrap/Button";
-
+import { Button } from "unichat/components/Button";
 import { commandService } from "unichat/services/commandService";
 import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
 import { Dimensions } from "unichat/types";
@@ -256,20 +255,12 @@ export function Tour(_props: Props): React.ReactNode {
             <div className="actions">
                 {stepsToRun.length > 1 && (
                     <>
-                        <Button
-                            variant={currentStep === 0 ? "outline-primary" : "primary"}
-                            disabled={currentStep === 0}
-                            onClick={previousStage}
-                        >
+                        <Button disabled={currentStep === 0} onClick={previousStage}>
                             <i className="fas fa-chevron-left" />
                             Previous
                         </Button>
 
-                        <Button
-                            variant={currentStep === stepsToRun.length - 1 ? "outline-primary" : "primary"}
-                            disabled={currentStep === stepsToRun.length - 1}
-                            onClick={nextStage}
-                        >
+                        <Button disabled={currentStep === stepsToRun.length - 1} onClick={nextStage}>
                             Next
                             <i className="fas fa-chevron-right" />
                         </Button>
@@ -279,7 +270,8 @@ export function Tour(_props: Props): React.ReactNode {
                 {stepsToRun.length > 1 && currentStep !== stepsToRun.length - 1 && (
                     <Button
                         style={{ position: "absolute", transform: "translateY(calc(-100% - 8px))" }}
-                        variant="outline-danger"
+                        variant="light"
+                        color="red"
                         onClick={endTour}
                     >
                         <i className="fas fa-times" />
@@ -290,7 +282,8 @@ export function Tour(_props: Props): React.ReactNode {
                 {(stepsToRun.length === 1 || currentStep === stepsToRun.length - 1) && (
                     <Button
                         style={{ position: "absolute", transform: "translateY(calc(-100% - 8px))" }}
-                        variant="success"
+                        variant="light"
+                        color="green"
                         onClick={endTour}
                     >
                         End Tour <i className="fas fa-check" />

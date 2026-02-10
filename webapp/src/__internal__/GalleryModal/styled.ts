@@ -12,7 +12,7 @@ import type { BsPrefixProps, ReplaceProps } from "react-bootstrap/esm/helpers";
 import Row, { RowProps } from "react-bootstrap/Row";
 import styled from "styled-components";
 
-export const GalleryStyledContainer = styled.div`
+export const GalleryModalStyledContainer = styled.div`
     position: relative;
 
     > .btn {

@@ -11,11 +11,11 @@
 import React from "react";
 
 import * as eventService from "@tauri-apps/api/event";
-import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 
 import { PluginsModal, PluginsModalActions } from "unichat/__internal__/PluginsModal";
 import { SettingsModalLeftSection, SettingsModal } from "unichat/__internal__/SettingsModal";
+import { Button } from "unichat/components/Button";
 import { ErrorBoundary } from "unichat/components/ErrorBoundary";
 import { Tooltip } from "unichat/components/OverlayTrigger";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
@@ -153,7 +153,8 @@ export function App(): JSX.Element {
                         <Tooltip key={key} content={tab.label} placement="right">
                             <Button
                                 data-tour={`tab-${key}-toggle`}
-                                variant={selectedTab === key ? "success" : "default"}
+                                variant={selectedTab === key ? "filled" : "default"}
+                                color={selectedTab === key ? "green" : "blue"}
                                 onClick={() => setSelectedTab(key)}
                             >
                                 {tab.icon}

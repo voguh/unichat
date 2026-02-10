@@ -12,9 +12,9 @@ import React from "react";
 
 import * as eventService from "@tauri-apps/api/event";
 import Badge from "react-bootstrap/Badge";
-import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 
+import { Button } from "unichat/components/Button";
 import { TextInput } from "unichat/components/forms/TextInput";
 import { Tooltip } from "unichat/components/OverlayTrigger";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
@@ -201,7 +201,7 @@ export function ScraperCard(props: Props): React.ReactNode {
                         />
                     </Tooltip>
                     <Button
-                        variant="secondary"
+                        color="gray"
                         onClick={scraperIsRunning ? handleStop : handleStart}
                         disabled={loading || scraperIsLoading}
                     >
@@ -209,7 +209,7 @@ export function ScraperCard(props: Props): React.ReactNode {
                         {handleStatusLabel()}
                     </Button>
                     {scraperIsRunning && (
-                        <Button variant="dark" onClick={handleOpenScraperWindow}>
+                        <Button onClick={handleOpenScraperWindow}>
                             <i className={Strings.isNullOrEmpty(scraper.icon) ? "fas fa-square" : scraper.icon} />
                         </Button>
                     )}

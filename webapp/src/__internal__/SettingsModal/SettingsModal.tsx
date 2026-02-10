@@ -11,8 +11,8 @@
 import React from "react";
 
 import clsx from "clsx";
-import Button from "react-bootstrap/Button";
 
+import { Button } from "unichat/components/Button";
 import { ErrorBoundary } from "unichat/components/ErrorBoundary";
 import { ModalContext } from "unichat/contexts/ModalContext";
 
@@ -95,7 +95,7 @@ export const SettingsModalLeftSection = (_props: Props): React.ReactNode => {
                 {Object.entries(settingsItems).map(([key, item]) => (
                     <Button
                         key={key}
-                        variant={key === sharedStore.selectedItem ? "primary" : "default"}
+                        variant={key === sharedStore.selectedItem ? "filled" : "default"}
                         onClick={() => setSharedStore((old) => ({ ...old, selectedItem: key }))}
                     >
                         <i className={clsx(item.icon, "fa-fw")} />
