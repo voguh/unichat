@@ -92,7 +92,6 @@ export class Logger {
 
         const callStack = await StackTrace.get();
         const callSite = callStack[OS_TYPE === "windows" ? 3 : 4];
-        console.log(callStack);
 
         if (callSite != null) {
             const _fileName = callSite.fileName;
