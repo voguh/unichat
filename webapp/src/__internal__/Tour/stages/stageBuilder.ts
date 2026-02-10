@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -16,7 +15,7 @@ import { BACKDROP_COLOR, INDICATORS_COLOR, TourBuilder } from "../Tour";
 export function stageBuilder(
     selector: string,
     title: string,
-    subTitle: string,
+    subTitle: string | null,
     vLine = 50,
     hLine = 300,
     ignorePrefix = false

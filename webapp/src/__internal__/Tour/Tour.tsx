@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,15 +10,15 @@
 
 import React from "react";
 
-import { alpha, Button, DEFAULT_THEME } from "@mantine/core";
+import Button from "react-bootstrap/Button";
 
 import { commandService } from "unichat/services/commandService";
 import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
 import { Dimensions } from "unichat/types";
 
-import { defaultStageBuilder } from "./stages/defaultStageBuilder";
-import { editorStageBuilder } from "./stages/editorStageBuilder";
-import { widgetsSelectorBuilder } from "./stages/widgetsSelectorBuilder";
+import { dashboardStageBuilder } from "./stages/dashboardStageBuilder";
+import { stageBuilder } from "./stages/stageBuilder";
+import { widgetEditorStageBuilder } from "./stages/widgetEditorStageBuilder";
 import { TourStyledContainer } from "./styled";
 
 interface Props {
@@ -28,8 +27,8 @@ interface Props {
 
 export type TourBuilder = (svg: SVGSVGElement, dimensions: Dimensions) => Promise<void>;
 
-export const BACKDROP_COLOR = alpha(DEFAULT_THEME.colors.gray[9], 0.95);
-export const INDICATORS_COLOR = DEFAULT_THEME.colors.green[6];
+export const BACKDROP_COLOR = "rgba(var(--oc-gray-9-rgb), 0.95)";
+export const INDICATORS_COLOR = "var(--oc-green-6)";
 
 interface TourStep {
     id: string;
@@ -44,11 +43,11 @@ interface TourStep {
 const steps: TourStep[] = [
     {
         id: "73865214-715f-425b-8664-8ddfca448514",
-        builder: defaultStageBuilder("clear-chat", "Clear chat history", null, 50, 200)
+        builder: dashboardStageBuilder("clear-chat", "Clear chat history", null, 50, 200)
     },
     {
         id: "25c20d64-e75c-4f0b-84f4-826ccf2fe7e6",
-        builder: defaultStageBuilder(
+        builder: dashboardStageBuilder(
             "user-widgets-directory",
             "Open user widgets directory",
             "Open your own custom widgets directory, here you can add your own widgets.",
@@ -58,33 +57,23 @@ const steps: TourStep[] = [
     },
     {
         id: "1e255868-930b-4e20-be2b-41b07c8cf97f",
-        builder: defaultStageBuilder("toggle-widget-preview", "Toggle widget preview", null, 50, 300)
+        builder: dashboardStageBuilder("toggle-widget-preview", "Toggle widget preview", null, 50, 300)
     },
     {
         id: "94c455c6-5a1f-4131-83dd-aff3c25358ce",
-        builder: defaultStageBuilder("widgets-selector", "Widget selector", null, 50, -200)
-    },
-    {
-        id: "830dee0e-c81f-4f3a-8fe4-2567f05ceebd",
-        builder: widgetsSelectorBuilder(
-            "div.mantine-Select-dropdown",
-            "Widgets",
-            "Contains all available widgets provided by default or created by you.",
-            50,
-            -300
-        )
+        builder: dashboardStageBuilder("widgets-selector", "Widget selector", null, 50, -200)
     },
     {
         id: "fce131f8-3acb-4b27-82da-130f418b70ad",
-        builder: defaultStageBuilder("preview-reload", "Reload preview", null, 50, -200)
+        builder: dashboardStageBuilder("preview-reload", "Reload preview", null, 50, -200)
     },
     {
         id: "8df4d19e-ef74-4578-8cd2-895bb55eefaf",
-        builder: defaultStageBuilder("preview-open-in-browser", "Open preview in browser", null, 50, -300)
+        builder: dashboardStageBuilder("preview-open-in-browser", "Open preview in browser", null, 50, -300)
     },
     {
         id: "908b35ad-0127-49af-b37a-d3ec625f1d0e",
-        builder: defaultStageBuilder(
+        builder: dashboardStageBuilder(
             "youtube-chat--url-input",
             "YouTube Chat URL",
             "Also you can paste normal video, shorts or live urls or direct video id.",
@@ -94,7 +83,7 @@ const steps: TourStep[] = [
     },
     {
         id: "44515b23-2a9e-4c73-9c45-96a232d52fc2",
-        builder: defaultStageBuilder(
+        builder: dashboardStageBuilder(
             "twitch-chat--url-input",
             "Twitch Chat URL",
             "Also you can paste normal Twitch url or direct channel name.",
@@ -104,7 +93,7 @@ const steps: TourStep[] = [
     },
     {
         id: "1b19c7f5-eee9-4ef2-bc66-59cbebf06ad7",
-        builder: defaultStageBuilder(
+        builder: dashboardStageBuilder(
             "kick-chat--url-input",
             "Kick Chat URL",
             "<strong>Note:</strong> Only messages and remove message events are supported for now.",
@@ -115,8 +104,8 @@ const steps: TourStep[] = [
 
     {
         id: "21fe0e64-d83f-460e-94f3-519ef3843929a",
-        builder: defaultStageBuilder(
-            "widget-editor",
+        builder: dashboardStageBuilder(
+            "tab-widgetEditor-toggle",
             "Widget Editor",
             "Here you can edit your created/downloaded widgets (System widgets aren't editable).",
             50,
@@ -125,7 +114,7 @@ const steps: TourStep[] = [
     },
     {
         id: "4b135c24-eb9a-4960-8ae5-61c486342b78",
-        builder: editorStageBuilder(
+        builder: widgetEditorStageBuilder(
             "gallery-toggle",
             "Assets Gallery",
             "Open the assets gallery to view and manage your widget assets like images, sounds and more.",
@@ -135,7 +124,7 @@ const steps: TourStep[] = [
     },
     {
         id: "e2961d69-f7c0-4c2f-a340-04339e3d75eb",
-        builder: editorStageBuilder(
+        builder: widgetEditorStageBuilder(
             "widget-editor-emulator-events-dispatcher",
             "Emulator Events Dispatcher",
             "Here you can emit events to test your widget's event handling functionality.",
@@ -146,7 +135,7 @@ const steps: TourStep[] = [
 
     {
         id: "fd2ac461-b46c-45db-8cd9-8737d7e64f40",
-        builder: defaultStageBuilder(
+        builder: stageBuilder(
             "settings-modal-toggle",
             "Settings",
             "Manage application settings, check for updates and more.",
@@ -156,7 +145,7 @@ const steps: TourStep[] = [
     },
     {
         id: "d4ea3587-6b7d-4ae9-9717-53c7253037aa",
-        builder: defaultStageBuilder(
+        builder: stageBuilder(
             "plugins-modal-toggle",
             "Plugins",
             "Here you can see all installed plugins and view more information about them.",
@@ -178,6 +167,11 @@ export function Tour(_props: Props): React.ReactNode {
         setStepsToRun([]);
         setCurrentStep(-1);
         commandService.setTourSteps(steps.map((s) => s.id));
+
+        const dashboardButton = document.querySelector<HTMLButtonElement>("[data-tour='tab-dashboard-toggle']");
+        if (dashboardButton != null && !dashboardButton.classList.contains("btn-success")) {
+            dashboardButton.click();
+        }
     }
 
     function previousStage(): void {
@@ -193,12 +187,14 @@ export function Tour(_props: Props): React.ReactNode {
     }
 
     async function stepHandler(): Promise<void> {
-        if (currentStep > -1 && currentStep < stepsToRun.length) {
-            const step = stepsToRun[currentStep];
+        if (svgRef.current != null) {
+            if (currentStep > -1 && currentStep < stepsToRun.length) {
+                const step = stepsToRun[currentStep];
 
-            await step.builder(svgRef.current, dimensions);
-        } else if (svgRef.current) {
-            svgRef.current.innerHTML = "";
+                await step.builder(svgRef.current, dimensions);
+            } else {
+                svgRef.current.innerHTML = "";
+            }
         }
     }
 
@@ -261,19 +257,21 @@ export function Tour(_props: Props): React.ReactNode {
                 {stepsToRun.length > 1 && (
                     <>
                         <Button
+                            variant={currentStep === 0 ? "outline-primary" : "primary"}
                             disabled={currentStep === 0}
-                            leftSection={<i className="fas fa-chevron-left" />}
                             onClick={previousStage}
                         >
+                            <i className="fas fa-chevron-left" />
                             Previous
                         </Button>
 
                         <Button
+                            variant={currentStep === stepsToRun.length - 1 ? "outline-primary" : "primary"}
                             disabled={currentStep === stepsToRun.length - 1}
-                            rightSection={<i className="fas fa-chevron-right" />}
                             onClick={nextStage}
                         >
                             Next
+                            <i className="fas fa-chevron-right" />
                         </Button>
                     </>
                 )}
@@ -281,11 +279,10 @@ export function Tour(_props: Props): React.ReactNode {
                 {stepsToRun.length > 1 && currentStep !== stepsToRun.length - 1 && (
                     <Button
                         style={{ position: "absolute", transform: "translateY(calc(-100% - 8px))" }}
-                        variant="light"
-                        color="red"
-                        leftSection={<i className="fas fa-times" />}
+                        variant="outline-danger"
                         onClick={endTour}
                     >
+                        <i className="fas fa-times" />
                         Skip Tour
                     </Button>
                 )}
@@ -293,12 +290,10 @@ export function Tour(_props: Props): React.ReactNode {
                 {(stepsToRun.length === 1 || currentStep === stepsToRun.length - 1) && (
                     <Button
                         style={{ position: "absolute", transform: "translateY(calc(-100% - 8px))" }}
-                        variant="light"
-                        color="green"
-                        rightSection={<i className="fas fa-check" />}
+                        variant="success"
                         onClick={endTour}
                     >
-                        End Tour
+                        End Tour <i className="fas fa-check" />
                     </Button>
                 )}
             </div>

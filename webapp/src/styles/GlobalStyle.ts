@@ -85,15 +85,6 @@ export const GlobalStyle = createGlobalStyle`
         box-shadow: none !important;
     }
 
-    .btn {
-        font-weight: 600;
-        height: 34px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-    }
-
     /* <=======================[ TOOLTIP OR POPOVER ]=======================> */
     .popover {
         /* --bs-popover-zindex: 1070; */
@@ -157,6 +148,11 @@ export const GlobalStyle = createGlobalStyle`
         /* --bs-btn-focus-box-shadow: 0 0 0 0.25rem rgba(var(--bs-btn-focus-shadow-rgb), .5); */
 
         height: 36px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
     }
 
     .btn-default {
