@@ -10,5 +10,17 @@
     "terminal.integrated.env.osx": {
         "TAURI_APP_PATH": "${workspaceFolder}",
         "TAURI_FRONTEND_PATH": "${workspaceFolder}/webapp"
-    }
+    },
+
+    "json.schemaDownload.enable": true,
+    "json.schemas": [
+        {
+            "fileMatch": ["**/tauri.conf.json"],
+            "url": "https://schema.tauri.app/config/2.9.5"
+        },
+        {
+            "fileMatch": ["**/fields.json"],
+            "url": "https://cdn.statically.io/gh/voguh/unichat/1.3.0/widgets/fields-schema.json"
+        }
+    ],
 }
