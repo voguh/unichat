@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 import { StorybookConfig } from "@storybook/react-vite";
-import path from "node:path";
+import { mergeConfig } from 'vite'
 
 const config: StorybookConfig = {
     framework: "@storybook/react-vite",
@@ -17,7 +17,16 @@ const config: StorybookConfig = {
     stories: [
         "../__stories__/**/*.mdx",
         "../__stories__/**/*.stories.@(js|jsx|mjs|ts|tsx)"
-    ]
+    ],
+    async viteFinal(config, options) {
+        return mergeConfig(config, {
+            resolve: {
+                alias: {
+                    "unichat": "/src"
+                }
+            }
+        })
+    }
 };
 
 export default config;
