@@ -16,6 +16,7 @@ import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter"
 import { Dimensions } from "unichat/types";
 
 import { dashboardStageBuilder } from "./stages/dashboardStageBuilder";
+import { notificationStageBuilder } from "./stages/notificationStageBuilder";
 import { stageBuilder } from "./stages/stageBuilder";
 import { widgetEditorStageBuilder } from "./stages/widgetEditorStageBuilder";
 import { TourStyledContainer } from "./styled";
@@ -99,6 +100,14 @@ const steps: TourStep[] = [
             50,
             500
         )
+    },
+    {
+        id: "14fe744f-ac12-4ef5-91f3-c638e0367f3f",
+        replaces: "1b19c7f5-eee9-4ef2-bc66-59cbebf06ad7",
+        builder: notificationStageBuilder("Kick Integration was Moved", [
+            "To improve kick integration, it was moved to a standalone plugin.",
+            'You can find it in <a href="https://github.com/unichat-community/unichat-plugin-kick/releases" target="_blank" rel="noopener noreferrer">GitHub</a>.'
+        ])
     },
 
     {
