@@ -1,8 +1,7 @@
 {
     "env": {
         "es2023": true,
-        "browser": true,
-        "jest": true
+        "browser": true
     },
     "extends": [
         "standard",
@@ -18,7 +17,7 @@
             "jsx": true
         }
     },
-    "plugins": ["import", "@typescript-eslint", "prettier", "react", "react-hooks", "prettier", "eslint-plugin-import-helpers", "jest"],
+    "plugins": ["import", "@typescript-eslint", "prettier", "react", "react-hooks", "prettier", "eslint-plugin-import-helpers", "vitest"],
     "rules": {
         "prettier/prettier": "warn",
 
