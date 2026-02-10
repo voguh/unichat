@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2024-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -9,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import "./styles/bootstrap.scss";
+import "unichat/styles/bootstrap.scss";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "@fontsource/roboto/400";
 import "@fontsource/roboto/400-italic";
@@ -27,40 +26,47 @@ import "@fontsource/roboto-mono/700-italic";
 import React from "react";
 import { createRoot } from "react-dom/client";
 
+import { DefaultTheme, ThemeProvider } from "styled-components";
+
+import { ModalContainer } from "unichat/__internal__/ModalContainer";
+import { ToastContainer } from "unichat/__internal__/ToastContainer";
+import { App } from "unichat/App";
 import { AppContextProvider } from "unichat/contexts/AppContext";
+import { GlobalStyle } from "unichat/styles/GlobalStyle";
+import { theme } from "unichat/styles/theme";
 
-let initializationAttempts = 0;
-function init(): void {
-    if (typeof __IS_DEV__ !== "boolean") {
-        if (initializationAttempts === 50) {
-            throw new Error("Initialization failed: __IS_DEV__ is not defined");
-        }
+if (!("__IS_DEV__" in globalThis)) {
+    Object.defineProperty(globalThis, "__IS_DEV__", {
+        value: import.meta.env.DEV,
+        writable: false,
+        configurable: false,
+        enumerable: true
+    });
+}
 
-        setTimeout(init, 100);
-        initializationAttempts++;
-
-        return;
-    }
-
+if (!__IS_DEV__) {
     window.addEventListener("contextmenu", async (event) => {
         event.preventDefault();
     });
-
-    const documentRoot = document.querySelector("#root");
-    if (documentRoot == null) {
-        throw new Error("Root element not found");
-    }
-
-    const root = createRoot(documentRoot);
-    root.render(
-        <React.StrictMode>
-            <AppContextProvider>UniChat works!</AppContextProvider>
-        </React.StrictMode>
-    );
 }
 
-if (document.readyState === "interactive" || document.readyState === "complete") {
-    init();
-} else {
-    document.addEventListener("DOMContentLoaded", init);
+document.documentElement.setAttribute("data-bs-theme", "dark");
+const documentRoot = document.querySelector("#root");
+if (documentRoot == null) {
+    throw new Error("Root element not found");
 }
+
+const root = createRoot(documentRoot);
+root.render(
+    <React.StrictMode>
+        <ThemeProvider theme={theme as DefaultTheme}>
+            <GlobalStyle />
+
+            <AppContextProvider>
+                <App />
+                <ToastContainer limit={3} position="bottom-center" />
+                <ModalContainer centered />
+            </AppContextProvider>
+        </ThemeProvider>
+    </React.StrictMode>
+);

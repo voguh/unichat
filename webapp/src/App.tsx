@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2024-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,220 +10,178 @@
 
 import React from "react";
 
-import { createTheme, MantineProvider, Button, Card, Tooltip, Modal } from "@mantine/core";
-import { ModalsProvider } from "@mantine/modals";
-import { notifications, Notifications } from "@mantine/notifications";
 import * as eventService from "@tauri-apps/api/event";
-import { revealItemInDir } from "@tauri-apps/plugin-opener";
-import semver from "semver";
+import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
 
-import { DashboardHome } from "./components/DashboardHome";
-import { Gallery, GalleryActions } from "./components/Gallery";
-import { ModalWrapper } from "./components/ModalWrapper";
-import { Plugins, PluginsActions } from "./components/Plugins";
-import { SettingsModal } from "./components/SettingsModal";
-import { Tour } from "./components/Tour";
-import { WidgetEditor } from "./components/WidgetEditor";
-import { AppContext } from "./contexts/AppContext";
+import { PluginsModal, PluginsModalActions } from "unichat/__internal__/PluginsModal";
+import { SettingsModalLeftSection, SettingsModal } from "unichat/__internal__/SettingsModal";
+import { ErrorBoundary } from "unichat/components/ErrorBoundary";
+import { Tooltip } from "unichat/components/OverlayTrigger";
+import { LoggerFactory } from "unichat/logging/LoggerFactory";
+import { modalService } from "unichat/services/modalService";
+import { notificationService } from "unichat/services/notificationService";
+import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
+import { Dashboard, DashboardLeftSection } from "unichat/tabs/Dashboard";
+import { WidgetEditor, WidgetEditorLeftSection } from "unichat/tabs/WidgetEditor";
+import { IPCNotificationEvent } from "unichat/utils/IPCStatusEvent";
+import { Strings } from "unichat/utils/Strings";
+
+import { Tour } from "./__internal__/Tour";
 import { commandService } from "./services/commandService";
-import { modalService } from "./services/modalService";
-import { DashboardStyledContainer } from "./styles/DashboardStyled";
-import { UniChatSettings } from "./utils/constants";
-import { IPCNotificationEvent } from "./utils/IPCStatusEvent";
-import { Strings } from "./utils/Strings";
 
-const theme = createTheme({
-    fontFamily: "Roboto, sans-serif",
-    fontFamilyMonospace: "Roboto Mono, monospace"
-});
+interface TabOptions {
+    label: string;
+    icon: React.ReactNode;
+    component: React.ReactNode;
+    leftSection: React.ReactNode;
+}
 
-const tabs = {
+const tabs: Record<string, TabOptions> = {
     dashboard: {
         label: "Dashboard",
-        component: DashboardHome
+        icon: <i className="fas fa-th-large" />,
+        component: <Dashboard />,
+        leftSection: <DashboardLeftSection />
     },
     widgetEditor: {
         label: "Widget Editor",
-        component: WidgetEditor
+        icon: <i className="fas fa-pencil-ruler" />,
+        component: <WidgetEditor />,
+        leftSection: <WidgetEditorLeftSection />
     }
 };
 
-export default function App(): JSX.Element {
+function TabLeftSection({ selectedTab }: { selectedTab: keyof typeof tabs }): React.ReactNode {
+    const leftSection = tabs[selectedTab]?.leftSection;
+    if (leftSection == null) {
+        return null;
+    }
+
+    return (
+        <>
+            <div className="divider" />
+            {leftSection}
+        </>
+    );
+}
+
+function TabContent({ selectedTab }: { selectedTab: keyof typeof tabs }): React.ReactNode {
+    const content = tabs[selectedTab]?.component;
+    if (content == null) {
+        return null;
+    }
+
+    return (
+        <ErrorBoundary>
+            <div className="divider" />
+            {content}
+        </ErrorBoundary>
+    );
+}
+
+const _logger = LoggerFactory.getLogger("App");
+export function App(): JSX.Element {
     const [selectedTab, setSelectedTab] = React.useState<keyof typeof tabs>("dashboard");
-    const [settingsModalOpen, setSettingsModalOpen] = React.useState<boolean | string>(false);
-
-    const { setShowWidgetPreview, showWidgetPreview } = React.useContext(AppContext);
-
-    const isMounted = React.useRef(false);
-
-    async function handleClearChat(): Promise<void> {
-        await commandService.dispatchClearChat();
-    }
-
-    function toggleGallery(): void {
-        modalService.openModal({
-            size: "xl",
-            title: "Gallery",
-            actions: <GalleryActions />,
-            children: <Gallery />
-        });
-    }
 
     function togglePluginsModal(): void {
         modalService.openModal({
             size: "xl",
             title: "Plugins",
-            actions: <PluginsActions />,
-            children: <Plugins />
+            actions: <PluginsModalActions />,
+            children: <PluginsModal />
         });
     }
 
+    function toggleSettingsModal(tab?: string | null): void {
+        modalService.openModal({
+            size: "xl",
+            title: "Settings",
+            leftSectionTitle: "Settings",
+            leftSection: <SettingsModalLeftSection />,
+            children: <SettingsModal />,
+            sharedStoreInitialState: {
+                selectedItem: Strings.isNullOrEmpty(tab) ? "general" : tab
+            }
+        });
+    }
+
+    /* ========================================================================================== */
+
     async function init(): Promise<void> {
-        UNICHAT_RELEASES.sort((a, b) => semver.rcompare(a.name, b.name));
-
-        const isOpenToLan = await commandService.settingsGetItem(UniChatSettings.OPEN_TO_LAN);
-
+        const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
         if (isOpenToLan) {
-            notifications.show({
+            notificationService.warn({
                 title: `${UNICHAT_DISPLAY_NAME} is open to LAN`,
-                message: "Your widgets are accessible by other devices on the same local network.",
-                color: "yellow"
+                message: "Your widgets are accessible by other devices on the same local network."
             });
         }
 
         /* ====================================================================================== */
 
-        const currentVersion = UNICHAT_VERSION;
-        const latestRelease = UNICHAT_RELEASES.find((release) => !release.prerelease);
-
-        if (latestRelease && semver.gt(latestRelease.name, currentVersion)) {
-            setSettingsModalOpen("check-updates");
+        const releaseInfo = await commandService.getReleases();
+        if (releaseInfo.hasUpdate) {
+            toggleSettingsModal("check-updates");
         }
     }
 
     React.useEffect(() => {
-        if (isMounted.current) {
-            return;
-        }
-
-        isMounted.current = true;
         init();
 
-        eventService.listen<IPCNotificationEvent>("unichat://notification", ({ payload }) => {
+        /* ====================================================================================== */
+
+        const unListenerPromise = eventService.listen<IPCNotificationEvent>("unichat://notification", ({ payload }) => {
             const title = payload.title || "Notification";
             const message = payload.message || "";
             if (!Strings.isNullOrEmpty(message)) {
-                notifications.show({ message, title });
+                notificationService.info({ title, message });
             }
         });
+
+        return () => {
+            if (unListenerPromise) {
+                unListenerPromise.then((unlisten) => unlisten());
+            }
+        };
     }, []);
 
     return (
-        <MantineProvider defaultColorScheme="dark" theme={theme}>
-            <ModalsProvider modals={{ unichat: ModalWrapper }}>
-                <Notifications position="bottom-center" />
-
-                <DashboardStyledContainer>
-                    <Card className="sidebar" withBorder shadow="xs">
-                        <div>
-                            <Tooltip label="Dashboard" position="right" withArrow>
-                                <Button
-                                    size="sm"
-                                    onClick={() => setSelectedTab("dashboard")}
-                                    variant={selectedTab === "dashboard" ? "filled" : "default"}
-                                    data-tour="dashboard"
-                                    color="green"
-                                >
-                                    <i className="fas fa-th-large" />
-                                </Button>
-                            </Tooltip>
-                            <Tooltip label="Widget Editor" position="right" withArrow>
-                                <Button
-                                    size="sm"
-                                    onClick={() => setSelectedTab("widgetEditor")}
-                                    variant={selectedTab === "widgetEditor" ? "filled" : "default"}
-                                    data-tour="widget-editor"
-                                    color="green"
-                                >
-                                    <i className="fas fa-pencil-ruler" />
-                                </Button>
-                            </Tooltip>
-
-                            <div className="divider" />
-
-                            {selectedTab === "dashboard" && (
-                                <Tooltip label="Clear chat history" position="right" withArrow>
-                                    <Button size="sm" onClick={handleClearChat} data-tour="clear-chat">
-                                        <i className="fas fa-eraser" />
-                                    </Button>
-                                </Tooltip>
-                            )}
-                            <Tooltip label="Open user widgets folder" position="right" withArrow>
-                                <Button
-                                    onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)}
-                                    data-tour="user-widgets-directory"
-                                >
-                                    <i className="fas fa-folder" />
-                                </Button>
-                            </Tooltip>
-                            {selectedTab === "dashboard" && (
-                                <Tooltip label="Toggle widget preview" position="right" withArrow>
-                                    <Button
-                                        onClick={() => setShowWidgetPreview((old) => !old)}
-                                        variant={showWidgetPreview ? "filled" : "default"}
-                                        data-tour="toggle-widget-preview"
-                                    >
-                                        {showWidgetPreview ? (
-                                            <i className="fas fa-window-maximize" />
-                                        ) : (
-                                            <i className="far fa-window-maximize" />
-                                        )}
-                                    </Button>
-                                </Tooltip>
-                            )}
-                            {selectedTab === "widgetEditor" && (
-                                <Tooltip label="Gallery" position="right" withArrow>
-                                    <Button onClick={toggleGallery} data-tour="gallery-toggle">
-                                        <i className="fas fa-images" />
-                                    </Button>
-                                </Tooltip>
-                            )}
-                        </div>
-
-                        <Tooltip label="Plugins" position="right" withArrow>
-                            <Button variant="default" onClick={togglePluginsModal} data-tour="plugins-modal-toggle">
-                                <i className="fas fa-cubes" />
-                            </Button>
-                        </Tooltip>
-
-                        <Tooltip label="Settings" position="right" withArrow>
+        <>
+            <Card className="sidebar">
+                <div>
+                    {Object.entries(tabs).map(([key, tab]) => (
+                        <Tooltip key={key} content={tab.label} placement="right">
                             <Button
-                                variant="default"
-                                onClick={() => setSettingsModalOpen(true)}
-                                data-tour="settings-modal-toggle"
+                                data-tour={`tab-${key}-toggle`}
+                                variant={selectedTab === key ? "success" : "default"}
+                                onClick={() => setSelectedTab(key)}
                             >
-                                <i className="fas fa-sliders-h" />
+                                {tab.icon}
                             </Button>
                         </Tooltip>
-                    </Card>
-                    <div className="content">
-                        {tabs[selectedTab] && React.createElement(tabs[selectedTab].component)}
-                    </div>
-                </DashboardStyledContainer>
+                    ))}
 
-                <Tour />
-                <Modal
-                    opened={settingsModalOpen != null && settingsModalOpen !== false}
-                    size="100%"
-                    withCloseButton={false}
-                    onClose={() => setSettingsModalOpen(false)}
-                >
-                    <SettingsModal
-                        onClose={() => setSettingsModalOpen(false)}
-                        startupTab={typeof settingsModalOpen === "string" ? settingsModalOpen : null}
-                    />
-                </Modal>
-            </ModalsProvider>
-        </MantineProvider>
+                    <TabLeftSection selectedTab={selectedTab} />
+                </div>
+
+                <Tooltip content="Plugins" placement="right">
+                    <Button variant="default" onClick={togglePluginsModal} data-tour="plugins-modal-toggle">
+                        <i className="fas fa-cubes" />
+                    </Button>
+                </Tooltip>
+
+                <Tooltip content="Settings" placement="right">
+                    <Button variant="default" onClick={() => toggleSettingsModal()} data-tour="settings-modal-toggle">
+                        <i className="fas fa-sliders-h" />
+                    </Button>
+                </Tooltip>
+            </Card>
+
+            <div className="content">
+                <TabContent selectedTab={selectedTab} />
+            </div>
+
+            <Tour />
+        </>
     );
 }
