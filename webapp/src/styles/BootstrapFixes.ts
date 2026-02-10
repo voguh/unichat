@@ -10,6 +10,76 @@
 
 import { createGlobalStyle } from "styled-components";
 
+const colors = [
+    ["gray", "secondary"],
+    ["red", "danger"],
+    ["pink"],
+    ["grape"],
+    ["violet"],
+    ["indigo"],
+    ["blue", "primary"],
+    ["cyan", "info"],
+    ["teal"],
+    ["green", "success"],
+    ["lime"],
+    ["yellow", "warning"],
+    ["orange"]
+];
+
+function generateButtonStyles(): string {
+    const styles: string[] = [];
+
+    for (const variants of colors) {
+        const color = variants[0];
+        const filledSelectors = variants.map((variant) => `.btn-${variant}`).join(", ");
+        const outlineSelectors = variants.map((variant) => `.btn-outline-${variant}`).join(", ");
+        styles.push(`
+            ${filledSelectors} {
+                --bs-btn-color: var(--oc-white);
+                --bs-btn-bg: var(--oc-${color}-8);
+                --bs-btn-border-color: var(--oc-${color}-8);
+                --bs-btn-hover-color: var(--oc-white);
+                --bs-btn-hover-bg: var(--oc-${color}-9);
+                --bs-btn-hover-border-color: var(--oc-${color}-9);
+                --bs-btn-focus-shadow-rgb: ;
+                --bs-btn-active-color: var(--oc-white);
+                --bs-btn-active-bg: var(--oc-${color}-9);
+                --bs-btn-active-border-color: var(--oc-${color}-9);
+                --bs-btn-active-shadow: ;
+            }
+
+            ${outlineSelectors} {
+                --bs-btn-color: var(--oc-${color}-8);
+                --bs-btn-border-color: var(--oc-${color}-8);
+                --bs-btn-hover-color: var(--oc-${color}-8);
+                --bs-btn-hover-bg: rgba(var(--oc-${color}-8-rgb), 0.125);
+                --bs-btn-hover-border-color: var(--oc-${color}-8);
+                --bs-btn-focus-shadow-rgb: ;
+                --bs-btn-active-color: var(--oc-${color}-8);
+                --bs-btn-active-bg: rgba(var(--oc-${color}-8-rgb), 0.125);
+                --bs-btn-active-border-color: var(--oc-${color}-8);
+                --bs-btn-active-shadow: ;
+            }
+
+            .btn-light-${color} {
+                --bs-btn-color: var(--oc-${color}-8);
+                --bs-btn-bg: rgba(var(--oc-${color}-8-rgb), 0.125);
+                --bs-btn-border-color: transparent;
+                --bs-btn-hover-color: var(--oc-${color}-8);
+                --bs-btn-hover-bg: rgba(var(--oc-${color}-8-rgb), 0.25);
+                --bs-btn-hover-border-color: transparent;
+                --bs-btn-focus-shadow-rgb: ;
+                --bs-btn-active-color: var(--oc-${color}-8);
+                --bs-btn-active-bg: rgba(var(--oc-${color}-8-rgb), 0.25);
+                --bs-btn-active-border-color: transparent;
+                --bs-btn-active-shadow: ;
+            }
+        `);
+    }
+
+    return styles.join("\n");
+}
+
 export const BootstrapFixes = createGlobalStyle`
     input, textarea, select, button {
         outline: none;
@@ -77,13 +147,50 @@ export const BootstrapFixes = createGlobalStyle`
         /* --bs-btn-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 1px rgba(0, 0, 0, 0.075); */
         /* --bs-btn-disabled-opacity: 0.65; */
         /* --bs-btn-focus-box-shadow: 0 0 0 0.25rem rgba(var(--bs-btn-focus-shadow-rgb), .5); */
+        --bs-btn-disabled-color: var(--oc-dark-3);
+        --bs-btn-disabled-bg: var(--oc-dark-6);
+        --bs-btn-disabled-border-color: var(--oc-dark-6);
 
-        height: 36px;
+        min-height: 36px;
         font-weight: 600;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
+
+        &:disabled {
+            cursor: not-allowed;
+        }
+    }
+
+    .btn-white, .btn-light {
+        --bs-btn-color: var(--oc-gray-8);
+        --bs-btn-bg: var(--oc-white);
+        --bs-btn-border-color: var(--oc-white);
+        --bs-btn-hover-color: var(--oc-gray-8);
+        --bs-btn-hover-bg: var(--oc-gray-1);
+        --bs-btn-hover-border-color: var(--oc-gray-1);
+        --bs-btn-focus-shadow-rgb: ;
+        --bs-btn-active-color: var(--oc-gray-8);
+        --bs-btn-active-bg: var(--oc-gray-1);
+        --bs-btn-active-border-color: var(--oc-gray-1);
+        --bs-btn-active-shadow: ;
+    }
+
+    .btn-outline-white, .btn-outline-light {
+        --bs-btn-color: var(--oc-white);
+        --bs-btn-border-color: var(--oc-white);
+        --bs-btn-hover-color: var(--oc-gray-8);
+        --bs-btn-hover-bg: var(--oc-white);
+        --bs-btn-hover-border-color: var(--oc-white);
+        --bs-btn-focus-shadow-rgb: ;
+        --bs-btn-active-color: var(--oc-gray-8);
+        --bs-btn-active-bg: var(--oc-white);
+        --bs-btn-active-border-color: var(--oc-white);
+        --bs-btn-active-shadow: ;
+        --bs-btn-disabled-color: var(--oc-white);
+        --bs-btn-disabled-bg: transparent;
+        --bs-btn-disabled-border-color: var(--oc-white);
     }
 
     .btn-default {
@@ -98,77 +205,7 @@ export const BootstrapFixes = createGlobalStyle`
         }
     }
 
-    .btn-primary {
-        color: var(--oc-white);
-        background: var(--oc-blue-8);
-        border-color: transparent;
-
-        &:hover, &:active, &:focus {
-            color: var(--oc-white) !important;
-            background: var(--oc-blue-9) !important;
-            border-color: transparent !important;
-        }
-    }
-
-    .btn-secondary {
-        color: var(--oc-white);
-        background: var(--oc-gray-8);
-        border-color: transparent;
-
-        &:hover, &:active, &:focus {
-            color: var(--oc-white) !important;
-            background: var(--oc-gray-9) !important;
-            border-color: transparent !important;
-        }
-    }
-
-    .btn-success {
-        color: var(--oc-white);
-        background: var(--oc-green-8);
-        border-color: transparent;
-
-        &:hover, &:active, &:focus {
-            color: var(--oc-white) !important;
-            background: var(--oc-green-9) !important;
-            border-color: transparent !important;
-        }
-    }
-
-    .btn-info {
-        color: var(--oc-white);
-        background: var(--oc-cyan-8);
-        border-color: transparent;
-
-        &:hover, &:active, &:focus {
-            color: var(--oc-white) !important;
-            background: var(--oc-cyan-9) !important;
-            border-color: transparent !important;
-        }
-    }
-
-    .btn-warning {
-        color: var(--oc-white);
-        background: var(--oc-yellow-8);
-        border-color: transparent;
-
-        &:hover, &:active, &:focus {
-            color: var(--oc-white) !important;
-            background: var(--oc-yellow-9) !important;
-            border-color: transparent !important;
-        }
-    }
-
-    .btn-danger {
-        color: var(--oc-white);
-        background: var(--oc-red-8);
-        border-color: transparent;
-
-        &:hover, &:active, &:focus {
-            color: var(--oc-white) !important;
-            background: var(--oc-red-9) !important;
-            border-color: transparent !important;
-        }
-    }
+    ${generateButtonStyles()}
     /* <===========================[ END BUTTON ]===========================> */
 
     /* <==============================[ CARD ]==============================> */

@@ -15,6 +15,23 @@ export interface Dimensions {
     height: number;
 }
 
+export type UniChatColors =
+    | "gray"
+    | "red"
+    | "pink"
+    | "grape"
+    | "violet"
+    | "indigo"
+    | "blue"
+    | "cyan"
+    | "teal"
+    | "green"
+    | "lime"
+    | "yellow"
+    | "orange";
+
+/* ========================================================================== */
+
 export interface ThirdPartyLicenseInfo {
     source: string;
     name: string;
