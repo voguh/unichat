@@ -27,29 +27,32 @@ export const GlobalStyle = createGlobalStyle`
     }
 
     #root {
+        --unichat-root-padding: 8px;
+        --unichat-root-gap: 8px;
+        --unichat-sidebar-width: 50px;
+
         position: fixed;
         inset: 0;
-        padding: 8px;
+        padding: var(--unichat-root-padding);
 
         display: grid;
         grid-template-areas: "SID CTT";
-        grid-template-columns: 50px 1fr;
-        grid-template-rows: 1fr;
-        gap: 8px;
+        grid-template-columns: var(--unichat-sidebar-width) calc(100vw - ((var(--unichat-root-padding) * 2) + var(--unichat-root-gap) + var(--unichat-sidebar-width)));
+        grid-template-rows: calc(100vh - (var(--unichat-root-padding) * 2));
+        gap: var(--unichat-root-gap);
 
         > .sidebar {
             grid-area: SID;
-            padding: 8px;
+            padding: var(--unichat-root-padding);
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            height: 100%;
+            gap: var(--unichat-root-gap);
 
             > div {
                 flex: 1;
                 display: flex;
                 flex-direction: column;
-                gap: 8px;
+                gap: var(--unichat-root-gap);
 
                 > .divider {
                     width: 100%;
