@@ -133,9 +133,7 @@ export function Dashboard(_props: Props): React.ReactNode {
                         <Card className="preview-header">
                             <div className="preview-header-widget-selector">
                                 <Select
-                                    value={widgets
-                                        .flatMap((widget) => widget.options)
-                                        .find((option) => option.value === selectedWidget)}
+                                    value={{ label: selectedWidget, value: selectedWidget }}
                                     options={widgets}
                                     onChange={handleSelectWidget}
                                     data-tour="widgets-selector"
