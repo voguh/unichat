@@ -9,6 +9,7 @@
  ******************************************************************************/
 
 #![allow(unused)]
+use std::cmp::Ordering;
 use std::fmt::Display;
 
 use anyhow::anyhow;
@@ -391,4 +392,35 @@ impl Display for VersionRange {
 
         return write!(f, "{},{}", min_str, max_str);
     }
+}
+
+/* ================================================================================================================== */
+
+pub fn compare(a: &str, b: &str) -> Ordering {
+    let a_ver = Version::parse(a);
+    let b_ver = Version::parse(b);
+
+    match (a_ver, b_ver) {
+        (Ok(a_parsed), Ok(b_parsed)) => a_parsed.cmp(&b_parsed),
+        (Ok(_), Err(_)) => Ordering::Greater,
+        (Err(_), Ok(_)) => Ordering::Less,
+        (Err(_), Err(_)) => Ordering::Equal,
+    }
+}
+
+pub fn rcompare(a: &str, b: &str) -> Ordering {
+    return compare(b, a);
+}
+
+
+pub fn gt(a: &str, b: &str) -> bool {
+    return compare(a, b) == Ordering::Greater;
+}
+
+pub fn eq(a: &str, b: &str) -> bool {
+    return compare(a, b) == Ordering::Equal;
+}
+
+pub fn lt(a: &str, b: &str) -> bool {
+    return compare(a, b) == Ordering::Less;
 }

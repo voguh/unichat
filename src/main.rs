@@ -31,7 +31,6 @@ use tauri_plugin_dialog::MessageDialogKind;
 
 use crate::actix::ActixState;
 use crate::utils::base64;
-use crate::utils::get_releases;
 use crate::utils::path_to_string;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -251,10 +250,6 @@ fn setup_inner() -> Result<(), Error> {
     let plugins_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatUserPlugins));
     let widgets_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatUserWidgets));
 
-    let third_party_licenses: serde_json::Value = serde_json::from_str(THIRD_PARTY_LICENSES).unwrap_or(serde_json::Value::Array(vec![]));
-    let releases = get_releases().unwrap_or_default();
-    let releases = serde_json::to_value(&releases).unwrap_or(serde_json::Value::Array(vec![]));
-
     let main_url = tauri::WebviewUrl::App("index.html".into());
     let window = WebviewWindowBuilder::new(app_handle, "main", main_url)
         .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION))
@@ -281,9 +276,6 @@ fn setup_inner() -> Result<(), Error> {
             globalThis.UNICHAT_LICENSE_FILE = "{license_file}";
             globalThis.UNICHAT_PLUGINS_DIR = "{plugins_dir}";
             globalThis.UNICHAT_WIDGETS_DIR = "{widgets_dir}";
-
-            globalThis.UNICHAT_THIRD_PARTY_LICENSES = {third_party_licenses};
-            globalThis.UNICHAT_RELEASES = {releases};
         "#))
         .build()?;
 
@@ -398,7 +390,9 @@ async fn main() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             commands::dispatch_clear_chat,
+            commands::get_releases,
             commands::get_system_hosts,
+            commands::get_third_party_licenses,
             commands::gallery::get_gallery_items,
             commands::gallery::upload_gallery_items,
             commands::plugins::get_plugins,

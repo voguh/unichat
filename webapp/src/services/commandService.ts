@@ -10,7 +10,15 @@
 
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
-import { GalleryItem, UniChatPluginMetadata, UniChatScraper, UniChatWidget, WidgetFields } from "unichat/types";
+import {
+    GalleryItem,
+    UniChatPluginMetadata,
+    UniChatScraper,
+    UniChatWidget,
+    WidgetFields,
+    ThirdPartyLicenseInfo,
+    UniChatReleaseInfo
+} from "unichat/types";
 
 async function invoke<T>(cmd: string, args?: Record<string, any>): Promise<T> {
     try {
@@ -24,13 +32,29 @@ async function invoke<T>(cmd: string, args?: Record<string, any>): Promise<T> {
     }
 }
 
+let cachedReleases: UniChatReleaseInfo | null = null;
 export class CommandService {
     public async dispatchClearChat(): Promise<void> {
         await invoke("dispatch_clear_chat");
     }
 
+    public async getReleases(): Promise<UniChatReleaseInfo> {
+        if (cachedReleases) {
+            return cachedReleases;
+        }
+
+        const releases = await invoke<UniChatReleaseInfo>("get_releases");
+        cachedReleases = releases;
+
+        return releases;
+    }
+
     public async getSystemHosts(): Promise<string[]> {
         return invoke("get_system_hosts");
+    }
+
+    public async getThirdPartyLicenses(): Promise<ThirdPartyLicenseInfo[]> {
+        return invoke("get_third_party_licenses");
     }
 
     /* ========================================================================================== */

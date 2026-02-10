@@ -24,7 +24,7 @@ export interface ThirdPartyLicenseInfo {
     licenses: string;
 }
 
-export interface ReleaseInfo {
+export interface UniChatRelease {
     id: number;
     name: string;
     description: string;
@@ -35,6 +35,12 @@ export interface ReleaseInfo {
     publishedAt: string;
 }
 
+export interface UniChatReleaseInfo {
+    hasUpdate: boolean;
+    latestStable: UniChatRelease | null;
+    latestUnstable: UniChatRelease | null;
+}
+
 /* ========================================================================== */
 
 export interface GalleryItem {
@@ -42,13 +48,6 @@ export interface GalleryItem {
     type: "image" | "video" | "audio" | "file";
     previewUrl: string;
     url: string;
-}
-
-/* ========================================================================== */
-
-export interface UniChatWidgetGroup {
-    group: string;
-    items: string[];
 }
 
 /* ========================================================================== */
@@ -85,7 +84,6 @@ export interface UniChatScraper {
 export interface UniChatWidget {
     restPath: string;
     widgetSource: UniChatWidgetSource;
-    name: string;
 }
 
 export interface UniChatWidgetSource {

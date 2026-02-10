@@ -16,9 +16,9 @@ import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
-import semver from "semver";
 
-import { ReleaseInfo } from "unichat/types";
+import { commandService } from "unichat/services/commandService";
+import { UniChatRelease } from "unichat/types";
 
 import { CheckUpdatesSettingsTabStyledContainer, ReleaseNotesWrapper } from "./styled";
 
@@ -27,19 +27,15 @@ interface Props {
 }
 
 export function CheckUpdatesSettingsTab(_props: Props): React.ReactNode {
-    const [latestStable, setLatestStable] = React.useState<ReleaseInfo | null>(null);
-    const [latestUnstable, setLatestUnstable] = React.useState<ReleaseInfo | null>(null);
+    const [latestStable, setLatestStable] = React.useState<UniChatRelease | null>(null);
+    const [latestUnstable, setLatestUnstable] = React.useState<UniChatRelease | null>(null);
 
     const isMounted = React.useRef(false);
 
     async function init(): Promise<void> {
-        const stableRelease = UNICHAT_RELEASES.find((release) => !release.prerelease) || null;
-        const unstableRelease = UNICHAT_RELEASES.find((release) => release.prerelease) || null;
-
-        setLatestStable(stableRelease);
-        if (unstableRelease && stableRelease && semver.gt(unstableRelease.name, stableRelease.name)) {
-            setLatestUnstable(unstableRelease);
-        }
+        const releases = await commandService.getReleases();
+        setLatestStable(releases.latestStable);
+        setLatestUnstable(releases.latestUnstable);
     }
 
     React.useEffect(() => {

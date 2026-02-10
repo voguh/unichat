@@ -15,6 +15,9 @@ import clsx from "clsx";
 import Badge from "react-bootstrap/Badge";
 import Table from "react-bootstrap/Table";
 
+import { commandService } from "unichat/services/commandService";
+import { ThirdPartyLicenseInfo } from "unichat/types";
+
 import { ThirdPartyLicensesStyledContainer } from "./styled";
 
 interface Props {
@@ -22,6 +25,8 @@ interface Props {
 }
 
 export function ThirdPartyLicenses(_props: Props): React.ReactNode {
+    const [thirdPartyLicenses, setThirdPartyLicenses] = React.useState<ThirdPartyLicenseInfo[]>([]);
+
     function formatLicenses(expr: string): string[] {
         const ids = expr
             .replace(/[()]/g, " ")
@@ -34,6 +39,10 @@ export function ThirdPartyLicenses(_props: Props): React.ReactNode {
         return Array.from(new Set(ids)).sort();
     }
 
+    React.useEffect(() => {
+        commandService.getThirdPartyLicenses().then(setThirdPartyLicenses);
+    }, []);
+
     return (
         <ThirdPartyLicensesStyledContainer>
             <Table>
@@ -44,33 +53,33 @@ export function ThirdPartyLicenses(_props: Props): React.ReactNode {
                     </tr>
                 </thead>
                 <tbody>
-                    {UNICHAT_THIRD_PARTY_LICENSES.sort((a, b) =>
-                        `${a.source}:${a.name}`.localeCompare(`${b.source}:${b.name}`)
-                    ).map((pkg) => (
-                        <tr key={pkg.name} className={clsx({ withLink: !!pkg.repository })}>
-                            <td onClick={() => pkg.repository && openUrl(pkg.repository)}>
-                                <span>
-                                    <Badge bg="default" data-source={pkg.source}>
-                                        {pkg.source}
-                                    </Badge>
-                                    {pkg.name} v{pkg.version}
-                                </span>
-                            </td>
-                            <td>
-                                <span>
-                                    {formatLicenses(pkg.licenses).map((l) => (
-                                        <Badge
-                                            key={l}
-                                            bg="success"
-                                            onClick={() => openUrl(`https://opensource.org/license/${l}`)}
-                                        >
-                                            {l}
+                    {thirdPartyLicenses
+                        .sort((a, b) => `${a.source}:${a.name}`.localeCompare(`${b.source}:${b.name}`))
+                        .map((pkg) => (
+                            <tr key={pkg.name} className={clsx({ withLink: !!pkg.repository })}>
+                                <td onClick={() => pkg.repository && openUrl(pkg.repository)}>
+                                    <span>
+                                        <Badge bg="default" data-source={pkg.source}>
+                                            {pkg.source}
                                         </Badge>
-                                    ))}
-                                </span>
-                            </td>
-                        </tr>
-                    ))}
+                                        {pkg.name} v{pkg.version}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span>
+                                        {formatLicenses(pkg.licenses).map((l) => (
+                                            <Badge
+                                                key={l}
+                                                bg="success"
+                                                onClick={() => openUrl(`https://opensource.org/license/${l}`)}
+                                            >
+                                                {l}
+                                            </Badge>
+                                        ))}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
                 </tbody>
             </Table>
         </ThirdPartyLicensesStyledContainer>

@@ -59,16 +59,16 @@ struct GitHubRelease {
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatRelease {
-    id: u64,
-    name: String,
-    description: String,
+    pub id: u64,
+    pub name: String,
+    pub description: String,
 
-    url: String,
-    prerelease: bool,
+    pub url: String,
+    pub prerelease: bool,
 
-    created_at: String,
-    updated_at: String,
-    published_at: Option<String>
+    pub created_at: String,
+    pub updated_at: String,
+    pub published_at: Option<String>
 }
 
 fn get_github_releases_inner<T: serde::de::DeserializeOwned>() -> Result<T, Error> {

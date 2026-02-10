@@ -35,9 +35,6 @@ declare global {
     const UNICHAT_PLUGINS_DIR: string;
     const UNICHAT_WIDGETS_DIR: string;
 
-    const UNICHAT_THIRD_PARTY_LICENSES: import("unichat/types").ThirdPartyLicenseInfo[];
-    const UNICHAT_RELEASES: import("unichat/types").ReleaseInfo[];
-
     /* ====================================================================== */
 
     interface Window {
@@ -66,9 +63,6 @@ declare global {
         UNICHAT_LICENSE_FILE: string;
         UNICHAT_PLUGINS_DIR: string;
         UNICHAT_WIDGETS_DIR: string;
-
-        UNICHAT_THIRD_PARTY_LICENSES: import("unichat/types").ThirdPartyLicenseInfo[];
-        UNICHAT_RELEASES: import("unichat/types").ReleaseInfo[];
     }
 }
 
