@@ -151,7 +151,7 @@ export const BootstrapFixes = createGlobalStyle`
         --bs-btn-disabled-bg: var(--oc-dark-6);
         --bs-btn-disabled-border-color: var(--oc-dark-6);
 
-        min-height: 36px;
+        height: 36px;
         font-weight: 600;
         display: flex;
         align-items: center;
