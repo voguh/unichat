@@ -54,6 +54,7 @@ const preview: Preview = {
                 document.body.style.display = "flex";
                 document.body.style.justifyContent = "center";
                 document.body.style.alignItems = "center";
+                document.body.style.overflow = "auto";
             }, [themeVariant]);
 
             return (
