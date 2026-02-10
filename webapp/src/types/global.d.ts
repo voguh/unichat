@@ -19,6 +19,7 @@ declare global {
     /* ====================================================================== */
 
     const __IS_DEV__: boolean;
+    const __PLATFORM__: string;
     const UNICHAT_DISPLAY_NAME: string;
     const UNICHAT_NAME: string;
     const UNICHAT_VERSION: string;
@@ -48,6 +49,7 @@ declare global {
         /* ================================================================== */
 
         __IS_DEV__: boolean;
+        __PLATFORM__: string;
         UNICHAT_DISPLAY_NAME: string;
         UNICHAT_NAME: string;
         UNICHAT_VERSION: string;

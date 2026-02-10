@@ -26,6 +26,7 @@ import "@fontsource/roboto-mono/700-italic";
 import React from "react";
 import { createRoot } from "react-dom/client";
 
+import { platform } from "@tauri-apps/plugin-os";
 import { DefaultTheme, ThemeProvider } from "styled-components";
 
 import { ModalContainer } from "unichat/__internal__/ModalContainer";
@@ -39,6 +40,15 @@ import { theme } from "unichat/styles/theme";
 if (!("__IS_DEV__" in globalThis)) {
     Object.defineProperty(globalThis, "__IS_DEV__", {
         value: import.meta.env.DEV,
+        writable: false,
+        configurable: false,
+        enumerable: true
+    });
+}
+
+if (!("__PLATFORM__" in globalThis)) {
+    Object.defineProperty(globalThis, "__PLATFORM__", {
+        value: platform(),
         writable: false,
         configurable: false,
         enumerable: true

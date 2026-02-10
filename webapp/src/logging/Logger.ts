@@ -9,7 +9,6 @@
  ******************************************************************************/
 
 import { invoke } from "@tauri-apps/api/core";
-import { platform } from "@tauri-apps/plugin-os";
 import StackTrace from "stacktrace-js";
 
 type LogLevel = "trace" | "debug" | "info" | "warn" | "error";
@@ -30,7 +29,6 @@ function logLevelGuard(level: string): level is LogLevel {
     return ["trace", "debug", "info", "warn", "error"].includes(level);
 }
 
-const OS_TYPE = platform();
 export class Logger {
     private readonly name: string;
 
@@ -91,7 +89,7 @@ export class Logger {
         let lineNumber: number | null = null;
 
         const callStack = await StackTrace.get();
-        const callSite = callStack[OS_TYPE === "windows" ? 3 : 4];
+        const callSite = callStack[__PLATFORM__ === "windows" ? 3 : 4];
 
         if (callSite != null) {
             const _fileName = callSite.fileName;
