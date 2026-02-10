@@ -94,27 +94,68 @@ export const GlobalStyle = createGlobalStyle`
         gap: 4px;
     }
 
+    /* <=======================[ TOOLTIP OR POPOVER ]=======================> */
+    .popover {
+        /* --bs-popover-zindex: 1070; */
+        /* --bs-popover-max-width: 276px; */
+        /* --bs-popover-font-size: 0.875rem; */
+        /* --bs-popover-bg: var(--bs-body-bg); */
+        /* --bs-popover-border-width: var(--bs-border-width); */
+        /* --bs-popover-border-color: var(--bs-border-color-translucent); */
+        /* --bs-popover-border-radius: var(--bs-border-radius-lg); */
+        /* --bs-popover-inner-border-radius: calc(var(--bs-border-radius-lg) - var(--bs-border-width)); */
+        /* --bs-popover-box-shadow: var(--bs-box-shadow); */
+        /* --bs-popover-header-padding-x: 1rem; */
+        /* --bs-popover-header-padding-y: 0.5rem; */
+        /* --bs-popover-header-font-size: 1rem; */
+        /* --bs-popover-header-color: inherit; */
+        /* --bs-popover-header-bg: var(--bs-secondary-bg); */
+        /* --bs-popover-body-padding-x: 1rem; */
+        /* --bs-popover-body-padding-y: 1rem; */
+        /* --bs-popover-body-color: var(--bs-body-color); */
+        /* --bs-popover-arrow-width: 1rem; */
+        /* --bs-popover-arrow-height: 0.5rem; */
+        /* --bs-popover-arrow-border: var(--bs-popover-border-color); */
+    }
+
     .tooltip {
-        --bs-tooltip-zindex: 1080;
-        --bs-tooltip-max-width: 200px;
+        /* --bs-tooltip-zindex: 1080; */
+        /* --bs-tooltip-max-width: 200px; */
         --bs-tooltip-padding-x: 0.75rem;
         --bs-tooltip-padding-y: 0.5rem;
-        --bs-tooltip-margin: ;
+        /* --bs-tooltip-margin: ; */
         --bs-tooltip-font-size: 1rem;
         --bs-tooltip-color: var(--oc-black);
         --bs-tooltip-bg: var(--oc-gray-0);
-        --bs-tooltip-border-radius: var(--bs-border-radius);
+        /* --bs-tooltip-border-radius: var(--bs-border-radius); */
         --bs-tooltip-opacity: 1;
-        --bs-tooltip-arrow-width: 0.8rem;
-        --bs-tooltip-arrow-height: 0.4rem;
+        /* --bs-tooltip-arrow-width: 0.8rem; */
+        /* --bs-tooltip-arrow-height: 0.4rem; */
 
         > .tooltip-inner {
             border: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color);
         }
     }
+    /* <=====================[ END TOOLTIP OR POPOVER ]=====================> */
 
     /* <=============================[ BUTTON ]=============================> */
     .btn {
+        /* --bs-btn-padding-x: 0.75rem; */
+        /* --bs-btn-padding-y: 0.375rem; */
+        /* --bs-btn-font-family: ; */
+        /* --bs-btn-font-size: 1rem; */
+        /* --bs-btn-font-weight: 400; */
+        /* --bs-btn-line-height: 1.5; */
+        /* --bs-btn-color: var(--bs-body-color); */
+        /* --bs-btn-bg: transparent; */
+        /* --bs-btn-border-width: var(--bs-border-width); */
+        /* --bs-btn-border-color: transparent; */
+        /* --bs-btn-border-radius: var(--bs-border-radius); */
+        /* --bs-btn-hover-border-color: transparent; */
+        /* --bs-btn-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 1px rgba(0, 0, 0, 0.075); */
+        /* --bs-btn-disabled-opacity: 0.65; */
+        /* --bs-btn-focus-box-shadow: 0 0 0 0.25rem rgba(var(--bs-btn-focus-shadow-rgb), .5); */
+
         height: 36px;
     }
 
@@ -251,6 +292,53 @@ export const GlobalStyle = createGlobalStyle`
 
             &:focus {
                 border-color: var(--oc-blue-8);
+            }
+        }
+
+        > .colorpicker-inputgroup {
+            display: flex;
+            gap: 8px;
+
+            > .color-preview {
+                flex-shrink: 0;
+                position: relative;
+                width: 36px;
+                height: 36px;
+                border-radius: var(--bs-border-radius);
+                overflow: hidden;
+                background-image:
+                    linear-gradient(45deg, rgb(66, 66, 66) 25%, rgba(0, 0, 0, 0) 25%),
+                    linear-gradient(-45deg, rgb(66, 66, 66) 25%, rgba(0, 0, 0, 0) 25%),
+                    linear-gradient(45deg, rgba(0, 0, 0, 0) 75%, rgb(66, 66, 66) 75%),
+                    linear-gradient(-45deg, rgb(36, 36, 36) 75%, rgb(66, 66, 66) 75%);
+                background-position-x:
+                    0px,
+                    0px,
+                    4px,
+                    -4px;
+                background-position-y:
+                    0px,
+                    4px,
+                    -4px,
+                    0px;
+                background-size:
+                    8px 8px,
+                    8px 8px,
+                    8px 8px,
+                    8px 8px;
+
+                > div {
+                    width: 100%;
+                    height: 100%;
+                }
+
+                > span {
+                    position: absolute;
+                    inset: 0;
+                    box-shadow:
+                        rgba(0, 0, 0, 0.1) 0px 0px 0px 1px inset,
+                        rgba(0, 0, 0, 0.15) 0px 0px 4px 0px inset;
+                }
             }
         }
 

@@ -18,7 +18,7 @@ import { LoggerFactory } from "unichat/logging/LoggerFactory";
 interface Props extends Omit<OverlayTriggerProps, "children" | "overlay"> {
     children: JSX.Element;
 
-    title: React.ReactNode;
+    title?: React.ReactNode;
     content: React.ReactNode;
 
     hasDoneInitialMeasure?: boolean;
@@ -33,7 +33,7 @@ export function Popover(props: Props): React.ReactNode {
 
     const popover = (
         <BSPopover style={style} hasDoneInitialMeasure={hasDoneInitialMeasure}>
-            <BSPopover.Header style={headerStyle}>{title}</BSPopover.Header>
+            {title && <BSPopover.Header style={headerStyle}>{title}</BSPopover.Header>}
             <BSPopover.Body style={bodyStyle}>{content}</BSPopover.Body>
         </BSPopover>
     );
