@@ -32,6 +32,7 @@ import { ModalContainer } from "unichat/__internal__/ModalContainer";
 import { ToastContainer } from "unichat/__internal__/ToastContainer";
 import { App } from "unichat/App";
 import { AppContextProvider } from "unichat/contexts/AppContext";
+import { BootstrapFixes } from "unichat/styles/BootstrapFixes";
 import { GlobalStyle } from "unichat/styles/GlobalStyle";
 import { theme } from "unichat/styles/theme";
 
@@ -61,6 +62,7 @@ root.render(
     <React.StrictMode>
         <ThemeProvider theme={theme as DefaultTheme}>
             <GlobalStyle />
+            <BootstrapFixes />
 
             <AppContextProvider>
                 <App />
