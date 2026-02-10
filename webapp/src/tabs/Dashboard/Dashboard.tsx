@@ -17,15 +17,18 @@ import Card from "react-bootstrap/Card";
 import Dropdown from "react-bootstrap/Dropdown";
 import ListGroup from "react-bootstrap/ListGroup";
 
-import { GroupBase, Option, Select } from "unichat/components/forms/Select";
+import { Option, Select } from "unichat/components/forms/Select";
 import { Tooltip } from "unichat/components/OverlayTrigger";
 import { AppContext } from "unichat/contexts/AppContext";
+import { useScrapers } from "unichat/hooks/useScrapers";
+import { useWidgets } from "unichat/hooks/useWidgets";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
 import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
 import { UniChatScraper } from "unichat/types";
 import { scraperPriority, WIDGET_URL_PREFIX } from "unichat/utils/constants";
+import { toWidgetOptionGroup } from "unichat/utils/toWidgetOptionGroup";
 
 import { QRCodeModal } from "./QRCodeModal";
 import { ScraperCard } from "./ScraperCard";
@@ -35,13 +38,26 @@ interface Props {
     children?: React.ReactNode;
 }
 
+function sortScrapers(scrapers: UniChatScraper[]): UniChatScraper[] {
+    return scrapers.sort((a, b) => {
+        const pa = scraperPriority(a.id);
+        const pb = scraperPriority(b.id);
+
+        if (pa !== pb) {
+            return pa - pb;
+        }
+
+        return a.name.localeCompare(b.name);
+    });
+}
+
 const _logger = LoggerFactory.getLogger("Dashboard");
 export function Dashboard(_props: Props): React.ReactNode {
     const [selectedWidget, setSelectedWidget] = React.useState("default");
-    const [widgets, setWidgets] = React.useState<GroupBase<Option>[]>([]);
-    const [scrapers, setScrapers] = React.useState<UniChatScraper[]>([]);
     const [isOpenToLan, setIsOpenToLan] = React.useState(false);
 
+    const [scrapers, _reloadScrapers] = useScrapers(sortScrapers, []);
+    const [widgets, reloadWidgets] = useWidgets(toWidgetOptionGroup, []);
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
     const { requiresRestart, showWidgetPreview } = React.useContext(AppContext);
 
@@ -79,22 +95,8 @@ export function Dashboard(_props: Props): React.ReactNode {
         }
     }
 
-    async function handleFetchWidgets(): Promise<GroupBase<Option>[]> {
-        const widgets = await commandService.listWidgets();
-
-        return widgets.map((groupItem) => ({
-            label: groupItem.group,
-            options: groupItem.items
-                .filter((item) => item !== "example")
-                .sort((a, b) => a.localeCompare(b))
-                .map((widget) => ({ label: widget, value: widget }))
-        }));
-    }
-
     async function reloadIframe(): Promise<void> {
-        await commandService.reloadWidgets();
-        const widgets = await handleFetchWidgets();
-        setWidgets(widgets);
+        await reloadWidgets();
 
         if (iframeRef.current) {
             iframeRef.current.src = `${WIDGET_URL_PREFIX}/${selectedWidget}`;
@@ -103,24 +105,8 @@ export function Dashboard(_props: Props): React.ReactNode {
 
     React.useEffect(() => {
         async function init(): Promise<void> {
-            const widgets = await handleFetchWidgets();
-            setWidgets(widgets);
-
             const defaultPreviewWidget = await settingsService.getItem(UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET);
             setSelectedWidget(defaultPreviewWidget);
-
-            const scrapers = await commandService.getScrapers();
-            const sortedScrapers = scrapers.sort((a, b) => {
-                const pa = scraperPriority(a.id);
-                const pb = scraperPriority(b.id);
-
-                if (pa !== pb) {
-                    return pa - pb;
-                }
-
-                return a.name.localeCompare(b.name);
-            });
-            setScrapers(sortedScrapers);
 
             const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
             setIsOpenToLan(isOpenToLan);

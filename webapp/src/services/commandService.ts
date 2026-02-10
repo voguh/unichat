@@ -10,14 +10,7 @@
 
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
-import {
-    GalleryItem,
-    UniChatPluginMetadata,
-    UniChatScraper,
-    UniChatWidget,
-    UniChatWidgetGroup,
-    WidgetFields
-} from "unichat/types";
+import { GalleryItem, UniChatPluginMetadata, UniChatScraper, UniChatWidget, WidgetFields } from "unichat/types";
 
 async function invoke<T>(cmd: string, args?: Record<string, any>): Promise<T> {
     try {
@@ -123,16 +116,8 @@ export class CommandService {
         await invoke("set_widget_fieldstate", { widget, data });
     }
 
-    public async listDetailedWidgets(): Promise<UniChatWidget[]> {
-        return invoke<UniChatWidget[]>("list_detailed_widgets");
-    }
-
-    public async listWidgets(): Promise<UniChatWidgetGroup[]> {
-        return invoke("list_widgets");
-    }
-
-    public async reloadWidgets(): Promise<void> {
-        await invoke("reload_widgets");
+    public async getWidgets(): Promise<UniChatWidget[]> {
+        return invoke<UniChatWidget[]>("get_widgets");
     }
 }
 

@@ -13,15 +13,14 @@ use std::collections::HashMap;
 use std::fs;
 
 use indexmap::IndexMap;
-use serde_json::json;
 use serde_json::Value;
 use tauri::AppHandle;
 use tauri::Runtime;
 
+use crate::widgets;
 use crate::widgets::WidgetMetadata;
 use crate::widgets::WidgetSource;
 use crate::widgets::get_widget_from_rest_path;
-use crate::widgets::get_widgets;
 use crate::widgets::reload_user_widgets;
 
 #[tauri::command]
@@ -66,46 +65,8 @@ pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
 /* ================================================================================================================== */
 
 #[tauri::command]
-pub async fn list_detailed_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<WidgetMetadata>, String> {
-    let widgets = get_widgets().map_err(|e| format!("Failed to get widgets list: {:#?}", e))?;
-
-    return Ok(widgets);
-}
-
-#[tauri::command]
-pub async fn list_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Value, String> {
-    let widgets = get_widgets().map_err(|e| format!("Failed to get widgets list: {:#?}", e))?;
-
-    let mut system_widgets: Vec<String> = Vec::new();
-    let mut user_widgets: Vec<String> = Vec::new();
-    let mut plugins_widgets: Vec<String> = Vec::new();
-
-    for widget in widgets.iter() {
-        match widget.widget_source {
-            WidgetSource::System => {
-                system_widgets.push(widget.rest_path.clone());
-            }
-            WidgetSource::User => {
-                user_widgets.push(widget.rest_path.clone());
-            }
-            WidgetSource::SystemPlugin(_) => {
-                plugins_widgets.push(widget.rest_path.clone());
-            }
-            WidgetSource::UserPlugin(_) => {
-                plugins_widgets.push(widget.rest_path.clone());
-            }
-        }
-    }
-
-    return Ok(json!([
-        { "group": "System Widgets", "items": system_widgets },
-        { "group": "User Widgets", "items": user_widgets },
-        { "group": "Plugin Widgets", "items": plugins_widgets }
-    ]));
-}
-
-#[tauri::command]
-pub async fn reload_widgets<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<(), String> {
+pub async fn get_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<WidgetMetadata>, String> {
     reload_user_widgets().map_err(|e| format!("Failed to reload user widgets: {:#?}", e))?;
-    return Ok(());
+    let widgets = widgets::get_widgets().map_err(|e| format!("Failed to get widgets list: {:#?}", e))?;
+    return Ok(widgets);
 }
