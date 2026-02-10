@@ -1,12 +1,12 @@
 {
-    "include": ["__tests__", "src", "vite.config.ts"],
+    "include": ["__stories__", "__tests__", ".storybook", "src", "vite.config.ts"],
     "compilerOptions": {
         /* Visit https://aka.ms/tsconfig to read more about this file */
 
         /* Projects */
         // "incremental": true,                                            /* Save .tsbuildinfo files to allow for incremental compilation of projects. */
         // "composite": true,                                              /* Enable constraints that allow a TypeScript project to be used with project references. */
-        // "tsBuildInfoFile": "./.tsbuildinfo",                            /* Specify the path to .tsbuildinfo incremental compilation file. */
+        "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo", /* Specify the path to .tsbuildinfo incremental compilation file. */
         // "disableSourceOfProjectReferenceRedirect": true,                /* Disable preferring source files instead of declaration files when referencing composite projects. */
         // "disableSolutionSearching": true,                               /* Opt a project out of multi-project reference checking when editing. */
         // "disableReferencedProjectLoad": true,                           /* Reduce the number of projects loaded automatically by TypeScript. */
@@ -15,20 +15,20 @@
         "target": "ES2023",                                                /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
         "lib": ["ES2023", "DOM", "DOM.Iterable"],                          /* Specify a set of bundled library declaration files that describe the target runtime environment. */
         "jsx": "react-jsx",                                                /* Specify what JSX code is generated. */
-        "experimentalDecorators": true,                                    /* Enable experimental support for legacy experimental decorators. */
-        "emitDecoratorMetadata": true,                                     /* Emit design-type metadata for decorated declarations in source files. */
+        // "experimentalDecorators": true,                                 /* Enable experimental support for legacy experimental decorators. */
+        // "emitDecoratorMetadata": true,                                  /* Emit design-type metadata for decorated declarations in source files. */
         // "jsxFactory": "",                                               /* Specify the JSX factory function used when targeting React JSX emit, e.g. 'React.createElement' or 'h'. */
         // "jsxFragmentFactory": "",                                       /* Specify the JSX Fragment reference used for fragments when targeting React JSX emit e.g. 'React.Fragment' or 'Fragment'. */
         // "jsxImportSource": "",                                          /* Specify module specifier used to import the JSX factory functions when using 'jsx: react-jsx*'. */
         // "reactNamespace": "",                                           /* Specify the object invoked for 'createElement'. This only applies when targeting 'react' JSX emit. */
         // "noLib": true,                                                  /* Disable including any library files, including the default lib.d.ts. */
-        // "useDefineForClassFields": true,                                /* Emit ECMAScript-standard-compliant class fields. */
-        // "moduleDetection": "auto",                                      /* Control what method is used to detect module-format JS files. */
+        "useDefineForClassFields": true,                                   /* Emit ECMAScript-standard-compliant class fields. */
+        "moduleDetection": "force",                                        /* Control what method is used to detect module-format JS files. */
 
         /* Modules */
         "module": "ESNext",                                                /* Specify what module code is generated. */
         // "rootDir": "./",                                                /* Specify the root folder within your source files. */
-        "moduleResolution": "node",                                        /* Specify how TypeScript looks up a file from a given module specifier. */
+        "moduleResolution": "bundler",                                     /* Specify how TypeScript looks up a file from a given module specifier. */
         // "baseUrl": "./",                                                /* Specify the base directory to resolve non-relative module names. */
         // "paths": {},                                                    /* Specify a set of entries that re-map imports to additional lookup locations. */
         // "rootDirs": [],                                                 /* Allow multiple folders to be treated as one when resolving modules. */
@@ -36,7 +36,7 @@
         "types": ["vite/client", "vitest/globals"],                        /* Specify type package names to be included without being referenced in a source file. */
         // "allowUmdGlobalAccess": true,                                   /* Allow accessing UMD globals from modules. */
         // "moduleSuffixes": [],                                           /* List of file name suffixes to search when resolving a module. */
-        // "allowImportingTsExtensions": true,                             /* Allow imports to include TypeScript file extensions. Requires '--moduleResolution bundler' and either '--noEmit' or '--emitDeclarationOnly' to be set. */
+        "allowImportingTsExtensions": true,                                /* Allow imports to include TypeScript file extensions. Requires '--moduleResolution bundler' and either '--noEmit' or '--emitDeclarationOnly' to be set. */
         // "rewriteRelativeImportExtensions": true,                        /* Rewrite '.ts', '.tsx', '.mts', and '.cts' file extensions in relative import paths to their JavaScript equivalent in output files. */
         // "resolvePackageJsonExports": true,                              /* Use the package.json 'exports' field when resolving package imports. */
         // "resolvePackageJsonImports": true,                              /* Use the package.json 'imports' field when resolving imports. */
