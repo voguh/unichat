@@ -16,7 +16,7 @@ import Card from "react-bootstrap/Card";
 
 import { Button } from "unichat/components/Button";
 import { TextInput } from "unichat/components/forms/TextInput";
-import { Tooltip } from "unichat/components/OverlayTrigger";
+import { Popover } from "unichat/components/OverlayTrigger";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
@@ -181,14 +181,13 @@ export function ScraperCard(props: Props): React.ReactNode {
                     ))}
                 </ScraperBadgesWrapper>
                 <ScraperCardStyledContainer>
-                    <Tooltip
+                    <Popover
                         content={editingTooltip}
                         placement="bottom-start"
                         trigger="focus"
                         style={
                             {
-                                "--bs-tooltip-max-width": "407px",
-                                "--bs-tooltip-bg": "var(--oc-gray-8)"
+                                "--bs-popover-max-width": "407px"
                             } as React.CSSProperties
                         }
                     >
@@ -199,7 +198,7 @@ export function ScraperCard(props: Props): React.ReactNode {
                             disabled={loading || scraperIsLoading || scraperIsRunning}
                             data-tour={`${scraper.id}--url-input`}
                         />
-                    </Tooltip>
+                    </Popover>
                     <Button
                         color="gray"
                         onClick={scraperIsRunning ? handleStop : handleStart}
