@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -49,7 +48,7 @@ function fakeSuperChatTier(ytValue: string, platform: UniChatPlatform): number |
 
 export async function buildEmulatedEventData<T extends UniChatEvent>(
     eventType: T["type"],
-    requirePlatform: UniChatPlatform
+    requirePlatform?: UniChatPlatform
 ): Promise<T["data"]> {
     const userDisplayName = randomizeAuthorDisplayName();
     const rng = seededRandom(userDisplayName);

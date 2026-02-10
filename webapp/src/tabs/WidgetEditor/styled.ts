@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -44,11 +43,11 @@ export const WidgetEditorStyledContainer = styled.div`
 
     > .editor-area {
         grid-area: EDT;
-        background-color: var(--mantine-color-dark-6);
-        border-left: calc(0.0625rem * var(--mantine-scale)) solid var(--mantine-color-dark-4);
-        border-bottom: calc(0.0625rem * var(--mantine-scale)) solid var(--mantine-color-dark-4);
+        background-color: var(--oc-dark-6);
+        border-left: calc(0.0625rem) solid var(--oc-dark-4);
+        border-bottom: calc(0.0625rem) solid var(--oc-dark-4);
         overflow: hidden;
-        border-bottom-left-radius: var(--mantine-radius-default);
+        border-bottom-left-radius: var(--bs-border-radius);
         padding: 8px;
         display: flex;
         flex-direction: column;
@@ -83,7 +82,7 @@ export const WidgetEditorStyledContainer = styled.div`
 
             > .mantine-Accordion-root {
                 > .mantine-Accordion-item {
-                    background: var(--mantine-color-dark-7);
+                    background: var(--oc-dark-7);
 
                     &:first-child {
                         border-bottom-left-radius: 0;
@@ -147,11 +146,11 @@ export const WidgetEditorStyledContainer = styled.div`
 
     > .emulator-area {
         grid-area: EMT;
-        background-color: var(--mantine-color-dark-6);
-        border-right: calc(0.0625rem * var(--mantine-scale)) solid var(--mantine-color-dark-4);
-        border-bottom: calc(0.0625rem * var(--mantine-scale)) solid var(--mantine-color-dark-4);
+        background-color: var(--oc-dark-6);
+        border-right: calc(0.0625rem) solid var(--oc-dark-4);
+        border-bottom: calc(0.0625rem) solid var(--oc-dark-4);
         overflow: hidden;
-        border-bottom-right-radius: var(--mantine-radius-default);
+        border-bottom-right-radius: var(--bs-border-radius);
         padding: 8px;
 
         > .emulator-header {
@@ -165,20 +164,28 @@ export const WidgetEditorStyledContainer = styled.div`
         > .emulator-operation-mode-select {
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-end;
             margin-bottom: 8px;
             gap: 8px;
+
+            > .form-group {
+                flex: 1;
+            }
 
             > button {
                 width: 36px;
                 height: 36px;
                 padding: 0;
-                margin-top: 23px;
             }
         }
 
         > .emulator-events-dispatcher {
-            > .mantine-ButtonGroup-group {
+            > .emulator-events-title {
+                width: 100%;
+                text-align: center;
+            }
+
+            > .btn-group-vertical {
                 width: 100%;
             }
         }

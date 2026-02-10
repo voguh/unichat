@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -11,81 +10,55 @@
 
 import React from "react";
 
-import {
-    Accordion,
-    Button,
-    Card,
-    Checkbox,
-    ComboboxItemGroup,
-    Divider,
-    Input,
-    NumberInput,
-    Select,
-    Slider,
-    Text,
-    Textarea,
-    TextInput,
-    Tooltip
-} from "@mantine/core";
-import { notifications } from "@mantine/notifications";
+import { revealItemInDir } from "@tauri-apps/plugin-opener";
+import Accordion from "react-bootstrap/Accordion";
+import Button from "react-bootstrap/Button";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
+import Card from "react-bootstrap/Card";
 
-import type { UniChatEvent, UniChatPlatform } from "unichat-widgets/unichat";
-import { ColorPicker } from "unichat/components/ColorPicker";
+import { UniChatEvent, UniChatPlatform } from "unichat-widgets/unichat";
+import { Gallery, GalleryActions } from "unichat/__internal__/GalleryModal";
+import { Checkbox } from "unichat/components/forms/Checkbox";
+import { ColorPicker } from "unichat/components/forms/ColorPicker";
+import { NumberInput } from "unichat/components/forms/NumberInput";
+import { Select } from "unichat/components/forms/Select";
+import { Textarea } from "unichat/components/forms/Textarea";
+import { TextInput } from "unichat/components/forms/TextInput";
+import { GalleryFileInput } from "unichat/components/GalleryFileInput";
+import { Tooltip } from "unichat/components/OverlayTrigger";
+import { useWidgets } from "unichat/hooks/useWidgets";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
-import { UniChatWidget, WidgetFields } from "unichat/types";
+import { modalService } from "unichat/services/modalService";
+import { notificationService } from "unichat/services/notificationService";
+import { WidgetFields } from "unichat/types";
 import { WIDGET_URL_PREFIX } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
-import {
-    isGeneralUserWidget,
-    isSystemPluginWidget,
-    isSystemWidget,
-    isUserWidget
-} from "unichat/utils/widgetSourceTypeGuards";
+import { toWidgetOptionGroup } from "unichat/utils/toWidgetOptionGroup";
+import { isGeneralUserWidget, isSystemPluginWidget, isSystemWidget } from "unichat/utils/widgetSourceTypeGuards";
 
-import { GalleryFileInput } from "../GalleryFileInput";
 import { WidgetEditorStyledContainer } from "./styled";
 import { buildEmulatedEventData } from "./util/buildEmulatedEventData";
-
-export interface WidgetMetadata {
-    fields: Record<string, WidgetFields>;
-    fieldstate: Record<string, any>;
-    html: string;
-    js: string;
-    css: string;
-}
 
 interface Props {
     children?: React.ReactNode;
 }
 
-const _logger = LoggerFactory.getLogger(__filename);
+const _logger = LoggerFactory.getLogger("WidgetEditor");
 export function WidgetEditor(_props: Props): React.ReactNode {
     const [emulationMode, setEmulationMode] = React.useState<UniChatPlatform | "mixed">("mixed");
 
     const [fields, setFields] = React.useState<Record<string, WidgetFields>>({});
     const [fieldState, setFieldState] = React.useState<Record<string, any>>({});
     const [selectedWidget, setSelectedWidget] = React.useState<string>("default");
-    const [widgets, setWidgets] = React.useState<Map<string, UniChatWidget>>(new Map());
 
+    const [widgets, reloadWidgets] = useWidgets((ws) => new Map(ws.map((w) => [w.restPath, w])), new Map());
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
     function buildField(key: string, builder: WidgetFields): JSX.Element {
         const value = fieldState[key] ?? ("value" in builder ? builder.value : null);
 
         switch (builder.type) {
-            case "slider":
-                return (
-                    <Input.Wrapper>
-                        <Slider
-                            value={value}
-                            step={builder.step ?? 0.1}
-                            min={builder.min ?? 0}
-                            max={builder.max ?? 100}
-                            onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
-                        />
-                    </Input.Wrapper>
-                );
             case "checkbox":
                 return (
                     <Checkbox
@@ -116,7 +89,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         description={builder.description}
                         value={value}
                         onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
-                        data={Object.entries(builder.options).map(([value, label]) => ({ value, label }))}
+                        options={Object.entries(builder.options).map(([value, label]) => ({ value, label }))}
                     />
                 );
             case "number":
@@ -146,8 +119,8 @@ export function WidgetEditor(_props: Props): React.ReactNode {
             case "divider":
                 return (
                     <div key={key} className="divider-wrapper">
-                        <Divider />
-                        {builder.label && <Text size="sm">{builder.label}</Text>}
+                        <hr />
+                        {builder.label && <span>{builder.label}</span>}
                     </div>
                 );
             case "filepicker":
@@ -203,57 +176,19 @@ export function WidgetEditor(_props: Props): React.ReactNode {
             .map(([k]) => k)[0];
 
         return (
-            <Accordion variant="separated" chevronIconSize={18} defaultValue={firstSelectedGroup}>
+            <Accordion defaultActiveKey={firstSelectedGroup}>
                 {Object.entries(groups)
                     .filter(([_, elements]) => elements.length > 0)
                     .map(([groupName, elements]) => {
                         return (
-                            <Accordion.Item key={groupName} value={groupName}>
-                                <Accordion.Control>{groupName}</Accordion.Control>
-                                <Accordion.Panel>{elements}</Accordion.Panel>
+                            <Accordion.Item key={groupName} eventKey={groupName}>
+                                <Accordion.Header>{groupName}</Accordion.Header>
+                                <Accordion.Body>{elements}</Accordion.Body>
                             </Accordion.Item>
                         );
                     })}
             </Accordion>
         );
-    }
-
-    /* ====================================================================== */
-
-    function toOptions(widgets: Map<string, UniChatWidget>): ComboboxItemGroup<string>[] {
-        const systemWidgets = [];
-        const userWidgets = [];
-        const pluginWidgets = [];
-
-        for (const widget of widgets.values()) {
-            if (isSystemWidget(widget)) {
-                systemWidgets.push({ value: widget.restPath, label: widget.restPath });
-            } else if (isUserWidget(widget)) {
-                userWidgets.push({ value: widget.restPath, label: widget.restPath });
-            } else {
-                pluginWidgets.push({ value: widget.restPath, label: widget.restPath });
-            }
-        }
-
-        const options: ComboboxItemGroup<string>[] = [];
-
-        if (systemWidgets.length > 0) {
-            options.push({
-                group: "System Widgets",
-                items: systemWidgets.sort((a, b) => a.label.localeCompare(b.label))
-            });
-        }
-        if (userWidgets.length > 0) {
-            options.push({ group: "User Widgets", items: userWidgets.sort((a, b) => a.label.localeCompare(b.label)) });
-        }
-        if (pluginWidgets.length > 0) {
-            options.push({
-                group: "Plugin Widgets",
-                items: pluginWidgets.sort((a, b) => a.label.localeCompare(b.label))
-            });
-        }
-
-        return options;
     }
 
     /* ====================================================================== */
@@ -287,16 +222,8 @@ export function WidgetEditor(_props: Props): React.ReactNode {
         }
     }
 
-    async function handleFetchWidgets(): Promise<void> {
-        const widgets = await commandService.listDetailedWidgets();
-
-        const widgetsMap = new Map(widgets.filter((w) => w.restPath !== "example").map((w) => [w.restPath, w]));
-        setWidgets(widgetsMap);
-    }
-
     async function reloadIframe(): Promise<void> {
-        await commandService.reloadWidgets();
-        await handleFetchWidgets();
+        await reloadWidgets();
 
         if (iframeRef.current) {
             iframeRef.current.src = `${WIDGET_URL_PREFIX}/${selectedWidget}`;
@@ -310,19 +237,13 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                 await commandService.setWidgetFieldState(selectedWidget, {});
                 setFieldState({});
                 reloadIframe();
-                notifications.show({
-                    title: "Success",
-                    message: "Widget field state reset.",
-                    color: "green",
-                    position: "top-center"
-                });
+                notificationService.success({ title: "Success", message: "Widget field state reset." });
             }
         } catch (err) {
             _logger.error("An error occurred on save 'fieldstate.json'", err);
-            notifications.show({
+            notificationService.error({
                 title: "Error",
-                message: `Failed to apply widget field state: ${(err as Error).message}`,
-                color: "red"
+                message: `Failed to apply widget field state: ${(err as Error).message}`
             });
         }
     }
@@ -332,19 +253,13 @@ export function WidgetEditor(_props: Props): React.ReactNode {
             if (!Strings.isNullOrEmpty(selectedWidget)) {
                 await commandService.setWidgetFieldState(selectedWidget, fieldState);
                 reloadIframe();
-                notifications.show({
-                    title: "Success",
-                    message: "Widget field state applied.",
-                    color: "green",
-                    position: "top-center"
-                });
+                notificationService.success({ title: "Success", message: "Widget field state applied." });
             }
         } catch (err) {
             _logger.error("An error occurred on save 'fieldstate.json'", err);
-            notifications.show({
+            notificationService.error({
                 title: "Error",
-                message: `Failed to apply widget field state: ${(err as Error).message}`,
-                color: "red"
+                message: `Failed to apply widget field state: ${(err as Error).message}`
             });
         }
     }
@@ -353,29 +268,18 @@ export function WidgetEditor(_props: Props): React.ReactNode {
         handleFetchWidgetData();
     }, [selectedWidget]);
 
-    React.useEffect(() => {
-        async function init(): Promise<void> {
-            await handleFetchWidgets();
-        }
-
-        init();
-    }, []);
-
     return (
         <WidgetEditorStyledContainer>
-            <Card className="preview-header" withBorder shadow="xs">
+            <Card className="preview-header">
                 <div className="preview-header-widget-selector">
                     <Select
-                        value={selectedWidget}
-                        data={toOptions(widgets)}
-                        allowDeselect={false}
-                        onChange={setSelectedWidget}
-                        disabled={widgets.size === 0}
-                        placeholder={widgets.size === 0 ? "No user widgets available" : "Select a widget"}
+                        value={{ label: selectedWidget, value: selectedWidget }}
+                        options={toWidgetOptionGroup(widgets.values())}
+                        onChange={(option) => setSelectedWidget(option!.value)}
                     />
                 </div>
 
-                <Tooltip label="Reload widget view" position="left" withArrow>
+                <Tooltip content="Reload widget view" placement="left">
                     <Button onClick={reloadIframe}>
                         <i className="fas fa-sync" />
                     </Button>
@@ -386,20 +290,12 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                     <div>Fields</div>
                     {Object.keys(fields).length > 0 && (
                         <>
-                            <Button
-                                size="xs"
-                                variant="default"
-                                leftSection={<i className="fas fa-undo" />}
-                                onClick={handleReset}
-                            >
+                            <Button variant="default" onClick={handleReset}>
+                                <i className="fas fa-undo" />
                                 Reset
                             </Button>
-                            <Button
-                                size="xs"
-                                color="green"
-                                leftSection={<i className="fas fa-check" />}
-                                onClick={handleApply}
-                            >
+                            <Button variant="success" onClick={handleApply}>
+                                <i className="fas fa-check" />
                                 Apply
                             </Button>
                         </>
@@ -415,15 +311,14 @@ export function WidgetEditor(_props: Props): React.ReactNode {
 
                 <div className="emulator-operation-mode-select">
                     <Select
-                        value={emulationMode}
+                        value={{ label: emulationMode, value: emulationMode }}
                         label="Emulation Mode"
-                        data={[
+                        options={[
                             { value: "mixed", label: "Mixed" },
                             { value: "twitch", label: "Twitch Only" },
                             { value: "youtube", label: "YouTube Only" }
                         ]}
-                        allowDeselect={false}
-                        onChange={(value) => setEmulationMode(value as UniChatPlatform | "mixed")}
+                        onChange={(option) => setEmulationMode(option!.value as UniChatPlatform | "mixed")}
                     />
                     <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:clear")}>
                         <i className="fas fa-eraser" />
@@ -431,53 +326,61 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                 </div>
 
                 <div className="emulator-events-dispatcher" data-tour="widget-editor-emulator-events-dispatcher">
-                    <Text size="sm">Emit Events</Text>
-                    <Button.Group orientation="vertical">
-                        <Button
-                            variant="default"
-                            leftSection={<i className="fas fa-comment" />}
-                            onClick={() => dispatchEmulatedEvent("unichat:message")}
-                        >
+                    <div className="emulator-events-title">Emit Events</div>
+                    <ButtonGroup vertical>
+                        <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:message")}>
+                            <i className="fas fa-comment" />
                             Message
                         </Button>
-                        <Button
-                            variant="default"
-                            leftSection={<i className="fas fa-money-bill-wave" />}
-                            onClick={() => dispatchEmulatedEvent("unichat:donate")}
-                        >
+                        <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:donate")}>
+                            <i className="fas fa-money-bill-wave" />
                             Donate
                         </Button>
-                        <Button
-                            variant="default"
-                            leftSection={<i className="fas fa-star" />}
-                            onClick={() => dispatchEmulatedEvent("unichat:sponsor")}
-                        >
+                        <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:sponsor")}>
+                            <i className="fas fa-star" />
                             Sponsor
                         </Button>
-                        <Button
-                            variant="default"
-                            leftSection={<i className="fas fa-meteor" />}
-                            onClick={() => dispatchEmulatedEvent("unichat:sponsor_gift")}
-                        >
+                        <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:sponsor_gift")}>
+                            <i className="fas fa-meteor" />
                             Sponsor Gift
                         </Button>
-                        <Button
-                            variant="default"
-                            leftSection={<i className="fas fa-user-friends" />}
-                            onClick={() => dispatchEmulatedEvent("unichat:raid")}
-                        >
+                        <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:raid")}>
+                            <i className="fas fa-user-friends" />
                             Raid
                         </Button>
-                        <Button
-                            variant="default"
-                            leftSection={<i className="fas fa-box" />}
-                            onClick={() => dispatchEmulatedEvent("unichat:redemption", "twitch")}
-                        >
+                        <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:redemption", "twitch")}>
+                            <i className="fas fa-box" />
                             Redemption
                         </Button>
-                    </Button.Group>
+                    </ButtonGroup>
                 </div>
             </div>
         </WidgetEditorStyledContainer>
+    );
+}
+
+export function WidgetEditorLeftSection(_props: Props): React.ReactNode {
+    function toggleGallery(): void {
+        modalService.openModal({
+            size: "xl",
+            title: "Gallery",
+            actions: <GalleryActions />,
+            children: <Gallery />
+        });
+    }
+
+    return (
+        <>
+            <Tooltip content="Open user widgets folder" placement="right">
+                <Button onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)} data-tour="user-widgets-directory">
+                    <i className="fas fa-folder" />
+                </Button>
+            </Tooltip>
+            <Tooltip content="Gallery" placement="right">
+                <Button onClick={toggleGallery} data-tour="gallery-toggle">
+                    <i className="fas fa-images" />
+                </Button>
+            </Tooltip>
+        </>
     );
 }

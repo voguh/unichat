@@ -1,5 +1,4 @@
 /*!******************************************************************************
- * UniChat
  * Copyright (c) 2025-2026 Voguh
  *
  * This program and the accompanying materials are made
@@ -168,12 +167,12 @@ export async function randomizeMessage(rng: () => number): Promise<[string, UniC
 
     const structures: Array<() => [string, UniChatEmote[]]> = [
         () => {
-            const emotes = [];
+            const emotes: UniChatEmote[] = [];
 
             return [`${pRng(pronouns)} ${pRng(verbs)} ${pRng(adjectives)} ${pRng(nouns)}.`, emotes];
         },
         () => {
-            const emotes = [];
+            const emotes: UniChatEmote[] = [];
 
             return [`The ${pRng(adjectives)} ${pRng(nouns)} ${pRng(verbs)} ${pRng(adverbs)}.`, emotes];
         },
