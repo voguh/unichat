@@ -113,15 +113,6 @@ Exemplo de arquivo `fields.json`:
         "max": 100,
         "step": 1
     },
-    "sliderProperty": {
-        "type": "slider",
-        "label": "I'm a slider",
-        "description": "This is a slider property",
-        "value": 50,
-        "min": 0,
-        "max": 100,
-        "step": 1
-    },
     "textProperty": {
         "type": "text",
         "label": "I'm a text input",

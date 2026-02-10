@@ -102,7 +102,7 @@ export interface WidgetFieldsText {
 }
 
 export interface WidgetFieldsNumber {
-    type: "number" | "slider";
+    type: "number";
     group?: string;
     label: string;
     description?: string;

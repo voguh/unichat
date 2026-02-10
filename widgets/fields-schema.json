@@ -22,7 +22,7 @@
                 {
                     "type": "object",
                     "properties": {
-                        "type": { "enum": ["number", "slider"] },
+                        "type": { "enum": ["number"] },
                         "group": { "type": "string" },
                         "label": { "type": "string" },
                         "description": { "type": "string" },

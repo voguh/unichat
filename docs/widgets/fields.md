@@ -12,20 +12,20 @@ Are replaced as normal strings.
 | `description` | `string`                 | NO       | Field description |
 | `value`       | `string`                 | NO       | Default value     |
 
-#### Field `number` or `slider`
+#### Field `number`
 
 Are replaced as normal numbers.
 
-| Parameter     | Type                     | Required | Description       |
-|---------------|--------------------------|----------|-------------------|
-| `type`        | `"number"` or `"slider"` | YES      | Field type        |
-| `group`       | `string`                 | NO       | Field group       |
-| `label`       | `string`                 | YES      | Field label       |
-| `description` | `string`                 | NO       | Field description |
-| `value`       | `number`                 | NO       | Default value     |
-| `min`         | `number`                 | NO       | Minimum value     |
-| `max`         | `number`                 | NO       | Maximum value     |
-| `step`        | `number`                 | NO       | Increment         |
+| Parameter     | Type       | Required | Description       |
+|---------------|------------|----------|-------------------|
+| `type`        | `"number"` | YES      | Field type        |
+| `group`       | `string`   | NO       | Field group       |
+| `label`       | `string`   | YES      | Field label       |
+| `description` | `string`   | NO       | Field description |
+| `value`       | `number`   | NO       | Default value     |
+| `min`         | `number`   | NO       | Minimum value     |
+| `max`         | `number`   | NO       | Maximum value     |
+| `step`        | `number`   | NO       | Increment         |
 
 #### Field `checkbox`
 

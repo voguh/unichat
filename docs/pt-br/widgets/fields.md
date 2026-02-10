@@ -12,20 +12,20 @@ São substituídos como strings normais.
 | `description` | `string`                 | NÃO         | Descrição do campo |
 | `value`       | `string`                 | NÃO         | Valor padrão       |
 
-#### Campo `number` ou `slider`
+#### Campo `number`
 
 São substituídos como números normais.
 
-| Parâmetro     | Tipo                     | Obrigatório | Descrição          |
-|---------------|--------------------------|-------------|--------------------|
-| `type`        | `"number"` ou `"slider"` | SIM         | Tipo do campo      |
-| `group`       | `string`                 | NÃO         | Grupo do campo     |
-| `label`       | `string`                 | SIM         | Rótulo do campo    |
-| `description` | `string`                 | NÃO         | Descrição do campo |
-| `value`       | `number`                 | NÃO         | Valor padrão       |
-| `min`         | `number`                 | NÃO         | Valor mínimo       |
-| `max`         | `number`                 | NÃO         | Valor máximo       |
-| `step`        | `number`                 | NÃO         | Incremento         |
+| Parâmetro     | Tipo       | Obrigatório | Descrição          |
+|---------------|------------|-------------|--------------------|
+| `type`        | `"number"` | SIM         | Tipo do campo      |
+| `group`       | `string`   | NÃO         | Grupo do campo     |
+| `label`       | `string`   | SIM         | Rótulo do campo    |
+| `description` | `string`   | NÃO         | Descrição do campo |
+| `value`       | `number`   | NÃO         | Valor padrão       |
+| `min`         | `number`   | NÃO         | Valor mínimo       |
+| `max`         | `number`   | NÃO         | Valor máximo       |
+| `step`        | `number`   | NÃO         | Incremento         |
 
 #### Campo `checkbox`
 
