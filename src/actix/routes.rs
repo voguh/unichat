@@ -80,6 +80,9 @@ static USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) G
 #[cfg(target_os = "linux")]
 static USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0";
 
+#[cfg(target_os = "macos")]
+static USER_AGENT: &str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0";
+
 #[get("/ytimg/{path:.*}")]
 pub async fn ytimg(req: HttpRequest) -> Result<impl Responder, actix_web::Error> {
     let asset_path: String = req.match_info().query("path").parse()?;
