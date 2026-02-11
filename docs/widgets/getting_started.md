@@ -32,9 +32,9 @@ So, the folder structure of a typical widget is as follows:
 widget-example
 ├── assets (optional)
 ├── fields.json (optional)
-├── index.html (required)
-├── script.js (required)
-└── style.css (required)
+├── widget.css (required)
+├── widget.html (required)
+└── widget.js (required)
 ```
 
 !> The widget folder name must contain only ASCII alphanumeric characters, hyphens, or underscores.
@@ -51,7 +51,7 @@ This folder is optional and is intended to provide static files. They can be acc
 
 This file is used by the widget editor to enable customizations. It has syntax similar to StreamElements’ `fields`, making it easy to create widgets for those already familiar with that platform.
 
-- All references to keys defined in `fields.json` written in the `index.html`, `script.js`, and `style.css` files following the pattern `{{key}}` will be replaced by the default values or those set by the user in the UniChat widget editor.
+- All references to keys defined in `fields.json` written in the `widget.css`, `widget.html` and `widget.js` files following the pattern `{{key}}` will be replaced by the default values or those set by the user in the UniChat widget editor.
 - The schema can be found [here](https://github.com/voguh/unichat/blob/main/widgets/fields-schema.json).
 - Documentation for each field type can be found [here](/widgets/fields).
 
@@ -138,17 +138,23 @@ Example `fields.json` file:
 
 ---
 
-### `index.html` file
+### `widget.css` file
+
+This file is required and must contain the widget’s CSS code.
+
+---
+
+### `widget.html` file
 
 As with custom StreamElements widgets, this file is the entry point for the widget’s graphical part.
 
 - This file should not contain any extra tags, only the content inside the `<body>`.
-- It is not necessary to include `<script>` or `<link>` tags for the `script.js` and `style.css` files, as they will be injected automatically.
+- It is not necessary to include `<script>` or `<link>` tags for the `widget.js` and `widget.css` files, as they will be injected automatically.
 - You may use other `<script>` or `<link>` tags to include external libraries, such as fonts.
 
 ---
 
-### `script.js` file
+### `widget.js` file
 
 This file is required and must contain the widget’s JavaScript code.
 On this file you can listen to some window events dispatched by UniChat:
@@ -185,10 +191,4 @@ On this file you can listen to some window events dispatched by UniChat:
   | Property | Type     | Description                                   |
   |----------|----------|-----------------------------------------------|
   | `key`    | `string` | The key of the updated userstore entry.       |
-  | `value`  | `string`    | The new value of the updated userstore entry. |
-
----
-
-### `style.css` file
-
-This file is required and must contain the widget’s CSS code.
+  | `value`  | `string` | The new value of the updated userstore entry. |

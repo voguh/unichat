@@ -32,9 +32,9 @@ Então, a estrutura de pastas de um widget típico é a seguinte:
 widget-example
 ├── assets (opcional)
 ├── fields.json (opcional)
-├── index.html (obrigatório)
-├── script.js (obrigatório)
-└── style.css (obrigatório)
+├── widget.css (obrigatório)
+├── widget.html (obrigatório)
+└── widget.js (obrigatório)
 ```
 
 !> O nome da pasta do widget deve conter apenas caracteres ASCII alfanuméricos, hífens ou underscores.
@@ -51,7 +51,7 @@ Esta pasta é opcional e tem o objetivo de prover arquivos estáticos. Eles pode
 
 Este arquivo é utilizado pelo editor de widgets para ativar customizações. Ele possui a sintaxe parecida com o `fields` do StreamElements, facilitando a criação de widgets para quem já está acostumado com aquela plataforma.
 
-- Todas as referencias às chaves definidas no `fields.json` escritas nos arquivos `index.html`, `script.js` e `style.css` seguindo o padrão `{{key}}` serão substituídas pelos valores padrões ou definidos pelo usuário no editor de widgets do UniChat.
+- Todas as referencias às chaves definidas no `fields.json` escritas nos arquivos `widget.css`, `widget.html` e `widget.js` seguindo o padrão `{{key}}` serão substituídas pelos valores padrões ou definidos pelo usuário no editor de widgets do UniChat.
 - O schema pode ser encontrado [aqui](https://github.com/voguh/unichat/blob/main/widgets/fields-schema.json).
 - A documentação para cada tipo de campo pode ser encontrada [aqui](/pt-br/widgets/fields).
 
@@ -139,17 +139,23 @@ Exemplo de arquivo `fields.json`:
 
 ---
 
-### Arquivo `index.html`
+### Arquivo `widget.css`
+
+Este arquivo é obrigatório e deve conter o código CSS do widget.
+
+---
+
+### Arquivo `widget.html`
 
 Assim como os widgets customizados do StreamElements, este arquivo é o ponto de entrada para a parte grafica do widget.
 
 - Este arquivo não deve conter nenhuma tag extra, apenas o conteúdo dentro do `<body>`.
-- Não é necessário incluir tags `<script>` ou `<link>` para os arquivos `script.js` e `style.css`, eles serão injetados automaticamente.
+- Não é necessário incluir tags `<script>` ou `<link>` para os arquivos `widget.js` e `widget.css`, eles serão injetados automaticamente.
 - Você pode utilizar outras tags `<script>` ou `<link>` para incluir bibliotecas externas, como o fontes.
 
 ---
 
-### Arquivo `script.js`
+### Arquivo `widget.js`
 Este arquivo é obrigatório e deve conter o código JavaScript do widget.
 Nesta arquivo você pode escutar alguns eventos de janela (window) disparados pelo UniChat:
 
@@ -186,9 +192,3 @@ Nesta arquivo você pode escutar alguns eventos de janela (window) disparados pe
   |-------------|----------|--------------------------------------------------|
   | `key`       | `string` | A chave da entrada do userstore atualizada.      |
   | `value`     | `string` | O novo valor da entrada do userstore atualizada. |
-
----
-
-### Arquivo `style.css`
-
-Este arquivo é obrigatório e deve conter o código CSS do widget.

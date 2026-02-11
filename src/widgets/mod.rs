@@ -97,7 +97,29 @@ impl WidgetMetadata {
 
     /* ====================================================================== */
 
+    pub fn widget_css_path(&self) -> PathBuf {
+        let path = self.path.join("widget.css");
+        if path.exists() {
+            return path;
+        }
+
+        log::warn!("Falling back to 'style.css' for widget '{:?}'", self.path);
+        return self.path.join("style.css");
+    }
+
+    pub fn widget_css(&self) -> String {
+        return fs::read_to_string(self.widget_css_path()).unwrap_or_default();
+    }
+
+    /* ====================================================================== */
+
     pub fn widget_html_path(&self) -> PathBuf {
+        let path = self.path.join("widget.html");
+        if path.exists() {
+            return path;
+        }
+
+        log::warn!("Falling back to 'main.html' for widget '{:?}'", self.path);
         return self.path.join("main.html");
     }
 
@@ -108,21 +130,17 @@ impl WidgetMetadata {
     /* ====================================================================== */
 
     pub fn widget_js_path(&self) -> PathBuf {
+        let path = self.path.join("widget.js");
+        if path.exists() {
+            return path;
+        }
+
+        log::warn!("Falling back to 'script.js' for widget '{:?}'", self.path);
         return self.path.join("script.js");
     }
 
     pub fn widget_js(&self) -> String {
         return fs::read_to_string(self.widget_js_path()).unwrap_or_default();
-    }
-
-    /* ====================================================================== */
-
-    pub fn widget_css_path(&self) -> PathBuf {
-        return self.path.join("style.css");
-    }
-
-    pub fn widget_css(&self) -> String {
-        return fs::read_to_string(self.widget_css_path()).unwrap_or_default();
     }
 }
 
