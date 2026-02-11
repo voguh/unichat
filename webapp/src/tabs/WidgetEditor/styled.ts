@@ -63,6 +63,14 @@ export const WidgetEditorStyledContainer = styled.div`
                 display: flex;
                 align-items: center;
             }
+
+            > button {
+                height: 24px;
+
+                > i {
+                    font-size: 10px;
+                }
+            }
         }
 
         > .editor-fields {
