@@ -160,6 +160,16 @@ const steps: TourStep[] = [
             -50,
             400
         )
+    },
+    {
+        id: "b567c4dc-054a-4ec8-98b8-1e886dcce93a",
+        builder: stageBuilder(
+            "widgets-modal-toggle",
+            "Widgets",
+            "Here you can see all installed widgets and open in browser or reveal in folder (user widgets only).",
+            -50,
+            400
+        )
     }
 ];
 

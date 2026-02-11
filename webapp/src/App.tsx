@@ -28,6 +28,7 @@ import { IPCNotificationEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
 
 import { Tour } from "./__internal__/Tour";
+import { WidgetsModal, WidgetsModalActions } from "./__internal__/WidgetsModal";
 import { commandService } from "./services/commandService";
 
 interface TabOptions {
@@ -90,6 +91,15 @@ export function App(): JSX.Element {
             title: "Plugins",
             actions: <PluginsModalActions />,
             children: <PluginsModal />
+        });
+    }
+
+    function toggleWidgetsModal(): void {
+        modalService.openModal({
+            size: "xl",
+            title: "Widgets",
+            actions: <WidgetsModalActions />,
+            children: <WidgetsModal />
         });
     }
 
@@ -164,6 +174,12 @@ export function App(): JSX.Element {
 
                     <TabLeftSection selectedTab={selectedTab} />
                 </div>
+
+                <Tooltip content="Widgets" placement="right">
+                    <Button variant="default" onClick={toggleWidgetsModal} data-tour="widgets-modal-toggle">
+                        <i className="fas fa-object-group" />
+                    </Button>
+                </Tooltip>
 
                 <Tooltip content="Plugins" placement="right">
                     <Button variant="default" onClick={togglePluginsModal} data-tour="plugins-modal-toggle">
