@@ -76,7 +76,6 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         label={builder.label}
                         description={builder.description}
                         value={value}
-                        withPickerFree={builder.withPickerFree ?? true}
                         swatches={builder.swatches ?? []}
                         onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
                     />

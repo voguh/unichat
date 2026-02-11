@@ -50,7 +50,6 @@ São substituídos como strings normais representando cores em formato hexadecim
 | `label`          | `string`                 | SIM         | Rótulo do campo                                  |
 | `description`    | `string`                 | NÃO         | Descrição do campo                               |
 | `value`          | `string`                 | NÃO         | Valor padrão                                     |
-| `withPickerFree` | `boolean`                | NÃO         | Permitir seleção livre de cores (Padrão: `true`) |
 | `swatches`      | `string[]`                | NÃO         | Cores predefinidas para seleção rápida           |
 
 #### Campo `dropdown`

@@ -50,7 +50,6 @@ Are replaced as normal strings representing colors in hexadecimal format.
 | `label`          | `string`        | YES      | Field label                                  |
 | `description`    | `string`        | NO       | Field description                            |
 | `value`          | `string`        | NO       | Default value                                |
-| `withPickerFree` | `boolean`       | NO       | Allow free color selection (Default: `true`) |
 | `swatches`       | `string[]`      | NO       | Preset colors for quick selection            |
 
 #### Field `dropdown`

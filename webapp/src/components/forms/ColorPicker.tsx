@@ -10,8 +10,8 @@
 
 import React from "react";
 
+import SketchPicker from "@uiw/react-color-sketch";
 import FormControl from "react-bootstrap/FormControl";
-import { GithubPicker, SketchPicker } from "react-color";
 
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 
@@ -22,11 +22,10 @@ import { TextInputProps } from "./TextInput";
 interface ColorPickerProps extends Omit<TextInputProps, "onChange"> {
     onChange?: (value: string) => void;
     swatches?: string[];
-    withPickerFree?: boolean;
 }
 
 function isColorPickerProps(key: string): boolean {
-    return ["swatches", "withPickerFree"].includes(key);
+    return ["swatches"].includes(key);
 }
 
 const _logger = LoggerFactory.getLogger("ColorPicker");
@@ -48,23 +47,12 @@ export const ColorPicker = React.forwardRef<HTMLInputElement, ColorPickerProps>(
     );
 
     const picker = (
-        <div style={{ margin: -14 }}>
-            {(colorPickerProps.withPickerFree ?? true) ? (
-                <SketchPicker
-                    presetColors={colorPickerProps.swatches}
-                    color={restProps.value || restProps.defaultValue}
-                    onChangeComplete={(color) => restProps.onChange?.(color.hex)}
-                    width="246px"
-                />
-            ) : (
-                <GithubPicker
-                    colors={colorPickerProps.swatches}
-                    color={restProps.value || restProps.defaultValue}
-                    onChangeComplete={(color) => restProps.onChange?.(color.hex)}
-                    width="246px"
-                />
-            )}
-        </div>
+        <SketchPicker
+            style={{ margin: -14 }}
+            presetColors={colorPickerProps.swatches}
+            color={restProps.value || restProps.defaultValue}
+            onChange={(color) => restProps.onChange?.(color.hex)}
+        />
     );
 
     return (

@@ -68,9 +68,8 @@ Exemplo de arquivo `fields.json`:
     "colorpickerProperty": {
         "type": "colorpicker",
         "label": "I'm a color picker",
-        "description": "This is a color picker property with only swatches",
+        "description": "This is a color picker property with swatches",
         "value": "#ff0000",
-        "withPickerFree": false,
         "swatches": [
             "#000000",
             "#800000",

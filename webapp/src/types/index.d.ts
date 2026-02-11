@@ -143,7 +143,6 @@ export interface WidgetFieldsColorPicker {
     label: string;
     description?: string;
     value?: string;
-    withPickerFree?: boolean;
     swatches?: string[];
 }
 

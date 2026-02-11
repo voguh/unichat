@@ -54,7 +54,6 @@
                         "label": { "type": "string" },
                         "description": { "type": "string" },
                         "value": { "type": "string" },
-                        "withPickerFree": { "type": "boolean" },
                         "swatches": {
                             "type": "array",
                             "items": { "type": "string" }
