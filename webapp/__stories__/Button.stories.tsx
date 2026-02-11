@@ -50,9 +50,6 @@ const meta = {
             ]
         },
         bsVariant: {
-            name: "[Compatibility] Bootstrap Variant",
-            description:
-                "This property is used to apply Bootstrap standard variants, prioritizing them over UniChat variants.<br/><br/>Prefer using `variant` and `color` for UniChat styling.",
             type: "string",
             control: { type: "select" },
             options: [

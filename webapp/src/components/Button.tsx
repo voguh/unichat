@@ -22,7 +22,7 @@ export interface ButtonProps extends RichBSButtonProps {
     color?: UniChatColors;
     variant?: "filled" | "light" | "default" | "outline";
 
-    /** @deprecated Compatibility only prefer {@link variant} and {@link color} instead! */
+    /** @deprecated Compatibility only! Prefer {@link variant} and {@link color} instead! */
     bsVariant?: BSButtonProps["variant"];
 }
 
