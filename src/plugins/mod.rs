@@ -51,15 +51,15 @@ pub enum PluginStatus {
 
 #[allow(dead_code)]
 pub struct UniChatPlugin {
-    pub manifest: PluginManifestYAML,
+    manifest: PluginManifestYAML,
 
-    pub name: String,
-    pub description: Option<String>,
-    pub version: semver::Version,
-    pub author: Option<String>,
-    pub license: Option<String>,
-    pub homepage: Option<String>,
-    pub dependencies: Vec<(String, semver::VersionRange)>,
+    name: String,
+    description: Option<String>,
+    version: semver::Version,
+    author: Option<String>,
+    license: Option<String>,
+    homepage: Option<String>,
+    dependencies: Vec<(String, semver::VersionRange)>,
 
     status: RwLock<PluginStatus>,
     messages: RwLock<Vec<String>>,
@@ -95,6 +95,36 @@ impl UniChatPlugin {
             plugin_env: arc_env,
             loaded_modules_cache: RwLock::new(HashMap::new())
         });
+    }
+
+    /* ====================================================================== */
+
+    pub fn name(&self) -> &str {
+        return &self.name;
+    }
+
+    pub fn description(&self) -> Option<&str> {
+        return self.description.as_deref();
+    }
+
+    pub fn version(&self) -> &semver::Version {
+        return &self.version;
+    }
+
+    pub fn author(&self) -> Option<&str> {
+        return self.author.as_deref();
+    }
+
+    pub fn license(&self) -> Option<&str> {
+        return self.license.as_deref();
+    }
+
+    pub fn homepage(&self) -> Option<&str> {
+        return self.homepage.as_deref();
+    }
+
+    pub fn dependencies(&self) -> &[(String, semver::VersionRange)] {
+        return &self.dependencies;
     }
 
     /* ====================================================================== */
@@ -192,16 +222,10 @@ impl UniChatPlugin {
 pub fn get_plugins() -> Vec<Arc<UniChatPlugin>> {
     match LOADED_PLUGINS.read() {
         Ok(envs) => {
-            let mut plugins: Vec<Arc<UniChatPlugin>> = Vec::new();
-            for (_name, manifest) in envs.iter() {
-                plugins.push(manifest.clone());
-            }
-
-            return plugins;
+            return envs.values().cloned().collect();
         }
         Err(err) => {
             log::error!("Failed to acquire read lock on loaded plugins: {:#?}", err);
-
             return Vec::new();
         }
     }

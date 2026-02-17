@@ -41,20 +41,19 @@ pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Serialize
     let mut serialized_plugins: Vec<SerializedPluginMetadata> = Vec::new();
 
     for plugin in plugins::get_plugins() {
-        let manifest = plugin.manifest.clone();
         let mut plugin_path = Some(plugin.get_plugin_path());
         if plugin.get_plugin_path().starts_with(properties::get_app_path(AppPaths::UniChatSystemPlugins)) {
             plugin_path = None;
         }
 
         let metadata = SerializedPluginMetadata {
-            name: manifest.name,
-            description: manifest.description,
-            version: manifest.version,
-            author: manifest.author,
-            license: manifest.license,
-            homepage: manifest.homepage,
-            dependencies: manifest.dependencies,
+            name: String::from(plugin.name()),
+            description: plugin.description().map(String::from),
+            version: plugin.version().to_string(),
+            author: plugin.author().map(String::from),
+            license: plugin.license().map(String::from),
+            homepage: plugin.homepage().map(String::from),
+            dependencies: plugin.dependencies().iter().map(|(name, range)| format!("{}@{}", name, range)).collect(),
 
             icon: plugin.get_icon().map(|bytes| format!("data:image/png;base64,{}", base64::encode(bytes))),
             status: plugin.get_status(),
