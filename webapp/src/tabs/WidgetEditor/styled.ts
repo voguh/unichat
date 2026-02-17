@@ -88,30 +88,24 @@ export const WidgetEditorStyledContainer = styled.div`
                 text-align: center;
             }
 
-            > .mantine-Accordion-root {
-                > .mantine-Accordion-item {
-                    background: var(--oc-dark-7);
+            > .accordion {
+                > .accordion-item {
+                    overflow: hidden;
+                    border-radius: var(--bs-accordion-border-radius);
+                    border: var(--bs-accordion-border-width) solid var(--bs-accordion-border-color);
 
-                    &:first-child {
-                        border-bottom-left-radius: 0;
-                        border-bottom-right-radius: 0;
+                    &:not(:last-child) {
+                        margin-bottom: 8px;
                     }
 
-                    &:not(:first-child):not(:last-child) {
-                        border-radius: 0;
+                    > .accordion-header {
+                        > button {
+                            background: var(--oc-dark-7);
+                        }
                     }
 
-                    &:last-child {
-                        border-top-left-radius: 0;
-                        border-top-right-radius: 0;
-                    }
-
-                    &:not(:first-child) {
-                        margin-top: 0;
-                    }
-
-                    > .mantine-Accordion-panel {
-                        > .mantine-Accordion-content {
+                    > .accordion-collapse {
+                        > .accordion-body {
                             > div {
                                 &:not(:first-child) {
                                     margin-top: 8px;
@@ -121,11 +115,11 @@ export const WidgetEditorStyledContainer = styled.div`
                                     margin-top: 32px;
                                     margin-bottom: 32px;
 
-                                    > .mantine-Divider-root {
+                                    > hr {
                                         margin: 0;
                                     }
 
-                                    > .mantine-Text-root {
+                                    > span {
                                         margin-top: 8px;
                                         text-align: center;
                                         font-weight: bolder;

@@ -59,7 +59,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
         const value = fieldState[key] ?? ("value" in builder ? builder.value : null);
 
         switch (builder.type) {
-            case "checkbox":
+            case "checkbox": {
                 return (
                     <Checkbox
                         key={key}
@@ -69,7 +69,8 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.checked }))}
                     />
                 );
-            case "colorpicker":
+            }
+            case "colorpicker": {
                 return (
                     <ColorPicker
                         key={key}
@@ -80,18 +81,22 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
                     />
                 );
-            case "dropdown":
+            }
+            case "dropdown": {
+                const options = Object.entries(builder.options).map(([value, label]) => ({ value, label }));
+                const optionValue = options.find((option) => option.value === value);
                 return (
                     <Select
                         key={key}
                         label={builder.label}
                         description={builder.description}
-                        value={value}
+                        value={optionValue}
                         onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
-                        options={Object.entries(builder.options).map(([value, label]) => ({ value, label }))}
+                        options={options}
                     />
                 );
-            case "number":
+            }
+            case "number": {
                 return (
                     <NumberInput
                         key={key}
@@ -104,7 +109,8 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         step={builder.step}
                     />
                 );
-            case "textarea":
+            }
+            case "textarea": {
                 return (
                     <Textarea
                         key={key}
@@ -115,26 +121,28 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
                     />
                 );
-            case "divider":
+            }
+            case "divider": {
                 return (
                     <div key={key} className="divider-wrapper">
                         <hr />
                         {builder.label && <span>{builder.label}</span>}
                     </div>
                 );
-            case "filepicker":
+            }
+            case "filepicker": {
                 return (
-                    <div key={key} className="filepicker-wrapper">
-                        <GalleryFileInput
-                            label={builder.label}
-                            description={builder.description}
-                            defaultValue={value}
-                            onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
-                            showTabs={builder.fileType}
-                        />
-                    </div>
+                    <GalleryFileInput
+                        key={key}
+                        label={builder.label}
+                        description={builder.description}
+                        defaultValue={value}
+                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                        showTabs={builder.fileType}
+                    />
                 );
-            default:
+            }
+            default: {
                 return (
                     <TextInput
                         key={key}
@@ -144,6 +152,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
                     />
                 );
+            }
         }
     }
 
