@@ -250,9 +250,17 @@ export const BootstrapFixes = createGlobalStyle`
         }
 
         > .form-control {
-            height: 36px;
             background: var(--input-bg);
             border-color: var(--input-bd);
+
+            &:not(textarea) {
+                height: 36px;
+            }
+
+            &:is(textarea) {
+                min-height: 36px;
+            }
+
 
             &:focus {
                 border-color: var(--oc-blue-8);
