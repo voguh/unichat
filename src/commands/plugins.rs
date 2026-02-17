@@ -39,9 +39,8 @@ pub struct SerializedPluginMetadata {
 #[tauri::command]
 pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<SerializedPluginMetadata>, String> {
     let mut serialized_plugins: Vec<SerializedPluginMetadata> = Vec::new();
-    let plugins = plugins::get_plugins().map_err(|e| format!("An error occurred on get plugins: {:#?}", e))?;
 
-    for plugin in plugins {
+    for plugin in plugins::get_plugins() {
         let manifest = plugin.manifest.clone();
         let mut plugin_path = Some(plugin.get_plugin_path());
         if plugin.get_plugin_path().starts_with(properties::get_app_path(AppPaths::UniChatSystemPlugins)) {

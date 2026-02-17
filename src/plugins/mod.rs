@@ -165,6 +165,10 @@ impl UniChatPlugin {
         return self.get_data_path().join("main.lua");
     }
 
+    pub fn get_ui_path(&self) -> PathBuf {
+        return self.plugin_path.join("ui").join("lib.js");
+    }
+
     pub fn get_widgets_path(&self) -> PathBuf {
         return self.plugin_path.join("widgets");
     }
@@ -185,15 +189,22 @@ impl UniChatPlugin {
 
 /* ============================================================================================== */
 
-pub fn get_plugins() -> Result<Vec<Arc<UniChatPlugin>>, Error> {
-    let envs = LOADED_PLUGINS.read().map_err(|_| anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
+pub fn get_plugins() -> Vec<Arc<UniChatPlugin>> {
+    match LOADED_PLUGINS.read() {
+        Ok(envs) => {
+            let mut plugins: Vec<Arc<UniChatPlugin>> = Vec::new();
+            for (_name, manifest) in envs.iter() {
+                plugins.push(manifest.clone());
+            }
 
-    let mut plugins: Vec<Arc<UniChatPlugin>> = Vec::new();
-    for (_name, manifest) in envs.iter() {
-        plugins.push(manifest.clone());
+            return plugins;
+        }
+        Err(err) => {
+            log::error!("Failed to acquire read lock on loaded plugins: {:#?}", err);
+
+            return Vec::new();
+        }
     }
-
-    return Ok(plugins);
 }
 
 pub fn get_plugin(plugin_name: &str) -> Result<Arc<UniChatPlugin>, Error> {
