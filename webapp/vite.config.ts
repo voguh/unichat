@@ -92,9 +92,7 @@ export default defineConfig({
             plugins: [
                 visualizer({
                     filename: path.resolve(__dirname, "coverage", "stats.html"),
-                    template: "sunburst",
-                    gzipSize: true,
-                    brotliSize: true
+                    template: "treemap"
                 })
             ],
             output: {
