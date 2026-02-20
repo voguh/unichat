@@ -27,7 +27,15 @@
             }
         ],
         "security": {
-            "csp": null
+            "csp": {
+                "default-src": "'none'",
+                "script-src": "'self' unichat:",
+                "style-src": "'self' 'unsafe-inline'",
+                "img-src": "'self' unichat: blob: data: http://asset.localhost",
+                "connect-src": "'self' ipc: http://ipc.localhost",
+                "font-src": "'self'",
+                "frame-ancestors": "'self'"
+            }
         }
     },
     "bundle": {
