@@ -395,6 +395,7 @@ async fn main() {
             commands::gallery::get_gallery_items,
             commands::gallery::upload_gallery_items,
             commands::plugins::get_plugins,
+            commands::plugins::get_plugin_settings_content,
             commands::store::settings_get_item,
             commands::store::settings_set_item,
             commands::store::store_get_item,

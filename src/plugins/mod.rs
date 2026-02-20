@@ -195,8 +195,8 @@ impl UniChatPlugin {
         return self.get_data_path().join("main.lua");
     }
 
-    pub fn get_ui_path(&self) -> PathBuf {
-        return self.plugin_path.join("ui").join("lib.js");
+    pub fn get_settings_path(&self) -> PathBuf {
+        return self.get_data_path().join("settings.jsx");
     }
 
     pub fn get_widgets_path(&self) -> PathBuf {

@@ -73,8 +73,8 @@ export class CommandService {
         return invoke("get_plugins");
     }
 
-    public async togglePluginState(pluginName: string, newState: boolean): Promise<void> {
-        await invoke("toggle_plugin_state", { pluginName, newState });
+    public async getPluginSettingsContent(pluginName: string): Promise<string | null> {
+        return invoke("get_plugin_settings_content", { pluginName });
     }
 
     /* ========================================================================================== */

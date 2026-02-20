@@ -66,3 +66,15 @@ pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Serialize
 
     return Ok(serialized_plugins);
 }
+
+#[tauri::command]
+pub async fn get_plugin_settings_content<R: Runtime>(_app: AppHandle<R>, plugin_name: String) -> Result<Option<String>, String> {
+    let plugin = plugins::get_plugin(&plugin_name).map_err(|e| format!("An error occurred on retrieve plugin: {:#?}", e))?;
+    let settings_path = plugin.get_settings_path();
+    if !settings_path.exists() {
+        return Ok(None);
+    }
+
+    let settings_content = std::fs::read_to_string(settings_path).map_err(|e| format!("Failed to read settings file for plugin '{}': {:#?}", plugin_name, e))?;
+    return Ok(Some(settings_content));
+}
