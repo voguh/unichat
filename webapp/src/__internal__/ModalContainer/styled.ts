@@ -39,7 +39,7 @@ export const ModalWrapperStyledContainer = styled.div`
 
         > .modal-wrapper-sidebar {
             grid-area: SB;
-            background: var(--oc-oc-dark-7);
+            background: var(--oc-dark-7);
             color: var(--oc-dark-0);
             border-right: 1px solid var(--oc-dark-4);
 
