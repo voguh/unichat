@@ -22,7 +22,7 @@
                 {
                     "type": "object",
                     "properties": {
-                        "type": { "enum": ["number"] },
+                        "type": { "const": "number" },
                         "group": { "type": "string" },
                         "label": { "type": "string" },
                         "description": { "type": "string" },
@@ -37,7 +37,7 @@
                 {
                     "type": "object",
                     "properties": {
-                        "type": { "const": "checkbox" },
+                        "type": { "enum": ["checkbox", "switch"] },
                         "group": { "type": "string" },
                         "label": { "type": "string" },
                         "description": { "type": "string" },

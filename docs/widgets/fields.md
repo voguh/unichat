@@ -27,17 +27,17 @@ Are replaced as normal numbers.
 | `max`         | `number`   | NO       | Maximum value     |
 | `step`        | `number`   | NO       | Increment         |
 
-#### Field `checkbox`
+#### Field `checkbox` or `switch`
 
 Are replaced as normal booleans.
 
-| Parameter     | Type         | Required | Description       |
-|---------------|--------------|----------|-------------------|
-| `type`        | `"checkbox"` | YES      | Field type        |
-| `group`       | `string`     | NO       | Field group       |
-| `label`       | `string`     | YES      | Field label       |
-| `description` | `string`     | NO       | Field description |
-| `value`       | `boolean`    | NO       | Default value     |
+| Parameter     | Type                       | Required | Description       |
+|---------------|----------------------------|----------|-------------------|
+| `type`        | `"checkbox"` or `"switch"` | YES      | Field type        |
+| `group`       | `string`                   | NO       | Field group       |
+| `label`       | `string`                   | YES      | Field label       |
+| `description` | `string`                   | NO       | Field description |
+| `value`       | `boolean`                  | NO       | Default value     |
 
 #### Field `colorpicker`
 

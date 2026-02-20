@@ -18,10 +18,10 @@ import Card from "react-bootstrap/Card";
 import { UniChatEvent, UniChatPlatform } from "unichat-widgets/unichat";
 import { GalleryModal, GalleryModalActions } from "unichat/__internal__/GalleryModal";
 import { Button } from "unichat/components/Button";
-import { Checkbox } from "unichat/components/forms/Checkbox";
 import { ColorPicker } from "unichat/components/forms/ColorPicker";
 import { NumberInput } from "unichat/components/forms/NumberInput";
 import { Select } from "unichat/components/forms/Select";
+import { Switch } from "unichat/components/forms/Switch";
 import { Textarea } from "unichat/components/forms/Textarea";
 import { TextInput } from "unichat/components/forms/TextInput";
 import { GalleryFileInput } from "unichat/components/GalleryFileInput";
@@ -59,13 +59,14 @@ export function WidgetEditor(_props: Props): React.ReactNode {
         const value = fieldState[key] ?? ("value" in builder ? builder.value : null);
 
         switch (builder.type) {
-            case "checkbox": {
+            case "checkbox":
+            case "switch": {
                 return (
-                    <Checkbox
+                    <Switch
                         key={key}
                         label={builder.label}
                         description={builder.description}
-                        checked={value}
+                        checked={value || false}
                         onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.checked }))}
                     />
                 );

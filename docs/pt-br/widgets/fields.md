@@ -27,30 +27,30 @@ São substituídos como números normais.
 | `max`         | `number`   | NÃO         | Valor máximo       |
 | `step`        | `number`   | NÃO         | Incremento         |
 
-#### Campo `checkbox`
+#### Campo `checkbox` ou `switch`
 
 São substituídos como booleanos normais.
 
-| Parâmetro     | Tipo                     | Obrigatório | Descrição          |
-|---------------|--------------------------|-------------|--------------------|
-| `type`        | `"checkbox"`             | SIM         | Tipo do campo      |
-| `group`       | `string`                 | NÃO         | Grupo do campo     |
-| `label`       | `string`                 | SIM         | Rótulo do campo    |
-| `description` | `string`                 | NÃO         | Descrição do campo |
-| `value`       | `boolean`                | NÃO         | Valor padrão       |
+| Parâmetro     | Tipo                       | Obrigatório | Descrição          |
+|---------------|----------------------------|-------------|--------------------|
+| `type`        | `"checkbox"` ou `"switch"` | SIM         | Tipo do campo      |
+| `group`       | `string`                   | NÃO         | Grupo do campo     |
+| `label`       | `string`                   | SIM         | Rótulo do campo    |
+| `description` | `string`                   | NÃO         | Descrição do campo |
+| `value`       | `boolean`                  | NÃO         | Valor padrão       |
 
 #### Campo `colorpicker`
 
 São substituídos como strings normais representando cores em formato hexadecimal.
 
-| Parâmetro        | Tipo                     | Obrigatório | Descrição                                        |
-|------------------|--------------------------|-------------|--------------------------------------------------|
-| `type`           | `"colorpicker"`          | SIM         | Tipo do campo                                    |
-| `group`          | `string`                 | NÃO         | Grupo do campo                                   |
-| `label`          | `string`                 | SIM         | Rótulo do campo                                  |
-| `description`    | `string`                 | NÃO         | Descrição do campo                               |
-| `value`          | `string`                 | NÃO         | Valor padrão                                     |
-| `swatches`      | `string[]`                | NÃO         | Cores predefinidas para seleção rápida           |
+| Parâmetro        | Tipo            | Obrigatório | Descrição                                        |
+|------------------|-----------------|-------------|--------------------------------------------------|
+| `type`           | `"colorpicker"` | SIM         | Tipo do campo                                    |
+| `group`          | `string`        | NÃO         | Grupo do campo                                   |
+| `label`          | `string`        | SIM         | Rótulo do campo                                  |
+| `description`    | `string`        | NÃO         | Descrição do campo                               |
+| `value`          | `string`        | NÃO         | Valor padrão                                     |
+| `swatches`      | `string[]`       | NÃO         | Cores predefinidas para seleção rápida           |
 
 #### Campo `dropdown`
 
