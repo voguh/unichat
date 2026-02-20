@@ -22,13 +22,21 @@ export function exposeItem(name: string, item: any): void {
 }
 
 export function exposeModules(prefix: string, modules: Record<string, any>): void {
+    const prefixParts = prefix.split("/");
+
     for (const [path, mod] of Object.entries(modules)) {
-        const clean = path
-            .replace(/^.*\/src/, "")
+        const pathParts = path.split("/");
+        if (pathParts[0] === "." && pathParts[1] === prefixParts[1]) {
+            pathParts.shift();
+            pathParts.shift();
+        }
+
+        const clean = pathParts
+            .join("/")
             .replace(/\.(tsx?|jsx?)$/, "")
             .replace(/\/index$/, "");
 
-        let fullPath = `${prefix}${clean}`.replace(/\/+/g, "/");
+        let fullPath = `${prefix}/${clean}`.replace(/\/+/g, "/");
         if (fullPath.endsWith("/")) {
             fullPath = fullPath.slice(0, -1);
         }
