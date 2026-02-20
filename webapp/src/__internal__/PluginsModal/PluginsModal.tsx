@@ -14,11 +14,10 @@ import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 import Badge from "react-bootstrap/Badge";
 
 import { Button } from "unichat/components/Button";
+import { usePlugins } from "unichat/hooks/usePlugins";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
-import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
-import { notificationService } from "unichat/services/notificationService";
-import { UniChatPluginMetadata } from "unichat/types";
+import { UniChatPlugin } from "unichat/types";
 import { PLUGIN_STATUS_COLOR } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
 
@@ -31,9 +30,9 @@ interface Props {
 
 const _logger = LoggerFactory.getLogger("Plugins");
 export function PluginsModal(_props: Props): React.ReactNode {
-    const [plugins, setPlugins] = React.useState<UniChatPluginMetadata[]>([]);
+    const [plugins] = usePlugins((plugins) => plugins, []);
 
-    function openPluginDetails(plugin: UniChatPluginMetadata): void {
+    function openPluginDetails(plugin: UniChatPlugin): void {
         modalService.openModal({
             fullscreen: true,
             title: "Plugin Overview",
@@ -42,28 +41,13 @@ export function PluginsModal(_props: Props): React.ReactNode {
         });
     }
 
-    function getPluginIconDataUrl(plugin: UniChatPluginMetadata): string {
+    function getPluginIconDataUrl(plugin: UniChatPlugin): string {
         if (Strings.isNullOrEmpty(plugin.icon)) {
             return UNICHAT_ICON;
         } else {
             return plugin.icon;
         }
     }
-
-    async function handleFetchPlugins(): Promise<void> {
-        try {
-            const items = await commandService.getPlugins();
-            setPlugins(items);
-        } catch (error) {
-            _logger.error("An error occurred on fetch plugins", error);
-
-            notificationService.error({ title: "Fetch Error", message: "An error occurred while fetching plugins." });
-        }
-    }
-
-    React.useEffect(() => {
-        handleFetchPlugins();
-    }, []);
 
     return (
         <PluginsStyledContainer>

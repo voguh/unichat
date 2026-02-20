@@ -12,7 +12,7 @@ import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
 import {
     GalleryItem,
-    UniChatPluginMetadata,
+    UniChatPlugin,
     UniChatScraper,
     UniChatWidget,
     WidgetFields,
@@ -69,7 +69,7 @@ export class CommandService {
 
     /* ========================================================================================== */
 
-    public async getPlugins(): Promise<UniChatPluginMetadata[]> {
+    public async getPlugins(): Promise<UniChatPlugin[]> {
         return invoke("get_plugins");
     }
 

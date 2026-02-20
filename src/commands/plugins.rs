@@ -8,6 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use std::fs;
 use std::path::PathBuf;
 
 use tauri::AppHandle;
@@ -31,6 +32,7 @@ pub struct SerializedPluginMetadata {
     pub dependencies: Vec<String>,
 
     pub icon: Option<String>,
+    pub has_custom_settings: bool,
     pub status: PluginStatus,
     pub messages: Vec<String>,
     pub plugin_path: Option<PathBuf>
@@ -56,6 +58,7 @@ pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Serialize
             dependencies: plugin.dependencies().iter().map(|(name, range)| format!("{}@{}", name, range)).collect(),
 
             icon: plugin.get_icon().map(|bytes| format!("data:image/png;base64,{}", base64::encode(bytes))),
+            has_custom_settings: plugin.get_settings_path().exists(),
             status: plugin.get_status(),
             messages: plugin.get_messages(),
             plugin_path: plugin_path,
@@ -75,6 +78,6 @@ pub async fn get_plugin_settings_content<R: Runtime>(_app: AppHandle<R>, plugin_
         return Ok(None);
     }
 
-    let settings_content = std::fs::read_to_string(settings_path).map_err(|e| format!("Failed to read settings file for plugin '{}': {:#?}", plugin_name, e))?;
+    let settings_content = fs::read_to_string(settings_path).map_err(|e| format!("Failed to read settings file for plugin '{}': {:#?}", plugin_name, e))?;
     return Ok(Some(settings_content));
 }

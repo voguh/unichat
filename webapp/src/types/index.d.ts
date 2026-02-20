@@ -69,7 +69,7 @@ export interface GalleryItem {
 
 /* ========================================================================== */
 
-export interface UniChatPluginMetadata {
+export interface UniChatPlugin {
     name: string;
     description?: string;
     version: string;
@@ -79,6 +79,7 @@ export interface UniChatPluginMetadata {
     dependencies: string[];
 
     icon?: string;
+    hasCustomSettings: boolean;
     status: PluginStatus;
     messages: string[];
     pluginPath?: string;

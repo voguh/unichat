@@ -15,21 +15,21 @@ import Badge from "react-bootstrap/Badge";
 
 import { Button } from "unichat/components/Button";
 import { Tooltip } from "unichat/components/OverlayTrigger";
-import { UniChatPluginMetadata } from "unichat/types";
+import { UniChatPlugin } from "unichat/types";
 import { PLUGIN_STATUS_COLOR } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
 
 import { PluginOverviewStyledContainer } from "./styled";
 
 interface Props {
-    plugin: UniChatPluginMetadata;
+    plugin: UniChatPlugin;
 }
 
 export function PluginOverviewModal(props: Props): React.ReactNode {
     const { plugin } = props;
     const [bgColor, fgColor] = PLUGIN_STATUS_COLOR[plugin.status];
 
-    function getPluginIconDataUrl(plugin: UniChatPluginMetadata): string {
+    function getPluginIconDataUrl(plugin: UniChatPlugin): string {
         if (Strings.isNullOrEmpty(plugin.icon)) {
             return UNICHAT_ICON;
         } else {
