@@ -8,6 +8,10 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+import { LoggerFactory } from "unichat/logging/LoggerFactory";
+
+const _logger = LoggerFactory.getLogger("expose-api");
+
 export function exposeItem(name: string, item: any): void {
     if (!("__MODULES__" in globalThis)) {
         Object.defineProperty(globalThis, "__MODULES__", {
@@ -18,7 +22,24 @@ export function exposeItem(name: string, item: any): void {
         });
     }
 
-    window.__MODULES__[name] = item;
+    let moduleToExpose = item;
+    if (item != null && typeof item === "object" && item.default !== undefined && !("__esModule" in item)) {
+        try {
+            if (!Object.isExtensible(item)) {
+                moduleToExpose = Object.create(null);
+
+                for (const key in item) {
+                    moduleToExpose[key] = item[key];
+                }
+            }
+
+            Object.defineProperty(moduleToExpose, "__esModule", { value: true });
+        } catch (e) {
+            _logger.warn(`An error occurred while defining '__esModule' in '{}':`, name, e);
+        }
+    }
+
+    window.__MODULES__[name] = moduleToExpose;
 }
 
 export function exposeModules(prefix: string, modules: Record<string, any>): void {
