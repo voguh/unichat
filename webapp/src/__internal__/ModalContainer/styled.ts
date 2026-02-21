@@ -105,6 +105,8 @@ export const ModalWrapperStyledContainer = styled.div`
         }
 
         > .modal-wrapper-body {
+            --modal-body-width: var(--modal-content-width);
+            --modal-body-inner-width: calc(var(--modal-body-width) - 32px);
             --modal-body-max-height: calc(var(--modal-max-height) - var(--modal-header-height));
             --modal-body-inner-max-height: calc(var(--modal-body-max-height) - 32px);
             max-height: var(--modal-body-max-height);

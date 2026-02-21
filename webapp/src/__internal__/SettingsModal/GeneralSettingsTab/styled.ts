@@ -12,7 +12,7 @@ import styled from "styled-components";
 
 export const GeneralSettingsTabStyledContainer = styled.div`
     position: relative;
-    width: var(--modal-content-width);
+    width: var(--modal-body-inner-width);
     height: var(--modal-body-inner-max-height);
 
     > .tour-section {
