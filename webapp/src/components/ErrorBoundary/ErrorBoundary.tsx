@@ -41,6 +41,12 @@ export class ErrorBoundary extends React.Component<Props, State> {
         return { error };
     }
 
+    public componentDidUpdate(prevProps: Props): void {
+        if (this.state.error && prevProps.children !== this.props.children) {
+            this.setState({ error: null, errorInfo: null });
+        }
+    }
+
     public render(): React.ReactNode {
         const { error, errorInfo } = this.state;
 
