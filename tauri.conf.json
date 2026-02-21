@@ -29,9 +29,9 @@
         "security": {
             "csp": {
                 "default-src": "'none'",
-                "script-src": "'self' unichat:",
+                "script-src": "'self' 'unsafe-eval' 'unsafe-inline'",
                 "style-src": "'self' 'unsafe-inline'",
-                "img-src": "'self' unichat: blob: data: http://asset.localhost",
+                "img-src": "'self' blob: data: http://asset.localhost",
                 "connect-src": "'self' ipc: http://ipc.localhost",
                 "font-src": "'self'",
                 "frame-ancestors": "'self'"

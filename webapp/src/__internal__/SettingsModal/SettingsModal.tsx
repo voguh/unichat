@@ -14,12 +14,15 @@ import clsx from "clsx";
 
 import { Button } from "unichat/components/Button";
 import { ErrorBoundary } from "unichat/components/ErrorBoundary";
+import { Tooltip } from "unichat/components/OverlayTrigger";
 import { ModalContext } from "unichat/contexts/ModalContext";
+import { usePlugins } from "unichat/hooks/usePlugins";
 
 import { AboutSettingsTab } from "./AboutSettingsTab";
 import { CheckUpdatesSettingsTab } from "./CheckUpdatesSettingsTab";
 import { DevelopersSettingsTab } from "./DevelopersSettingsTab";
 import { GeneralSettingsTab } from "./GeneralSettingsTab";
+import { PluginSettingsTab } from "./PluginSettingsTab";
 import { SettingsSidebarStyledFooter, SettingsSidebarStyledItems } from "./styled";
 
 interface Props {
@@ -59,6 +62,14 @@ const settingsItems: Record<string, SettingsItem> = {
     }
 };
 
+function capitalizePluginName(pluginName: string): string {
+    if (pluginName.startsWith("plugin-")) {
+        pluginName = pluginName.substring(7);
+    }
+
+    return (pluginName.charAt(0).toUpperCase() + pluginName.slice(1)).replace(/[-_]/g, " ");
+}
+
 function TabContent({ selectedItem, ...rest }: { selectedItem: string } & SelectedItemProps): React.ReactNode {
     if (!(selectedItem in settingsItems)) {
         throw new Error("Selected item not found in settingsItems");
@@ -73,11 +84,26 @@ export function SettingsModal(_props: Props): React.ReactNode {
     const { sharedStore, setSharedStore, onClose } = React.useContext(ModalContext);
 
     React.useEffect(() => {
-        const selectedItem = settingsItems[sharedStore.selectedItem];
-        if (selectedItem != null) {
-            setSharedStore((old) => ({ ...old, modalTitle: selectedItem.title }));
+        if (sharedStore.selectedItem.startsWith("plugin:")) {
+            const pluginName = sharedStore.selectedItem.substring(7);
+            setSharedStore((old) => ({ ...old, modalTitle: capitalizePluginName(pluginName) }));
+        } else {
+            const selectedItem = settingsItems[sharedStore.selectedItem];
+            if (selectedItem != null) {
+                setSharedStore((old) => ({ ...old, modalTitle: selectedItem.title }));
+            }
         }
     }, [sharedStore.selectedItem]);
+
+    if ((sharedStore.selectedItem || "general").startsWith("plugin:")) {
+        const pluginName = sharedStore.selectedItem.substring(7);
+
+        return (
+            <ErrorBoundary>
+                <PluginSettingsTab onClose={onClose} pluginName={pluginName} />
+            </ErrorBoundary>
+        );
+    }
 
     return (
         <ErrorBoundary>
@@ -89,6 +115,8 @@ export function SettingsModal(_props: Props): React.ReactNode {
 export const SettingsModalLeftSection = (_props: Props): React.ReactNode => {
     const { sharedStore, setSharedStore } = React.useContext(ModalContext);
 
+    const [plugins, _refreshPlugins] = usePlugins((plugins) => plugins, []);
+
     return (
         <>
             <SettingsSidebarStyledItems className="settings-sidebar-items">
@@ -99,9 +127,30 @@ export const SettingsModalLeftSection = (_props: Props): React.ReactNode => {
                         onClick={() => setSharedStore((old) => ({ ...old, selectedItem: key }))}
                     >
                         <i className={clsx(item.icon, "fa-fw")} />
-                        {item.title}
+                        <span>{item.title}</span>
                     </Button>
                 ))}
+
+                <div className="divider">
+                    <hr />
+                    <div>PLUGINS</div>
+                </div>
+
+                {plugins
+                    .filter((plugin) => plugin.hasCustomSettings)
+                    .map((plugin) => (
+                        <Tooltip key={plugin.name} placement="right" content={plugin.name}>
+                            <Button
+                                variant={`plugin:${plugin.name}` === sharedStore.selectedItem ? "filled" : "default"}
+                                onClick={() =>
+                                    setSharedStore((old) => ({ ...old, selectedItem: `plugin:${plugin.name}` }))
+                                }
+                            >
+                                <i className="fas fa-puzzle-piece fa-fw" />
+                                <span>{capitalizePluginName(plugin.name)}</span>
+                            </Button>
+                        </Tooltip>
+                    ))}
             </SettingsSidebarStyledItems>
 
             <SettingsSidebarStyledFooter className="settings-sidebar-footer">

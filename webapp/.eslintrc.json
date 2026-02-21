@@ -81,6 +81,8 @@
         /* ============================ END IMPORT ============================ */
 
         /* ============================== COMMON ============================== */
+        "no-new-func": "off",
+
         "semi": ["warn", "always"],
 
         /* Disable quotes enforcement due to conflict with prettier */

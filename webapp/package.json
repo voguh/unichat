@@ -35,7 +35,8 @@
         "react-dom": "18.3.1",
         "react-select": "5.10.2",
         "stacktrace-js": "2.0.2",
-        "styled-components": "6.3.9"
+        "styled-components": "6.3.9",
+        "sucrase": "3.35.1"
     },
     "devDependencies": {
         "@storybook/addon-docs": "^10.2.8",
