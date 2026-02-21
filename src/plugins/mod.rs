@@ -196,7 +196,12 @@ impl UniChatPlugin {
     }
 
     pub fn get_settings_path(&self) -> PathBuf {
-        return self.get_data_path().join("settings.jsx");
+        let jsx_path = self.get_data_path().join("settings.jsx");
+        if jsx_path.exists() {
+            return jsx_path;
+        }
+
+        return self.get_data_path().join("settings.tsx");
     }
 
     pub fn get_widgets_path(&self) -> PathBuf {
