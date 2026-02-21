@@ -29,6 +29,7 @@ pub mod gallery;
 pub mod plugins;
 pub mod store;
 pub mod tour;
+pub mod userstore;
 pub mod scrapers;
 pub mod widgets;
 
