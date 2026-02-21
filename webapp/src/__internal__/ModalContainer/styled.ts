@@ -21,6 +21,7 @@ export const ModalContainerStyledContainer = styled.div`
 `;
 
 export const ModalWrapperStyledContainer = styled.div`
+    --modal-width: calc(var(--bs-modal-width) - 2px);
     --modal-max-height: calc(100vh - 58px);
     --modal-header-height: 45px;
 
@@ -32,13 +33,17 @@ export const ModalWrapperStyledContainer = styled.div`
     }
 
     &.with-sidebar {
+        --modal-sidebar-width: 200px;
+        --modal-content-width: calc(var(--modal-width) - var(--modal-sidebar-width));
+
         display: grid;
-        grid-template-columns: 200px 1fr;
+        grid-template-columns: var(--modal-sidebar-width) var(--modal-content-width);
         grid-template-rows: var(--settings-modal-height);
         grid-template-areas: "SB CT";
 
         > .modal-wrapper-sidebar {
             grid-area: SB;
+            width: var(--modal-sidebar-width);
             background: var(--oc-dark-7);
             color: var(--oc-dark-0);
             border-right: 1px solid var(--oc-dark-4);
@@ -61,9 +66,15 @@ export const ModalWrapperStyledContainer = styled.div`
         }
     }
 
+    &:not(.with-sidebar) {
+        --modal-content-width: var(--modal-width);
+    }
+
     > .modal-wrapper-content {
         grid-area: CT;
+        width: var(--modal-content-width);
         background: var(--oc-dark-6);
+        color: var(--oc-dark-0);
 
         > .modal-wrapper-header {
             height: var(--modal-header-height);

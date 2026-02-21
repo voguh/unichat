@@ -11,11 +11,9 @@
 import styled from "styled-components";
 
 export const DevelopersSettingsTabStyledContainer = styled.div`
-    height: var(--modal-body-inner-max-height);
     position: relative;
-
-    > .create-webview-hidden-section {
-    }
+    width: var(--modal-content-width);
+    height: var(--modal-body-inner-max-height);
 
     > .scraper-logging-section {
         > .btn-group {

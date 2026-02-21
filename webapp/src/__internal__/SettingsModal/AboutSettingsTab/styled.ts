@@ -12,6 +12,7 @@ import styled from "styled-components";
 
 export const AboutSettingsTabStyledContainer = styled.div`
     position: relative;
+    width: var(--modal-content-width);
     height: var(--modal-body-inner-max-height);
     overflow: hidden;
     display: flex;

@@ -11,8 +11,9 @@
 import styled from "styled-components";
 
 export const CheckUpdatesSettingsTabStyledContainer = styled.div`
-    height: var(--modal-body-inner-max-height);
     position: relative;
+    width: var(--modal-content-width);
+    height: var(--modal-body-inner-max-height);
 
     > .no-versions-available {
         position: absolute;

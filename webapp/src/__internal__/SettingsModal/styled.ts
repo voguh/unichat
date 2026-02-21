@@ -16,8 +16,33 @@ export const SettingsSidebarStyledItems = styled.div`
     gap: 4px;
     overflow-y: auto;
     height: calc(var(--modal-sidebar-content-inner-max-height) - 48px);
-    width: 100%;
+    width: var(--modal-sidebar-width);
     padding: 8px;
+
+    > .divider {
+        position: relative;
+
+        > div {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--oc-dark-7);
+            padding: 8px 16px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+    }
+
+    > .btn {
+        > span {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-clamp: 1;
+            white-space: nowrap;
+        }
+    }
 `;
 
 export const SettingsSidebarStyledFooter = styled.div`
