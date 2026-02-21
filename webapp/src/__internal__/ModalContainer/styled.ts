@@ -58,6 +58,7 @@ export const ModalWrapperStyledContainer = styled.div`
             }
 
             > .modal-wrapper-sidebar-content {
+                --modal-sidebar-content-inner-width: calc(var(--modal-sidebar-width) - 1px);
                 --modal-sidebar-content-max-height: calc(var(--modal-max-height) - var(--modal-header-height));
                 --modal-sidebar-content-inner-max-height: var(--modal-sidebar-content-max-height);
                 max-height: var(--modal-sidebar-content-max-height);
@@ -109,6 +110,7 @@ export const ModalWrapperStyledContainer = styled.div`
             --modal-body-inner-width: calc(var(--modal-body-width) - 32px);
             --modal-body-max-height: calc(var(--modal-max-height) - var(--modal-header-height));
             --modal-body-inner-max-height: calc(var(--modal-body-max-height) - 32px);
+            width: var(--modal-body-width);
             max-height: var(--modal-body-max-height);
             overflow-y: auto;
             padding: 16px;

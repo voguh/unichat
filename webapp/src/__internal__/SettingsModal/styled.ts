@@ -16,7 +16,7 @@ export const SettingsSidebarStyledItems = styled.div`
     gap: 4px;
     overflow-y: auto;
     height: calc(var(--modal-sidebar-content-inner-max-height) - 48px);
-    width: var(--modal-sidebar-width);
+    width: var(--modal-sidebar-content-inner-width);
     padding: 8px;
 
     > .divider {
