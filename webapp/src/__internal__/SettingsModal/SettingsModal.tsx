@@ -90,7 +90,7 @@ export function SettingsModal(_props: Props): React.ReactNode {
         } else {
             const selectedItem = settingsItems[sharedStore.selectedItem];
             if (selectedItem != null) {
-                setSharedStore((old) => ({ ...old, modalTitle: selectedItem.title }));
+                setSharedStore((old) => ({ ...old, modalActions: undefined, modalTitle: selectedItem.title }));
             }
         }
     }, [sharedStore.selectedItem]);

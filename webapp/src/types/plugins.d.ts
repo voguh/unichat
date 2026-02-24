@@ -8,6 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import styled from "styled-components";
-
-export const PluginSettingsTabStyledContainer = styled.div``;
+export interface PluginSettingsTabProps {
+    onClose: () => void;
+    initialValues: Readonly<Record<string, string>>;
+    onChange: (key: string, value: string | null) => void;
+}

@@ -11,19 +11,19 @@
 import { invoke } from "@tauri-apps/api/core";
 
 export class UserstoreService {
-    public async getItems(prefix: string): Promise<Record<string, any>> {
+    public async getItems(prefix: string): Promise<Record<string, string>> {
         return invoke("userstore_get_items", { prefix });
     }
 
-    public async getItem<T>(key: string): Promise<T> {
+    public async getItem(key: string): Promise<string> {
         return invoke("userstore_get_item", { key });
     }
 
-    public async setItems(items: Record<string, any>): Promise<void> {
+    public async setItems(items: Record<string, string>): Promise<void> {
         await invoke("userstore_set_items", { items });
     }
 
-    public async setItem<T>(key: string, value: T): Promise<void> {
+    public async setItem(key: string, value: string): Promise<void> {
         await invoke("userstore_set_item", { key, value });
     }
 }
