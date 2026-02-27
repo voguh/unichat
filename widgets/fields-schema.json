@@ -4,6 +4,12 @@
     "title": "UniChat - Fields Schema",
     "description": "The schema for `fields.json` file used in UniChat widgets for customization.",
     "additionalProperties": false,
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "description": "The JSON Schema reference"
+        }
+    },
     "patternProperties": {
         ".*": {
             "oneOf": [
