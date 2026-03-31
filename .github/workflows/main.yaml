@@ -1,9 +1,10 @@
-name: main.yaml
+name: release.yaml
 
 on:
   push:
     branches:
-      - '**'
+      - main
+      - stable/*
     tags:
       - '[0-9]+.[0-9]+.[0-9]+*'
   workflow_dispatch:
@@ -16,86 +17,8 @@ env:
   TAURI_FRONTEND_PATH: ${{ github.workspace }}/webapp
 
 jobs:
-  webapp-install-dependencies:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.2.2
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4.1.0
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4.4.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          cache-dependency-path: webapp/pnpm-lock.yaml
-
-      - name: Install dependencies
-        working-directory: ${{ env.TAURI_FRONTEND_PATH }}
-        run: pnpm install --frozen-lockfile
-
-  webapp-lint:
-    runs-on: ubuntu-24.04
-    needs: webapp-install-dependencies
-    continue-on-error: true
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.2.2
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4.1.0
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4.4.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          cache-dependency-path: webapp/pnpm-lock.yaml
-
-      - name: Install dependencies
-        working-directory: ${{ env.TAURI_FRONTEND_PATH }}
-        run: pnpm install --frozen-lockfile
-
-      - name: Run lint
-        working-directory: ${{ env.TAURI_FRONTEND_PATH }}
-        run: pnpm lint
-
-  webapp-tests:
-    runs-on: ubuntu-24.04
-    needs: webapp-install-dependencies
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.2.2
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4.1.0
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4.4.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          cache-dependency-path: webapp/pnpm-lock.yaml
-
-      - name: Install dependencies
-        working-directory: ${{ env.TAURI_FRONTEND_PATH }}
-        run: pnpm install --frozen-lockfile
-
-      - name: Run tests
-        working-directory: ${{ env.TAURI_FRONTEND_PATH }}
-        run: pnpm test run --passWithNoTests
-
   webapp-build:
     runs-on: ubuntu-24.04
-    needs: webapp-tests
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
@@ -110,15 +33,17 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-          cache-dependency-path: webapp/pnpm-lock.yaml
+          cache-dependency-path: ${{ env.TAURI_FRONTEND_PATH }}/pnpm-lock.yaml
 
       - name: Install dependencies
         working-directory: ${{ env.TAURI_FRONTEND_PATH }}
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
 
       - name: Build webapp
         working-directory: ${{ env.TAURI_FRONTEND_PATH }}
-        run: pnpm build:ui
+        run: |
+          pnpm build:ui
 
       - name: Upload webapp artifact
         uses: actions/upload-artifact@v4.6.2
@@ -126,39 +51,9 @@ jobs:
           name: webapp-dist
           path: ${{ env.TAURI_FRONTEND_PATH }}/dist
 
-  rust-install-dependencies:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-24.04, windows-2022]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.2.2
-
-      - name: Rust toolchain setup
-        uses: dtolnay/rust-toolchain@v1
-        with:
-          toolchain: ${{ env.RUST_VERSION }}
-
-      - name: Cache cargo registry
-        id: cache-cargo
-        uses: actions/cache@v4.2.3
-        with:
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
-          path: |
-            ~/.cargo/registry/index
-            ~/.cargo/registry/cache
-            ~/.cargo/git/db/
-
-      - name: Install dependencies
-        if: steps.cache-cargo.outputs.cache-hit != 'true'
-        run: cargo fetch --locked
-
-  rust-lint:
+  package-linux:
     runs-on: ubuntu-24.04
-    needs: [webapp-build, rust-install-dependencies]
-    continue-on-error: true
+    needs: [webapp-build]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
@@ -169,168 +64,70 @@ jobs:
           name: webapp-dist
           path: ${{ env.TAURI_FRONTEND_PATH }}/dist
 
-      - name: Setup tauri dependencies
+      - name: Prepare build environment
         run: |
           sudo apt update
           sudo apt install --no-install-recommends -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
-
-      - name: Rust toolchain setup
-        uses: dtolnay/rust-toolchain@v1
-        with:
-          toolchain: ${{ env.RUST_VERSION }}
-          components: clippy
-
-      - name: Cache cargo registry
-        id: cache-cargo
-        uses: actions/cache@v4.2.3
-        with:
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
-          path: |
-            ~/.cargo/registry/index
-            ~/.cargo/registry/cache
-            ~/.cargo/git/db/
-
-      - name: Cache cargo target
-        uses: actions/cache@v4.2.3
-        with:
-          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-target-
-          path: |
-            target/release/deps
-            target/debug/deps
-
-      - name: Install dependencies
-        if: steps.cache-cargo.outputs.cache-hit != 'true'
-        run: cargo fetch --locked
-
-      - name: Run lint
-        run: cargo clippy --all-targets --all-features
-
-  rust-tests:
-    runs-on: ${{ matrix.os }}
-    needs: [webapp-build, rust-install-dependencies]
-    strategy:
-      matrix:
-        os: [ubuntu-24.04, windows-2022]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.2.2
-
-      - name: Download webapp artifact
-        uses: actions/download-artifact@v5.0.0
-        with:
-          name: webapp-dist
-          path: ${{ env.TAURI_FRONTEND_PATH }}/dist
-
-      - name: Setup tauri dependencies
-        if: matrix.os == 'ubuntu-24.04'
-        run: |
-          sudo apt update
-          sudo apt install --no-install-recommends -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
-
-      - name: Rust toolchain setup
-        uses: dtolnay/rust-toolchain@v1
-        with:
-          toolchain: ${{ env.RUST_VERSION }}
-
-      - name: Cache cargo registry
-        id: cache-cargo
-        uses: actions/cache@v4.2.3
-        with:
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
-          path: |
-            ~/.cargo/registry/index
-            ~/.cargo/registry/cache
-            ~/.cargo/git/db
-
-      - name: Cache cargo target
-        uses: actions/cache@v4.2.3
-        with:
-          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-target-
-          path: |
-            target/release/deps
-            target/debug/deps
-
-      - name: Install dependencies
-        if: steps.cache-cargo.outputs.cache-hit != 'true'
-        run: cargo fetch --locked
-
-      - name: Run test
-        run: cargo test --all-targets --all-features
-
-  package:
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/stable/') || startsWith(github.ref, 'refs/tags/')
-    runs-on: ${{ matrix.os }}
-    needs: rust-tests
-    strategy:
-      matrix:
-        os: [ubuntu-24.04, windows-2022]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.2.2
-
-      - name: Download webapp artifact
-        uses: actions/download-artifact@v5.0.0
-        with:
-          name: webapp-dist
-          path: ${{ env.TAURI_FRONTEND_PATH }}/dist
-
-      - name: Setup tauri dependencies
-        if: matrix.os == 'ubuntu-24.04'
-        run: |
-          sudo apt update
-          sudo apt install --no-install-recommends -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
-
-      - name: Rust toolchain setup
-        uses: dtolnay/rust-toolchain@v1
-        with:
-          toolchain: ${{ env.RUST_VERSION }}
-
-      - name: Cache cargo registry
-        id: cache-cargo
-        uses: actions/cache@v4.2.3
-        with:
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
-          path: |
-            ~/.cargo/registry/index
-            ~/.cargo/registry/cache
-            ~/.cargo/git/db/
-
-      - name: Cache cargo target
-        uses: actions/cache@v4.2.3
-        with:
-          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-target-
-          path: |
-            target/release/deps
-            target/debug/deps
-
-      - name: Install dependencies
-        if: steps.cache-cargo.outputs.cache-hit != 'true'
-        run: cargo fetch --locked
-
-      - name: Prepare configuration
-        run: |
           npm install -g @tauri-apps/cli
           node -e "let fs = require('fs'); let path = require('path'); let cPath = path.join(__dirname, 'tauri.conf.json'); let c = JSON.parse(fs.readFileSync(cPath)); c.build.beforeBuildCommand = ''; fs.writeFileSync(cPath, JSON.stringify(c, null, 4));"
 
+      - name: Rust toolchain setup
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+
       - name: Run build app
-        run: tauri build
+        run: |
+          tauri build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: ${{ matrix.os }}-bundles
+          name: linux-bundles
           path: ${{ github.workspace }}/target/release/bundle
+
+  package-windows:
+    runs-on: ubuntu-24.04
+    needs: [webapp-build]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Download webapp artifact
+        uses: actions/download-artifact@v5.0.0
+        with:
+          name: webapp-dist
+          path: ${{ env.TAURI_FRONTEND_PATH }}/dist
+
+      - name: Prepare build environment
+        run: |
+          sudo apt update
+          sudo apt install --no-install-recommends -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+          sudo apt install --no-install-recommends -y nsis clang lld llvm
+          npm install -g @tauri-apps/cli
+          node -e "let fs = require('fs'); let path = require('path'); let cPath = path.join(__dirname, 'tauri.conf.json'); let c = JSON.parse(fs.readFileSync(cPath)); c.build.beforeBuildCommand = ''; fs.writeFileSync(cPath, JSON.stringify(c, null, 4));"
+
+      - name: Rust toolchain setup
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          targets: x86_64-pc-windows-msvc
+
+      - name: Run build app
+        run: |
+          cargo install cargo-xwin
+          tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: windows-bundles
+          path: ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/bundle
 
   publish:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-24.04
-    needs: package
+    needs: [package-linux, package-windows]
     permissions:
       contents: write
     steps:
@@ -340,13 +137,13 @@ jobs:
       - name: Download windows build artifacts
         uses: actions/download-artifact@v5.0.0
         with:
-          name: windows-2022-bundles
+          name: windows-bundles
           path: ${{ github.workspace }}/target/windows
 
       - name: Download linux build artifacts
         uses: actions/download-artifact@v5.0.0
         with:
-          name: ubuntu-24.04-bundles
+          name: linux-bundles
           path: ${{ github.workspace }}/target/linux
 
       - name: Setup version
