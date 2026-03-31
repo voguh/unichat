@@ -20,7 +20,6 @@ use anyhow::anyhow;
 use anyhow::Error;
 use url::Url;
 
-use crate::UNICHAT_HOMEPAGE;
 use crate::utils::properties::AppPaths;
 
 pub mod base64;
@@ -42,21 +41,6 @@ pub fn is_dev() -> bool {
 /* ================================================================================================================== */
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
-struct GitHubRelease {
-    id: u64,
-    name: Option<String>,
-    tag_name: String,
-    body: Option<String>,
-
-    html_url: String,
-    prerelease: bool,
-
-    created_at: String,
-    updated_at: Option<String>,
-    published_at: Option<String>
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatRelease {
     pub id: u64,
@@ -64,6 +48,7 @@ pub struct UniChatRelease {
     pub description: String,
 
     pub url: String,
+    pub source_url: String,
     pub prerelease: bool,
 
     pub created_at: String,
@@ -71,7 +56,7 @@ pub struct UniChatRelease {
     pub published_at: Option<String>
 }
 
-fn get_github_releases_inner<T: serde::de::DeserializeOwned>() -> Result<T, Error> {
+fn get_releases_inner<T: serde::de::DeserializeOwned>() -> Result<T, Error> {
     let cached_releases_path = properties::get_app_path(AppPaths::AppCache).join("cached_releases.json");
     if let Ok(metadata) = fs::metadata(&cached_releases_path) {
         let modified_at = metadata.modified()?;
@@ -88,8 +73,7 @@ fn get_github_releases_inner<T: serde::de::DeserializeOwned>() -> Result<T, Erro
     }
 
     log::info!("Fetching releases from GitHub API...");
-    let url = UNICHAT_HOMEPAGE.replace("https://github.com", "https://api.github.com/repos") + "/releases";
-    let mut releases = ureq::get(&url).call()?;
+    let mut releases = ureq::get("https://unichat.voguh.me/api/v1/unichat-releases").call()?;
     let body = releases.body_mut();
 
     let releases_string = body.read_to_string()?;
@@ -101,34 +85,13 @@ fn get_github_releases_inner<T: serde::de::DeserializeOwned>() -> Result<T, Erro
 }
 
 pub fn get_releases() -> Result<Vec<UniChatRelease>, Error> {
-    let gh_releases: Vec<GitHubRelease> = get_github_releases_inner().unwrap_or_default();
-    let mut unichat_releases: Vec<UniChatRelease> = Vec::new();
-
-    for gh_release in gh_releases {
-        let id = gh_release.id;
-        let name = gh_release.tag_name.clone();
-        let description = gh_release.body.unwrap_or_default();
-        let url = gh_release.html_url;
-        let prerelease = gh_release.prerelease;
-        let created_at = gh_release.created_at.clone();
-        let updated_at = gh_release.updated_at.unwrap_or(gh_release.created_at.clone());
-        let published_at = gh_release.published_at;
-
-        let release = UniChatRelease {
-            id: id,
-            name: name,
-            description: description,
-            url: url,
-            prerelease: prerelease,
-            created_at: created_at,
-            updated_at: updated_at,
-            published_at: published_at
-        };
-
-        unichat_releases.push(release);
-    }
-
-    return Ok(unichat_releases);
+    return match get_releases_inner() {
+        Ok(releases) => Ok(releases),
+        Err(err) => {
+            log::error!("Failed to fetch releases: {:#?}", err);
+            return Ok(vec![]);
+        }
+    };
 }
 
 /* ================================================================================================================== */
