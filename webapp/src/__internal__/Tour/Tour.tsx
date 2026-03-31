@@ -106,7 +106,7 @@ const steps: TourStep[] = [
         replaces: "1b19c7f5-eee9-4ef2-bc66-59cbebf06ad7",
         builder: notificationStageBuilder("Kick Integration was Moved", [
             "To improve kick integration, it was moved to a standalone plugin.",
-            'You can find it in <a href="https://github.com/unichat-community/unichat-plugin-kick/releases" target="_blank" rel="noopener noreferrer">GitHub</a>.'
+            'You can find it in <a href="https://codeberg.org/unichat-community/unichat-plugin-kick/releases" target="_blank" rel="noopener noreferrer">Codeberg</a>.'
         ])
     },
 
