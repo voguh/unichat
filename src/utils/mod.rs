@@ -72,7 +72,7 @@ fn get_releases_inner<T: serde::de::DeserializeOwned>() -> Result<T, Error> {
         }
     }
 
-    log::info!("Fetching releases from GitHub API...");
+    log::info!("Fetching releases from UniChat API...");
     let mut releases = ureq::get("https://unichat.voguh.me/api/v1/unichat-releases").call()?;
     let body = releases.body_mut();
 
