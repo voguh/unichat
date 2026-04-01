@@ -52,13 +52,13 @@ This folder is optional and is intended to provide static files. They can be acc
 This file is used by the widget editor to enable customizations. It has syntax similar to StreamElements’ `fields`, making it easy to create widgets for those already familiar with that platform.
 
 - All references to keys defined in `fields.json` written in the `widget.css`, `widget.html` and `widget.js` files following the pattern `{{key}}` will be replaced by the default values or those set by the user in the UniChat widget editor.
-- The schema can be found [here](https://github.com/voguh/unichat/blob/main/widgets/fields-schema.json).
+- The schema can be found [here](https://codeberg.org/unichat/unichat/src/branch/main/widgets/fields-schema.json).
 - Documentation for each field type can be found [here](/widgets/fields).
 
 Example `fields.json` file:
 ```json
 {
-    "$schema": "https://cdn.statically.io/gh/voguh/unichat/1.3.1/widgets/fields-schema.json",
+    "$schema": "https://codeberg.org/unichat/unichat/raw/tag/1.4.4/widgets/fields-schema.json",
     "checkboxProperty": {
         "type": "checkbox",
         "label": "I'm a checkbox",

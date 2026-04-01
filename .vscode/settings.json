@@ -13,14 +13,9 @@
     },
 
     "json.schemaDownload.enable": true,
-    "json.schemas": [
-        {
-            "fileMatch": ["**/tauri.conf.json"],
-            "url": "https://schema.tauri.app/config/2.9.5"
-        },
-        {
-            "fileMatch": ["**/fields.json"],
-            "url": "https://cdn.statically.io/gh/voguh/unichat/1.3.0/widgets/fields-schema.json"
-        }
-    ],
+    "json.schemaDownload.trustedDomains": {
+        "https://codeberg.org/": true,
+        "https://raw.githubusercontent.com/": true,
+        "https://schema.tauri.app": true
+    },
 }

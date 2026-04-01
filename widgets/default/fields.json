@@ -1,5 +1,5 @@
 {
-    "$schema": "https://cdn.statically.io/gh/voguh/unichat/1.4.0-beta.4/widgets/fields-schema.json",
+    "$schema": "https://codeberg.org/unichat/unichat/raw/tag/1.4.4/widgets/fields-schema.json",
     "platformBadge": {
         "type": "checkbox",
         "label": "Show platform badge",

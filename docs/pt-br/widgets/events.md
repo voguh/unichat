@@ -12,7 +12,7 @@ Todo evento segue o padrão:
 }
 ```
 
-!> A tipagem em typescript pode ser encontrada em [`unichat.d.ts`](https://github.com/voguh/unichat/blob/main/widgets/unichat.d.ts) ou na pasta `widgets/unichat.d.ts` na pasta de instalação do UniChat.
+!> A tipagem em typescript pode ser encontrada em [`unichat.d.ts`](https://codeberg.org/unichat/unichat/src/branch/main/widgets/unichat.d.ts) ou na pasta `widgets/unichat.d.ts` na pasta de instalação do UniChat.
 
 ---
 

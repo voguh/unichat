@@ -2,11 +2,6 @@
 
 UniChat is a tool for streamers who broadcast on YouTube and Twitch, providing a chat widget with support for third-party emotes and customization via HTML/CSS/JS.
 
-> [!IMPORTANT]
-> The development was migrated to Codeberg.
-> The latest version of the project can be found at [https://codeberg.org/unichat/unichat](https://codeberg.org/unichat/unichat).
-> This repository will no longer receive updates, but it will remain available for reference and historical purposes.
-
 <p align="center">
   <img src="docs/screenshot1.png" alt="UniChat Screenshot" width="600"/>
 </p>
@@ -23,7 +18,7 @@ UniChat is a tool for streamers who broadcast on YouTube and Twitch, providing a
 
 ## 🚀 Installation
 
-You can download the latest version for Windows and Linux directly from the project's [Releases page](https://github.com/voguh/unichat/releases).
+You can download the latest version for Windows and Linux directly from the project's [Releases page](https://codeberg.org/unichat/unichat/releases).
 
 -   **Windows:** Download the `.exe` installer.
 -   **Linux:** Choose the ideal package for your distribution (`.deb`, `.rpm`, or `.AppImage`).

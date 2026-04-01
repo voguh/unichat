@@ -12,7 +12,7 @@ Every event follows the pattern:
 }
 ```
 
-!> The TypeScript typings can be found in [`unichat.d.ts`](https://github.com/voguh/unichat/blob/main/widgets/unichat.d.ts) or in the `widgets/unichat.d.ts` folder inside the UniChat installation directory.
+!> The TypeScript typings can be found in [`unichat.d.ts`](https://codeberg.org/unichat/unichat/src/branch/main/widgets/unichat.d.ts) or in the `widgets/unichat.d.ts` folder inside the UniChat installation directory.
 
 ---
 
