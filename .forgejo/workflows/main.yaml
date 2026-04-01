@@ -1,4 +1,4 @@
-name: release.yaml
+name: main.yaml
 
 on:
   push:
@@ -13,12 +13,13 @@ env:
   NODE_VERSION: '24.10.0'
   PNPM_VERSION: '10.30.3'
   RUST_VERSION: '1.92.0'
-  TAURI_APP_PATH: ${{ github.workspace }}
-  TAURI_FRONTEND_PATH: ${{ github.workspace }}/webapp
 
 jobs:
   webapp-build:
     runs-on: ubuntu-24.04
+    env:
+      TAURI_APP_PATH: ${{ forgejo.workspace }}
+      TAURI_FRONTEND_PATH: ${{ forgejo.workspace }}/webapp
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
@@ -46,7 +47,7 @@ jobs:
           pnpm build:ui
 
       - name: Upload webapp artifact
-        uses: actions/upload-artifact@v4.6.2
+        uses: forgejo/upload-artifact@v4.6.2
         with:
           name: webapp-dist
           path: ${{ env.TAURI_FRONTEND_PATH }}/dist
@@ -54,12 +55,15 @@ jobs:
   package-linux:
     runs-on: ubuntu-24.04
     needs: [webapp-build]
+    env:
+      TAURI_APP_PATH: ${{ forgejo.workspace }}
+      TAURI_FRONTEND_PATH: ${{ forgejo.workspace }}/webapp
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
 
       - name: Download webapp artifact
-        uses: actions/download-artifact@v5.0.0
+        uses: forgejo/download-artifact@v5.0.0
         with:
           name: webapp-dist
           path: ${{ env.TAURI_FRONTEND_PATH }}/dist
@@ -72,7 +76,7 @@ jobs:
           node -e "let fs = require('fs'); let path = require('path'); let cPath = path.join(__dirname, 'tauri.conf.json'); let c = JSON.parse(fs.readFileSync(cPath)); c.build.beforeBuildCommand = ''; fs.writeFileSync(cPath, JSON.stringify(c, null, 4));"
 
       - name: Rust toolchain setup
-        uses: dtolnay/rust-toolchain@v1
+        uses: github.com/dtolnay/rust-toolchain@v1
         with:
           toolchain: ${{ env.RUST_VERSION }}
 
@@ -81,20 +85,23 @@ jobs:
           tauri build
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4.6.2
+        uses: forgejo/upload-artifact@v4.6.2
         with:
           name: linux-bundles
-          path: ${{ github.workspace }}/target/release/bundle
+          path: ${{ forgejo.workspace }}/target/release/bundle
 
   package-windows:
     runs-on: ubuntu-24.04
     needs: [webapp-build]
+    env:
+      TAURI_APP_PATH: ${{ forgejo.workspace }}
+      TAURI_FRONTEND_PATH: ${{ forgejo.workspace }}/webapp
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
 
       - name: Download webapp artifact
-        uses: actions/download-artifact@v5.0.0
+        uses: forgejo/download-artifact@v5.0.0
         with:
           name: webapp-dist
           path: ${{ env.TAURI_FRONTEND_PATH }}/dist
@@ -108,7 +115,7 @@ jobs:
           node -e "let fs = require('fs'); let path = require('path'); let cPath = path.join(__dirname, 'tauri.conf.json'); let c = JSON.parse(fs.readFileSync(cPath)); c.build.beforeBuildCommand = ''; fs.writeFileSync(cPath, JSON.stringify(c, null, 4));"
 
       - name: Rust toolchain setup
-        uses: dtolnay/rust-toolchain@v1
+        uses: github.com/dtolnay/rust-toolchain@v1
         with:
           toolchain: ${{ env.RUST_VERSION }}
           targets: x86_64-pc-windows-msvc
@@ -119,10 +126,10 @@ jobs:
           tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4.6.2
+        uses: forgejo/upload-artifact@v4.6.2
         with:
           name: windows-bundles
-          path: ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/bundle
+          path: ${{ forgejo.workspace }}/target/x86_64-pc-windows-msvc/release/bundle
 
   publish:
     if: startsWith(github.ref, 'refs/tags/')
@@ -135,16 +142,16 @@ jobs:
         uses: actions/checkout@v4.2.2
 
       - name: Download windows build artifacts
-        uses: actions/download-artifact@v5.0.0
+        uses: forgejo/download-artifact@v5.0.0
         with:
           name: windows-bundles
-          path: ${{ github.workspace }}/target/windows
+          path: ${{ forgejo.workspace }}/target/windows
 
       - name: Download linux build artifacts
-        uses: actions/download-artifact@v5.0.0
+        uses: forgejo/download-artifact@v5.0.0
         with:
           name: linux-bundles
-          path: ${{ github.workspace }}/target/linux
+          path: ${{ forgejo.workspace }}/target/linux
 
       - name: Setup version
         id: setup_version
@@ -170,33 +177,20 @@ jobs:
       - name: Move build artifacts
         run: |
           export VERSION="${{ steps.setup_version.outputs.revision }}"
-          mkdir -p ${{ github.workspace }}/dist
-          cp ${{ github.workspace }}/target/linux/appimage/*.AppImage ${{ github.workspace }}/dist/unichat-$VERSION.AppImage
-          cp ${{ github.workspace }}/target/linux/deb/*.deb ${{ github.workspace }}/dist/unichat-$VERSION.deb
-          cp ${{ github.workspace }}/target/linux/rpm/*.rpm ${{ github.workspace }}/dist/unichat-$VERSION.rpm
-          cp ${{ github.workspace }}/target/windows/nsis/*.exe ${{ github.workspace }}/dist/unichat-$VERSION-setup.exe
-          for file in ${{ github.workspace }}/dist/*; do
+          mkdir -p ${{ forgejo.workspace }}/dist
+          cp ${{ forgejo.workspace }}/target/linux/appimage/*.AppImage ${{ forgejo.workspace }}/dist/unichat-$VERSION.AppImage
+          cp ${{ forgejo.workspace }}/target/linux/deb/*.deb ${{ forgejo.workspace }}/dist/unichat-$VERSION.deb
+          cp ${{ forgejo.workspace }}/target/linux/rpm/*.rpm ${{ forgejo.workspace }}/dist/unichat-$VERSION.rpm
+          cp ${{ forgejo.workspace }}/target/windows/nsis/*.exe ${{ forgejo.workspace }}/dist/unichat-$VERSION-setup.exe
+          for file in ${{ forgejo.workspace }}/dist/*; do
             if [ -f "$file" ]; then
               sha256sum "$file" > "${file}.sha256"
             fi
           done
 
       - name: Create and upload to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
-          if [ -n "$(command -v gh)" ]; then
-            echo "Creating GitHub Release for tag $TAG_NAME"
-            echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
-            gh release create "$TAG_NAME" --prerelease
-            for file in ${{ github.workspace }}/dist/*; do
-              if [ -f "$file" ]; then
-                echo "Uploading $file to GitHub Release $TAG_NAME"
-                gh release upload "$TAG_NAME" "$file"
-              fi
-            done
-            echo "All files uploaded to GitHub Release successfully."
-          else
-            echo "GitHub CLI is not installed. Skipping upload to GitHub Release."
-            exit 0
-          fi
+        uses: actions/forgejo-release@v2.11.3
+        with:
+          direction: upload
+          prerelease: true
+          release-dir: ${{ forgejo.workspace }}/dist

@@ -9,7 +9,7 @@ trim_trailing_whitespace = true
 insert_final_newline = true
 rulers = 80, 100, 120
 
-[.github/**/*]
+[.forgejo/**/*]
 indent_size = 2
 
 [docs/**/*]
