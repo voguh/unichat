@@ -76,7 +76,7 @@ jobs:
           node -e "let fs = require('fs'); let path = require('path'); let cPath = path.join(__dirname, 'tauri.conf.json'); let c = JSON.parse(fs.readFileSync(cPath)); c.build.beforeBuildCommand = ''; fs.writeFileSync(cPath, JSON.stringify(c, null, 4));"
 
       - name: Rust toolchain setup
-        uses: github.com/dtolnay/rust-toolchain@v1
+        uses: ./.forgejo/actions/rust-toolchain
         with:
           toolchain: ${{ env.RUST_VERSION }}
 
@@ -115,7 +115,7 @@ jobs:
           node -e "let fs = require('fs'); let path = require('path'); let cPath = path.join(__dirname, 'tauri.conf.json'); let c = JSON.parse(fs.readFileSync(cPath)); c.build.beforeBuildCommand = ''; fs.writeFileSync(cPath, JSON.stringify(c, null, 4));"
 
       - name: Rust toolchain setup
-        uses: github.com/dtolnay/rust-toolchain@v1
+        uses: ./.forgejo/actions/rust-toolchain
         with:
           toolchain: ${{ env.RUST_VERSION }}
           targets: x86_64-pc-windows-msvc
