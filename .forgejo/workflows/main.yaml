@@ -16,7 +16,7 @@ env:
 
 jobs:
   webapp-build:
-    runs-on: ubuntu-24.04
+    runs-on: codeberg-medium
     env:
       TAURI_APP_PATH: ${{ forgejo.workspace }}
       TAURI_FRONTEND_PATH: ${{ forgejo.workspace }}/webapp
@@ -53,7 +53,7 @@ jobs:
           path: ${{ env.TAURI_FRONTEND_PATH }}/dist
 
   package-linux:
-    runs-on: ubuntu-24.04
+    runs-on: codeberg-medium
     needs: [webapp-build]
     env:
       TAURI_APP_PATH: ${{ forgejo.workspace }}
@@ -91,7 +91,7 @@ jobs:
           path: ${{ forgejo.workspace }}/target/release/bundle
 
   package-windows:
-    runs-on: ubuntu-24.04
+    runs-on: codeberg-medium
     needs: [webapp-build]
     env:
       TAURI_APP_PATH: ${{ forgejo.workspace }}
@@ -133,7 +133,7 @@ jobs:
 
   publish:
     if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-24.04
+    runs-on: codeberg-medium
     needs: [package-linux, package-windows]
     permissions:
       contents: write
