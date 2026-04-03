@@ -113,7 +113,7 @@ export function PluginsModalActions(_props: Props): React.ReactNode {
         <>
             <Button
                 variant="default"
-                onClick={() => openUrl("https://voguh.github.io/unichat/#/plugins/getting_started")}
+                onClick={() => openUrl("https://unichat.voguh.me/docs/1.4.x/plugins/getting_started.html")}
             >
                 <i className="fas fa-book" />
                 Read the Docs
