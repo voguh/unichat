@@ -71,7 +71,7 @@ export const ColorPicker = React.forwardRef<HTMLInputElement, ColorPickerProps>(
                 <div className="colorpicker-inputgroup">
                     <FormControl
                         {...restProps}
-                        onChange={(evt) => restProps.onChange?.(evt.currentTarget.value)}
+                        onChange={(evt) => restProps.onChange?.(evt.target.value)}
                         ref={inputRef}
                     />
                     <div className="color-preview">

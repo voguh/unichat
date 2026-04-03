@@ -22,6 +22,7 @@ import { Checkbox } from "unichat/components/forms/Checkbox";
 import { ColorPicker } from "unichat/components/forms/ColorPicker";
 import { NumberInput } from "unichat/components/forms/NumberInput";
 import { Select } from "unichat/components/forms/Select";
+import { Switch } from "unichat/components/forms/Switch";
 import { Textarea } from "unichat/components/forms/Textarea";
 import { TextInput } from "unichat/components/forms/TextInput";
 import { GalleryFileInput } from "unichat/components/GalleryFileInput";
@@ -66,7 +67,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         label={builder.label}
                         description={builder.description}
                         checked={value}
-                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.checked }))}
+                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.target.checked }))}
                     />
                 );
             case "colorpicker":
@@ -112,7 +113,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         description={builder.description}
                         value={value}
                         rows={3}
-                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.target.value }))}
                     />
                 );
             case "divider":
@@ -129,7 +130,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                             label={builder.label}
                             description={builder.description}
                             defaultValue={value}
-                            onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                            onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.target.value }))}
                             showTabs={builder.fileType}
                         />
                     </div>
@@ -141,7 +142,7 @@ export function WidgetEditor(_props: Props): React.ReactNode {
                         label={builder.label}
                         description={builder.description}
                         value={value}
-                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.target.value }))}
                     />
                 );
         }
