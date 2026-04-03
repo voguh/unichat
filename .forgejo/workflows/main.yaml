@@ -132,7 +132,7 @@ jobs:
           path: ${{ forgejo.workspace }}/target/x86_64-pc-windows-msvc/release/bundle
 
   publish:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(forgejo.ref, 'refs/tags/')
     runs-on: ubuntu-24.04
     needs: [package-linux, package-windows]
     permissions:
@@ -157,18 +157,18 @@ jobs:
         id: setup_version
         run: |
           export CARGO_PACKAGE_VERSION="$(cargo pkgid | cut -d# -f2)"
-          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            TAG_NAME="${GITHUB_REF#refs/tags/}"
+          if [[ "$FORGEJO_REF" == refs/tags/* ]]; then
+            TAG_NAME="${FORGEJO_REF#refs/tags/}"
             if [ "$CARGO_PACKAGE_VERSION" != "$TAG_NAME" ]; then
               echo "Error: The version in Cargo.toml ($CARGO_PACKAGE_VERSION) does not match the release tag ($TAG_NAME)."
               exit 1
             fi
-            echo "revision=$TAG_NAME" >> $GITHUB_OUTPUT
+            echo "revision=$TAG_NAME" >> $FORGEJO_OUTPUT
           else
             export SHORT_CARGO_VERSION="$(echo $CARGO_PACKAGE_VERSION | cut -d '-' -f1)"
-            export NEW_VERSION="$SHORT_CARGO_VERSION+$GITHUB_SHA"
+            export NEW_VERSION="$SHORT_CARGO_VERSION+$FORGEJO_SHA"
             sed -i "s/^version = \"$CARGO_PACKAGE_VERSION\"/version = \"$NEW_VERSION\"/" "Cargo.toml"
-            echo "revision=$NEW_VERSION" >> $GITHUB_OUTPUT
+            echo "revision=$NEW_VERSION" >> $FORGEJO_OUTPUT
           fi
 
       - name: Print revision
@@ -188,7 +188,7 @@ jobs:
             fi
           done
 
-      - name: Create and upload to GitHub Release
+      - name: Create and upload to Forgejo Release
         uses: actions/forgejo-release@v2.11.3
         with:
           direction: upload
