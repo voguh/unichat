@@ -1,5 +1,4 @@
 {
-    "ignorePatterns": ["!.storybook/**/*"],
     "env": {
         "es2023": true,
         "browser": true
@@ -8,8 +7,7 @@
         "standard",
         "plugin:@typescript-eslint/recommended",
         "plugin:react/recommended",
-        "plugin:prettier/recommended",
-        "plugin:storybook/recommended"
+        "plugin:prettier/recommended"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
@@ -19,7 +17,7 @@
             "jsx": true
         }
     },
-    "plugins": ["import", "@typescript-eslint", "prettier", "react", "react-hooks", "prettier", "eslint-plugin-import-helpers", "vitest"],
+    "plugins": ["import", "@typescript-eslint", "prettier", "react", "react-hooks", "prettier", "eslint-plugin-import-helpers"],
     "rules": {
         "prettier/prettier": "warn",
 
@@ -137,7 +135,7 @@
     },
     "settings": {
         "react": {
-            "version": "detect"
+            "version": "18"
         }
     }
 }

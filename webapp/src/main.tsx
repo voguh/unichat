@@ -10,18 +10,6 @@
 
 import "unichat/styles/bootstrap.scss";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import "@fontsource/roboto/400";
-import "@fontsource/roboto/400-italic";
-import "@fontsource/roboto/600";
-import "@fontsource/roboto/600-italic";
-import "@fontsource/roboto/700";
-import "@fontsource/roboto/700-italic";
-import "@fontsource/roboto-mono/400";
-import "@fontsource/roboto-mono/400-italic";
-import "@fontsource/roboto-mono/600";
-import "@fontsource/roboto-mono/600-italic";
-import "@fontsource/roboto-mono/700";
-import "@fontsource/roboto-mono/700-italic";
 
 import React from "react";
 import { createRoot } from "react-dom/client";

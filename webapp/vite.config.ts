@@ -8,31 +8,22 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-/// <reference types="vite/client" />
-/// <reference types="vitest/config" />
-
 import fs from "node:fs";
 import path from "node:path";
 
-import react from "@vitejs/plugin-react-swc";
-import { visualizer } from "rollup-plugin-visualizer";
+import react from "@vitejs/plugin-react";
+import sonda from "sonda/vite";
 import { defineConfig, Plugin } from "vite";
-
-function fullReload(): Plugin {
-    return {
-        name: "@vitejs/plugin-full-reload",
-        handleHotUpdate({ server }) {
-            server.ws.send({ type: "full-reload" });
-
-            return [];
-        }
-    };
-}
 
 const DIST_DIR = path.resolve(__dirname, "dist");
 function uniChatBuildTools(): Plugin {
     return {
         name: "@unichat/build-tools",
+        handleHotUpdate({ server }) {
+            server.ws.send({ type: "full-reload" });
+
+            return [];
+        },
         buildStart() {
             if (fs.existsSync(DIST_DIR)) {
                 fs.rmSync(DIST_DIR, { recursive: true, force: true });
@@ -55,7 +46,16 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig({
     root: path.resolve(__dirname),
     publicDir: path.resolve(__dirname, "public"),
-    plugins: [fullReload(), uniChatBuildTools(), react({ plugins: [["@swc/plugin-styled-components", {}]] })],
+    plugins: [
+        sonda({
+            brotli: true,
+            filename: path.resolve(__dirname, "coverage", "stats.html"),
+            gzip: true,
+            open: false
+        }),
+        uniChatBuildTools(),
+        react()
+    ],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
     //
@@ -89,19 +89,12 @@ export default defineConfig({
         sourcemap: true,
         rollupOptions: {
             treeshake: true,
-            plugins: [
-                visualizer({
-                    filename: path.resolve(__dirname, "coverage", "stats.html"),
-                    template: "sunburst",
-                    gzipSize: true,
-                    brotliSize: true
-                })
-            ],
             output: {
                 entryFileNames: "js/[name]-[hash].js",
                 chunkFileNames: "js/[name]-[hash].js",
                 assetFileNames(chunkInfo) {
-                    const ext = path.extname(chunkInfo.name!).slice(1);
+                    const name = chunkInfo.name ?? chunkInfo.fileName ?? "";
+                    const ext = path.extname(name).slice(1);
                     if (ext === "css") {
                         return "css/[name]-[hash].[ext]";
                     }
@@ -128,19 +121,6 @@ export default defineConfig({
     resolve: {
         alias: {
             unichat: path.resolve(__dirname, "src")
-        }
-    },
-
-    test: {
-        globals: true,
-        setupFiles: path.resolve(__dirname, "__tests__", "setupTests.ts"),
-        environment: "jsdom",
-        coverage: {
-            provider: "v8",
-            reportsDirectory: path.resolve(__dirname, "coverage"),
-            reporter: ["text", "html", "clover", "json"],
-            include: ["src/**/*.{ts,tsx,js,jsx}"],
-            exclude: ["node_modules/", "__tests__", "**/*.d.ts", "**/index.{ts,tsx,js,jsx}"]
         }
     }
 });
