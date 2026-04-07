@@ -27,7 +27,21 @@
             }
         ],
         "security": {
-            "csp": null
+            "csp": {
+                "default-src": ["'self'", "asset:", "http://asset.localhost"],
+
+                "script-src": ["'self'", "'unsafe-inline'", "asset:", "http://asset.localhost"],
+                "script-src-elem": ["'self'", "'unsafe-inline'", "asset:", "http://asset.localhost"],
+                "script-src-attr": ["'none'"],
+
+                "style-src": ["'self'", "'unsafe-inline'", "asset:", "http://asset.localhost"],
+                "style-src-elem": ["'self'", "'unsafe-inline'", "asset:", "http://asset.localhost"],
+                "style-src-attr": ["'self'", "asset:", "http://asset.localhost"],
+
+                "img-src": ["'self'", "asset:", "blob:", "data:", "http://asset.localhost"],
+                "connect-src": ["'self'", "ipc:", "http://ipc.localhost"],
+                "frame-src": ["'self'", "http://localhost:9527"]
+            }
         }
     },
     "bundle": {
