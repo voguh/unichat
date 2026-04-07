@@ -1,8 +1,0 @@
-# UniChat Documentation
-
-Complete list of documentation for developing plugins and widgets for **UniChat**.
-
-- To learn how to develop plugins, see [here](/plugins/getting_started).
-- To learn how to develop widgets, see [here](/widgets/getting_started).
-
-Documentation for version 1.5.x of **UniChat**.
