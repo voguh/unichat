@@ -16,12 +16,12 @@
         "@fortawesome/fontawesome-free": "5.15.4",
         "@react-input/number-format": "2.0.3",
         "@tauri-apps/api": "2.10.1",
-        "@tauri-apps/plugin-dialog": "2.6.0",
+        "@tauri-apps/plugin-dialog": "2.7.0",
         "@tauri-apps/plugin-log": "2.8.0",
         "@tauri-apps/plugin-opener": "2.5.3",
         "@tauri-apps/plugin-os": "2.3.2",
         "@tauri-apps/plugin-store": "2.4.2",
-        "@uiw/react-color-sketch": "2.9.6",
+        "@uiw/react-color-sketch": "2.10.0",
         "bootstrap": "5.3.8",
         "clsx": "2.1.1",
         "marked": "17.0.5",
@@ -56,6 +56,6 @@
         "prettier": "3.8.1",
         "sonda": "0.11.1",
         "typescript": "5.9.3",
-        "vite": "8.0.3"
+        "vite": "8.0.7"
     }
 }

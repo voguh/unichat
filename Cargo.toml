@@ -16,8 +16,8 @@ custom-protocol = ["tauri/custom-protocol"]
 [build-dependencies]
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.149", features = ["preserve_order"] }
-tauri-build = { version = "2.5.5", features = [] }
-ureq = { version = "3.2.0", default-features = false, features = ["json", "native-tls"] }
+tauri-build = { version = "2.5.6", features = [] }
+ureq = { version = "3.3.0", default-features = false, features = ["json", "native-tls"] }
 
 [dependencies]
 actix-web = "4.13.0"
@@ -27,24 +27,24 @@ base64 = "0.22.1"
 ctrlc = "3.5.2"
 futures = "0.3.32"
 if-addrs = "0.15.0"
-indexmap = { version = "2.13.0", features = ["serde"] }
+indexmap = { version = "2.13.1", features = ["serde"] }
 infer = "0.19.0"
 log = "0.4.29"
 mime_guess = "2.0.5"
 mlua = { version = "0.11.6", features = ["lua54", "vendored", "serde", "send"] }
-moka = { version = "0.12.13", features = ["sync"] }
+moka = { version = "0.12.15", features = ["sync"] }
 rand = "0.10.0"
 regex = "1.12.3"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.149", features = ["preserve_order"] }
 serde_plain = "1.0.2"
-serde-saphyr = "0.0.20"
-tauri = { version = "2.10.2", features = ["native-tls"] }
-tauri-plugin-dialog = "2.6.0"
+serde-saphyr = "0.0.23"
+tauri = { version = "2.10.3", features = ["native-tls"] }
+tauri-plugin-dialog = "2.7.0"
 tauri-plugin-log = "2.8.0"
 tauri-plugin-opener = "2.5.3"
 tauri-plugin-os = "2.3.2"
 tauri-plugin-store = "2.4.2"
-tokio = { version = "1.49.0", features = ["full"] }
-ureq = { version = "3.2.0", default-features = false, features = ["json", "native-tls"] }
+tokio = { version = "1.51.0", features = ["full"] }
+ureq = { version = "3.3.0", default-features = false, features = ["json", "native-tls"] }
 url = { version = "2.5.7", features = ["serde"] }
