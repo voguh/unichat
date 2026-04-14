@@ -15,6 +15,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 
 import { platform } from "@tauri-apps/plugin-os";
+import { render } from "preact";
 import { DefaultTheme, ThemeProvider } from "styled-components";
 
 import { ModalContainer } from "unichat/__internal__/ModalContainer";
@@ -55,18 +56,16 @@ if (documentRoot == null) {
     throw new Error("Root element not found");
 }
 
-const root = createRoot(documentRoot);
-root.render(
-    <React.StrictMode>
-        <ThemeProvider theme={theme as DefaultTheme}>
-            <GlobalStyle />
-            <BootstrapFixes />
+render(
+    <ThemeProvider theme={theme as DefaultTheme}>
+        <GlobalStyle />
+        <BootstrapFixes />
 
-            <AppContextProvider>
-                <App />
-                <ToastContainer limit={3} position="bottom-center" />
-                <ModalContainer centered />
-            </AppContextProvider>
-        </ThemeProvider>
-    </React.StrictMode>
+        <AppContextProvider>
+            <App />
+            <ToastContainer limit={3} position="bottom-center" />
+            <ModalContainer centered />
+        </AppContextProvider>
+    </ThemeProvider>,
+    documentRoot
 );

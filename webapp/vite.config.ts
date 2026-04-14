@@ -11,11 +11,26 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import react from "@vitejs/plugin-react";
-import sonda from "sonda/vite";
+import preact from "@preact/preset-vite";
+import JSONC from "jsonc-parser";
+import { CompilerOptions } from "typescript";
 import { defineConfig, Plugin } from "vite";
 
-const DIST_DIR = path.resolve(__dirname, "dist");
+const tsConfigRaw = fs.readFileSync(path.resolve(__dirname, "tsconfig.json"), { encoding: "utf-8" });
+const compilerOptions = (JSONC.parse(tsConfigRaw) || {}).compilerOptions as CompilerOptions;
+const tsConfigPaths = Object.entries(compilerOptions?.paths ?? {}).reduce((acc, [key, value]) => {
+    const normalizedKey = key.endsWith("/*") ? key.slice(0, -2) : key;
+    const normalizedValue = value[0].endsWith("/*") ? value[0].slice(0, -2) : value[0];
+
+    return {
+        ...acc,
+        [normalizedKey]: path.resolve(__dirname, normalizedValue),
+        ...(key.endsWith("/*") && {
+            [`${normalizedKey}/*`]: path.resolve(__dirname, `${normalizedValue}/*`)
+        })
+    };
+}, {});
+
 function uniChatBuildTools(): Plugin {
     return {
         name: "@unichat/build-tools",
@@ -23,20 +38,6 @@ function uniChatBuildTools(): Plugin {
             server.ws.send({ type: "full-reload" });
 
             return [];
-        },
-        buildStart() {
-            if (fs.existsSync(DIST_DIR)) {
-                fs.rmSync(DIST_DIR, { recursive: true, force: true });
-            }
-        },
-        generateBundle(_, bundle) {
-            for (const [fileName, chunk] of Object.entries(bundle)) {
-                const isVendor = fileName.includes("vendor") || chunk.name === "vendor";
-                const isMap = fileName.endsWith(".map");
-                if (isVendor && isMap) {
-                    delete bundle[fileName];
-                }
-            }
         }
     };
 }
@@ -46,16 +47,7 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig({
     root: path.resolve(__dirname),
     publicDir: path.resolve(__dirname, "public"),
-    plugins: [
-        sonda({
-            brotli: true,
-            filename: path.resolve(__dirname, "coverage", "stats.html"),
-            gzip: true,
-            open: false
-        }),
-        uniChatBuildTools(),
-        react()
-    ],
+    plugins: [uniChatBuildTools(), preact({ babel: { plugins: [["babel-plugin-macros"]] }, devToolsEnabled: false })],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
     //
@@ -86,13 +78,15 @@ export default defineConfig({
     },
 
     build: {
-        sourcemap: true,
+        sourcemap: false,
         rollupOptions: {
             treeshake: true,
             output: {
                 entryFileNames: "js/[name]-[hash].js",
                 chunkFileNames: "js/[name]-[hash].js",
                 assetFileNames(chunkInfo) {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
                     const name = chunkInfo.name ?? chunkInfo.fileName ?? "";
                     const ext = path.extname(name).slice(1);
                     if (ext === "css") {
@@ -119,8 +113,6 @@ export default defineConfig({
     },
 
     resolve: {
-        alias: {
-            unichat: path.resolve(__dirname, "src")
-        }
+        alias: tsConfigPaths
     }
 });
