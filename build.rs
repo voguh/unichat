@@ -95,9 +95,18 @@ struct CargoDependency {
 
 fn generate_crate_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::error::Error>> {
     let mut final_licenses: Vec<FinalLicenseInfo> = Vec::new();
+    let mut cargo_bin = env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
+    if cargo_bin.contains("cargo-xwin") || cargo_bin.contains("cargo-win") {
+        cargo_bin = String::from("cargo");
+    }
 
-    let cargo_bin = env::var("CARGO_HOME").map(|h| format!("{}/bin/cargo", h)).unwrap_or_else(|_| "cargo".to_string());
-    let metadata_output = Command::new(&cargo_bin).args(["metadata", "--format-version", "1"]).output()?;
+    let metadata_output = Command::new(&cargo_bin)
+        .args(["metadata", "--format-version", "1"])
+        // Remove env vars that may force cross-target flags into rustc.
+        .env_remove("RUSTFLAGS")
+        .env_remove("CARGO_ENCODED_RUSTFLAGS")
+        .env_remove("CARGO")
+        .output()?;
     if !metadata_output.status.success() {
         return Err(format!("Failed to run metadata: {}", String::from_utf8_lossy(&metadata_output.stderr)).into());
     }
