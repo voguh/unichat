@@ -36,8 +36,7 @@ export interface ThirdPartyLicenseInfo {
     source: string;
     name: string;
     version: string;
-    authors?: string[];
-    repository?: string;
+    repository: string;
     licenses: string;
 }
 
