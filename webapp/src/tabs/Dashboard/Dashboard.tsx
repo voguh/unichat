@@ -194,35 +194,3 @@ export function Dashboard(_props: Props): React.ReactNode {
         </DashboardStyledContainer>
     );
 }
-
-export function DashboardLeftSection(_props: Props): React.ReactNode {
-    const { showWidgetPreview, setShowWidgetPreview } = React.useContext(AppContext);
-
-    async function handleClearChat(): Promise<void> {
-        await commandService.dispatchClearChat();
-    }
-
-    return (
-        <>
-            <Tooltip content="Clear chat history" placement="right">
-                <Button size="sm" onClick={handleClearChat} data-tour="clear-chat">
-                    <i className="fas fa-eraser" />
-                </Button>
-            </Tooltip>
-            <Tooltip content="Open user widgets folder" placement="right">
-                <Button onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)} data-tour="user-widgets-directory">
-                    <i className="fas fa-folder" />
-                </Button>
-            </Tooltip>
-            <Tooltip content="Toggle widget preview" placement="right">
-                <Button
-                    onClick={() => setShowWidgetPreview((old) => !old)}
-                    variant={showWidgetPreview ? "filled" : "default"}
-                    data-tour="toggle-widget-preview"
-                >
-                    {showWidgetPreview ? <i className="fas fa-eye" /> : <i className="fas fa-eye-slash" />}
-                </Button>
-            </Tooltip>
-        </>
-    );
-}
