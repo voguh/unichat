@@ -8,163 +8,163 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import PReact from "preact";
+import { useEffect, useState } from "preact/hooks";
 
-import * as eventService from "@tauri-apps/api/event";
-import Card from "react-bootstrap/Card";
+// import * as eventService from "@tauri-apps/api/event";
+// import Card from "react-bootstrap/Card";
 
-import { PluginsModal, PluginsModalActions } from "unichat/__internal__/PluginsModal";
-import { SettingsModalLeftSection, SettingsModal } from "unichat/__internal__/SettingsModal";
+// import { PluginsModal, PluginsModalActions } from "unichat/__internal__/PluginsModal";
+// import { SettingsModalLeftSection, SettingsModal } from "unichat/__internal__/SettingsModal";
 import { Button } from "unichat/components/Button";
-import { ErrorBoundary } from "unichat/components/ErrorBoundary";
+// import { ErrorBoundary } from "unichat/components/ErrorBoundary";
 import { Tooltip } from "unichat/components/OverlayTrigger";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
-import { modalService } from "unichat/services/modalService";
-import { notificationService } from "unichat/services/notificationService";
-import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
-import { Dashboard, DashboardLeftSection } from "unichat/tabs/Dashboard";
-import { WidgetEditor, WidgetEditorLeftSection } from "unichat/tabs/WidgetEditor";
-import { IPCNotificationEvent } from "unichat/utils/IPCStatusEvent";
-import { Strings } from "unichat/utils/Strings";
 
-import { Tour } from "./__internal__/Tour";
-import { WidgetsModal, WidgetsModalActions } from "./__internal__/WidgetsModal";
-import { commandService } from "./services/commandService";
+import { DashboardLeftSection } from "./tabs/Dashboard";
+// import { modalService } from "unichat/services/modalService";
+// import { notificationService } from "unichat/services/notificationService";
+// import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
+// import { Dashboard, DashboardLeftSection } from "unichat/tabs/Dashboard";
+// import { WidgetEditor, WidgetEditorLeftSection } from "unichat/tabs/WidgetEditor";
+// import { IPCNotificationEvent } from "unichat/utils/IPCStatusEvent";
+// import { Strings } from "unichat/utils/Strings";
+
+// import { Tour } from "./__internal__/Tour";
+// import { WidgetsModal, WidgetsModalActions } from "./__internal__/WidgetsModal";
+// import { commandService } from "./services/commandService";
 
 interface TabOptions {
     label: string;
-    icon: React.ReactNode;
-    component: React.ReactNode;
-    leftSection: React.ReactNode;
+    icon: PReact.ComponentChildren;
+    component: PReact.ComponentChildren;
+    leftSection: PReact.ComponentChildren;
 }
 
 const tabs: Record<string, TabOptions> = {
     dashboard: {
         label: "Dashboard",
         icon: <i className="fas fa-th-large" />,
-        component: <Dashboard />,
+        component: <>batata</>,
         leftSection: <DashboardLeftSection />
     },
     widgetEditor: {
         label: "Widget Editor",
         icon: <i className="fas fa-pencil-ruler" />,
-        component: <WidgetEditor />,
-        leftSection: <WidgetEditorLeftSection />
+        component: <>widget editor</>,
+        leftSection: <>widget editor left section</>
     }
 };
 
-function TabLeftSection({ selectedTab }: { selectedTab: keyof typeof tabs }): React.ReactNode {
+function TabLeftSection({ selectedTab }: { selectedTab: keyof typeof tabs }): PReact.ComponentChildren {
     const leftSection = tabs[selectedTab]?.leftSection;
     if (leftSection == null) {
         return null;
     }
 
     return (
-        <>
-            <div className="divider" />
+        <div className="sidebar__left-section">
+            <div className="sidebar__divider" />
             {leftSection}
-        </>
+        </div>
     );
 }
 
-function TabContent({ selectedTab }: { selectedTab: keyof typeof tabs }): React.ReactNode {
-    const content = tabs[selectedTab]?.component;
-    if (content == null) {
-        return null;
-    }
+// function TabContent({ selectedTab }: { selectedTab: keyof typeof tabs }): React.ReactNode {
+//     const content = tabs[selectedTab]?.component;
+//     if (content == null) {
+//         return null;
+//     }
 
-    return (
-        <ErrorBoundary>
-            <div className="divider" />
-            {content}
-        </ErrorBoundary>
-    );
-}
+//     return (
+//         <ErrorBoundary>
+//             <div className="divider" />
+//             {content}
+//         </ErrorBoundary>
+//     );
+// }
 
 const _logger = LoggerFactory.getLogger("App");
-export function App(): JSX.Element {
-    const [selectedTab, setSelectedTab] = React.useState<keyof typeof tabs>("dashboard");
+export function App(): PReact.ComponentChildren {
+    const [selectedTab, setSelectedTab] = useState<keyof typeof tabs>("dashboard");
 
     function togglePluginsModal(): void {
-        modalService.openModal({
-            size: "xl",
-            title: "Plugins",
-            actions: <PluginsModalActions />,
-            children: <PluginsModal />
-        });
+        //     modalService.openModal({
+        //         size: "xl",
+        //         title: "Plugins",
+        //         actions: <PluginsModalActions />,
+        //         children: <PluginsModal />
+        //     });
     }
 
     function toggleWidgetsModal(): void {
-        modalService.openModal({
-            size: "xl",
-            title: "Widgets",
-            actions: <WidgetsModalActions />,
-            children: <WidgetsModal />
-        });
+        //     modalService.openModal({
+        //         size: "xl",
+        //         title: "Widgets",
+        //         actions: <WidgetsModalActions />,
+        //         children: <WidgetsModal />
+        //     });
     }
 
     function toggleSettingsModal(tab?: string | null): void {
-        modalService.openModal({
-            size: "xl",
-            title: "Settings",
-            leftSectionTitle: "Settings",
-            leftSection: <SettingsModalLeftSection />,
-            children: <SettingsModal />,
-            sharedStoreInitialState: {
-                selectedItem: Strings.isNullOrEmpty(tab) ? "general" : tab
-            }
-        });
+        //     modalService.openModal({
+        //         size: "xl",
+        //         title: "Settings",
+        //         leftSectionTitle: "Settings",
+        //         leftSection: <SettingsModalLeftSection />,
+        //         children: <SettingsModal />,
+        //         sharedStoreInitialState: {
+        //             selectedItem: Strings.isNullOrEmpty(tab) ? "general" : tab
+        //         }
+        //     });
     }
 
     /* ========================================================================================== */
 
     async function init(): Promise<void> {
-        const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
-        if (isOpenToLan) {
-            notificationService.warn({
-                title: `${UNICHAT_DISPLAY_NAME} is open to LAN`,
-                message: "Your widgets are accessible by other devices on the same local network."
-            });
-        }
-
-        /* ====================================================================================== */
-
-        const releaseInfo = await commandService.getReleases();
-        if (releaseInfo.hasUpdate) {
-            toggleSettingsModal("check-updates");
-        }
+        //     const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
+        //     if (isOpenToLan) {
+        //         notificationService.warn({
+        //             title: `${UNICHAT_DISPLAY_NAME} is open to LAN`,
+        //             message: "Your widgets are accessible by other devices on the same local network."
+        //         });
+        //     }
+        //     /* ====================================================================================== */
+        //     const releaseInfo = await commandService.getReleases();
+        //     if (releaseInfo.hasUpdate) {
+        //         toggleSettingsModal("check-updates");
+        //     }
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         init();
 
-        /* ====================================================================================== */
+        //     /* ====================================================================================== */
 
-        const unListenerPromise = eventService.listen<IPCNotificationEvent>("unichat://notification", ({ payload }) => {
-            const title = payload.title || "Notification";
-            const message = payload.message || "";
-            if (!Strings.isNullOrEmpty(message)) {
-                notificationService.info({ title, message });
-            }
-        });
+        //     const unListenerPromise = eventService.listen<IPCNotificationEvent>("unichat://notification", ({ payload }) => {
+        //         const title = payload.title || "Notification";
+        //         const message = payload.message || "";
+        //         if (!Strings.isNullOrEmpty(message)) {
+        //             notificationService.info({ title, message });
+        //         }
+        //     });
 
-        return () => {
-            if (unListenerPromise) {
-                unListenerPromise.then((unlisten) => unlisten());
-            }
-        };
+        //     return () => {
+        //         if (unListenerPromise) {
+        //             unListenerPromise.then((unlisten) => unlisten());
+        //         }
+        //     };
     }, []);
 
     return (
         <>
-            <Card className="sidebar">
-                <div>
+            <div className="sidebar">
+                <div className="sidebar__tabs">
                     {Object.entries(tabs).map(([key, tab]) => (
                         <Tooltip key={key} content={tab.label} placement="right">
                             <Button
                                 data-tour={`tab-${key}-toggle`}
-                                variant={selectedTab === key ? "filled" : "default"}
-                                color={selectedTab === key ? "green" : "blue"}
+                                variant={selectedTab === key ? "primary" : undefined}
                                 onClick={() => setSelectedTab(key)}
                             >
                                 {tab.icon}
@@ -175,30 +175,30 @@ export function App(): JSX.Element {
                     <TabLeftSection selectedTab={selectedTab} />
                 </div>
 
-                <Tooltip content="Widgets" placement="right">
-                    <Button variant="default" onClick={toggleWidgetsModal} data-tour="widgets-modal-toggle">
-                        <i className="fas fa-object-group" />
-                    </Button>
-                </Tooltip>
+                <div className="sidebar__footer">
+                    <Tooltip content="Widgets" placement="right">
+                        <Button onClick={toggleWidgetsModal} data-tour="widgets-modal-toggle">
+                            <i className="fas fa-object-group" />
+                        </Button>
+                    </Tooltip>
 
-                <Tooltip content="Plugins" placement="right">
-                    <Button variant="default" onClick={togglePluginsModal} data-tour="plugins-modal-toggle">
-                        <i className="fas fa-cubes" />
-                    </Button>
-                </Tooltip>
+                    <Tooltip content="Plugins" placement="right">
+                        <Button onClick={togglePluginsModal} data-tour="plugins-modal-toggle">
+                            <i className="fas fa-cubes" />
+                        </Button>
+                    </Tooltip>
 
-                <Tooltip content="Settings" placement="right">
-                    <Button variant="default" onClick={() => toggleSettingsModal()} data-tour="settings-modal-toggle">
-                        <i className="fas fa-sliders-h" />
-                    </Button>
-                </Tooltip>
-            </Card>
-
-            <div className="content">
-                <TabContent selectedTab={selectedTab} />
+                    <Tooltip content="Settings" placement="right">
+                        <Button onClick={() => toggleSettingsModal()} data-tour="settings-modal-toggle">
+                            <i className="fas fa-sliders-h" />
+                        </Button>
+                    </Tooltip>
+                </div>
             </div>
 
-            <Tour />
+            <div className="content">{/* <TabContent selectedTab={selectedTab} /> */}</div>
+
+            {/* <Tour /> */}
         </>
     );
 }

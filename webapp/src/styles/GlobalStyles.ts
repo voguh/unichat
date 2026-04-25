@@ -26,15 +26,29 @@ export const GlobalStyle = createGlobalStyles({
             "--unichat-sidebar-inner-width": "calc(var(--unichat-sidebar-width) - (0.5rem * 2 + 1px))", // 0.5rem padding + 1px border
             "--unichat-sidebar-padding": "0.5rem", // p-2
 
-            ...tw`p-2 bg-stone-900 border-r border-stone-800`,
+            ...tw`flex flex-col justify-between p-2 bg-stone-900 border-r border-stone-800`,
             gridColumn: "1",
 
+            button: {
+                ...tw`p-0 flex justify-center items-center`,
+                width: "var(--unichat-sidebar-inner-width)",
+                height: "var(--unichat-sidebar-inner-width)"
+            },
+
             "> .sidebar__tabs": {
-                ...tw`flex flex-col items-center gap-2`
+                ...tw`flex flex-col items-center gap-2`,
+
+                "> .sidebar__left-section": {
+                    ...tw`flex flex-col items-center gap-2`,
+
+                    "> .sidebar__divider": {
+                        ...tw`w-full border-t border-stone-700 my-2`
+                    }
+                }
             },
 
             "> .sidebar__footer": {
-                ...tw`mt-auto flex flex-col items-center gap-2`
+                ...tw`flex flex-col items-center gap-2`
             }
         },
 
