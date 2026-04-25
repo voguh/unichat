@@ -47,7 +47,14 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig({
     root: path.resolve(__dirname),
     publicDir: path.resolve(__dirname, "public"),
-    plugins: [uniChatBuildTools(), preact({ babel: { plugins: [["babel-plugin-macros"]] }, devToolsEnabled: false })],
+    plugins: [
+        uniChatBuildTools(),
+        preact({
+            babel: { plugins: [["babel-plugin-macros"], ["babel-plugin-transform-goober"]] },
+            devToolsEnabled: false,
+            reactAliasesEnabled: false
+        })
+    ],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
     //
@@ -78,7 +85,7 @@ export default defineConfig({
     },
 
     build: {
-        sourcemap: false,
+        sourcemap: true,
         rollupOptions: {
             treeshake: true,
             output: {

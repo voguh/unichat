@@ -111,10 +111,6 @@
         // "paths": {}                                                     /* Specify a set of entries that re-map imports to additional lookup locations. */
         "baseUrl": ".",
         "paths": {
-            "react": ["./node_modules/preact/compat/"],
-            "react/jsx-runtime": ["./node_modules/preact/jsx-runtime"],
-            "react-dom": ["./node_modules/preact/compat/"],
-            "react-dom/*": ["./node_modules/preact/compat/*"],
             "unichat/*": ["./src/*"],
             "unichat-widgets/unichat": ["../widgets/unichat.d.ts"]
         }
