@@ -4,6 +4,7 @@
 /examples
 /node_modules
 /webapp
+/zztools
 /.editorconfig
 /.gitignore
 /LICENSE
