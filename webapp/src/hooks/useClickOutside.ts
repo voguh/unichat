@@ -11,7 +11,7 @@
 import { RefObject } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 
-export function useClickOutside<T extends HTMLElement = HTMLElement>(cb: (event?: Event) => void): RefObject<T> {
+export function useClickOutside<T extends Element = Element>(cb: (event?: Event) => void): RefObject<T> {
     const ref = useRef<T | null>(null);
 
     useEffect(() => {
