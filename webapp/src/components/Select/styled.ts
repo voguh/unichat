@@ -16,9 +16,27 @@ import tw from "twin.macro";
 export const SelectStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
     ...tw`relative w-full`,
 
-    "> input": {
-        ...tw`w-full rounded border border-stone-800 bg-stone-800/90 py-2 pl-3 pr-10 text-white cursor-pointer transition-colors duration-150`,
-        minHeight: "40px",
+    "> .input-container": {
+        ...tw`relative w-full rounded border border-stone-800 bg-stone-800/90`,
+        height: "40px",
+
+        "> input": {
+            ...tw`w-full py-2 pl-3 pr-10 bg-transparent border-none text-white cursor-pointer transition-colors duration-150`,
+            height: "40px",
+            marginRight: "40px"
+        },
+
+        "> .dropdown-indicator": {
+            position: "absolute",
+            top: 0,
+            right: 0,
+            width: "40px",
+            height: "40px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none"
+        },
 
         "&::placeholder": {
             ...tw`text-stone-500`
@@ -29,6 +47,10 @@ export const SelectStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>
         },
 
         "&:hover": {
+            ...tw`border-stone-700`
+        },
+
+        "&[data-focused='true']": {
             ...tw`border-stone-700`
         }
     }

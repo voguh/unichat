@@ -206,11 +206,9 @@ export function Select({ options = [], onChange, value }: Props): PReact.Compone
 
     return (
         <SelectStyledContainer ref={captureRef} className="select-container">
-            <input
-                readOnly
-                type="text"
-                value={internalValue?.label ?? ""}
-                placeholder="Select an option"
+            <div
+                className="input-container"
+                data-focused={isOpen ? "true" : "false"}
                 onClick={() => {
                     if (isOpen) {
                         hide();
@@ -218,17 +216,28 @@ export function Select({ options = [], onChange, value }: Props): PReact.Compone
                         show();
                     }
                 }}
-                onKeyDown={(event) => {
-                    if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        show();
-                    }
+            >
+                <input
+                    readOnly
+                    type="text"
+                    value={internalValue?.label ?? ""}
+                    placeholder="Select an option"
+                    onKeyDown={(event) => {
+                        if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            show();
+                        }
 
-                    if (event.key === "Escape") {
-                        hide();
-                    }
-                }}
-            />
+                        if (event.key === "Escape") {
+                            hide();
+                        }
+                    }}
+                />
+
+                <div className="dropdown-indicator">
+                    {isOpen ? <i className="fas fa-chevron-up" /> : <i className="fas fa-chevron-down" />}
+                </div>
+            </div>
             <div
                 ref={dropdownRef}
                 style={{
