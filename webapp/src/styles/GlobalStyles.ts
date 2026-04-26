@@ -20,7 +20,6 @@ export const GlobalStyle = createGlobalStyles({
         display: "grid",
         gridTemplateColumns: "var(--unichat-sidebar-width) 1fr",
         gridTemplateRows: "1fr",
-        gap: "8px",
 
         "> .sidebar": {
             "--unichat-sidebar-inner-width": "calc(var(--unichat-sidebar-width) - (0.5rem * 2 + 1px))", // p-2
