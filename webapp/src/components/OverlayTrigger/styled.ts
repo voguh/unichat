@@ -28,7 +28,7 @@ export const TooltipStyledContainer = styled.div({
     "&[data-placement^='bottom']::after": {
         top: "-4px",
         left: "50%",
-        transform: "translateX(-50%) rotate(45deg)"
+        transform: "translateX(-50%) rotate(135deg)"
     },
     "&[data-placement^='left']::after": {
         right: "-4px",
