@@ -13,6 +13,7 @@ import { useRef } from "preact/hooks";
 
 import { computePosition, offset, flip, shift, Placement } from "@floating-ui/dom";
 
+import { Portal } from "../Portal";
 import { TooltipStyledContainer } from "./styled";
 
 interface Props {
@@ -83,8 +84,8 @@ export function Tooltip({ children, content, placement }: Props): PReact.Compone
     return (
         <>
             {trigger}
-            <div
-                ref={tooltipRef}
+            <Portal
+                containerRef={tooltipRef}
                 style={{
                     position: "absolute",
                     visibility: "hidden",
@@ -93,7 +94,7 @@ export function Tooltip({ children, content, placement }: Props): PReact.Compone
                 }}
             >
                 <TooltipStyledContainer data-placement={resolvedPlacement}>{content}</TooltipStyledContainer>
-            </div>
+            </Portal>
         </>
     );
 }
