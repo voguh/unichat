@@ -8,9 +8,10 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { useEffect, useRef } from "react";
+import { RefObject } from "preact";
+import { useEffect, useRef } from "preact/hooks";
 
-export function useClickOutside<T extends HTMLElement = HTMLElement>(cb: (event?: Event) => void): React.RefObject<T> {
+export function useClickOutside<T extends HTMLElement = HTMLElement>(cb: (event?: Event) => void): RefObject<T> {
     const ref = useRef<T | null>(null);
 
     useEffect(() => {

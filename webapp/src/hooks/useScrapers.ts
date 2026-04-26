@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "preact/hooks";
 
 import { commandService } from "unichat/services/commandService";
 import { UniChatScraper } from "unichat/types";
