@@ -1,19 +1,20 @@
 {
-    "reactFuncionalComponent": {
-        "prefix": ["reactFuncionalComponent", "rfc"],
-        "description": "Creates a new react functional component",
+    "preactFuncionalComponent": {
+        "prefix": ["preactFuncionalComponent", "pfc"],
+        "description": "Creates a new preact functional component",
         "body": [
-            "import PReact from \"preact\";",
+            "import * as PReact from \"preact\";",
+            "import { useEffect } from \"preact/hooks\";",
             "",
             "import { LoggerFactory } from \"unichat/logging/LoggerFactory\";",
             "",
             "interface Props {",
-            "    children?: React.ReactNode;",
+            "    children?: PReact.ComponentChildren;",
             "}",
             "",
             "const _logger = LoggerFactory.getLogger(\"${TM_DIRECTORY/^.+\\/(.*)$/$1/}\");",
             "export function ${TM_DIRECTORY/^.+\\/(.*)$/$1/}(props: Props): PReact.ComponentChildren {",
-            "    React.useEffect(() => {",
+            "    useEffect(() => {",
             "        _logger.debug(\"${TM_DIRECTORY/^.+\\/(.*)$/$1/} mounted\");",
             "",
             "        return () => {",
@@ -26,9 +27,9 @@
             ""
         ]
     },
-    "stypedComponents": {
-        "prefix": ["stypedComponents", "styled"],
-        "description": "Creates a new styled components content",
+    "gooberStyledComponents": {
+        "prefix": ["goober", "styled"],
+        "description": "Creates a new goober styled components content",
         "body": [
             "import { styled } from \"goober\";",
             "import tw from \"twin.macro\";",
