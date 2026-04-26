@@ -21,9 +21,8 @@ export const SelectStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>
         height: "40px",
 
         "> input": {
-            ...tw`w-full py-2 pl-3 pr-10 bg-transparent border-none text-white cursor-pointer transition-colors duration-150`,
-            height: "40px",
-            marginRight: "40px"
+            ...tw`py-2 pl-3 pr-10 bg-transparent border-none text-white cursor-pointer transition-colors duration-150`,
+            height: "40px"
         },
 
         "> .dropdown-indicator": {
