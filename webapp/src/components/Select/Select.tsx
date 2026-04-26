@@ -15,6 +15,7 @@ import { computePosition, flip, offset, shift } from "@floating-ui/dom";
 
 import { useClickOutside } from "unichat/hooks/useClickOutside";
 
+import { Portal } from "../Portal";
 import { SelectStyledContainer, SelectStyledDropdown, SelectStyledGroupContainer, SelectStyledOption } from "./styled";
 
 export interface OptionGroupBase<OptionType> {
@@ -106,25 +107,28 @@ export function Select({ options = [], onChange, value }: Props): PReact.Compone
     const [isOpen, setIsOpen] = useState(false);
     const [internalValue, setInternalValue] = useState<Option | null>(value ?? null);
 
-    const wrapperRef = useClickOutside(hide);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+    const wrapperRef = useRef<HTMLDivElement>(null);
+    const dropdownRef = useClickOutside<HTMLDivElement>(hide);
 
     async function updatePosition(visible: boolean): Promise<void> {
         if (!wrapperRef.current || !dropdownRef.current) {
             return;
         }
 
+        const wrapperRect = wrapperRef.current.getBoundingClientRect();
+        const centeredX = wrapperRect.left + window.scrollX + wrapperRect.width / 2;
+
         if (!visible) {
             Object.assign(dropdownRef.current.style, {
                 visibility: "hidden",
                 opacity: "0",
-                left: "0",
-                top: "0"
+                left: `${centeredX}px`,
+                transform: "translateX(-50%)"
             });
             return;
         }
 
-        const { x, y } = await computePosition(wrapperRef.current, dropdownRef.current, {
+        const { y } = await computePosition(wrapperRef.current, dropdownRef.current, {
             placement: "bottom",
             middleware: [offset(8), flip(), shift({ padding: 8 })]
         });
@@ -132,8 +136,10 @@ export function Select({ options = [], onChange, value }: Props): PReact.Compone
         Object.assign(dropdownRef.current.style, {
             visibility: "visible",
             opacity: "1",
-            left: `${x}px`,
-            top: `${y}px`
+            left: `${centeredX}px`,
+            top: `${y}px`,
+            transform: "translateX(-50%)",
+            width: `${wrapperRef.current.offsetWidth}px`
         });
     }
 
@@ -142,16 +148,23 @@ export function Select({ options = [], onChange, value }: Props): PReact.Compone
         updatePosition(true);
     }
 
-    function hide(): void {
+    function hide(event?: Event): void {
+        if (event != null) {
+            const wrapper = wrapperRef.current;
+            if (wrapper && event.target instanceof Node && wrapper.contains(event.target)) {
+                return;
+            }
+        }
+
         setIsOpen(false);
         updatePosition(false);
     }
 
     function captureRef(el: Element | PReact.Component | null): void {
-        if (el instanceof Element) {
+        if (el instanceof HTMLDivElement) {
             wrapperRef.current = el;
         } else if (el != null) {
-            if ("base" in el && el.base instanceof Element) {
+            if ("base" in el && el.base instanceof HTMLDivElement) {
                 wrapperRef.current = el.base;
             } else {
                 throw new Error("Select trigger must be an Element or a Component that forwards ref to an Element");
@@ -180,11 +193,11 @@ export function Select({ options = [], onChange, value }: Props): PReact.Compone
             }
         }
 
+        updatePosition(true);
+
         window.addEventListener("resize", handleReposition);
         window.addEventListener("scroll", handleReposition, true);
         window.addEventListener("keydown", handleKeyDown);
-
-        updatePosition(true);
 
         return () => {
             window.removeEventListener("resize", handleReposition);
@@ -238,14 +251,14 @@ export function Select({ options = [], onChange, value }: Props): PReact.Compone
                     {isOpen ? <i className="fas fa-chevron-up" /> : <i className="fas fa-chevron-down" />}
                 </div>
             </div>
-            <div
-                ref={dropdownRef}
+
+            <Portal
+                containerRef={dropdownRef}
                 style={{
                     position: "absolute",
-                    visibility: isOpen ? "visible" : "hidden",
-                    opacity: isOpen ? "1" : "0",
-                    width: "100%",
-                    pointerEvents: isOpen ? "auto" : "none"
+                    visibility: "hidden",
+                    opacity: "0",
+                    transform: "translateX(-50%)"
                 }}
             >
                 <SelectStyledDropdown>
@@ -268,7 +281,7 @@ export function Select({ options = [], onChange, value }: Props): PReact.Compone
                         />
                     ))}
                 </SelectStyledDropdown>
-            </div>
+            </Portal>
         </SelectStyledContainer>
     );
 }
