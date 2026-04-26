@@ -9,40 +9,60 @@
  ******************************************************************************/
 
 import * as PReact from "preact";
-import { useLayoutEffect, useMemo } from "preact/hooks";
+import { useLayoutEffect, useMemo, useRef } from "preact/hooks";
 
 interface Props {
-    id?: string;
     style?: PReact.CSSProperties;
-    containerRef?: PReact.RefObject<Element | null>;
+    containerRef?: PReact.RefObject<HTMLElement | null>;
     children: PReact.ComponentChildren;
 }
 
-export function Portal({ children, containerRef, id, style }: Props): PReact.ComponentChildren {
-    const portalId = useMemo(() => id || `unichat-portal-${Math.random().toString(16).slice(2)}`, [id]);
+export function Portal({ children, containerRef, style }: Props): PReact.ComponentChildren {
+    const portalId = useMemo(() => `unichat-portal-${Math.random().toString(16).slice(2)}`, []);
+    const portalElementRef = useRef<HTMLElement | null>(null);
 
     useLayoutEffect(() => {
-        const existing = document.getElementById(portalId);
-        const el = existing ?? document.createElement("div");
-
-        if (!existing) {
+        let el = portalElementRef.current ?? document.getElementById(portalId);
+        if (el == null) {
+            el = document.createElement("div");
             el.id = portalId;
+            Object.assign(el.style, style ?? {});
             document.body.appendChild(el);
         }
 
-        Object.assign(el.style, style ?? {});
+        portalElementRef.current = el;
         if (containerRef != null) {
             containerRef.current = el;
         }
-        PReact.render(children, el);
 
         return () => {
-            PReact.render(null, el);
             if (el.childElementCount === 0) {
                 el.remove();
             }
         };
-    }, [children, style, portalId]);
+    }, [portalId, containerRef]);
+
+    useLayoutEffect(() => {
+        const el = portalElementRef.current;
+        if (!el) {
+            return;
+        }
+
+        Object.assign(el.style, style ?? {});
+    }, [style]);
+
+    useLayoutEffect(() => {
+        const el = portalElementRef.current;
+        if (!el) {
+            return;
+        }
+
+        PReact.render(children, el);
+
+        return () => {
+            PReact.render(null, el);
+        };
+    }, [children]);
 
     return null;
 }
