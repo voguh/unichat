@@ -21,6 +21,7 @@ import { Button } from "unichat/components/Button";
 import { Tooltip } from "unichat/components/OverlayTrigger";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 
+import { GlobalStyle } from "./styles/GlobalStyles";
 import { DashboardLeftSection } from "./tabs/Dashboard";
 // import { modalService } from "unichat/services/modalService";
 // import { notificationService } from "unichat/services/notificationService";
@@ -158,6 +159,7 @@ export function App(): PReact.ComponentChildren {
 
     return (
         <>
+            <GlobalStyle />
             <div className="sidebar">
                 <div className="sidebar__tabs">
                     {Object.entries(tabs).map(([key, tab]) => (

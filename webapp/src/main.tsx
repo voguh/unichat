@@ -19,9 +19,6 @@ import { platform } from "@tauri-apps/plugin-os";
 import { setup } from "goober";
 
 import { App } from "unichat/App";
-import { AppContextProvider } from "unichat/contexts/AppContext";
-
-import { GlobalStyle } from "./styles/GlobalStyles";
 
 if (!("__IS_DEV__" in globalThis)) {
     Object.defineProperty(globalThis, "__IS_DEV__", {
@@ -53,10 +50,4 @@ if (documentRoot == null) {
 }
 
 setup(h);
-render(
-    <AppContextProvider>
-        <GlobalStyle />
-        <App />
-    </AppContextProvider>,
-    documentRoot
-);
+render(<App />, documentRoot);

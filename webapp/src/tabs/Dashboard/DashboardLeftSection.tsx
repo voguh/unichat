@@ -9,17 +9,16 @@
  ******************************************************************************/
 
 import PReact from "preact";
-import { useContext } from "preact/hooks";
 
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { Button } from "unichat/components/Button";
 import { Tooltip } from "unichat/components/OverlayTrigger";
-import { AppContext } from "unichat/contexts/AppContext";
 import { commandService } from "unichat/services/commandService";
+import { useGlobalSignal } from "unichat/signals";
 
 export function DashboardLeftSection(): PReact.ComponentChildren {
-    const { showWidgetPreview, setShowWidgetPreview } = useContext(AppContext);
+    const [showWidgetPreview, setShowWidgetPreview] = useGlobalSignal("showWidgetPreview");
 
     async function handleClearChat(): Promise<void> {
         await commandService.dispatchClearChat();
