@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import PReact from "preact";
+import * as PReact from "preact";
 
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 

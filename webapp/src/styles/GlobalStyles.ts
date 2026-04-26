@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import PReact from "preact";
+import * as PReact from "preact";
 
 import { createGlobalStyles } from "goober/global";
 import tw from "twin.macro";
@@ -53,6 +53,8 @@ export const GlobalStyle = createGlobalStyles({
         },
 
         "> .content": {
+            "--unichat-content-width": "calc(100vw - var(--unichat-sidebar-width))",
+
             gridColumn: "2"
         }
     }

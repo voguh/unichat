@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import PReact from "preact";
+import * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
 // import * as eventService from "@tauri-apps/api/event";
@@ -22,11 +22,10 @@ import { Tooltip } from "unichat/components/OverlayTrigger";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 
 import { GlobalStyle } from "./styles/GlobalStyles";
-import { DashboardLeftSection } from "./tabs/Dashboard";
+import { Dashboard, DashboardLeftSection } from "./tabs/Dashboard";
 // import { modalService } from "unichat/services/modalService";
 // import { notificationService } from "unichat/services/notificationService";
 // import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
-// import { Dashboard, DashboardLeftSection } from "unichat/tabs/Dashboard";
 // import { WidgetEditor, WidgetEditorLeftSection } from "unichat/tabs/WidgetEditor";
 // import { IPCNotificationEvent } from "unichat/utils/IPCStatusEvent";
 // import { Strings } from "unichat/utils/Strings";
@@ -46,7 +45,7 @@ const tabs: Record<string, TabOptions> = {
     dashboard: {
         label: "Dashboard",
         icon: <i className="fas fa-th-large" />,
-        component: <>batata</>,
+        component: <Dashboard />,
         leftSection: <DashboardLeftSection />
     },
     widgetEditor: {
@@ -71,19 +70,14 @@ function TabLeftSection({ selectedTab }: { selectedTab: keyof typeof tabs }): PR
     );
 }
 
-// function TabContent({ selectedTab }: { selectedTab: keyof typeof tabs }): React.ReactNode {
-//     const content = tabs[selectedTab]?.component;
-//     if (content == null) {
-//         return null;
-//     }
+function TabContent({ selectedTab }: { selectedTab: keyof typeof tabs }): PReact.ComponentChildren {
+    const content = tabs[selectedTab]?.component;
+    if (content == null) {
+        return null;
+    }
 
-//     return (
-//         <ErrorBoundary>
-//             <div className="divider" />
-//             {content}
-//         </ErrorBoundary>
-//     );
-// }
+    return content;
+}
 
 const _logger = LoggerFactory.getLogger("App");
 export function App(): PReact.ComponentChildren {
@@ -198,7 +192,9 @@ export function App(): PReact.ComponentChildren {
                 </div>
             </div>
 
-            <div className="content">{/* <TabContent selectedTab={selectedTab} /> */}</div>
+            <div className="content">
+                <TabContent selectedTab={selectedTab} />
+            </div>
 
             {/* <Tour /> */}
         </>

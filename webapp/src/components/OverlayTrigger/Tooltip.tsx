@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import PReact, { cloneElement } from "preact";
+import * as PReact from "preact";
 import { useRef } from "preact/hooks";
 
 import { computePosition, offset, flip, shift, Placement } from "@floating-ui/dom";
@@ -74,7 +74,7 @@ export function Tooltip({ children, content, placement }: Props): PReact.Compone
         }
     }
 
-    const trigger = cloneElement(children, {
+    const trigger = PReact.cloneElement(children, {
         ref: captureRef,
         onMouseEnter: show,
         onMouseLeave: hide
