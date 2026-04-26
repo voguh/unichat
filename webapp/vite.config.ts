@@ -13,6 +13,7 @@ import path from "node:path";
 
 import preact from "@preact/preset-vite";
 import JSONC from "jsonc-parser";
+import sonda from "sonda/vite";
 import { CompilerOptions } from "typescript";
 import { defineConfig, Plugin } from "vite";
 
@@ -48,6 +49,12 @@ export default defineConfig({
     root: path.resolve(__dirname),
     publicDir: path.resolve(__dirname, "public"),
     plugins: [
+        sonda({
+            brotli: true,
+            filename: path.resolve(__dirname, "coverage", "stats.html"),
+            gzip: true,
+            open: false
+        }),
         uniChatBuildTools(),
         preact({
             babel: { plugins: [["babel-plugin-macros"], ["babel-plugin-transform-goober"]] },
