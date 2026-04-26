@@ -23,7 +23,7 @@ export const GlobalStyle = createGlobalStyles({
         gap: "8px",
 
         "> .sidebar": {
-            "--unichat-sidebar-inner-width": "calc(var(--unichat-sidebar-width) - (0.5rem * 2 + 1px))", // 0.5rem padding + 1px border
+            "--unichat-sidebar-inner-width": "calc(var(--unichat-sidebar-width) - (0.5rem * 2 + 1px))", // p-2
             "--unichat-sidebar-padding": "0.5rem", // p-2
 
             ...tw`flex flex-col justify-between p-2 bg-stone-900 border-r border-stone-800`,
