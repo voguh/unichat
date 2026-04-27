@@ -14,5 +14,5 @@ import { styled } from "goober";
 import tw from "twin.macro";
 
 export const CardStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`bg-stone-800 border border-stone-700 rounded p-4 shadow-md`
+    ...tw`bg-stone-900 border border-stone-800 rounded p-4 shadow-md`
 });
