@@ -11,7 +11,9 @@
 import { styled } from "goober";
 import tw from "twin.macro";
 
-export type ButtonVariant = "primary" | "secondary" | "success" | "danger" | "warning" | "info";
+import { Variants } from "unichat/types";
+
+export type ButtonVariant = Variants | "default";
 
 interface Props {
     variant: ButtonVariant;
