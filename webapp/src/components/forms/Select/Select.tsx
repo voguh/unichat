@@ -249,7 +249,7 @@ export function Select({ options = [], onChange, value, ...props }: SelectProps)
                 <SelectStyledContainer
                     {...rest}
                     ref={captureRef}
-                    className="select-container"
+                    className="Select-container"
                     data-focused={isOpen ? "true" : "false"}
                     onClick={() => {
                         if (isOpen) {

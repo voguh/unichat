@@ -12,7 +12,7 @@ import * as PReact from "preact";
 import { useEffect, useRef } from "preact/hooks";
 
 import { FormGroup, FormGroupBaseProps } from "../FormGroup";
-import { SelectStyledContainer } from "./styled";
+import { TextInputStyledContainer } from "./styled";
 
 export interface TextInputProps extends PReact.InputHTMLAttributes<HTMLInputElement>, FormGroupBaseProps {
     inputRef?: PReact.Ref<HTMLInputElement>;
@@ -80,7 +80,7 @@ export function TextInput(props: TextInputProps): PReact.ComponentChildren {
             errorProps={errorProps}
             {...dataProps}
         >
-            <SelectStyledContainer className="TextInput-container">
+            <TextInputStyledContainer className="TextInput-container">
                 <input
                     {...rest}
                     ref={(el) => {
@@ -95,7 +95,7 @@ export function TextInput(props: TextInputProps): PReact.ComponentChildren {
                         innerRef.current = el;
                     }}
                 />
-            </SelectStyledContainer>
+            </TextInputStyledContainer>
         </FormGroup>
     );
 }

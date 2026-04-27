@@ -13,7 +13,7 @@ import { ComponentType, HTMLAttributes } from "preact";
 import { styled } from "goober";
 import tw from "twin.macro";
 
-export const SelectStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
+export const TextInputStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
     ...tw`relative w-full`,
 
     "> input": {
@@ -31,6 +31,10 @@ export const SelectStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>
 
         "&:hover": {
             ...tw`border-stone-700`
+        },
+
+        "&:disabled": {
+            ...tw`cursor-not-allowed border-stone-700 bg-stone-700/50 text-stone-500`
         }
     }
 });
