@@ -12,6 +12,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import preact from "@preact/preset-vite";
+import { glob } from "glob";
 import JSONC from "jsonc-parser";
 import sonda from "sonda/vite";
 import { CompilerOptions } from "typescript";
@@ -33,8 +34,43 @@ const tsConfigPaths = Object.entries(compilerOptions?.paths ?? {}).reduce((acc, 
 }, {});
 
 function uniChatBuildTools(): Plugin {
+    const cwd = path.resolve(__dirname);
+
+    const allFiles = new Set<string>();
+    const importedFiles = new Set<string>();
+
     return {
         name: "@unichat/build-tools",
+        async buildStart(_inputOptions) {
+            const files = await glob("./src/**/*.{js,ts,tsx,jsx}", { cwd });
+            for (const file of files) {
+                if ([".d.ts", ".test.ts", ".spec.ts"].some((ext) => file.endsWith(ext))) {
+                    continue;
+                }
+
+                allFiles.add(path.resolve(cwd, file));
+            }
+        },
+        load(id, _options) {
+            if (allFiles.has(id.split("?")[0])) {
+                importedFiles.add(id.split("?")[0]);
+            }
+        },
+        buildEnd(_error) {
+            const orphanFiles = Array.from(allFiles).filter((file) => !importedFiles.has(file));
+
+            if (orphanFiles.length > 0) {
+                this.info("╔══ Orphan files detected ══════════════════════════════════════════════════════");
+
+                for (const file of orphanFiles) {
+                    const relativePath = path.relative(cwd, file);
+                    this.info(`║  ./${relativePath}`);
+                }
+
+                this.info("╚═══════════════════════════════════════════════════════════════════════════════");
+            }
+        },
+
         handleHotUpdate({ server }) {
             server.ws.send({ type: "full-reload" });
 
