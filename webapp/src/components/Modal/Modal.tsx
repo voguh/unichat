@@ -14,7 +14,9 @@ import { Button } from "../Button";
 import { Portal } from "../Portal";
 import { ModalStyledBackdrop, ModalStyledContainer } from "./styled";
 
-interface Props extends Omit<PReact.HTMLAttributes<HTMLDivElement>, "title"> {
+export interface ModalProps extends Omit<PReact.HTMLAttributes<HTMLDivElement>, "title"> {
+    withPortal?: boolean;
+
     onHide: () => void;
     show?: boolean;
     autoFocus?: boolean;
@@ -29,6 +31,8 @@ interface Props extends Omit<PReact.HTMLAttributes<HTMLDivElement>, "title"> {
 }
 
 export function Modal({
+    withPortal = true,
+
     onHide,
     show = true,
     autoFocus = true,
@@ -43,9 +47,9 @@ export function Modal({
 
     children,
     ...rest
-}: Props): PReact.ComponentChildren {
-    return (
-        <Portal>
+}: ModalProps): PReact.ComponentChildren {
+    const content = (
+        <>
             {show && (
                 <>
                     {backdrop && <ModalStyledBackdrop />}
@@ -66,6 +70,12 @@ export function Modal({
                     </ModalStyledContainer>
                 </>
             )}
-        </Portal>
+        </>
     );
+
+    if (withPortal) {
+        return <Portal>{content}</Portal>;
+    } else {
+        return content;
+    }
 }

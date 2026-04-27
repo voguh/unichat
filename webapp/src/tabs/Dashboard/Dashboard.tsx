@@ -22,6 +22,7 @@ import { useScrapers } from "unichat/hooks/useScrapers";
 import { useWidgets } from "unichat/hooks/useWidgets";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
+import { modalService } from "unichat/services/modalService";
 import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
 import { useGlobalSignal } from "unichat/signals";
 import { UniChatScraper } from "unichat/types";
@@ -49,7 +50,6 @@ const _logger = LoggerFactory.getLogger("Dashboard");
 export function Dashboard(): PReact.ComponentChildren {
     const [selectedWidget, setSelectedWidget] = useState("default");
     const [isOpenToLan, setIsOpenToLan] = useState(false);
-    const [showQrCodeModal, setShowQrCodeModal] = useState(false);
     const [showWidgetPreview] = useGlobalSignal("showWidgetPreview");
 
     const [scrapers, _reloadScrapers] = useScrapers(sortScrapers, []);
@@ -77,17 +77,26 @@ export function Dashboard(): PReact.ComponentChildren {
 
     /* ====================================================================== */
 
+    async function openQrCodeModal(url: string): Promise<void> {
+        modalService.openModal({
+            size: "sm",
+            title: "Open on device",
+            children: <QRCodeModal baseUrl={url} />
+        });
+    }
+
+    /* ====================================================================== */
+
     async function handleOpenInBrowser(): Promise<void> {
         if (isOpenToLan) {
-            setShowQrCodeModal(true);
-            return;
-        }
-
-        try {
-            const url = `${WIDGET_URL_PREFIX}/${selectedWidget}`;
-            await openUrl(url);
-        } catch (err) {
-            _logger.error("Failed to open URL in browser", err);
+            openQrCodeModal(`${WIDGET_URL_PREFIX}/${selectedWidget}`);
+        } else {
+            try {
+                const url = `${WIDGET_URL_PREFIX}/${selectedWidget}`;
+                await openUrl(url);
+            } catch (err) {
+                _logger.error("Failed to open URL in browser", err);
+            }
         }
     }
 
@@ -176,10 +185,6 @@ export function Dashboard(): PReact.ComponentChildren {
                     )}
                 </div>
             </DashboardStyledContainer>
-
-            <Modal onHide={() => setShowQrCodeModal(false)} show={showQrCodeModal} size="sm" title="Open on device">
-                <QRCodeModal baseUrl={`${WIDGET_URL_PREFIX}/${selectedWidget}`} />
-            </Modal>
         </>
     );
 }

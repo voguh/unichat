@@ -22,6 +22,8 @@ import { Tooltip } from "unichat/components/Tooltip";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { GlobalStyle } from "unichat/styles/GlobalStyles";
 import { Dashboard, DashboardLeftSection } from "unichat/tabs/Dashboard";
+
+import { ModalContainer } from "./__internal__/ModalContainer";
 // import { modalService } from "unichat/services/modalService";
 // import { notificationService } from "unichat/services/notificationService";
 // import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
@@ -195,6 +197,7 @@ export function App(): PReact.ComponentChildren {
             </div>
 
             {/* <Tour /> */}
+            <ModalContainer />
         </>
     );
 }

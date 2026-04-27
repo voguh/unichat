@@ -8,13 +8,14 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
+import { useEffect, useRef, useState } from "preact/hooks";
 
+import { Modal } from "unichat/components/Modal";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { eventEmitter } from "unichat/services/eventEmitter";
 import { OpenModalOptions } from "unichat/services/modalService";
 
-import { ModalWrapper } from "./ModalWrapper";
 import { ModalContainerStyledContainer } from "./styled";
 
 interface RichModalWrapperProps extends OpenModalOptions {
@@ -22,17 +23,15 @@ interface RichModalWrapperProps extends OpenModalOptions {
 }
 
 interface Props {
-    size?: "sm" | "lg" | "xl";
-    fullscreen?: true | string | "sm-down" | "md-down" | "lg-down" | "xl-down" | "xxl-down";
-    centered?: boolean;
-    backdrop?: true | false | "static";
+    size?: "sm" | "md" | "lg" | "xl";
+    fullscreen?: boolean;
 }
 
 const _logger = LoggerFactory.getLogger("ModalContainer");
-export function ModalContainer(defaultProps: Props): React.ReactNode {
-    const [openedModals, setOpenedModals] = React.useState<RichModalWrapperProps[]>([]);
+export function ModalContainer(defaultProps: Props): PReact.ComponentChildren {
+    const [openedModals, setOpenedModals] = useState<RichModalWrapperProps[]>([]);
 
-    const modalContainerRef = React.useRef<HTMLDivElement>(null);
+    const modalContainerRef = useRef<HTMLDivElement>(null);
 
     function requestClose(id: string): void {
         setOpenedModals((prev) => prev.filter((modal) => modal.modalId !== id));
@@ -43,7 +42,7 @@ export function ModalContainer(defaultProps: Props): React.ReactNode {
         setOpenedModals((prev) => [...prev, richModalOptions]);
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         eventEmitter.on("modal:open", handleOpenModal);
 
         return () => {
@@ -53,14 +52,14 @@ export function ModalContainer(defaultProps: Props): React.ReactNode {
 
     return (
         <ModalContainerStyledContainer className="modal-container" ref={modalContainerRef}>
-            {openedModals.map((modalProps) => (
-                <ModalWrapper
+            {openedModals.map(({ modalId, ...modalProps }) => (
+                <Modal
                     {...defaultProps}
                     {...modalProps}
-                    key={modalProps.modalId}
-                    container={modalContainerRef}
+                    withPortal={false}
+                    key={modalId}
                     show
-                    onHide={() => requestClose(modalProps.modalId)}
+                    onHide={() => requestClose(modalId)}
                 />
             ))}
         </ModalContainerStyledContainer>

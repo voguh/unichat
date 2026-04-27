@@ -9,4 +9,3 @@
  ******************************************************************************/
 
 export * from "./ModalContainer";
-export * from "./ModalWrapper";
