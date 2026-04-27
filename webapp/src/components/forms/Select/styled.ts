@@ -14,28 +14,16 @@ import { styled } from "goober";
 import tw from "twin.macro";
 
 export const SelectStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`relative w-full`,
+    ...tw`relative w-full rounded border border-stone-800 bg-stone-800/90`,
+    height: "36px",
 
-    "> .input-container": {
-        ...tw`relative w-full rounded border border-stone-800 bg-stone-800/90`,
-        height: "40px",
+    "&[data-focused='true']": {
+        ...tw`border-stone-700`
+    },
 
-        "> input": {
-            ...tw`py-2 pl-3 pr-10 bg-transparent border-none text-white cursor-pointer transition-colors duration-150`,
-            height: "40px"
-        },
-
-        "> .dropdown-indicator": {
-            position: "absolute",
-            top: 0,
-            right: 0,
-            width: "40px",
-            height: "40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            pointerEvents: "none"
-        },
+    "> input": {
+        ...tw`py-2 pl-3 pr-10 bg-transparent border-none text-white cursor-pointer transition-colors duration-150`,
+        height: "36px",
 
         "&::placeholder": {
             ...tw`text-stone-500`
@@ -47,11 +35,19 @@ export const SelectStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>
 
         "&:hover": {
             ...tw`border-stone-700`
-        },
-
-        "&[data-focused='true']": {
-            ...tw`border-stone-700`
         }
+    },
+
+    "> .dropdown-indicator": {
+        position: "absolute",
+        top: 0,
+        right: 0,
+        width: "36px",
+        height: "36px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        pointerEvents: "none"
     }
 });
 

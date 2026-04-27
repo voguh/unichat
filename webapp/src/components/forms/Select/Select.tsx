@@ -13,9 +13,10 @@ import { useEffect, useRef, useState } from "preact/hooks";
 
 import { computePosition, flip, offset, shift } from "@floating-ui/dom";
 
+import { Portal } from "unichat/components/Portal";
 import { useClickOutside } from "unichat/hooks/useClickOutside";
 
-import { Portal } from "../Portal";
+import { FormGroup, FormGroupBaseProps } from "../FormGroup";
 import { SelectStyledContainer, SelectStyledDropdown, SelectStyledGroupContainer, SelectStyledOption } from "./styled";
 
 export interface OptionGroupBase<OptionType> {
@@ -27,12 +28,6 @@ export interface Option {
     value: string;
     label: string;
     [key: string]: any;
-}
-
-interface Props {
-    options: Option[] | OptionGroupBase<Option>[];
-    value?: Option;
-    onChange?: (value: Option) => void;
 }
 
 function isOptionGroup(option: Option | OptionGroupBase<Option>): option is OptionGroupBase<Option> {
@@ -103,7 +98,28 @@ function DropdownItemRenderer({ item, onClick, selectedValue }: DropdownItemProp
 
 /* ============================================================================================== */
 
-export function Select({ options = [], onChange, value }: Props): PReact.ComponentChildren {
+export type SelectProps = Omit<PReact.HTMLAttributes<HTMLDivElement>, "onChange"> &
+    FormGroupBaseProps & {
+        options: Option[] | OptionGroupBase<Option>[];
+        value?: Option;
+        onChange?: (value: Option | null) => void;
+    };
+
+export function Select({ options = [], onChange, value, ...props }: SelectProps): PReact.ComponentChildren {
+    const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...unfiltered } = props;
+    const [dataProps, rest] = Object.entries(unfiltered).reduce(
+        (acc, [key, value]) => {
+            if (key.startsWith("data-")) {
+                acc[0][key.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)] = value;
+            } else {
+                acc[1][key] = value;
+            }
+
+            return acc;
+        },
+        [{}, {}] as unknown as [Record<string, any>, Record<string, any>]
+    );
+
     const [isOpen, setIsOpen] = useState(false);
     const [internalValue, setInternalValue] = useState<Option | null>(value ?? null);
 
@@ -218,39 +234,53 @@ export function Select({ options = [], onChange, value }: Props): PReact.Compone
     }, [options]);
 
     return (
-        <SelectStyledContainer ref={captureRef} className="select-container">
-            <div
-                className="input-container"
-                data-focused={isOpen ? "true" : "false"}
-                onClick={() => {
-                    if (isOpen) {
-                        hide();
-                    } else {
-                        show();
-                    }
-                }}
+        <>
+            <FormGroup
+                id={id}
+                className={className}
+                label={label}
+                labelProps={labelProps}
+                description={description}
+                descriptionProps={descriptionProps}
+                error={error}
+                errorProps={errorProps}
+                {...dataProps}
             >
-                <input
-                    readOnly
-                    type="text"
-                    value={internalValue?.label ?? ""}
-                    placeholder="Select an option"
-                    onKeyDown={(event) => {
-                        if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
-                            event.preventDefault();
+                <SelectStyledContainer
+                    {...rest}
+                    ref={captureRef}
+                    className="select-container"
+                    data-focused={isOpen ? "true" : "false"}
+                    onClick={() => {
+                        if (isOpen) {
+                            hide();
+                        } else {
                             show();
                         }
-
-                        if (event.key === "Escape") {
-                            hide();
-                        }
                     }}
-                />
+                >
+                    <input
+                        readOnly
+                        type="text"
+                        value={internalValue?.label ?? ""}
+                        placeholder="Select an option"
+                        onKeyDown={(event) => {
+                            if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                show();
+                            }
 
-                <div className="dropdown-indicator">
-                    {isOpen ? <i className="fas fa-chevron-up" /> : <i className="fas fa-chevron-down" />}
-                </div>
-            </div>
+                            if (event.key === "Escape") {
+                                hide();
+                            }
+                        }}
+                    />
+
+                    <div className="dropdown-indicator">
+                        {isOpen ? <i className="fas fa-chevron-up" /> : <i className="fas fa-chevron-down" />}
+                    </div>
+                </SelectStyledContainer>
+            </FormGroup>
 
             <Portal
                 containerRef={dropdownRef}
@@ -282,6 +312,6 @@ export function Select({ options = [], onChange, value }: Props): PReact.Compone
                     ))}
                 </SelectStyledDropdown>
             </Portal>
-        </SelectStyledContainer>
+        </>
     );
 }
