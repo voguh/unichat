@@ -16,12 +16,12 @@ import { Variants } from "unichat/types";
 
 import { BadgeStyledContainer } from "./styled";
 
-interface Props {
+interface Props extends PReact.HTMLAttributes<HTMLDivElement> {
     bg?: Variants;
     children: PReact.ComponentChildren;
 }
 
-export function Badge({ bg, children }: Props): PReact.ComponentChildren {
+export function Badge({ bg, children, style, ...props }: Props): PReact.ComponentChildren {
     function formatBackgroundColor(color: string | undefined): TwStyle {
         switch (color) {
             case "primary":
@@ -40,8 +40,15 @@ export function Badge({ bg, children }: Props): PReact.ComponentChildren {
                 return tw`bg-stone-700/75 border border-stone-700 text-white`;
         }
     }
+
+    function mergeStyles(
+        ...styles: (TwStyle | PReact.Signalish<string | PReact.CSSProperties | undefined>)[]
+    ): PReact.CSSProperties {
+        return Object.assign({}, ...styles);
+    }
+
     return (
-        <BadgeStyledContainer style={formatBackgroundColor(bg) as PReact.CSSProperties}>
+        <BadgeStyledContainer {...props} style={mergeStyles(formatBackgroundColor(bg), style)}>
             {children}
         </BadgeStyledContainer>
     );
