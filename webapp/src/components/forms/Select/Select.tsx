@@ -101,7 +101,7 @@ function DropdownItemRenderer({ item, onClick, selectedValue }: DropdownItemProp
 export type SelectProps = Omit<PReact.HTMLAttributes<HTMLDivElement>, "onChange"> &
     FormGroupBaseProps & {
         options: Option[] | OptionGroupBase<Option>[];
-        value?: Option;
+        value?: Option | null;
         onChange?: (value: Option | null) => void;
     };
 

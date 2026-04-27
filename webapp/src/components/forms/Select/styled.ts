@@ -14,7 +14,7 @@ import { styled } from "goober";
 import tw from "twin.macro";
 
 export const SelectStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`relative w-full rounded border border-stone-800 bg-stone-800/90`,
+    ...tw`relative w-full rounded border border-stone-800 bg-stone-800/90 text-white`,
     height: "36px",
 
     "&[data-focused='true']": {
@@ -22,7 +22,7 @@ export const SelectStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>
     },
 
     "> input": {
-        ...tw`py-2 pl-3 pr-10 bg-transparent border-none text-white cursor-pointer transition-colors duration-150`,
+        ...tw`w-full py-2 pl-3 pr-10 bg-transparent border-none cursor-pointer transition-colors duration-150`,
         height: "36px",
 
         "&::placeholder": {
