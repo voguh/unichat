@@ -43,8 +43,10 @@ export const ModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
     },
 
     "> .modal-content": {
+        maxHeight: "90vh",
+
         "> .modal-header": {
-            ...tw`flex justify-between items-center p-2`,
+            ...tw`flex justify-between items-center p-2 sticky top-0`,
 
             "> .modal-title": {
                 ...tw`text-lg font-semibold text-stone-100 flex-1 ml-2`
@@ -65,7 +67,8 @@ export const ModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
         },
 
         "> .modal-body": {
-            ...tw`overflow-auto p-4`
+            ...tw`overflow-auto p-4 overflow-x-scroll`,
+            maxHeight: "calc(90vh - (32px + 1rem + 2px))" // 32px of close button + 0.5rem * 2 of padding + 2px of border
         }
     }
 });
