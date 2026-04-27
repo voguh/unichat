@@ -8,11 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
+import { useEffect, useState } from "preact/hooks";
 
-import { QRCodeSVG } from "qrcode.react";
+import encodeQR from "qr";
 
 import { Option, Select } from "unichat/components/forms/Select";
+import { TextInput } from "unichat/components/forms/TextInput";
 import { commandService } from "unichat/services/commandService";
 
 import { QRCodeModalStyledContainer } from "./styled";
@@ -21,10 +23,10 @@ interface Props {
     baseUrl: string;
 }
 
-export function QRCodeModal({ baseUrl }: Props): React.ReactNode {
-    const [systemHosts, setSystemHosts] = React.useState<Option[]>([]);
-    const [selectedHost, setSelectedHost] = React.useState<Option | null>(null);
-    const [selectedHostQrCodeUrl, setSelectedHostQrCodeUrl] = React.useState<string | null>(null);
+export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
+    const [systemHosts, setSystemHosts] = useState<Option[]>([]);
+    const [selectedHost, setSelectedHost] = useState<Option | null>(null);
+    const [selectedHostQrCodeUrl, setSelectedHostQrCodeUrl] = useState<string | null>(null);
 
     function onSelectHost(option: Option | null): void {
         if (option == null) {
@@ -33,11 +35,12 @@ export function QRCodeModal({ baseUrl }: Props): React.ReactNode {
 
         setSelectedHost(option);
 
-        const hostUrl = baseUrl.replace("localhost", option.value);
+        const normalizedIp = option.value.includes(":") ? `[${option.value}]` : option.value; // Handle IPv6 addresses
+        const hostUrl = baseUrl.replace("localhost", normalizedIp);
         setSelectedHostQrCodeUrl(hostUrl);
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         async function init(): Promise<void> {
             const systemHosts = await commandService.getSystemHosts();
             setSystemHosts(systemHosts.map((host) => ({ label: host, value: host })));
@@ -67,11 +70,14 @@ export function QRCodeModal({ baseUrl }: Props): React.ReactNode {
                     onChange={onSelectHost}
                 />
             )}
-            <div className="qrcode-label">Scan this QR code with your device to open</div>
             {selectedHostQrCodeUrl && (
                 <>
-                    <QRCodeSVG value={selectedHostQrCodeUrl} size={200} />
-                    <div className="fake-text-input">{selectedHostQrCodeUrl}</div>
+                    <div className="qrcode-label">Scan this QR code with your device to open</div>
+                    <div
+                        className="qrcode"
+                        dangerouslySetInnerHTML={{ __html: encodeQR(selectedHostQrCodeUrl, "svg") }}
+                    />
+                    <TextInput value={selectedHostQrCodeUrl} readonly onClick={(e) => e.currentTarget.select()} />
                 </>
             )}
         </QRCodeModalStyledContainer>

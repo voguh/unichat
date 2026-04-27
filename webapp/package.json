@@ -24,7 +24,8 @@
         "goober": "2.1.18",
         "marked": "18.0.2",
         "mitt": "3.0.1",
-        "preact": "10.29.1"
+        "preact": "10.29.1",
+        "qr": "0.5.5"
     },
     "devDependencies": {
         "@preact/preset-vite": "2.10.5",
