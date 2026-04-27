@@ -14,5 +14,5 @@ import { styled } from "goober";
 import tw from "twin.macro";
 
 export const BadgeStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`inline-flex items-center rounded-full bg-stone-800/90 text-sm text-white px-2 py-1`
+    ...tw`inline-flex items-center rounded bg-stone-800/90 text-xs text-white px-1 py-0.5`
 });

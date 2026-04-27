@@ -25,19 +25,19 @@ export function Badge({ bg, children, style, ...props }: Props): PReact.Componen
     function formatBackgroundColor(color: string | undefined): TwStyle {
         switch (color) {
             case "primary":
-                return tw`bg-red-800/75 border border-red-800 text-white`;
+                return tw`bg-red-800/50 border border-red-800 text-white`;
             case "secondary":
-                return tw`bg-zinc-700/75 border border-zinc-700 text-white`;
+                return tw`bg-zinc-700/50 border border-zinc-700 text-white`;
             case "success":
-                return tw`bg-green-700/75 border border-green-700 text-white`;
+                return tw`bg-green-700/50 border border-green-700 text-white`;
             case "danger":
-                return tw`bg-rose-700/75 border border-rose-700 text-white`;
+                return tw`bg-rose-700/50 border border-rose-700 text-white`;
             case "warning":
-                return tw`bg-yellow-700/75 border border-yellow-700 text-white`;
+                return tw`bg-yellow-700/50 border border-yellow-700 text-white`;
             case "info":
-                return tw`bg-blue-700/75 border border-blue-700 text-white`;
+                return tw`bg-blue-700/50 border border-blue-700 text-white`;
             default:
-                return tw`bg-stone-700/75 border border-stone-700 text-white`;
+                return tw`bg-stone-700/50 border border-stone-700 text-white`;
         }
     }
 
