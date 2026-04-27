@@ -19,6 +19,7 @@ import { PopoverStyledContainer } from "./styled";
 interface Props {
     children: PReact.VNode;
 
+    trigger?: "hover" | "focus";
     placement?: Placement;
     title?: PReact.ComponentChildren;
     content: PReact.ComponentChildren;
@@ -29,7 +30,7 @@ interface Props {
 }
 
 export function Popover(props: Props): PReact.ComponentChildren {
-    const { children, content, bodyStyle, headerStyle, placement, style, title } = props;
+    const { children, content, bodyStyle, headerStyle, placement, style, title, trigger = "hover" } = props;
 
     const wrapperRef = useRef<Element>(null);
     const tooltipRef = useRef<HTMLDivElement>(null);
@@ -83,15 +84,19 @@ export function Popover(props: Props): PReact.ComponentChildren {
         }
     }
 
-    const trigger = PReact.cloneElement(children, {
+    const triggerElement = PReact.cloneElement(children, {
         ref: captureRef,
-        onMouseEnter: show,
-        onMouseLeave: hide
+
+        onMouseEnter: trigger === "hover" ? show : undefined,
+        onMouseLeave: trigger === "hover" ? hide : undefined,
+
+        onFocus: trigger === "focus" ? show : undefined,
+        onBlur: trigger === "focus" ? hide : undefined
     });
 
     return (
         <>
-            {trigger}
+            {triggerElement}
             <Portal
                 containerRef={tooltipRef}
                 style={{
