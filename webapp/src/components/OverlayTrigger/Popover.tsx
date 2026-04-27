@@ -8,39 +8,110 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
+import { useRef } from "preact/hooks";
 
-import OverlayTrigger, { OverlayTriggerProps } from "react-bootstrap/OverlayTrigger";
-import BSPopover from "react-bootstrap/Popover";
+import { computePosition, flip, offset, Placement, shift } from "@floating-ui/dom";
 
-import { LoggerFactory } from "unichat/logging/LoggerFactory";
+import { Portal } from "../Portal";
+import { PopoverStyledContainer } from "./styled";
 
-interface Props extends Omit<OverlayTriggerProps, "children" | "overlay"> {
-    children: JSX.Element;
+interface Props {
+    children: PReact.VNode;
 
-    title?: React.ReactNode;
-    content: React.ReactNode;
+    placement?: Placement;
+    title?: PReact.ComponentChildren;
+    content: PReact.ComponentChildren;
 
-    hasDoneInitialMeasure?: boolean;
-    style?: React.CSSProperties;
-    headerStyle?: React.CSSProperties;
-    bodyStyle?: React.CSSProperties;
+    style?: PReact.CSSProperties;
+    headerStyle?: PReact.CSSProperties;
+    bodyStyle?: PReact.CSSProperties;
 }
 
-const _logger = LoggerFactory.getLogger("Popover");
-export function Popover(props: Props): React.ReactNode {
-    const { children, content, hasDoneInitialMeasure, title, style, headerStyle, bodyStyle, ...rest } = props;
+export function Popover(props: Props): PReact.ComponentChildren {
+    const { children, content, bodyStyle, headerStyle, placement, style, title } = props;
 
-    const popover = (
-        <BSPopover style={style} hasDoneInitialMeasure={hasDoneInitialMeasure}>
-            {title && <BSPopover.Header style={headerStyle}>{title}</BSPopover.Header>}
-            <BSPopover.Body style={bodyStyle}>{content}</BSPopover.Body>
-        </BSPopover>
-    );
+    const wrapperRef = useRef<Element>(null);
+    const tooltipRef = useRef<HTMLDivElement>(null);
+    const resolvedPlacement = placement || "top";
+
+    async function updatePosition(visible: boolean): Promise<void> {
+        if (!wrapperRef.current || !tooltipRef.current) {
+            return;
+        }
+
+        if (!visible) {
+            Object.assign(tooltipRef.current.style, {
+                visibility: "hidden",
+                opacity: "0",
+                left: "0",
+                top: "0"
+            });
+            return;
+        }
+
+        const { x, y } = await computePosition(wrapperRef.current, tooltipRef.current, {
+            placement: resolvedPlacement,
+            middleware: [offset(8), flip(), shift({ padding: 8 })]
+        });
+
+        Object.assign(tooltipRef.current.style, {
+            visibility: "visible",
+            opacity: "1",
+            left: `${x}px`,
+            top: `${y}px`
+        });
+    }
+
+    function show(): void {
+        updatePosition(true);
+    }
+
+    function hide(): void {
+        updatePosition(false);
+    }
+
+    function captureRef(el: Element | PReact.Component | null): void {
+        if (el instanceof Element) {
+            wrapperRef.current = el;
+        } else if (el != null) {
+            if ("base" in el && el.base instanceof Element) {
+                wrapperRef.current = el.base;
+            } else {
+                throw new Error("Tooltip trigger must be an Element or a Component that forwards ref to an Element");
+            }
+        }
+    }
+
+    const trigger = PReact.cloneElement(children, {
+        ref: captureRef,
+        onMouseEnter: show,
+        onMouseLeave: hide
+    });
 
     return (
-        <OverlayTrigger {...rest} overlay={popover}>
-            {children}
-        </OverlayTrigger>
+        <>
+            {trigger}
+            <Portal
+                containerRef={tooltipRef}
+                style={{
+                    position: "absolute",
+                    visibility: "hidden",
+                    opacity: "0",
+                    pointerEvents: "none"
+                }}
+            >
+                <PopoverStyledContainer data-placement={resolvedPlacement} style={style}>
+                    {title && (
+                        <div className="popover-header" style={headerStyle}>
+                            {title}
+                        </div>
+                    )}
+                    <div className="popover-body" style={bodyStyle}>
+                        {content}
+                    </div>
+                </PopoverStyledContainer>
+            </Portal>
+        </>
     );
 }
