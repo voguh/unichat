@@ -8,12 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 
 import * as eventService from "@tauri-apps/api/event";
-import Badge from "react-bootstrap/Badge";
-import Card from "react-bootstrap/Card";
+import clsx from "clsx";
 
+import { Badge } from "unichat/components/Badge";
 import { Button } from "unichat/components/Button";
 import { TextInput } from "unichat/components/forms/TextInput";
 import { Popover } from "unichat/components/OverlayTrigger";
@@ -25,10 +26,10 @@ import { UniChatScraper } from "unichat/types";
 import { IPCEvents, IPCStatusEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
 
-import { ScraperBadgesWrapper, ScraperCardStyledContainer } from "./styled";
+import { ScraperCardContainer, ScraperLabel } from "./styled";
 
 interface Props {
-    editingTooltip: React.ReactNode;
+    editingTooltip: PReact.ComponentChildren;
     scraper: UniChatScraper;
     validateUrl: (url: string) => Promise<string>;
 }
@@ -40,16 +41,16 @@ const DEFAULT_EVENT: IPCStatusEvent = {
 };
 
 const _logger = LoggerFactory.getLogger("ScraperCard");
-export function ScraperCard(props: Props): React.ReactNode {
+export function ScraperCard(props: Props): PReact.ComponentChildren {
     const { editingTooltip, scraper, validateUrl } = props;
 
-    const [loading, setLoading] = React.useState(false);
-    const [event, setEvent] = React.useState<IPCStatusEvent | null>({ ...DEFAULT_EVENT, scraperId: scraper.id });
+    const [loading, setLoading] = useState(false);
+    const [event, setEvent] = useState<IPCStatusEvent | null>({ ...DEFAULT_EVENT, scraperId: scraper.id });
 
-    const scraperIsRunning = React.useMemo(() => event != null && ["ready", "ping"].includes(event.type), [event]);
-    const scraperIsLoading = React.useMemo(() => event == null, [event]);
+    const scraperIsRunning = useMemo(() => event != null && ["ready", "ping"].includes(event.type), [event]);
+    const scraperIsLoading = useMemo(() => event == null, [event]);
 
-    const inputRef = React.useRef<HTMLInputElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     async function handleStart(): Promise<void> {
         try {
@@ -80,10 +81,6 @@ export function ScraperCard(props: Props): React.ReactNode {
         }
     }
 
-    async function handleOpenScraperWindow(): Promise<void> {
-        await commandService.toggleScraperWebview(scraper.id);
-    }
-
     /* ============================================================================================================== */
 
     function handleStatusLabel(): string {
@@ -94,7 +91,7 @@ export function ScraperCard(props: Props): React.ReactNode {
         }
     }
 
-    function handleStatusIcon(): React.ReactNode {
+    function handleStatusIcon(): PReact.ComponentChildren {
         if (loading || scraperIsLoading) {
             return <i className="fas fa-spinner fa-spin" />;
         } else {
@@ -102,7 +99,7 @@ export function ScraperCard(props: Props): React.ReactNode {
         }
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         async function init(): Promise<void> {
             setLoading(true);
 
@@ -127,7 +124,7 @@ export function ScraperCard(props: Props): React.ReactNode {
         init();
     }, []);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const unListen = eventService.listen<IPCStatusEvent>(IPCEvents.STATUS_EVENT, ({ payload }) => {
             if (payload.scraperId !== scraper.id) {
                 return;
@@ -171,49 +168,47 @@ export function ScraperCard(props: Props): React.ReactNode {
     }, []);
 
     return (
-        <Card>
-            <Card.Body>
-                <ScraperBadgesWrapper>
-                    {scraper.badges.map((badge, idx) => (
-                        <Badge key={idx} bg="primary" style={{ marginRight: "4px" }}>
-                            {badge.toUpperCase()}
-                        </Badge>
-                    ))}
-                </ScraperBadgesWrapper>
-                <ScraperCardStyledContainer>
-                    <Popover
-                        content={editingTooltip}
-                        placement="bottom-start"
-                        trigger="focus"
-                        style={
-                            {
-                                "--bs-popover-max-width": "407px"
-                            } as React.CSSProperties
+        <ScraperCardContainer
+            data-active={scraperIsRunning ? "true" : "false"}
+            data-loading={loading || scraperIsLoading ? "true" : "false"}
+        >
+            <div className="scraper-badges-wrapper">
+                {scraper.badges.map((badge, idx) => (
+                    <Badge key={idx} bg="primary" style={{ marginRight: "4px" }}>
+                        {badge.toUpperCase()}
+                    </Badge>
+                ))}
+            </div>
+            <div className="scraper-card-body">
+                <Popover content={editingTooltip} placement="bottom-start" trigger="focus">
+                    <TextInput
+                        label={
+                            <ScraperLabel>
+                                <div
+                                    className="scraper-icon"
+                                    data-active={scraperIsRunning ? "true" : "false"}
+                                    data-loading={loading || scraperIsLoading ? "true" : "false"}
+                                >
+                                    <i className={clsx(scraper.icon, "fa-fw")} />
+                                </div>
+                                {`${scraper.name} chat URL`}
+                            </ScraperLabel>
                         }
-                    >
-                        <TextInput
-                            label={`${scraper.name} chat URL`}
-                            placeholder={scraper.placeholderText}
-                            ref={inputRef}
-                            disabled={loading || scraperIsLoading || scraperIsRunning}
-                            data-tour={`${scraper.id}--url-input`}
-                        />
-                    </Popover>
-                    <Button
-                        color="gray"
-                        onClick={scraperIsRunning ? handleStop : handleStart}
-                        disabled={loading || scraperIsLoading}
-                    >
-                        {handleStatusIcon()}
-                        {handleStatusLabel()}
-                    </Button>
-                    {scraperIsRunning && (
-                        <Button onClick={handleOpenScraperWindow}>
-                            <i className={Strings.isNullOrEmpty(scraper.icon) ? "fas fa-square" : scraper.icon} />
-                        </Button>
-                    )}
-                </ScraperCardStyledContainer>
-            </Card.Body>
-        </Card>
+                        placeholder={scraper.placeholderText}
+                        inputRef={inputRef}
+                        disabled={loading || scraperIsLoading || scraperIsRunning}
+                        data-tour={`${scraper.id}--url-input`}
+                    />
+                </Popover>
+                <Button
+                    variant="secondary"
+                    onClick={scraperIsRunning ? handleStop : handleStart}
+                    disabled={loading || scraperIsLoading}
+                >
+                    {handleStatusIcon()}
+                    {handleStatusLabel()}
+                </Button>
+            </div>
+        </ScraperCardContainer>
     );
 }
