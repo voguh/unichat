@@ -22,7 +22,11 @@ interface Props {
 export const ButtonStyledContainer = styled.button((props: Props) => {
     const styles = {
         ...tw`px-4 py-2 rounded focus:outline-none transition-colors duration-200 border border-stone-700 text-white`,
-        height: "36px"
+        height: "36px",
+
+        "&:hover": {
+            ...tw`bg-stone-700 border-stone-700`
+        }
     };
 
     switch (props.variant) {
