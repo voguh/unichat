@@ -22,5 +22,15 @@ export const QRCodeModalStyledContainer = styled.div({
         ...tw`bg-white`,
         width: "256px",
         height: "256px"
+    },
+
+    "> .qrcode-url": {
+        ...tw`w-full flex items-center gap-2`,
+
+        "> button": {
+            ...tw`p-0 flex justify-center items-center flex-shrink-0`,
+            width: "36px",
+            height: "36px"
+        }
     }
 });

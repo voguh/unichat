@@ -11,10 +11,13 @@
 import * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
+import { openUrl } from "@tauri-apps/plugin-opener";
 import encodeQR from "qr";
 
+import { Button } from "unichat/components/Button";
 import { Option, Select } from "unichat/components/forms/Select";
 import { TextInput } from "unichat/components/forms/TextInput";
+import { Tooltip } from "unichat/components/Tooltip";
 import { commandService } from "unichat/services/commandService";
 
 import { QRCodeModalStyledContainer } from "./styled";
@@ -77,7 +80,14 @@ export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
                         className="qrcode"
                         dangerouslySetInnerHTML={{ __html: encodeQR(selectedHostQrCodeUrl, "svg") }}
                     />
-                    <TextInput value={selectedHostQrCodeUrl} readonly onClick={(e) => e.currentTarget.select()} />
+                    <div className="qrcode-url">
+                        <TextInput value={selectedHostQrCodeUrl} readonly onClick={(e) => e.currentTarget.select()} />
+                        <Tooltip placement="left" content="Open in browser">
+                            <Button onClick={() => openUrl(baseUrl)}>
+                                <i className="fas fa-external-link-alt" />
+                            </Button>
+                        </Tooltip>
+                    </div>
                 </>
             )}
         </QRCodeModalStyledContainer>
