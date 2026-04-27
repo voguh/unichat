@@ -8,77 +8,57 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import styled from "styled-components";
+import { styled } from "goober";
+import tw from "twin.macro";
 
-export const WidgetsModalStyledContainer = styled.div`
-    position: relative;
+export const WidgetsStyledTable = styled.table({
+    "--cell-padding-x": "8px",
+    "--cell-padding-y": "8px",
+    "--cell-inner-min-width": "30px",
+    "--cell-inner-height": "30px",
+    "--cell-min-width": "calc(var(--cell-inner-min-width) + var(--cell-padding-x) * 2)",
+    "--cell-height": "calc(var(--cell-inner-height) + var(--cell-padding-y) * 2)",
 
-    > .accordion {
-        > .accordion-item {
-            > .accordion-collapse {
-                > .accordion-body {
-                    padding: 0;
+    ...tw`w-full border-collapse table-fixed`,
 
-                    > table {
-                        --cell-padding-x: 8px;
-                        --cell-padding-y: 8px;
-                        --cell-inner-min-width: 30px;
-                        --cell-inner-height: 30px;
-                        --cell-min-width: calc(var(--cell-inner-min-width) + var(--cell-padding-x) * 2);
-                        --cell-height: calc(var(--cell-inner-height) + var(--cell-padding-y) * 2);
-                        width: 100%;
-                        border-collapse: collapse;
-                        table-layout: fixed;
+    "> tbody": {
+        "> tr": {
+            "&:nth-child(odd)": {
+                ...tw`bg-stone-600/25`
+            },
 
-                        > tbody {
-                            > tr {
-                                &:nth-child(odd) {
-                                    background-color: var(--oc-dark-5);
-                                }
+            "&:nth-child(even)": {
+                ...tw`bg-stone-700/25`
+            },
 
-                                &:nth-child(even) {
-                                    background-color: var(--oc-dark-4);
-                                }
+            "> td": {
+                height: "var(--cell-height)",
+                minWidth: "var(--cell-min-width)",
+                padding: "var(--cell-padding-y) var(--cell-padding-x)",
+                textAlign: "left",
 
-                                > td {
-                                    height: var(--cell-height);
-                                    min-width: var(--cell-min-width);
-                                    padding: var(--cell-padding-y) var(--cell-padding-x);
-                                    text-align: left;
+                "&.widget-name": {
+                    verticalAlign: "middle",
 
-                                    &.widget-name {
-                                        vertical-align: middle;
+                    "> span": {
+                        ...tw`font-semibold whitespace-nowrap overflow-hidden text-ellipsis`
+                    }
+                },
 
-                                        > span {
-                                            font-weight: bolder;
-                                            font-size: 14px;
-                                            white-space: nowrap;
-                                            overflow: hidden;
-                                            text-overflow: ellipsis;
-                                        }
-                                    }
+                "&.plugin-actions": {
+                    width: "calc(127px + var(--cell-padding-x) * 2)",
 
-                                    &.plugin-actions {
-                                        width: calc(127px + var(--cell-padding-x) * 2);
+                    "> div": {
+                        ...tw`flex justify-end items-center gap-2`,
 
-                                        > div {
-                                            display: flex;
-                                            justify-content: flex-end;
-                                            align-items: center;
-                                            gap: 8px;
-
-                                            > button {
-                                                white-space: nowrap;
-                                                height: 30px;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                        "> button": {
+                            ...tw`py-0 px-4 flex justify-center items-center gap-2`,
+                            whiteSpace: "nowrap",
+                            height: "30px"
                         }
                     }
                 }
             }
         }
     }
-`;
+});
