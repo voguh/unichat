@@ -8,73 +8,81 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import styled from "styled-components";
+import { styled } from "goober";
+import tw from "twin.macro";
 
-export const DashboardStyledContainer = styled.div`
-    width: 100%;
-    height: 100%;
-    display: grid;
-    grid-template-areas: "FDS PRV";
-    grid-template-columns: 1fr 400px;
-    grid-template-rows: 1fr;
-    gap: 8px;
+export const DashboardStyledContainer = styled.div({
+    "--unichat-dashboard-preview-width": "401px",
 
-    > .fields {
-        grid-area: FDS;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
+    ...tw`relative`,
+    width: "var(--unichat-content-width)",
+    height: "100vh",
+    display: "grid",
+    gridTemplateColumns: "1fr var(--unichat-dashboard-preview-width)",
+    gridTemplateRows: "1fr",
+
+    "> .scrapers": {
+        ...tw`p-2 flex flex-col gap-2`,
+        gridColumn: "1"
+    },
+
+    "> .preview": {
+        "--unichat-dashboard-preview-inner-width": "calc(var(--unichat-dashboard-preview-width) - 1px)", // 1px for border
+
+        ...tw`relative bg-stone-900 border-l border-stone-800`,
+        gridColumn: "2",
+
+        "> .preview__header": {
+            ...tw`p-2 relative flex gap-2`,
+            width: "var(--unichat-dashboard-preview-inner-width)",
+
+            "> button": {
+                ...tw`p-0 flex justify-center items-center shrink-0`,
+                width: "36px",
+                height: "36px"
+            }
+        },
+
+        "> .preview__iframe-wrapper": {
+            height: "calc(100% - 50px)",
+
+            "> iframe": {
+                width: "100%",
+                height: "100%",
+                border: "none",
+                pointerEvents: "none",
+                background: "white"
+            }
+        },
+
+        "> .preview__disabled": {
+            ...tw`flex justify-center items-center`,
+            width: "var(--unichat-dashboard-preview-inner-width)",
+            height: "100vh",
+
+            "> div": {
+                ...tw`flex flex-col justify-center items-center gap-4 text-center`,
+
+                "> .preview__disabled-icons": {
+                    position: "relative",
+
+                    "> i.fa-desktop": {
+                        ...tw`text-stone-600/70`
+                    },
+
+                    "> i.fa-times": {
+                        ...tw`text-stone-500`,
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, calc(-50% - 3px))"
+                    }
+                },
+
+                "> .preview__disabled-text": {
+                    ...tw`text-stone-300`
+                }
+            }
+        }
     }
-
-    > .preview {
-        grid-area: PRV;
-        overflow: hidden;
-        position: relative;
-
-        > .preview-header {
-            display: flex;
-            flex-direction: row;
-            gap: 4px;
-            padding: 8px;
-            border-bottom-left-radius: 0;
-            border-bottom-right-radius: 0;
-
-            > .preview-header-widget-selector {
-                width: 100%;
-            }
-
-            > button {
-                flex-shrink: 0;
-                width: 36px;
-                height: 36px;
-                padding: 0;
-            }
-        }
-
-        > .iframe-wrapper {
-            width: 100%;
-            height: calc(100% - (36px + 16px + 2px)); // 36px for content, 16px for padding, 2px for border
-            border-bottom-left-radius: var(--bs-border-radius);
-            border-bottom-right-radius: var(--bs-border-radius);
-            overflow: hidden;
-
-            > iframe {
-                width: 100%;
-                height: 100%;
-                border: none;
-                pointer-events: none;
-            }
-        }
-
-        > .iframe-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--oc-dark-6);
-            border: 1px solid var(--oc-dark-4);
-            border-radius: var(--bs-border-radius);
-        }
-    }
-`;
+});

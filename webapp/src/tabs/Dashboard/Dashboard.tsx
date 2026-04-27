@@ -8,24 +8,22 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
+import { useEffect, useRef, useState } from "preact/hooks";
 
-import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
-import Badge from "react-bootstrap/Badge";
-import Card from "react-bootstrap/Card";
-import Dropdown from "react-bootstrap/Dropdown";
-import ListGroup from "react-bootstrap/ListGroup";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
+import { Badge } from "unichat/components/Badge";
 import { Button } from "unichat/components/Button";
 import { Option, Select } from "unichat/components/forms/Select";
-import { Tooltip } from "unichat/components/OverlayTrigger";
-import { AppContext } from "unichat/contexts/AppContext";
+import { Modal } from "unichat/components/Modal";
+import { Tooltip } from "unichat/components/Tooltip";
 import { useScrapers } from "unichat/hooks/useScrapers";
 import { useWidgets } from "unichat/hooks/useWidgets";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
-import { modalService } from "unichat/services/modalService";
 import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
+import { useGlobalSignal } from "unichat/signals";
 import { UniChatScraper } from "unichat/types";
 import { scraperPriority, WIDGET_URL_PREFIX } from "unichat/utils/constants";
 import { toWidgetOptionGroup } from "unichat/utils/toWidgetOptionGroup";
@@ -33,10 +31,6 @@ import { toWidgetOptionGroup } from "unichat/utils/toWidgetOptionGroup";
 import { QRCodeModal } from "./QRCodeModal";
 import { ScraperCard } from "./ScraperCard";
 import { DashboardStyledContainer } from "./styled";
-
-interface Props {
-    children?: React.ReactNode;
-}
 
 function sortScrapers(scrapers: UniChatScraper[]): UniChatScraper[] {
     return scrapers.sort((a, b) => {
@@ -52,24 +46,27 @@ function sortScrapers(scrapers: UniChatScraper[]): UniChatScraper[] {
 }
 
 const _logger = LoggerFactory.getLogger("Dashboard");
-export function Dashboard(_props: Props): React.ReactNode {
-    const [selectedWidget, setSelectedWidget] = React.useState("default");
-    const [isOpenToLan, setIsOpenToLan] = React.useState(false);
+export function Dashboard(): PReact.ComponentChildren {
+    const [selectedWidget, setSelectedWidget] = useState("default");
+    const [isOpenToLan, setIsOpenToLan] = useState(false);
+    const [showQrCodeModal, setShowQrCodeModal] = useState(false);
+    const [showWidgetPreview] = useGlobalSignal("showWidgetPreview");
 
     const [scrapers, _reloadScrapers] = useScrapers(sortScrapers, []);
     const [widgets, reloadWidgets] = useWidgets(toWidgetOptionGroup, []);
-    const iframeRef = React.useRef<HTMLIFrameElement>(null);
-    const { requiresRestart, showWidgetPreview } = React.useContext(AppContext);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
 
-    function mountEditingTooltip(message: string, availableUrls: string[]): React.ReactNode {
+    function mountEditingTooltip(message: string, availableUrls: string[]): PReact.ComponentChildren {
         // prettier-ignore
         return (
             <>
                 {message}
                 <br />
-                <ListGroup style={{textAlign: "left"}}>
-                    {availableUrls.map((url, idx) => <ListGroup.Item key={idx}>{url}</ListGroup.Item>)}
-                </ListGroup>
+                <ul className="list-disc list-inside">
+                    {availableUrls.map((url, idx) => (
+                        <li key={idx}>{url}</li>
+                    ))}
+                </ul>
                 <br />
                 You can enter the URL with or without the <Badge>www.</Badge> prefix.
                 <br />
@@ -80,11 +77,18 @@ export function Dashboard(_props: Props): React.ReactNode {
 
     /* ====================================================================== */
 
-    async function openQrCodeModal(url: string): Promise<void> {
-        modalService.openModal({
-            title: "Open on device",
-            children: <QRCodeModal baseUrl={url} />
-        });
+    async function handleOpenInBrowser(): Promise<void> {
+        if (isOpenToLan) {
+            setShowQrCodeModal(true);
+            return;
+        }
+
+        try {
+            const url = `${WIDGET_URL_PREFIX}/${selectedWidget}`;
+            await openUrl(url);
+        } catch (err) {
+            _logger.error("Failed to open URL in browser", err);
+        }
     }
 
     /* ====================================================================== */
@@ -103,7 +107,7 @@ export function Dashboard(_props: Props): React.ReactNode {
         }
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         async function init(): Promise<void> {
             const defaultPreviewWidget = await settingsService.getItem(UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET);
             setSelectedWidget(defaultPreviewWidget);
@@ -116,81 +120,66 @@ export function Dashboard(_props: Props): React.ReactNode {
     }, []);
 
     return (
-        <DashboardStyledContainer>
-            <div className="fields">
-                {scrapers.map((s) => (
-                    <ScraperCard
-                        key={s.id}
-                        editingTooltip={mountEditingTooltip(s.editingTooltipMessage, s.editingTooltipUrls)}
-                        validateUrl={(value) => commandService.validateScraperUrl(s.id, value)}
-                        scraper={s}
-                    />
-                ))}
-            </div>
-            <div className="preview">
-                {showWidgetPreview ? (
-                    <>
-                        <Card className="preview-header">
-                            <div className="preview-header-widget-selector">
+        <>
+            <DashboardStyledContainer>
+                <div className="scrapers">
+                    {scrapers.map((s) => (
+                        <ScraperCard
+                            key={s.id}
+                            editingTooltip={mountEditingTooltip(s.editingTooltipMessage, s.editingTooltipUrls)}
+                            validateUrl={(value) => commandService.validateScraperUrl(s.id, value)}
+                            scraper={s}
+                        />
+                    ))}
+                </div>
+                <div className="preview">
+                    {showWidgetPreview ? (
+                        <>
+                            <div className="preview__header">
                                 <Select
-                                    value={{ label: selectedWidget, value: selectedWidget }}
                                     options={widgets}
                                     onChange={handleSelectWidget}
-                                    data-tour="widgets-selector"
+                                    value={{ label: selectedWidget, value: selectedWidget }}
                                 />
-                            </div>
 
-                            <Tooltip content="Reload widget view" placement="left">
-                                <Button onClick={reloadIframe} data-tour="preview-reload">
-                                    <i className="fas fa-redo" />
-                                </Button>
-                            </Tooltip>
+                                <Tooltip content="Reload widget view" placement="left">
+                                    <Button onClick={reloadIframe} data-tour="preview-reload">
+                                        <i className="fas fa-redo" />
+                                    </Button>
+                                </Tooltip>
 
-                            {isOpenToLan && !requiresRestart ? (
-                                <Dropdown>
-                                    <Tooltip content="Open in device" placement="left">
-                                        <Dropdown.Toggle variant="dark">
-                                            <i className="fas fa-globe" />
-                                        </Dropdown.Toggle>
-                                    </Tooltip>
-
-                                    <Dropdown.Menu>
-                                        <Dropdown.Item
-                                            onClick={() => openUrl(`${WIDGET_URL_PREFIX}/${selectedWidget}`)}
-                                        >
-                                            <i className="fas fa-globe" /> Open in browser
-                                        </Dropdown.Item>
-                                        <Dropdown.Item
-                                            onClick={() => openQrCodeModal(`${WIDGET_URL_PREFIX}/${selectedWidget}`)}
-                                        >
-                                            <i className="fas fa-mobile-alt" />
-                                            Open on device
-                                        </Dropdown.Item>
-                                    </Dropdown.Menu>
-                                </Dropdown>
-                            ) : (
-                                <Tooltip content="Open in browser" placement="left">
-                                    <Button
-                                        onClick={() => openUrl(`${WIDGET_URL_PREFIX}/${selectedWidget}`)}
-                                        data-tour="preview-open-in-browser"
-                                    >
+                                <Tooltip content={isOpenToLan ? "Open on device" : "Open in browser"} placement="left">
+                                    <Button onClick={handleOpenInBrowser} data-tour="preview-open-in-browser">
                                         <i className="fas fa-globe" />
                                     </Button>
                                 </Tooltip>
-                            )}
-                        </Card>
-                        <div className="iframe-wrapper">
-                            <iframe
-                                ref={iframeRef}
-                                src={`${WIDGET_URL_PREFIX}/${selectedWidget}`}
-                                sandbox="allow-scripts"
-                            />
+                            </div>
+
+                            <div className="preview__iframe-wrapper">
+                                <iframe
+                                    ref={iframeRef}
+                                    src={`${WIDGET_URL_PREFIX}/${selectedWidget}`}
+                                    sandbox="allow-scripts"
+                                />
+                            </div>
+                        </>
+                    ) : (
+                        <div className="preview__disabled">
+                            <div>
+                                <div className="preview__disabled-icons">
+                                    <i className="fas fa-desktop fa-3x" />
+                                    <i className="fas fa-times fa-2x" />
+                                </div>
+                                <div className="preview__disabled-text">Widget preview is disabled.</div>
+                            </div>
                         </div>
-                    </>
-                ) : (
-                    <div className="iframe-placeholder">Widget preview is disabled.</div>
-                )}
-            </div>
-        </DashboardStyledContainer>
+                    )}
+                </div>
+            </DashboardStyledContainer>
+
+            <Modal onHide={() => setShowQrCodeModal(false)} show={showQrCodeModal} size="sm" title="Open on device">
+                <QRCodeModal baseUrl={`${WIDGET_URL_PREFIX}/${selectedWidget}`} />
+            </Modal>
+        </>
     );
 }

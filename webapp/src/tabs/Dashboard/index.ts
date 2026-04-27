@@ -8,5 +8,5 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-// export * from "./Dashboard";
+export * from "./Dashboard";
 export * from "./DashboardLeftSection";
