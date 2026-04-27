@@ -44,16 +44,19 @@ export const ModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
 
     "> .modal-content": {
         "> .modal-header": {
-            ...tw`flex justify-end items-center p-2`,
+            ...tw`flex justify-between items-center p-2`,
 
             "> .modal-title": {
                 ...tw`text-lg font-semibold text-stone-100 flex-1 ml-2`
             },
 
-            "> .close-button": {
-                ...tw`p-0 flex justify-center items-center`,
-                width: "32px",
-                height: "32px"
+            "> .modal-header-actions": {
+                ...tw`ml-auto flex justify-center items-center gap-2`,
+                "> .close-button": {
+                    ...tw`p-0 flex justify-center items-center`,
+                    width: "32px",
+                    height: "32px"
+                }
             },
 
             "&:not(:last-child)": {

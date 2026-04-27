@@ -27,6 +27,7 @@ export interface ModalProps extends Omit<PReact.HTMLAttributes<HTMLDivElement>, 
     backdrop?: boolean;
 
     title?: PReact.ComponentChildren;
+    actions?: PReact.ComponentChildren;
     withCloseButton?: boolean;
 }
 
@@ -43,6 +44,7 @@ export function Modal({
     backdrop = true,
 
     title,
+    actions,
     withCloseButton = true,
 
     children,
@@ -58,11 +60,13 @@ export function Modal({
                             {(title != null || withCloseButton) && (
                                 <div className="modal-header">
                                     {title != null && <div className="modal-title">{title}</div>}
-                                    {withCloseButton && (
-                                        <Button className="close-button" onClick={onHide}>
-                                            <i className="fas fa-times" />
-                                        </Button>
-                                    )}
+                                    <div className="modal-header-actions">
+                                        {withCloseButton && (
+                                            <Button className="close-button" onClick={onHide}>
+                                                <i className="fas fa-times" />
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                             {children && <div className="modal-body">{children}</div>}
