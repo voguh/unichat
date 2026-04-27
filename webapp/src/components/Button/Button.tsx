@@ -12,7 +12,7 @@ import * as PReact from "preact";
 
 import { ButtonStyledContainer, ButtonVariant } from "./styled";
 
-interface Props extends Omit<PReact.HTMLAttributes<HTMLButtonElement>, "ref"> {
+interface Props extends Omit<PReact.ButtonHTMLAttributes<HTMLButtonElement>, "ref"> {
     variant?: ButtonVariant;
 }
 
