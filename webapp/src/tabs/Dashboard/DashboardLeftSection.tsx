@@ -13,7 +13,7 @@ import * as PReact from "preact";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { Button } from "unichat/components/Button";
-import { Tooltip } from "unichat/components/OverlayTrigger";
+import { Tooltip } from "unichat/components/Tooltip";
 import { commandService } from "unichat/services/commandService";
 import { useGlobalSignal } from "unichat/signals";
 

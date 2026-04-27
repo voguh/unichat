@@ -18,21 +18,19 @@ import { useEffect, useState } from "preact/hooks";
 // import { SettingsModalLeftSection, SettingsModal } from "unichat/__internal__/SettingsModal";
 import { Button } from "unichat/components/Button";
 // import { ErrorBoundary } from "unichat/components/ErrorBoundary";
-import { Tooltip } from "unichat/components/OverlayTrigger";
+import { Tooltip } from "unichat/components/Tooltip";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
-
-import { GlobalStyle } from "./styles/GlobalStyles";
-import { Dashboard, DashboardLeftSection } from "./tabs/Dashboard";
+import { GlobalStyle } from "unichat/styles/GlobalStyles";
+import { Dashboard, DashboardLeftSection } from "unichat/tabs/Dashboard";
 // import { modalService } from "unichat/services/modalService";
 // import { notificationService } from "unichat/services/notificationService";
 // import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
 // import { WidgetEditor, WidgetEditorLeftSection } from "unichat/tabs/WidgetEditor";
 // import { IPCNotificationEvent } from "unichat/utils/IPCStatusEvent";
 // import { Strings } from "unichat/utils/Strings";
-
-// import { Tour } from "./__internal__/Tour";
-// import { WidgetsModal, WidgetsModalActions } from "./__internal__/WidgetsModal";
-// import { commandService } from "./services/commandService";
+// import { Tour } from "unichat/__internal__/Tour";
+// import { WidgetsModal, WidgetsModalActions } from "unichat/__internal__/WidgetsModal";
+// import { commandService } from "unichat/services/commandService";
 
 interface TabOptions {
     label: string;

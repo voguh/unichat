@@ -17,7 +17,7 @@ import clsx from "clsx";
 import { Badge } from "unichat/components/Badge";
 import { Button } from "unichat/components/Button";
 import { TextInput } from "unichat/components/forms/TextInput";
-import { Popover } from "unichat/components/OverlayTrigger";
+import { Popover } from "unichat/components/Popover";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
