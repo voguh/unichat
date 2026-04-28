@@ -1,5 +1,5 @@
 {
-    "include": ["./src/**/*", "./vite.config.ts"],
+    "include": ["__stories__/**/*", ".storybook/**/*", "./src/**/*", "./vite.config.ts"],
     "compilerOptions": {
         /* Visit https://aka.ms/tsconfig to read more about this file */
 

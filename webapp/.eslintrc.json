@@ -1,4 +1,5 @@
 {
+    "ignorePatterns": ["!.storybook"],
     "env": {
         "es2023": true,
         "browser": true
