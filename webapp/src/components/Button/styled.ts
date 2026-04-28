@@ -21,7 +21,7 @@ interface Props {
 
 export const ButtonStyledContainer = styled.button((props: Props) => {
     const styles = {
-        ...tw`px-4 py-2 rounded focus:outline-none transition-colors duration-200 border border-stone-700 text-white`,
+        ...tw`px-4 py-2 rounded focus:outline-none transition-colors duration-200 border border-stone-700 text-white flex justify-center items-center gap-2 font-semibold`,
         height: "36px",
 
         "&:hover": {
@@ -69,10 +69,10 @@ export const ButtonStyledContainer = styled.button((props: Props) => {
         case "warning":
             return {
                 ...styles,
-                ...tw`bg-yellow-700 text-black border-yellow-700`,
+                ...tw`bg-yellow-500 text-black border-yellow-500`,
 
                 "&:hover": {
-                    ...tw`bg-yellow-800 border-yellow-800`
+                    ...tw`bg-yellow-600 border-yellow-600`
                 }
             };
         case "info":
