@@ -70,7 +70,7 @@ export function Dashboard(): PReact.ComponentChildren {
                 <br />
                 You can enter the URL with or without the <Badge>www.</Badge> prefix.
                 <br />
-                You can also include or omit the <Badge bg="success">https://</Badge> or <Badge bg="danger">http://</Badge> prefix.
+                You can also include or omit the <Badge variant="success">https://</Badge> or <Badge variant="danger">http://</Badge> prefix.
             </>
         );
     }

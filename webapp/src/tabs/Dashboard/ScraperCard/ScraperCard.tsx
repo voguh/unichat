@@ -174,7 +174,7 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
         >
             <div className="scraper-badges-wrapper">
                 {scraper.badges.map((badge, idx) => (
-                    <Badge key={idx} bg="primary" style={{ marginRight: "4px" }}>
+                    <Badge key={idx} variant="primary" style={{ marginRight: "4px" }}>
                         {badge.toUpperCase()}
                     </Badge>
                 ))}
