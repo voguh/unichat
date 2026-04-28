@@ -14,7 +14,7 @@ import { styled } from "goober";
 import tw from "twin.macro";
 
 export const TooltipStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`bg-stone-900 text-white border border-stone-700 py-1 px-2 rounded text-sm pointer-events-none`,
+    ...tw`bg-stone-900 text-stone-50 border border-stone-700 py-1 px-2 rounded text-sm pointer-events-none`,
 
     "&::after": {
         ...tw`absolute border-l border-b bg-inherit border-inherit`,

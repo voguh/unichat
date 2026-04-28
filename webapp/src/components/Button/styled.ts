@@ -21,7 +21,7 @@ interface Props {
 
 export const ButtonStyledContainer = styled.button((props: Props) => {
     const styles = {
-        ...tw`px-4 py-2 rounded focus:outline-none transition-colors duration-200 border border-stone-700 text-white flex justify-center items-center gap-2 font-semibold`,
+        ...tw`px-4 py-2 rounded focus:outline-none transition-colors duration-200 border border-stone-700 text-stone-50 flex justify-center items-center gap-2 font-semibold`,
         height: "36px",
 
         "&:hover": {
@@ -33,7 +33,7 @@ export const ButtonStyledContainer = styled.button((props: Props) => {
         case "primary":
             return {
                 ...styles,
-                ...tw`bg-red-800 text-white border-red-800`,
+                ...tw`bg-red-800 text-stone-50 border-red-800`,
 
                 "&:hover": {
                     ...tw`bg-red-900 border-red-900`
@@ -42,7 +42,7 @@ export const ButtonStyledContainer = styled.button((props: Props) => {
         case "secondary":
             return {
                 ...styles,
-                ...tw`bg-zinc-700 text-white border-zinc-700`,
+                ...tw`bg-zinc-700 text-stone-50 border-zinc-700`,
 
                 "&:hover": {
                     ...tw`bg-zinc-800 border-zinc-800`
@@ -51,7 +51,7 @@ export const ButtonStyledContainer = styled.button((props: Props) => {
         case "success":
             return {
                 ...styles,
-                ...tw`bg-green-700 text-white border-green-700`,
+                ...tw`bg-green-700 text-stone-50 border-green-700`,
 
                 "&:hover": {
                     ...tw`bg-green-800 border-green-800`
@@ -60,7 +60,7 @@ export const ButtonStyledContainer = styled.button((props: Props) => {
         case "danger":
             return {
                 ...styles,
-                ...tw`bg-rose-700 text-white border-rose-700`,
+                ...tw`bg-rose-700 text-stone-50 border-rose-700`,
 
                 "&:hover": {
                     ...tw`bg-rose-800 border-rose-800`
@@ -78,7 +78,7 @@ export const ButtonStyledContainer = styled.button((props: Props) => {
         case "info":
             return {
                 ...styles,
-                ...tw`bg-cyan-700 text-white border-cyan-700`,
+                ...tw`bg-cyan-700 text-stone-50 border-cyan-700`,
 
                 "&:hover": {
                     ...tw`bg-cyan-800 border-cyan-800`

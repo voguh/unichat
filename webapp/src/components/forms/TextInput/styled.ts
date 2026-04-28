@@ -17,7 +17,7 @@ export const TextInputStyledContainer: ComponentType<HTMLAttributes<HTMLDivEleme
     ...tw`relative w-full`,
 
     "> input": {
-        ...tw`relative w-full py-2 px-3 rounded border text-white border-stone-800 bg-stone-800/90 transition-colors duration-150`,
+        ...tw`relative w-full py-2 px-3 rounded border text-stone-50 border-stone-800 bg-stone-800/90 transition-colors duration-150`,
         height: "36px",
         outline: "none",
 

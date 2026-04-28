@@ -67,7 +67,7 @@ export const ModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
         },
 
         "> .modal-body": {
-            ...tw`overflow-auto p-4 overflow-x-scroll`,
+            ...tw`overflow-auto p-4 overflow-x-scroll text-stone-50`,
             maxHeight: "calc(90vh - (32px + 1rem + 2px))" // 32px of close button + 0.5rem * 2 of padding + 2px of border
         }
     }
