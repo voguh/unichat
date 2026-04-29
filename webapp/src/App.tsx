@@ -115,40 +115,42 @@ export function App(): PReact.ComponentChildren {
 
     /* ========================================================================================== */
 
-    async function init(): Promise<void> {
-        //     const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
-        //     if (isOpenToLan) {
-        //         notificationService.warn({
-        //             title: `${UNICHAT_DISPLAY_NAME} is open to LAN`,
-        //             message: "Your widgets are accessible by other devices on the same local network."
-        //         });
-        //     }
-        //     /* ====================================================================================== */
-        //     const releaseInfo = await commandService.getReleases();
-        //     if (releaseInfo.hasUpdate) {
-        //         toggleSettingsModal("check-updates");
-        //     }
-    }
+    // async function init(): Promise<void> {
+    //     const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
+    //     if (isOpenToLan) {
+    //         notificationService.warn({
+    //             title: `${UNICHAT_DISPLAY_NAME} is open to LAN`,
+    //             message: "Your widgets are accessible by other devices on the same local network."
+    //         });
+    //     }
 
-    useEffect(() => {
-        init();
+    //     /* ====================================================================================== */
 
-        //     /* ====================================================================================== */
+    //     const releaseInfo = await commandService.getReleases();
+    //     if (releaseInfo.hasUpdate) {
+    //         toggleSettingsModal("check-updates");
+    //     }
+    // }
 
-        //     const unListenerPromise = eventService.listen<IPCNotificationEvent>("unichat://notification", ({ payload }) => {
-        //         const title = payload.title || "Notification";
-        //         const message = payload.message || "";
-        //         if (!Strings.isNullOrEmpty(message)) {
-        //             notificationService.info({ title, message });
-        //         }
-        //     });
+    // useEffect(() => {
+    //     init();
 
-        //     return () => {
-        //         if (unListenerPromise) {
-        //             unListenerPromise.then((unlisten) => unlisten());
-        //         }
-        //     };
-    }, []);
+    //     /* ====================================================================================== */
+
+    //     const unListenerPromise = eventService.listen<IPCNotificationEvent>("unichat://notification", ({ payload }) => {
+    //         const title = payload.title || "Notification";
+    //         const message = payload.message || "";
+    //         if (!Strings.isNullOrEmpty(message)) {
+    //             notificationService.info({ title, message });
+    //         }
+    //     });
+
+    //     return () => {
+    //         if (unListenerPromise) {
+    //             unListenerPromise.then((unlisten) => unlisten());
+    //         }
+    //     };
+    // }, []);
 
     return (
         <>
