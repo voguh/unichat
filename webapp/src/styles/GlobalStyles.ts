@@ -56,5 +56,10 @@ export const GlobalStyle = createGlobalStyles({
 
             gridColumn: "2"
         }
+    },
+
+    ".fa, .fas, .far, .fal, .fab, .fa-solid, .fa-regular, .fa-light, .fa-brands": {
+        textAlign: "center",
+        width: "1.25em"
     }
 }) as PReact.ComponentType;
