@@ -16,7 +16,6 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { Badge } from "unichat/components/Badge";
 import { Button } from "unichat/components/Button";
 import { Option, Select } from "unichat/components/forms/Select";
-import { Modal } from "unichat/components/Modal";
 import { Tooltip } from "unichat/components/Tooltip";
 import { useScrapers } from "unichat/hooks/useScrapers";
 import { useWidgets } from "unichat/hooks/useWidgets";
