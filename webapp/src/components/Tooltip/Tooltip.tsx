@@ -17,12 +17,13 @@ import { Portal } from "../Portal";
 import { TooltipStyledContainer } from "./styled";
 
 interface Props {
+    maxWidth?: number;
     placement?: Placement;
     content: PReact.ComponentChildren;
     children: PReact.VNode;
 }
 
-export function Tooltip({ children, content, placement }: Props): PReact.ComponentChildren {
+export function Tooltip({ children, content, maxWidth, placement }: Props): PReact.ComponentChildren {
     const wrapperRef = useRef<Element>(null);
     const tooltipRef = useRef<HTMLDivElement>(null);
     const resolvedPlacement = placement || "top";
@@ -93,7 +94,9 @@ export function Tooltip({ children, content, placement }: Props): PReact.Compone
                     pointerEvents: "none"
                 }}
             >
-                <TooltipStyledContainer data-placement={resolvedPlacement}>{content}</TooltipStyledContainer>
+                <TooltipStyledContainer data-placement={resolvedPlacement} style={{ maxWidth: maxWidth ?? "300px" }}>
+                    {content}
+                </TooltipStyledContainer>
             </Portal>
         </>
     );
