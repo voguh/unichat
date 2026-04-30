@@ -41,7 +41,8 @@ pub struct WidgetMetadata {
     #[serde(skip_serializing)]
     path: PathBuf,
     pub rest_path: String,
-    pub widget_source: WidgetSource
+    pub widget_source: WidgetSource,
+    pub warnings: Vec<String>
 }
 
 impl WidgetMetadata {
@@ -149,6 +150,30 @@ static WIDGETS: LazyLock<RwLock<HashMap<String, WidgetMetadata>>> = LazyLock::ne
 
 /* ============================================================================================== */
 
+fn get_warnings_for_widget(widget_path: &Path) -> Vec<String> {
+    let mut warnings = Vec::new();
+
+    if widget_path.join("main.html").exists() && widget_path.join("widget.html").exists() {
+        warnings.push("DUPLICATE_HTML_ENTRYPOINT".to_string());
+    } else if widget_path.join("main.html").exists() && !widget_path.join("widget.html").exists() {
+        warnings.push("LEGACY_HTML_ENTRYPOINT".to_string());
+    }
+
+    if widget_path.join("script.js").exists() && widget_path.join("widget.js").exists() {
+        warnings.push("DUPLICATE_JS_ENTRYPOINT".to_string());
+    } else if widget_path.join("script.js").exists() && !widget_path.join("widget.js").exists() {
+        warnings.push("LEGACY_JS_ENTRYPOINT".to_string());
+    }
+
+    if widget_path.join("style.css").exists() && widget_path.join("widget.css").exists() {
+        warnings.push("DUPLICATE_CSS_ENTRYPOINT".to_string());
+    } else if widget_path.join("style.css").exists() && !widget_path.join("widget.css").exists() {
+        warnings.push("LEGACY_CSS_ENTRYPOINT".to_string());
+    }
+
+    return warnings;
+}
+
 fn load_widgets_from_disk(widgets_path: &Path, source_type: WidgetSource, cb: impl Fn(&WidgetMetadata)) -> Result<(), Error> {
     if !widgets_path.exists() || !widgets_path.is_dir() {
         return Ok(());
@@ -181,10 +206,13 @@ fn load_widgets_from_disk(widgets_path: &Path, source_type: WidgetSource, cb: im
                 rest_path = widget_name
             }
 
+            let warnings = get_warnings_for_widget(&widget_path);
+
             let metadata = WidgetMetadata {
                 path: widget_path,
                 rest_path: rest_path.clone(),
-                widget_source: source_type.clone()
+                widget_source: source_type.clone(),
+                warnings: warnings,
             };
             cb(&metadata);
             widgets.insert(rest_path.clone(), metadata);

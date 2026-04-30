@@ -18,7 +18,6 @@ export interface Dimensions {
 export type Variants = "primary" | "secondary" | "success" | "danger" | "warning" | "info";
 
 /* ========================================================================== */
-/* ========================================================================== */
 
 export interface ThirdPartyLicenseInfo {
     source: string;
@@ -88,6 +87,7 @@ export interface UniChatScraper {
 export interface UniChatWidget {
     restPath: string;
     widgetSource: UniChatWidgetSource;
+    warnings: string[];
 }
 
 export interface UniChatWidgetSource {

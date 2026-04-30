@@ -20,11 +20,11 @@ export function toWidgetOptionGroup(widgets: Iterable<UniChatWidget>): OptionGro
 
     for (const widget of widgets) {
         if (isSystemWidget(widget)) {
-            systemWidgets.push({ value: widget.restPath, label: widget.restPath });
+            systemWidgets.push({ value: widget.restPath, label: widget.restPath, warnings: widget.warnings });
         } else if (isUserWidget(widget)) {
-            userWidgets.push({ value: widget.restPath, label: widget.restPath });
+            userWidgets.push({ value: widget.restPath, label: widget.restPath, warnings: widget.warnings });
         } else {
-            pluginWidgets.push({ value: widget.restPath, label: widget.restPath });
+            pluginWidgets.push({ value: widget.restPath, label: widget.restPath, warnings: widget.warnings });
         }
     }
 
