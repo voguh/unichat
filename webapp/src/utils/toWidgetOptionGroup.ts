@@ -19,6 +19,10 @@ export function toWidgetOptionGroup(widgets: Iterable<UniChatWidget>): OptionGro
     const pluginWidgets = [];
 
     for (const widget of widgets) {
+        if (widget.restPath === "example") {
+            continue;
+        }
+
         if (isSystemWidget(widget)) {
             systemWidgets.push({ value: widget.restPath, label: widget.restPath, warnings: widget.warnings });
         } else if (isUserWidget(widget)) {
