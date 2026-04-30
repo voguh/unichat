@@ -80,7 +80,7 @@ export function WidgetsModal(): PReact.ComponentChildren {
                 return {
                     message: (
                         <>
-                            <i className="fab fa-css3" /> Duplicated
+                            <i className="fab fa-css3-alt" /> Duplicated
                         </>
                     ),
                     details: "This widget contains multiple CSS entrypoints. Only 'widget.css' will be used.",
@@ -90,7 +90,7 @@ export function WidgetsModal(): PReact.ComponentChildren {
                 return {
                     message: (
                         <>
-                            <i className="fab fa-css3" /> Legacy
+                            <i className="fab fa-css3-alt" /> Legacy
                         </>
                     ),
                     details: "This widget uses a deprecated CSS entrypoint. Consider renaming it to 'widget.css'.",
