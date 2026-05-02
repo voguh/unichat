@@ -9,9 +9,12 @@
  ******************************************************************************/
 
 import { createContext } from "preact";
+import { Dispatch, StateUpdater } from "preact/hooks";
 
 export interface ModalContextType {
     onClose: () => void;
+    setSharedStore: Dispatch<StateUpdater<Record<string, any>>>;
+    sharedStore: Record<string, any>;
 }
 
 export const ModalContext = createContext({} as ModalContextType);

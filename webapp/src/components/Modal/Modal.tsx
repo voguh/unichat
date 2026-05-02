@@ -9,6 +9,7 @@
  ******************************************************************************/
 
 import * as PReact from "preact";
+import { useState } from "preact/hooks";
 
 import { ModalContext } from "unichat/contexts/ModalContext";
 
@@ -52,12 +53,14 @@ export function Modal({
     children,
     ...rest
 }: ModalProps): PReact.ComponentChildren {
+    const [sharedStore, setSharedStore] = useState<Record<string, unknown>>({});
+
     const content = (
         <>
             {show && (
                 <>
                     {backdrop && <ModalStyledBackdrop />}
-                    <ModalContext.Provider value={{ onClose: onHide }}>
+                    <ModalContext.Provider value={{ onClose: onHide, sharedStore, setSharedStore }}>
                         <ModalStyledContainer
                             {...rest}
                             data-size={size}
