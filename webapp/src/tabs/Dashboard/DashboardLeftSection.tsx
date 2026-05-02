@@ -42,8 +42,8 @@ export function DashboardLeftSection(): PReact.ComponentChildren {
             </Tooltip>
             <Tooltip content="Toggle widget preview" placement="right">
                 <Button
-                    onClick={() => setShowWidgetPreview((old) => !old)}
                     variant={showWidgetPreview ? "secondary" : undefined}
+                    onClick={() => setShowWidgetPreview((old) => !old)}
                     data-tour="toggle-widget-preview"
                 >
                     {showWidgetPreview ? <i className="fas fa-eye" /> : <i className="fas fa-eye-slash" />}
