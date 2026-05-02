@@ -358,29 +358,3 @@ export function WidgetEditor(_props: Props): React.ReactNode {
         </WidgetEditorStyledContainer>
     );
 }
-
-export function WidgetEditorLeftSection(_props: Props): React.ReactNode {
-    function toggleGallery(): void {
-        modalService.openModal({
-            size: "xl",
-            title: "Gallery",
-            actions: <GalleryModalActions />,
-            children: <GalleryModal />
-        });
-    }
-
-    return (
-        <>
-            <Tooltip content="Open user widgets folder" placement="right">
-                <Button onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)} data-tour="user-widgets-directory">
-                    <i className="fas fa-folder" />
-                </Button>
-            </Tooltip>
-            <Tooltip content="Gallery" placement="right">
-                <Button onClick={toggleGallery} data-tour="gallery-toggle">
-                    <i className="fas fa-images" />
-                </Button>
-            </Tooltip>
-        </>
-    );
-}
