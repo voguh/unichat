@@ -10,6 +10,8 @@
 
 import * as PReact from "preact";
 
+import { ModalContext } from "unichat/contexts/ModalContext";
+
 import { Button } from "../Button";
 import { Portal } from "../Portal";
 import { ModalStyledBackdrop, ModalStyledContainer } from "./styled";
@@ -55,23 +57,31 @@ export function Modal({
             {show && (
                 <>
                     {backdrop && <ModalStyledBackdrop />}
-                    <ModalStyledContainer {...rest} data-size={size} data-fullscreen={fullscreen} autoFocus={autoFocus}>
-                        <div className="modal-content">
-                            {(title != null || withCloseButton) && (
-                                <div className="modal-header">
-                                    {title != null && <div className="modal-title">{title}</div>}
-                                    <div className="modal-header-actions">
-                                        {withCloseButton && (
-                                            <Button className="close-button" onClick={onHide}>
-                                                <i className="fas fa-times" />
-                                            </Button>
-                                        )}
+                    <ModalContext.Provider value={{ onClose: onHide }}>
+                        <ModalStyledContainer
+                            {...rest}
+                            data-size={size}
+                            data-fullscreen={fullscreen}
+                            autoFocus={autoFocus}
+                        >
+                            <div className="modal-content">
+                                {(title != null || withCloseButton) && (
+                                    <div className="modal-header">
+                                        {title != null && <div className="modal-title">{title}</div>}
+                                        <div className="modal-header-actions">
+                                            {actions}
+                                            {withCloseButton && (
+                                                <Button className="close-button" onClick={onHide}>
+                                                    <i className="fas fa-times" />
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
-                            {children && <div className="modal-body">{children}</div>}
-                        </div>
-                    </ModalStyledContainer>
+                                )}
+                                {children && <div className="modal-body">{children}</div>}
+                            </div>
+                        </ModalStyledContainer>
+                    </ModalContext.Provider>
                 </>
             )}
         </>

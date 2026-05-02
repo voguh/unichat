@@ -54,6 +54,12 @@ export const ModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
 
             "> .modal-header-actions": {
                 ...tw`ml-auto flex justify-center items-center gap-2`,
+
+                "> button": {
+                    ...tw`py-0 flex justify-center items-center`,
+                    height: "32px"
+                },
+
                 "> .close-button": {
                     ...tw`p-0 flex justify-center items-center`,
                     width: "32px",
