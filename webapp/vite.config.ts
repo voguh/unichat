@@ -123,15 +123,6 @@ export default defineConfig({
             : undefined
     },
 
-    css: {
-        preprocessorOptions: {
-            scss: {
-                quietDeps: true,
-                silenceDeprecations: ["import"]
-            }
-        }
-    },
-
     build: {
         sourcemap: true,
         rollupOptions: {
