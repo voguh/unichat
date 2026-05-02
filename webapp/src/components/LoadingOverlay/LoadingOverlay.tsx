@@ -8,29 +8,35 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
 
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 
 import { LoadingOverlayStyledContainer } from "./styled";
 
-type ContainerProps = React.ComponentProps<"div">;
-interface Props extends ContainerProps {
+interface Props extends PReact.HTMLAttributes<HTMLDivElement> {
     visible: boolean;
     zIndex?: string | number;
 }
 
 const _logger = LoggerFactory.getLogger("LoadingOverlay");
-export const LoadingOverlay = React.forwardRef<HTMLDivElement, Props>(function LoadingOverlay(props, ref) {
-    const { visible, zIndex = 400, ...rest } = props;
+export function LoadingOverlay({ visible, zIndex = 400, ref, ...rest }: Props): PReact.ComponentChildren {
+    function mergeStyles(): PReact.CSSProperties {
+        const style: PReact.CSSProperties = { zIndex };
+        if (rest.style != null) {
+            Object.assign(style, rest.style);
+        }
+
+        return style;
+    }
 
     if (!visible) {
         return null;
     }
 
     return (
-        <LoadingOverlayStyledContainer {...rest} ref={ref} style={{ zIndex, ...rest.style }}>
+        <LoadingOverlayStyledContainer {...rest} ref={ref} style={mergeStyles()}>
             <i className="fas fa-spinner fa-spin" />
         </LoadingOverlayStyledContainer>
     );
-});
+}

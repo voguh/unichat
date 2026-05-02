@@ -8,6 +8,9 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import styled from "styled-components";
+import { ComponentType, HTMLAttributes } from "preact";
 
-export const LoadingOverlayStyledContainer = styled.div``;
+import { styled } from "goober";
+import tw from "twin.macro";
+
+export const LoadingOverlayStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({});
