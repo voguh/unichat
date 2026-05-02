@@ -11,7 +11,6 @@
 import React from "react";
 
 import * as dialog from "@tauri-apps/plugin-dialog";
-import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import Col from "react-bootstrap/Col";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
@@ -148,14 +147,5 @@ export function GalleryModal(props: Props): React.ReactNode {
                 )}
             </Tabs>
         </GalleryModalStyledContainer>
-    );
-}
-
-export function GalleryModalActions(_props: Props): React.ReactNode {
-    return (
-        <Button variant="outline" onClick={() => revealItemInDir(UNICHAT_GALLERY_DIR)}>
-            <i className="fas fa-folder" />
-            &nbsp;Show Gallery Folder
-        </Button>
     );
 }
