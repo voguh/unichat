@@ -31,10 +31,12 @@
         "prefix": ["goober", "styled"],
         "description": "Creates a new goober styled components content",
         "body": [
+            "import { ComponentType, HTMLAttributes } from \"preact\";",
+            "",
             "import { styled } from \"goober\";",
             "import tw from \"twin.macro\";",
             "",
-            "export const ${TM_DIRECTORY/^.+\\/(.*)$/$1/}StyledContainer = styled.div({});",
+            "export const ${TM_DIRECTORY/^.+\\/(.*)$/$1/}StyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({});",
             ""
         ]
     }
