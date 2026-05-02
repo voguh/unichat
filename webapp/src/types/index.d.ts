@@ -19,6 +19,12 @@ export type Variants = "primary" | "secondary" | "success" | "danger" | "warning
 
 /* ========================================================================== */
 
+export interface Class<T> {
+    new (...args: any[]): T;
+}
+
+/* ========================================================================== */
+
 export interface ThirdPartyLicenseInfo {
     source: string;
     name: string;

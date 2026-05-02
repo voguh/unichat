@@ -11,8 +11,10 @@
 import * as PReact from "preact";
 import { useEffect, useRef } from "preact/hooks";
 
+import { captureNativeRef } from "unichat/utils/captureNativeRef";
+
 import { FormGroup, FormGroupBaseProps } from "../FormGroup";
-import { TextInputStyledContainer } from "./styled";
+import { StyledTextInput } from "./styled";
 
 export interface TextInputProps extends PReact.InputHTMLAttributes<HTMLInputElement>, FormGroupBaseProps {
     inputRef?: PReact.Ref<HTMLInputElement>;
@@ -80,22 +82,7 @@ export function TextInput(props: TextInputProps): PReact.ComponentChildren {
             errorProps={errorProps}
             {...dataProps}
         >
-            <TextInputStyledContainer className="TextInput-container">
-                <input
-                    {...rest}
-                    ref={(el) => {
-                        if (inputRef != null) {
-                            if (inputRef instanceof Function) {
-                                inputRef(el);
-                            } else {
-                                inputRef.current = el;
-                            }
-                        }
-
-                        innerRef.current = el;
-                    }}
-                />
-            </TextInputStyledContainer>
+            <StyledTextInput {...rest} ref={captureNativeRef(HTMLInputElement, inputRef, innerRef)} />
         </FormGroup>
     );
 }

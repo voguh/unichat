@@ -15,6 +15,7 @@ import { computePosition, flip, offset, shift } from "@floating-ui/dom";
 
 import { Portal } from "unichat/components/Portal";
 import { useClickOutside } from "unichat/hooks/useClickOutside";
+import { captureNativeRef } from "unichat/utils/captureNativeRef";
 
 import { FormGroup, FormGroupBaseProps } from "../FormGroup";
 import { SelectStyledContainer, SelectStyledDropdown, SelectStyledGroupContainer, SelectStyledOption } from "./styled";
@@ -176,18 +177,6 @@ export function Select({ options = [], onChange, value, ...props }: SelectProps)
         updatePosition(false);
     }
 
-    function captureRef(el: Element | PReact.Component | null): void {
-        if (el instanceof HTMLDivElement) {
-            wrapperRef.current = el;
-        } else if (el != null) {
-            if ("base" in el && el.base instanceof HTMLDivElement) {
-                wrapperRef.current = el.base;
-            } else {
-                throw new Error("Select trigger must be an Element or a Component that forwards ref to an Element");
-            }
-        }
-    }
-
     useEffect(() => {
         if (value !== undefined) {
             setInternalValue(value);
@@ -248,7 +237,7 @@ export function Select({ options = [], onChange, value, ...props }: SelectProps)
             >
                 <SelectStyledContainer
                     {...rest}
-                    ref={captureRef}
+                    ref={captureNativeRef(HTMLDivElement, wrapperRef)}
                     className="Select-container"
                     data-focused={isOpen ? "true" : "false"}
                     onClick={() => {

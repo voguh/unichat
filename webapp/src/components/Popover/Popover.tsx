@@ -13,6 +13,8 @@ import { useRef } from "preact/hooks";
 
 import { computePosition, flip, offset, Placement, shift } from "@floating-ui/dom";
 
+import { captureNativeRef } from "unichat/utils/captureNativeRef";
+
 import { Portal } from "../Portal";
 import { PopoverStyledContainer } from "./styled";
 
@@ -72,20 +74,8 @@ export function Popover(props: Props): PReact.ComponentChildren {
         updatePosition(false);
     }
 
-    function captureRef(el: Element | PReact.Component | null): void {
-        if (el instanceof Element) {
-            wrapperRef.current = el;
-        } else if (el != null) {
-            if ("base" in el && el.base instanceof Element) {
-                wrapperRef.current = el.base;
-            } else {
-                throw new Error("Tooltip trigger must be an Element or a Component that forwards ref to an Element");
-            }
-        }
-    }
-
     const triggerElement = PReact.cloneElement(children, {
-        ref: captureRef,
+        ref: captureNativeRef(Element, wrapperRef),
 
         onMouseEnter: trigger === "hover" ? show : undefined,
         onMouseLeave: trigger === "hover" ? hide : undefined,

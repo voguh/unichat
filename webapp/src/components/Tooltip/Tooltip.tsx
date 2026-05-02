@@ -13,6 +13,8 @@ import { useRef } from "preact/hooks";
 
 import { computePosition, offset, flip, shift, Placement } from "@floating-ui/dom";
 
+import { captureNativeRef } from "unichat/utils/captureNativeRef";
+
 import { Portal } from "../Portal";
 import { TooltipStyledContainer } from "./styled";
 
@@ -64,20 +66,9 @@ export function Tooltip({ children, content, maxWidth, placement }: Props): PRea
         updatePosition(false);
     }
 
-    function captureRef(el: Element | PReact.Component | null): void {
-        if (el instanceof Element) {
-            wrapperRef.current = el;
-        } else if (el != null) {
-            if ("base" in el && el.base instanceof Element) {
-                wrapperRef.current = el.base;
-            } else {
-                throw new Error("Tooltip trigger must be an Element or a Component that forwards ref to an Element");
-            }
-        }
-    }
-
     const trigger = PReact.cloneElement(children, {
-        ref: captureRef,
+        ref: captureNativeRef(Element, wrapperRef),
+
         onMouseEnter: show,
         onMouseLeave: hide
     });
