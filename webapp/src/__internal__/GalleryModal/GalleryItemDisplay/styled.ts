@@ -24,10 +24,14 @@ export const GalleryItemDisplayStyledContainer: ComponentType<HTMLAttributes<HTM
         ...tw`w-full bg-gray-200 rounded flex justify-center items-center overflow-hidden`,
         aspectRatio: "16 / 9",
 
-        "& > img, & > video, & > audio": {
+        "& > img, & > video": {
             width: "100%",
             height: "100%",
             objectFit: "contain"
+        },
+
+        "& > audio": {
+            width: "100%"
         }
     },
 
