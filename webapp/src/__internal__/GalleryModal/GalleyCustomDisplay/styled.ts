@@ -8,59 +8,28 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import styled from "styled-components";
+import { ComponentType, HTMLAttributes } from "preact";
 
-export const GalleyTabEmptyStyledContainer = styled.div`
-    width: 100%;
-    height: 217px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
+import { styled } from "goober";
+import tw from "twin.macro";
 
-    > .media-wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 224px;
-        height: 126px;
-        background-color: var(--oc-gray-9);
+export const GalleyCustomDisplayStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
+    ...tw`flex flex-col gap-4 justify-center items-center mx-auto`,
+    gridColumn: "1 / -1",
+    width: "300px",
 
-        > img {
-            max-width: 224px;
-            max-height: 126px;
-            object-fit: contain;
+    "> .media-wrapper": {
+        ...tw`w-full bg-gray-200 rounded flex justify-center items-center overflow-hidden`,
+        aspectRatio: "16 / 9",
+
+        "& > img, & > video, & > audio": {
+            width: "100%",
+            height: "100%",
+            objectFit: "contain"
         }
+    },
 
-        > video {
-            max-width: 224px;
-            max-height: 126px;
-            object-fit: contain;
-        }
-
-        > audio {
-            width: calc(100% - 20px);
-        }
+    "> .input-wrapper": {
+        ...tw`w-full flex justify-center items-end gap-2`
     }
-
-    > .input-wrapper {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: flex-end;
-        gap: 8px;
-        margin-top: 12px;
-
-        > .form-group {
-            flex: 1;
-        }
-
-        > button {
-            width: 36px;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-    }
-`;
+});

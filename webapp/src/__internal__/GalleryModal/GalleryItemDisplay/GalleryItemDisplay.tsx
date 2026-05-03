@@ -8,14 +8,11 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
-
-import CardBody from "react-bootstrap/CardBody";
-import CardFooter from "react-bootstrap/CardFooter";
-import CardHeader from "react-bootstrap/CardHeader";
+import * as PReact from "preact";
+import { useContext } from "preact/hooks";
 
 import { Button } from "unichat/components/Button";
-import { Tooltip } from "unichat/components/OverlayTrigger";
+import { Tooltip } from "unichat/components/Tooltip";
 import { ModalContext } from "unichat/contexts/ModalContext";
 import { GalleryItem } from "unichat/types";
 
@@ -26,12 +23,12 @@ interface Props extends GalleryItem {
     onSelectItem?: (url: string, context: { close: () => void }) => void;
 }
 
-export function GalleryItemDisplay(props: Props): React.ReactNode {
+export function GalleryItemDisplay(props: Props): PReact.ComponentChildren {
     const { previewUrl, title, type, url, onSelectItem, selected } = props;
 
-    const { onClose } = React.useContext(ModalContext);
+    const { onClose } = useContext(ModalContext);
 
-    function renderPreview(): React.ReactNode {
+    function renderPreview(): PReact.ComponentChildren {
         if ((previewUrl ?? "").trim().length > 0) {
             if (type === "image") {
                 return <img src={previewUrl} alt={title} />;
@@ -47,18 +44,22 @@ export function GalleryItemDisplay(props: Props): React.ReactNode {
 
     return (
         <GalleryItemDisplayStyledContainer>
-            <CardHeader>
+            <div className="gallery-item--name">
                 <Tooltip content={title} placement="top">
                     <span>{title}</span>
                 </Tooltip>
-            </CardHeader>
-            <CardBody>{renderPreview()}</CardBody>
+            </div>
+            <div className="gallery-item--preview">{renderPreview()}</div>
             {!!onSelectItem && (
-                <CardFooter>
-                    <Button disabled={selected} onClick={() => onSelectItem(url, { close: onClose })}>
+                <div className="gallery-item--footer">
+                    <Button
+                        variant="secondary"
+                        disabled={selected}
+                        onClick={() => onSelectItem(url, { close: onClose })}
+                    >
                         Select
                     </Button>
-                </CardFooter>
+                </div>
             )}
         </GalleryItemDisplayStyledContainer>
     );

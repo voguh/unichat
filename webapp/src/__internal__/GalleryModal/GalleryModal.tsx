@@ -8,15 +8,12 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
+import { useContext, useEffect, useState } from "preact/hooks";
 
-import * as dialog from "@tauri-apps/plugin-dialog";
-import Col from "react-bootstrap/Col";
-import Tab from "react-bootstrap/Tab";
-import Tabs from "react-bootstrap/Tabs";
-
-import { Button } from "unichat/components/Button";
 import { LoadingOverlay } from "unichat/components/LoadingOverlay";
+import { Tab, Tabs } from "unichat/components/Tabs";
+import { ModalContext } from "unichat/contexts/ModalContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { notificationService } from "unichat/services/notificationService";
@@ -37,29 +34,70 @@ interface Props {
 }
 
 const _logger = LoggerFactory.getLogger("Gallery");
-export function GalleryModal(props: Props): React.ReactNode {
+export function GalleryModal(props: Props): PReact.ComponentChildren {
     const { onSelectItem, selectedItem = "", showTabs = ["image", "video", "audio", "file"], startSelectedTab } = props;
 
-    const [loading, setLoading] = React.useState<boolean>(false);
-    const [galleryItems, setGalleryItems] = React.useState<GalleryItem[]>([]);
+    const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
 
-    function hasItemsInTab(type: GalleryTabs): boolean {
-        const itemsInTab = (galleryItems ?? []).filter((item) => item.type === type);
+    const { sharedStore } = useContext(ModalContext);
 
-        return itemsInTab.length > 0;
-    }
-
-    function printGalleryItems(type: GalleryTabs): JSX.Element[] {
+    function printGalleryItems(type: GalleryTabs): PReact.ComponentChildren {
         const itemsToPrint = (galleryItems ?? []).filter((item) => item.type === type);
         if (itemsToPrint.length === 0) {
             return [<GalleyTabEmpty key={crypto.randomUUID()} withSelect={!!onSelectItem} />];
         }
 
         return itemsToPrint.map((item) => (
-            <Col key={item.title}>
-                <GalleryItemDisplay {...item} onSelectItem={onSelectItem} selected={item.url === selectedItem} />
-            </Col>
+            <GalleryItemDisplay
+                {...item}
+                key={item.title}
+                onSelectItem={onSelectItem}
+                selected={item.url === selectedItem}
+            />
         ));
+    }
+
+    function buildTabs(): Tab[] {
+        const tabs: Tab[] = [];
+        if (showTabs.includes("image")) {
+            tabs.push({
+                title: "Images",
+                content: <GalleryTabContainer>{printGalleryItems("image")}</GalleryTabContainer>
+            });
+        }
+
+        if (showTabs.includes("video")) {
+            tabs.push({
+                title: "Videos",
+                content: <GalleryTabContainer>{printGalleryItems("video")}</GalleryTabContainer>
+            });
+        }
+
+        if (showTabs.includes("audio")) {
+            tabs.push({
+                title: "Audios",
+                content: <GalleryTabContainer>{printGalleryItems("audio")}</GalleryTabContainer>
+            });
+        }
+        if (showTabs.includes("file")) {
+            tabs.push({
+                title: "Others",
+                content: <GalleryTabContainer>{printGalleryItems("file")}</GalleryTabContainer>
+            });
+        }
+
+        if (typeof onSelectItem === "function") {
+            tabs.push({
+                title: "Custom",
+                content: (
+                    <GalleryTabContainer>
+                        <GalleyCustomDisplay selectedItem={selectedItem} onSelectItem={onSelectItem} />
+                    </GalleryTabContainer>
+                )
+            });
+        }
+
+        return tabs;
     }
 
     async function handleFetchGalleryItems(): Promise<void> {
@@ -76,76 +114,16 @@ export function GalleryModal(props: Props): React.ReactNode {
         }
     }
 
-    async function onFilesUploadClick(): Promise<void> {
-        try {
-            setLoading(true);
-            const response = await dialog.open({ multiple: true, directory: false });
-            if (response == null || !Array.isArray(response)) {
-                throw new Error("Invalid response from file dialog");
-            }
-
-            await commandService.uploadGalleryItems(response);
-            await handleFetchGalleryItems();
-        } catch (error) {
-            _logger.error("An error occurred on upload gallery items", error);
-
-            notificationService.error({
-                title: "Upload Error",
-                message: "An error occurred while uploading gallery items."
-            });
-        } finally {
-            setLoading(false);
-            await handleFetchGalleryItems();
+    useEffect(() => {
+        if (!sharedStore.uploading) {
+            handleFetchGalleryItems();
         }
-    }
-
-    React.useEffect(() => {
-        handleFetchGalleryItems();
-    }, []);
+    }, [sharedStore.uploading]);
 
     return (
         <GalleryModalStyledContainer>
-            <LoadingOverlay visible={loading} />
-            <Button className="upload-to-gallery" onClick={onFilesUploadClick}>
-                Add to Gallery
-            </Button>
-            <Tabs defaultActiveKey={(startSelectedTab ?? showTabs[0]) as string}>
-                {showTabs.includes("image") && (
-                    <Tab eventKey="image" title="Images">
-                        <GalleryTabContainer xs={hasItemsInTab("image") ? 3 : 1}>
-                            {printGalleryItems("image")}
-                        </GalleryTabContainer>
-                    </Tab>
-                )}
-                {showTabs.includes("video") && (
-                    <Tab eventKey="video" title="Videos">
-                        <GalleryTabContainer xs={hasItemsInTab("video") ? 3 : 1}>
-                            {printGalleryItems("video")}
-                        </GalleryTabContainer>
-                    </Tab>
-                )}
-                {showTabs.includes("audio") && (
-                    <Tab eventKey="audio" title="Audios">
-                        <GalleryTabContainer xs={hasItemsInTab("audio") ? 3 : 1}>
-                            {printGalleryItems("audio")}
-                        </GalleryTabContainer>
-                    </Tab>
-                )}
-                {showTabs.includes("file") && (
-                    <Tab eventKey="file" title="Others">
-                        <GalleryTabContainer xs={hasItemsInTab("file") ? 3 : 1}>
-                            {printGalleryItems("file")}
-                        </GalleryTabContainer>
-                    </Tab>
-                )}
-                {typeof onSelectItem === "function" && (
-                    <Tab eventKey="custom" title="Custom">
-                        <GalleryTabContainer xs={1}>
-                            <GalleyCustomDisplay selectedItem={selectedItem} onSelectItem={onSelectItem} />
-                        </GalleryTabContainer>
-                    </Tab>
-                )}
-            </Tabs>
+            <LoadingOverlay visible={sharedStore.uploading} />
+            <Tabs initialTab={startSelectedTab} tabs={buildTabs()} />
         </GalleryModalStyledContainer>
     );
 }

@@ -8,18 +8,17 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import styled from "styled-components";
+import { ComponentType, HTMLAttributes } from "preact";
 
-export const GalleyTabEmptyStyledContainer = styled.div`
-    width: 100%;
-    height: 164px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: 600;
+import { styled } from "goober";
+import tw from "twin.macro";
 
-    &.with-select {
-        height: 217px;
+export const GalleyTabEmptyStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
+    ...tw`w-full flex items-center justify-center text-2xl font-semibold`,
+    gridColumn: "1 / -1",
+    height: "146px",
+
+    "&.with-select": {
+        height: "189px"
     }
-`;
+});

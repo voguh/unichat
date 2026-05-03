@@ -12,7 +12,7 @@ import * as PReact from "preact";
 
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
-import { GalleryModalActions } from "unichat/__internal__/GalleryModal";
+import { GalleryModal, GalleryModalActions } from "unichat/__internal__/GalleryModal";
 import { Button } from "unichat/components/Button";
 import { Tooltip } from "unichat/components/Tooltip";
 import { modalService } from "unichat/services/modalService";
@@ -23,7 +23,7 @@ export function WidgetEditorLeftSection(): PReact.ComponentChildren {
             size: "xl",
             title: "Gallery",
             actions: <GalleryModalActions />,
-            children: <>Gallery modal content</>
+            children: <GalleryModal />
         });
     }
 

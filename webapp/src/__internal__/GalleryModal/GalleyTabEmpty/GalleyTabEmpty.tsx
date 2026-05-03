@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
 
 import { GalleyTabEmptyStyledContainer } from "./styled";
 
@@ -16,7 +16,7 @@ interface Props {
     withSelect: boolean;
 }
 
-export function GalleyTabEmpty({ withSelect }: Props): React.ReactNode {
+export function GalleyTabEmpty({ withSelect }: Props): PReact.ComponentChildren {
     return (
         <GalleyTabEmptyStyledContainer className={withSelect ? "with-select" : undefined}>
             No items to display

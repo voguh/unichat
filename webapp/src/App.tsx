@@ -13,6 +13,7 @@ import { useEffect, useState } from "preact/hooks";
 
 import * as eventService from "@tauri-apps/api/event";
 
+import { ModalContainer } from "unichat/__internal__/ModalContainer";
 import { PluginsModal, PluginsModalActions } from "unichat/__internal__/PluginsModal";
 import { SettingsModalLeftSection, SettingsModal } from "unichat/__internal__/SettingsModal";
 import { Tour } from "unichat/__internal__/Tour";
@@ -30,8 +31,6 @@ import { Dashboard, DashboardLeftSection } from "unichat/tabs/Dashboard";
 import { WidgetEditor, WidgetEditorLeftSection } from "unichat/tabs/WidgetEditor";
 import { IPCNotificationEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
-
-import { ModalContainer } from "./__internal__/ModalContainer";
 
 interface TabOptions {
     label: string;
@@ -51,7 +50,7 @@ const tabs: Record<string, TabOptions> = {
         label: "Widget Editor",
         icon: <i className="fas fa-pencil-ruler" />,
         component: <>widget editor</>,
-        leftSection: <>widget editor left section</>
+        leftSection: <WidgetEditorLeftSection />
     }
 };
 
