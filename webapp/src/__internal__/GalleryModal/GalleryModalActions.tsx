@@ -15,6 +15,7 @@ import * as dialog from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { Button } from "unichat/components/Button";
+import { Tooltip } from "unichat/components/Tooltip";
 import { ModalContext } from "unichat/contexts/ModalContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
@@ -45,10 +46,11 @@ export function GalleryModalActions(): PReact.ComponentChildren {
                 <i className="fas fa-upload" />
                 Add to Gallery
             </Button>
-            <Button variant="secondary" onClick={() => revealItemInDir(UNICHAT_GALLERY_DIR)}>
-                <i className="fas fa-folder" />
-                Show Gallery Folder
-            </Button>
+            <Tooltip placement="bottom" content="Show Gallery Folder">
+                <Button variant="secondary" onClick={() => revealItemInDir(UNICHAT_GALLERY_DIR)}>
+                    <i className="fas fa-folder" />
+                </Button>
+            </Tooltip>
         </>
     );
 }
