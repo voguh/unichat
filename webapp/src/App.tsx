@@ -13,7 +13,8 @@ import { useEffect, useState } from "preact/hooks";
 
 import * as eventService from "@tauri-apps/api/event";
 
-import { ModalContainer } from "unichat/__internal__/ModalContainer";
+import { ModalProvider } from "unichat/__internal__/ModalProvider";
+import { NotificationProvider } from "unichat/__internal__/NotificationProvider";
 import { PluginsModal, PluginsModalActions } from "unichat/__internal__/PluginsModal";
 import { SettingsModalLeftSection, SettingsModal } from "unichat/__internal__/SettingsModal";
 import { Tour } from "unichat/__internal__/Tour";
@@ -114,42 +115,42 @@ export function App(): PReact.ComponentChildren {
 
     /* ========================================================================================== */
 
-    // async function init(): Promise<void> {
-    //     const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
-    //     if (isOpenToLan) {
-    //         notificationService.warn({
-    //             title: `${UNICHAT_DISPLAY_NAME} is open to LAN`,
-    //             message: "Your widgets are accessible by other devices on the same local network."
-    //         });
-    //     }
+    async function init(): Promise<void> {
+        const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
+        if (isOpenToLan) {
+            notificationService.warn({
+                title: `${UNICHAT_DISPLAY_NAME} is open to LAN`,
+                message: "Your widgets are accessible by other devices on the same local network."
+            });
+        }
 
-    //     /* ====================================================================================== */
+        /* ====================================================================================== */
 
-    //     const releaseInfo = await commandService.getReleases();
-    //     if (releaseInfo.hasUpdate) {
-    //         toggleSettingsModal("check-updates");
-    //     }
-    // }
+        const releaseInfo = await commandService.getReleases();
+        if (releaseInfo.hasUpdate) {
+            toggleSettingsModal("check-updates");
+        }
+    }
 
-    // useEffect(() => {
-    //     init();
+    useEffect(() => {
+        init();
 
-    //     /* ====================================================================================== */
+        /* ====================================================================================== */
 
-    //     const unListenerPromise = eventService.listen<IPCNotificationEvent>("unichat://notification", ({ payload }) => {
-    //         const title = payload.title || "Notification";
-    //         const message = payload.message || "";
-    //         if (!Strings.isNullOrEmpty(message)) {
-    //             notificationService.info({ title, message });
-    //         }
-    //     });
+        const unListenerPromise = eventService.listen<IPCNotificationEvent>("unichat://notification", ({ payload }) => {
+            const title = payload.title || "Notification";
+            const message = payload.message || "";
+            if (!Strings.isNullOrEmpty(message)) {
+                notificationService.info({ title, message });
+            }
+        });
 
-    //     return () => {
-    //         if (unListenerPromise) {
-    //             unListenerPromise.then((unlisten) => unlisten());
-    //         }
-    //     };
-    // }, []);
+        return () => {
+            if (unListenerPromise) {
+                unListenerPromise.then((unlisten) => unlisten());
+            }
+        };
+    }, []);
 
     return (
         <>
@@ -197,7 +198,8 @@ export function App(): PReact.ComponentChildren {
             </div>
 
             {/* <Tour /> */}
-            <ModalContainer />
+            <ModalProvider />
+            <NotificationProvider />
         </>
     );
 }

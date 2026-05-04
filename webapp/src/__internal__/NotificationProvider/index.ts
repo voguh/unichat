@@ -8,5 +8,4 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-export * from "./ToastContainer";
-export * from "./ToastWrapper";
+export * from "./NotificationProvider";
