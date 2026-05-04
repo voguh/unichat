@@ -12,7 +12,6 @@ import * as PReact from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 
 import { Modal } from "unichat/components/Modal";
-import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { eventEmitter } from "unichat/services/eventEmitter";
 import { OpenModalOptions } from "unichat/services/modalService";
 
@@ -27,8 +26,7 @@ interface Props {
     fullscreen?: boolean;
 }
 
-const _logger = LoggerFactory.getLogger("ModalContainer");
-export function ModalContainer(defaultProps: Props): PReact.ComponentChildren {
+export function ModalProvider(defaultProps: Props): PReact.ComponentChildren {
     const [openedModals, setOpenedModals] = useState<RichModalWrapperProps[]>([]);
 
     const modalContainerRef = useRef<HTMLDivElement>(null);
