@@ -16,7 +16,7 @@ import { glob } from "glob";
 import JSONC from "jsonc-parser";
 import sonda from "sonda/vite";
 import { CompilerOptions } from "typescript";
-import { defineConfig, Plugin } from "vite";
+import { defineConfig, Plugin, PluginOption } from "vite";
 
 const tsConfigRaw = fs.readFileSync(path.resolve(__dirname, "tsconfig.json"), { encoding: "utf-8" });
 const compilerOptions = (JSONC.parse(tsConfigRaw) || {}).compilerOptions as CompilerOptions;
@@ -86,23 +86,32 @@ function uniChatBuildTools(): Plugin {
 
 const host = process.env.TAURI_DEV_HOST;
 
-export default defineConfig({
-    root: path.resolve(__dirname),
-    publicDir: path.resolve(__dirname, "public"),
-    plugins: [
+const plugins: PluginOption[] = [
+    preact({
+        babel: { plugins: [["babel-plugin-macros"], ["babel-plugin-transform-goober"]] },
+        devToolsEnabled: process.env.NODE_ENV !== "production",
+        devtoolsInProd: false,
+        prefreshEnabled: process.env.NODE_ENV !== "production",
+        reactAliasesEnabled: false
+    })
+];
+
+if (process.env.NODE_ENV !== "production") {
+    plugins.push(
         sonda({
             brotli: true,
             filename: path.resolve(__dirname, "coverage", "stats.html"),
             gzip: true,
             open: false
         }),
-        uniChatBuildTools(),
-        preact({
-            babel: { plugins: [["babel-plugin-macros"], ["babel-plugin-transform-goober"]] },
-            devToolsEnabled: false,
-            reactAliasesEnabled: false
-        })
-    ],
+        uniChatBuildTools()
+    );
+}
+
+export default defineConfig({
+    root: path.resolve(__dirname),
+    publicDir: path.resolve(__dirname, "public"),
+    plugins: [...plugins],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
     //
