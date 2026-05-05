@@ -63,18 +63,23 @@ export function useLocalStorage<K extends keyof LocalStorageValues>(
     function setLocalStorageValue(newValue: StateUpdater<LocalStorageValues[K]>): void {
         setValue((oldValue) => {
             let finalValue: LocalStorageValues[K];
-            if (newValue instanceof Function) {
+            if (typeof newValue === "function") {
                 finalValue = newValue(oldValue);
             } else {
                 finalValue = newValue;
             }
 
-            localStorage.setItem(prefixedKey, JSON.stringify(finalValue));
-            localStorageListener.emit("local_storage:change", {
-                dispatcherId: listenerId,
-                key,
-                value: finalValue
-            });
+            if (finalValue === oldValue) {
+                return oldValue;
+            }
+
+            if (finalValue == null) {
+                localStorage.removeItem(prefixedKey);
+            } else {
+                localStorage.setItem(prefixedKey, JSON.stringify(finalValue));
+            }
+
+            localStorageListener.emit("local_storage:change", { dispatcherId: listenerId, key, value: finalValue });
 
             return finalValue;
         });
