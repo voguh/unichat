@@ -21,7 +21,11 @@ export const QRCodeModalStyledContainer = styled.div({
     "> .qrcode": {
         ...tw`bg-white`,
         width: "256px",
-        height: "256px"
+        height: "256px",
+
+        "> img": {
+            ...tw`w-full h-full`
+        }
     },
 
     "> .qrcode-url": {

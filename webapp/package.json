@@ -24,10 +24,10 @@
         "@tauri-apps/plugin-store": "2.4.2",
         "clsx": "2.1.1",
         "goober": "2.1.18",
+        "lean-qr": "2.7.1",
         "marked": "18.0.2",
         "mitt": "3.0.1",
-        "preact": "10.29.1",
-        "qr": "0.5.5"
+        "preact": "10.29.1"
     },
     "devDependencies": {
         "@preact/preset-vite": "2.10.5",

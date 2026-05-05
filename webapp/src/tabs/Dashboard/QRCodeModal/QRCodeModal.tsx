@@ -12,7 +12,7 @@ import * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
-import encodeQR from "qr";
+import { generate } from "lean-qr";
 
 import { Button } from "unichat/components/Button";
 import { Option, Select } from "unichat/components/forms/Select";
@@ -30,6 +30,17 @@ export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
     const [systemHosts, setSystemHosts] = useState<Option[]>([]);
     const [selectedHost, setSelectedHost] = useState<Option | null>(null);
     const [selectedHostQrCodeUrl, setSelectedHostQrCodeUrl] = useState<string | null>(null);
+    const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
+
+    function encodeQR(hostUrl: string): void {
+        if (hostUrl == null) {
+            return;
+        }
+
+        const qrCode = generate(hostUrl);
+        const dataUrl = qrCode.toDataURL({ scale: 10 });
+        setQrCodeDataUrl(dataUrl);
+    }
 
     function onSelectHost(option: Option | null): void {
         if (option == null) {
@@ -41,6 +52,7 @@ export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
         const normalizedIp = option.value.includes(":") ? `[${option.value}]` : option.value; // Handle IPv6 addresses
         const hostUrl = baseUrl.replace("localhost", normalizedIp);
         setSelectedHostQrCodeUrl(hostUrl);
+        encodeQR(hostUrl);
     }
 
     useEffect(() => {
@@ -76,10 +88,7 @@ export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
             {selectedHostQrCodeUrl && (
                 <>
                     <div className="qrcode-label">Scan this QR code with your device to open</div>
-                    <div
-                        className="qrcode"
-                        dangerouslySetInnerHTML={{ __html: encodeQR(selectedHostQrCodeUrl, "svg") }}
-                    />
+                    <div className="qrcode">{qrCodeDataUrl && <img src={qrCodeDataUrl} alt="QR Code" />}</div>
                     <div className="qrcode-url">
                         <TextInput value={selectedHostQrCodeUrl} readonly onClick={(e) => e.currentTarget.select()} />
                         <Tooltip placement="left" content="Open in browser">
