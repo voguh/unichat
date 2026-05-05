@@ -8,28 +8,48 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import "@fortawesome/fontawesome-free/css/all.min.css";
 import "tailwindcss/base.css";
 import "tailwindcss/components.css";
 import "tailwindcss/utilities.css";
 
-import { h } from "preact";
+import { ComponentType, h } from "preact";
 
 import type { Preview } from "@storybook/preact-vite";
 import { setup } from "goober";
+import { createGlobalStyles } from "goober/global";
+import tw from "twin.macro";
 
 setup(h);
+
+const GlobalStyle = createGlobalStyles({
+    "html, body, #storybook-root": tw`w-full h-full m-0 p-0 relative overflow-hidden`,
+    "#storybook-root": tw`absolute inset-0 flex justify-center items-center bg-stone-950 text-stone-50 overflow-y-scroll`
+}) as ComponentType;
+
 const preview: Preview = {
     tags: ["autodocs"],
     decorators: [
         (Story) => {
+            const linkFontawesome = document.createElement("link");
+            linkFontawesome.rel = "stylesheet";
+            linkFontawesome.href = "/fontawesome/css/fontawesome.min.css";
+            document.head.append(linkFontawesome);
+
+            const linkFontawesomeBrands = document.createElement("link");
+            linkFontawesomeBrands.rel = "stylesheet";
+            linkFontawesomeBrands.href = "/fontawesome/css/brands.min.css";
+            document.head.append(linkFontawesomeBrands);
+
+            const linkFontawesomeSolid = document.createElement("link");
+            linkFontawesomeSolid.rel = "stylesheet";
+            linkFontawesomeSolid.href = "/fontawesome/css/solid.min.css";
+            document.head.append(linkFontawesomeSolid);
+
             return (
-                <div
-                    className="relative overflow-hidden bg-stone-950 text-stone-50 overflow-y-scroll flex justify-center items-center"
-                    style={{ width: "100vw", height: "100vh", margin: "-16px", fontSize: "14px" }}
-                >
+                <>
                     <Story />
-                </div>
+                    <GlobalStyle />
+                </>
             );
         }
     ]
