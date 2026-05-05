@@ -89,14 +89,14 @@ const host = process.env.TAURI_DEV_HOST;
 const plugins: PluginOption[] = [
     preact({
         babel: { plugins: [["babel-plugin-macros"], ["babel-plugin-transform-goober"]] },
-        devToolsEnabled: process.env.NODE_ENV !== "production",
+        devToolsEnabled: false,
         devtoolsInProd: false,
-        prefreshEnabled: process.env.NODE_ENV !== "production",
+        prefreshEnabled: false,
         reactAliasesEnabled: false
     })
 ];
 
-if (process.env.NODE_ENV !== "production") {
+if (process.env.BUNDLE_ANALYZE === "true") {
     plugins.push(
         sonda({
             brotli: true,
