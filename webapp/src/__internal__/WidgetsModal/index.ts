@@ -9,3 +9,4 @@
  ******************************************************************************/
 
 export * from "./WidgetsModal";
+export * from "./WidgetsModalActions";

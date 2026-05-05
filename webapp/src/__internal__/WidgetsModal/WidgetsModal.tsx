@@ -172,21 +172,3 @@ export function WidgetsModal(): PReact.ComponentChildren {
         </div>
     );
 }
-
-export function WidgetsModalActions(): PReact.ComponentChildren {
-    return (
-        <>
-            <Button
-                variant="default"
-                onClick={() => openUrl("https://unichat.voguh.me/docs/1.4.x/widgets/getting_started.html")}
-            >
-                <i className="fas fa-book" />
-                Read the Docs
-            </Button>
-            <Button onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)}>
-                <i className="fas fa-folder" />
-                Show Widgets Folder
-            </Button>
-        </>
-    );
-}
