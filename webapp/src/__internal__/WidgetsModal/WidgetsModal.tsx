@@ -11,7 +11,6 @@
 import * as PReact from "preact";
 import { useState } from "preact/hooks";
 
-import { sep } from "@tauri-apps/api/path";
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { AccordionItem } from "unichat/components/AccordionItem";
@@ -148,7 +147,7 @@ export function WidgetsModal(): PReact.ComponentChildren {
                                                             variant="default"
                                                             onClick={() =>
                                                                 revealItemInDir(
-                                                                    `${UNICHAT_WIDGETS_DIR}${sep()}${widget.label}`
+                                                                    `${UNICHAT_WIDGETS_DIR}/${widget.label}`
                                                                 )
                                                             }
                                                         >
