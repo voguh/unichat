@@ -8,11 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import "@fortawesome/fontawesome-free/css/all.min.css";
-import "tailwindcss/base.css";
-import "tailwindcss/components.css";
-import "tailwindcss/utilities.css";
-
 import { h, render } from "preact";
 
 import { platform } from "@tauri-apps/plugin-os";

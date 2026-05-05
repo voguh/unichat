@@ -13,9 +13,7 @@
     "packageManager": "pnpm@10.30.3",
     "dependencies": {
         "@floating-ui/dom": "1.7.6",
-        "@fortawesome/fontawesome-free": "5.15.4",
         "@jridgewell/trace-mapping": "0.3.31",
-        "@preact/signals": "2.9.0",
         "@tauri-apps/api": "2.10.1",
         "@tauri-apps/plugin-dialog": "2.7.0",
         "@tauri-apps/plugin-log": "2.8.0",
