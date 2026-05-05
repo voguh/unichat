@@ -33,6 +33,8 @@ import { WidgetEditor, WidgetEditorLeftSection } from "unichat/tabs/WidgetEditor
 import { IPCNotificationEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
 
+import { StorageKeys, useLocalStorage } from "./hooks/useLocalStorage";
+
 interface TabOptions {
     label: string;
     icon: PReact.ComponentChildren;
@@ -81,6 +83,7 @@ function TabContent({ selectedTab }: { selectedTab: keyof typeof tabs }): PReact
 const _logger = LoggerFactory.getLogger("App");
 export function App(): PReact.ComponentChildren {
     const [selectedTab, setSelectedTab] = useState<keyof typeof tabs>("dashboard");
+    const [requiresRestart, setRequiresRestart] = useLocalStorage(StorageKeys.REQUIRES_RESTART, false);
 
     function togglePluginsModal(): void {
         //     modalService.openModal({
@@ -116,6 +119,8 @@ export function App(): PReact.ComponentChildren {
     /* ========================================================================================== */
 
     async function init(): Promise<void> {
+        setRequiresRestart(false);
+
         const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
         if (isOpenToLan) {
             notificationService.warn({
@@ -131,6 +136,15 @@ export function App(): PReact.ComponentChildren {
             toggleSettingsModal("check-updates");
         }
     }
+
+    useEffect(() => {
+        if (requiresRestart) {
+            notificationService.info({
+                title: "Restart Required",
+                message: "Please restart the application to apply the changes."
+            });
+        }
+    }, [requiresRestart]);
 
     useEffect(() => {
         init();
