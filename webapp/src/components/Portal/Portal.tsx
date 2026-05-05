@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 import * as PReact from "preact";
-import { useLayoutEffect, useMemo, useRef } from "preact/hooks";
+import { useId, useLayoutEffect, useRef } from "preact/hooks";
 
 interface Props {
     style?: PReact.CSSProperties;
@@ -18,7 +18,7 @@ interface Props {
 }
 
 export function Portal({ children, containerRef, style }: Props): PReact.ComponentChildren {
-    const portalId = useMemo(() => `unichat-portal-${Math.random().toString(16).slice(2)}`, []);
+    const portalId = useId();
     const portalElementRef = useRef<HTMLElement | null>(null);
 
     useLayoutEffect(() => {

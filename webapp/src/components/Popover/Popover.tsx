@@ -87,10 +87,11 @@ export function Popover(props: Props): PReact.ComponentChildren {
     return (
         <>
             {triggerElement}
-            <Portal
-                containerRef={tooltipRef}
+            <div
+                ref={tooltipRef}
                 style={{
-                    position: "absolute",
+                    zIndex: 9998,
+                    position: "fixed",
                     visibility: "hidden",
                     opacity: "0",
                     pointerEvents: "none"
@@ -106,7 +107,7 @@ export function Popover(props: Props): PReact.ComponentChildren {
                         {content}
                     </div>
                 </PopoverStyledContainer>
-            </Portal>
+            </div>
         </>
     );
 }

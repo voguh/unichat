@@ -223,58 +223,56 @@ export function Select({ options = [], onChange, value, ...props }: SelectProps)
     }, [options]);
 
     return (
-        <>
-            <FormGroup
-                id={id}
-                className={className}
-                label={label}
-                labelProps={labelProps}
-                description={description}
-                descriptionProps={descriptionProps}
-                error={error}
-                errorProps={errorProps}
-                {...dataProps}
+        <FormGroup
+            id={id}
+            className={className}
+            label={label}
+            labelProps={labelProps}
+            description={description}
+            descriptionProps={descriptionProps}
+            error={error}
+            errorProps={errorProps}
+            {...dataProps}
+        >
+            <SelectStyledContainer
+                {...rest}
+                ref={captureNativeRef(HTMLDivElement, wrapperRef)}
+                className="Select-container"
+                data-focused={isOpen ? "true" : "false"}
+                onClick={() => {
+                    if (isOpen) {
+                        hide();
+                    } else {
+                        show();
+                    }
+                }}
             >
-                <SelectStyledContainer
-                    {...rest}
-                    ref={captureNativeRef(HTMLDivElement, wrapperRef)}
-                    className="Select-container"
-                    data-focused={isOpen ? "true" : "false"}
-                    onClick={() => {
-                        if (isOpen) {
-                            hide();
-                        } else {
+                <input
+                    readOnly
+                    type="text"
+                    value={internalValue?.label ?? ""}
+                    placeholder="Select an option"
+                    onKeyDown={(event) => {
+                        if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
                             show();
                         }
+
+                        if (event.key === "Escape") {
+                            hide();
+                        }
                     }}
-                >
-                    <input
-                        readOnly
-                        type="text"
-                        value={internalValue?.label ?? ""}
-                        placeholder="Select an option"
-                        onKeyDown={(event) => {
-                            if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
-                                event.preventDefault();
-                                show();
-                            }
+                />
 
-                            if (event.key === "Escape") {
-                                hide();
-                            }
-                        }}
-                    />
-
-                    <div className="dropdown-indicator">
-                        {isOpen ? <i className="fas fa-chevron-up" /> : <i className="fas fa-chevron-down" />}
-                    </div>
-                </SelectStyledContainer>
-            </FormGroup>
-
-            <Portal
-                containerRef={dropdownRef}
+                <div className="dropdown-indicator">
+                    {isOpen ? <i className="fas fa-chevron-up" /> : <i className="fas fa-chevron-down" />}
+                </div>
+            </SelectStyledContainer>
+            <div
+                ref={dropdownRef}
                 style={{
-                    position: "absolute",
+                    zIndex: 9998,
+                    position: "fixed",
                     visibility: "hidden",
                     opacity: "0",
                     transform: "translateX(-50%)"
@@ -300,7 +298,7 @@ export function Select({ options = [], onChange, value, ...props }: SelectProps)
                         />
                     ))}
                 </SelectStyledDropdown>
-            </Portal>
-        </>
+            </div>
+        </FormGroup>
     );
 }

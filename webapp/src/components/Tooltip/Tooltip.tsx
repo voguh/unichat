@@ -76,10 +76,11 @@ export function Tooltip({ children, content, maxWidth, placement }: Props): PRea
     return (
         <>
             {trigger}
-            <Portal
-                containerRef={tooltipRef}
+            <div
+                ref={tooltipRef}
                 style={{
-                    position: "absolute",
+                    zIndex: 9998,
+                    position: "fixed",
                     visibility: "hidden",
                     opacity: "0",
                     pointerEvents: "none"
@@ -88,7 +89,7 @@ export function Tooltip({ children, content, maxWidth, placement }: Props): PRea
                 <TooltipStyledContainer data-placement={resolvedPlacement} style={{ maxWidth: maxWidth ?? "300px" }}>
                     {content}
                 </TooltipStyledContainer>
-            </Portal>
+            </div>
         </>
     );
 }
