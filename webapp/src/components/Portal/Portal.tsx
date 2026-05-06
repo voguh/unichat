@@ -12,44 +12,40 @@ import * as PReact from "preact";
 import { useId, useLayoutEffect, useRef } from "preact/hooks";
 
 interface Props {
-    style?: PReact.CSSProperties;
+    initialStyle?: PReact.CSSProperties;
     containerRef?: PReact.RefObject<HTMLElement | null>;
     children: PReact.ComponentChildren;
 }
 
-export function Portal({ children, containerRef, style }: Props): PReact.ComponentChildren {
+export function Portal({ children, containerRef, initialStyle }: Props): PReact.ComponentChildren {
     const portalId = useId();
     const portalElementRef = useRef<HTMLElement | null>(null);
 
     useLayoutEffect(() => {
-        let el = portalElementRef.current ?? document.getElementById(portalId);
+        let el = portalElementRef.current;
         if (el == null) {
             el = document.createElement("div");
             el.id = portalId;
-            Object.assign(el.style, style ?? {});
+            Object.assign(el.style, initialStyle ?? {});
             document.body.appendChild(el);
-        }
 
-        portalElementRef.current = el;
-        if (containerRef != null) {
-            containerRef.current = el;
+            portalElementRef.current = el;
+            if (containerRef != null) {
+                containerRef.current = el;
+            }
         }
 
         return () => {
-            if (el.childElementCount === 0) {
-                el.remove();
+            PReact.render(null, el);
+
+            portalElementRef.current = null;
+            if (containerRef != null) {
+                containerRef.current = null;
             }
+
+            document.body.removeChild(el);
         };
-    }, [portalId, containerRef]);
-
-    useLayoutEffect(() => {
-        const el = portalElementRef.current;
-        if (!el) {
-            return;
-        }
-
-        Object.assign(el.style, style ?? {});
-    }, [style]);
+    }, []);
 
     useLayoutEffect(() => {
         const el = portalElementRef.current;
@@ -58,10 +54,6 @@ export function Portal({ children, containerRef, style }: Props): PReact.Compone
         }
 
         PReact.render(children, el);
-
-        return () => {
-            PReact.render(null, el);
-        };
     }, [children]);
 
     return null;
