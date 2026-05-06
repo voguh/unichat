@@ -43,7 +43,8 @@ export const NotificationProviderStyledContainer: ComponentType<Props> = styled.
     };
 
     return {
-        ...tw`fixed z-[9999] m-2 flex flex-col gap-2`,
-        ...placement[props.position]
+        ...tw`fixed m-2 flex flex-col gap-2`,
+        ...placement[props.position],
+        zIndex: "9999"
     };
 });
