@@ -13,6 +13,7 @@ import { useRef } from "preact/hooks";
 
 import { computePosition, flip, offset, Placement, shift } from "@floating-ui/dom";
 
+import { useComputePosition } from "unichat/hooks/useComputePosition";
 import { captureNativeRef } from "unichat/utils/captureNativeRef";
 
 import { Portal } from "../Portal";
@@ -31,47 +32,29 @@ interface Props {
     bodyStyle?: PReact.CSSProperties;
 }
 
-export function Popover(props: Props): PReact.ComponentChildren {
-    const { children, content, bodyStyle, headerStyle, placement, style, title, trigger = "hover" } = props;
-
-    const wrapperRef = useRef<Element>(null);
-    const tooltipRef = useRef<HTMLDivElement>(null);
+export function Popover({
+    children,
+    content,
+    bodyStyle,
+    headerStyle,
+    placement,
+    style,
+    title,
+    trigger = "hover"
+}: Props): PReact.ComponentChildren {
     const resolvedPlacement = placement || "top";
 
-    async function updatePosition(visible: boolean): Promise<void> {
-        if (!wrapperRef.current || !tooltipRef.current) {
-            return;
-        }
-
-        if (!visible) {
-            Object.assign(tooltipRef.current.style, {
-                visibility: "hidden",
-                opacity: "0",
-                left: "0",
-                top: "0"
-            });
-            return;
-        }
-
-        const { x, y } = await computePosition(wrapperRef.current, tooltipRef.current, {
-            placement: resolvedPlacement,
-            middleware: [offset(8), flip(), shift({ padding: 8 })]
-        });
-
-        Object.assign(tooltipRef.current.style, {
-            visibility: "visible",
-            opacity: "1",
-            left: `${x}px`,
-            top: `${y}px`
-        });
-    }
+    const [wrapperRef, tooltipRef, updateVisualization] = useComputePosition<Element, HTMLDivElement>({
+        placement: placement || "top",
+        middleware: [offset(8), flip(), shift({ padding: 8 })]
+    });
 
     function show(): void {
-        updatePosition(true);
+        updateVisualization(true);
     }
 
     function hide(): void {
-        updatePosition(false);
+        updateVisualization(false);
     }
 
     const triggerElement = PReact.cloneElement(children, {
@@ -87,10 +70,9 @@ export function Popover(props: Props): PReact.ComponentChildren {
     return (
         <>
             {triggerElement}
-            <div
-                ref={tooltipRef}
-                style={{
-                    zIndex: 9998,
+            <Portal
+                containerRef={tooltipRef}
+                initialStyle={{
                     position: "fixed",
                     visibility: "hidden",
                     opacity: "0",
@@ -107,7 +89,7 @@ export function Popover(props: Props): PReact.ComponentChildren {
                         {content}
                     </div>
                 </PopoverStyledContainer>
-            </div>
+            </Portal>
         </>
     );
 }

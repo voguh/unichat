@@ -9,12 +9,12 @@
  ******************************************************************************/
 
 import * as PReact from "preact";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 
-import { computePosition, flip, offset, shift } from "@floating-ui/dom";
+import { flip, offset, shift } from "@floating-ui/dom";
 
 import { Portal } from "unichat/components/Portal";
-import { useClickOutside } from "unichat/hooks/useClickOutside";
+import { useComputePosition } from "unichat/hooks/useComputePosition";
 import { captureNativeRef } from "unichat/utils/captureNativeRef";
 
 import { FormGroup, FormGroupBaseProps } from "../FormGroup";
@@ -106,6 +106,14 @@ export type SelectProps = Omit<PReact.HTMLAttributes<HTMLDivElement>, "onChange"
         onChange?: (value: Option | null) => void;
     };
 
+function adjustFloatingPosition(reference: HTMLElement, floating: HTMLElement, x: number, y: number): [number, number] {
+    const wrapperRect = reference.getBoundingClientRect();
+    const centeredX = wrapperRect.left + window.scrollX + wrapperRect.width / 2;
+    floating.style.width = `${wrapperRect.width}px`;
+
+    return [centeredX, y];
+}
+
 export function Select({ options = [], onChange, value, ...props }: SelectProps): PReact.ComponentChildren {
     const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...unfiltered } = props;
     const [dataProps, rest] = Object.entries(unfiltered).reduce(
@@ -124,61 +132,23 @@ export function Select({ options = [], onChange, value, ...props }: SelectProps)
     const [isOpen, setIsOpen] = useState(false);
     const [internalValue, setInternalValue] = useState<Option | null>(value ?? null);
 
-    const wrapperRef = useRef<HTMLDivElement>(null);
-    const dropdownRef = useClickOutside<HTMLDivElement>(hide);
-
-    async function updatePosition(visible: boolean): Promise<void> {
-        if (!wrapperRef.current || !dropdownRef.current) {
-            return;
-        }
-
-        const wrapperRect = wrapperRef.current.getBoundingClientRect();
-        const centeredX = wrapperRect.left + window.scrollX + wrapperRect.width / 2;
-
-        if (!visible) {
-            Object.assign(dropdownRef.current.style, {
-                visibility: "hidden",
-                opacity: "0",
-                left: `${centeredX}px`,
-                transform: "translateX(-50%)"
-            });
-            return;
-        }
-
-        const { y } = await computePosition(wrapperRef.current, dropdownRef.current, {
-            placement: "bottom",
-            middleware: [offset(8), flip(), shift({ padding: 8 })]
-        });
-
-        Object.assign(dropdownRef.current.style, {
-            visibility: "visible",
-            opacity: "1",
-            left: `${centeredX}px`,
-            top: `${y}px`,
-            transform: "translateX(-50%)",
-            width: `${wrapperRef.current.offsetWidth}px`
-        });
-    }
+    const [wrapperRef, dropdownRef, updateVisualization] = useComputePosition<HTMLDivElement, HTMLDivElement>(
+        { placement: "bottom", middleware: [offset(8), flip(), shift({ padding: 8 })] },
+        adjustFloatingPosition
+    );
 
     function show(): void {
         setIsOpen(true);
-        updatePosition(true);
+        updateVisualization(true);
     }
 
-    function hide(event?: Event): void {
-        if (event != null) {
-            const wrapper = wrapperRef.current;
-            if (wrapper && event.target instanceof Node && wrapper.contains(event.target)) {
-                return;
-            }
-        }
-
+    function hide(): void {
         setIsOpen(false);
-        updatePosition(false);
+        updateVisualization(false);
     }
 
     useEffect(() => {
-        if (value !== undefined) {
+        if (value != null) {
             setInternalValue(value);
         }
     }, [value]);
@@ -188,28 +158,40 @@ export function Select({ options = [], onChange, value, ...props }: SelectProps)
             return;
         }
 
-        function handleReposition(): void {
-            updatePosition(true);
-        }
-
         function handleKeyDown(event: KeyboardEvent): void {
             if (event.key === "Escape") {
                 hide();
             }
         }
 
-        updatePosition(true);
+        function handleClickOutside(event: Event): void {
+            const wrapperEl = wrapperRef.current;
+            const dropdownEl = dropdownRef.current;
+            if (!wrapperEl || !dropdownEl) {
+                return;
+            }
 
-        window.addEventListener("resize", handleReposition);
-        window.addEventListener("scroll", handleReposition, true);
+            if (event.target instanceof Node && wrapperEl.contains(event.target)) {
+                return;
+            }
+
+            if (event.target instanceof Node && dropdownEl.contains(event.target)) {
+                return;
+            }
+
+            hide();
+        }
+
         window.addEventListener("keydown", handleKeyDown);
+        document.addEventListener("pointerdown", handleClickOutside);
+        document.addEventListener("touchstart", handleClickOutside);
 
         return () => {
-            window.removeEventListener("resize", handleReposition);
-            window.removeEventListener("scroll", handleReposition, true);
             window.removeEventListener("keydown", handleKeyDown);
+            document.removeEventListener("pointerdown", handleClickOutside);
+            document.removeEventListener("touchstart", handleClickOutside);
         };
-    }, [isOpen, options]);
+    }, [isOpen]);
 
     useEffect(() => {
         if (options.length > 0) {
@@ -268,10 +250,9 @@ export function Select({ options = [], onChange, value, ...props }: SelectProps)
                     {isOpen ? <i className="fas fa-chevron-up" /> : <i className="fas fa-chevron-down" />}
                 </div>
             </SelectStyledContainer>
-            <div
-                ref={dropdownRef}
-                style={{
-                    zIndex: 9998,
+            <Portal
+                containerRef={dropdownRef}
+                initialStyle={{
                     position: "fixed",
                     visibility: "hidden",
                     opacity: "0",
@@ -298,7 +279,7 @@ export function Select({ options = [], onChange, value, ...props }: SelectProps)
                         />
                     ))}
                 </SelectStyledDropdown>
-            </div>
+            </Portal>
         </FormGroup>
     );
 }

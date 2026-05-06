@@ -9,10 +9,10 @@
  ******************************************************************************/
 
 import * as PReact from "preact";
-import { useRef } from "preact/hooks";
 
-import { computePosition, offset, flip, shift, Placement } from "@floating-ui/dom";
+import { offset, flip, shift, Placement } from "@floating-ui/dom";
 
+import { useComputePosition } from "unichat/hooks/useComputePosition";
 import { captureNativeRef } from "unichat/utils/captureNativeRef";
 
 import { Portal } from "../Portal";
@@ -26,47 +26,22 @@ interface Props {
 }
 
 export function Tooltip({ children, content, maxWidth, placement }: Props): PReact.ComponentChildren {
-    const wrapperRef = useRef<Element>(null);
-    const tooltipRef = useRef<HTMLDivElement>(null);
     const resolvedPlacement = placement || "top";
 
-    async function updatePosition(visible: boolean): Promise<void> {
-        if (!wrapperRef.current || !tooltipRef.current) {
-            return;
-        }
-
-        if (!visible) {
-            Object.assign(tooltipRef.current.style, {
-                visibility: "hidden",
-                opacity: "0",
-                left: "0",
-                top: "0"
-            });
-            return;
-        }
-
-        const { x, y } = await computePosition(wrapperRef.current, tooltipRef.current, {
-            placement: resolvedPlacement,
-            middleware: [offset(8), flip(), shift({ padding: 8 })]
-        });
-
-        Object.assign(tooltipRef.current.style, {
-            visibility: "visible",
-            opacity: "1",
-            left: `${x}px`,
-            top: `${y}px`
-        });
-    }
+    const [wrapperRef, tooltipRef, updateVisualization] = useComputePosition<Element, HTMLDivElement>({
+        placement: resolvedPlacement,
+        middleware: [offset(8), flip(), shift({ padding: 8 })]
+    });
 
     function show(): void {
-        updatePosition(true);
+        updateVisualization(true);
     }
 
     function hide(): void {
-        updatePosition(false);
+        updateVisualization(false);
     }
 
-    const trigger = PReact.cloneElement(children, {
+    const triggerElement = PReact.cloneElement(children, {
         ref: captureNativeRef(Element, wrapperRef),
 
         onMouseEnter: show,
@@ -75,11 +50,10 @@ export function Tooltip({ children, content, maxWidth, placement }: Props): PRea
 
     return (
         <>
-            {trigger}
-            <div
-                ref={tooltipRef}
-                style={{
-                    zIndex: 9998,
+            {triggerElement}
+            <Portal
+                containerRef={tooltipRef}
+                initialStyle={{
                     position: "fixed",
                     visibility: "hidden",
                     opacity: "0",
@@ -89,7 +63,7 @@ export function Tooltip({ children, content, maxWidth, placement }: Props): PRea
                 <TooltipStyledContainer data-placement={resolvedPlacement} style={{ maxWidth: maxWidth ?? "300px" }}>
                     {content}
                 </TooltipStyledContainer>
-            </div>
+            </Portal>
         </>
     );
 }
