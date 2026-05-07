@@ -64,7 +64,7 @@ function uniChatBuildTools(): Plugin {
                     "[plugin @unichat/build-tools] ╔══ Orphan files detected ══════════════════════════════════════════════════════"
                 ];
 
-                for (const file of orphanFiles) {
+                for (const file of orphanFiles.sort()) {
                     const relativePath = path.relative(cwd, file);
                     logLines.push(`[plugin @unichat/build-tools] ║  ./${relativePath}`);
                 }
