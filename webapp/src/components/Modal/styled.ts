@@ -35,13 +35,13 @@ export const ModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
 
                 "> button": {
                     ...tw`py-0 flex justify-center items-center`,
-                    height: "32px"
+                    height: "28px"
                 },
 
                 "> .close-button": {
                     ...tw`p-0 flex justify-center items-center`,
-                    width: "32px",
-                    height: "32px"
+                    width: "28px",
+                    height: "28px"
                 }
             },
 

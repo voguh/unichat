@@ -68,17 +68,19 @@ export function Modal({
                             autoFocus={autoFocus}
                         >
                             <div className="modal-content">
-                                {(title != null || withCloseButton) && (
+                                {(title != null || actions != null || withCloseButton) && (
                                     <div className="modal-header">
                                         {title != null && <div className="modal-title">{title}</div>}
-                                        <div className="modal-header-actions">
-                                            {actions}
-                                            {withCloseButton && (
-                                                <Button className="close-button" onClick={onHide}>
-                                                    <i className="fas fa-times" />
-                                                </Button>
-                                            )}
-                                        </div>
+                                        {(actions != null || withCloseButton) && (
+                                            <div className="modal-header-actions">
+                                                {actions}
+                                                {withCloseButton && (
+                                                    <Button className="close-button" onClick={onHide}>
+                                                        <i className="fas fa-times" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                                 {children && <div className="modal-body">{children}</div>}
