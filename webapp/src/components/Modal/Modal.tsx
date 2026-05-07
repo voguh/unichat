@@ -28,6 +28,7 @@ export interface ModalProps extends Omit<PReact.HTMLAttributes<HTMLDivElement>, 
     fullscreen?: boolean;
 
     backdrop?: boolean;
+    CustomModalBody?: PReact.ComponentType<PReact.HTMLAttributes<HTMLDivElement>>;
 
     title?: PReact.ComponentChildren;
     actions?: PReact.ComponentChildren;
@@ -45,6 +46,7 @@ export function Modal({
     fullscreen = false,
 
     backdrop = true,
+    CustomModalBody = ({ children, ...props }) => <div {...props}>{children}</div>,
 
     title,
     actions,
@@ -83,7 +85,7 @@ export function Modal({
                                         )}
                                     </div>
                                 )}
-                                {children && <div className="modal-body">{children}</div>}
+                                {children && <CustomModalBody className="modal-body">{children}</CustomModalBody>}
                             </div>
                         </ModalStyledContainer>
                     </ModalContext.Provider>

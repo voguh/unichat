@@ -8,82 +8,45 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import styled from "styled-components";
+import { ComponentType, HTMLAttributes } from "preact";
 
-export const ThirdPartyLicensesStyledContainer = styled.div`
-    height: var(--modal-body-inner-max-height);
-    margin: 0 -16px 0 0;
-    padding: 0 16px 0 0;
-    overflow-y: scroll;
+import { styled } from "goober";
+import tw from "twin.macro";
 
-    > table {
-        > thead {
-            > tr {
-                position: sticky;
-                top: 0;
-                background: var(--oc-dark-9);
+export const ThirdPartyLicensesStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
+    "> table": {
+        ...tw`w-full border-collapse`,
 
-                > th {
-                    background: none;
+        "> thead": {
+            ...tw`bg-stone-950`,
+
+            "> tr": {
+                "> th": {
+                    ...tw`text-left px-4 py-2 border-b border-stone-700`
                 }
             }
-        }
-        > tbody {
-            > tr {
-                &:nth-child(even) {
-                    background: var(--oc-dark-7);
-                }
+        },
 
-                &:nth-child(odd) {
-                    background: var(--oc-dark-8);
-                }
+        "> tbody": {
+            "> tr": {
+                ...tw`bg-stone-900`,
 
-                &.withLink:hover {
-                    cursor: pointer;
-                    background: rgba(var(--oc-blue-4-rgb), 0.25);
-                }
+                "&:nth-child(even)": {
+                    ...tw`bg-stone-800`
+                },
 
-                > td {
-                    background: none;
-                    vertical-align: middle;
+                "&.withLink": {
+                    cursor: "pointer"
+                },
 
-                    &:first-child {
-                        > span {
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: center;
-                            gap: 8px;
+                "> td": {
+                    ...tw`px-4 py-2 border-b border-stone-700`,
 
-                            > .badge {
-                                text-transform: uppercase;
-
-                                &[data-source="crate"] {
-                                    background: var(--oc-yellow-8);
-                                    color: var(--oc-dark-8);
-                                }
-
-                                &[data-source="npm"] {
-                                    background: var(--oc-blue-8);
-                                    color: var(--oc-dark-0);
-                                }
-                            }
-                        }
-                    }
-
-                    &:last-child {
-                        > span {
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: center;
-                            gap: 8px;
-
-                            > .badge {
-                                cursor: pointer;
-                            }
-                        }
+                    "> span": {
+                        ...tw`flex items-center gap-2`
                     }
                 }
             }
         }
     }
-`;
+});

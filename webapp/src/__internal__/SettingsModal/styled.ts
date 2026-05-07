@@ -8,28 +8,41 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import styled from "styled-components";
+import { ComponentType, HTMLAttributes } from "preact";
 
-export const SettingsSidebarStyledItems = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    overflow-y: auto;
-    height: calc(var(--modal-sidebar-content-inner-max-height) - 48px);
-    width: 100%;
-    padding: 8px;
-`;
+import { styled } from "goober";
+import tw from "twin.macro";
 
-export const SettingsSidebarStyledFooter = styled.div`
-    bottom: 16px;
-    height: 48px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+export const SettingsModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
+    position: "relative",
+    display: "flex",
+    flexWrap: "nowrap",
+    padding: "0 !important",
+    width: "calc(64rem - 2px)", // 2px is the border
+    height: "calc(90vh - 47px)",
 
-    > span {
-        font-size: 12px;
-        color: var(--oc-dark-2);
+    "> .settings_modal--sidebar": {
+        ...tw`bg-stone-900 border-r border-stone-800`,
+
+        width: "201px", // 200px is the sidebar + 1px is the border
+        height: "calc(90vh - 47px)",
+
+        "> .settings_modal--sidebar_items": {
+            ...tw`p-2 flex flex-col gap-1`,
+            height: "calc(90vh - (47px + 45px))" // 47px is the header and 45px is the footer
+        },
+
+        "> .settings_modal--sidebar_footer": {
+            ...tw`p-4 text-center text-sm text-stone-500`
+        }
+    },
+
+    "> .settings_modal--content": {
+        "--settings-modal-content-width": "calc(64rem - 203px)", // 200px is the sidebar + 3px is the border
+        "--settings-modal-content-height": "calc(90vh - 47px)",
+
+        ...tw`bg-stone-900`,
+        width: "var(--settings-modal-content-width)",
+        height: "var(--settings-modal-content-height)"
     }
-`;
+});

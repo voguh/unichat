@@ -8,7 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
+import { useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 import clsx from "clsx";
@@ -23,8 +24,8 @@ interface Props {
     onClose: () => void;
 }
 
-export function AboutSettingsTab(_props: Props): React.ReactNode {
-    const [isCreditsOpen, setIsCreditsOpen] = React.useState(false);
+export function AboutSettingsTab(_props: Props): PReact.ComponentChildren {
+    const [isCreditsOpen, setIsCreditsOpen] = useState(false);
 
     function handleOpenThirdPartyLicenses(): void {
         modalService.openModal({

@@ -16,7 +16,7 @@ import * as eventService from "@tauri-apps/api/event";
 import { ModalProvider } from "unichat/__internal__/ModalProvider";
 import { NotificationProvider } from "unichat/__internal__/NotificationProvider";
 import { PluginsModal, PluginsModalActions } from "unichat/__internal__/PluginsModal";
-import { SettingsModalLeftSection, SettingsModal } from "unichat/__internal__/SettingsModal";
+import { SettingsModal } from "unichat/__internal__/SettingsModal";
 import { Tour } from "unichat/__internal__/Tour";
 import { WidgetsModal, WidgetsModalActions } from "unichat/__internal__/WidgetsModal";
 import { Button } from "unichat/components/Button";
@@ -32,6 +32,8 @@ import { Dashboard, DashboardLeftSection } from "unichat/tabs/Dashboard";
 import { WidgetEditor, WidgetEditorLeftSection } from "unichat/tabs/WidgetEditor";
 import { IPCNotificationEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
+
+import { Modal } from "./components/Modal";
 
 interface TabOptions {
     label: string;
@@ -80,7 +82,8 @@ function TabContent({ selectedTab }: { selectedTab: keyof typeof tabs }): PReact
 
 const _logger = LoggerFactory.getLogger("App");
 export function App(): PReact.ComponentChildren {
-    const [selectedTab, setSelectedTab] = useState<keyof typeof tabs>("widgetEditor");
+    const [openedSettingsModal, setOpenedSettingsModal] = useState<string | boolean>("about");
+    const [selectedTab, setSelectedTab] = useState<keyof typeof tabs>("dashboard");
 
     function togglePluginsModal(): void {
         modalService.openModal({
@@ -100,19 +103,6 @@ export function App(): PReact.ComponentChildren {
         });
     }
 
-    function toggleSettingsModal(tab?: string | null): void {
-        //     modalService.openModal({
-        //         size: "xl",
-        //         title: "Settings",
-        //         leftSectionTitle: "Settings",
-        //         leftSection: <SettingsModalLeftSection />,
-        //         children: <SettingsModal />,
-        //         sharedStoreInitialState: {
-        //             selectedItem: Strings.isNullOrEmpty(tab) ? "general" : tab
-        //         }
-        //     });
-    }
-
     /* ========================================================================================== */
 
     async function init(): Promise<void> {
@@ -130,7 +120,7 @@ export function App(): PReact.ComponentChildren {
 
         const releaseInfo = await commandService.getReleases();
         if (releaseInfo.hasUpdate) {
-            toggleSettingsModal("check-updates");
+            setOpenedSettingsModal("check-updates");
         }
     }
 
@@ -188,7 +178,7 @@ export function App(): PReact.ComponentChildren {
                     </Tooltip>
 
                     <Tooltip content="Settings" placement="right">
-                        <Button onClick={() => toggleSettingsModal()} data-tour="settings-modal-toggle">
+                        <Button onClick={() => setOpenedSettingsModal(true)} data-tour="settings-modal-toggle">
                             <i className="fas fa-sliders-h" />
                         </Button>
                     </Tooltip>
@@ -198,6 +188,12 @@ export function App(): PReact.ComponentChildren {
             <div className="content">
                 <TabContent selectedTab={selectedTab} />
             </div>
+
+            <SettingsModal
+                externalActiveTab={typeof openedSettingsModal === "string" ? openedSettingsModal : null}
+                show={!!openedSettingsModal}
+                onHide={() => setOpenedSettingsModal(false)}
+            />
 
             {/* <Tour /> */}
             <ModalProvider />

@@ -57,19 +57,23 @@ export const ModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
     },
 
     "&[data-size=sm]": {
-        ...tw`w-[24rem] max-h-[90vh]`
+        width: "24rem",
+        maxHeight: "90vh"
     },
 
     "&[data-size=md]": {
-        ...tw`w-[32rem] max-h-[90vh]`
+        width: "32rem",
+        maxHeight: "90vh"
     },
 
     "&[data-size=lg]": {
-        ...tw`w-[48rem] max-h-[90vh]`
+        width: "48rem",
+        maxHeight: "90vh"
     },
 
     "&[data-size=xl]": {
-        ...tw`w-[64rem] max-h-[90vh]`
+        width: "64rem",
+        maxHeight: "90vh"
     },
 
     "&[data-fullscreen=true]": {

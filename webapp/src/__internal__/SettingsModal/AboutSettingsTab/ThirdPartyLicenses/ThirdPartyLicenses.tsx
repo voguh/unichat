@@ -8,24 +8,20 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
+import { useEffect, useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 import clsx from "clsx";
-import Badge from "react-bootstrap/Badge";
-import Table from "react-bootstrap/Table";
 
+import { Badge } from "unichat/components/Badge";
 import { commandService } from "unichat/services/commandService";
 import { ThirdPartyLicenseInfo } from "unichat/types";
 
 import { ThirdPartyLicensesStyledContainer } from "./styled";
 
-interface Props {
-    children?: React.ReactNode;
-}
-
-export function ThirdPartyLicenses(_props: Props): React.ReactNode {
-    const [thirdPartyLicenses, setThirdPartyLicenses] = React.useState<ThirdPartyLicenseInfo[]>([]);
+export function ThirdPartyLicenses(): PReact.ComponentChildren {
+    const [thirdPartyLicenses, setThirdPartyLicenses] = useState<ThirdPartyLicenseInfo[]>([]);
 
     function formatLicenses(expr: string): string[] {
         const ids = expr
@@ -39,13 +35,13 @@ export function ThirdPartyLicenses(_props: Props): React.ReactNode {
         return Array.from(new Set(ids)).sort();
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         commandService.getThirdPartyLicenses().then(setThirdPartyLicenses);
     }, []);
 
     return (
         <ThirdPartyLicensesStyledContainer>
-            <Table>
+            <table>
                 <thead>
                     <tr>
                         <th>Package</th>
@@ -59,9 +55,7 @@ export function ThirdPartyLicenses(_props: Props): React.ReactNode {
                             <tr key={pkg.name} className={clsx({ withLink: !!pkg.repository })}>
                                 <td onClick={() => pkg.repository && openUrl(pkg.repository)}>
                                     <span>
-                                        <Badge bg="default" data-source={pkg.source}>
-                                            {pkg.source}
-                                        </Badge>
+                                        <Badge data-source={pkg.source}>{pkg.source}</Badge>
                                         {pkg.name} v{pkg.version}
                                     </span>
                                 </td>
@@ -70,7 +64,7 @@ export function ThirdPartyLicenses(_props: Props): React.ReactNode {
                                         {formatLicenses(pkg.licenses).map((l) => (
                                             <Badge
                                                 key={l}
-                                                bg="success"
+                                                variant="success"
                                                 onClick={() => openUrl(`https://opensource.org/license/${l}`)}
                                             >
                                                 {l}
@@ -81,7 +75,7 @@ export function ThirdPartyLicenses(_props: Props): React.ReactNode {
                             </tr>
                         ))}
                 </tbody>
-            </Table>
+            </table>
         </ThirdPartyLicensesStyledContainer>
     );
 }
