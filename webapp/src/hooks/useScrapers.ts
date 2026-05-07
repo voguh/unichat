@@ -28,7 +28,7 @@ export function useScrapers<T = UniChatScraper>(
             scrapers = await commandService.getScrapers();
             cachedScrapers.splice(0, cachedScrapers.length, ...scrapers);
         } else {
-            scrapers = [...cachedScrapers];
+            scrapers = structuredClone(cachedScrapers);
         }
 
         const transformedValue = transformer(scrapers);

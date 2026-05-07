@@ -25,7 +25,7 @@ export function useWidgets<T = UniChatWidget>(transformer: Transformer<T>, defau
             widgets = await commandService.getWidgets();
             cachedWidgets.splice(0, cachedWidgets.length, ...widgets);
         } else {
-            widgets = [...cachedWidgets];
+            widgets = structuredClone(cachedWidgets);
         }
 
         const transformedValue = transformer(widgets);
