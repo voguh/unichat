@@ -8,86 +8,54 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import styled from "styled-components";
+import { styled } from "goober";
+import tw from "twin.macro";
 
-export const PluginsStyledContainer = styled.div`
-    position: relative;
+export const PluginsStyledContainer = styled.div({
+    ...tw`relative`,
 
-    > table {
-        --cell-padding-x: 8px;
-        --cell-padding-y: 8px;
-        --cell-inner-min-width: 30px;
-        --cell-inner-height: 30px;
-        --cell-min-width: calc(var(--cell-inner-min-width) + var(--cell-padding-x) * 2);
-        --cell-height: calc(var(--cell-inner-height) + var(--cell-padding-y) * 2);
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
+    "> table": {
+        ...tw`w-full border-collapse table-fixed`,
 
-        > tbody {
-            > tr {
-                &:nth-child(odd) {
-                    background-color: var(--oc-dark-5);
-                }
+        "> tbody": {
+            "> tr": {
+                "&:nth-child(odd)": {
+                    ...tw`bg-stone-950/25`
+                },
 
-                &:nth-child(even) {
-                    background-color: var(--oc-dark-4);
-                }
+                "&:nth-child(even)": {
+                    ...tw`bg-stone-950/50`
+                },
 
-                > td {
-                    height: var(--cell-height);
-                    min-width: var(--cell-min-width);
-                    padding: var(--cell-padding-y) var(--cell-padding-x);
-                    text-align: left;
+                "> td": {
+                    ...tw`w-fit p-2`,
 
-                    &.plugin-icon {
-                        width: var(--cell-min-width);
+                    "&.plugin-icon": {
+                        ...tw`w-[calc(_theme(padding.2) * 2 + 36px)]`,
 
-                        > img {
-                            display: block;
-                            width: 30px;
-                            height: 30px;
+                        "> img": {
+                            ...tw`object-cover rounded`,
+                            width: "36px",
+                            height: "36px"
                         }
-                    }
+                    },
 
-                    &.plugin-name {
-                        vertical-align: middle;
+                    "&.plugin-name": {},
 
-                        > span {
-                            font-weight: bolder;
-                            font-size: 14px;
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
+                    "&.plugin-badges": {
+                        ...tw`w-fit`,
+
+                        "> div": {
+                            ...tw`flex flex-nowrap gap-1 justify-end items-center`,
+                            height: "36px"
                         }
-                    }
+                    },
 
-                    &.plugin-badges {
-                        text-align: center;
-                        vertical-align: middle;
-
-                        > span {
-                            display: flex;
-                            justify-content: flex-end;
-                            align-items: center;
-                            gap: 4px;
-
-                            > .badge {
-                                font-size: 12px;
-                            }
-                        }
-                    }
-
-                    &.plugin-actions {
-                        width: calc(67px + var(--cell-padding-x) * 2);
-                        text-align: right;
-
-                        > button {
-                            height: 30px;
-                        }
+                    "&.plugin-actions": {
+                        ...tw`w-[calc(_theme(padding.2) * 2 + 77px)]`
                     }
                 }
             }
         }
     }
-`;
+});

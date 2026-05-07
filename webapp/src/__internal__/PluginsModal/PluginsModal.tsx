@@ -8,30 +8,26 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
+import { useEffect, useState } from "preact/hooks";
 
-import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
-import Badge from "react-bootstrap/Badge";
-
+import { Badge } from "unichat/components/Badge";
 import { Button } from "unichat/components/Button";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
 import { notificationService } from "unichat/services/notificationService";
 import { UniChatPluginMetadata } from "unichat/types";
-import { PLUGIN_STATUS_COLOR } from "unichat/utils/constants";
 import { Strings } from "unichat/utils/Strings";
 
 import { PluginOverviewModal, PluginOverviewModalActions } from "./PluginOverview";
 import { PluginsStyledContainer } from "./styled";
-
-interface Props {
-    children?: React.ReactNode;
-}
+import { getPluginIconDataUrl } from "./utils/getPluginIconDataUrl";
+import { handleBadgeVariant } from "./utils/handleBadgeVariant";
 
 const _logger = LoggerFactory.getLogger("Plugins");
-export function PluginsModal(_props: Props): React.ReactNode {
-    const [plugins, setPlugins] = React.useState<UniChatPluginMetadata[]>([]);
+export function PluginsModal(): PReact.ComponentChildren {
+    const [plugins, setPlugins] = useState<UniChatPluginMetadata[]>([]);
 
     function openPluginDetails(plugin: UniChatPluginMetadata): void {
         modalService.openModal({
@@ -40,14 +36,6 @@ export function PluginsModal(_props: Props): React.ReactNode {
             actions: <PluginOverviewModalActions plugin={plugin} />,
             children: <PluginOverviewModal plugin={plugin} />
         });
-    }
-
-    function getPluginIconDataUrl(plugin: UniChatPluginMetadata): string {
-        if (Strings.isNullOrEmpty(plugin.icon)) {
-            return UNICHAT_ICON;
-        } else {
-            return plugin.icon;
-        }
     }
 
     async function handleFetchPlugins(): Promise<void> {
@@ -61,7 +49,7 @@ export function PluginsModal(_props: Props): React.ReactNode {
         }
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         handleFetchPlugins();
     }, []);
 
@@ -71,57 +59,31 @@ export function PluginsModal(_props: Props): React.ReactNode {
                 <tbody>
                     {plugins
                         .sort((a, b) => a.name.localeCompare(b.name))
-                        .map((plugin) => {
-                            const [bgColor, fgColor] = PLUGIN_STATUS_COLOR[plugin.status];
-
-                            return (
-                                <tr key={plugin.name}>
-                                    <td style={{ width: 44 }} className="plugin-icon">
-                                        <img src={getPluginIconDataUrl(plugin)} />
-                                    </td>
-                                    <td className="plugin-name">
-                                        <span>{plugin.name}</span>
-                                    </td>
-                                    <td className="plugin-badges">
-                                        <span>
-                                            {Strings.isNullOrEmpty(plugin.pluginPath) && (
-                                                <Badge>
-                                                    <i className="fas fa-code-branch" /> BUILT-IN
-                                                </Badge>
-                                            )}
-                                            <Badge bg="default" style={{ background: bgColor, color: fgColor }}>
-                                                {plugin.status}
+                        .map((plugin) => (
+                            <tr key={plugin.name}>
+                                <td className="plugin-icon">
+                                    <img src={getPluginIconDataUrl(plugin)} />
+                                </td>
+                                <td className="plugin-name">
+                                    <span>{plugin.name}</span>
+                                </td>
+                                <td className="plugin-badges">
+                                    <div>
+                                        {Strings.isNullOrEmpty(plugin.pluginPath) && (
+                                            <Badge>
+                                                <i className="fas fa-code-branch" /> BUILT-IN
                                             </Badge>
-                                        </span>
-                                    </td>
-                                    <td style={{ width: 80 }} className="plugin-actions">
-                                        <Button variant="default" onClick={() => openPluginDetails(plugin)}>
-                                            Details
-                                        </Button>
-                                    </td>
-                                </tr>
-                            );
-                        })}
+                                        )}
+                                        <Badge variant={handleBadgeVariant(plugin.status)}>{plugin.status}</Badge>
+                                    </div>
+                                </td>
+                                <td className="plugin-actions">
+                                    <Button onClick={() => openPluginDetails(plugin)}>Details</Button>
+                                </td>
+                            </tr>
+                        ))}
                 </tbody>
             </table>
         </PluginsStyledContainer>
-    );
-}
-
-export function PluginsModalActions(_props: Props): React.ReactNode {
-    return (
-        <>
-            <Button
-                variant="default"
-                onClick={() => openUrl("https://unichat.voguh.me/docs/1.4.x/plugins/getting_started.html")}
-            >
-                <i className="fas fa-book" />
-                Read the Docs
-            </Button>
-            <Button variant="outline" onClick={() => revealItemInDir(UNICHAT_PLUGINS_DIR)}>
-                <i className="fas fa-folder" />
-                Show Plugins Folder
-            </Button>
-        </>
     );
 }

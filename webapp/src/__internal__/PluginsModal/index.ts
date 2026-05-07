@@ -9,3 +9,4 @@
  ******************************************************************************/
 
 export * from "./PluginsModal";
+export * from "./PluginsModalActions";

@@ -38,13 +38,6 @@ export enum PluginStatus {
     ERROR = "ERROR"
 }
 
-export const PLUGIN_STATUS_COLOR = {
-    [PluginStatus.LOADED]: ["var(--oc-yellow-8)", "var(--oc-black)"],
-    [PluginStatus.INVALID]: ["var(--oc-red-8)", "var(--oc-black)"],
-    [PluginStatus.ACTIVE]: ["var(--oc-green-8)", "var(--oc-black)"],
-    [PluginStatus.ERROR]: ["var(--oc-red-8)", "var(--oc-black)"]
-};
-
 export enum WidgetSourceType {
     SYSTEM = "SYSTEM",
     SYSTEM_PLUGIN = "SYSTEM_PLUGIN",

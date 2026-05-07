@@ -84,12 +84,12 @@ export function App(): PReact.ComponentChildren {
     const [selectedTab, setSelectedTab] = useState<keyof typeof tabs>("dashboard");
 
     function togglePluginsModal(): void {
-        //     modalService.openModal({
-        //         size: "xl",
-        //         title: "Plugins",
-        //         actions: <PluginsModalActions />,
-        //         children: <PluginsModal />
-        //     });
+        modalService.openModal({
+            size: "xl",
+            title: "Plugins",
+            actions: <PluginsModalActions />,
+            children: <PluginsModal />
+        });
     }
 
     function toggleWidgetsModal(): void {
