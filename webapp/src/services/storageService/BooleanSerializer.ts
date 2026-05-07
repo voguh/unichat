@@ -10,6 +10,30 @@
 
 import { StorageSerializer } from "./StorageSerializer";
 
+export class NullishBooleanSerializer extends StorageSerializer<boolean | null> {
+    public serialize(value: boolean | null | undefined): string {
+        if (value == null) {
+            return "null";
+        } else if (typeof value === "boolean") {
+            return value ? "true" : "false";
+        } else {
+            throw new TypeError(`Expected boolean or null value for serialization, got ${typeof value}.`);
+        }
+    }
+
+    public deserialize(raw: string): boolean | null {
+        if (raw === "null") {
+            return null;
+        } else if (raw === "true" || raw === "1") {
+            return true;
+        } else if (raw === "false" || raw === "0") {
+            return false;
+        } else {
+            throw new TypeError(`Expected boolean string or "null" for deserialization, got ${raw}.`);
+        }
+    }
+}
+
 export class BooleanSerializer extends StorageSerializer<boolean> {
     public serialize(value: boolean): string {
         if (typeof value !== "boolean") {
@@ -20,9 +44,9 @@ export class BooleanSerializer extends StorageSerializer<boolean> {
     }
 
     public deserialize(raw: string): boolean {
-        if (["true", "1"].includes(raw)) {
+        if (raw === "true" || raw === "1") {
             return true;
-        } else if (["false", "0"].includes(raw)) {
+        } else if (raw === "false" || raw === "0") {
             return false;
         } else {
             throw new TypeError(`Expected boolean string for deserialization, got ${raw}.`);
