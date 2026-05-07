@@ -21,11 +21,11 @@ interface Props {
 
 export const ButtonStyledContainer = styled.button((props: Props) => {
     const styles = {
-        ...tw`px-4 py-2 rounded focus:outline-none transition-colors duration-200 border border-stone-700 text-stone-50 flex justify-center items-center gap-2 font-semibold`,
+        ...tw`px-4 py-2 rounded bg-stone-900 border border-stone-700 text-stone-50 flex justify-center items-center gap-2 font-semibold`,
         height: "36px",
 
         "&:hover": {
-            ...tw`bg-stone-700 border-stone-700`
+            ...tw`bg-stone-800 border-stone-700`
         }
     };
 
