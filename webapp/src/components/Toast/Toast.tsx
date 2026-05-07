@@ -96,10 +96,8 @@ export function Toast({
 
     return (
         <ToastStyledContainer ref={captureNativeRef(HTMLDivElement, toastRef)} type={type} onClick={handleClick}>
-            <div className="toast--header">
-                <div className="toast--icon">{variantIcon()}</div>
-                <div className="toast--title">{title}</div>
-            </div>
+            <div className="toast--icon">{variantIcon()}</div>
+            <div className="toast--title">{title}</div>
             <div className="toast--body">{children}</div>
         </ToastStyledContainer>
     );

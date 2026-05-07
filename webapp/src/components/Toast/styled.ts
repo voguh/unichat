@@ -54,23 +54,31 @@ export const ToastStyledContainer: ComponentType<Props> = styled.div(({ type }: 
         ...variantStyles[type ?? "default"],
         ...tw`text-stone-50 rounded shadow-lg p-4 cursor-pointer`,
         animation: `${entryAnimation} 250ms ease-out`,
+        display: "grid",
+        gridTemplateAreas: `"icon title" "icon body"`,
+        gridTemplateColumns: "auto 1fr",
+        gridTemplateRows: "auto 1fr",
+        gap: "0 0.5rem",
 
         "&.toast--exit": {
             animation: `${exitAnimation} 250ms ease-in forwards`
         },
 
-        ".toast--header": {
-            ...tw`flex justify-start items-center gap-2 mb-3`,
-
-            ".toast--icon": {
-                ...tw`w-[25px] h-[25px] bg-white/10 flex justify-center items-center rounded`
-            },
-
-            ".toast--title": {
-                ...tw`font-semibold`
-            }
+        ".toast--icon": {
+            ...tw`bg-white/10 flex justify-center items-center rounded`,
+            alignSelf: "center",
+            gridArea: "icon",
+            width: "25px",
+            height: "25px"
         },
 
-        ".toast--body": {}
+        ".toast--title": {
+            ...tw`font-semibold`,
+            gridArea: "title"
+        },
+
+        ".toast--body": {
+            gridArea: "body"
+        }
     };
 });
