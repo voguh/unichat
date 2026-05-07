@@ -61,6 +61,7 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
         const tabs: Tab[] = [];
         if (showTabs.includes("image")) {
             tabs.push({
+                id: "image",
                 title: "Images",
                 content: <GalleryTabContainer>{printGalleryItems("image")}</GalleryTabContainer>
             });
@@ -68,6 +69,7 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
 
         if (showTabs.includes("video")) {
             tabs.push({
+                id: "video",
                 title: "Videos",
                 content: <GalleryTabContainer>{printGalleryItems("video")}</GalleryTabContainer>
             });
@@ -75,12 +77,14 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
 
         if (showTabs.includes("audio")) {
             tabs.push({
+                id: "audio",
                 title: "Audios",
                 content: <GalleryTabContainer>{printGalleryItems("audio")}</GalleryTabContainer>
             });
         }
         if (showTabs.includes("file")) {
             tabs.push({
+                id: "file",
                 title: "Others",
                 content: <GalleryTabContainer>{printGalleryItems("file")}</GalleryTabContainer>
             });
@@ -88,6 +92,7 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
 
         if (typeof onSelectItem === "function") {
             tabs.push({
+                id: "custom",
                 title: "Custom",
                 content: (
                     <GalleryTabContainer>

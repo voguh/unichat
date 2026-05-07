@@ -17,13 +17,14 @@ export const TabsStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> 
     ...tw`w-full h-full flex flex-col`,
 
     "> .tabs--tab-list": {
-        ...tw`flex border-b border-gray-300 dark:border-gray-700`,
+        ...tw`flex border-b border-stone-300`,
 
         "> .tab-list--tab": {
-            ...tw`px-4 py-2 cursor-pointer text-gray-600 dark:text-gray-300`,
+            ...tw`px-4 py-2 cursor-pointer text-stone-50`,
 
             "&.tab-list--tab-selected": {
-                ...tw`border-b-2 border-blue-500 text-blue-500 dark:text-blue-400`
+                ...tw`font-semibold text-blue-500 border-b border-blue-500`,
+                marginBottom: "-1px"
             }
         }
     },

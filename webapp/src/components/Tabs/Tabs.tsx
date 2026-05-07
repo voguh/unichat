@@ -13,9 +13,12 @@ import { useState } from "preact/hooks";
 
 import clsx from "clsx";
 
+import { GalleryTabs } from "unichat/__internal__/GalleryModal";
+
 import { TabsStyledContainer } from "./styled";
 
 export interface Tab {
+    id: GalleryTabs;
     title: string;
     content: PReact.ComponentChild;
 }
@@ -27,10 +30,10 @@ interface Props {
 }
 
 export function Tabs({ initialTab, tabs }: Props): PReact.ComponentChildren {
-    const [selectedTab, setSelectedTab] = useState<string>(initialTab ?? tabs[0].title);
+    const [selectedTab, setSelectedTab] = useState(initialTab ?? tabs[0].id);
 
     function TabContent(): PReact.ComponentChildren {
-        const tabToRender = tabs.find((tab) => tab.title === selectedTab);
+        const tabToRender = tabs.find((tab) => tab.id === selectedTab);
 
         if (!tabToRender) {
             return null;
@@ -44,9 +47,9 @@ export function Tabs({ initialTab, tabs }: Props): PReact.ComponentChildren {
             <div className="tabs--tab-list">
                 {tabs.map((tab) => (
                     <button
-                        key={tab.title}
-                        className={clsx("tab-list--tab", { "tab-list--tab-selected": selectedTab === tab.title })}
-                        onClick={() => setSelectedTab(tab.title)}
+                        key={tab.id}
+                        className={clsx("tab-list--tab", { "tab-list--tab-selected": selectedTab === tab.id })}
+                        onClick={() => setSelectedTab(tab.id)}
                     >
                         {tab.title}
                     </button>
