@@ -13,12 +13,10 @@ import { useState } from "preact/hooks";
 
 import clsx from "clsx";
 
-import { GalleryTabs } from "unichat/__internal__/GalleryModal";
-
 import { TabsStyledContainer } from "./styled";
 
 export interface Tab {
-    id: GalleryTabs;
+    id: string;
     title: string;
     content: PReact.ComponentChild;
 }
