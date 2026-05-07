@@ -9,6 +9,7 @@
  ******************************************************************************/
 
 import * as PReact from "preact";
+import { useEffect, useRef } from "preact/hooks";
 
 import { splitProperties } from "unichat/components/forms/__utils__/splitProperties";
 import { FormGroup, FormGroupBaseProps } from "unichat/components/forms/FormGroup";
@@ -17,16 +18,35 @@ import { captureNativeRef } from "unichat/utils/captureNativeRef";
 import { StyledInput } from "./styled";
 
 type VanillaProps = Omit<PReact.InputHTMLAttributes<HTMLInputElement>, "type">;
-export interface TextInputProps extends VanillaProps, FormGroupBaseProps {
+export interface NumberInputProps extends VanillaProps, FormGroupBaseProps {
     inputRef?: PReact.Ref<HTMLInputElement>;
 }
 
-export function TextInput({ inputRef, id, ...props }: TextInputProps): PReact.ComponentChildren {
+export function NumberInput({ inputRef, id, ...props }: NumberInputProps): PReact.ComponentChildren {
     const [formGroupProps, dataProps, rest] = splitProperties(props);
+
+    const innerRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        const input = innerRef.current;
+        if (input == null) {
+            return;
+        }
+
+        function typeNumberSafeguard(this: HTMLInputElement, _event: Event): void {
+            this.value = this.value.replace(/[eE+]/g, "");
+        }
+
+        input.addEventListener("input", typeNumberSafeguard);
+
+        return () => {
+            input.removeEventListener("input", typeNumberSafeguard);
+        };
+    }, []);
 
     return (
         <FormGroup id={id} {...formGroupProps} {...dataProps}>
-            <StyledInput {...rest} type="text" ref={captureNativeRef(HTMLInputElement, inputRef)} />
+            <StyledInput {...rest} type="text" ref={captureNativeRef(HTMLInputElement, inputRef, innerRef)} />
         </FormGroup>
     );
 }

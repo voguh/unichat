@@ -13,6 +13,7 @@ import { useEffect, useState } from "preact/hooks";
 
 import { flip, offset, shift } from "@floating-ui/dom";
 
+import { splitProperties } from "unichat/components/forms/__utils__/splitProperties";
 import { FormGroup, FormGroupBaseProps } from "unichat/components/forms/FormGroup";
 import { Portal } from "unichat/components/Portal";
 import { useComputePosition } from "unichat/hooks/useComputePosition";
@@ -114,20 +115,8 @@ function adjustFloatingPosition(reference: HTMLElement, floating: HTMLElement, x
     return [centeredX, y];
 }
 
-export function Select({ options = [], onChange, value, ...props }: SelectProps): PReact.ComponentChildren {
-    const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...unfiltered } = props;
-    const [dataProps, rest] = Object.entries(unfiltered).reduce(
-        (acc, [key, value]) => {
-            if (key.startsWith("data-")) {
-                acc[0][key.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)] = value;
-            } else {
-                acc[1][key] = value;
-            }
-
-            return acc;
-        },
-        [{}, {}] as unknown as [Record<string, any>, Record<string, any>]
-    );
+export function Select({ options = [], onChange, value, id, ...props }: SelectProps): PReact.ComponentChildren {
+    const [formGroupProps, dataProps, rest] = splitProperties(props);
 
     const [isOpen, setIsOpen] = useState(false);
     const [internalValue, setInternalValue] = useState<Option | null>(value ?? null);
@@ -205,17 +194,7 @@ export function Select({ options = [], onChange, value, ...props }: SelectProps)
     }, [options]);
 
     return (
-        <FormGroup
-            id={id}
-            className={className}
-            label={label}
-            labelProps={labelProps}
-            description={description}
-            descriptionProps={descriptionProps}
-            error={error}
-            errorProps={errorProps}
-            {...dataProps}
-        >
+        <FormGroup id={id} {...formGroupProps} {...dataProps}>
             <SelectStyledContainer
                 {...rest}
                 ref={captureNativeRef(HTMLDivElement, wrapperRef)}
