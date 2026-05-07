@@ -16,7 +16,7 @@ import { TextInput } from "unichat/components/forms/TextInput";
 import { modalService } from "unichat/services/modalService";
 import { captureNativeRef } from "unichat/utils/captureNativeRef";
 
-import { FormGroupBaseProps } from "../FormGroup";
+import { FormGroupBaseProps } from "./FormGroup";
 
 type VanillaProps = Omit<PReact.InputHTMLAttributes<HTMLInputElement>, "type">;
 interface GalleryInputProps extends VanillaProps, FormGroupBaseProps {
