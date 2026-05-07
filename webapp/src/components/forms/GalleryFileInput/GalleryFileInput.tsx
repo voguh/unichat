@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 import * as PReact from "preact";
-import { useEffect, useRef } from "preact/hooks";
+import { useRef } from "preact/hooks";
 
 import { GalleryModalActions, GalleryModal, GalleryTabs } from "unichat/__internal__/GalleryModal";
 import { TextInput } from "unichat/components/forms/TextInput";
@@ -86,11 +86,7 @@ export function GalleryFileInput({
         }
     }
 
-    useEffect(() => {
-        if (props.defaultValue && innerRef.current) {
-            innerRef.current.value = props.defaultValue.toString();
-        }
-    }, [props.defaultValue]);
-
-    return <TextInput {...props} ref={captureNativeRef(HTMLInputElement, inputRef, innerRef)} onClick={handleClick} />;
+    return (
+        <TextInput {...props} inputRef={captureNativeRef(HTMLInputElement, inputRef, innerRef)} onClick={handleClick} />
+    );
 }
