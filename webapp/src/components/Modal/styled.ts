@@ -20,28 +20,6 @@ export const ModalStyledBackdrop: ComponentType<HTMLAttributes<HTMLDivElement>> 
 export const ModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
     ...tw`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-stone-900 rounded border border-stone-800`,
 
-    "&[data-size=sm]": {
-        ...tw`w-[24rem] max-h-[90vh]`
-    },
-
-    "&[data-size=md]": {
-        ...tw`w-[32rem] max-h-[90vh]`
-    },
-
-    "&[data-size=lg]": {
-        ...tw`w-[48rem] max-h-[90vh]`
-    },
-
-    "&[data-size=xl]": {
-        ...tw`w-[64rem] max-h-[90vh]`
-    },
-
-    "&[data-fullscreen=true]": {
-        ...tw`w-screen h-screen rounded-none`,
-        maxWidth: "100vw",
-        maxHeight: "100vh"
-    },
-
     "> .modal-content": {
         maxHeight: "90vh",
 
@@ -74,7 +52,38 @@ export const ModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
 
         "> .modal-body": {
             ...tw`overflow-auto p-4 overflow-x-scroll text-stone-50`,
-            maxHeight: "calc(90vh - (32px + 1rem + 2px))" // 32px of close button + 0.5rem * 2 of padding + 2px of border
+            maxHeight: "calc(90vh - 47px)"
+        }
+    },
+
+    "&[data-size=sm]": {
+        ...tw`w-[24rem] max-h-[90vh]`
+    },
+
+    "&[data-size=md]": {
+        ...tw`w-[32rem] max-h-[90vh]`
+    },
+
+    "&[data-size=lg]": {
+        ...tw`w-[48rem] max-h-[90vh]`
+    },
+
+    "&[data-size=xl]": {
+        ...tw`w-[64rem] max-h-[90vh]`
+    },
+
+    "&[data-fullscreen=true]": {
+        ...tw`w-screen h-screen rounded-none`,
+        maxWidth: "100vw",
+        maxHeight: "100vh",
+
+        "> .modal-content": {
+            maxHeight: "100vh",
+
+            "> .modal-body": {
+                ...tw`overflow-auto p-4 overflow-x-scroll text-stone-50`,
+                maxHeight: "calc(100vh - 47px)"
+            }
         }
     }
 });
