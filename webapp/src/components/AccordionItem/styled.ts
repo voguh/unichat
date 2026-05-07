@@ -12,7 +12,7 @@ import { styled } from "goober";
 import tw from "twin.macro";
 
 export const AccordionItemStyledContainer = styled.div({
-    ...tw`bg-stone-800 rounded`,
+    ...tw`bg-stone-800 rounded overflow-hidden`,
 
     "> .accordion-header": {
         ...tw`flex items-center gap-2 cursor-pointer px-4 py-2`,
