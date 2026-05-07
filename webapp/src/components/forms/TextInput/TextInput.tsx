@@ -11,9 +11,9 @@
 import * as PReact from "preact";
 import { useEffect, useRef } from "preact/hooks";
 
+import { FormGroup, FormGroupBaseProps } from "unichat/components/forms/FormGroup";
 import { captureNativeRef } from "unichat/utils/captureNativeRef";
 
-import { FormGroup, FormGroupBaseProps } from "../FormGroup";
 import { StyledTextInput } from "./styled";
 
 export interface TextInputProps extends PReact.InputHTMLAttributes<HTMLInputElement>, FormGroupBaseProps {

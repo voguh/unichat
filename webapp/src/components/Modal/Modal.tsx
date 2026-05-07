@@ -11,10 +11,10 @@
 import * as PReact from "preact";
 import { useState } from "preact/hooks";
 
+import { Button } from "unichat/components/Button";
+import { Portal } from "unichat/components/Portal";
 import { ModalContext } from "unichat/contexts/ModalContext";
 
-import { Button } from "../Button";
-import { Portal } from "../Portal";
 import { ModalStyledBackdrop, ModalStyledContainer } from "./styled";
 
 export interface ModalProps extends Omit<PReact.HTMLAttributes<HTMLDivElement>, "title"> {

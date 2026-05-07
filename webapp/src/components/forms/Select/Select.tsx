@@ -13,11 +13,11 @@ import { useEffect, useState } from "preact/hooks";
 
 import { flip, offset, shift } from "@floating-ui/dom";
 
+import { FormGroup, FormGroupBaseProps } from "unichat/components/forms/FormGroup";
 import { Portal } from "unichat/components/Portal";
 import { useComputePosition } from "unichat/hooks/useComputePosition";
 import { captureNativeRef } from "unichat/utils/captureNativeRef";
 
-import { FormGroup, FormGroupBaseProps } from "../FormGroup";
 import { SelectStyledContainer, SelectStyledDropdown, SelectStyledGroupContainer, SelectStyledOption } from "./styled";
 
 export interface OptionGroupBase<OptionType> {

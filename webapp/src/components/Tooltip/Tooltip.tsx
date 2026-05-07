@@ -12,10 +12,10 @@ import * as PReact from "preact";
 
 import { offset, flip, shift, Placement } from "@floating-ui/dom";
 
+import { Portal } from "unichat/components/Portal";
 import { useComputePosition } from "unichat/hooks/useComputePosition";
 import { captureNativeRef } from "unichat/utils/captureNativeRef";
 
-import { Portal } from "../Portal";
 import { TooltipStyledContainer } from "./styled";
 
 interface Props {

@@ -9,14 +9,13 @@
  ******************************************************************************/
 
 import * as PReact from "preact";
-import { useRef } from "preact/hooks";
 
-import { computePosition, flip, offset, Placement, shift } from "@floating-ui/dom";
+import { flip, offset, Placement, shift } from "@floating-ui/dom";
 
+import { Portal } from "unichat/components/Portal";
 import { useComputePosition } from "unichat/hooks/useComputePosition";
 import { captureNativeRef } from "unichat/utils/captureNativeRef";
 
-import { Portal } from "../Portal";
 import { PopoverStyledContainer } from "./styled";
 
 interface Props {
