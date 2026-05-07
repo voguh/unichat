@@ -27,13 +27,12 @@ import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
 import { notificationService } from "unichat/services/notificationService";
 import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
+import { StorageKeys, storageService } from "unichat/services/storageService";
 import { GlobalStyle } from "unichat/styles/GlobalStyles";
 import { Dashboard, DashboardLeftSection } from "unichat/tabs/Dashboard";
 import { WidgetEditor, WidgetEditorLeftSection } from "unichat/tabs/WidgetEditor";
 import { IPCNotificationEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
-
-import { StorageKeys, useLocalStorage } from "./hooks/useLocalStorage";
 
 interface TabOptions {
     label: string;
@@ -83,7 +82,6 @@ function TabContent({ selectedTab }: { selectedTab: keyof typeof tabs }): PReact
 const _logger = LoggerFactory.getLogger("App");
 export function App(): PReact.ComponentChildren {
     const [selectedTab, setSelectedTab] = useState<keyof typeof tabs>("dashboard");
-    const [requiresRestart, setRequiresRestart] = useLocalStorage(StorageKeys.REQUIRES_RESTART, false);
 
     function togglePluginsModal(): void {
         //     modalService.openModal({
@@ -119,7 +117,7 @@ export function App(): PReact.ComponentChildren {
     /* ========================================================================================== */
 
     async function init(): Promise<void> {
-        setRequiresRestart(false);
+        storageService.set(StorageKeys.REQUIRES_RESTART, false);
 
         const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
         if (isOpenToLan) {
@@ -136,15 +134,6 @@ export function App(): PReact.ComponentChildren {
             toggleSettingsModal("check-updates");
         }
     }
-
-    useEffect(() => {
-        if (requiresRestart) {
-            notificationService.info({
-                title: "Restart Required",
-                message: "Please restart the application to apply the changes."
-            });
-        }
-    }, [requiresRestart]);
 
     useEffect(() => {
         init();

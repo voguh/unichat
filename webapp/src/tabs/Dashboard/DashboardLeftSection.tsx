@@ -14,11 +14,12 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { Button } from "unichat/components/Button";
 import { Tooltip } from "unichat/components/Tooltip";
-import { StorageKeys, useLocalStorage } from "unichat/hooks/useLocalStorage";
+import { useStorage } from "unichat/hooks/useStorage";
 import { commandService } from "unichat/services/commandService";
+import { StorageKeys } from "unichat/services/storageService";
 
 export function DashboardLeftSection(): PReact.ComponentChildren {
-    const [showWidgetPreview, setShowWidgetPreview] = useLocalStorage(StorageKeys.SHOW_WIDGET_PREVIEW, true);
+    const [showWidgetPreview, setShowWidgetPreview] = useStorage(StorageKeys.SHOW_WIDGET_PREVIEW);
 
     async function handleClearChat(): Promise<void> {
         await commandService.dispatchClearChat();

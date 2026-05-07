@@ -17,13 +17,14 @@ import { Badge } from "unichat/components/Badge";
 import { Button } from "unichat/components/Button";
 import { Option, Select } from "unichat/components/forms/Select";
 import { Tooltip } from "unichat/components/Tooltip";
-import { StorageKeys, useLocalStorage } from "unichat/hooks/useLocalStorage";
 import { useScrapers } from "unichat/hooks/useScrapers";
+import { useStorage } from "unichat/hooks/useStorage";
 import { useWidgets } from "unichat/hooks/useWidgets";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
 import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
+import { StorageKeys } from "unichat/services/storageService";
 import { UniChatScraper } from "unichat/types";
 import { scraperPriority, WIDGET_URL_PREFIX } from "unichat/utils/constants";
 import { toWidgetOptionGroup } from "unichat/utils/toWidgetOptionGroup";
@@ -49,7 +50,7 @@ const _logger = LoggerFactory.getLogger("Dashboard");
 export function Dashboard(): PReact.ComponentChildren {
     const [selectedWidget, setSelectedWidget] = useState("default");
     const [isOpenToLan, setIsOpenToLan] = useState(false);
-    const [showWidgetPreview, _setShowWidgetPreview] = useLocalStorage(StorageKeys.SHOW_WIDGET_PREVIEW, true);
+    const [showWidgetPreview, _setShowWidgetPreview] = useStorage(StorageKeys.SHOW_WIDGET_PREVIEW);
 
     const [scrapers, _reloadScrapers] = useScrapers(sortScrapers, []);
     const [widgets, reloadWidgets] = useWidgets(toWidgetOptionGroup, []);
