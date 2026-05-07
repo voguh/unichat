@@ -53,11 +53,11 @@ export function GalleryItemDisplay(props: Props): PReact.ComponentChildren {
             {!!onSelectItem && (
                 <div className="gallery-item--footer">
                     <Button
-                        variant="secondary"
+                        variant={selected ? "success" : "secondary"}
                         disabled={selected}
                         onClick={() => onSelectItem(url, { close: onClose })}
                     >
-                        Select
+                        {selected ? "Selected" : "Select"}
                     </Button>
                 </div>
             )}
