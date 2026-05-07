@@ -20,7 +20,6 @@ import { SettingsModalLeftSection, SettingsModal } from "unichat/__internal__/Se
 import { Tour } from "unichat/__internal__/Tour";
 import { WidgetsModal, WidgetsModalActions } from "unichat/__internal__/WidgetsModal";
 import { Button } from "unichat/components/Button";
-import { ErrorBoundary } from "unichat/components/ErrorBoundary";
 import { Tooltip } from "unichat/components/Tooltip";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
@@ -51,7 +50,7 @@ const tabs: Record<string, TabOptions> = {
     widgetEditor: {
         label: "Widget Editor",
         icon: <i className="fas fa-pencil-ruler" />,
-        component: <>widget editor</>,
+        component: <WidgetEditor />,
         leftSection: <WidgetEditorLeftSection />
     }
 };
@@ -81,7 +80,7 @@ function TabContent({ selectedTab }: { selectedTab: keyof typeof tabs }): PReact
 
 const _logger = LoggerFactory.getLogger("App");
 export function App(): PReact.ComponentChildren {
-    const [selectedTab, setSelectedTab] = useState<keyof typeof tabs>("dashboard");
+    const [selectedTab, setSelectedTab] = useState<keyof typeof tabs>("widgetEditor");
 
     function togglePluginsModal(): void {
         modalService.openModal({
