@@ -12,6 +12,8 @@ import { Component, RefCallback, RefObject } from "preact";
 
 import { Class } from "unichat/types";
 
+import { mergeRefs } from "./mergeRefs";
+
 type Ref<T> = RefObject<T> | RefCallback<T> | null | undefined;
 
 export function captureNativeRef<N extends Element>(ctor: Class<N>, ...cb: Ref<N>[]) {
@@ -27,14 +29,6 @@ export function captureNativeRef<N extends Element>(ctor: Class<N>, ...cb: Ref<N
             nativeElement = instance as N;
         }
 
-        for (const refObject of cb) {
-            if (refObject != null) {
-                if (refObject instanceof Function) {
-                    refObject(nativeElement);
-                } else {
-                    refObject.current = nativeElement;
-                }
-            }
-        }
+        mergeRefs(...cb)(nativeElement);
     };
 }
