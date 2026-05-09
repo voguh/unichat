@@ -16,12 +16,12 @@ import { OptionRenderer } from "unichat/components/forms/Select/DropdownItemRend
 import { GroupOptionRendererStyledContainer } from "./styled";
 
 interface GroupOptionProps {
+    inputRef: PReact.RefObject<HTMLInputElement>;
     group: OptionGroupBase<Option>;
-    selectedValue: Option | null;
     onClick: (value: Option) => void;
 }
 
-export function GroupOptionRenderer({ group, onClick, selectedValue }: GroupOptionProps): PReact.ComponentChildren {
+export function GroupOptionRenderer({ group, onClick, inputRef }: GroupOptionProps): PReact.ComponentChildren {
     return (
         <GroupOptionRendererStyledContainer>
             <div className="group-label">{group.label}</div>
@@ -31,7 +31,7 @@ export function GroupOptionRenderer({ group, onClick, selectedValue }: GroupOpti
                         key={idx}
                         onClick={onClick}
                         option={option}
-                        selected={option.value === selectedValue?.value}
+                        selected={inputRef.current?.value === option.value}
                     />
                 ))}
             </div>

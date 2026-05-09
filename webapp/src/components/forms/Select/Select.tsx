@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 import * as PReact from "preact";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 
 import { flip, offset, shift } from "@floating-ui/dom";
 
@@ -19,8 +19,6 @@ import { Portal } from "unichat/components/Portal";
 import { useComputePosition } from "unichat/hooks/useComputePosition";
 import { captureNativeRef } from "unichat/utils/captureNativeRef";
 
-import { isOption } from "./__utils__/isOption";
-import { isOptionGroup } from "./__utils__/isOptionGroup";
 import { DropdownItemRenderer } from "./DropdownItemRenderer";
 import { SelectStyledContainer, SelectStyledDropdown } from "./styled";
 
@@ -37,12 +35,11 @@ export interface Option {
 
 /* ============================================================================================== */
 
-export type SelectProps = Omit<PReact.HTMLAttributes<HTMLDivElement>, "onChange"> &
-    FormGroupBaseProps & {
-        options: Option[] | OptionGroupBase<Option>[];
-        value?: Option | null;
-        onChange?: (value: Option | null) => void;
-    };
+type VanillaProps = Omit<PReact.InputHTMLAttributes<HTMLInputElement>, "ref">;
+export interface SelectProps extends VanillaProps, FormGroupBaseProps {
+    inputRef?: PReact.Ref<HTMLInputElement>;
+    options: Option[] | OptionGroupBase<Option>[];
+}
 
 function adjustFloatingPosition(reference: HTMLElement, floating: HTMLElement, x: number, y: number): [number, number] {
     const wrapperRect = reference.getBoundingClientRect();
@@ -52,12 +49,12 @@ function adjustFloatingPosition(reference: HTMLElement, floating: HTMLElement, x
     return [centeredX, y];
 }
 
-export function Select({ options = [], onChange, value, id, ...props }: SelectProps): PReact.ComponentChildren {
-    const [formGroupProps, dataProps, rest] = splitProperties(props);
+export function Select({ options = [], inputRef, id, ...props }: SelectProps): PReact.ComponentChildren {
+    const [formGroupProps, dataProps, inputProps] = splitProperties(props);
 
     const [isOpen, setIsOpen] = useState(false);
-    const [internalValue, setInternalValue] = useState<Option | null>(value ?? null);
 
+    const innerRef = useRef<HTMLInputElement>(null);
     const [wrapperRef, dropdownRef, updateVisualization] = useComputePosition<HTMLDivElement, HTMLDivElement>(
         { placement: "bottom", middleware: [offset(8), flip(), shift({ padding: 8 })] },
         adjustFloatingPosition
@@ -72,12 +69,6 @@ export function Select({ options = [], onChange, value, id, ...props }: SelectPr
         setIsOpen(false);
         updateVisualization(false);
     }
-
-    useEffect(() => {
-        if (value != null) {
-            setInternalValue(value);
-        }
-    }, [value]);
 
     useEffect(() => {
         if (!isOpen) {
@@ -119,21 +110,9 @@ export function Select({ options = [], onChange, value, id, ...props }: SelectPr
         };
     }, [isOpen]);
 
-    useEffect(() => {
-        if (options.length > 0) {
-            const isOptionGroupAll = options.every(isOptionGroup);
-            const isOptionAll = options.every(isOption);
-
-            if (!isOptionGroupAll && !isOptionAll) {
-                throw new Error("All options must be either Option or OptionGroup");
-            }
-        }
-    }, [options]);
-
     return (
         <FormGroup id={id} {...formGroupProps} {...dataProps}>
             <SelectStyledContainer
-                {...rest}
                 ref={captureNativeRef(HTMLDivElement, wrapperRef)}
                 className="Select-container"
                 data-focused={isOpen ? "true" : "false"}
@@ -146,24 +125,24 @@ export function Select({ options = [], onChange, value, id, ...props }: SelectPr
                 }}
             >
                 <input
+                    {...inputProps}
+                    ref={captureNativeRef(HTMLInputElement, innerRef, inputRef)}
                     readOnly
                     type="text"
-                    value={internalValue?.label ?? ""}
                     placeholder="Select an option"
                     onKeyDown={(event) => {
-                        if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
-                            event.preventDefault();
-                            show();
-                        }
-
                         if (event.key === "Escape") {
                             hide();
+                        }
+
+                        if (typeof inputProps.onKeyDown === "function") {
+                            inputProps.onKeyDown(event);
                         }
                     }}
                 />
 
                 <div className="dropdown-indicator">
-                    {isOpen ? <i className="fas fa-chevron-up" /> : <i className="fas fa-chevron-down" />}
+                    <i className={`fas ${isOpen ? "fa-chevron-up" : "fa-chevron-down"}`} />
                 </div>
             </SelectStyledContainer>
             <Portal
@@ -180,14 +159,13 @@ export function Select({ options = [], onChange, value, id, ...props }: SelectPr
                         <DropdownItemRenderer
                             key={idx}
                             item={item}
-                            selectedValue={internalValue}
+                            inputRef={innerRef}
                             onClick={(option) => {
                                 try {
-                                    if (value == null) {
-                                        setInternalValue(option);
+                                    if (innerRef.current) {
+                                        innerRef.current.value = option.value;
+                                        innerRef.current.dispatchEvent(new Event("change", { bubbles: true }));
                                     }
-
-                                    onChange?.(option);
                                 } finally {
                                     hide();
                                 }
