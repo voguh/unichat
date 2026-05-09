@@ -10,15 +10,20 @@
 
 import * as PReact from "preact";
 
-import { ButtonStyledContainer, ButtonVariant } from "./styled";
+import { Variants } from "unichat/types";
 
-interface Props extends Omit<PReact.ButtonHTMLAttributes<HTMLButtonElement>, "ref"> {
+import { ButtonStyledContainer } from "./styled";
+
+export type ButtonVariant = Variants | "default";
+
+type VanillaProps = Omit<PReact.ButtonHTMLAttributes<HTMLButtonElement>, "ref">;
+interface Props extends VanillaProps {
     variant?: ButtonVariant;
 }
 
 export function Button({ children, variant, ...props }: Props): PReact.ComponentChildren {
     return (
-        <ButtonStyledContainer {...props} variant={variant}>
+        <ButtonStyledContainer {...props} data-variant={variant}>
             {children}
         </ButtonStyledContainer>
     );
