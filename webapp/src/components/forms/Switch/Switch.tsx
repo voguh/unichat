@@ -23,33 +23,12 @@ export interface SwitchProps extends VanillaProps, FormGroupBaseProps {
 }
 
 export function Switch({ inputRef, id, ...props }: SwitchProps): PReact.ComponentChildren {
-    const [formGroupProps, dataProps, rest] = splitProperties(props);
-
-    const [checked, setChecked] = useState(props.checked ?? false);
-
-    const innerRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-        const input = innerRef.current;
-        if (input == null) {
-            return;
-        }
-
-        function handleChange(): void {
-            setChecked(innerRef.current?.checked ?? false);
-        }
-
-        input.addEventListener("change", handleChange);
-
-        return () => {
-            input.removeEventListener("change", handleChange);
-        };
-    }, []);
+    const [formGroupProps, dataProps, inputProps] = splitProperties(props);
 
     return (
         <FormGroup id={id} {...formGroupProps} {...dataProps}>
-            <StyledInputWrapper data-checked={checked}>
-                <input {...rest} type="checkbox" ref={captureNativeRef(HTMLInputElement, inputRef, innerRef)} />
+            <StyledInputWrapper>
+                <input {...inputProps} type="checkbox" ref={captureNativeRef(HTMLInputElement, inputRef)} />
                 <div />
             </StyledInputWrapper>
         </FormGroup>

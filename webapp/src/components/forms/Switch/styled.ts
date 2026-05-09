@@ -37,14 +37,12 @@ export const StyledInputWrapper: ComponentType<LabelHTMLAttributes<HTMLLabelElem
         }
     },
 
-    "&[data-checked=true]": {
-        "> div": {
-            ...tw`bg-blue-600 border-blue-600`,
+    "> input:checked + div": {
+        ...tw`bg-blue-600 border-blue-600`,
 
-            "&::after": {
-                left: "calc(100% - 2px)",
-                transform: "translate(-100%, -50%)"
-            }
+        "&::after": {
+            left: "calc(100% - 2px)",
+            transform: "translate(-100%, -50%)"
         }
     }
 });
