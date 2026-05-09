@@ -105,7 +105,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
 
             <hr />
 
-            <div>
+            <div className="openToLan-section">
                 <Switch
                     inputRef={openToLanRef}
                     label="Open to LAN"
