@@ -22,20 +22,20 @@ export const SelectStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>
     },
 
     "> input": {
+        display: "none"
+    },
+
+    "> .fake-input": {
         ...tw`w-full py-2 pl-3 pr-10 bg-transparent border-none cursor-pointer transition-colors duration-150`,
         height: "36px",
 
-        "&::placeholder": {
+        "> .placeholder": {
             ...tw`text-stone-500`
-        },
-
-        "&:focus": {
-            ...tw`border-stone-700`
-        },
-
-        "&:hover": {
-            ...tw`border-stone-700`
         }
+
+        // "&:hover": {
+        //     ...tw`border-stone-700`
+        // }
     },
 
     "> .dropdown-indicator": {

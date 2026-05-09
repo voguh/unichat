@@ -19,6 +19,7 @@ import { Portal } from "unichat/components/Portal";
 import { useComputePosition } from "unichat/hooks/useComputePosition";
 import { captureNativeRef } from "unichat/utils/captureNativeRef";
 
+import { isOptionGroup } from "./__utils__/isOptionGroup";
 import { DropdownItemRenderer } from "./DropdownItemRenderer";
 import { SelectStyledContainer, SelectStyledDropdown } from "./styled";
 
@@ -53,6 +54,17 @@ export function Select({ options = [], inputRef, id, ...props }: SelectProps): P
     const [formGroupProps, dataProps, inputProps] = splitProperties(props);
 
     const [isOpen, setIsOpen] = useState(false);
+    const [selectedOption, setSelectedOption] = useState<Option | null>(() => {
+        const plainOptions = (options ?? []).flatMap((opt) => (isOptionGroup(opt) ? opt.options : [opt]));
+        const initialOption = inputProps.value || inputProps.defaultValue || "";
+
+        if (typeof initialOption === "string" && initialOption !== "") {
+            const foundOption = plainOptions.find((opt) => opt.value === initialOption);
+            return foundOption || null;
+        }
+
+        return null;
+    });
 
     const innerRef = useRef<HTMLInputElement>(null);
     const [wrapperRef, dropdownRef, updateVisualization] = useComputePosition<HTMLDivElement, HTMLDivElement>(
@@ -129,18 +141,14 @@ export function Select({ options = [], inputRef, id, ...props }: SelectProps): P
                     ref={captureNativeRef(HTMLInputElement, innerRef, inputRef)}
                     readOnly
                     type="text"
-                    placeholder="Select an option"
-                    onKeyDown={(event) => {
-                        if (event.key === "Escape") {
-                            hide();
-                        }
-
-                        if (typeof inputProps.onKeyDown === "function") {
-                            inputProps.onKeyDown(event);
-                        }
-                    }}
                 />
-
+                <div className="fake-input">
+                    {selectedOption ? (
+                        selectedOption.label
+                    ) : (
+                        <span className="placeholder">{inputProps.placeholder || "Select an option"}</span>
+                    )}
+                </div>
                 <div className="dropdown-indicator">
                     <i className={`fas ${isOpen ? "fa-chevron-up" : "fa-chevron-down"}`} />
                 </div>
@@ -166,6 +174,8 @@ export function Select({ options = [], inputRef, id, ...props }: SelectProps): P
                                         innerRef.current.value = option.value;
                                         innerRef.current.dispatchEvent(new Event("change", { bubbles: true }));
                                     }
+
+                                    setSelectedOption(option);
                                 } finally {
                                     hide();
                                 }

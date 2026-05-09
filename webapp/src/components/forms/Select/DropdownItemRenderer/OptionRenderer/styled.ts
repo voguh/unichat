@@ -15,6 +15,9 @@ import tw from "twin.macro";
 
 export const OptionRendererStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
     ...tw`w-full rounded px-2 py-1.5 cursor-pointer text-stone-100 transition-colors duration-150`,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
 
     "&[data-selected='true']": {
         ...tw`bg-stone-600 text-stone-50`
