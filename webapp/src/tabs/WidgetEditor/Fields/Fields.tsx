@@ -70,19 +70,12 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
             //         />
             //     );
             case "dropdown": {
-                let optionValue: Option | undefined;
-                if (typeof value === "string") {
-                    const optLabel = value;
-                    const optValue = builder.options[value];
-                    optionValue = { label: optLabel, value: optValue };
-                }
-
                 return (
                     <Select
                         key={key}
                         label={builder.label}
                         description={builder.description}
-                        value={optionValue}
+                        value={value as string}
                         onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
                         options={Object.entries(builder.options).map(([value, label]) => ({ value, label }))}
                     />

@@ -102,12 +102,6 @@ export function Dashboard(): PReact.ComponentChildren {
 
     /* ====================================================================== */
 
-    function handleSelectWidget(option: Option | null): void {
-        if (option) {
-            setSelectedWidget(option.value);
-        }
-    }
-
     async function reloadIframe(): Promise<void> {
         await reloadWidgets();
 
@@ -147,8 +141,8 @@ export function Dashboard(): PReact.ComponentChildren {
                             <div className="preview__header">
                                 <Select
                                     options={widgets}
-                                    onChange={handleSelectWidget}
-                                    value={{ label: selectedWidget, value: selectedWidget }}
+                                    onChange={(evt) => setSelectedWidget(evt.currentTarget.value)}
+                                    value={selectedWidget}
                                 />
 
                                 <Tooltip content="Reload widget view" placement="left">

@@ -28,8 +28,8 @@ interface Props {
 
 export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
     const [systemHosts, setSystemHosts] = useState<Option[]>([]);
-    const [selectedHost, setSelectedHost] = useState<Option | null>(null);
-    const [selectedHostQrCodeUrl, setSelectedHostQrCodeUrl] = useState<string | null>(null);
+    const [selectedHost, setSelectedHost] = useState<string>("localhost");
+    const [selectedHostQrCodeUrl, setSelectedHostQrCodeUrl] = useState<string>(baseUrl);
     const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
 
     function encodeQR(hostUrl: string): void {
@@ -38,29 +38,28 @@ export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
         }
 
         const qrCode = generate(hostUrl);
-        const dataUrl = qrCode.toDataURL({ scale: 10 });
+        const dataUrl = qrCode.toDataURL({ scale: 10, pad: 1 });
         setQrCodeDataUrl(dataUrl);
     }
 
-    function onSelectHost(option: Option | null): void {
-        if (option == null) {
-            return;
-        }
-
-        setSelectedHost(option);
-
-        const normalizedIp = option.value.includes(":") ? `[${option.value}]` : option.value; // Handle IPv6 addresses
-        const hostUrl = baseUrl.replace("localhost", normalizedIp);
+    function onSelectHost(value: string): void {
+        const hostUrl = baseUrl.replace("localhost", value);
         setSelectedHostQrCodeUrl(hostUrl);
+        setSelectedHost(value);
         encodeQR(hostUrl);
     }
 
     useEffect(() => {
         async function init(): Promise<void> {
             const systemHosts = await commandService.getSystemHosts();
-            setSystemHosts(systemHosts.map((host) => ({ label: host, value: host })));
+            setSystemHosts(
+                systemHosts
+                    .map((host) => (host.includes(":") ? `[${host}]` : host))
+                    .map((host) => ({ label: host, value: host }))
+            );
+
             if (systemHosts.length > 0) {
-                onSelectHost({ label: systemHosts[0], value: systemHosts[0] });
+                onSelectHost(systemHosts[0]);
             }
         }
 
@@ -82,7 +81,7 @@ export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
                     label="Select Network Interface"
                     options={systemHosts}
                     value={selectedHost}
-                    onChange={onSelectHost}
+                    onChange={(evt) => onSelectHost(evt.currentTarget.value)}
                 />
             )}
             {selectedHostQrCodeUrl && (
@@ -92,7 +91,7 @@ export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
                     <div className="qrcode-url">
                         <TextInput value={selectedHostQrCodeUrl} readonly onClick={(e) => e.currentTarget.select()} />
                         <Tooltip placement="left" content="Open in browser">
-                            <Button onClick={() => openUrl(baseUrl)}>
+                            <Button onClick={() => openUrl(selectedHostQrCodeUrl)}>
                                 <i className="fas fa-external-link-alt" />
                             </Button>
                         </Tooltip>
