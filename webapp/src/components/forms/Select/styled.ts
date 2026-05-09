@@ -57,27 +57,3 @@ export const SelectStyledDropdown: ComponentType<HTMLAttributes<HTMLDivElement>>
     maxHeight: "calc(32px * 6)",
     padding: "6px"
 });
-
-export const SelectStyledGroupContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`w-full`,
-
-    "> .group-label": {
-        ...tw`px-2 py-1 text-xs font-semibold uppercase tracking-wider text-stone-400`
-    },
-
-    "> .group-items": {
-        ...tw`w-full pl-2`
-    }
-});
-
-export const SelectStyledOption: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`w-full rounded px-2 py-1.5 cursor-pointer text-stone-100 transition-colors duration-150`,
-
-    "&[data-selected='true']": {
-        ...tw`bg-stone-600 text-stone-50`
-    },
-
-    "&:hover": {
-        ...tw`bg-stone-700`
-    }
-});

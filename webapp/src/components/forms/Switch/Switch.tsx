@@ -50,7 +50,7 @@ export function Switch({ inputRef, id, ...props }: SwitchProps): PReact.Componen
         <FormGroup id={id} {...formGroupProps} {...dataProps}>
             <StyledInputWrapper data-checked={checked}>
                 <input {...rest} type="checkbox" ref={captureNativeRef(HTMLInputElement, inputRef, innerRef)} />
-                <div></div>
+                <div />
             </StyledInputWrapper>
         </FormGroup>
     );

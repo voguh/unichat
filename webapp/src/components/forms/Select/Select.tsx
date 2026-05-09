@@ -19,7 +19,10 @@ import { Portal } from "unichat/components/Portal";
 import { useComputePosition } from "unichat/hooks/useComputePosition";
 import { captureNativeRef } from "unichat/utils/captureNativeRef";
 
-import { SelectStyledContainer, SelectStyledDropdown, SelectStyledGroupContainer, SelectStyledOption } from "./styled";
+import { isOption } from "./__utils__/isOption";
+import { isOptionGroup } from "./__utils__/isOptionGroup";
+import { DropdownItemRenderer } from "./DropdownItemRenderer";
+import { SelectStyledContainer, SelectStyledDropdown } from "./styled";
 
 export interface OptionGroupBase<OptionType> {
     label: string;
@@ -30,72 +33,6 @@ export interface Option {
     value: string;
     label: string;
     [key: string]: any;
-}
-
-function isOptionGroup(option: Option | OptionGroupBase<Option>): option is OptionGroupBase<Option> {
-    return "options" in option && "label" in option;
-}
-
-function isOption(option: Option | OptionGroupBase<Option>): option is Option {
-    return "value" in option && "label" in option;
-}
-
-/* ============================================================================================== */
-
-interface OptionProps {
-    option: Option;
-    selected?: boolean;
-    onClick: (value: Option) => void;
-}
-
-function OptionRenderer({ onClick, option, selected }: OptionProps): PReact.ComponentChildren {
-    return (
-        <SelectStyledOption data-selected={selected ? "true" : "false"} onClick={() => onClick(option)}>
-            {option.label}
-        </SelectStyledOption>
-    );
-}
-
-/* ============================================================================================== */
-
-interface GroupOptionProps {
-    group: OptionGroupBase<Option>;
-    selectedValue: Option | null;
-    onClick: (value: Option) => void;
-}
-
-function GroupOptionRenderer({ group, onClick, selectedValue }: GroupOptionProps): PReact.ComponentChildren {
-    return (
-        <SelectStyledGroupContainer>
-            <div className="group-label">{group.label}</div>
-            <div className="group-items">
-                {group.options.map((option, idx) => (
-                    <OptionRenderer
-                        key={idx}
-                        onClick={onClick}
-                        option={option}
-                        selected={option.value === selectedValue?.value}
-                    />
-                ))}
-            </div>
-        </SelectStyledGroupContainer>
-    );
-}
-
-/* ============================================================================================== */
-
-interface DropdownItemProps {
-    item: Option | OptionGroupBase<Option>;
-    selectedValue: Option | null;
-    onClick: (value: Option) => void;
-}
-
-function DropdownItemRenderer({ item, onClick, selectedValue }: DropdownItemProps): PReact.ComponentChildren {
-    if (isOptionGroup(item)) {
-        return <GroupOptionRenderer group={item} onClick={onClick} selectedValue={selectedValue} />;
-    } else {
-        return <OptionRenderer onClick={onClick} option={item} selected={item.value === selectedValue?.value} />;
-    }
 }
 
 /* ============================================================================================== */
