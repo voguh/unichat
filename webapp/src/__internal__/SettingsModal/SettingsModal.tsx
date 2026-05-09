@@ -39,7 +39,7 @@ export const settingsItems: Record<string, SettingsItem> = {
     general: {
         title: "General",
         icon: "fas fa-cog",
-        children: () => <></> // GeneralSettingsTab
+        children: GeneralSettingsTab
     },
     developers: {
         title: "Developers",

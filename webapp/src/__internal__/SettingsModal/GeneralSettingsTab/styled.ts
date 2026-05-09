@@ -8,40 +8,43 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import styled from "styled-components";
+import { ComponentType, HTMLAttributes } from "preact";
 
-export const GeneralSettingsTabStyledContainer = styled.div`
-    height: var(--modal-body-inner-max-height);
-    position: relative;
+import { styled } from "goober";
+import tw from "twin.macro";
 
-    > .tour-section {
-        > .btn-group {
-            width: 100%;
+export const GeneralSettingsTabStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
+    ...tw`p-4 flex flex-col justify-center items-center gap-2`,
 
-            > .btn {
-                flex: 1;
+    "> div": {
+        ...tw`w-full`
+    },
+
+    "> .openToLan-section": {
+        "> .alert": {
+            ...tw`mt-4 p-2 rounded border flex flex-nowrap gap-2`,
+
+            "&.alert-primary": {
+                ...tw`bg-red-800/25 text-stone-50 border-red-800`
+            },
+
+            "&.alert-warning": {
+                ...tw`bg-yellow-500/25 text-stone-50 border-yellow-500`
             }
         }
-    }
-`;
+    },
 
-export const OpenToLANSettingWrapper = styled.div`
-    > .alert {
-        margin-top: 16px;
-        display: flex;
-        flex-wrap: nowrap;
-        gap: 4px;
+    "> .tour-section": {
+        "> .tour-section--buttons": {
+            ...tw`mt-4 flex flex-wrap gap-2`,
 
-        > div {
-            width: 20px;
-            height: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            "> button": {
+                ...tw`flex-1`
+            }
         }
+    },
 
-        > span {
-            flex: 1;
-        }
+    "> .general_settings--footer": {
+        ...tw`absolute bottom-0 left-0 p-4 flex justify-end gap-2`
     }
-`;
+});
