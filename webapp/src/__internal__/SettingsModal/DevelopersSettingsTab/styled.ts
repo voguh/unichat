@@ -8,22 +8,29 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import styled from "styled-components";
+import { ComponentType, HTMLAttributes } from "preact";
 
-export const DevelopersSettingsTabStyledContainer = styled.div`
-    height: var(--modal-body-inner-max-height);
-    position: relative;
+import { styled } from "goober";
+import tw from "twin.macro";
 
-    > .create-webview-hidden-section {
-    }
+export const DevelopersSettingsTabStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
+    ...tw`p-4 flex flex-col justify-center items-center gap-2`,
 
-    > .scraper-logging-section {
-        > .btn-group {
-            width: 100%;
+    "> div": {
+        ...tw`w-full`
+    },
 
-            > .btn {
-                flex: 1;
+    "> .scraper-logging-section": {
+        "> .scraperLogging_section--buttons": {
+            ...tw`mt-4 flex flex-wrap gap-2`,
+
+            "> button": {
+                ...tw`flex-1`
             }
         }
+    },
+
+    "> .developers_settings--footer": {
+        ...tw`absolute bottom-0 left-0 p-4 flex justify-end gap-2`
     }
-`;
+});

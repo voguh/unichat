@@ -44,7 +44,7 @@ export const settingsItems: Record<string, SettingsItem> = {
     developers: {
         title: "Developers",
         icon: "fas fa-code",
-        children: () => <></> // DevelopersSettingsTab
+        children: DevelopersSettingsTab
     },
     "check-updates": {
         title: "Check for Updates",

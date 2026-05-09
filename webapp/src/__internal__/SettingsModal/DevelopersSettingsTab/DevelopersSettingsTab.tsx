@@ -8,9 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
-
-import ButtonGroup from "react-bootstrap/ButtonGroup";
+import * as PReact from "preact";
+import { useEffect, useRef, useState } from "preact/hooks";
 
 import { Button } from "unichat/components/Button";
 import { FormGroup } from "unichat/components/forms/FormGroup";
@@ -28,33 +27,55 @@ interface Props {
     onClose: () => void;
 }
 
-export function DevelopersSettingsTab(_props: Props): React.ReactNode {
-    const [settings, setSettings] = React.useState({} as UniChatSettings);
+export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
+    const [dirty, setDirty] = useState(false);
+    const [initialSettings, setInitialSettings] = useState<Partial<UniChatSettings>>({});
 
-    async function updateSetting<K extends keyof UniChatSettings>(key: K, value: UniChatSettings[K]): Promise<void> {
-        const settingsCopy = { ...settings };
-        if (settingsCopy[key] == null) {
-            throw new Error(`Setting with key "${key}" does not exist.`);
+    const createWebviewsHiddenRef = useRef<HTMLInputElement>(null);
+    const [logEventsRef, setLogEventsRef] = useState(LogLevel.UNKNOWN_EVENTS);
+
+    function changeLogEvents(logLevel: LogLevel): void {
+        setLogEventsRef(logLevel);
+        setDirty(true);
+    }
+
+    async function applySettings(): Promise<void> {
+        const settingsCopy = { ...initialSettings };
+
+        if (createWebviewsHiddenRef.current) {
+            settingsCopy[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN] = createWebviewsHiddenRef.current.checked;
         }
 
-        settingsCopy[key] = value;
-        setSettings(settingsCopy);
-        await settingsService.setItem(key, value);
+        if (logEventsRef) {
+            settingsCopy[UniChatSettingsKeys.LOG_SCRAPER_EVENTS] = logEventsRef;
+        }
+
+        await settingsService.setItems(settingsCopy);
+        setInitialSettings(settingsCopy);
     }
 
-    function getLogLevel(): LogLevel {
-        return settings[UniChatSettingsKeys.LOG_SCRAPER_EVENTS];
-    }
+    useEffect(() => {
+        function changeDirty(this: HTMLInputElement): void {
+            setDirty(true);
+            this.removeEventListener("change", changeDirty);
+        }
 
-    React.useEffect(() => {
         async function init(): Promise<void> {
-            const createWebviewsHidden = await settingsService.getItem(UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN);
-            const logEvents = await settingsService.getItem(UniChatSettingsKeys.LOG_SCRAPER_EVENTS);
+            const settings = await settingsService.getItems([
+                UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN,
+                UniChatSettingsKeys.LOG_SCRAPER_EVENTS
+            ]);
 
-            const newSettings = { ...settings };
-            newSettings[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN] = createWebviewsHidden;
-            newSettings[UniChatSettingsKeys.LOG_SCRAPER_EVENTS] = logEvents;
-            setSettings(newSettings);
+            if (createWebviewsHiddenRef.current) {
+                createWebviewsHiddenRef.current.checked = settings[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN] ?? false;
+                createWebviewsHiddenRef.current.addEventListener("change", changeDirty);
+            }
+
+            if (logEventsRef) {
+                setLogEventsRef(settings[UniChatSettingsKeys.LOG_SCRAPER_EVENTS] ?? LogLevel.ONLY_ERRORS);
+            }
+
+            setInitialSettings(settings);
         }
 
         init();
@@ -64,10 +85,9 @@ export function DevelopersSettingsTab(_props: Props): React.ReactNode {
         <DevelopersSettingsTabStyledContainer>
             <div className="create-webview-hidden-section">
                 <Switch
+                    inputRef={createWebviewsHiddenRef}
                     label="Create webviews silent"
                     description="On startup, webviews will be created in background and only shown when requested."
-                    checked={settings[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN]}
-                    onChange={(evt) => updateSetting(UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN, evt.target.checked)}
                 />
             </div>
 
@@ -83,30 +103,36 @@ export function DevelopersSettingsTab(_props: Props): React.ReactNode {
                 }
                 className="scraper-logging-section"
             >
-                <ButtonGroup>
+                <div className="scraperLogging_section--buttons">
                     <Button
-                        variant={getLogLevel() === LogLevel.ONLY_ERRORS ? "filled" : "default"}
-                        disabled={__IS_DEV__ || getLogLevel() === "ONLY_ERRORS"}
-                        onClick={() => updateSetting(UniChatSettingsKeys.LOG_SCRAPER_EVENTS, LogLevel.ONLY_ERRORS)}
+                        variant={logEventsRef === LogLevel.ONLY_ERRORS ? "primary" : "default"}
+                        disabled={__IS_DEV__ || logEventsRef === "ONLY_ERRORS"}
+                        onClick={() => changeLogEvents(LogLevel.ONLY_ERRORS)}
                     >
                         Only Errors
                     </Button>
                     <Button
-                        variant={getLogLevel() === LogLevel.UNKNOWN_EVENTS ? "filled" : "default"}
-                        disabled={__IS_DEV__ || getLogLevel() === LogLevel.UNKNOWN_EVENTS}
-                        onClick={() => updateSetting(UniChatSettingsKeys.LOG_SCRAPER_EVENTS, LogLevel.UNKNOWN_EVENTS)}
+                        variant={logEventsRef === LogLevel.UNKNOWN_EVENTS ? "primary" : "default"}
+                        disabled={__IS_DEV__ || logEventsRef === LogLevel.UNKNOWN_EVENTS}
+                        onClick={() => changeLogEvents(LogLevel.UNKNOWN_EVENTS)}
                     >
                         Errors + Unknown Events
                     </Button>
                     <Button
-                        variant={getLogLevel() === LogLevel.ALL_EVENTS ? "filled" : "default"}
-                        disabled={__IS_DEV__ || getLogLevel() === LogLevel.ALL_EVENTS}
-                        onClick={() => updateSetting(UniChatSettingsKeys.LOG_SCRAPER_EVENTS, LogLevel.ALL_EVENTS)}
+                        variant={logEventsRef === LogLevel.ALL_EVENTS ? "primary" : "default"}
+                        disabled={__IS_DEV__ || logEventsRef === LogLevel.ALL_EVENTS}
+                        onClick={() => changeLogEvents(LogLevel.ALL_EVENTS)}
                     >
                         Errors + All Events
                     </Button>
-                </ButtonGroup>
+                </div>
             </FormGroup>
+
+            <div className="developers_settings--footer">
+                <Button variant="success" disabled={!dirty} onClick={applySettings}>
+                    Apply
+                </Button>
+            </div>
         </DevelopersSettingsTabStyledContainer>
     );
 }

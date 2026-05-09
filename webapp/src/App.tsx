@@ -33,8 +33,6 @@ import { WidgetEditor, WidgetEditorLeftSection } from "unichat/tabs/WidgetEditor
 import { IPCNotificationEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
 
-import { Modal } from "./components/Modal";
-
 interface TabOptions {
     label: string;
     icon: PReact.ComponentChildren;
@@ -82,7 +80,7 @@ function TabContent({ selectedTab }: { selectedTab: keyof typeof tabs }): PReact
 
 const _logger = LoggerFactory.getLogger("App");
 export function App(): PReact.ComponentChildren {
-    const [openedSettingsModal, setOpenedSettingsModal] = useState<string | boolean>("about");
+    const [openedSettingsModal, setOpenedSettingsModal] = useState<string | boolean>(false);
     const [selectedTab, setSelectedTab] = useState<keyof typeof tabs>("dashboard");
 
     function togglePluginsModal(): void {
