@@ -45,6 +45,14 @@ export class SettingsService {
     public async setItem<K extends keyof UniChatSettings>(key: K, value: UniChatSettings[K]): Promise<void> {
         await invoke("settings_set_item", { key, value });
     }
+
+    public async getItems<K extends keyof UniChatSettings>(keys: K[]): Promise<Pick<UniChatSettings, K>> {
+        return invoke<Pick<UniChatSettings, K>>("settings_get_items", { keys });
+    }
+
+    public async setItems<K extends keyof UniChatSettings>(items: Pick<UniChatSettings, K>): Promise<void> {
+        await invoke("settings_set_items", { items });
+    }
 }
 
 export const settingsService = new SettingsService();
