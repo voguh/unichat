@@ -8,15 +8,15 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
+import { useEffect, useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { marked } from "marked";
-import Badge from "react-bootstrap/Badge";
-import Tab from "react-bootstrap/Tab";
-import Tabs from "react-bootstrap/Tabs";
 
+import { Badge } from "unichat/components/Badge";
 import { Button } from "unichat/components/Button";
+import { Markdown } from "unichat/components/Markdown";
+import { Tab, Tabs } from "unichat/components/Tabs";
 import { commandService } from "unichat/services/commandService";
 import { UniChatRelease } from "unichat/types";
 
@@ -26,11 +26,60 @@ interface Props {
     onClose: () => void;
 }
 
-export function CheckUpdatesSettingsTab(_props: Props): React.ReactNode {
-    const [latestStable, setLatestStable] = React.useState<UniChatRelease | null>(null);
-    const [latestUnstable, setLatestUnstable] = React.useState<UniChatRelease | null>(null);
+export function CheckUpdatesSettingsTab(_props: Props): PReact.ComponentChildren {
+    const [latestStable, setLatestStable] = useState<UniChatRelease | null>(null);
+    const [latestUnstable, setLatestUnstable] = useState<UniChatRelease | null>(null);
 
-    const isMounted = React.useRef(false);
+    const tabs: Tab[] = [
+        {
+            id: "stable",
+            title: "Latest Stable",
+            content: latestStable ? (
+                <ReleaseNotesWrapper key="stable">
+                    <div className="release-name">
+                        <div className="release-data">
+                            {latestStable.name}
+                            <Badge variant="success">Latest</Badge>
+                        </div>
+                        <div className="release-download">
+                            <Button onClick={() => openUrl(latestStable.url)}>Go to Release Page</Button>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <Markdown className="release-notes" content={latestStable.description} />
+                </ReleaseNotesWrapper>
+            ) : (
+                <div style={{ padding: "16px" }}>No stable release available.</div>
+            )
+        },
+        {
+            id: "unstable",
+            title: "Latest Unstable",
+            content: latestUnstable ? (
+                <ReleaseNotesWrapper>
+                    <div className="release-name">
+                        <div className="release-data">
+                            {latestUnstable.name}
+                            <Badge variant="warning" style={{ color: "var(--oc-dark-9)" }}>
+                                Pre-Release
+                            </Badge>
+                        </div>
+                        <div className="release-download">
+                            <Button onClick={() => openUrl(latestUnstable.url)}>Go to Release Page</Button>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <Markdown className="release-notes" content={latestUnstable.description} />
+                </ReleaseNotesWrapper>
+            ) : (
+                <div style={{ padding: "16px" }}>No unstable release available.</div>
+            )
+        }
+    ];
 
     async function init(): Promise<void> {
         const releases = await commandService.getReleases();
@@ -38,12 +87,7 @@ export function CheckUpdatesSettingsTab(_props: Props): React.ReactNode {
         setLatestUnstable(releases.latestUnstable);
     }
 
-    React.useEffect(() => {
-        if (isMounted.current) {
-            return;
-        }
-
-        isMounted.current = true;
+    useEffect(() => {
         init();
     }, []);
 
@@ -56,53 +100,8 @@ export function CheckUpdatesSettingsTab(_props: Props): React.ReactNode {
     }
 
     return (
-        <CheckUpdatesSettingsTabStyledContainer>
-            <Tabs defaultActiveKey="stable">
-                <Tab eventKey="stable" title="Latest Stable">
-                    {latestStable && (
-                        <ReleaseNotesWrapper>
-                            <div className="release-name">
-                                <div>
-                                    {latestStable.name}
-                                    <Badge bg="success">Latest</Badge>
-                                </div>
-                                <div>
-                                    <Button onClick={() => openUrl(latestStable.url)}>Go to Release Page</Button>
-                                </div>
-                            </div>
-
-                            <hr />
-
-                            <div
-                                className="release-notes"
-                                dangerouslySetInnerHTML={{ __html: marked.parse(latestStable.description) }}
-                            />
-                        </ReleaseNotesWrapper>
-                    )}
-                </Tab>
-                <Tab eventKey="pre-release" title="Latest Pre-Release">
-                    {latestUnstable && (
-                        <ReleaseNotesWrapper>
-                            <div className="release-name">
-                                <div>
-                                    {latestUnstable.name}
-                                    <Badge bg="warning" style={{ color: "var(--oc-dark-9)" }}>
-                                        Pre-Release
-                                    </Badge>
-                                </div>
-                                <div>
-                                    <Button onClick={() => openUrl(latestUnstable.url)}>Go to Release Page</Button>
-                                </div>
-                            </div>
-                            <hr />
-                            <div
-                                className="release-notes"
-                                dangerouslySetInnerHTML={{ __html: marked.parse(latestUnstable.description) }}
-                            />
-                        </ReleaseNotesWrapper>
-                    )}
-                </Tab>
-            </Tabs>
-        </CheckUpdatesSettingsTabStyledContainer>
+        <>
+            <Tabs initialTab="stable" tabs={tabs} />
+        </>
     );
 }

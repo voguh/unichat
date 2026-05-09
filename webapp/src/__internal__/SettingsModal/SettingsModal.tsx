@@ -49,7 +49,7 @@ export const settingsItems: Record<string, SettingsItem> = {
     "check-updates": {
         title: "Check for Updates",
         icon: "fas fa-download",
-        children: () => <></> // CheckUpdatesSettingsTab
+        children: CheckUpdatesSettingsTab
     },
     about: {
         title: "About",
