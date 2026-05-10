@@ -12,6 +12,7 @@
     },
     "packageManager": "pnpm@10.30.3",
     "dependencies": {
+        "@ctrl/tinycolor": "4.2.0",
         "@floating-ui/dom": "1.7.6",
         "@jridgewell/trace-mapping": "0.3.31",
         "@tauri-apps/api": "2.11.0",

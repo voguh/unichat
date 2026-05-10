@@ -13,9 +13,10 @@ import { useEffect, useState } from "preact/hooks";
 
 import { AccordionItem } from "unichat/components/AccordionItem";
 import { Button } from "unichat/components/Button";
+import { ColorPicker } from "unichat/components/forms/ColorPicker/ColorPicker";
 import { GalleryFileInput } from "unichat/components/forms/GalleryFileInput";
 import { NumberInput } from "unichat/components/forms/NumberInput";
-import { Option, Select } from "unichat/components/forms/Select";
+import { Select } from "unichat/components/forms/Select";
 import { Switch } from "unichat/components/forms/Switch/index";
 import { Textarea } from "unichat/components/forms/Textarea";
 import { TextInput } from "unichat/components/forms/TextInput";
@@ -54,21 +55,21 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         key={key}
                         label={builder.label}
                         description={builder.description}
-                        checked={value as boolean | undefined}
+                        checked={value as boolean}
                         onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.checked }))}
                     />
                 );
-            // case "colorpicker":
-            //     return (
-            //         <ColorPicker
-            //             key={key}
-            //             label={builder.label}
-            //             description={builder.description}
-            //             value={value}
-            //             swatches={builder.swatches ?? []}
-            //             onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
-            //         />
-            //     );
+            case "colorpicker":
+                return (
+                    <ColorPicker
+                        key={key}
+                        label={builder.label}
+                        description={builder.description}
+                        value={value as string}
+                        swatches={builder.swatches ?? []}
+                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                    />
+                );
             case "dropdown": {
                 return (
                     <Select
