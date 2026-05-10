@@ -10,11 +10,8 @@
 
 import * as PReact from "preact";
 
-import { splitProperties } from "unichat/components/forms/__utils__/splitProperties";
-import { FormGroup, FormGroupBaseProps } from "unichat/components/forms/FormGroup";
-import { captureNativeRef } from "unichat/utils/captureNativeRef";
-
-import { StyledInput } from "./styled";
+import { splitProperties } from "./__utils__/splitProperties";
+import { FormGroup, FormGroupBaseProps } from "./FormGroup";
 
 type VanillaProps = Omit<PReact.InputHTMLAttributes<HTMLInputElement>, "type">;
 export interface TextInputProps extends VanillaProps, FormGroupBaseProps {
@@ -22,11 +19,13 @@ export interface TextInputProps extends VanillaProps, FormGroupBaseProps {
 }
 
 export function TextInput({ inputRef, id, ...props }: TextInputProps): PReact.ComponentChildren {
-    const [formGroupProps, dataProps, rest] = splitProperties(props);
+    const [formGroupProps, dataProps, inputProps] = splitProperties(props);
 
     return (
         <FormGroup id={id} {...formGroupProps} {...dataProps}>
-            <StyledInput {...rest} type="text" ref={captureNativeRef(HTMLInputElement, inputRef)} />
+            <div className="TextInput-container">
+                <input {...inputProps} type="text" ref={inputRef} />
+            </div>
         </FormGroup>
     );
 }

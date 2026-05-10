@@ -13,29 +13,15 @@ import { ComponentType, HTMLAttributes } from "preact";
 import { styled } from "goober";
 import tw from "twin.macro";
 
+import { inputGeneralStyle } from "unichat/components/forms/FormGroup";
+
 export const SelectStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`relative w-full rounded border border-stone-800 bg-stone-800/90 text-stone-50`,
-    height: "36px",
-
-    "&[data-focused='true']": {
-        ...tw`border-stone-700`
-    },
-
     "> input": {
         display: "none"
     },
 
     "> .fake-input": {
-        ...tw`w-full py-2 pl-3 pr-10 bg-transparent border-none cursor-pointer transition-colors duration-150`,
-        height: "36px",
-
-        "> .placeholder": {
-            ...tw`text-stone-500`
-        }
-
-        // "&:hover": {
-        //     ...tw`border-stone-700`
-        // }
+        ...inputGeneralStyle
     },
 
     "> .dropdown-indicator": {

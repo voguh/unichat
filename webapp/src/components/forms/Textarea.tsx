@@ -10,11 +10,8 @@
 
 import * as PReact from "preact";
 
-import { splitProperties } from "unichat/components/forms/__utils__/splitProperties";
-import { FormGroup, FormGroupBaseProps } from "unichat/components/forms/FormGroup";
-import { captureNativeRef } from "unichat/utils/captureNativeRef";
-
-import { StyledTextarea } from "./styled";
+import { splitProperties } from "./__utils__/splitProperties";
+import { FormGroup, FormGroupBaseProps } from "./FormGroup";
 
 type VanillaProps = PReact.TextareaHTMLAttributes<HTMLTextAreaElement>;
 export interface TextareaProps extends VanillaProps, FormGroupBaseProps {
@@ -22,11 +19,13 @@ export interface TextareaProps extends VanillaProps, FormGroupBaseProps {
 }
 
 export function Textarea({ inputRef, id, ...props }: TextareaProps): PReact.ComponentChildren {
-    const [formGroupProps, dataProps, rest] = splitProperties(props);
+    const [formGroupProps, dataProps, textareaProps] = splitProperties(props);
 
     return (
         <FormGroup id={id} {...formGroupProps} {...dataProps}>
-            <StyledTextarea {...rest} ref={captureNativeRef(HTMLTextAreaElement, inputRef)} />
+            <div className="Textarea-container">
+                <textarea {...textareaProps} ref={inputRef} />
+            </div>
         </FormGroup>
     );
 }

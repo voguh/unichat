@@ -12,11 +12,11 @@ import * as PReact from "preact";
 import { useRef, useState } from "preact/hooks";
 
 import { GalleryModalActions, GalleryModal, GalleryTabs } from "unichat/__internal__/GalleryModal";
-import { TextInput } from "unichat/components/forms/TextInput";
 import { modalService } from "unichat/services/modalService";
-import { captureNativeRef } from "unichat/utils/captureNativeRef";
+import { mergeRefs } from "unichat/utils/mergeRefs";
 
-import { FormGroupBaseProps } from "./FormGroup";
+import { splitProperties } from "./__utils__/splitProperties";
+import { FormGroup, FormGroupBaseProps } from "./FormGroup";
 
 type VanillaProps = Omit<PReact.InputHTMLAttributes<HTMLInputElement>, "type">;
 interface GalleryInputProps extends VanillaProps, FormGroupBaseProps {
@@ -24,14 +24,8 @@ interface GalleryInputProps extends VanillaProps, FormGroupBaseProps {
     inputRef?: PReact.Ref<HTMLInputElement>;
 }
 
-export function GalleryFileInput({
-    showTabs = [],
-    onClick,
-    inputRef,
-    value,
-    defaultValue,
-    ...props
-}: GalleryInputProps): PReact.ComponentChildren {
+export function GalleryFileInput({ showTabs, inputRef, id, ...props }: GalleryInputProps): PReact.ComponentChildren {
+    const [formGroupProps, dataProps, { value, defaultValue, onClick, ...inputProps }] = splitProperties(props);
     const isControlled = value !== undefined;
 
     const [innerValue, setInnerValue] = useState(() => value ?? defaultValue ?? "");
@@ -97,12 +91,17 @@ export function GalleryFileInput({
     }
 
     return (
-        <TextInput
-            {...props}
-            value={currentValue}
-            inputRef={captureNativeRef(HTMLInputElement, inputRef, innerRef)}
-            readOnly
-            onClick={handleClick}
-        />
+        <FormGroup id={id} {...formGroupProps} {...dataProps}>
+            <div className="GalleryFileInput-container">
+                <input
+                    {...inputProps}
+                    value={currentValue}
+                    ref={mergeRefs(inputRef, innerRef)}
+                    readOnly
+                    type="text"
+                    onClick={handleClick}
+                />
+            </div>
+        </FormGroup>
     );
 }

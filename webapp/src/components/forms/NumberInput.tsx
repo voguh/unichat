@@ -11,11 +11,10 @@
 import * as PReact from "preact";
 import { useEffect, useRef } from "preact/hooks";
 
-import { splitProperties } from "unichat/components/forms/__utils__/splitProperties";
-import { FormGroup, FormGroupBaseProps } from "unichat/components/forms/FormGroup";
-import { captureNativeRef } from "unichat/utils/captureNativeRef";
+import { mergeRefs } from "unichat/utils/mergeRefs";
 
-import { StyledInput } from "./styled";
+import { splitProperties } from "./__utils__/splitProperties";
+import { FormGroup, FormGroupBaseProps } from "./FormGroup";
 
 type VanillaProps = Omit<PReact.InputHTMLAttributes<HTMLInputElement>, "type">;
 export interface NumberInputProps extends VanillaProps, FormGroupBaseProps {
@@ -23,7 +22,7 @@ export interface NumberInputProps extends VanillaProps, FormGroupBaseProps {
 }
 
 export function NumberInput({ inputRef, id, ...props }: NumberInputProps): PReact.ComponentChildren {
-    const [formGroupProps, dataProps, rest] = splitProperties(props);
+    const [formGroupProps, dataProps, inputProps] = splitProperties(props);
 
     const innerRef = useRef<HTMLInputElement>(null);
 
@@ -46,7 +45,9 @@ export function NumberInput({ inputRef, id, ...props }: NumberInputProps): PReac
 
     return (
         <FormGroup id={id} {...formGroupProps} {...dataProps}>
-            <StyledInput {...rest} type="text" ref={captureNativeRef(HTMLInputElement, inputRef, innerRef)} />
+            <div className="NumberInput-container">
+                <input {...inputProps} type="text" ref={mergeRefs(inputRef, innerRef)} />
+            </div>
         </FormGroup>
     );
 }

@@ -9,3 +9,4 @@
  ******************************************************************************/
 
 export * from "./FormGroup";
+export { inputGeneralStyle } from "./styled";

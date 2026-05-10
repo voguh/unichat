@@ -12,7 +12,7 @@ import * as PReact from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 
 import { TinyColor } from "@ctrl/tinycolor";
-import { flip, shift } from "@floating-ui/dom";
+import { flip, offset, shift } from "@floating-ui/dom";
 
 import { splitProperties } from "unichat/components/forms/__utils__/splitProperties";
 import { FormGroup, FormGroupBaseProps } from "unichat/components/forms/FormGroup";
@@ -54,7 +54,7 @@ export function ColorPicker({ swatches, inputRef, id, ...props }: ColorPickerPro
 
     const innerRef = useRef<HTMLInputElement>(null);
     const [wrapperRef, dropdownRef, updateVisualization] = useComputePosition<HTMLDivElement, HTMLDivElement>(
-        { placement: "bottom", middleware: [flip(), shift({ padding: 8 })] },
+        { placement: "bottom", middleware: [offset(2), flip(), shift({ padding: 8 })] },
         adjustFloatingPosition
     );
 

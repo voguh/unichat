@@ -25,7 +25,7 @@ export function Switch({ inputRef, id, ...props }: SwitchProps): PReact.Componen
 
     return (
         <FormGroup id={id} {...formGroupProps} {...dataProps}>
-            <StyledInputWrapper>
+            <StyledInputWrapper className="Switch-container">
                 <input {...inputProps} type="checkbox" ref={inputRef} />
                 <div />
             </StyledInputWrapper>

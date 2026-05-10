@@ -16,28 +16,6 @@ import tw from "twin.macro";
 export const ColorPickerStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
     ...tw`relative flex justify-center items-center gap-2`,
 
-    "> input": {
-        ...tw`relative flex-1 py-2 px-3 rounded border text-stone-50 border-stone-800 bg-stone-800/90 transition-colors duration-150`,
-        height: "36px",
-        outline: "none",
-
-        "&::placeholder": {
-            ...tw`text-stone-500`
-        },
-
-        "&:focus": {
-            ...tw`border-stone-700`
-        },
-
-        "&:hover": {
-            ...tw`border-stone-700`
-        },
-
-        "&:disabled": {
-            ...tw`cursor-not-allowed border-stone-700 bg-stone-700/50 text-stone-500`
-        }
-    },
-
     "> .color-preview": {
         ...tw`relative flex-shrink-0 rounded border border-stone-800 overflow-hidden`,
 
