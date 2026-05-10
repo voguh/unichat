@@ -148,17 +148,13 @@ export function Select({ options = [], inputRef, id, ...props }: SelectProps): P
                             selectedOption={selectedOption}
                             onClick={(option) => {
                                 try {
-                                    const inputEl = innerRef.current;
-
                                     if (!isControlled) {
                                         setInnerValue(option.value);
-
-                                        if (inputEl != null) {
-                                            inputEl.value = option.value;
-                                        }
                                     }
 
+                                    const inputEl = innerRef.current;
                                     if (inputEl != null) {
+                                        inputEl.value = option.value;
                                         inputEl.dispatchEvent(new Event("change", { bubbles: true }));
                                     }
                                 } finally {

@@ -143,18 +143,15 @@ export function ColorPicker({ swatches, inputRef, id, ...props }: ColorPickerPro
                 <ColorPickerPicker
                     currentColor={currentTinyColor}
                     onChange={(newColor) => {
-                        const inputEl = innerRef.current;
+                        const color = new TinyColor(newColor).toRgbString();
 
                         if (!isControlled) {
-                            const color = new TinyColor(newColor).toRgbString();
                             setInnerValue(color);
-
-                            if (inputEl != null) {
-                                inputEl.value = color;
-                            }
                         }
 
+                        const inputEl = innerRef.current;
                         if (inputEl != null) {
+                            inputEl.value = color;
                             inputEl.dispatchEvent(new Event("change", { bubbles: true }));
                         }
                     }}

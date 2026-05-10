@@ -61,17 +61,13 @@ export function GalleryFileInput({ showTabs, inputRef, id, ...props }: GalleryIn
                         selectedItem={innerRef.current?.value}
                         onSelectItem={(url, context) => {
                             try {
-                                const inputEl = innerRef.current;
-
                                 if (!isControlled) {
                                     setInnerValue(url);
-
-                                    if (inputEl != null) {
-                                        inputEl.value = url;
-                                    }
                                 }
 
+                                const inputEl = innerRef.current;
                                 if (inputEl != null) {
+                                    inputEl.value = url;
                                     inputEl.dispatchEvent(new Event("change", { bubbles: true }));
                                 }
                             } finally {
