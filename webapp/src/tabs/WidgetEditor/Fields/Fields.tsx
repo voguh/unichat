@@ -17,7 +17,7 @@ import { ColorPicker } from "unichat/components/forms/ColorPicker";
 import { GalleryFileInput } from "unichat/components/forms/GalleryFileInput";
 import { NumberInput } from "unichat/components/forms/NumberInput";
 import { Select } from "unichat/components/forms/Select";
-import { Switch } from "unichat/components/forms/Switch/index";
+import { Switch } from "unichat/components/forms/Switch";
 import { Textarea } from "unichat/components/forms/Textarea";
 import { TextInput } from "unichat/components/forms/TextInput";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
