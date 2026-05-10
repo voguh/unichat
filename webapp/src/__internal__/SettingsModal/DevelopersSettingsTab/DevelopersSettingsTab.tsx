@@ -82,9 +82,10 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
     }, []);
 
     return (
-        <DevelopersSettingsTabStyledContainer>
+        <DevelopersSettingsTabStyledContainer key={Object.keys(initialSettings).length === 0 ? "loading" : "loaded"}>
             <div className="create-webview-hidden-section">
                 <Switch
+                    defaultChecked={initialSettings[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN] ?? false}
                     inputRef={createWebviewsHiddenRef}
                     label="Create webviews silent"
                     description="On startup, webviews will be created in background and only shown when requested."

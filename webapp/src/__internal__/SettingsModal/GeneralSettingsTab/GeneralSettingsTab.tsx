@@ -28,10 +28,10 @@ interface Props {
 }
 
 export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren {
-    const [dirty, setDirty] = useState(false);
-    const [initialSettings, setInitialSettings] = useState<Partial<UniChatSettings>>({});
     const [widgets, _reloadWidgets] = useWidgets(toWidgetOptionGroup, []);
 
+    const [dirty, setDirty] = useState(false);
+    const [initialSettings, setInitialSettings] = useState<Partial<UniChatSettings>>({});
     const selectRef = useRef<HTMLInputElement>(null);
     const openToLanRef = useRef<HTMLInputElement>(null);
 
@@ -76,27 +76,26 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
                 UniChatSettingsKeys.OPEN_TO_LAN
             ]);
 
+            setInitialSettings(settings);
+
+            /* ================================================================================== */
+
             if (selectRef.current) {
-                selectRef.current.value = settings[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET] || "default";
                 selectRef.current.addEventListener("change", changeDirty);
             }
 
             if (openToLanRef.current) {
-                openToLanRef.current.checked = settings[UniChatSettingsKeys.OPEN_TO_LAN] || false;
                 openToLanRef.current.addEventListener("change", changeDirty);
             }
-
-            /* ================================================================================== */
-
-            setInitialSettings(settings);
         }
 
         init();
     }, []);
 
     return (
-        <GeneralSettingsTabStyledContainer>
+        <GeneralSettingsTabStyledContainer key={Object.keys(initialSettings).length === 0 ? "loading" : "loaded"}>
             <Select
+                defaultValue={initialSettings[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET] ?? ""}
                 inputRef={selectRef}
                 label="Default preview widget"
                 description="Select the default widget to be used in preview panels"
@@ -107,6 +106,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
 
             <div className="openToLan-section">
                 <Switch
+                    defaultChecked={initialSettings[UniChatSettingsKeys.OPEN_TO_LAN] ?? false}
                     inputRef={openToLanRef}
                     label="Open to LAN"
                     description="Allow other devices on your local network view widgets."
