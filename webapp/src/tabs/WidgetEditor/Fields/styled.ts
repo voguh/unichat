@@ -53,11 +53,11 @@ export const FieldsStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>
             },
 
             "> .accordion-content": {
-                ...tw`bg-stone-700 p-2 flex flex-col gap-4`,
+                ...tw`bg-stone-700/25 p-2 flex flex-col gap-4`,
 
                 "> .form-group": {
                     "> .form-description": {
-                        ...tw`text-white/50`
+                        ...tw`text-stone-50/50`
                     }
                 }
             }
