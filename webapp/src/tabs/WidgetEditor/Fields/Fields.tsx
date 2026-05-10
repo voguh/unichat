@@ -13,7 +13,7 @@ import { useEffect, useState } from "preact/hooks";
 
 import { AccordionItem } from "unichat/components/AccordionItem";
 import { Button } from "unichat/components/Button";
-import { ColorPicker } from "unichat/components/forms/ColorPicker/ColorPicker";
+import { ColorPicker } from "unichat/components/forms/ColorPicker";
 import { GalleryFileInput } from "unichat/components/forms/GalleryFileInput";
 import { NumberInput } from "unichat/components/forms/NumberInput";
 import { Select } from "unichat/components/forms/Select";
