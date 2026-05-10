@@ -60,19 +60,15 @@ function uniChatBuildTools(): Plugin {
             const orphanFiles = Array.from(allFiles).filter((file) => !importedFiles.has(file));
 
             if (orphanFiles.length > 0) {
-                const logLines = [
-                    "[plugin @unichat/build-tools] ╔══ Orphan files detected ══════════════════════════════════════════════════════"
-                ];
+                const logLines = ["╔══ Orphan files detected ══════════════════════════════════════════════════════"];
 
                 for (const file of orphanFiles.sort()) {
                     const relativePath = path.relative(cwd, file);
-                    logLines.push(`[plugin @unichat/build-tools] ║  ./${relativePath}`);
+                    logLines.push(`║  ./${relativePath}`);
                 }
 
-                logLines.push(
-                    "[plugin @unichat/build-tools] ╚══════════════════════════════════════════════════════════════════════════════"
-                );
-                this.info(logLines.join("\n"));
+                logLines.push("╚══════════════════════════════════════════════════════════════════════════════");
+                this.info(logLines.join("\n[plugin @unichat/build-tools] "));
             }
         },
 
