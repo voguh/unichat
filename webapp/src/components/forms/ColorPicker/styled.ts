@@ -11,21 +11,27 @@
 import { ComponentType, HTMLAttributes } from "preact";
 
 import { styled } from "goober";
-import tw from "twin.macro";
+import tw, { theme } from "twin.macro";
 
 export const ColorPickerStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`relative flex justify-center items-center gap-2`,
+    ...tw`relative flex justify-center items-center gap-1`,
 
     "> .color-preview": {
-        ...tw`relative flex-shrink-0 rounded border border-stone-800 overflow-hidden`,
+        ...tw`relative flex-shrink-0 rounded border border-stone-50/25 overflow-hidden`,
 
         width: "36px",
         height: "36px",
 
         "> .color_picker-preview-checkerboard": {
+            "--checkerboard-color": theme`colors.stone.400`,
+
             ...tw`absolute inset-0`,
-            backgroundImage:
-                "linear-gradient(45deg, #a8a29e 25%, transparent 25%), linear-gradient(-45deg, #a8a29e 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #a8a29e 75%), linear-gradient(-45deg, transparent 75%, #a8a29e 75%)",
+            backgroundImage: `
+                linear-gradient(45deg, var(--checkerboard-color) 25%, transparent 25%),
+                linear-gradient(-45deg, var(--checkerboard-color) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, var(--checkerboard-color) 75%),
+                linear-gradient(-45deg, transparent 75%, var(--checkerboard-color) 75%)
+            `,
             backgroundSize: "1rem 1rem",
             backgroundPosition: "0 0, 0 0.5rem, 0.5rem -0.5rem, -0.5rem 0px"
         },
