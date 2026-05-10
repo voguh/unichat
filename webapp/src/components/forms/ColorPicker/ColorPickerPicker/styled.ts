@@ -14,7 +14,7 @@ import { styled } from "goober";
 import tw from "twin.macro";
 
 export const ColorPickerPickerStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`bg-stone-900 border border-stone-700 rounded p-2 shadow`,
+    ...tw`w-full p-2 rounded border border-stone-700 bg-stone-800/95 shadow-xl overflow-auto backdrop-blur-sm`,
     width: "233px",
     userSelect: "none",
 
