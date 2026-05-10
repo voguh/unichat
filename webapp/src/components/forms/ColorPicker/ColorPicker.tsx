@@ -9,9 +9,9 @@
  ******************************************************************************/
 
 import * as PReact from "preact";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 
-import { HSVA, Numberify, TinyColor } from "@ctrl/tinycolor";
+import { TinyColor } from "@ctrl/tinycolor";
 import { flip, shift } from "@floating-ui/dom";
 
 import { splitProperties } from "unichat/components/forms/__utils__/splitProperties";
@@ -42,13 +42,15 @@ function adjustFloatingPosition(reference: HTMLElement, floating: HTMLElement, x
 }
 
 export function ColorPicker({ swatches, inputRef, id, ...props }: ColorPickerProps): PReact.ComponentChildren {
-    const [formGroupProps, dataProps, inputProps] = splitProperties(props);
+    const [formGroupProps, dataProps, { value, defaultValue, ...inputProps }] = splitProperties(props);
+    const isControlled = value !== undefined;
 
     const [isOpen, setIsOpen] = useState(false);
-    const [inputValue, setInputValue] = useState(inputProps.value || inputProps.defaultValue || "");
-    const [innerColor, setInnerColor] = useState<Numberify<HSVA>>(
-        new TinyColor(inputProps.value || inputProps.defaultValue).toHsv()
-    );
+
+    const [innerValue, setInnerValue] = useState(value ?? defaultValue ?? "");
+    const currentValue = isControlled ? value : innerValue;
+    const currentTinyColor = useMemo(() => new TinyColor(currentValue), [currentValue]);
+    const currentRgbString = useMemo(() => currentTinyColor.toRgbString(), [currentTinyColor]);
 
     const innerRef = useRef<HTMLInputElement>(null);
     const [wrapperRef, dropdownRef, updateVisualization] = useComputePosition<HTMLDivElement, HTMLDivElement>(
@@ -97,125 +99,68 @@ export function ColorPicker({ swatches, inputRef, id, ...props }: ColorPickerPro
 
         window.addEventListener("keydown", handleKeyDown);
         document.addEventListener("pointerdown", handleClickOutside);
-        document.addEventListener("touchstart", handleClickOutside);
 
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
             document.removeEventListener("pointerdown", handleClickOutside);
-            document.removeEventListener("touchstart", handleClickOutside);
         };
     }, [isOpen]);
 
-    useEffect(() => {
-        const inputEl = innerRef.current;
-        if (document.activeElement === inputEl) {
-            return;
-        }
-
-        const { r, g, b, a } = new TinyColor(innerColor).toRgb();
-        const hexR = r.toString(16).padStart(2, "0");
-        const hexG = g.toString(16).padStart(2, "0");
-        const hexB = b.toString(16).padStart(2, "0");
-        const alpha = Math.round(a * 255);
-        const hexA = alpha > 255 ? alpha.toString(16).padStart(2, "0") : "";
-
-        setInputValue(`#${hexR}${hexG}${hexB}${hexA}`);
-    }, [innerColor]);
-
-    useEffect(() => {
-        const inputEl = innerRef.current;
-        if (!inputEl) {
-            return;
-        }
-
-        function sync(this: HTMLInputElement): void {
-            const newColor = new TinyColor(this.value);
-            if (newColor.isValid) {
-                setInnerColor(newColor.toHsv());
-            }
-        }
-
-        const descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
-        if (!descriptor?.set || !descriptor.get) {
-            return;
-        }
-
-        const originalGet = descriptor.get;
-        const originalSet = descriptor.set;
-        Object.defineProperty(inputEl, "value", {
-            configurable: true,
-
-            get() {
-                return originalGet.call(this);
-            },
-
-            set(value: string) {
-                originalSet.call(this, value);
-                sync.call(this);
-            }
-        });
-
-        return () => {
-            Object.defineProperty(inputEl, "value", descriptor);
-        };
-    }, []);
-
     return (
-        <>
-            <FormGroup id={id} {...formGroupProps} {...dataProps}>
-                <ColorPickerStyledContainer
-                    ref={captureNativeRef(HTMLDivElement, wrapperRef)}
-                    className="ColorPicker-container"
-                    data-focused={isOpen ? "true" : "false"}
-                    onClick={() => {
-                        if (isOpen) {
-                            hide();
-                        } else {
-                            show();
+        <FormGroup id={id} {...formGroupProps} {...dataProps}>
+            <ColorPickerStyledContainer
+                ref={captureNativeRef(HTMLDivElement, wrapperRef)}
+                className="ColorPicker-container"
+                data-focused={isOpen ? "true" : "false"}
+                onClick={() => (isOpen ? hide() : show())}
+            >
+                <input
+                    {...inputProps}
+                    value={currentValue}
+                    ref={mergeRefs(innerRef, inputRef)}
+                    type="text"
+                    onChange={(evt) => {
+                        try {
+                            if (!isControlled) {
+                                setInnerValue(evt.currentTarget.value);
+                            }
+                        } finally {
+                            if (typeof inputProps.onChange === "function") {
+                                inputProps.onChange(evt);
+                            }
                         }
                     }}
-                >
-                    <input
-                        {...inputProps}
-                        type="text"
-                        ref={mergeRefs(innerRef, inputRef)}
-                        value={inputValue}
-                        onChange={(evt) => {
-                            try {
-                                const value = evt.currentTarget.value;
-                                setInputValue(value);
+                />
+                <div className="color-preview">
+                    <div className="color_picker-preview-checkerboard" />
+                    <div className="color_picker-preview-color" style={{ backgroundColor: currentRgbString }} />
+                </div>
+            </ColorPickerStyledContainer>
+            <Portal
+                containerRef={dropdownRef}
+                initialStyle={{ position: "fixed", visibility: "hidden", opacity: "0", transform: "translateX(-50%)" }}
+            >
+                <ColorPickerPicker
+                    currentColor={currentTinyColor}
+                    onChange={(newColor) => {
+                        const inputEl = innerRef.current;
 
-                                const newColor = new TinyColor(value);
-                                if (newColor.isValid) {
-                                    setInnerColor(newColor.toHsv());
-                                }
-                            } finally {
-                                if (typeof inputProps.onChange === "function") {
-                                    inputProps.onChange(evt);
-                                }
+                        if (!isControlled) {
+                            const color = new TinyColor(newColor).toRgbString();
+                            setInnerValue(color);
+
+                            if (inputEl != null) {
+                                inputEl.value = color;
                             }
-                        }}
-                    />
-                    <div className="color-preview">
-                        <div className="color_picker-preview-checkerboard" />
-                        <div
-                            className="color_picker-preview-color"
-                            style={{ backgroundColor: new TinyColor(innerColor).toRgbString() }}
-                        />
-                    </div>
-                </ColorPickerStyledContainer>
-                <Portal
-                    containerRef={dropdownRef}
-                    initialStyle={{
-                        position: "fixed",
-                        visibility: "hidden",
-                        opacity: "0",
-                        transform: "translateX(-50%)"
+                        }
+
+                        if (inputEl != null) {
+                            inputEl.dispatchEvent(new Event("change", { bubbles: true }));
+                        }
                     }}
-                >
-                    <ColorPickerPicker hsv={innerColor} setHsv={setInnerColor} swatches={swatches} />
-                </Portal>
-            </FormGroup>
-        </>
+                    swatches={swatches}
+                />
+            </Portal>
+        </FormGroup>
     );
 }

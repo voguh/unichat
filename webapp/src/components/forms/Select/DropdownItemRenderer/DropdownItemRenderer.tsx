@@ -17,15 +17,15 @@ import { GroupOptionRenderer } from "./GroupOptionRenderer";
 import { OptionRenderer } from "./OptionRenderer";
 
 interface DropdownItemProps {
-    inputRef: PReact.RefObject<HTMLInputElement>;
+    selectedOption: Option | null;
     item: Option | OptionGroupBase<Option>;
     onClick: (value: Option) => void;
 }
 
-export function DropdownItemRenderer({ item, onClick, inputRef }: DropdownItemProps): PReact.ComponentChildren {
+export function DropdownItemRenderer({ item, onClick, selectedOption }: DropdownItemProps): PReact.ComponentChildren {
     if (isOptionGroup(item)) {
-        return <GroupOptionRenderer group={item} onClick={onClick} inputRef={inputRef} />;
+        return <GroupOptionRenderer group={item} onClick={onClick} selectedOption={selectedOption} />;
     } else {
-        return <OptionRenderer onClick={onClick} option={item} selected={inputRef.current?.value === item.value} />;
+        return <OptionRenderer onClick={onClick} option={item} selected={selectedOption?.value === item.value} />;
     }
 }

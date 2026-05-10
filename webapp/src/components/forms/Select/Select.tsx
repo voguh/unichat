@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 import * as PReact from "preact";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 
 import { flip, offset, shift } from "@floating-ui/dom";
 
@@ -18,6 +18,7 @@ import { FormGroup, FormGroupBaseProps } from "unichat/components/forms/FormGrou
 import { Portal } from "unichat/components/Portal";
 import { useComputePosition } from "unichat/hooks/useComputePosition";
 import { captureNativeRef } from "unichat/utils/captureNativeRef";
+import { mergeRefs } from "unichat/utils/mergeRefs";
 
 import { isOptionGroup } from "./__utils__/isOptionGroup";
 import { DropdownItemRenderer } from "./DropdownItemRenderer";
@@ -51,24 +52,19 @@ function adjustFloatingPosition(reference: HTMLElement, floating: HTMLElement, x
 }
 
 export function Select({ options = [], inputRef, id, ...props }: SelectProps): PReact.ComponentChildren {
-    const [formGroupProps, dataProps, inputProps] = splitProperties(props);
+    const [formGroupProps, dataProps, { value, defaultValue, ...inputProps }] = splitProperties(props);
+    const isControlled = value !== undefined;
 
     const [isOpen, setIsOpen] = useState(false);
-    const [selectedOption, setSelectedOption] = useState<Option | null>(() => {
-        const plainOptions = (options ?? []).flatMap((opt) => (isOptionGroup(opt) ? opt.options : [opt]));
-        const initialOption = inputProps.value || inputProps.defaultValue || "";
 
-        if (typeof initialOption === "string" && initialOption !== "") {
-            const foundOption = plainOptions.find((opt) => opt.value === initialOption);
-            return foundOption || null;
-        }
-
-        return null;
-    });
+    const flattenedOptions = useMemo(() => options.flatMap((o) => (isOptionGroup(o) ? o.options : [o])), [options]);
+    const [innerValue, setInnerValue] = useState(() => value ?? defaultValue ?? "");
+    const currentValue = isControlled ? value : innerValue;
+    const selectedOption = flattenedOptions.find((o) => o.value === currentValue) ?? null;
 
     const innerRef = useRef<HTMLInputElement>(null);
     const [wrapperRef, dropdownRef, updateVisualization] = useComputePosition<HTMLDivElement, HTMLDivElement>(
-        { placement: "bottom", middleware: [offset(8), flip(), shift({ padding: 8 })] },
+        { placement: "bottom", middleware: [offset(2), flip(), shift({ padding: 8 })] },
         adjustFloatingPosition
     );
 
@@ -113,12 +109,10 @@ export function Select({ options = [], inputRef, id, ...props }: SelectProps): P
 
         window.addEventListener("keydown", handleKeyDown);
         document.addEventListener("pointerdown", handleClickOutside);
-        document.addEventListener("touchstart", handleClickOutside);
 
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
             document.removeEventListener("pointerdown", handleClickOutside);
-            document.removeEventListener("touchstart", handleClickOutside);
         };
     }, [isOpen]);
 
@@ -128,20 +122,9 @@ export function Select({ options = [], inputRef, id, ...props }: SelectProps): P
                 ref={captureNativeRef(HTMLDivElement, wrapperRef)}
                 className="Select-container"
                 data-focused={isOpen ? "true" : "false"}
-                onClick={() => {
-                    if (isOpen) {
-                        hide();
-                    } else {
-                        show();
-                    }
-                }}
+                onClick={() => (isOpen ? hide() : show())}
             >
-                <input
-                    {...inputProps}
-                    ref={captureNativeRef(HTMLInputElement, innerRef, inputRef)}
-                    readOnly
-                    type="text"
-                />
+                <input {...inputProps} value={currentValue} ref={mergeRefs(innerRef, inputRef)} readOnly type="text" />
                 <div className="fake-input">
                     {selectedOption ? (
                         selectedOption.label
@@ -155,27 +138,29 @@ export function Select({ options = [], inputRef, id, ...props }: SelectProps): P
             </SelectStyledContainer>
             <Portal
                 containerRef={dropdownRef}
-                initialStyle={{
-                    position: "fixed",
-                    visibility: "hidden",
-                    opacity: "0",
-                    transform: "translateX(-50%)"
-                }}
+                initialStyle={{ position: "fixed", visibility: "hidden", opacity: "0", transform: "translateX(-50%)" }}
             >
                 <SelectStyledDropdown>
                     {options.map((item, idx) => (
                         <DropdownItemRenderer
                             key={idx}
                             item={item}
-                            inputRef={innerRef}
+                            selectedOption={selectedOption}
                             onClick={(option) => {
                                 try {
-                                    if (innerRef.current) {
-                                        innerRef.current.value = option.value;
-                                        innerRef.current.dispatchEvent(new Event("change", { bubbles: true }));
+                                    const inputEl = innerRef.current;
+
+                                    if (!isControlled) {
+                                        setInnerValue(option.value);
+
+                                        if (inputEl != null) {
+                                            inputEl.value = option.value;
+                                        }
                                     }
 
-                                    setSelectedOption(option);
+                                    if (inputEl != null) {
+                                        inputEl.dispatchEvent(new Event("change", { bubbles: true }));
+                                    }
                                 } finally {
                                     hide();
                                 }

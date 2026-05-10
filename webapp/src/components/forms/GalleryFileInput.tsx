@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 import * as PReact from "preact";
-import { useRef } from "preact/hooks";
+import { useRef, useState } from "preact/hooks";
 
 import { GalleryModalActions, GalleryModal, GalleryTabs } from "unichat/__internal__/GalleryModal";
 import { TextInput } from "unichat/components/forms/TextInput";
@@ -27,10 +27,16 @@ interface GalleryInputProps extends VanillaProps, FormGroupBaseProps {
 export function GalleryFileInput({
     showTabs = [],
     onClick,
-    onChange,
     inputRef,
+    value,
+    defaultValue,
     ...props
 }: GalleryInputProps): PReact.ComponentChildren {
+    const isControlled = value !== undefined;
+
+    const [innerValue, setInnerValue] = useState(() => value ?? defaultValue ?? "");
+    const currentValue = isControlled ? value : innerValue;
+
     const innerRef = useRef<HTMLInputElement>(null);
 
     function handleShowTabs(): GalleryTabs[] {
@@ -43,50 +49,60 @@ export function GalleryFileInput({
     }
 
     function handleClick(event: PReact.TargetedMouseEvent<HTMLInputElement>): void {
-        event.stopPropagation();
+        try {
+            const _showTabs = handleShowTabs();
+            let wrappedSelectedTab: GalleryTabs | null = innerRef.current?.value.startsWith("http") ? "custom" : null;
+            if (wrappedSelectedTab == null) {
+                wrappedSelectedTab = (_showTabs ?? [])[0] ?? "image";
+            }
 
-        const _showTabs = handleShowTabs();
-        let wrappedSelectedTab: GalleryTabs | null = innerRef.current?.value.startsWith("http") ? "custom" : null;
-        if (wrappedSelectedTab == null) {
-            wrappedSelectedTab = (_showTabs ?? [])[0] ?? "image";
-        }
+            modalService.openModal({
+                size: "xl",
+                title: "Gallery",
+                actions: <GalleryModalActions />,
+                children: (
+                    <GalleryModal
+                        showTabs={_showTabs}
+                        startSelectedTab={wrappedSelectedTab}
+                        selectedItem={innerRef.current?.value}
+                        onSelectItem={(url, context) => {
+                            try {
+                                const inputEl = innerRef.current;
 
-        modalService.openModal({
-            size: "xl",
-            title: "Gallery",
-            actions: <GalleryModalActions />,
-            children: (
-                <GalleryModal
-                    showTabs={_showTabs}
-                    startSelectedTab={wrappedSelectedTab}
-                    selectedItem={innerRef.current?.value}
-                    onSelectItem={(url, context) => {
-                        if (innerRef.current) {
-                            innerRef.current.value = url;
+                                if (!isControlled) {
+                                    setInnerValue(url);
 
-                            if (onChange) {
-                                const syntheticEvent = {
-                                    target: innerRef.current,
-                                    currentTarget: innerRef.current
-                                } as unknown as PReact.TargetedEvent<HTMLInputElement, Event>;
-                                onChange(syntheticEvent);
+                                    if (inputEl != null) {
+                                        inputEl.value = url;
+                                    }
+                                }
+
+                                if (inputEl != null) {
+                                    inputEl.dispatchEvent(new Event("change", { bubbles: true }));
+                                }
+                            } finally {
+                                context.close();
                             }
 
-                            innerRef.current.dispatchEvent(new Event("input", { bubbles: true }));
-                        }
-
-                        context.close();
-                    }}
-                />
-            )
-        });
-
-        if (onClick) {
-            onClick(event);
+                            context.close();
+                        }}
+                    />
+                )
+            });
+        } finally {
+            if (typeof onClick === "function") {
+                onClick(event);
+            }
         }
     }
 
     return (
-        <TextInput {...props} inputRef={captureNativeRef(HTMLInputElement, inputRef, innerRef)} onClick={handleClick} />
+        <TextInput
+            {...props}
+            value={currentValue}
+            inputRef={captureNativeRef(HTMLInputElement, inputRef, innerRef)}
+            readOnly
+            onClick={handleClick}
+        />
     );
 }

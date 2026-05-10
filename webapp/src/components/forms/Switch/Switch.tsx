@@ -9,11 +9,9 @@
  ******************************************************************************/
 
 import * as PReact from "preact";
-import { useEffect, useRef, useState } from "preact/hooks";
 
 import { splitProperties } from "unichat/components/forms/__utils__/splitProperties";
 import { FormGroup, FormGroupBaseProps } from "unichat/components/forms/FormGroup";
-import { captureNativeRef } from "unichat/utils/captureNativeRef";
 
 import { StyledInputWrapper } from "./styled";
 
@@ -28,7 +26,7 @@ export function Switch({ inputRef, id, ...props }: SwitchProps): PReact.Componen
     return (
         <FormGroup id={id} {...formGroupProps} {...dataProps}>
             <StyledInputWrapper>
-                <input {...inputProps} type="checkbox" ref={captureNativeRef(HTMLInputElement, inputRef)} />
+                <input {...inputProps} type="checkbox" ref={inputRef} />
                 <div />
             </StyledInputWrapper>
         </FormGroup>
