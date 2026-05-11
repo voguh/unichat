@@ -11,6 +11,7 @@
 import * as PReact from "preact";
 import { useRef, useState } from "preact/hooks";
 
+import { UniChatEvent } from "unichat-widgets/unichat";
 import { Button } from "unichat/components/Button";
 import { Select } from "unichat/components/forms/Select";
 import { Tooltip } from "unichat/components/Tooltip";
@@ -40,7 +41,12 @@ export function WidgetEditor(): PReact.ComponentChildren {
 
         if (iframeRef.current) {
             iframeRef.current.src = `${WIDGET_URL_PREFIX}/${selectedWidget}`;
-            // handleFetchWidgetData();
+        }
+    }
+
+    function dispatchEvent(event: UniChatEvent): void {
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+            iframeRef.current.contentWindow.postMessage({ type: "unichat:event", detail: event }, "*");
         }
     }
 
@@ -105,7 +111,7 @@ export function WidgetEditor(): PReact.ComponentChildren {
                     <iframe ref={iframeRef} src={`${WIDGET_URL_PREFIX}/${selectedWidget}`} sandbox="allow-scripts" />
                 </div>
                 <div className="widget_editor--emulator">
-                    <Emulator iframeRef={iframeRef} />
+                    <Emulator dispatchEvent={dispatchEvent} />
                 </div>
             </div>
         </WidgetEditorStyledContainer>

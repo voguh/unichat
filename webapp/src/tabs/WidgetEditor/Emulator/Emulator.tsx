@@ -25,26 +25,22 @@ const opModeOptions: Option[] = [
 ];
 
 interface Props {
-    iframeRef: PReact.RefObject<HTMLIFrameElement>;
+    dispatchEvent: (event: UniChatEvent) => void;
 }
 
-export function Emulator({ iframeRef }: Props): PReact.ComponentChildren {
+export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
     const [emulationMode, setEmulationMode] = useState<UniChatPlatform | "mixed">("mixed");
 
-    function dispatchEmulatedEvent<T extends UniChatEvent>(
+    async function dispatchEmulatedEvent<T extends UniChatEvent>(
         eventType: T["type"],
         requirePlatform?: UniChatPlatform
-    ): void {
+    ): Promise<void> {
         if (requirePlatform == null && emulationMode !== "mixed") {
             requirePlatform = emulationMode as UniChatPlatform;
         }
 
-        buildEmulatedEventData<T>(eventType, requirePlatform).then((data) => {
-            if (iframeRef.current && iframeRef.current.contentWindow) {
-                const detail = { type: eventType, data };
-                iframeRef.current.contentWindow.postMessage({ type: "unichat:event", detail }, "*");
-            }
-        });
+        const data = await buildEmulatedEventData<T>(eventType, requirePlatform);
+        dispatchEvent({ type: eventType, data } as UniChatEvent);
     }
 
     return (
@@ -54,9 +50,9 @@ export function Emulator({ iframeRef }: Props): PReact.ComponentChildren {
             <div className="emulator--operation-mode-select">
                 <Select
                     label="Emulation Mode"
-                    value={opModeOptions.find((option) => option.value === emulationMode)}
+                    value={emulationMode}
                     options={opModeOptions}
-                    onChange={(option) => setEmulationMode(option!.value as UniChatPlatform | "mixed")}
+                    onChange={(evt) => setEmulationMode(evt.currentTarget.value)}
                 />
                 <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:clear")}>
                     <i className="fas fa-eraser" />
