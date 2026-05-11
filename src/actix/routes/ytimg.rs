@@ -19,13 +19,13 @@ use actix_web::get;
 use actix_web::http::StatusCode;
 
 #[cfg(target_os = "windows")]
-static USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) Gecko/20100101 Firefox/143.0";
+static USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0";
 
 #[cfg(target_os = "linux")]
-static USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0";
+static USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64; rv:150.0) Gecko/20100101 Firefox/150.0";
 
 #[cfg(target_os = "macos")]
-static USER_AGENT: &str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0";
+static USER_AGENT: &str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14.0; rv:150.0) Gecko/20100101 Firefox/150.0";
 
 #[get("/ytimg/{path:.*}")]
 pub async fn ytimg(req: HttpRequest) -> Result<impl Responder, actix_web::Error> {
