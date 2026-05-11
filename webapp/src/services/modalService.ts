@@ -12,7 +12,7 @@ import { ModalProps } from "unichat/components/Modal";
 
 import { eventEmitter } from "./eventEmitter";
 
-export interface OpenModalOptions extends Omit<ModalProps, "show" | "onHide" | "withPortal"> {}
+export type OpenModalOptions = Omit<ModalProps, "show" | "onHide" | "withPortal">;
 
 export class ModalService {
     public openModal(opts: OpenModalOptions): void {

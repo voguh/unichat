@@ -10,17 +10,12 @@
 
 import * as PReact from "preact";
 
-import { LoggerFactory } from "unichat/logging/LoggerFactory";
-
-import { LoadingOverlayStyledContainer } from "./styled";
-
 interface Props extends PReact.HTMLAttributes<HTMLDivElement> {
     visible: boolean;
     zIndex?: string | number;
 }
 
-const _logger = LoggerFactory.getLogger("LoadingOverlay");
-export function LoadingOverlay({ visible, zIndex = 400, ref, ...rest }: Props): PReact.ComponentChildren {
+export function LoadingOverlay({ visible, zIndex = 400, ...rest }: Props): PReact.ComponentChildren {
     function mergeStyles(): PReact.CSSProperties {
         const style: PReact.CSSProperties = { zIndex };
         if (rest.style != null) {
@@ -35,8 +30,8 @@ export function LoadingOverlay({ visible, zIndex = 400, ref, ...rest }: Props): 
     }
 
     return (
-        <LoadingOverlayStyledContainer {...rest} ref={ref} style={mergeStyles()}>
+        <div {...rest} style={mergeStyles()}>
             <i className="fas fa-spinner fa-spin" />
-        </LoadingOverlayStyledContainer>
+        </div>
     );
 }

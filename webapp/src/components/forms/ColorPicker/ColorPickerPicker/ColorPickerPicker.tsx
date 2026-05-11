@@ -9,7 +9,6 @@
  ******************************************************************************/
 
 import * as PReact from "preact";
-import { useMemo } from "preact/hooks";
 
 import { HSVA, Numberify, TinyColor } from "@ctrl/tinycolor";
 
