@@ -55,21 +55,32 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
     }
 
     useEffect(() => {
+        if (Object.keys(initialSettings).length === 0) {
+            return;
+        }
+
         function changeDirty(this: HTMLInputElement): void {
             setDirty(true);
             this.removeEventListener("change", changeDirty);
         }
 
+        if (createWebviewsHiddenRef.current) {
+            createWebviewsHiddenRef.current.addEventListener("change", changeDirty);
+        }
+
+        return () => {
+            if (createWebviewsHiddenRef.current) {
+                createWebviewsHiddenRef.current.removeEventListener("change", changeDirty);
+            }
+        };
+    }, [initialSettings]);
+
+    useEffect(() => {
         async function init(): Promise<void> {
             const settings = await settingsService.getItems([
                 UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN,
                 UniChatSettingsKeys.LOG_SCRAPER_EVENTS
             ]);
-
-            if (createWebviewsHiddenRef.current) {
-                createWebviewsHiddenRef.current.checked = settings[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN] ?? false;
-                createWebviewsHiddenRef.current.addEventListener("change", changeDirty);
-            }
 
             if (logEventsRef) {
                 setLogEventsRef(settings[UniChatSettingsKeys.LOG_SCRAPER_EVENTS] ?? LogLevel.ONLY_ERRORS);

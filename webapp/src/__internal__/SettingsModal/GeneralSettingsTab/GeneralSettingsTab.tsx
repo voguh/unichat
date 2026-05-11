@@ -53,6 +53,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
 
         await settingsService.setItems(settingsCopy);
         setInitialSettings(settingsCopy);
+        setDirty(false);
 
         if (beforeOpenToLan !== settingsCopy[UniChatSettingsKeys.OPEN_TO_LAN]) {
             setRequiresRestart(true);
@@ -65,11 +66,35 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
     }
 
     useEffect(() => {
+        if (Object.keys(initialSettings).length === 0) {
+            return;
+        }
+
         function changeDirty(this: HTMLInputElement): void {
             setDirty(true);
             this.removeEventListener("change", changeDirty);
         }
 
+        if (selectRef.current) {
+            selectRef.current.addEventListener("change", changeDirty);
+        }
+
+        if (openToLanRef.current) {
+            openToLanRef.current.addEventListener("change", changeDirty);
+        }
+
+        return () => {
+            if (selectRef.current) {
+                selectRef.current.removeEventListener("change", changeDirty);
+            }
+
+            if (openToLanRef.current) {
+                openToLanRef.current.removeEventListener("change", changeDirty);
+            }
+        };
+    }, [initialSettings]);
+
+    useEffect(() => {
         async function init(): Promise<void> {
             const settings = await settingsService.getItems([
                 UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET,
@@ -77,16 +102,6 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
             ]);
 
             setInitialSettings(settings);
-
-            /* ================================================================================== */
-
-            if (selectRef.current) {
-                selectRef.current.addEventListener("change", changeDirty);
-            }
-
-            if (openToLanRef.current) {
-                openToLanRef.current.addEventListener("change", changeDirty);
-            }
         }
 
         init();
