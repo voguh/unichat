@@ -17,6 +17,7 @@ import JSONC from "jsonc-parser";
 import sonda from "sonda/vite";
 import { CompilerOptions } from "typescript";
 import { defineConfig, Plugin, PluginOption } from "vite";
+import { ViteMinifyPlugin as minifyPlugin } from "vite-plugin-minify";
 
 const tsConfigRaw = fs.readFileSync(path.resolve(__dirname, "tsconfig.json"), { encoding: "utf-8" });
 const compilerOptions = (JSONC.parse(tsConfigRaw) || {}).compilerOptions as CompilerOptions;
@@ -89,7 +90,8 @@ const plugins: PluginOption[] = [
         devtoolsInProd: false,
         prefreshEnabled: false,
         reactAliasesEnabled: false
-    })
+    }),
+    minifyPlugin()
 ];
 
 if (process.env.BUNDLE_ANALYZE === "true") {
