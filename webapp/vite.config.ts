@@ -73,6 +73,16 @@ function uniChatBuildTools(): Plugin {
             }
         },
 
+        generateBundle(_, bundle) {
+            for (const [fileName, chunk] of Object.entries(bundle)) {
+                const isVendor = fileName.includes("vendor") || chunk.name === "vendor";
+                const isMap = fileName.endsWith(".map");
+                if (isVendor && isMap) {
+                    delete bundle[fileName];
+                }
+            }
+        },
+
         handleHotUpdate({ server }) {
             server.ws.send({ type: "full-reload" });
 
