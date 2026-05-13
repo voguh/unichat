@@ -11,8 +11,6 @@
 import * as PReact from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 
-import clsx from "clsx";
-
 import { Button } from "unichat/components/Button";
 import { Modal } from "unichat/components/Modal";
 import { ModalContext } from "unichat/contexts/ModalContext";
@@ -105,7 +103,7 @@ export function SettingsModal({ externalActiveTab, onHide, show }: Props): PReac
                             variant={key === activeTab ? "secondary" : "default"}
                             onClick={() => setActiveTab(key)}
                         >
-                            <i className={clsx(item.icon, "fa-fw")} />
+                            <i className={item.icon} />
                             {item.title}
                         </Button>
                     ))}
