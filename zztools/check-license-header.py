@@ -60,6 +60,7 @@ def main():
         "capabilities",
         "coverage",
         "dist",
+        "fontawesome",
         "gen",
         "node_modules",
         "plugins",
