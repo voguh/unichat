@@ -166,6 +166,9 @@ export default defineConfig({
     },
 
     resolve: {
-        alias: tsConfigPaths
+        alias: {
+            clsx: "clsx/lite",
+            ...tsConfigPaths
+        }
     }
 });
