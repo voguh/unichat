@@ -8,9 +8,4 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { ComponentType, HTMLAttributes } from "preact";
-
-import { styled } from "goober";
-import tw from "twin.macro";
-
-export const CheckUpdatesSettingsTabStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({});
+export * from "./ReleaseNotes";

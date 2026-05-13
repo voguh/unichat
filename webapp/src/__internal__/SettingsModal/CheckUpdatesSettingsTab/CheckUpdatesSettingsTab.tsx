@@ -11,16 +11,12 @@
 import * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
-import { openUrl } from "@tauri-apps/plugin-opener";
-
-import { Badge } from "unichat/components/Badge";
-import { Button } from "unichat/components/Button";
-import { Markdown } from "unichat/components/Markdown";
 import { Tab, Tabs } from "unichat/components/Tabs";
 import { commandService } from "unichat/services/commandService";
 import { UniChatRelease } from "unichat/types";
 
-import { CheckUpdatesSettingsTabStyledContainer, ReleaseNotesWrapper } from "./styled";
+import { ReleaseNotes } from "./ReleaseNotes";
+import { CheckUpdatesSettingsTabStyledContainer } from "./styled";
 
 interface Props {
     onClose: () => void;
@@ -34,50 +30,12 @@ export function CheckUpdatesSettingsTab(_props: Props): PReact.ComponentChildren
         {
             id: "stable",
             title: "Latest Stable",
-            content: latestStable ? (
-                <ReleaseNotesWrapper key="stable">
-                    <div className="release-name">
-                        <div className="release-data">
-                            {latestStable.name}
-                            <Badge variant="success">Latest</Badge>
-                        </div>
-                        <div className="release-download">
-                            <Button onClick={() => openUrl(latestStable.url)}>Go to Release Page</Button>
-                        </div>
-                    </div>
-
-                    <hr />
-
-                    <Markdown className="release-notes" content={latestStable.description} />
-                </ReleaseNotesWrapper>
-            ) : (
-                <div style={{ padding: "16px" }}>No stable release available.</div>
-            )
+            content: <ReleaseNotes release={latestStable} />
         },
         {
             id: "unstable",
             title: "Latest Unstable",
-            content: latestUnstable ? (
-                <ReleaseNotesWrapper>
-                    <div className="release-name">
-                        <div className="release-data">
-                            {latestUnstable.name}
-                            <Badge variant="warning" style={{ color: "var(--oc-dark-9)" }}>
-                                Pre-Release
-                            </Badge>
-                        </div>
-                        <div className="release-download">
-                            <Button onClick={() => openUrl(latestUnstable.url)}>Go to Release Page</Button>
-                        </div>
-                    </div>
-
-                    <hr />
-
-                    <Markdown className="release-notes" content={latestUnstable.description} />
-                </ReleaseNotesWrapper>
-            ) : (
-                <div style={{ padding: "16px" }}>No unstable release available.</div>
-            )
+            content: <ReleaseNotes release={latestUnstable} />
         }
     ];
 

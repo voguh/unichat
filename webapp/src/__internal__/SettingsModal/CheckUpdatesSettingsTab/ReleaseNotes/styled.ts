@@ -13,4 +13,16 @@ import { ComponentType, HTMLAttributes } from "preact";
 import { styled } from "goober";
 import tw from "twin.macro";
 
-export const CheckUpdatesSettingsTabStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({});
+export const ReleaseNotesWrapper: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
+    ...tw`px-4`,
+
+    "> .release-name": {
+        ...tw`p-4 flex items-center justify-between mb-4 sticky top-0 bg-stone-900 border-b border-stone-700`,
+
+        "> .release-data": {
+            ...tw`text-xl font-semibold flex justify-center items-center gap-2`
+        },
+
+        "> .release-download": {}
+    }
+});
