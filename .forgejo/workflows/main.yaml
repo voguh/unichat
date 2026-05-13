@@ -52,10 +52,20 @@ jobs:
           name: webapp-build
           path: ${{ env.TAURI_FRONTEND_PATH }}/dist
 
-
-  package-linux:
+  package:
     runs-on: ubuntu-24.04
     needs: [bundle-webapp]
+    strategy:
+      matrix:
+        include:
+          - target: linux
+            rust_target: x86_64-unknown-linux-gnu
+            bundle_path: target/release/bundle
+            build_command: cargo tauri build
+          - target: windows
+            rust_target: x86_64-pc-windows-msvc
+            bundle_path: target/x86_64-pc-windows-msvc/release/bundle
+            build_command: cargo tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
     env:
       TAURI_APP_PATH: ${{ forgejo.workspace }}
       TAURI_FRONTEND_PATH: ${{ forgejo.workspace }}/webapp
@@ -73,6 +83,7 @@ jobs:
         uses: ./.forgejo/actions/rust-toolchain
         with:
           toolchain: ${{ env.RUST_VERSION }}
+          targets: ${{ matrix.rust_target }}
 
       - name: Cache cargo registry
         uses: actions/cache@v5.0.5
@@ -87,9 +98,9 @@ jobs:
         with:
           path: |
             target
-          key: cargo-target-linux-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-target-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            cargo-target-linux-
+            cargo-target-${{ matrix.target }}-
 
       - name: Cache cargo bin
         uses: actions/cache@v5.0.5
@@ -97,7 +108,7 @@ jobs:
           path: |
             ~/.cargo/bin/cargo-xwin
             ~/.cargo/bin/cargo-tauri
-          key: cargo-bin-linux-${{ env.RUST_VERSION }}-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-bin-${{ matrix.target }}-${{ env.RUST_VERSION }}-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Prepare build environment
         run: |
@@ -105,91 +116,25 @@ jobs:
           sudo apt install --no-install-recommends --no-install-suggests -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev xdg-utils
           jq '.build.beforeBuildCommand = ""' tauri.conf.json > tmp.json && mv tmp.json tauri.conf.json
           corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION}} --activate && corepack enable pnpm
+          command -v cargo-tauri || cargo install --locked tauri-cli
+          if [[ "${{ matrix.target }}" == "windows" ]]; then
+              sudo apt install --no-install-recommends --no-install-suggests -y nsis clang lld llvm
+              command -v cargo-xwin || cargo install --locked cargo-xwin
+          fi
 
       - name: Run build app
-        run: |
-          command -v cargo-tauri || cargo install --locked tauri-cli
-          (cd ${{ env.TAURI_FRONTEND_PATH }} && pnpm install --prod --frozen-lockfile)
-          cargo tauri build
+        run: ${{ matrix.build_command }}
 
       - name: Upload build artifacts
         uses: forgejo/upload-artifact@v5
         with:
-          name: linux-bundles
-          path: ${{ forgejo.workspace }}/target/release/bundle
-
-  package-windows:
-    runs-on: ubuntu-24.04
-    needs: [bundle-webapp]
-    env:
-      TAURI_APP_PATH: ${{ forgejo.workspace }}
-      TAURI_FRONTEND_PATH: ${{ forgejo.workspace }}/webapp
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6.0.2
-
-      - name: Download webapp build artifacts
-        uses: forgejo/download-artifact@v7
-        with:
-          name: webapp-build
-          path: ${{ env.TAURI_FRONTEND_PATH }}/dist
-
-      - name: Rust toolchain setup
-        uses: ./.forgejo/actions/rust-toolchain
-        with:
-          toolchain: ${{ env.RUST_VERSION }}
-          targets: x86_64-pc-windows-msvc
-
-      - name: Cache cargo registry
-        uses: actions/cache@v5.0.5
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Cache cargo target
-        uses: actions/cache@v5.0.5
-        with:
-          path: |
-            target
-          key: cargo-target-windows-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            cargo-target-windows-
-
-      - name: Cache cargo bin
-        uses: actions/cache@v5.0.5
-        with:
-          path: |
-            ~/.cargo/bin/cargo-xwin
-            ~/.cargo/bin/cargo-tauri
-          key: cargo-bin-windows-${{ env.RUST_VERSION }}-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Prepare build environment
-        run: |
-          sudo apt update
-          sudo apt install --no-install-recommends --no-install-suggests -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev xdg-utils
-          sudo apt install --no-install-recommends --no-install-suggests -y nsis clang lld llvm
-          jq '.build.beforeBuildCommand = ""' tauri.conf.json > tmp.json && mv tmp.json tauri.conf.json
-          corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION}} --activate && corepack enable pnpm
-
-      - name: Run build app
-        run: |
-          command -v cargo-tauri || cargo install --locked tauri-cli
-          command -v cargo-xwin || cargo install --locked cargo-xwin
-          (cd ${{ env.TAURI_FRONTEND_PATH }} && pnpm install --prod --frozen-lockfile)
-          cargo tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
-
-      - name: Upload build artifacts
-        uses: forgejo/upload-artifact@v5
-        with:
-          name: windows-bundles
-          path: ${{ forgejo.workspace }}/target/x86_64-pc-windows-msvc/release/bundle
+          name: ${{ matrix.target }}-bundles
+          path: ${{ forgejo.workspace }}/${{ matrix.bundle_path }}
 
   publish:
     if: startsWith(forgejo.ref, 'refs/tags/')
     runs-on: ubuntu-24.04
-    needs: [package-linux, package-windows]
+    needs: [package]
     permissions:
       contents: write
     steps:
