@@ -8,34 +8,36 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
+import { useEffect, useState } from "preact/hooks";
 
 import * as eventService from "@tauri-apps/api/event";
-import Card from "react-bootstrap/Card";
 
+import { ModalProvider } from "unichat/__internal__/ModalProvider";
+import { NotificationProvider } from "unichat/__internal__/NotificationProvider";
 import { PluginsModal, PluginsModalActions } from "unichat/__internal__/PluginsModal";
-import { SettingsModalLeftSection, SettingsModal } from "unichat/__internal__/SettingsModal";
+import { SettingsModal } from "unichat/__internal__/SettingsModal";
+import { Tour } from "unichat/__internal__/Tour";
+import { WidgetsModal, WidgetsModalActions } from "unichat/__internal__/WidgetsModal";
 import { Button } from "unichat/components/Button";
-import { ErrorBoundary } from "unichat/components/ErrorBoundary";
-import { Tooltip } from "unichat/components/OverlayTrigger";
+import { Tooltip } from "unichat/components/Tooltip";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
+import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
 import { notificationService } from "unichat/services/notificationService";
 import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
+import { StorageKeys, storageService } from "unichat/services/storageService";
+import { GlobalStyle } from "unichat/styles/GlobalStyles";
 import { Dashboard, DashboardLeftSection } from "unichat/tabs/Dashboard";
 import { WidgetEditor, WidgetEditorLeftSection } from "unichat/tabs/WidgetEditor";
 import { IPCNotificationEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
 
-import { Tour } from "./__internal__/Tour";
-import { WidgetsModal, WidgetsModalActions } from "./__internal__/WidgetsModal";
-import { commandService } from "./services/commandService";
-
 interface TabOptions {
     label: string;
-    icon: React.ReactNode;
-    component: React.ReactNode;
-    leftSection: React.ReactNode;
+    icon: PReact.ComponentChildren;
+    component: PReact.ComponentChildren;
+    leftSection: PReact.ComponentChildren;
 }
 
 const tabs: Record<string, TabOptions> = {
@@ -53,37 +55,33 @@ const tabs: Record<string, TabOptions> = {
     }
 };
 
-function TabLeftSection({ selectedTab }: { selectedTab: keyof typeof tabs }): React.ReactNode {
+function TabLeftSection({ selectedTab }: { selectedTab: keyof typeof tabs }): PReact.ComponentChildren {
     const leftSection = tabs[selectedTab]?.leftSection;
     if (leftSection == null) {
         return null;
     }
 
     return (
-        <>
-            <div className="divider" />
+        <div className="sidebar__left-section">
+            <div className="sidebar__divider" />
             {leftSection}
-        </>
+        </div>
     );
 }
 
-function TabContent({ selectedTab }: { selectedTab: keyof typeof tabs }): React.ReactNode {
+function TabContent({ selectedTab }: { selectedTab: keyof typeof tabs }): PReact.ComponentChildren {
     const content = tabs[selectedTab]?.component;
     if (content == null) {
         return null;
     }
 
-    return (
-        <ErrorBoundary>
-            <div className="divider" />
-            {content}
-        </ErrorBoundary>
-    );
+    return content;
 }
 
 const _logger = LoggerFactory.getLogger("App");
-export function App(): JSX.Element {
-    const [selectedTab, setSelectedTab] = React.useState<keyof typeof tabs>("dashboard");
+export function App(): PReact.ComponentChildren {
+    const [openedSettingsModal, setOpenedSettingsModal] = useState<string | boolean>(false);
+    const [selectedTab, setSelectedTab] = useState<keyof typeof tabs>("dashboard");
 
     function togglePluginsModal(): void {
         modalService.openModal({
@@ -103,22 +101,11 @@ export function App(): JSX.Element {
         });
     }
 
-    function toggleSettingsModal(tab?: string | null): void {
-        modalService.openModal({
-            size: "xl",
-            title: "Settings",
-            leftSectionTitle: "Settings",
-            leftSection: <SettingsModalLeftSection />,
-            children: <SettingsModal />,
-            sharedStoreInitialState: {
-                selectedItem: Strings.isNullOrEmpty(tab) ? "general" : tab
-            }
-        });
-    }
-
     /* ========================================================================================== */
 
     async function init(): Promise<void> {
+        storageService.set(StorageKeys.REQUIRES_RESTART, false);
+
         const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
         if (isOpenToLan) {
             notificationService.warn({
@@ -131,11 +118,11 @@ export function App(): JSX.Element {
 
         const releaseInfo = await commandService.getReleases();
         if (releaseInfo.hasUpdate) {
-            toggleSettingsModal("check-updates");
+            setOpenedSettingsModal("check-updates");
         }
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         init();
 
         /* ====================================================================================== */
@@ -157,14 +144,14 @@ export function App(): JSX.Element {
 
     return (
         <>
-            <Card className="sidebar">
-                <div>
+            <GlobalStyle />
+            <div className="sidebar">
+                <div className="sidebar__tabs">
                     {Object.entries(tabs).map(([key, tab]) => (
                         <Tooltip key={key} content={tab.label} placement="right">
                             <Button
                                 data-tour={`tab-${key}-toggle`}
-                                variant={selectedTab === key ? "filled" : "default"}
-                                color={selectedTab === key ? "green" : "blue"}
+                                variant={selectedTab === key ? "primary" : undefined}
                                 onClick={() => setSelectedTab(key)}
                             >
                                 {tab.icon}
@@ -175,30 +162,40 @@ export function App(): JSX.Element {
                     <TabLeftSection selectedTab={selectedTab} />
                 </div>
 
-                <Tooltip content="Widgets" placement="right">
-                    <Button variant="default" onClick={toggleWidgetsModal} data-tour="widgets-modal-toggle">
-                        <i className="fas fa-object-group" />
-                    </Button>
-                </Tooltip>
+                <div className="sidebar__footer">
+                    <Tooltip content="Widgets" placement="right">
+                        <Button onClick={toggleWidgetsModal} data-tour="widgets-modal-toggle">
+                            <i className="fas fa-object-group" />
+                        </Button>
+                    </Tooltip>
 
-                <Tooltip content="Plugins" placement="right">
-                    <Button variant="default" onClick={togglePluginsModal} data-tour="plugins-modal-toggle">
-                        <i className="fas fa-cubes" />
-                    </Button>
-                </Tooltip>
+                    <Tooltip content="Plugins" placement="right">
+                        <Button onClick={togglePluginsModal} data-tour="plugins-modal-toggle">
+                            <i className="fas fa-cubes" />
+                        </Button>
+                    </Tooltip>
 
-                <Tooltip content="Settings" placement="right">
-                    <Button variant="default" onClick={() => toggleSettingsModal()} data-tour="settings-modal-toggle">
-                        <i className="fas fa-sliders-h" />
-                    </Button>
-                </Tooltip>
-            </Card>
+                    <Tooltip content="Settings" placement="right">
+                        <Button onClick={() => setOpenedSettingsModal(true)} data-tour="settings-modal-toggle">
+                            <i className="fas fa-sliders-h" />
+                        </Button>
+                    </Tooltip>
+                </div>
+            </div>
 
             <div className="content">
                 <TabContent selectedTab={selectedTab} />
             </div>
 
-            <Tour />
+            <SettingsModal
+                externalActiveTab={typeof openedSettingsModal === "string" ? openedSettingsModal : null}
+                show={!!openedSettingsModal}
+                onHide={() => setOpenedSettingsModal(false)}
+            />
+
+            {/* <Tour /> */}
+            <ModalProvider />
+            <NotificationProvider />
         </>
     );
 }

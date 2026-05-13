@@ -8,111 +8,84 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import styled from "styled-components";
+import { ComponentType, HTMLAttributes } from "preact";
 
-export const AboutSettingsTabStyledContainer = styled.div`
-    position: relative;
-    height: var(--modal-body-inner-max-height);
-    overflow: hidden;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    flex-direction: column;
+import { styled } from "goober";
+import tw from "twin.macro";
 
-    > div {
-        > span {
-            text-decoration: underline;
-            cursor: pointer;
-            color: var(--oc-blue-4);
+export const AboutSettingsTabStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
+    ...tw`relative flex flex-col items-center`,
+    width: "var(--settings-modal-content-width)",
+    height: "var(--settings-modal-content-height)",
+    overflow: "hidden",
+
+    "> .app-image": {
+        "> img": {
+            width: "128px"
         }
-    }
+    },
 
-    > .app-image {
-        > img {
-            width: 128px;
-        }
-    }
+    "> .app-name": {
+        ...tw`font-semibold mt-4`
+    },
 
-    > .app-name {
-        font-weight: 600;
-        margin-top: 16px;
-    }
+    "> .app-version": {
+        ...tw`text-sm mt-2 text-stone-500`
+    },
 
-    > .app-version {
-        font-size: 12px;
-        margin-top: 8px;
-        color: var(--oc-dark-1);
-    }
+    "> .app-homepage": {
+        ...tw`mt-4 text-blue-500 cursor-pointer`
+    },
 
-    > .app-homepage {
-        margin-top: 16px;
-    }
+    "> .app-description": {
+        ...tw`text-sm mt-4 text-stone-500 text-center`
+    },
 
-    > .app-description {
-        font-size: 12px;
-        text-align: center;
-    }
+    "> .app-footer": {
+        ...tw`absolute bottom-0 left-0 w-full flex justify-between p-4`
+    },
 
-    > .app-footer {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-    }
+    "> .app-credits": {
+        ...tw`absolute bg-stone-800 border border-stone-700 rounded p-4`,
+        bottom: "-1px",
+        left: "16px",
+        width: "calc(var(--settings-modal-content-width) - 32px)",
+        height: "calc(var(--settings-modal-content-height) / 2)",
+        transform: "translateY(100%)",
+        transition: "transform 200ms ease",
 
-    > .app-credits {
-        position: absolute;
-        bottom: -1px;
-        left: 0;
-        height: 50%;
-        width: 100%;
-        background: var(--oc-dark-7);
-        transform: translateY(100%);
-        transition: transform 200ms ease;
-        border: 1px solid var(--oc-dark-5);
-        border-radius: var(--bs-border-radius);
-        padding: 16px;
+        "&.isCreditsOpen": {
+            bottom: "16px",
+            transform: "translateY(0)"
+        },
 
-        &.isCreditsOpen {
-            bottom: 0;
-            transform: translateY(0);
-        }
+        "> .credits-data": {
+            height: "calc(100% - (36px + 32px))",
+            fontSize: "12px",
 
-        > .credits-data {
-            height: calc(100% - (36px + 32px));
-            font-size: 12px;
+            "> div": {
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gridTemplateAreas: `"LT RT"`,
+                gap: "8px",
 
-            > div {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                grid-template-areas: "LT RT";
-                gap: 8px;
+                "> div.label": {
+                    ...tw`font-bold text-right`,
+                    gridArea: "LT"
+                },
 
-                > div.label {
-                    grid-area: LT;
-                    text-align: right;
-                    font-weight: bold;
-                }
-
-                > div.values {
-                    grid-area: RT;
-                    text-align: left;
-                    color: var(--oc-dark-1);
-
-                    > p {
-                        margin: 0;
-                    }
+                "> div.values": {
+                    ...tw`text-stone-50 text-left`,
+                    gridArea: "RT"
                 }
             }
-        }
+        },
 
-        > .credits-footer {
-            width: 100%;
-            margin-top: 32px;
-            display: flex;
-            justify-content: center;
+        "> .credits-footer": {
+            width: "100%",
+            marginTop: "32px",
+            display: "flex",
+            justifyContent: "center"
         }
     }
-`;
+});

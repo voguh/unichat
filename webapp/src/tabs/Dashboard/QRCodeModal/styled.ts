@@ -8,33 +8,33 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import styled from "styled-components";
+import { styled } from "goober";
+import tw from "twin.macro";
 
-export const QRCodeModalStyledContainer = styled.div`
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
+export const QRCodeModalStyledContainer = styled.div({
+    ...tw`w-full h-full flex flex-col justify-center items-center gap-4`,
 
-    > .qrcode-label {
-        font-size: 1rem;
-        color: var(--oc-dark-0);
+    "> .qrcode-label": {
+        ...tw`text-stone-100 text-center`
+    },
+
+    "> .qrcode": {
+        ...tw`bg-white`,
+        width: "256px",
+        height: "256px",
+
+        "> img": {
+            ...tw`w-full h-full`
+        }
+    },
+
+    "> .qrcode-url": {
+        ...tw`w-full flex items-center gap-2`,
+
+        "> button": {
+            ...tw`p-0 flex justify-center items-center flex-shrink-0`,
+            width: "36px",
+            height: "36px"
+        }
     }
-
-    > .fake-text-input {
-        --input-height: 2.25rem;
-
-        height: var(--input-height);
-        border: 1px solid var(--oc-dark-4);
-        color: var(--oc-text);
-        border: calc(0.0625rem * var(--mantine-scale)) solid var(--oc-dark-4);
-        background-color: var(--oc-dark-6);
-        border-radius: var(--bs-border-radius);
-        display: flex;
-        align-items: center;
-        padding: 0 calc(var(--input-height) / 3);
-    }
-`;
+});

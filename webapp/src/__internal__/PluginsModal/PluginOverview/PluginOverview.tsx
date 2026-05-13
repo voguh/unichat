@@ -8,16 +8,15 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
 
-import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
-import Badge from "react-bootstrap/Badge";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { Button } from "unichat/components/Button";
-import { Tooltip } from "unichat/components/OverlayTrigger";
+import { getPluginIconDataUrl } from "unichat/__internal__/PluginsModal/utils/getPluginIconDataUrl";
+import { handleBadgeVariant } from "unichat/__internal__/PluginsModal/utils/handleBadgeVariant";
+import { Badge } from "unichat/components/Badge";
+import { Tooltip } from "unichat/components/Tooltip";
 import { UniChatPluginMetadata } from "unichat/types";
-import { PLUGIN_STATUS_COLOR } from "unichat/utils/constants";
-import { Strings } from "unichat/utils/Strings";
 
 import { PluginOverviewStyledContainer } from "./styled";
 
@@ -25,18 +24,7 @@ interface Props {
     plugin: UniChatPluginMetadata;
 }
 
-export function PluginOverviewModal(props: Props): React.ReactNode {
-    const { plugin } = props;
-    const [bgColor, fgColor] = PLUGIN_STATUS_COLOR[plugin.status];
-
-    function getPluginIconDataUrl(plugin: UniChatPluginMetadata): string {
-        if (Strings.isNullOrEmpty(plugin.icon)) {
-            return UNICHAT_ICON;
-        } else {
-            return plugin.icon;
-        }
-    }
-
+export function PluginOverviewModal({ plugin }: Props): PReact.ComponentChildren {
     return (
         <PluginOverviewStyledContainer>
             <div className="plugin-details">
@@ -55,20 +43,18 @@ export function PluginOverviewModal(props: Props): React.ReactNode {
                     <div className="plugin-status">
                         <div className="details-label">Status</div>
                         <div className="details-value">
-                            <Badge bg="default" style={{ backgroundColor: bgColor, color: fgColor }}>
-                                {plugin.status}
-                            </Badge>
+                            <Badge variant={handleBadgeVariant(plugin.status)}>{plugin.status}</Badge>
                         </div>
                     </div>
                     <div className="plugin-authors">
                         <div className="details-label">Authors</div>
-                        <Tooltip content={plugin.author} placement="bottom">
+                        <Tooltip placement="bottom" content={plugin.author}>
                             <div className="details-value">{plugin.author}</div>
                         </Tooltip>
                     </div>
                     <div className="plugin-license">
                         <div className="details-label">License</div>
-                        <Tooltip content={plugin.license} placement="bottom">
+                        <Tooltip placement="bottom" content={plugin.license}>
                             <div className="details-value">{plugin.license}</div>
                         </Tooltip>
                     </div>
@@ -86,26 +72,5 @@ export function PluginOverviewModal(props: Props): React.ReactNode {
             </div>
             <pre className="plugin-messages">{plugin.messages.join("\n")}</pre>
         </PluginOverviewStyledContainer>
-    );
-}
-
-export function PluginOverviewModalActions(props: Props): React.ReactNode {
-    const {
-        plugin: { pluginPath }
-    } = props;
-
-    return (
-        <>
-            {Strings.isNullOrEmpty(pluginPath) ? (
-                <Button variant="outline" disabled>
-                    Built-In Plugin
-                </Button>
-            ) : (
-                <Button variant="outline" onClick={() => revealItemInDir(pluginPath)}>
-                    <i className="fas fa-folder" />
-                    &nbsp;Show in Folder
-                </Button>
-            )}
-        </>
     );
 }

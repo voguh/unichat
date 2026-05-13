@@ -8,35 +8,34 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
+import { useContext, useEffect, useState } from "preact/hooks";
 
 import clsx from "clsx";
 
 import { Button } from "unichat/components/Button";
-import { ErrorBoundary } from "unichat/components/ErrorBoundary";
+import { Modal } from "unichat/components/Modal";
 import { ModalContext } from "unichat/contexts/ModalContext";
 
 import { AboutSettingsTab } from "./AboutSettingsTab";
 import { CheckUpdatesSettingsTab } from "./CheckUpdatesSettingsTab";
 import { DevelopersSettingsTab } from "./DevelopersSettingsTab";
 import { GeneralSettingsTab } from "./GeneralSettingsTab";
-import { SettingsSidebarStyledFooter, SettingsSidebarStyledItems } from "./styled";
+import { SettingsModalStyledContainer } from "./styled";
 
-interface Props {
-    children?: React.ReactNode;
-}
+/* ========================================================================== */
 
-interface SelectedItemProps {
+export interface SelectedItemProps {
     onClose(): void;
 }
 
-interface SettingsItem {
+export interface SettingsItem {
     title: string;
     icon: string;
-    children: React.ComponentType<SelectedItemProps>;
+    children: PReact.ComponentType<SelectedItemProps>;
 }
 
-const settingsItems: Record<string, SettingsItem> = {
+export const settingsItems: Record<string, SettingsItem> = {
     general: {
         title: "General",
         icon: "fas fa-cog",
@@ -58,8 +57,9 @@ const settingsItems: Record<string, SettingsItem> = {
         children: AboutSettingsTab
     }
 };
+/* ========================================================================== */
 
-function TabContent({ selectedItem, ...rest }: { selectedItem: string } & SelectedItemProps): React.ReactNode {
+function TabContent({ selectedItem, ...rest }: { selectedItem: string } & SelectedItemProps): PReact.ComponentChildren {
     if (!(selectedItem in settingsItems)) {
         throw new Error("Selected item not found in settingsItems");
     }
@@ -69,46 +69,56 @@ function TabContent({ selectedItem, ...rest }: { selectedItem: string } & Select
     return <Element {...rest} />;
 }
 
-export function SettingsModal(_props: Props): React.ReactNode {
-    const { sharedStore, setSharedStore, onClose } = React.useContext(ModalContext);
+/* ========================================================================== */
 
-    React.useEffect(() => {
-        const selectedItem = settingsItems[sharedStore.selectedItem];
-        if (selectedItem != null) {
-            setSharedStore((old) => ({ ...old, modalTitle: selectedItem.title }));
-        }
-    }, [sharedStore.selectedItem]);
-
-    return (
-        <ErrorBoundary>
-            <TabContent selectedItem={sharedStore.selectedItem} onClose={onClose} />
-        </ErrorBoundary>
-    );
+interface Props {
+    show: boolean;
+    onHide(): void;
+    externalActiveTab: string | null;
 }
 
-export const SettingsModalLeftSection = (_props: Props): React.ReactNode => {
-    const { sharedStore, setSharedStore } = React.useContext(ModalContext);
+export function SettingsModal({ externalActiveTab, onHide, show }: Props): PReact.ComponentChildren {
+    const [activeTab, setActiveTab] = useState<keyof typeof settingsItems>("general");
+
+    const { onClose } = useContext(ModalContext);
+
+    useEffect(() => {
+        if (externalActiveTab != null && externalActiveTab in settingsItems) {
+            setActiveTab(externalActiveTab);
+        }
+    }, [externalActiveTab]);
 
     return (
-        <>
-            <SettingsSidebarStyledItems className="settings-sidebar-items">
-                {Object.entries(settingsItems).map(([key, item]) => (
-                    <Button
-                        key={key}
-                        variant={key === sharedStore.selectedItem ? "filled" : "default"}
-                        onClick={() => setSharedStore((old) => ({ ...old, selectedItem: key }))}
-                    >
-                        <i className={clsx(item.icon, "fa-fw")} />
-                        {item.title}
-                    </Button>
-                ))}
-            </SettingsSidebarStyledItems>
-
-            <SettingsSidebarStyledFooter className="settings-sidebar-footer">
-                <span>
-                    <strong>{UNICHAT_DISPLAY_NAME}</strong> {UNICHAT_VERSION}
-                </span>
-            </SettingsSidebarStyledFooter>
-        </>
+        <Modal
+            withPortal={false}
+            show={show}
+            onHide={onHide}
+            size="xl"
+            title="Settings"
+            CustomModalBody={SettingsModalStyledContainer}
+        >
+            <div className="settings_modal--sidebar">
+                <div className="settings_modal--sidebar_items">
+                    {Object.entries(settingsItems).map(([key, item]) => (
+                        <Button
+                            key={key}
+                            variant={key === activeTab ? "secondary" : "default"}
+                            onClick={() => setActiveTab(key)}
+                        >
+                            <i className={clsx(item.icon, "fa-fw")} />
+                            {item.title}
+                        </Button>
+                    ))}
+                </div>
+                <div className="settings_modal--sidebar_footer">
+                    <span>
+                        <strong>{UNICHAT_DISPLAY_NAME}</strong> {UNICHAT_VERSION}
+                    </span>
+                </div>
+            </div>
+            <div className="settings_modal--content">
+                <TabContent selectedItem={activeTab} onClose={onClose} />
+            </div>
+        </Modal>
     );
-};
+}

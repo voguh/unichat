@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "preact/hooks";
 
 import { commandService } from "unichat/services/commandService";
 import { UniChatScraper } from "unichat/types";
@@ -28,7 +28,7 @@ export function useScrapers<T = UniChatScraper>(
             scrapers = await commandService.getScrapers();
             cachedScrapers.splice(0, cachedScrapers.length, ...scrapers);
         } else {
-            scrapers = [...cachedScrapers];
+            scrapers = structuredClone(cachedScrapers);
         }
 
         const transformedValue = transformer(scrapers);

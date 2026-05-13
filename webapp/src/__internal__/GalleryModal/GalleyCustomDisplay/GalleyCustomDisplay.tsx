@@ -8,14 +8,15 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
+import { useContext, useEffect, useRef, useState } from "preact/hooks";
 
 import { Button } from "unichat/components/Button";
 import { TextInput } from "unichat/components/forms/TextInput";
 import { ModalContext } from "unichat/contexts/ModalContext";
 import { GalleryItem } from "unichat/types";
 
-import { GalleyTabEmptyStyledContainer } from "./styled";
+import { GalleyCustomDisplayStyledContainer } from "./styled";
 
 interface Props {
     selectedItem?: string;
@@ -68,15 +69,15 @@ function testAudio(url: string): Promise<boolean> {
     });
 }
 
-export function GalleyCustomDisplay(props: Props): React.ReactNode {
+export function GalleyCustomDisplay(props: Props): PReact.ComponentChildren {
     const { onSelectItem, selectedItem } = props;
 
-    const [tempType, setTempType] = React.useState<GalleryItem["type"]>("image");
-    const [tempURL, setTempURL] = React.useState("");
+    const [tempType, setTempType] = useState<GalleryItem["type"]>("image");
+    const [tempURL, setTempURL] = useState("");
 
-    const { onClose } = React.useContext(ModalContext);
+    const { onClose } = useContext(ModalContext);
 
-    const inputRef = React.useRef<HTMLInputElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     async function handleApply(): Promise<void> {
         if (inputRef.current) {
@@ -103,7 +104,7 @@ export function GalleyCustomDisplay(props: Props): React.ReactNode {
         }
     }
 
-    function renderPreview(): React.ReactNode {
+    function renderPreview(): PReact.ComponentChildren {
         if ((tempURL ?? "").trim().length > 0) {
             if (tempType === "image") {
                 return <img src={tempURL} />;
@@ -117,7 +118,7 @@ export function GalleyCustomDisplay(props: Props): React.ReactNode {
         return <img src="https://placehold.co/600x400?text=No+Preview" alt="No Preview Available" />;
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (selectedItem && selectedItem.startsWith("http")) {
             if (inputRef.current) {
                 inputRef.current.value = selectedItem;
@@ -127,7 +128,7 @@ export function GalleyCustomDisplay(props: Props): React.ReactNode {
     }, []);
 
     return (
-        <GalleyTabEmptyStyledContainer>
+        <GalleyCustomDisplayStyledContainer>
             <div className="media-wrapper">{renderPreview()}</div>
 
             <div className="input-wrapper">
@@ -139,6 +140,7 @@ export function GalleyCustomDisplay(props: Props): React.ReactNode {
 
             {(tempURL ?? "").trim().length > 0 && (
                 <Button
+                    variant="secondary"
                     onClick={() => {
                         if (typeof onSelectItem === "function") {
                             onSelectItem(tempURL, { close: onClose });
@@ -148,6 +150,6 @@ export function GalleyCustomDisplay(props: Props): React.ReactNode {
                     Select
                 </Button>
             )}
-        </GalleyTabEmptyStyledContainer>
+        </GalleyCustomDisplayStyledContainer>
     );
 }

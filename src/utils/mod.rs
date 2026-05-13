@@ -56,7 +56,7 @@ pub struct UniChatRelease {
     pub published_at: Option<String>
 }
 
-fn get_releases_inner<T: serde::de::DeserializeOwned>() -> Result<T, Error> {
+pub fn get_releases() -> Result<Vec<UniChatRelease>, Error> {
     let cached_releases_path = properties::get_app_path(AppPaths::AppCache).join("cached_releases.json");
     if let Ok(metadata) = fs::metadata(&cached_releases_path) {
         let modified_at = metadata.modified()?;
@@ -66,7 +66,7 @@ fn get_releases_inner<T: serde::de::DeserializeOwned>() -> Result<T, Error> {
         if duration < Duration::from_secs(3600) {
             log::info!("Using cached releases file (age: {} seconds)", duration.as_secs());
             let data = fs::read_to_string(&cached_releases_path)?;
-            let json_data: T = serde_json::from_str(&data)?;
+            let json_data: Vec<UniChatRelease> = serde_json::from_str(&data)?;
 
             return Ok(json_data);
         }
@@ -78,20 +78,9 @@ fn get_releases_inner<T: serde::de::DeserializeOwned>() -> Result<T, Error> {
 
     let releases_string = body.read_to_string()?;
     fs::write(&cached_releases_path, &releases_string)?;
-
-    let releases_json: T = body.read_json()?;
+    let releases_json: Vec<UniChatRelease> = body.read_json()?;
 
     return Ok(releases_json);
-}
-
-pub fn get_releases() -> Result<Vec<UniChatRelease>, Error> {
-    return match get_releases_inner() {
-        Ok(releases) => Ok(releases),
-        Err(err) => {
-            log::error!("Failed to fetch releases: {:#?}", err);
-            return Ok(vec![]);
-        }
-    };
 }
 
 /* ================================================================================================================== */

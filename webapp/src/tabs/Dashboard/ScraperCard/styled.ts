@@ -8,39 +8,51 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import styled from "styled-components";
+import { ComponentType, HTMLAttributes } from "preact";
 
-export const ScraperCardStyledContainer = styled.div`
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: flex-end;
-    gap: 8px;
+import { styled } from "goober";
+import tw from "twin.macro";
 
-    > div {
-        flex: 1;
+export const ScraperCardContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
+    ...tw`bg-stone-900 border border-stone-800 rounded p-4 shadow-md`,
+
+    "&[data-active=true]": {
+        ...tw`bg-green-500/10 border-green-500/50`
+    },
+
+    "&[data-loading=true]": {
+        ...tw`bg-yellow-500/10 border-yellow-500/50`
+    },
+
+    "> .scraper-badges-wrapper": {
+        ...tw`flex flex-row flex-nowrap items-center mb-2 absolute top-2 right-2`
+    },
+
+    "> .scraper-card-body": {
+        ...tw`flex flex-row flex-nowrap items-end gap-2`,
+
+        "> div": {
+            ...tw`flex-1`
+        },
+
+        "> button": {
+            ...tw`flex justify-center items-center gap-2`
+        }
     }
+});
 
-    > button {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
+export const ScraperLabel: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
+    ...tw`flex flex-row flex-nowrap items-center gap-2 mb-2`,
+
+    "> .scraper-icon": {
+        ...tw`w-8 h-8 rounded shrink-0 flex justify-center items-center bg-stone-500/50 border border-stone-500`,
+
+        "&[data-active=true]": {
+            ...tw`bg-green-500/50 border-green-500/50`
+        },
+
+        "&[data-loading=true]": {
+            ...tw`bg-yellow-500/50 border-yellow-500/50`
+        }
     }
-
-    > button:nth-of-type(2) {
-        padding: 0;
-        width: 36px;
-    }
-`;
-
-export const ScraperBadgesWrapper = styled.div`
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    margin-bottom: 8px;
-    position: absolute;
-    top: 8px;
-    right: 8px;
-`;
+});

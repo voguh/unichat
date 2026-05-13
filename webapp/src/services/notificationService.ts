@@ -8,11 +8,18 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { ToastWrapperProps } from "unichat/__internal__/ToastContainer";
+import { ComponentChildren } from "preact";
+
+import { ToastType } from "unichat/components/Toast";
 
 import { eventEmitter } from "./eventEmitter";
 
-export type NotificationOptions = Omit<ToastWrapperProps, "onClose">;
+export interface NotificationOptions {
+    type: ToastType;
+    title: string;
+    message: string;
+    icon?: ComponentChildren;
+}
 
 export class NotificationService {
     public show(data: NotificationOptions): void {

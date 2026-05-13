@@ -1,5 +1,3 @@
 onlyBuiltDependencies:
-  - '@fortawesome/fontawesome-free'
   - '@parcel/watcher'
-  - '@swc/core'
   - esbuild

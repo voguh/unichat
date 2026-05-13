@@ -11,24 +11,68 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import react from "@vitejs/plugin-react";
+import preact from "@preact/preset-vite";
+import { glob } from "glob";
+import JSONC from "jsonc-parser";
 import sonda from "sonda/vite";
-import { defineConfig, Plugin } from "vite";
+import { CompilerOptions } from "typescript";
+import { defineConfig, Plugin, PluginOption } from "vite";
+import { ViteMinifyPlugin as minifyPlugin } from "vite-plugin-minify";
 
-const DIST_DIR = path.resolve(__dirname, "dist");
+const tsConfigRaw = fs.readFileSync(path.resolve(__dirname, "tsconfig.json"), { encoding: "utf-8" });
+const compilerOptions = (JSONC.parse(tsConfigRaw) || {}).compilerOptions as CompilerOptions;
+const tsConfigPaths = Object.entries(compilerOptions?.paths ?? {}).reduce((acc, [key, value]) => {
+    const normalizedKey = key.endsWith("/*") ? key.slice(0, -2) : key;
+    const normalizedValue = value[0].endsWith("/*") ? value[0].slice(0, -2) : value[0];
+
+    return {
+        ...acc,
+        [normalizedKey]: path.resolve(__dirname, normalizedValue),
+        ...(key.endsWith("/*") && {
+            [`${normalizedKey}/*`]: path.resolve(__dirname, `${normalizedValue}/*`)
+        })
+    };
+}, {});
+
 function uniChatBuildTools(): Plugin {
+    const cwd = path.resolve(__dirname);
+
+    const allFiles = new Set<string>();
+    const importedFiles = new Set<string>();
+
     return {
         name: "@unichat/build-tools",
-        handleHotUpdate({ server }) {
-            server.ws.send({ type: "full-reload" });
+        async buildStart(_inputOptions) {
+            const files = await glob("./src/**/*.{js,ts,tsx,jsx}", { cwd });
+            for (const file of files) {
+                if ([".d.ts", ".test.ts", ".spec.ts"].some((ext) => file.endsWith(ext))) {
+                    continue;
+                }
 
-            return [];
-        },
-        buildStart() {
-            if (fs.existsSync(DIST_DIR)) {
-                fs.rmSync(DIST_DIR, { recursive: true, force: true });
+                allFiles.add(path.resolve(cwd, file));
             }
         },
+        load(id, _options) {
+            if (allFiles.has(id.split("?")[0])) {
+                importedFiles.add(id.split("?")[0]);
+            }
+        },
+        buildEnd(_error) {
+            const orphanFiles = Array.from(allFiles).filter((file) => !importedFiles.has(file));
+
+            if (orphanFiles.length > 0) {
+                const logLines = ["╔══ Orphan files detected ══════════════════════════════════════════════════════"];
+
+                for (const file of orphanFiles.sort()) {
+                    const relativePath = path.relative(cwd, file);
+                    logLines.push(`║  ./${relativePath}`);
+                }
+
+                logLines.push("╚══════════════════════════════════════════════════════════════════════════════");
+                this.info(logLines.join("\n[plugin @unichat/build-tools] "));
+            }
+        },
+
         generateBundle(_, bundle) {
             for (const [fileName, chunk] of Object.entries(bundle)) {
                 const isVendor = fileName.includes("vendor") || chunk.name === "vendor";
@@ -37,25 +81,45 @@ function uniChatBuildTools(): Plugin {
                     delete bundle[fileName];
                 }
             }
+        },
+
+        handleHotUpdate({ server }) {
+            server.ws.send({ type: "full-reload" });
+
+            return [];
         }
     };
 }
 
 const host = process.env.TAURI_DEV_HOST;
 
-export default defineConfig({
-    root: path.resolve(__dirname),
-    publicDir: path.resolve(__dirname, "public"),
-    plugins: [
+const plugins: PluginOption[] = [
+    preact({
+        babel: { plugins: [["babel-plugin-macros"], ["babel-plugin-transform-goober"]] },
+        devToolsEnabled: false,
+        devtoolsInProd: false,
+        prefreshEnabled: false,
+        reactAliasesEnabled: false
+    }),
+    minifyPlugin()
+];
+
+if (process.env.BUNDLE_ANALYZE === "true") {
+    plugins.push(
         sonda({
             brotli: true,
             filename: path.resolve(__dirname, "coverage", "stats.html"),
             gzip: true,
             open: false
         }),
-        uniChatBuildTools(),
-        react()
-    ],
+        uniChatBuildTools()
+    );
+}
+
+export default defineConfig({
+    root: path.resolve(__dirname),
+    publicDir: path.resolve(__dirname, "public"),
+    plugins: [...plugins],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
     //
@@ -76,15 +140,6 @@ export default defineConfig({
             : undefined
     },
 
-    css: {
-        preprocessorOptions: {
-            scss: {
-                quietDeps: true,
-                silenceDeprecations: ["import"]
-            }
-        }
-    },
-
     build: {
         sourcemap: true,
         rollupOptions: {
@@ -93,6 +148,8 @@ export default defineConfig({
                 entryFileNames: "js/[name]-[hash].js",
                 chunkFileNames: "js/[name]-[hash].js",
                 assetFileNames(chunkInfo) {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
                     const name = chunkInfo.name ?? chunkInfo.fileName ?? "";
                     const ext = path.extname(name).slice(1);
                     if (ext === "css") {
@@ -120,7 +177,8 @@ export default defineConfig({
 
     resolve: {
         alias: {
-            unichat: path.resolve(__dirname, "src")
+            clsx: "clsx/lite",
+            ...tsConfigPaths
         }
     }
 });

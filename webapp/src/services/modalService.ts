@@ -8,23 +8,11 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+import { ModalProps } from "unichat/components/Modal";
+
 import { eventEmitter } from "./eventEmitter";
 
-export interface OpenModalOptions {
-    title: string;
-    children: React.ReactNode;
-    actions?: React.ReactNode;
-    leftSection?: React.ReactNode;
-    leftSectionTitle?: string;
-    sharedStoreInitialState?: Record<string, any>;
-
-    size?: "sm" | "lg" | "xl";
-    fullscreen?: true | string | "sm-down" | "md-down" | "lg-down" | "xl-down" | "xxl-down";
-    centered?: boolean;
-    scrollable?: boolean;
-    style?: React.CSSProperties;
-    backdrop?: true | false | "static";
-}
+export type OpenModalOptions = Omit<ModalProps, "show" | "onHide" | "withPortal">;
 
 export class ModalService {
     public openModal(opts: OpenModalOptions): void {

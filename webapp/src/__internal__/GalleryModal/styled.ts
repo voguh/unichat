@@ -8,32 +8,14 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import type { BsPrefixProps, ReplaceProps } from "react-bootstrap/esm/helpers";
-import Row, { RowProps } from "react-bootstrap/Row";
-import styled from "styled-components";
+import { ComponentType, HTMLAttributes } from "preact";
 
-export const GalleryModalStyledContainer = styled.div`
-    position: relative;
+import { styled } from "goober";
+import tw from "twin.macro";
 
-    > .btn {
-        height: 30px;
-    }
+export const GalleryModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({});
 
-    > .upload-to-gallery {
-        position: absolute;
-        top: calc(36px / 2);
-        right: 2px;
-        transform: translateY(-50%);
-        z-index: 10;
-    }
-`;
-
-type Props = React.PropsWithChildren<ReplaceProps<"div", BsPrefixProps<"div"> & RowProps>>;
-export const GalleryTabContainer: React.FC<Props> = styled(Row)`
-    padding: 16px;
-    margin: 0;
-    border-left: 1px solid var(--oc-dark-4);
-    border-right: 1px solid var(--oc-dark-4);
-    border-bottom: 1px solid var(--oc-dark-4);
-    border-radius: 0 0 4px 4px;
-`;
+export const GalleryTabContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
+    ...tw`grid gap-1`,
+    gridTemplateColumns: "repeat(4, 1fr)"
+});

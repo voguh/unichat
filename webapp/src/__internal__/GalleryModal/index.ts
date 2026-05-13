@@ -9,3 +9,4 @@
  ******************************************************************************/
 
 export * from "./GalleryModal";
+export * from "./GalleryModalActions";

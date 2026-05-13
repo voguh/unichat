@@ -8,44 +8,55 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
-
-import Alert from "react-bootstrap/Alert";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
+import * as PReact from "preact";
+import { useEffect, useRef, useState } from "preact/hooks";
 
 import { Button } from "unichat/components/Button";
 import { Select } from "unichat/components/forms/Select";
 import { Switch } from "unichat/components/forms/Switch";
-import { AppContext } from "unichat/contexts/AppContext";
+import { useStorage } from "unichat/hooks/useStorage";
 import { useWidgets } from "unichat/hooks/useWidgets";
 import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
 import { settingsService, UniChatSettings, UniChatSettingsKeys } from "unichat/services/settingsService";
+import { StorageKeys } from "unichat/services/storageService";
 import { toWidgetOptionGroup } from "unichat/utils/toWidgetOptionGroup";
 
-import { GeneralSettingsTabStyledContainer, OpenToLANSettingWrapper } from "./styled";
+import { GeneralSettingsTabStyledContainer } from "./styled";
 
 interface Props {
     onClose: () => void;
 }
 
-export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
-    const [settings, setSettings] = React.useState({} as UniChatSettings);
-
+export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren {
     const [widgets, _reloadWidgets] = useWidgets(toWidgetOptionGroup, []);
-    const { requiresRestart, setRequiresRestart } = React.useContext(AppContext);
 
-    async function updateSetting<K extends keyof UniChatSettings>(key: K, value: UniChatSettings[K]): Promise<void> {
-        const settingsCopy = { ...settings };
-        if (settingsCopy[key] == null) {
-            throw new Error(`Setting with key "${key}" does not exist.`);
+    const [dirty, setDirty] = useState(false);
+    const [initialSettings, setInitialSettings] = useState<Partial<UniChatSettings>>({});
+    const selectRef = useRef<HTMLInputElement>(null);
+    const openToLanRef = useRef<HTMLInputElement>(null);
+
+    const [requiresRestart, setRequiresRestart] = useStorage(StorageKeys.REQUIRES_RESTART);
+
+    async function applySettings(): Promise<void> {
+        const beforeOpenToLan = initialSettings[UniChatSettingsKeys.OPEN_TO_LAN];
+        const settingsCopy = { ...initialSettings };
+        if (selectRef.current != null) {
+            const value = selectRef.current.value;
+            settingsCopy[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET] = value;
         }
 
-        settingsCopy[key] = value;
-        setSettings(settingsCopy);
-        await settingsService.setItem(key, value);
+        if (openToLanRef.current != null) {
+            const checked = openToLanRef.current.checked;
 
-        if (key === UniChatSettingsKeys.OPEN_TO_LAN) {
-            setRequiresRestart();
+            settingsCopy[UniChatSettingsKeys.OPEN_TO_LAN] = checked;
+        }
+
+        await settingsService.setItems(settingsCopy);
+        setInitialSettings(settingsCopy);
+        setDirty(false);
+
+        if (beforeOpenToLan !== settingsCopy[UniChatSettingsKeys.OPEN_TO_LAN]) {
+            setRequiresRestart(true);
         }
     }
 
@@ -54,74 +65,95 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
         eventEmitter.emit("tour:start", { type });
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
+        if (Object.keys(initialSettings).length === 0) {
+            return;
+        }
+
+        function changeDirty(this: HTMLInputElement): void {
+            setDirty(true);
+            this.removeEventListener("change", changeDirty);
+        }
+
+        if (selectRef.current) {
+            selectRef.current.addEventListener("change", changeDirty);
+        }
+
+        if (openToLanRef.current) {
+            openToLanRef.current.addEventListener("change", changeDirty);
+        }
+
+        return () => {
+            if (selectRef.current) {
+                selectRef.current.removeEventListener("change", changeDirty);
+            }
+
+            if (openToLanRef.current) {
+                openToLanRef.current.removeEventListener("change", changeDirty);
+            }
+        };
+    }, [initialSettings]);
+
+    useEffect(() => {
         async function init(): Promise<void> {
-            const defaultPreviewWidget = await settingsService.getItem(UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET);
+            const settings = await settingsService.getItems([
+                UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET,
+                UniChatSettingsKeys.OPEN_TO_LAN
+            ]);
 
-            /* ================================================================================== */
-
-            const lanStatus = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
-
-            /* ================================================================================== */
-
-            const newSettings = { ...settings };
-            newSettings[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET] = defaultPreviewWidget;
-            newSettings[UniChatSettingsKeys.OPEN_TO_LAN] = lanStatus;
-            setSettings(newSettings);
+            setInitialSettings(settings);
         }
 
         init();
     }, []);
 
     return (
-        <GeneralSettingsTabStyledContainer>
+        <GeneralSettingsTabStyledContainer key={Object.keys(initialSettings).length === 0 ? "loading" : "loaded"}>
             <Select
+                defaultValue={initialSettings[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET] ?? ""}
+                inputRef={selectRef}
                 label="Default preview widget"
                 description="Select the default widget to be used in preview panels"
                 options={widgets}
-                value={widgets
-                    .flatMap((group) => group.options)
-                    .find((option) => option.value === settings[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET])}
-                onChange={(option) => updateSetting(UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET, option!.value)}
             />
 
             <hr />
 
-            <OpenToLANSettingWrapper>
+            <div className="openToLan-section">
                 <Switch
+                    defaultChecked={initialSettings[UniChatSettingsKeys.OPEN_TO_LAN] ?? false}
+                    inputRef={openToLanRef}
                     label="Open to LAN"
                     description="Allow other devices on your local network view widgets."
-                    checked={settings[UniChatSettingsKeys.OPEN_TO_LAN] || false}
-                    onChange={(evt) => updateSetting(UniChatSettingsKeys.OPEN_TO_LAN, evt.target.checked)}
                 />
 
                 {requiresRestart && (
-                    <Alert variant="primary">
+                    <div className="alert alert-primary">
                         <div>
                             <i className="fas fa-info-circle" />
                         </div>
                         <span>
                             <strong>{UNICHAT_DISPLAY_NAME}</strong> must be restarted for this setting to take effect.
                         </span>
-                    </Alert>
+                    </div>
                 )}
-                {settings[UniChatSettingsKeys.OPEN_TO_LAN] && (
-                    <Alert variant="warning">
+                {openToLanRef.current?.checked && (
+                    <div className="alert alert-warning">
                         <div>
                             <i className="fas fa-info-circle" />
                         </div>
                         <span>
                             Make sure your firewall allows incoming connections on port <strong>9527</strong>.
                         </span>
-                    </Alert>
+                    </div>
                 )}
-            </OpenToLANSettingWrapper>
+            </div>
 
             <hr />
 
             <div className="tour-section">
                 Tour
-                <ButtonGroup>
+                <div className="tour-section--buttons">
                     <Button variant="default" onClick={() => dispatchTour("full")}>
                         <i className="fas fa-compass" />
                         View Tour
@@ -130,7 +162,13 @@ export function GeneralSettingsTab({ onClose }: Props): React.ReactNode {
                         <i className="fas fa-map" />
                         What&apos;s New?
                     </Button>
-                </ButtonGroup>
+                </div>
+            </div>
+
+            <div className="general_settings--footer">
+                <Button variant="success" disabled={!dirty} onClick={applySettings}>
+                    Apply
+                </Button>
             </div>
         </GeneralSettingsTabStyledContainer>
     );

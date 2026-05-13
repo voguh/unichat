@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "preact/hooks";
 
 import { commandService } from "unichat/services/commandService";
 import { UniChatWidget } from "unichat/types";
@@ -25,7 +25,7 @@ export function useWidgets<T = UniChatWidget>(transformer: Transformer<T>, defau
             widgets = await commandService.getWidgets();
             cachedWidgets.splice(0, cachedWidgets.length, ...widgets);
         } else {
-            widgets = [...cachedWidgets];
+            widgets = structuredClone(cachedWidgets);
         }
 
         const transformedValue = transformer(widgets);

@@ -8,46 +8,24 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
 
-import type { BsPrefixProps, ReplaceProps } from "react-bootstrap/esm/helpers";
-import FormControl, { FormControlProps } from "react-bootstrap/FormControl";
-
-import { LoggerFactory } from "unichat/logging/LoggerFactory";
-
+import { splitProperties } from "./__utils__/splitProperties";
 import { FormGroup, FormGroupBaseProps } from "./FormGroup";
 
-export type TextareaProps = ReplaceProps<"textarea", BsPrefixProps<"textarea"> & FormControlProps> & FormGroupBaseProps;
+type VanillaProps = PReact.TextareaHTMLAttributes<HTMLTextAreaElement>;
+export interface TextareaProps extends VanillaProps, FormGroupBaseProps {
+    inputRef?: PReact.Ref<HTMLTextAreaElement>;
+}
 
-const _logger = LoggerFactory.getLogger("Textarea");
-export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(props, ref) {
-    const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...unfiltered } = props;
-    const [dataProps, rest] = Object.entries(unfiltered).reduce(
-        (acc, [key, value]) => {
-            if (key.startsWith("data-")) {
-                acc[0][key.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)] = value;
-            } else {
-                acc[1][key] = value;
-            }
-
-            return acc;
-        },
-        [{}, {}] as unknown as [Record<string, any>, Record<string, any>]
-    );
+export function Textarea({ inputRef, id, ...props }: TextareaProps): PReact.ComponentChildren {
+    const [formGroupProps, dataProps, textareaProps] = splitProperties(props);
 
     return (
-        <FormGroup
-            id={id}
-            className={className}
-            label={label}
-            labelProps={labelProps}
-            description={description}
-            descriptionProps={descriptionProps}
-            error={error}
-            errorProps={errorProps}
-            {...dataProps}
-        >
-            <FormControl {...rest} as="textarea" ref={ref} />
+        <FormGroup id={id} {...formGroupProps} {...dataProps}>
+            <div className="Textarea-container">
+                <textarea {...textareaProps} ref={inputRef} />
+            </div>
         </FormGroup>
     );
-});
+}

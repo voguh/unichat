@@ -9,7 +9,8 @@
  ******************************************************************************/
 
 import { invoke } from "@tauri-apps/api/core";
-import StackTrace from "stacktrace-js";
+
+import { StackElements } from "./StackElements";
 
 type LogLevel = "trace" | "debug" | "info" | "warn" | "error";
 
@@ -88,12 +89,11 @@ export class Logger {
         let fileName = this.name;
         let lineNumber: number | null = null;
 
-        const callStack = await StackTrace.get();
-        const callSite = callStack[__PLATFORM__ === "windows" ? 3 : 4];
+        const stackLine = await StackElements.getStackTraceElement(__PLATFORM__ === "windows" ? 4 : 5);
 
-        if (callSite != null) {
-            const _fileName = callSite.fileName;
-            const _lineNumber = callSite.lineNumber;
+        if (stackLine != null) {
+            const _fileName = stackLine.file;
+            const _lineNumber = stackLine.line;
 
             if (_fileName != null && _lineNumber != null) {
                 fileName = _fileName.split("/src/")[1] || fileName;

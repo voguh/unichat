@@ -17,23 +17,33 @@ export enum ScraperEventsLogLevel {
 }
 
 export enum UniChatSettingsKeys {
-    CURRENT_TOUR_STEPS = "current-tour-steps",
-    PREVIOUS_TOUR_STEPS = "previous-tour-steps",
+    /* General settings */
     DEFAULT_PREVIEW_WIDGET = "default-preview-widget",
     OPEN_TO_LAN = "open-to-lan",
 
     /* Developers settings */
     CREATE_WEBVIEW_HIDDEN = "create-webview-hidden",
-    LOG_SCRAPER_EVENTS = "log-scraper-events"
+    LOG_SCRAPER_EVENTS = "log-scraper-events",
+
+    /* Tour steps */
+    PREVIOUS_TOUR_STEPS = "previous-tour-steps",
+    CURRENT_TOUR_STEPS = "current-tour-steps"
 }
 
 export interface UniChatSettings {
-    [UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN]: boolean;
-    [UniChatSettingsKeys.CURRENT_TOUR_STEPS]: string[];
+    /* General settings */
     [UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET]: string;
-    [UniChatSettingsKeys.LOG_SCRAPER_EVENTS]: ScraperEventsLogLevel;
     [UniChatSettingsKeys.OPEN_TO_LAN]: boolean;
+
+    /* Developers settings */
+    [UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN]: boolean;
+    [UniChatSettingsKeys.LOG_SCRAPER_EVENTS]: ScraperEventsLogLevel;
+
+    /* Tour steps */
+    [UniChatSettingsKeys.CURRENT_TOUR_STEPS]: string[];
     [UniChatSettingsKeys.PREVIOUS_TOUR_STEPS]: string[];
+
+    /* Allow for future settings without breaking the type */
     [key: string]: any;
 }
 
@@ -44,6 +54,14 @@ export class SettingsService {
 
     public async setItem<K extends keyof UniChatSettings>(key: K, value: UniChatSettings[K]): Promise<void> {
         await invoke("settings_set_item", { key, value });
+    }
+
+    public async getItems<K extends keyof UniChatSettings>(keys: K[]): Promise<Pick<UniChatSettings, K>> {
+        return invoke<Pick<UniChatSettings, K>>("settings_get_items", { keys });
+    }
+
+    public async setItems<K extends keyof UniChatSettings>(items: Pick<UniChatSettings, K>): Promise<void> {
+        await invoke("settings_set_items", { items });
     }
 }
 

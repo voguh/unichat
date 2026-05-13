@@ -8,46 +8,36 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import Card from "react-bootstrap/Card";
-import styled from "styled-components";
+import { ComponentType, HTMLAttributes } from "preact";
 
-export const GalleryItemDisplayStyledContainer = styled(Card)`
-    width: 226px;
-    margin: 0;
-    overflow: hidden;
+import { styled } from "goober";
+import tw from "twin.macro";
 
-    > .card-body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 0;
-        width: 224px;
-        height: 126px;
-        background-color: var(--oc-gray-9);
-        overflow: hidden;
+export const GalleryItemDisplayStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
+    ...tw`w-full bg-stone-950 p-2 rounded flex flex-col gap-2`,
 
-        > img {
-            max-width: 224px;
-            max-height: 126px;
-            object-fit: contain;
+    "> .gallery-item--name": {
+        ...tw`text-sm font-medium text-center text-ellipsis overflow-hidden whitespace-nowrap`
+    },
+
+    "> .gallery-item--preview": {
+        ...tw`w-full bg-gray-200 rounded flex justify-center items-center overflow-hidden`,
+        aspectRatio: "16 / 9",
+
+        "& > img, & > video": {
+            width: "100%",
+            height: "100%",
+            objectFit: "contain"
+        },
+
+        "& > audio": {
+            width: "100%"
         }
+    },
 
-        > video {
-            max-width: 224px;
-            max-height: 126px;
-            object-fit: contain;
-        }
-
-        > audio {
-            width: calc(100% - 20px);
+    "> .gallery-item--footer": {
+        "> button": {
+            ...tw`w-full`
         }
     }
-
-    > .card-footer {
-        padding: 8px;
-
-        > .btn {
-            width: 100%;
-        }
-    }
-`;
+});

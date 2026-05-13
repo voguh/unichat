@@ -8,46 +8,24 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
 
-import type { BsPrefixProps, ReplaceProps } from "react-bootstrap/esm/helpers";
-import FormControl, { FormControlProps } from "react-bootstrap/FormControl";
-
-import { LoggerFactory } from "unichat/logging/LoggerFactory";
-
+import { splitProperties } from "./__utils__/splitProperties";
 import { FormGroup, FormGroupBaseProps } from "./FormGroup";
 
-export type TextInputProps = ReplaceProps<"input", BsPrefixProps<"input"> & FormControlProps> & FormGroupBaseProps;
+type VanillaProps = Omit<PReact.InputHTMLAttributes<HTMLInputElement>, "type">;
+export interface TextInputProps extends VanillaProps, FormGroupBaseProps {
+    inputRef?: PReact.Ref<HTMLInputElement>;
+}
 
-const _logger = LoggerFactory.getLogger("TextInput");
-export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(function TextInput(props, ref) {
-    const { label, labelProps, description, descriptionProps, error, errorProps, id, className, ...unfiltered } = props;
-    const [dataProps, rest] = Object.entries(unfiltered).reduce(
-        (acc, [key, value]) => {
-            if (key.startsWith("data-")) {
-                acc[0][key.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)] = value;
-            } else {
-                acc[1][key] = value;
-            }
-
-            return acc;
-        },
-        [{}, {}] as unknown as [Record<string, any>, Record<string, any>]
-    );
+export function TextInput({ inputRef, id, ...props }: TextInputProps): PReact.ComponentChildren {
+    const [formGroupProps, dataProps, inputProps] = splitProperties(props);
 
     return (
-        <FormGroup
-            id={id}
-            className={className}
-            label={label}
-            labelProps={labelProps}
-            description={description}
-            descriptionProps={descriptionProps}
-            error={error}
-            errorProps={errorProps}
-            {...dataProps}
-        >
-            <FormControl {...rest} ref={ref} />
+        <FormGroup id={id} {...formGroupProps} {...dataProps}>
+            <div className="TextInput-container">
+                <input {...inputProps} type="text" ref={inputRef} />
+            </div>
         </FormGroup>
     );
-});
+}

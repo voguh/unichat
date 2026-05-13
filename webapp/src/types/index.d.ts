@@ -15,20 +15,13 @@ export interface Dimensions {
     height: number;
 }
 
-export type UniChatColors =
-    | "gray"
-    | "red"
-    | "pink"
-    | "grape"
-    | "violet"
-    | "indigo"
-    | "blue"
-    | "cyan"
-    | "teal"
-    | "green"
-    | "lime"
-    | "yellow"
-    | "orange";
+export type Variants = "primary" | "secondary" | "success" | "danger" | "warning" | "info";
+
+/* ========================================================================== */
+
+export interface Class<T> {
+    new (...args: any[]): T;
+}
 
 /* ========================================================================== */
 
@@ -100,6 +93,7 @@ export interface UniChatScraper {
 export interface UniChatWidget {
     restPath: string;
     widgetSource: UniChatWidgetSource;
+    warnings: string[];
 }
 
 export interface UniChatWidgetSource {

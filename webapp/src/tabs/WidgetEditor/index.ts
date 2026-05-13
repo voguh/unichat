@@ -9,3 +9,4 @@
  ******************************************************************************/
 
 export * from "./WidgetEditor";
+export * from "./WidgetEditorLeftSection";

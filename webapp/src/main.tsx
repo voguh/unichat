@@ -8,22 +8,12 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import "unichat/styles/bootstrap.scss";
-import "@fortawesome/fontawesome-free/css/all.min.css";
-
-import React from "react";
-import { createRoot } from "react-dom/client";
+import { h, render } from "preact";
 
 import { platform } from "@tauri-apps/plugin-os";
-import { DefaultTheme, ThemeProvider } from "styled-components";
+import { setup } from "goober";
 
-import { ModalContainer } from "unichat/__internal__/ModalContainer";
-import { ToastContainer } from "unichat/__internal__/ToastContainer";
 import { App } from "unichat/App";
-import { AppContextProvider } from "unichat/contexts/AppContext";
-import { BootstrapFixes } from "unichat/styles/BootstrapFixes";
-import { GlobalStyle } from "unichat/styles/GlobalStyle";
-import { theme } from "unichat/styles/theme";
 
 if (!("__IS_DEV__" in globalThis)) {
     Object.defineProperty(globalThis, "__IS_DEV__", {
@@ -49,24 +39,10 @@ if (!__IS_DEV__) {
     });
 }
 
-document.documentElement.setAttribute("data-bs-theme", "dark");
 const documentRoot = document.querySelector("#root");
 if (documentRoot == null) {
     throw new Error("Root element not found");
 }
 
-const root = createRoot(documentRoot);
-root.render(
-    <React.StrictMode>
-        <ThemeProvider theme={theme as DefaultTheme}>
-            <GlobalStyle />
-            <BootstrapFixes />
-
-            <AppContextProvider>
-                <App />
-                <ToastContainer limit={3} position="bottom-center" />
-                <ModalContainer centered />
-            </AppContextProvider>
-        </ThemeProvider>
-    </React.StrictMode>
-);
+setup(h);
+render(<App />, documentRoot);

@@ -19,4 +19,16 @@
         "https://raw.githubusercontent.com/": true,
         "https://schema.tauri.app": true
     },
+
+    "tailwindCSS.experimental.classRegex": [
+        "tw`([^`]*)", // tw`...`
+        "tw=\"([^\"]*)", // <div tw="..." />
+        "tw={\"([^\"}]*)", // <div tw={"..."} />
+        "tw\\.\\w+`([^`]*)", // tw.xxx`...`
+        "tw\\(.*?\\)`([^`]*)" // tw(Component)`...`
+    ],
+    "tailwindCSS.includeLanguages": {
+        "typescript": "javascript",
+        "typescriptreact": "javascript"
+    }
 }
