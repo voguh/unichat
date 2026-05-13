@@ -55,7 +55,7 @@ export function ThirdPartyLicenses(): PReact.ComponentChildren {
                             <tr key={pkg.name} className={clsx({ withLink: !!pkg.repository })}>
                                 <td onClick={() => pkg.repository && openUrl(pkg.repository)}>
                                     <span>
-                                        <Badge data-source={pkg.source}>{pkg.source}</Badge>
+                                        <Badge>{pkg.source}</Badge>
                                         {pkg.name} v{pkg.version}
                                     </span>
                                 </td>
