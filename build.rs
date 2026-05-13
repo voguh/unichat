@@ -15,9 +15,6 @@
 use std::collections::HashMap;
 use std::env;
 use std::fs;
-use std::hash::DefaultHasher;
-use std::hash::Hash;
-use std::hash::Hasher as _;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
@@ -188,50 +185,8 @@ fn generate_npm_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::er
     return Ok(final_licenses);
 }
 
-fn calculate_hash(content: &[u8]) -> u64 {
-    let mut hasher = DefaultHasher::new();
-    content.hash(&mut hasher);
-
-    return hasher.finish();
-}
-
-fn generate_third_party_licenses_lock_hash() -> Result<String, Box<dyn std::error::Error>> {
-    let cargo_lock_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Cargo.lock");
-    let pnpm_lock_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("webapp").join("pnpm-lock.yaml");
-
-    let cargo_content = fs::read(&cargo_lock_path)?;
-    let pnpm_content = fs::read(&pnpm_lock_path)?;
-    let combined_content = [cargo_content, pnpm_content].concat();
-
-    let current_hash = calculate_hash(&combined_content);
-    return Ok(current_hash.to_string());
-}
-
 fn generate_third_party_licenses(target_gen_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
-    let current_hash = generate_third_party_licenses_lock_hash()?;
-
     let licenses_file_path = target_gen_dir.join("third_party_licenses.json");
-    let licenses_lock_file_path = target_gen_dir.join("third_party_licenses.lock");
-    let file_exists = licenses_file_path.exists();
-    let lock_exists = licenses_lock_file_path.exists();
-
-    // Remove the licenses file or lock file if only one of them exists, to avoid inconsistency.
-    if file_exists != lock_exists {
-        if file_exists {
-            fs::remove_dir(&licenses_file_path)?;
-        } else {
-            fs::remove_file(&licenses_lock_file_path)?;
-        }
-    }
-
-    if lock_exists {
-        let existing_hash = fs::read_to_string(&licenses_lock_file_path)?;
-
-        if existing_hash == current_hash {
-            return Ok(());
-        }
-    }
-
     let mut final_licenses: Vec<FinalLicenseInfo> = Vec::new();
 
     let crate_licenses = generate_crate_licenses_info()?;
@@ -242,7 +197,6 @@ fn generate_third_party_licenses(target_gen_dir: &Path) -> Result<(), Box<dyn st
 
     let final_licenses_json = serde_json::to_string(&final_licenses)?;
     fs::write(licenses_file_path, final_licenses_json)?;
-    fs::write(licenses_lock_file_path, current_hash)?;
 
     return Ok(());
 }
