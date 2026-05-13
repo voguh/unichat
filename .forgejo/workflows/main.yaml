@@ -33,8 +33,8 @@ jobs:
         uses: actions/setup-node@v4.4.0
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          cache-dependency-path: ${{ env.TAURI_FRONTEND_PATH }}/pnpm-lock.yaml
+          # cache: 'pnpm'
+          # cache-dependency-path: ${{ env.TAURI_FRONTEND_PATH }}/pnpm-lock.yaml
 
       - name: Install dependencies
         working-directory: ${{ env.TAURI_FRONTEND_PATH }}
@@ -108,7 +108,7 @@ jobs:
       - name: Run build app
         run: |
           command -v cargo-tauri || cargo install --locked tauri-cli
-          tauri build
+          cargo tauri build
 
       - name: Upload build artifacts
         uses: forgejo/upload-artifact@v4
@@ -174,7 +174,7 @@ jobs:
         run: |
           command -v cargo-tauri || cargo install --locked tauri-cli
           command -v cargo-xwin || cargo install --locked cargo-xwin
-          tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
+          cargo tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
 
       - name: Upload build artifacts
         uses: forgejo/upload-artifact@v4
