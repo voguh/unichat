@@ -105,7 +105,7 @@ jobs:
       - name: Run build app
         run: |
           command -v cargo-tauri || cargo install --locked tauri-cli
-          pnpm install --prod --frozen-lockfile
+          (cd ${{ env.TAURI_FRONTEND_PATH }} && pnpm install --prod --frozen-lockfile)
           cargo tauri build
 
       - name: Upload build artifacts
@@ -173,7 +173,7 @@ jobs:
         run: |
           command -v cargo-tauri || cargo install --locked tauri-cli
           command -v cargo-xwin || cargo install --locked cargo-xwin
-          pnpm install --prod --frozen-lockfile
+          (cd ${{ env.TAURI_FRONTEND_PATH }} && pnpm install --prod --frozen-lockfile)
           cargo tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
 
       - name: Upload build artifacts
