@@ -76,7 +76,7 @@ export const ModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
         maxHeight: "90vh"
     },
 
-    "&[data-fullscreen=true]": {
+    "&[data-size='fullscreen']": {
         ...tw`w-screen h-screen rounded-none`,
         maxWidth: "100vw",
         maxHeight: "100vh",

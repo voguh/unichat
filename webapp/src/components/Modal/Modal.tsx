@@ -65,8 +65,7 @@ export function Modal({
                     <ModalContext.Provider value={{ onClose: onHide, sharedStore, setSharedStore }}>
                         <ModalStyledContainer
                             {...rest}
-                            data-size={size}
-                            data-fullscreen={fullscreen}
+                            data-size={fullscreen ? "fullscreen" : size}
                             autoFocus={autoFocus}
                         >
                             <div className="modal-content">
