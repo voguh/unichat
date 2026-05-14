@@ -10,7 +10,7 @@
 
 import PReact from "preact";
 
-import clsx from "clsx";
+import { clsx } from "unichat/utils/clsx";
 
 import { AccordionItemStyledContainer } from "./styled";
 

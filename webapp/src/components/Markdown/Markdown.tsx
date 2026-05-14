@@ -11,8 +11,9 @@
 import PReact from "preact";
 import { useMemo } from "preact/hooks";
 
-import clsx from "clsx";
 import { Marked, Token } from "marked";
+
+import { clsx } from "unichat/utils/clsx";
 
 import { MarkdownStyledContainer } from "./styled";
 

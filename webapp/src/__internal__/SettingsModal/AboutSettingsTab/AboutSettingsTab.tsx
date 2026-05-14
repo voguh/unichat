@@ -12,10 +12,10 @@ import * as PReact from "preact";
 import { useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
-import clsx from "clsx";
 
 import { Button } from "unichat/components/Button";
 import { modalService } from "unichat/services/modalService";
+import { clsx } from "unichat/utils/clsx";
 
 import { AboutSettingsTabStyledContainer } from "./styled";
 import { ThirdPartyLicenses } from "./ThirdPartyLicenses";

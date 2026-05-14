@@ -12,11 +12,11 @@ import * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
-import clsx from "clsx";
 
 import { Badge } from "unichat/components/Badge";
 import { commandService } from "unichat/services/commandService";
 import { ThirdPartyLicenseInfo } from "unichat/types";
+import { clsx } from "unichat/utils/clsx";
 
 import { ThirdPartyLicensesStyledContainer } from "./styled";
 

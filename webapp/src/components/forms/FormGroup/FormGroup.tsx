@@ -10,7 +10,7 @@
 
 import * as PReact from "preact";
 
-import clsx from "clsx";
+import { clsx } from "unichat/utils/clsx";
 
 import { FormGroupStyledContainer } from "./styled";
 

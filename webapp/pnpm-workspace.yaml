@@ -1,4 +1,5 @@
-minimumReleaseAge: 20160
+minimumReleaseAge: 10080
+# minimumReleaseAge: 20160 # TODO: increase to 2 weeks later
 
 onlyBuiltDependencies:
   - '@parcel/watcher'

@@ -11,8 +11,6 @@
 import * as PReact from "preact";
 import { useState } from "preact/hooks";
 
-import clsx from "clsx";
-
 import { TabsStyledContainer } from "./styled";
 
 export interface Tab {

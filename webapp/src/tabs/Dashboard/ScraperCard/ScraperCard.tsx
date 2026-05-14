@@ -12,7 +12,6 @@ import * as PReact from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 
 import * as eventService from "@tauri-apps/api/event";
-import clsx from "clsx";
 
 import { Badge } from "unichat/components/Badge";
 import { Button } from "unichat/components/Button";
@@ -189,7 +188,7 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                                     data-active={scraperIsRunning ? "true" : "false"}
                                     data-loading={loading || scraperIsLoading ? "true" : "false"}
                                 >
-                                    <i className={clsx(scraper.icon, "fa-fw")} />
+                                    <i className={scraper.icon} />
                                 </div>
                                 {`${scraper.name} chat URL`}
                             </ScraperLabel>
