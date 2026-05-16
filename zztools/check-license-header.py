@@ -11,13 +11,11 @@
 
 from datetime import datetime, timezone
 import fnmatch
-import logger
 import os
 from pathlib import Path
 import re
-
-TOOLS_PATH = Path(__file__).resolve().parent
-ROOT_PATH = TOOLS_PATH.parent
+from utils import logger
+from utils.constants import check_requirements, ROOT_PATH
 
 # ============================================================================ #
 
@@ -116,6 +114,7 @@ def main():
 
 if __name__ == "__main__":
     try:
+        check_requirements()
         main()
     except KeyboardInterrupt:
         logger.info("Interrupted by user.")
