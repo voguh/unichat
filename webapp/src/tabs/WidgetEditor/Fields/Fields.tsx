@@ -77,7 +77,7 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         label={builder.label}
                         description={builder.description}
                         value={value as string}
-                        onChange={(value) => setFieldState((old) => ({ ...old, [key]: value }))}
+                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
                         options={Object.entries(builder.options).map(([value, label]) => ({ value, label }))}
                     />
                 );
