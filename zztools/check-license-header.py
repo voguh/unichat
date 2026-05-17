@@ -15,7 +15,7 @@ import os
 from pathlib import Path
 import re
 from utils import logger
-from utils.constants import check_requirements, ROOT_PATH
+from utils.constants import ROOT_PATH
 
 # ============================================================================ #
 
@@ -114,7 +114,6 @@ def main():
 
 if __name__ == "__main__":
     try:
-        check_requirements()
         main()
     except KeyboardInterrupt:
         logger.info("Interrupted by user.")
