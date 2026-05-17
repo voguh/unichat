@@ -14,7 +14,7 @@ import sys
 from utils import logger
 from utils.exec import exec
 from utils.confirm import confirm
-from utils.constants import check_requirements, ROOT_PATH, TAURI_APP_PATH, TAURI_FRONTEND_PATH
+from utils.constants import ROOT_PATH, TAURI_APP_PATH, TAURI_FRONTEND_PATH
 from utils.semver import Version
 
 CARGO_TOML_PATH = ROOT_PATH / "Cargo.toml"
@@ -99,7 +99,6 @@ def main():
 
 if __name__ == "__main__":
     try:
-        check_requirements()
         main()
     except KeyboardInterrupt:
         logger.info("Interrupted by user.")
