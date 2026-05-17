@@ -22,7 +22,13 @@ export const EmulatorStyledContainer: ComponentType<HTMLAttributes<HTMLDivElemen
     },
 
     "> .emulator--operation-mode-select": {
-        ...tw`flex justify-center items-end gap-2 mt-2`
+        ...tw`flex justify-center items-end gap-2 mt-2`,
+
+        "> button": {
+            ...tw`px-0`,
+            flexShrink: 0,
+            width: "36px"
+        }
     },
 
     "> .emulator--events-dispatcher": {
@@ -59,11 +65,7 @@ export const EmulatorStyledContainer: ComponentType<HTMLAttributes<HTMLDivElemen
         width: "calc(100% - 2rem)",
 
         "> .emulator--target-title": {
-            ...tw`font-medium text-stone-300 mb-1`
-        },
-
-        "> .form-description": {
-            ...tw`block mb-1 text-sm text-stone-500`
+            ...tw`font-medium text-stone-300 mb-1 flex justify-start items-center gap-1`
         },
 
         "> .emulator--emulation-target-select": {
@@ -71,13 +73,14 @@ export const EmulatorStyledContainer: ComponentType<HTMLAttributes<HTMLDivElemen
 
             "> div": {
                 ...tw`flex justify-center items-center gap-2`,
+                height: "36px",
 
                 "> .form-group": {
                     width: "fit-content"
                 },
 
                 "&:nth-child(1)": {
-                    ...tw`justify-end`
+                    ...tw`justify-end text-sm text-stone-400`
                 },
 
                 "&:nth-child(2)": {
@@ -85,7 +88,7 @@ export const EmulatorStyledContainer: ComponentType<HTMLAttributes<HTMLDivElemen
                 },
 
                 "&:nth-child(3)": {
-                    ...tw`justify-start`
+                    ...tw`justify-start text-sm text-stone-400`
                 }
             }
         }

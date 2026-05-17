@@ -52,6 +52,23 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
         }
     }
 
+    function buildTooltipContent(): PReact.ComponentChildren {
+        return (
+            <>
+                <ul>
+                    <li>
+                        <strong>Global</strong>: The events emitted by this emulator will be dispatched globally and can
+                        be received by other widgets as well.
+                    </li>
+                    <li>
+                        <strong>Emulator Only</strong>: The events emitted by this emulator will only be dispatched to
+                        the emulator itself.
+                    </li>
+                </ul>
+            </>
+        );
+    }
+
     return (
         <EmulatorStyledContainer>
             <div className="emulator--header">Emulator</div>
@@ -99,14 +116,12 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
             </div>
 
             <div className="emulator--emulation-target">
-                <div className="emulator--target-title">
-                    Emulation Target
-                    <Tooltip
-                        content={`When "Emulator Only" is enabled, the events emitted by this emulator will only be dispatched to the emulator itself. Otherwise, they will be dispatched globally and can be received by other widgets as well.`}
-                    >
+                <Tooltip content={buildTooltipContent()}>
+                    <div className="emulator--target-title">
+                        Emulation Target
                         <i className="fas fa-info-circle" />
-                    </Tooltip>
-                </div>
+                    </div>
+                </Tooltip>
 
                 <div className="emulator--emulation-target-select">
                     <div>Global</div>
