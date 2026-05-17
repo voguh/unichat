@@ -30,15 +30,19 @@ export function FormGroup(props: FormGroupProps): PReact.ComponentChildren {
 
     return (
         <FormGroupStyledContainer {...rest} className={clsx("form-group", rest.className)}>
-            {label && <label {...labelProps}>{label}</label>}
+            {label && (
+                <label {...labelProps} className={clsx("form-label", labelProps?.className)}>
+                    {label}
+                </label>
+            )}
             {description && (
-                <small className="form-description" {...descriptionProps}>
+                <small {...descriptionProps} className={clsx("form-description", descriptionProps?.className)}>
                     {description}
                 </small>
             )}
             {children}
             {error && (
-                <small className="form-error" {...errorProps}>
+                <small {...errorProps} className={clsx("form-error", errorProps?.className)}>
                     {error}
                 </small>
             )}

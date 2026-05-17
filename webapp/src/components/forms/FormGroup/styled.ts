@@ -37,7 +37,7 @@ export const inputGeneralStyle = {
 export const FormGroupStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
     ...tw`w-full`,
 
-    "> label": {
+    "> .form-label": {
         ...tw`block mb-1 font-medium text-stone-300`
     },
 
