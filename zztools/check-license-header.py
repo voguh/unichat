@@ -11,13 +11,11 @@
 
 from datetime import datetime, timezone
 import fnmatch
-import logger
 import os
 from pathlib import Path
 import re
-
-TOOLS_PATH = Path(__file__).resolve().parent
-ROOT_PATH = TOOLS_PATH.parent
+from utils import logger
+from utils.constants import ROOT_PATH
 
 # ============================================================================ #
 

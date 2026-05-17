@@ -9,18 +9,14 @@
 #  SPDX-License-Identifier: EPL-2.0
 # ******************************************************************************
 
-from confirm import confirm
-from exec import exec
-import logger
 from pathlib import Path
-from semver import Version
 import sys
+from utils import logger
+from utils.exec import exec
+from utils.confirm import confirm
+from utils.constants import check_requirements, ROOT_PATH, TAURI_APP_PATH, TAURI_FRONTEND_PATH
+from utils.semver import Version
 
-TOOLS_PATH = Path(__file__).resolve().parent
-ROOT_PATH = TOOLS_PATH.parent
-
-TAURI_APP_PATH = ROOT_PATH
-TAURI_FRONTEND_PATH = TAURI_APP_PATH / "webapp"
 CARGO_TOML_PATH = ROOT_PATH / "Cargo.toml"
 CARGO_LOCK_PATH = ROOT_PATH / "Cargo.lock"
 
@@ -102,4 +98,9 @@ def main():
     logger.info("Updated '\033[33mCargo.toml\033[0m' to version '\033[33m{}\033[0m'.", next_version)
 
 if __name__ == "__main__":
-    main()
+    try:
+        check_requirements()
+        main()
+    except KeyboardInterrupt:
+        logger.info("Interrupted by user.")
+        exit(0)

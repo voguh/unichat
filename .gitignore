@@ -10,4 +10,4 @@
 /webapp/node_modules
 /webapp/target
 /widgets/*/fieldstate.json
-/zztools/__pycache__
+/zztools/**/__pycache__

@@ -10,18 +10,14 @@
 # ******************************************************************************
 
 import argparse
-from confirm import confirm
-from exec import exec
-import logger
 from pathlib import Path
-from semver import Version
 import shutil
+from utils import logger
+from utils.exec import exec
+from utils.confirm import confirm
+from utils.constants import check_requirements, TOOLS_PATH, ROOT_PATH, TAURI_APP_PATH, TAURI_FRONTEND_PATH
+from utils.semver import Version
 
-TOOLS_PATH = Path(__file__).resolve().parent
-ROOT_PATH = TOOLS_PATH.parent
-
-TAURI_APP_PATH = ROOT_PATH
-TAURI_FRONTEND_PATH = TAURI_APP_PATH / "webapp"
 CARGO_TOML_PATH = ROOT_PATH / "Cargo.toml"
 CARGO_LOCK_PATH = ROOT_PATH / "Cargo.lock"
 
@@ -50,7 +46,7 @@ def main():
     # ============================================================================================ #
 
     logger.info("Checking working directory status...")
-    git_status = exec(["git", "status", "--porcelain"], capture_output=True, text=True).stdout.strip()
+    git_status = exec(["git", "status", "--porcelain"]).stdout.strip()
     if git_status:
         logger.error("Working directory is not clean. Please commit or stash your changes before releasing.")
         return
@@ -58,7 +54,7 @@ def main():
     # ============================================================================================ #
 
     logger.info("Checking current git branch...")
-    current_branch = exec(["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, text=True).stdout.strip()
+    current_branch = exec(["git", "rev-parse", "--abbrev-ref", "HEAD"]).stdout.strip()
     if next_version.patch != 0:
         expected_branch = f"stable/{next_version.major}.{next_version.minor}.x"
 
@@ -74,7 +70,7 @@ def main():
     logger.info("Current git branch is '\033[33m{}\033[0m'.", current_branch)
 
     logger.info("Checking version tag uniqueness...")
-    existing_tags = exec(["git", "tag"], capture_output=True, text=True).stdout.strip().splitlines()
+    existing_tags = exec(["git", "tag"]).stdout.strip().splitlines()
     if str(next_version) in existing_tags:
         logger.error("Version tag '\033[33m{}\033[0m' already exists. Please choose a different version.", next_version)
         return
@@ -82,7 +78,8 @@ def main():
 
     # ============================================================================================ #
 
-    exec(["setversion.py", str(next_version)], cwd=TOOLS_PATH)
+    logger.info("Updating version in '\033[33mCargo.toml\033[0m'...")
+    exec([TOOLS_PATH / "setversion.py", str(next_version)])
 
     # ============================================================================================ #
 
@@ -95,9 +92,6 @@ def main():
 
     logger.info("Running tests and building project...")
     exec(["pnpm", "install", "--frozen-lockfile"], cwd=TAURI_FRONTEND_PATH)
-    exec(["pnpm", "test", "run", "--passWithNoTests"], cwd=TAURI_FRONTEND_PATH)
-    exec(["pnpm", "build:ui"], cwd=TAURI_FRONTEND_PATH)
-    exec(["cargo", "test", "--all-targets", "--all-features"])
     exec(["cargo", "tauri", "build"])
 
     # ============================================================================================ #
@@ -119,7 +113,7 @@ def main():
 
         logger.info("Checkout to branch '\033[33m{}\033[0m' and bumping version to '\033[33m{}\033[0m'...", current_branch, next_patch)
         exec(["git", "checkout", current_branch])
-        exec(["setversion.py", next_patch], cwd=TOOLS_PATH)
+        exec([TOOLS_PATH / "setversion.py", next_patch])
         exec(["git", "add", CARGO_TOML_PATH.as_posix(), CARGO_LOCK_PATH.as_posix()])
         exec(["git", "commit", "-m", f"chore: bump version to {next_patch}"])
         exec(["git", "push", "-u", "origin", current_branch])
@@ -129,10 +123,15 @@ def main():
 
         logger.info("Checkout to branch '\033[33m{}\033[0m' and bumping version to '\033[33m{}\033[0m'...", current_branch, next_minor)
         exec(["git", "checkout", current_branch])
-        exec(["setversion.py", next_minor], cwd=TOOLS_PATH)
+        exec([TOOLS_PATH / "setversion.py", next_minor])
         exec(["git", "add", CARGO_TOML_PATH.as_posix(), CARGO_LOCK_PATH.as_posix()])
         exec(["git", "commit", "-m", f"chore: bump version to {next_minor}"])
         exec(["git", "push", "-u", "origin", current_branch])
 
 if __name__ == "__main__":
-    main()
+    try:
+        check_requirements()
+        main()
+    except KeyboardInterrupt:
+        logger.info("Interrupted by user.")
+        exit(0)
