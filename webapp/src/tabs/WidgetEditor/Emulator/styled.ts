@@ -14,17 +14,24 @@ import { styled } from "goober";
 import tw from "twin.macro";
 
 export const EmulatorStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`flex flex-col gap-4 p-4`,
+    ...tw`relative p-4`,
+    height: "var(--unichat-widget_editor-content-height)",
 
     "> .emulator--header": {
         ...tw`w-full text-center text-lg font-bold`
     },
 
     "> .emulator--operation-mode-select": {
-        ...tw`flex justify-center items-end gap-2`
+        ...tw`flex justify-center items-end gap-2 mt-2`
     },
 
     "> .emulator--events-dispatcher": {
+        ...tw`mt-4`,
+
+        "> .emulator--events-title": {
+            ...tw`font-medium text-stone-300 mb-1`
+        },
+
         "> .emulator--button_group": {
             ...tw`flex flex-col bg-stone-700 rounded`,
             padding: "1px",
@@ -39,6 +46,46 @@ export const EmulatorStyledContainer: ComponentType<HTMLAttributes<HTMLDivElemen
 
                 "&:last-child": {
                     ...tw`rounded-b`
+                }
+            }
+        }
+    },
+
+    "> .emulator--emulation-target": {
+        position: "absolute",
+        bottom: "1rem",
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: "calc(100% - 2rem)",
+
+        "> .emulator--target-title": {
+            ...tw`font-medium text-stone-300 mb-1`
+        },
+
+        "> .form-description": {
+            ...tw`block mb-1 text-sm text-stone-500`
+        },
+
+        "> .emulator--emulation-target-select": {
+            ...tw`flex items-center gap-2`,
+
+            "> div": {
+                ...tw`flex justify-center items-center gap-2`,
+
+                "> .form-group": {
+                    width: "fit-content"
+                },
+
+                "&:nth-child(1)": {
+                    ...tw`justify-end`
+                },
+
+                "&:nth-child(2)": {
+                    width: "36px"
+                },
+
+                "&:nth-child(3)": {
+                    ...tw`justify-start`
                 }
             }
         }

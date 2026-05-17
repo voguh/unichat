@@ -25,6 +25,7 @@ use crate::utils::UniChatRelease;
 use crate::utils::get_current_timestamp;
 use crate::utils::semver;
 
+pub mod emulator;
 pub mod gallery;
 pub mod plugins;
 pub mod store;

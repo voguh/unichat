@@ -53,6 +53,8 @@ pub const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_PRIMARY_TEXT_COLOR: &str = "unichat:you
 pub const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_SECONDARY_BACKGROUND_COLOR: &str = "unichat:youtube_superchat_secondary_background_color";
 pub const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_SECONDARY_TEXT_COLOR: &str = "unichat:youtube_superchat_secondary_text_color";
 
+pub const UNICHAT_FLAG_EMULATOR_GENERATED: &str = "unichat:emulator_generated";
+
 /* <============================================================================================> */
 
 #[derive(Clone, Debug)]

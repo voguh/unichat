@@ -14,6 +14,9 @@ import { useState } from "preact/hooks";
 import { UniChatEvent, UniChatPlatform } from "unichat-widgets/unichat";
 import { Button } from "unichat/components/Button";
 import { Option, Select } from "unichat/components/forms/Select";
+import { Switch } from "unichat/components/forms/Switch";
+import { Tooltip } from "unichat/components/Tooltip";
+import { commandService } from "unichat/services/commandService";
 
 import { buildEmulatedEventData } from "./__utils__/buildEmulatedEventData";
 import { EmulatorStyledContainer } from "./styled";
@@ -30,6 +33,7 @@ interface Props {
 
 export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
     const [emulationMode, setEmulationMode] = useState<UniChatPlatform | "mixed">("mixed");
+    const [emulatorOnly, setEmulatorOnly] = useState(true);
 
     async function dispatchEmulatedEvent<T extends UniChatEvent>(
         eventType: T["type"],
@@ -40,7 +44,12 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
         }
 
         const data = await buildEmulatedEventData<T>(eventType, requirePlatform);
-        dispatchEvent({ type: eventType, data } as UniChatEvent);
+
+        if (emulatorOnly) {
+            dispatchEvent({ type: eventType, data } as UniChatEvent);
+        } else {
+            await commandService.dispatchEmulatedEvent({ type: eventType, data } as UniChatEvent);
+        }
     }
 
     return (
@@ -86,6 +95,25 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
                         <i className="fas fa-box" />
                         Redemption
                     </Button>
+                </div>
+            </div>
+
+            <div className="emulator--emulation-target">
+                <div className="emulator--target-title">
+                    Emulation Target
+                    <Tooltip
+                        content={`When "Emulator Only" is enabled, the events emitted by this emulator will only be dispatched to the emulator itself. Otherwise, they will be dispatched globally and can be received by other widgets as well.`}
+                    >
+                        <i className="fas fa-info-circle" />
+                    </Tooltip>
+                </div>
+
+                <div className="emulator--emulation-target-select">
+                    <div>Global</div>
+                    <div>
+                        <Switch checked={emulatorOnly} onChange={(evt) => setEmulatorOnly(evt.currentTarget.checked)} />
+                    </div>
+                    <div>Emulator Only</div>
                 </div>
             </div>
         </EmulatorStyledContainer>

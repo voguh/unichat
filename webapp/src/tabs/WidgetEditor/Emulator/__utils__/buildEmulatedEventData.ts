@@ -71,7 +71,9 @@ export async function buildEmulatedEventData<T extends UniChatEvent>(
         channelName: channelName,
 
         platform: platform,
-        flags: {},
+        flags: {
+            "unichat:emulator_generated": "true"
+        },
 
         authorId: crypto.randomUUID(),
         authorUsername: authorUsername,

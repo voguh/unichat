@@ -18,6 +18,8 @@ use anyhow::Error;
 use tokio::sync::broadcast;
 use unichat::UniChatEvent;
 
+use crate::events::unichat::UNICHAT_FLAG_EMULATOR_GENERATED;
+
 pub mod unichat;
 
 const ONCE_LOCK_NAME: &str = "Events::INSTANCE";
@@ -25,6 +27,20 @@ static INSTANCE: OnceLock<broadcast::Sender<UniChatEvent>> = OnceLock::new();
 
 const MAX_CAPACITY: usize = 50;
 static LATEST_EVENTS_CACHE: LazyLock<RwLock<VecDeque<UniChatEvent>>> = LazyLock::new(|| RwLock::new(VecDeque::with_capacity(MAX_CAPACITY)));
+
+fn event_is_emulated(event: &UniChatEvent) -> bool {
+    return match event {
+        UniChatEvent::RemoveMessage(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
+        UniChatEvent::RemoveAuthor(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
+        UniChatEvent::Message(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
+        UniChatEvent::Donate(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
+        UniChatEvent::Sponsor(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
+        UniChatEvent::SponsorGift(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
+        UniChatEvent::Raid(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
+        UniChatEvent::Redemption(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
+        _ => false
+    }
+}
 
 pub fn init() -> Result<(), Error> {
     let (tx, mut rx) = broadcast::channel(1000);
@@ -35,6 +51,11 @@ pub fn init() -> Result<(), Error> {
 
             match received {
                 Ok(event) => {
+                    if event_is_emulated(&event) {
+                        continue; // Skip caching emulated events
+                    }
+
+
                     if let Ok(mut cache) = LATEST_EVENTS_CACHE.write() {
                         if cache.len() == MAX_CAPACITY {
                             cache.pop_front();

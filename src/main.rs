@@ -392,6 +392,7 @@ async fn main() {
             commands::get_releases,
             commands::get_system_hosts,
             commands::get_third_party_licenses,
+            commands::emulator::dispatch_emulated_event,
             commands::gallery::get_gallery_items,
             commands::gallery::upload_gallery_items,
             commands::plugins::get_plugins,

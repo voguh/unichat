@@ -10,6 +10,7 @@
 
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
+import { UniChatEvent } from "unichat-widgets/unichat";
 import {
     GalleryItem,
     UniChatPluginMetadata,
@@ -55,6 +56,12 @@ export class CommandService {
 
     public async getThirdPartyLicenses(): Promise<ThirdPartyLicenseInfo[]> {
         return invoke("get_third_party_licenses");
+    }
+
+    /* ========================================================================================== */
+
+    public async dispatchEmulatedEvent(event: UniChatEvent): Promise<void> {
+        await invoke("dispatch_emulated_event", { event });
     }
 
     /* ========================================================================================== */
