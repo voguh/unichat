@@ -26,7 +26,7 @@ export const TooltipStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement
     "&[data-placement^='top']::after": {
         bottom: "-4px",
         left: "50%",
-        transform: "translateX(-50%) rotate(45deg)"
+        transform: "translateX(-50%) rotate(-45deg)"
     },
     "&[data-placement^='bottom']::after": {
         top: "-4px",
