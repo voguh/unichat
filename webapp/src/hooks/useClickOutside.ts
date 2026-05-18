@@ -11,31 +11,12 @@
 import { RefObject } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 
+import { clickOutside } from "unichat/utils/clickOutside";
+
 export function useClickOutside<T extends Element = Element>(cb: (event?: Event) => void): RefObject<T> {
     const ref = useRef<T | null>(null);
 
-    useEffect(() => {
-        function handler(event: Event): void {
-            const el = ref.current;
-            if (!el) {
-                return;
-            }
-
-            if (event.target instanceof Node && el.contains(event.target)) {
-                return;
-            }
-
-            cb(event);
-        }
-
-        document.addEventListener("pointerdown", handler);
-        document.addEventListener("touchstart", handler);
-
-        return () => {
-            document.removeEventListener("pointerdown", handler);
-            document.removeEventListener("touchstart", handler);
-        };
-    }, [cb]);
+    useEffect(() => clickOutside(cb, ref), [cb]);
 
     return ref;
 }

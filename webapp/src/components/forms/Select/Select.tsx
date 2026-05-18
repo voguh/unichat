@@ -18,6 +18,7 @@ import { FormGroup, FormGroupBaseProps } from "unichat/components/forms/FormGrou
 import { Portal } from "unichat/components/Portal";
 import { useComputePosition } from "unichat/hooks/useComputePosition";
 import { captureNativeRef } from "unichat/utils/captureNativeRef";
+import { clickOutside } from "unichat/utils/clickOutside";
 import { mergeRefs } from "unichat/utils/mergeRefs";
 
 import { isOptionGroup } from "./__utils__/isOptionGroup";
@@ -89,30 +90,12 @@ export function Select({ options = [], inputRef, id, ...props }: SelectProps): P
             }
         }
 
-        function handleClickOutside(event: Event): void {
-            const wrapperEl = wrapperRef.current;
-            const dropdownEl = dropdownRef.current;
-            if (!wrapperEl || !dropdownEl) {
-                return;
-            }
-
-            if (event.target instanceof Node && wrapperEl.contains(event.target)) {
-                return;
-            }
-
-            if (event.target instanceof Node && dropdownEl.contains(event.target)) {
-                return;
-            }
-
-            hide();
-        }
-
         window.addEventListener("keydown", handleKeyDown);
-        document.addEventListener("pointerdown", handleClickOutside);
+        const unlisten = clickOutside(hide, wrapperRef, dropdownRef);
 
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
-            document.removeEventListener("pointerdown", handleClickOutside);
+            unlisten();
         };
     }, [isOpen]);
 
