@@ -77,7 +77,7 @@
             "warn",
             {
                 "newlinesBetween": "always",
-                "groups": [["/^preact/", "/^react$/", "/^react-dom/", "/^node:/"], "module", ["/^unichat//", "/^unichat-widgets//"], ["parent", "sibling", "index"]],
+                "groups": [["/^preact/", "/^node:/"], "module", ["/^unichat//", "/^unichat-widgets//"], ["parent", "sibling", "index"]],
                 "alphabetize": { "order": "asc", "ignoreCase": true }
             }
         ],
