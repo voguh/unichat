@@ -16,7 +16,7 @@ export function mergeRefs<T>(...refs: Ref<T>[]) {
     return (instance: T | null): void => {
         for (const refObject of refs) {
             if (refObject != null) {
-                if (refObject instanceof Function) {
+                if (typeof refObject === "function") {
                     refObject(instance);
                 } else {
                     refObject.current = instance;
