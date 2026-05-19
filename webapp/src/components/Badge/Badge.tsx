@@ -10,47 +10,21 @@
 
 import * as PReact from "preact";
 
-import tw, { TwStyle } from "twin.macro";
-
 import { Variants } from "unichat/types";
 
 import { BadgeStyledContainer } from "./styled";
 
 export type BadgeVariant = Variants;
 
-interface Props extends PReact.HTMLAttributes<HTMLDivElement> {
+type VanillaProps = PReact.HTMLAttributes<HTMLDivElement>;
+interface Props extends VanillaProps {
     variant?: BadgeVariant;
     children: PReact.ComponentChildren;
 }
 
-export function Badge({ variant: bg, children, style, ...props }: Props): PReact.ComponentChildren {
-    function formatBackgroundColor(color: BadgeVariant | undefined): TwStyle {
-        switch (color) {
-            case "primary":
-                return tw`bg-red-800/50 border border-red-800 text-stone-50`;
-            case "secondary":
-                return tw`bg-zinc-700/50 border border-zinc-700 text-stone-50`;
-            case "success":
-                return tw`bg-green-700/50 border border-green-700 text-stone-50`;
-            case "danger":
-                return tw`bg-rose-700/50 border border-rose-700 text-stone-50`;
-            case "warning":
-                return tw`bg-yellow-700/50 border border-yellow-700 text-stone-50`;
-            case "info":
-                return tw`bg-blue-700/50 border border-blue-700 text-stone-50`;
-            default:
-                return tw`bg-zinc-700/50 border border-zinc-700 text-stone-50`;
-        }
-    }
-
-    function mergeStyles(
-        ...styles: (TwStyle | PReact.Signalish<string | PReact.CSSProperties | undefined>)[]
-    ): PReact.CSSProperties {
-        return Object.assign({}, ...styles);
-    }
-
+export function Badge({ variant, children, ...props }: Props): PReact.ComponentChildren {
     return (
-        <BadgeStyledContainer {...props} style={mergeStyles(formatBackgroundColor(bg), style)}>
+        <BadgeStyledContainer {...props} data-variant={variant ?? "secondary"}>
             {children}
         </BadgeStyledContainer>
     );
