@@ -146,13 +146,16 @@ export function Dashboard(): PReact.ComponentChildren {
                                     data-tour="widgets-selector"
                                 />
 
-                                <Tooltip content="Reload widget view" placement="left">
+                                <Tooltip content="Reload widget view" placement="bottom">
                                     <Button onClick={reloadIframe} data-tour="preview-reload">
                                         <i className="fas fa-redo" />
                                     </Button>
                                 </Tooltip>
 
-                                <Tooltip content={isOpenToLan ? "Open on device" : "Open in browser"} placement="left">
+                                <Tooltip
+                                    content={isOpenToLan ? "Open on device" : "Open in browser"}
+                                    placement="bottom"
+                                >
                                     <Button onClick={handleOpenInBrowser} data-tour="preview-open-in-browser">
                                         <i className="fas fa-globe" />
                                     </Button>

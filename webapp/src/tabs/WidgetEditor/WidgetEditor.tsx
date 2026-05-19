@@ -91,7 +91,7 @@ export function WidgetEditor(): PReact.ComponentChildren {
                     onChange={(evt) => setSelectedWidget(evt.currentTarget.value)}
                 />
 
-                <Tooltip content="Reload widget view" placement="left">
+                <Tooltip content="Reload widget view" placement="bottom">
                     <Button onClick={reloadIframe}>
                         <i className="fas fa-sync" />
                     </Button>
