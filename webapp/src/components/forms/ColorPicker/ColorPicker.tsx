@@ -12,7 +12,7 @@ import * as PReact from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 
 import { TinyColor } from "@ctrl/tinycolor";
-import { flip, offset, shift } from "@floating-ui/dom";
+import { ComputePositionReturn, flip, offset, shift } from "@floating-ui/dom";
 
 import { splitProperties } from "unichat/components/forms/__utils__/splitProperties";
 import { FormGroup, FormGroupBaseProps } from "unichat/components/forms/FormGroup";
@@ -35,7 +35,11 @@ export interface ColorPickerProps extends VanillaProps, FormGroupBaseProps {
     swatches?: string[];
 }
 
-function adjustFloatingPosition(reference: HTMLElement, floating: HTMLElement, x: number, y: number): [number, number] {
+function adjustFloatingPosition(
+    reference: HTMLElement,
+    floating: HTMLElement,
+    { y }: ComputePositionReturn
+): [number, number] {
     const wrapperRect = reference.getBoundingClientRect();
     const centeredX = wrapperRect.left + window.scrollX + wrapperRect.width / 2;
 

@@ -13,9 +13,15 @@ import { useEffect, useRef } from "preact/hooks";
 
 import { autoUpdate, computePosition, FloatingElement, ReferenceElement } from "@floating-ui/dom";
 
+export type AdjustFloatingPosition<Reference extends ReferenceElement, Floating extends FloatingElement> = (
+    reference: Reference,
+    floating: Floating,
+    values: Awaited<ReturnType<typeof computePosition>>
+) => [number, number];
+
 export function useComputePosition<Reference extends ReferenceElement, Floating extends FloatingElement>(
     options?: Parameters<typeof computePosition>[2],
-    adjustFloatingPosition?: (reference: Reference, floating: Floating, x: number, y: number) => [number, number]
+    adjustFloatingPosition?: AdjustFloatingPosition<Reference, Floating>
 ): [RefObject<Reference>, RefObject<Floating>, (visible: boolean) => void] {
     const referenceRef = useRef<Reference>(null);
     const floatingRef = useRef<Floating>(null);
@@ -40,12 +46,13 @@ export function useComputePosition<Reference extends ReferenceElement, Floating 
             Object.assign(floatingElem.style, { visibility: "visible", opacity: "1" });
 
             autoUpdateRef.current = autoUpdate(referenceElem, floatingElem, async () => {
-                const { x, y } = await computePosition(referenceElem, floatingElem, options);
+                const values = await computePosition(referenceElem, floatingElem, options);
 
                 if (typeof adjustFloatingPosition === "function") {
-                    const [customX, customY] = adjustFloatingPosition(referenceElem, floatingElem, x, y);
+                    const [customX, customY] = adjustFloatingPosition(referenceElem, floatingElem, values);
                     Object.assign(floatingElem.style, { left: `${customX}px`, top: `${customY}px` });
                 } else {
+                    const { x, y } = values;
                     Object.assign(floatingElem.style, { left: `${x}px`, top: `${y}px` });
                 }
             });

@@ -16,32 +16,23 @@ import tw from "twin.macro";
 export const PopoverStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
     ...tw`bg-stone-900 text-stone-50 border border-stone-700 p-4 rounded text-sm pointer-events-none`,
 
-    "&::after": {
-        ...tw`absolute border-l border-b bg-inherit border-inherit`,
-        content: '""',
+    "> .popover-caret": {
+        ...tw`fixed bg-inherit border-l border-b border-inherit`,
         width: "8px",
         height: "8px",
-        boxSizing: "border-box"
-    },
-    "&[data-placement^='top']::after": {
-        bottom: "-4px",
-        left: "50%",
-        transform: "translateX(-50%) rotate(45deg)"
-    },
-    "&[data-placement^='bottom']::after": {
-        top: "-4px",
-        left: "50%",
-        transform: "translateX(-50%) rotate(135deg)"
-    },
-    "&[data-placement^='left']::after": {
-        right: "-4px",
-        top: "50%",
-        transform: "translateY(-50%) rotate(-135deg)"
-    },
-    "&[data-placement^='right']::after": {
-        left: "-4px",
-        top: "50%",
-        transform: "translateY(-50%) rotate(45deg)"
+
+        "&[data-placement^='top']": {
+            transform: "translate(-50%, calc((100% + 4px) * -1)) rotate(-45deg)"
+        },
+        "&[data-placement^='bottom']": {
+            transform: "translate(-50%, 4px) rotate(135deg)"
+        },
+        "&[data-placement^='left']": {
+            transform: "translate(calc((100% + 4px) * -1), -50%) rotate(-135deg)"
+        },
+        "&[data-placement^='right']": {
+            transform: "translate(4px, -50%) rotate(45deg)"
+        }
     },
 
     "> .popover-header": {
