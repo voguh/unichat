@@ -18,18 +18,17 @@ export const SettingsModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivE
     display: "flex",
     flexWrap: "nowrap",
     padding: "0 !important",
-    width: "calc(64rem - 2px)", // 2px is the border
-    height: "calc(90vh - 47px)",
+    height: "var(--modal-body-max-height)",
 
     "> .settings_modal--sidebar": {
         ...tw`bg-stone-900 border-r border-stone-800`,
 
         width: "201px", // 200px is the sidebar + 1px is the border
-        height: "calc(90vh - 47px)",
+        height: "var(--modal-body-max-height)",
 
         "> .settings_modal--sidebar_items": {
             ...tw`p-2 flex flex-col gap-1`,
-            height: "calc(90vh - (47px + 46px))" // 47px is the header and 46px is the footer
+            height: "calc(var(--modal-body-max-height) - 46px)" // 46px is the footer
         },
 
         "> .settings_modal--sidebar_footer": {
@@ -38,8 +37,8 @@ export const SettingsModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivE
     },
 
     "> .settings_modal--content": {
-        "--settings-modal-content-width": "calc(64rem - 203px)", // 200px is the sidebar + 3px is the border
-        "--settings-modal-content-height": "calc(90vh - 47px)",
+        "--settings-modal-content-width": "calc(var(--modal-body-max-width) - 201px)", // 201px is the sidebar
+        "--settings-modal-content-height": "var(--modal-body-max-height)",
 
         ...tw`bg-stone-900`,
         width: "var(--settings-modal-content-width)",
