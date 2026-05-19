@@ -3,8 +3,7 @@ name: main.yaml
 on:
   push:
     branches:
-      - main
-      - stable/*
+      - '**'
     tags:
       - '[0-9]+.[0-9]+.[0-9]+*'
   workflow_dispatch:
@@ -15,8 +14,23 @@ env:
   RUST_VERSION: '1.92.0'
 
 jobs:
+  check_license_headers:
+    runs-on: ubuntu-24.04
+    env:
+      TAURI_APP_PATH: ${{ forgejo.workspace }}
+      TAURI_FRONTEND_PATH: ${{ forgejo.workspace }}/webapp
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6.0.2
+
+      - name: Check license headers
+        run: |
+          LOG_LEVEL=debug ./zztools/check-license-header.py
+
   bundle-webapp:
     runs-on: ubuntu-24.04
+    if: forgejo.event_name == "workflow_dispatch" || startsWith(forgejo.ref, 'refs/heads/main') || startsWith(forgejo.ref, 'refs/heads/stable/') || startsWith(forgejo.ref, 'refs/tags/')
+    needs: [check_license_headers]
     env:
       TAURI_APP_PATH: ${{ forgejo.workspace }}
       TAURI_FRONTEND_PATH: ${{ forgejo.workspace }}/webapp
