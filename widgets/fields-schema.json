@@ -43,7 +43,7 @@
                 {
                     "type": "object",
                     "properties": {
-                        "type": { "const": "checkbox" },
+                        "type": { "enum": ["checkbox", "switch"] },
                         "group": { "type": "string" },
                         "label": { "type": "string" },
                         "description": { "type": "string" },

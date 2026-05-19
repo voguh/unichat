@@ -123,7 +123,7 @@ export interface WidgetFieldsNumber {
 }
 
 export interface WidgetFieldsCheckbox {
-    type: "checkbox";
+    type: "checkbox" | "switch";
     group?: string;
     label: string;
     description?: string;
