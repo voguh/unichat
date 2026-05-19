@@ -13,10 +13,18 @@ import mitt from "mitt";
 import { OpenModalOptions } from "./modalService";
 import { NotificationOptions } from "./notificationService";
 
+export interface RichModalWrapperProps extends OpenModalOptions {
+    modalId: string;
+}
+
 export type EventEmitterEvents = {
     "tour:start": { type: "full" | "whats-new" };
+
     "notification:show": NotificationOptions;
-    "modal:open": OpenModalOptions;
+
+    "modal:open": RichModalWrapperProps;
+    "modal:close": { modalId: string };
+    "modal:closed": { modalId: string };
 };
 
 export const eventEmitter = mitt<EventEmitterEvents>();

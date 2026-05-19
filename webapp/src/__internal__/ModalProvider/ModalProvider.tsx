@@ -12,14 +12,10 @@ import * as PReact from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 
 import { Modal } from "unichat/components/Modal";
-import { eventEmitter } from "unichat/services/eventEmitter";
+import { eventEmitter, RichModalWrapperProps } from "unichat/services/eventEmitter";
 import { OpenModalOptions } from "unichat/services/modalService";
 
 import { ModalContainerStyledContainer } from "./styled";
-
-interface RichModalWrapperProps extends OpenModalOptions {
-    modalId: string;
-}
 
 interface Props {
     size?: "sm" | "md" | "lg" | "xl";
@@ -33,18 +29,24 @@ export function ModalProvider(defaultProps: Props): PReact.ComponentChildren {
 
     function requestClose(id: string): void {
         setOpenedModals((prev) => prev.filter((modal) => modal.modalId !== id));
-    }
-
-    function handleOpenModal(modalOptions: OpenModalOptions): void {
-        const richModalOptions = { ...modalOptions, modalId: crypto.randomUUID() };
-        setOpenedModals((prev) => [...prev, richModalOptions]);
+        eventEmitter.emit("modal:closed", { modalId: id });
     }
 
     useEffect(() => {
-        eventEmitter.on("modal:open", handleOpenModal);
+        function requestOpenModal(modalOptions: RichModalWrapperProps): void {
+            setOpenedModals((prev) => [...prev, modalOptions]);
+        }
+
+        function requestCloseModal({ modalId }: { modalId: string }): void {
+            requestClose(modalId);
+        }
+
+        eventEmitter.on("modal:open", requestOpenModal);
+        eventEmitter.on("modal:close", requestCloseModal);
 
         return () => {
-            eventEmitter.off("modal:open", handleOpenModal);
+            eventEmitter.off("modal:open", requestOpenModal);
+            eventEmitter.off("modal:close", requestCloseModal);
         };
     }, []);
 
