@@ -25,7 +25,13 @@ export const ScraperCardContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
     },
 
     "> .scraper-badges-wrapper": {
-        ...tw`flex flex-nowrap items-center mb-2 absolute top-2 right-2`
+        ...tw`flex flex-nowrap items-center mb-2 absolute top-2 right-2`,
+
+        "> div": {
+            "&:not(:first-child)": {
+                ...tw`ml-2`
+            }
+        }
     },
 
     "> .scraper-card-body": {
