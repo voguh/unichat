@@ -10,7 +10,7 @@
 
 import * as PReact from "preact";
 
-import { ComputePositionReturn, flip, offset, shift, Side } from "@floating-ui/dom";
+import { ComputePositionReturn, flip, offset, Placement, shift } from "@floating-ui/dom";
 
 import { Portal } from "unichat/components/Portal";
 import { useComputePosition } from "unichat/hooks/useComputePosition";
@@ -22,7 +22,7 @@ interface Props {
     children: PReact.VNode;
 
     trigger?: "hover" | "focus";
-    placement?: Side;
+    placement?: Placement;
     title?: PReact.ComponentChildren;
     content: PReact.ComponentChildren;
 
@@ -36,17 +36,21 @@ function adjustFloatingPosition(
     floating: HTMLElement,
     { placement, x, y }: ComputePositionReturn
 ): [number, number] {
-    const dialogCaretElem = floating.querySelector<HTMLDivElement>(".popover-caret");
-    if (dialogCaretElem != null) {
+    const caretElem = floating.querySelector<HTMLDivElement>(".popover-caret");
+    if (caretElem != null) {
         const bounds = reference.getBoundingClientRect();
 
-        dialogCaretElem.setAttribute("data-placement", placement);
-        if (placement === "top" || placement === "bottom") {
-            dialogCaretElem.style.left = `${bounds.x + bounds.width / 2}px`;
-            dialogCaretElem.style.top = placement === "top" ? `${bounds.y}px` : `${bounds.y + bounds.height}px`;
-        } else if (placement === "left" || placement === "right") {
-            dialogCaretElem.style.left = placement === "left" ? `${bounds.x}px` : `${bounds.x + bounds.width}px`;
-            dialogCaretElem.style.top = `${bounds.y + bounds.height / 2}px`;
+        caretElem.setAttribute("data-placement", placement);
+        const isTop = placement.startsWith("top");
+        const isRight = placement.startsWith("right");
+        const isBottom = placement.startsWith("bottom");
+        const isLeft = placement.startsWith("left");
+        if (isTop || isBottom) {
+            caretElem.style.left = `${bounds.x + bounds.width / 2}px`;
+            caretElem.style.top = isTop ? `${bounds.y}px` : `${bounds.y + bounds.height}px`;
+        } else if (isLeft || isRight) {
+            caretElem.style.left = isLeft ? `${bounds.x}px` : `${bounds.x + bounds.width}px`;
+            caretElem.style.top = `${bounds.y + bounds.height / 2}px`;
         }
     }
 

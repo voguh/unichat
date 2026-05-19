@@ -85,11 +85,15 @@ export function stageBuilder(
         dialogElem.style.top = `${y}px`;
 
         dialogCaretElem.setAttribute("data-placement", placement);
-        if (placement === "top" || placement === "bottom") {
+        const isTop = placement.startsWith("top");
+        const isRight = placement.startsWith("right");
+        const isBottom = placement.startsWith("bottom");
+        const isLeft = placement.startsWith("left");
+        if (isTop || isBottom) {
             dialogCaretElem.style.left = `${bounds.x + bounds.width / 2}px`;
-            dialogCaretElem.style.top = placement === "top" ? `${bounds.y}px` : `${bounds.y + bounds.height}px`;
-        } else if (placement === "left" || placement === "right") {
-            dialogCaretElem.style.left = placement === "left" ? `${bounds.x}px` : `${bounds.x + bounds.width}px`;
+            dialogCaretElem.style.top = isTop ? `${bounds.y}px` : `${bounds.y + bounds.height}px`;
+        } else if (isLeft || isRight) {
+            dialogCaretElem.style.left = isLeft ? `${bounds.x}px` : `${bounds.x + bounds.width}px`;
             dialogCaretElem.style.top = `${bounds.y + bounds.height / 2}px`;
         }
     };
