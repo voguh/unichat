@@ -38,6 +38,6 @@ export const SelectStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>
 });
 
 export const SelectStyledDropdown: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`w-full p-2 rounded border border-stone-700 bg-stone-800/95 shadow-xl overflow-auto backdrop-blur-sm`,
+    ...tw`w-full p-2 rounded border border-stone-700 bg-stone-800/95 shadow-xl backdrop-blur-sm`,
     maxHeight: "calc(32px * 6)"
 });

@@ -51,7 +51,7 @@ export const ModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
         },
 
         "> .modal-body": {
-            ...tw`overflow-auto p-4 overflow-x-scroll text-stone-50`,
+            ...tw`p-4 text-stone-50`,
             maxHeight: "calc(90vh - 47px)"
         }
     },
@@ -85,7 +85,6 @@ export const ModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
             maxHeight: "100vh",
 
             "> .modal-body": {
-                ...tw`overflow-auto p-4 overflow-x-scroll text-stone-50`,
                 maxHeight: "calc(100vh - 47px)"
             }
         }

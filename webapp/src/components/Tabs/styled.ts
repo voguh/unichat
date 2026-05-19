@@ -29,6 +29,6 @@ export const TabsStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> 
     },
 
     "> .tabs--content": {
-        ...tw`flex-1 overflow-auto`
+        ...tw`flex-1`
     }
 });
