@@ -29,7 +29,7 @@ export const SettingsModalStyledContainer: ComponentType<HTMLAttributes<HTMLDivE
 
         "> .settings_modal--sidebar_items": {
             ...tw`p-2 flex flex-col gap-1`,
-            height: "calc(90vh - (47px + 45px))" // 47px is the header and 45px is the footer
+            height: "calc(90vh - (47px + 46px))" // 47px is the header and 46px is the footer
         },
 
         "> .settings_modal--sidebar_footer": {
