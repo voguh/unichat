@@ -61,5 +61,21 @@ export const GlobalStyle = createGlobalStyles({
     ".fa, .fas, .far, .fal, .fab, .fa-solid, .fa-regular, .fa-light, .fa-brands": {
         textAlign: "center",
         width: "1.25em"
+    },
+
+    "::-webkit-scrollbar": {
+        width: "8px"
+    },
+
+    "::-webkit-scrollbar-track": {
+        ...tw`bg-stone-950/25`
+    },
+
+    "::-webkit-scrollbar-thumb": {
+        ...tw`bg-stone-700/50 rounded`,
+
+        "&:hover": {
+            ...tw`bg-stone-700/80`
+        }
     }
 }) as PReact.ComponentType;
