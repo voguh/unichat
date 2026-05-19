@@ -57,14 +57,20 @@ export const settingsItems: Record<string, SettingsItem> = {
 };
 /* ========================================================================== */
 
-function TabContent({ selectedItem, ...rest }: { selectedItem: string } & SelectedItemProps): PReact.ComponentChildren {
+interface TabContentProps {
+    selectedItem: string;
+}
+
+function TabContent({ selectedItem }: TabContentProps): PReact.ComponentChildren {
+    const { onClose } = useContext(ModalContext);
+
     if (!(selectedItem in settingsItems)) {
         throw new Error("Selected item not found in settingsItems");
     }
 
     const Element = settingsItems[selectedItem].children;
 
-    return <Element {...rest} />;
+    return <Element onClose={onClose} />;
 }
 
 /* ========================================================================== */
@@ -77,8 +83,6 @@ interface Props {
 
 export function SettingsModal({ externalActiveTab, onHide, show }: Props): PReact.ComponentChildren {
     const [activeTab, setActiveTab] = useState<keyof typeof settingsItems>("general");
-
-    const { onClose } = useContext(ModalContext);
 
     useEffect(() => {
         if (externalActiveTab != null && externalActiveTab in settingsItems) {
@@ -115,7 +119,7 @@ export function SettingsModal({ externalActiveTab, onHide, show }: Props): PReac
                 </div>
             </div>
             <div className="settings_modal--content">
-                <TabContent selectedItem={activeTab} onClose={onClose} />
+                <TabContent selectedItem={activeTab} />
             </div>
         </Modal>
     );

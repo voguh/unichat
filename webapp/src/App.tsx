@@ -193,7 +193,7 @@ export function App(): PReact.ComponentChildren {
                 onHide={() => setOpenedSettingsModal(false)}
             />
 
-            {/* <Tour /> */}
+            <Tour />
             <ModalProvider />
             <NotificationProvider />
         </>

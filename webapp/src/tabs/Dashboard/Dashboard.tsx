@@ -143,6 +143,7 @@ export function Dashboard(): PReact.ComponentChildren {
                                     options={widgets}
                                     onChange={(evt) => setSelectedWidget(evt.currentTarget.value)}
                                     value={selectedWidget}
+                                    data-tour="widgets-selector"
                                 />
 
                                 <Tooltip content="Reload widget view" placement="left">

@@ -8,27 +8,28 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import React from "react";
+import * as PReact from "preact";
+import { useEffect, useRef, useState } from "preact/hooks";
+
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { Button } from "unichat/components/Button";
+import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
-import { Dimensions } from "unichat/types";
 
 import { dashboardStageBuilder } from "./stages/dashboardStageBuilder";
-import { notificationStageBuilder } from "./stages/notificationStageBuilder";
+import { modalStageBuilder } from "./stages/modalStageBuilder";
 import { stageBuilder } from "./stages/stageBuilder";
+import { welcomeStageBuilder } from "./stages/welcomeStageBuilder";
 import { widgetEditorStageBuilder } from "./stages/widgetEditorStageBuilder";
 import { TourStyledContainer } from "./styled";
 
 interface Props {
-    children?: React.ReactNode;
+    children?: PReact.ComponentChildren;
 }
 
-export type TourBuilder = (svg: SVGSVGElement, dimensions: Dimensions) => Promise<void>;
-
-export const BACKDROP_COLOR = "rgba(var(--oc-gray-9-rgb), 0.95)";
-export const INDICATORS_COLOR = "var(--oc-green-6)";
+export type TourBuilder = (container: HTMLDivElement) => Promise<(() => void) | void>;
 
 interface TourStep {
     id: string;
@@ -42,8 +43,15 @@ interface TourStep {
 
 const steps: TourStep[] = [
     {
+        id: "c9ff8cfa-6dc7-4212-a0a8-cda2a8eb35c8",
+        builder: welcomeStageBuilder(`Welcome to ${UNICHAT_DISPLAY_NAME}!`, [
+            `This tour will guide you through the main features of ${UNICHAT_DISPLAY_NAME}`,
+            "<small>Also you can skip the tour and explore the application by yourself, if you want to see this message again you can start the tour anytime in the settings.</small>"
+        ])
+    },
+    {
         id: "73865214-715f-425b-8664-8ddfca448514",
-        builder: dashboardStageBuilder("clear-chat", "Clear chat history", null, 50, 200)
+        builder: dashboardStageBuilder("clear-chat", "Clear chat history", null, "right")
     },
     {
         id: "25c20d64-e75c-4f0b-84f4-826ccf2fe7e6",
@@ -51,25 +59,24 @@ const steps: TourStep[] = [
             "user-widgets-directory",
             "Open user widgets directory",
             "Open your own custom widgets directory, here you can add your own widgets.",
-            50,
-            300
+            "right"
         )
     },
     {
         id: "1e255868-930b-4e20-be2b-41b07c8cf97f",
-        builder: dashboardStageBuilder("toggle-widget-preview", "Toggle widget preview", null, 50, 300)
+        builder: dashboardStageBuilder("toggle-widget-preview", "Toggle widget preview", null, "right")
     },
     {
         id: "94c455c6-5a1f-4131-83dd-aff3c25358ce",
-        builder: dashboardStageBuilder("widgets-selector", "Widget selector", null, 50, -200)
+        builder: dashboardStageBuilder("widgets-selector", "Widget selector", null, "bottom")
     },
     {
         id: "fce131f8-3acb-4b27-82da-130f418b70ad",
-        builder: dashboardStageBuilder("preview-reload", "Reload preview", null, 50, -200)
+        builder: dashboardStageBuilder("preview-reload", "Reload preview", null, "bottom")
     },
     {
         id: "8df4d19e-ef74-4578-8cd2-895bb55eefaf",
-        builder: dashboardStageBuilder("preview-open-in-browser", "Open preview in browser", null, 50, -300)
+        builder: dashboardStageBuilder("preview-open-in-browser", "Open preview in browser", null, "bottom")
     },
     {
         id: "908b35ad-0127-49af-b37a-d3ec625f1d0e",
@@ -77,8 +84,7 @@ const steps: TourStep[] = [
             "youtube-chat--url-input",
             "YouTube Chat URL",
             "Also you can paste normal video, shorts or live urls or direct video id.",
-            50,
-            300
+            "bottom"
         )
     },
     {
@@ -87,27 +93,26 @@ const steps: TourStep[] = [
             "twitch-chat--url-input",
             "Twitch Chat URL",
             "Also you can paste normal Twitch url or direct channel name.",
-            50,
-            300
-        )
-    },
-    {
-        id: "1b19c7f5-eee9-4ef2-bc66-59cbebf06ad7",
-        builder: dashboardStageBuilder(
-            "kick-chat--url-input",
-            "Kick Chat URL",
-            "<strong>Note:</strong> Only messages and remove message events are supported for now.",
-            50,
-            500
+            "top"
         )
     },
     {
         id: "14fe744f-ac12-4ef5-91f3-c638e0367f3f",
         replaces: "1b19c7f5-eee9-4ef2-bc66-59cbebf06ad7",
-        builder: notificationStageBuilder("Kick Integration was Moved", [
-            "To improve kick integration, it was moved to a standalone plugin.",
-            'You can find it in <a href="https://codeberg.org/unichat-community/unichat-plugin-kick/releases" target="_blank" rel="noopener noreferrer">Codeberg</a>.'
-        ])
+        builder: modalStageBuilder(
+            "Kick Integration was Moved",
+            <div className="text-center">
+                <div>To improve kick integration, it was moved to a standalone plugin.</div>
+                <div className="mt-2 flex justify-center">
+                    <Button
+                        variant="info"
+                        onClick={() => openUrl("https://codeberg.org/unichat-community/unichat-plugin-kick/releases")}
+                    >
+                        View on Codeberg
+                    </Button>
+                </div>
+            </div>
+        )
     },
 
     {
@@ -116,8 +121,7 @@ const steps: TourStep[] = [
             "tab-widgetEditor-toggle",
             "Widget Editor",
             "Here you can edit your created/downloaded widgets (System widgets aren't editable).",
-            50,
-            350
+            "right"
         )
     },
     {
@@ -126,8 +130,7 @@ const steps: TourStep[] = [
             "gallery-toggle",
             "Assets Gallery",
             "Open the assets gallery to view and manage your widget assets like images, sounds and more.",
-            50,
-            400
+            "right"
         )
     },
     {
@@ -136,8 +139,16 @@ const steps: TourStep[] = [
             "widget-editor-emulator-events-dispatcher",
             "Emulator Events Dispatcher",
             "Here you can emit events to test your widget's event handling functionality.",
-            -50,
-            -400
+            "left"
+        )
+    },
+    {
+        id: "4ec842e4-c2cb-490b-ab35-43a7a8c85140",
+        builder: widgetEditorStageBuilder(
+            "widget-editor-emulator-target-selector",
+            "Emulator Target",
+            "Here you can select if emulated events should be dispatched to all widgets or only to the current widget.",
+            "top"
         )
     },
 
@@ -147,8 +158,7 @@ const steps: TourStep[] = [
             "settings-modal-toggle",
             "Settings",
             "Manage application settings, check for updates and more.",
-            -50,
-            400
+            "top"
         )
     },
     {
@@ -157,8 +167,7 @@ const steps: TourStep[] = [
             "plugins-modal-toggle",
             "Plugins",
             "Here you can see all installed plugins and view more information about them.",
-            -50,
-            400
+            "top"
         )
     },
     {
@@ -167,19 +176,18 @@ const steps: TourStep[] = [
             "widgets-modal-toggle",
             "Widgets",
             "Here you can see all installed widgets and open in browser or reveal in folder (user widgets only).",
-            -50,
-            400
+            "top"
         )
     }
 ];
 
-export function Tour(_props: Props): React.ReactNode {
-    const [dimensions, setDimensions] = React.useState({ width: window.innerWidth, height: window.innerHeight });
+const _logger = LoggerFactory.getLogger("Tour");
+export function Tour(_props: Props): PReact.ComponentChildren {
+    const [stepsToRun, setStepsToRun] = useState<TourStep[]>([]);
+    const [currentStep, setCurrentStep] = useState(-1);
+    const [stepCleanupCallback, setStepCleanupCallback] = useState<(() => void) | null>(null);
 
-    const [stepsToRun, setStepsToRun] = React.useState<TourStep[]>([]);
-    const [currentStep, setCurrentStep] = React.useState(-1);
-
-    const svgRef = React.useRef<SVGSVGElement>(null);
+    const svgRef = useRef<HTMLDivElement>(null);
 
     async function endTour(): Promise<void> {
         setStepsToRun([]);
@@ -194,13 +202,29 @@ export function Tour(_props: Props): React.ReactNode {
 
     function previousStage(): void {
         if (currentStep > 0) {
-            setCurrentStep((old) => old - 1);
+            try {
+                if (stepCleanupCallback != null) {
+                    stepCleanupCallback();
+                }
+            } catch (error) {
+                _logger.error("Error in beforePreviousCallback", error);
+            } finally {
+                setCurrentStep((old) => old - 1);
+            }
         }
     }
 
-    function nextStage(): void {
+    async function nextStage(): Promise<void> {
         if (currentStep < stepsToRun.length - 1) {
-            setCurrentStep((old) => old + 1);
+            try {
+                if (stepCleanupCallback != null) {
+                    stepCleanupCallback();
+                }
+            } catch (error) {
+                _logger.error("Error in beforeNextCallback", error);
+            } finally {
+                setCurrentStep((old) => old + 1);
+            }
         }
     }
 
@@ -209,7 +233,10 @@ export function Tour(_props: Props): React.ReactNode {
             if (currentStep > -1 && currentStep < stepsToRun.length) {
                 const step = stepsToRun[currentStep];
 
-                await step.builder(svgRef.current, dimensions);
+                const cb = await step.builder(svgRef.current);
+                if (typeof cb === "function") {
+                    setStepCleanupCallback(() => cb);
+                }
             } else {
                 svgRef.current.innerHTML = "";
             }
@@ -239,76 +266,49 @@ export function Tour(_props: Props): React.ReactNode {
         init(completedSteps);
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         stepHandler();
     }, [currentStep]);
 
-    React.useEffect(() => {
-        function handleResize(): void {
-            setDimensions({ width: window.innerWidth, height: window.innerHeight });
-        }
-
+    useEffect(() => {
         commandService.getTourSteps().then(async (completedSteps) => {
             await new Promise((resolve) => setTimeout(resolve, 500));
             init(completedSteps);
         });
-        window.addEventListener("resize", handleResize);
 
         eventEmitter.on("tour:start", handleTourStartCallback);
 
         return () => {
             eventEmitter.off("tour:start", handleTourStartCallback);
-            window.removeEventListener("resize", handleResize);
         };
     }, []);
 
     return (
         <TourStyledContainer style={{ visibility: currentStep === -1 ? "hidden" : "visible" }}>
-            <svg
-                ref={svgRef}
-                width={dimensions.width}
-                height={dimensions.height}
-                viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
-                xmlns="http://www.w3.org/2000/svg"
-            />
-            <div className="actions">
-                {stepsToRun.length > 1 && (
-                    <>
-                        <Button disabled={currentStep === 0} onClick={previousStage}>
-                            <i className="fas fa-chevron-left" />
-                            Previous
-                        </Button>
+            <div className="tour-container" ref={svgRef}></div>
+            <div className="tour-actions">
+                <Button disabled={currentStep === 0} onClick={previousStage} className="tour-prev">
+                    <i className="fas fa-chevron-left" />
+                    Previous
+                </Button>
 
-                        <Button disabled={currentStep === stepsToRun.length - 1} onClick={nextStage}>
-                            Next
-                            <i className="fas fa-chevron-right" />
-                        </Button>
-                    </>
-                )}
-
-                {stepsToRun.length > 1 && currentStep !== stepsToRun.length - 1 && (
-                    <Button
-                        style={{ position: "absolute", transform: "translateY(calc(-100% - 8px))" }}
-                        variant="light"
-                        color="red"
-                        onClick={endTour}
-                    >
-                        <i className="fas fa-times" />
-                        Skip Tour
-                    </Button>
-                )}
-
-                {(stepsToRun.length === 1 || currentStep === stepsToRun.length - 1) && (
-                    <Button
-                        style={{ position: "absolute", transform: "translateY(calc(-100% - 8px))" }}
-                        variant="light"
-                        color="green"
-                        onClick={endTour}
-                    >
-                        End Tour <i className="fas fa-check" />
-                    </Button>
-                )}
+                <Button disabled={currentStep === stepsToRun.length - 1} onClick={nextStage} className="tour-next">
+                    Next
+                    <i className="fas fa-chevron-right" />
+                </Button>
             </div>
+
+            {stepsToRun.length === 1 || currentStep === stepsToRun.length - 1 ? (
+                <Button variant="success" onClick={endTour} className="tour-end">
+                    <i className="fas fa-check" />
+                    End Tour
+                </Button>
+            ) : (
+                <Button onClick={endTour} className="tour-skip">
+                    <i className="fas fa-times" />
+                    Skip Tour
+                </Button>
+            )}
         </TourStyledContainer>
     );
 }

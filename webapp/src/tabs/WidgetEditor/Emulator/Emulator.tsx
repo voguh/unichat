@@ -115,7 +115,7 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
                 </div>
             </div>
 
-            <div className="emulator--emulation-target">
+            <div className="emulator--emulation-target" data-tour="widget-editor-emulator-target-selector">
                 <Tooltip content={buildTooltipContent()}>
                     <div className="emulator--target-title">
                         Emulation Target
