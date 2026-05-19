@@ -25,11 +25,11 @@ export const ScraperCardContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
     },
 
     "> .scraper-badges-wrapper": {
-        ...tw`flex flex-row flex-nowrap items-center mb-2 absolute top-2 right-2`
+        ...tw`flex flex-nowrap items-center mb-2 absolute top-2 right-2`
     },
 
     "> .scraper-card-body": {
-        ...tw`flex flex-row flex-nowrap items-end gap-2`,
+        ...tw`flex flex-nowrap items-end gap-2`,
 
         "> div": {
             ...tw`flex-1`
@@ -42,7 +42,7 @@ export const ScraperCardContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
 });
 
 export const ScraperLabel: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`flex flex-row flex-nowrap items-center gap-2 mb-2`,
+    ...tw`flex flex-nowrap items-center gap-2 mb-2`,
 
     "> .scraper-icon": {
         ...tw`w-8 h-8 rounded shrink-0 flex justify-center items-center bg-stone-500/50 border border-stone-500`,
