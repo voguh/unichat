@@ -18,6 +18,8 @@ use actix_web::error::ErrorNotFound;
 use actix_web::get;
 use actix_web::http::StatusCode;
 
+use crate::utils::ureq;
+
 #[cfg(target_os = "windows")]
 static USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0";
 
