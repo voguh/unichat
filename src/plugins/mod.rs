@@ -19,22 +19,37 @@ use std::sync::RwLock;
 use anyhow::anyhow;
 use anyhow::Error;
 
-use crate::plugins::lua_env::LUA_RUNTIME_ONCE_LOCK_KEY;
-use crate::plugins::lua_env::LUA_RUNTIME;
-use crate::plugins::lua_env::prepare_lua_env;
-use crate::plugins::plugin_instance::load_plugin;
-use crate::plugins::plugin_manifest::PluginManifestYAML;
+use crate::plugins::manifest::PluginManifestYAML;
+use crate::plugins::manifest::load_manifest;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::semver;
 
-mod lua_env;
-mod plugin_instance;
-mod plugin_manifest;
-mod utils;
+mod instance;
+mod manifest;
+mod runtime;
 
 const LOADED_PLUGINS_LAZY_LOCK_KEY: &str = "Plugins::LOADED_PLUGINS";
 static LOADED_PLUGINS: LazyLock<RwLock<HashMap<String, Arc<UniChatPlugin>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+
+/* ============================================================================================== */
+
+pub fn get_plugins() -> Result<Vec<Arc<UniChatPlugin>>, Error> {
+    let envs = LOADED_PLUGINS.read().map_err(|_| anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
+
+    let mut plugins: Vec<Arc<UniChatPlugin>> = Vec::new();
+    for (_name, manifest) in envs.iter() {
+        plugins.push(manifest.clone());
+    }
+
+    return Ok(plugins);
+}
+
+pub fn get_plugin(plugin_name: &str) -> Result<Arc<UniChatPlugin>, Error> {
+    let envs = LOADED_PLUGINS.read().map_err(|_| anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
+    let manifest = envs.get(plugin_name).ok_or(anyhow!("Plugin '{}' is not loaded", plugin_name))?;
+    return Ok(manifest.clone());
+}
 
 /* ============================================================================================== */
 
@@ -49,10 +64,7 @@ pub enum PluginStatus {
 
 /* ============================================================================================== */
 
-#[allow(dead_code)]
 pub struct UniChatPlugin {
-    pub manifest: PluginManifestYAML,
-
     pub name: String,
     pub description: Option<String>,
     pub version: semver::Version,
@@ -65,21 +77,18 @@ pub struct UniChatPlugin {
     messages: RwLock<Vec<String>>,
 
     plugin_path: PathBuf,
-    plugin_env: Arc<mlua::Table>,
-    loaded_modules_cache: RwLock<HashMap<String, Arc<mlua::Value>>>,
+    plugin_env: mlua::Table,
+    loaded_modules_cache: RwLock<HashMap<String, mlua::Value>>,
 }
 
 impl UniChatPlugin {
     pub(in crate::plugins) fn new(plugin_path: &Path, manifest: &PluginManifestYAML, dependencies: Vec<(String, semver::VersionRange)>) -> Result<Self, Error> {
         let version = semver::Version::parse(&manifest.version)?;
 
-        let lua = get_lua_runtime()?;
+        let lua = runtime::get()?;
         let env = lua.create_table()?;
-        let arc_env = Arc::new(env);
 
         return Ok(Self {
-            manifest: manifest.clone(),
-
             name: manifest.name.clone(),
             description: manifest.description.clone(),
             version: version,
@@ -92,7 +101,7 @@ impl UniChatPlugin {
             messages: RwLock::new(Vec::new()),
 
             plugin_path: plugin_path.to_path_buf(),
-            plugin_env: arc_env,
+            plugin_env: env,
             loaded_modules_cache: RwLock::new(HashMap::new())
         });
     }
@@ -124,7 +133,7 @@ impl UniChatPlugin {
 
     /* ====================================================================== */
 
-    pub(in crate::plugins) fn get_plugin_env(&self) -> Result<Arc<mlua::Table>, Error> {
+    pub(in crate::plugins) fn get_plugin_env(&self) -> Result<mlua::Table, Error> {
         return Ok(self.plugin_env.clone());
     }
 
@@ -133,17 +142,17 @@ impl UniChatPlugin {
     pub(in crate::plugins) fn get_cached_loaded_module(&self, module_name: &str) -> Result<mlua::Value, Error> {
         let cache = self.loaded_modules_cache.read().map_err(|_| anyhow!("Failed to acquire read lock on loaded modules cache"))?;
         if let Some(cached_module) = cache.get(module_name) {
-            return Ok(cached_module.as_ref().clone());
+            return Ok(cached_module.clone());
         }
 
         return Err(anyhow!("Module '{}' is not cached", module_name));
     }
 
-    pub(in crate::plugins) fn set_cached_loaded_module(&self, module_name: &str, module: Arc<mlua::Value>) -> Result<Arc<mlua::Value>, Error> {
-        let mut cache = self.loaded_modules_cache.write().map_err(|_| anyhow!("Failed to acquire read lock on loaded modules cache"))?;
+    pub(in crate::plugins) fn set_cached_loaded_module(&self, module_name: &str, module: mlua::Value) -> Result<mlua::Value, Error> {
+        let mut cache = self.loaded_modules_cache.write().map_err(|_| anyhow!("Failed to acquire write lock on loaded modules cache"))?;
         cache.insert(module_name.to_string(), module);
 
-        let cached_module = cache.get(module_name).ok_or(anyhow!("Failed to retrieve cached module '{}'", module_name))?;
+        let cached_module = cache.get(module_name).ok_or(anyhow!("Failed to retrieve module '{}' from cache after insertion", module_name))?;
         return Ok(cached_module.clone());
     }
 
@@ -169,11 +178,19 @@ impl UniChatPlugin {
         return self.plugin_path.join("widgets");
     }
 
+    pub fn get_icon_path(&self) -> Option<PathBuf> {
+        let icon_path = self.plugin_path.join("icon.png");
+        if icon_path.exists() && icon_path.is_file() {
+            return Some(icon_path);
+        }
+
+        return None;
+    }
+
     /* ====================================================================== */
 
     pub fn get_icon(&self) -> Option<Vec<u8>> {
-        let icon_path = self.plugin_path.join("icon.png");
-        if icon_path.exists() {
+        if let Some(icon_path) = self.get_icon_path() {
             if let Ok(icon_data) = fs::read(icon_path) {
                 return Some(icon_data);
             }
@@ -183,35 +200,10 @@ impl UniChatPlugin {
     }
 }
 
-/* ============================================================================================== */
-
-pub fn get_plugins() -> Result<Vec<Arc<UniChatPlugin>>, Error> {
-    let envs = LOADED_PLUGINS.read().map_err(|_| anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
-
-    let mut plugins: Vec<Arc<UniChatPlugin>> = Vec::new();
-    for (_name, manifest) in envs.iter() {
-        plugins.push(manifest.clone());
-    }
-
-    return Ok(plugins);
-}
-
-pub fn get_plugin(plugin_name: &str) -> Result<Arc<UniChatPlugin>, Error> {
-    let envs = LOADED_PLUGINS.read().map_err(|_| anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
-    let manifest = envs.get(plugin_name).ok_or(anyhow!("Plugin '{}' is not loaded", plugin_name))?;
-    return Ok(manifest.clone());
-}
-
-pub(in crate::plugins) fn get_lua_runtime() -> Result<Arc<mlua::Lua>, Error> {
-    let lua = LUA_RUNTIME.get().ok_or(anyhow!("{} was not initialized", LUA_RUNTIME_ONCE_LOCK_KEY))?;
-    return Ok(lua.clone());
-}
-
 /* ================================================================================================================== */
 
 pub fn init() -> Result<(), Error> {
-    prepare_lua_env()?;
-    return Ok(());
+    return runtime::new();
 }
 
 fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, PluginManifestYAML)>, Error> {
@@ -241,7 +233,7 @@ fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, PluginM
                 }
 
                 log::info!("Loading plugin manifest from directory: {:?}", plugin_path);
-                match plugin_manifest::load_manifest(&plugin_path) {
+                match load_manifest(&plugin_path) {
                     Ok(manifest) => {
                         loaded_manifests.push((plugin_path, manifest));
                     },
@@ -271,7 +263,7 @@ pub fn load_plugins() -> Result<(), Error> {
 
     for (plugin_path, manifest) in loaded_manifests.iter_mut() {
         log::info!("Loading plugin: {} v{}", manifest.name, manifest.version);
-        if let Err(e) = load_plugin(plugin_path, manifest) {
+        if let Err(e) = instance::create(plugin_path, manifest) {
             log::error!("Failed to load user plugin: {:?}", e);
         }
     }

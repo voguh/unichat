@@ -13,7 +13,7 @@ use mlua::LuaSerdeExt as _;
 use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
-use crate::plugins::utils::table_deep_readonly;
+use crate::plugins::instance::env::utils::table_deep_readonly;
 
 pub struct LuaUniChatEvent {
     pub inner: UniChatEvent
