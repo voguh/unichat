@@ -68,14 +68,14 @@ export const GlobalStyle = createGlobalStyles({
     },
 
     "::-webkit-scrollbar-track": {
-        ...tw`bg-stone-950/25`
+        ...tw`bg-stone-700`
     },
 
     "::-webkit-scrollbar-thumb": {
-        ...tw`bg-stone-700/50 rounded`,
+        ...tw`bg-stone-950/50 rounded-sm`,
 
         "&:hover": {
-            ...tw`bg-stone-700/80`
+            ...tw`bg-stone-950/75`
         }
     }
 }) as PReact.ComponentType;
