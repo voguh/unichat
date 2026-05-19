@@ -16,9 +16,9 @@ import tw from "twin.macro";
 export const GalleyTabEmptyStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
     ...tw`w-full flex items-center justify-center text-2xl font-semibold`,
     gridColumn: "1 / -1",
-    height: "146px",
+    height: "150px",
 
     "&.with-select": {
-        height: "189px"
+        height: "193px"
     }
 });
