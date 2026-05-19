@@ -173,7 +173,7 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
         >
             <div className="scraper-badges-wrapper">
                 {scraper.badges.map((badge, idx) => (
-                    <Badge key={idx} variant="primary" style={{ marginRight: "4px" }}>
+                    <Badge key={idx} variant="primary">
                         {badge.toUpperCase()}
                     </Badge>
                 ))}
@@ -188,7 +188,11 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                                     data-active={scraperIsRunning ? "true" : "false"}
                                     data-loading={loading || scraperIsLoading ? "true" : "false"}
                                 >
-                                    <i className={scraper.icon} />
+                                    {scraper.icon.startsWith("data:") ? (
+                                        <img src={scraper.icon} />
+                                    ) : (
+                                        <i className={scraper.icon} />
+                                    )}
                                 </div>
                                 {`${scraper.name} chat URL`}
                             </ScraperLabel>

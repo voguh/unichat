@@ -14,7 +14,7 @@ import { styled } from "goober";
 import tw from "twin.macro";
 
 export const ScraperCardContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`bg-stone-900 border border-stone-800 rounded p-4 shadow-md`,
+    ...tw`relative bg-stone-900 border border-stone-800 rounded p-4 shadow-md`,
 
     "&[data-active=true]": {
         ...tw`bg-green-500/10 border-green-500/50`
@@ -45,7 +45,9 @@ export const ScraperLabel: ComponentType<HTMLAttributes<HTMLDivElement>> = style
     ...tw`flex flex-nowrap items-center gap-2 mb-2`,
 
     "> .scraper-icon": {
-        ...tw`w-8 h-8 rounded shrink-0 flex justify-center items-center bg-stone-500/50 border border-stone-500`,
+        ...tw`rounded shrink-0 flex justify-center items-center bg-stone-500/50 border border-stone-500`,
+        width: "28px",
+        height: "28px",
 
         "&[data-active=true]": {
             ...tw`bg-green-500/50 border-green-500/50`
@@ -53,6 +55,18 @@ export const ScraperLabel: ComponentType<HTMLAttributes<HTMLDivElement>> = style
 
         "&[data-loading=true]": {
             ...tw`bg-yellow-500/50 border-yellow-500/50`
+        },
+
+        "> i": {
+            ...tw`flex justify-center items-center`,
+            width: "18px",
+            height: "18px"
+        },
+
+        "> img": {
+            width: "18px",
+            height: "18px",
+            objectFit: "contain"
         }
     }
 });
