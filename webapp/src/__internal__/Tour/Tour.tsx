@@ -46,7 +46,7 @@ const steps: TourStep[] = [
         id: "c9ff8cfa-6dc7-4212-a0a8-cda2a8eb35c8",
         builder: welcomeStageBuilder(`Welcome to ${UNICHAT_DISPLAY_NAME}!`, [
             `This tour will guide you through the main features of ${UNICHAT_DISPLAY_NAME}`,
-            "<small>Also you can skip the tour and explore the application by yourself, if you want to see this message again you can start the tour anytime in the settings.</small>"
+            "<small>You can also skip the tour and explore the application by yourself, if you want to see this message again you can start the tour anytime in the settings.</small>"
         ])
     },
     {
@@ -83,7 +83,7 @@ const steps: TourStep[] = [
         builder: dashboardStageBuilder(
             "youtube-chat--url-input",
             "YouTube Chat URL",
-            "Also you can paste normal video, shorts or live urls or direct video id.",
+            "You can also paste normal video, shorts or live urls or direct video id.",
             "bottom"
         )
     },
@@ -92,7 +92,7 @@ const steps: TourStep[] = [
         builder: dashboardStageBuilder(
             "twitch-chat--url-input",
             "Twitch Chat URL",
-            "Also you can paste normal Twitch url or direct channel name.",
+            "You can also paste normal Twitch url or direct channel name.",
             "top"
         )
     },
