@@ -19,7 +19,7 @@ export function WidgetsModalActions(): PReact.ComponentChildren {
         <>
             <Button
                 variant="default"
-                onClick={() => openUrl("https://unichat.voguh.me/docs/1.4.x/widgets/getting_started.html")}
+                onClick={() => openUrl("https://unichat.voguh.me/docs/1.5.x/widgets/getting_started.html")}
             >
                 <i className="fas fa-book" />
                 Read the Docs
