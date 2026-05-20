@@ -164,7 +164,7 @@ impl JsonRPCError {
     }
 
     pub fn server_error<D: Into<serde_json::Value>>(id: Option<String>, code: i32, message: String, data: Option<D>) -> Self {
-        if code >= -32000 || code <= -32099 {
+        if code < -32099 || code > -32000 {
             panic!("Server error code must be in the range -32000 to -32099");
         }
 
