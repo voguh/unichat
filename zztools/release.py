@@ -98,35 +98,9 @@ def main():
 
     logger.info("Committing changes...")
     exec(["git", "add", CARGO_TOML_PATH.as_posix(), CARGO_LOCK_PATH.as_posix()])
-    exec(["git", "commit", "-m", f"chore: release version {next_version}"])
+    exec(["git", "commit", "--allow-empty", "-m", f"chore: release version {next_version}"])
     exec(["git", "tag", "-a", f"{next_version}", "-m", f"{next_version}"])
     exec(["git", "push", "origin", current_branch, "--tags"])
-
-    if next_version.patch == 0 and current_branch == "main":
-        stable_branch = f"stable/{next_version.major}.{next_version.minor}.x"
-        exec(["git", "checkout", "-B", stable_branch])
-        exec(["git", "push", "-u", "origin", stable_branch])
-        current_branch = stable_branch
-
-    if current_branch.startswith("stable/"):
-        next_patch=f"{next_version.major}.{next_version.minor}.{next_version.patch + 1}-alpha.0"
-
-        logger.info("Checkout to branch '\033[33m{}\033[0m' and bumping version to '\033[33m{}\033[0m'...", current_branch, next_patch)
-        exec(["git", "checkout", current_branch])
-        exec([TOOLS_PATH / "setversion.py", next_patch])
-        exec(["git", "add", CARGO_TOML_PATH.as_posix(), CARGO_LOCK_PATH.as_posix()])
-        exec(["git", "commit", "-m", f"chore: bump version to {next_patch}"])
-        exec(["git", "push", "-u", "origin", current_branch])
-
-    if current_branch == "main":
-        next_minor=f"{next_version.major}.{next_version.minor + 1}.0-alpha.0"
-
-        logger.info("Checkout to branch '\033[33m{}\033[0m' and bumping version to '\033[33m{}\033[0m'...", current_branch, next_minor)
-        exec(["git", "checkout", current_branch])
-        exec([TOOLS_PATH / "setversion.py", next_minor])
-        exec(["git", "add", CARGO_TOML_PATH.as_posix(), CARGO_LOCK_PATH.as_posix()])
-        exec(["git", "commit", "-m", f"chore: bump version to {next_minor}"])
-        exec(["git", "push", "-u", "origin", current_branch])
 
 if __name__ == "__main__":
     try:
