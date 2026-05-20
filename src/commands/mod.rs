@@ -31,6 +31,7 @@ pub mod plugins;
 pub mod store;
 pub mod tour;
 pub mod scrapers;
+pub mod userstore;
 pub mod widgets;
 
 /* ================================================================================================================== */

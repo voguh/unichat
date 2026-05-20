@@ -412,6 +412,8 @@ async fn main() {
             commands::scrapers::get_scraper_webview_url,
             commands::scrapers::set_scraper_webview_url,
             commands::scrapers::toggle_scraper_webview,
+            commands::userstore::get_userstore,
+            commands::userstore::set_userstore,
             commands::widgets::get_widget_fields,
             commands::widgets::get_widget_fieldstate,
             commands::widgets::get_widgets,
