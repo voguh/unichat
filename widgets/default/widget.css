@@ -1,12 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 
 :root {
-    --maximum-width: 100vw;
     --general-box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
 
     /* <<== FIELDS TO CSS VARIABLES ==>> */
     --top-fade-effect-size: {{topFadeEffectSize}}px;
     --entry-animation: {{entryAnimation}} {{entryAnimationDuration}}ms ease-in;
+    --exit-delay: {{exitDelay}}ms;
+    --exit-animation: {{exitAnimation}} {{exitAnimationDuration}}ms ease-out;
     --accent-color: {{accentColor}};
     --general-padding: {{generalSpacing}}px;
     --general-border-radius: {{generalBorderRadius}}px;
@@ -46,12 +47,26 @@ html, body {
 /* <================================================[ SHARED STYLE ]================================================> */
 #main-container {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    max-height: calc(100vh - 32px);
-    width: calc(var(--maximum-width) - 32px);
+    inset: 0;
     padding: var(--general-padding);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    mask-image: linear-gradient(to bottom, transparent, black var(--top-fade-effect-size));
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black var(--top-fade-effect-size));
+}
+
+#main-container.obs-dock {
+    top: unset;
+    height: 100%;
+    max-height: calc(100vh - (var(--general-padding) * 2));
+    overflow-y: scroll;
+    display: inline;
+    flex-direction: initial;
+    justify-content: initial;
+    mask-image: none;
+    -webkit-mask-image: none;
 }
 
 #main-container > div {
@@ -67,7 +82,7 @@ html, body {
 
 #main-container > div > .author-meta {
     width: fit-content;
-    max-width: calc(var(--maximum-width)  - (var(--general-padding) * 6));
+    max-width: calc(100vw - (var(--general-padding) * 6));
     position: absolute;
     top: 0;
     left: var(--general-padding);

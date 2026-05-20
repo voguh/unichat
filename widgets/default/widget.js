@@ -1,9 +1,9 @@
 const searchQuery = new URLSearchParams(window.location.search);
-const USE_PLATFORM_BADGES = !(searchQuery.get("use_platform_badges") === "false");
 const IS_IN_OBS_DOCK = searchQuery.get("obs_dock") === "true";
 const MAXIMUM_MESSAGES = parseInt(searchQuery.get("max_messages") ?? "50", 10);
 
 /* <<==== FIELDS TO JS VARIABLES ====>> */
+const SHOW_PLATFORM_BADGE = "{{platformBadge}}" === "true";
 const EXIT_DELAY = parseInt("{{exitDelay}}", 10);
 const DONATE_TEMPLATE_MESSAGE = "{{donateTemplateMessage}}";
 const SPONSOR_TEMPLATE_MESSAGE = "{{sponsorTemplateMessage}}";
@@ -55,10 +55,9 @@ function parseTierName(platform, tier) {
         return parseInt(tier, 10) / 1000
     }
 
-    return tier || "sponsorship";
+    return tier;
 }
 
-const platformConditionalRegExp = /\{if_platform\(([^)]+)\)::([^:}]*)::([^:{}]*)\}/g;
 function enrichMessage(text, data) {
     let enrichedText = text;
 
@@ -72,16 +71,6 @@ function enrichMessage(text, data) {
         } else if (rawKey === "platform") {
             enrichedText = enrichedText.replaceAll(key, value);
             enrichedText = enrichedText.replaceAll(snakeKey, value);
-            enrichedText = enrichedText.replace(platformConditionalRegExp, (match, platforms, option1, option2) => {
-                const [platform1, platform2] = platforms.split(',').map(p => p.trim());
-                if (value === platform1.trim()) {
-                    return option1;
-                } else if (value === platform2.trim()) {
-                    return option2;
-                }
-
-                return match;
-            });
         } else if (rawKey === "viewerCount") {
             enrichedText = enrichedText.replaceAll(key, value > 1 ? value : RAID_VIEWERS_DEFAULT_TEXT);
             enrichedText = enrichedText.replaceAll(snakeKey, value > 1 ? value : RAID_VIEWERS_DEFAULT_TEXT);
@@ -107,21 +96,24 @@ function removeChildren() {
     }
 }
 
-
-if (IS_IN_OBS_DOCK) {
-    MAIN_CONTAINER.style.overflowY = "auto";
-}
-
 // Dispatch every time when websocket is connected (or reconnected)
 window.addEventListener("unichat:connected", function () {
     // This listener doesn't receive any data, actually it just notifies
     // that connection is established or re-established.
+
+    if (EXIT_DELAY > 0 && !MAIN_CONTAINER.classList.contains("with-exit-animation")) {
+        MAIN_CONTAINER.classList.add("with-exit-animation");
+    }
+
+    if (IS_IN_OBS_DOCK) {
+        MAIN_CONTAINER.classList.add("obs-dock");
+    }
 });
 
 window.addEventListener("unichat:event", function ({ detail: event }) {
     const isAtBottom = MAIN_CONTAINER.scrollHeight - MAIN_CONTAINER.scrollTop <= MAIN_CONTAINER.clientHeight + 20;
 
-    if (USE_PLATFORM_BADGES && event != null && event.data != null && Array.isArray(event.data.authorBadges)) {
+    if (SHOW_PLATFORM_BADGE && event != null && event.data != null && Array.isArray(event.data.authorBadges)) {
         let imgUrl;
         if (event.data.platform === "youtube") {
             imgUrl = `${window.location.pathname}/assets/platform_badge_youtube.png`;
