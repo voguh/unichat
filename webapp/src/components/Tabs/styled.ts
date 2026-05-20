@@ -17,7 +17,8 @@ export const TabsStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> 
     ...tw`w-full h-full flex flex-col`,
 
     "> .tabs--tab-list": {
-        ...tw`m-2 w-fit flex p-1 bg-stone-950/50 rounded`,
+        ...tw`m-2 w-fit flex bg-stone-950/50 rounded`,
+        padding: "4px",
 
         "> .tab-list--tab": {
             ...tw`px-3 py-1 rounded-sm cursor-pointer text-stone-50`,
