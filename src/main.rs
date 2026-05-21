@@ -209,7 +209,10 @@ fn setup_inner() -> Result<(), Error> {
     log_startup_process(&splash_screen, "[13/21] Initializing events emitter module...");
     events::init()?;
 
-    log_startup_process(&splash_screen, "[14/21] Initializing plugins module...");
+    log_startup_process(&splash_screen, "[14/21] Fetching global shared emotes...");
+    shared_emotes::fetch_global_shared_emotes()?;
+
+    log_startup_process(&splash_screen, "[15/21] Initializing plugins module...");
     plugins::init()?;
 
     log_startup_process(&splash_screen, "[16/21] Initializing userstore module...");
@@ -222,7 +225,7 @@ fn setup_inner() -> Result<(), Error> {
 
     log_startup_process(&splash_screen, "[18/21] Registering Twitch integration...");
     twitch::init()?;
-    log_startup_process(&splash_screen, "[29/21] Registering YouTube integration...");
+    log_startup_process(&splash_screen, "[19/21] Registering YouTube integration...");
     youtube::init()?;
 
     log_startup_process(&splash_screen, "[20/21] Loading plugins...");
