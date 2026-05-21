@@ -9,10 +9,10 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '24.10.0'
-  PNPM_VERSION: '10.30.3'
-  RUST_VERSION: '1.92.0'
-  YQ_VERSION: v4.50.1
+  NODE_VERSION: '24.16.0'
+  PNPM_VERSION: '10.33.4'
+  RUST_VERSION: '1.95.0'
+  YQ_VERSION: 'v4.53.2'
 
 jobs:
   check_license_headers:
@@ -106,16 +106,18 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-          key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-registry-${{ env.RUST_VERSION }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            cargo-registry-${{ env.RUST_VERSION }}-
 
       - name: Cache cargo target
         uses: actions/cache@v5.0.5
         with:
           path: |
             target
-          key: cargo-target-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-target-${{ matrix.target }}-${{ env.RUST_VERSION }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            cargo-target-${{ matrix.target }}-
+            cargo-target-${{ matrix.target }}-${{ env.RUST_VERSION }}-
 
       - name: Cache cargo bin
         uses: actions/cache@v5.0.5
@@ -123,7 +125,7 @@ jobs:
           path: |
             ~/.cargo/bin/cargo-xwin
             ~/.cargo/bin/cargo-tauri
-          key: cargo-bin-${{ matrix.target }}-${{ env.RUST_VERSION }}-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-bin-${{ matrix.target }}-${{ env.RUST_VERSION }}
 
       - name: Prepare build environment
         run: |
@@ -204,7 +206,7 @@ jobs:
           cp ${{ forgejo.workspace }}/target/windows/nsis/*.exe ${{ forgejo.workspace }}/dist/unichat-$VERSION-setup.exe
           for file in ${{ forgejo.workspace }}/dist/*; do
             if [ -f "$file" ]; then
-              sha256sum "$file" > "${file}.sha256"
+              (cd "$(dirname "$file")" && sha256sum "$(basename "$file")" > "$(basename "$file").sha256")
             fi
           done
 

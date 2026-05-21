@@ -53,9 +53,9 @@ Widget and Plugin development documentation can be found in the [here](https://u
 ### Building the Project
 
 **Prerequisites:**
-- Rust v1.92.0;
-- Node.js v24.10.0;
-- PNPM v10.30.3;
+- Rust v1.95.0;
+- Node.js v24.16.0;
+- PNPM v10.33.4;
 - Tauri v2 dependencies for your platform. Follow the [official guide](https://v2.tauri.app/start/prerequisites/);
 - Tauri CLI (You can install it with `cargo install tauri-cli --locked`);
 

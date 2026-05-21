@@ -10,7 +10,7 @@
         "storybook": "storybook dev -p 6006",
         "build-storybook": "storybook build"
     },
-    "packageManager": "pnpm@10.30.3",
+    "packageManager": "pnpm@10.33.4",
     "dependencies": {
         "@ctrl/tinycolor": "4.2.0",
         "@floating-ui/dom": "1.7.6",
@@ -30,7 +30,7 @@
         "@preact/preset-vite": "2.10.5",
         "@storybook/preact-vite": "^10.3.6",
         "@tailwindcss/typography": "0.5.19",
-        "@types/node": "24.10.0",
+        "@types/node": "24.12.2",
         "@typescript-eslint/eslint-plugin": "8.59.2",
         "@typescript-eslint/parser": "8.59.2",
         "autoprefixer": "10.5.0",
