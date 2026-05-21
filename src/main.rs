@@ -245,45 +245,7 @@ fn setup_inner() -> Result<(), Error> {
 
     /* ========================================================================================== */
 
-    let is_dev = utils::is_dev();
-    let unichat_icon = format!("data:image/png;base64,{}", base64::encode(UNICHAT_ICON_BYTES));
 
-    let gallery_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatGallery));
-    let license_file = path_to_string(&properties::get_app_path(AppPaths::UniChatLicense));
-    let plugins_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatUserPlugins));
-    let widgets_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatUserWidgets));
-
-    let main_url = tauri::WebviewUrl::App("index.html".into());
-    let window = WebviewWindowBuilder::new(app_handle, "main", main_url)
-        .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION))
-        .inner_size(1024.0, 576.0)
-        .maximizable(false)
-        .resizable(false)
-        .center()
-        .initialization_script(format!(r#"
-            globalThis.__IS_DEV__ = {is_dev};
-
-            globalThis.UNICHAT_DISPLAY_NAME = "{UNICHAT_DISPLAY_NAME}";
-            globalThis.UNICHAT_NAME = "{UNICHAT_NAME}";
-            globalThis.UNICHAT_VERSION = "{UNICHAT_VERSION}";
-            globalThis.UNICHAT_DESCRIPTION = "{UNICHAT_DESCRIPTION}";
-            globalThis.UNICHAT_AUTHORS = "{UNICHAT_AUTHORS}";
-            globalThis.UNICHAT_HOMEPAGE = "{UNICHAT_HOMEPAGE}";
-            globalThis.UNICHAT_ICON = "{unichat_icon}";
-            globalThis.UNICHAT_LICENSE_CODE = "{UNICHAT_LICENSE_CODE}";
-            globalThis.UNICHAT_LICENSE_NAME = "{UNICHAT_LICENSE_NAME}";
-            globalThis.UNICHAT_LICENSE_URL = "{UNICHAT_LICENSE_URL}";
-
-            globalThis.UNICHAT_GALLERY_DIR = "{gallery_dir}";
-            globalThis.UNICHAT_LICENSE_FILE = "{license_file}";
-            globalThis.UNICHAT_PLUGINS_DIR = "{plugins_dir}";
-            globalThis.UNICHAT_WIDGETS_DIR = "{widgets_dir}";
-        "#))
-        .build()?;
-
-    if !window.is_visible()? {
-        window.show()?;
-    }
 
     return Ok(());
 }
@@ -306,8 +268,52 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
                     app_handle.exit(1);
                 });
         } else {
-            if let Some(splash_screen) = app.get_webview_window("splash-screen") {
-                let _ = splash_screen.close();
+            let is_dev = utils::is_dev();
+            let platform = std::env::consts::OS;
+
+            let unichat_icon = format!("data:image/png;base64,{}", base64::encode(UNICHAT_ICON_BYTES));
+
+            let gallery_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatGallery));
+            let license_file = path_to_string(&properties::get_app_path(AppPaths::UniChatLicense));
+            let plugins_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatUserPlugins));
+            let widgets_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatUserWidgets));
+
+            let main_url = tauri::WebviewUrl::App("index.html".into());
+            let window_builder = WebviewWindowBuilder::new(app, "main", main_url)
+                .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION))
+                .inner_size(1024.0, 576.0)
+                .maximizable(false)
+                .resizable(false)
+                .center()
+                .initialization_script(format!(r#"
+                    globalThis.__IS_DEV__ = {is_dev};
+                    globalThis.__PLATFORM__ = "{platform}";
+
+                    globalThis.UNICHAT_DISPLAY_NAME = "{UNICHAT_DISPLAY_NAME}";
+                    globalThis.UNICHAT_NAME = "{UNICHAT_NAME}";
+                    globalThis.UNICHAT_VERSION = "{UNICHAT_VERSION}";
+                    globalThis.UNICHAT_DESCRIPTION = "{UNICHAT_DESCRIPTION}";
+                    globalThis.UNICHAT_AUTHORS = "{UNICHAT_AUTHORS}";
+                    globalThis.UNICHAT_HOMEPAGE = "{UNICHAT_HOMEPAGE}";
+                    globalThis.UNICHAT_ICON = "{unichat_icon}";
+                    globalThis.UNICHAT_LICENSE_CODE = "{UNICHAT_LICENSE_CODE}";
+                    globalThis.UNICHAT_LICENSE_NAME = "{UNICHAT_LICENSE_NAME}";
+                    globalThis.UNICHAT_LICENSE_URL = "{UNICHAT_LICENSE_URL}";
+
+                    globalThis.UNICHAT_GALLERY_DIR = "{gallery_dir}";
+                    globalThis.UNICHAT_LICENSE_FILE = "{license_file}";
+                    globalThis.UNICHAT_PLUGINS_DIR = "{plugins_dir}";
+                    globalThis.UNICHAT_WIDGETS_DIR = "{widgets_dir}";
+                "#));
+
+            if let Ok(_) = window_builder.build() {
+                log::info!("Main window created successfully.");
+
+                if let Some(splash_screen) = app.get_webview_window("splash-screen") {
+                    let _ = splash_screen.close();
+                }
+            } else {
+                log::error!("Failed to create main window.");
             }
         }
     });
@@ -388,7 +394,6 @@ async fn main() {
             .build()
         )
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             commands::dispatch_clear_chat,

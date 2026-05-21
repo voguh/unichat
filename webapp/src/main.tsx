@@ -10,28 +10,9 @@
 
 import { h, render } from "preact";
 
-import { platform } from "@tauri-apps/plugin-os";
 import { setup } from "goober";
 
 import { App } from "unichat/App";
-
-if (!("__IS_DEV__" in globalThis)) {
-    Object.defineProperty(globalThis, "__IS_DEV__", {
-        value: import.meta.env.DEV,
-        writable: false,
-        configurable: false,
-        enumerable: true
-    });
-}
-
-if (!("__PLATFORM__" in globalThis)) {
-    Object.defineProperty(globalThis, "__PLATFORM__", {
-        value: platform(),
-        writable: false,
-        configurable: false,
-        enumerable: true
-    });
-}
 
 if (!__IS_DEV__) {
     window.addEventListener("contextmenu", async (event) => {

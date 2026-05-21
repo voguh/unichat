@@ -19,7 +19,6 @@
         "@tauri-apps/plugin-dialog": "2.7.1",
         "@tauri-apps/plugin-log": "2.8.0",
         "@tauri-apps/plugin-opener": "2.5.4",
-        "@tauri-apps/plugin-os": "2.3.2",
         "@tauri-apps/plugin-store": "2.4.3",
         "goober": "2.1.18",
         "lean-qr": "2.7.1",
