@@ -24,5 +24,13 @@ export const ReleaseNotesWrapper: ComponentType<HTMLAttributes<HTMLDivElement>> 
         },
 
         "> .release-download": {}
+    },
+
+    "> .release-notes": {
+        // 36px is the tab header height
+        // 65px is the release name height
+        // 28px is the padding
+        // 1rem is the bottom padding
+        maxHeight: "calc(var(--settings-modal-content-height) - (36px + 65px + 28px + 1rem))"
     }
 });

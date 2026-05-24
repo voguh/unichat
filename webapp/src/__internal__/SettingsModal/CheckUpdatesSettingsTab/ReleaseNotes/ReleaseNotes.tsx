@@ -33,10 +33,12 @@ export function ReleaseNotes({ release }: Props): PReact.ComponentChildren {
             <div className="release-name">
                 <div className="release-data">
                     {release.name}
-                    <Badge variant={release.prerelease ? "warning" : "success"}>Latest</Badge>
+                    <Badge variant={release.prerelease ? "warning" : "success"}>
+                        {release.prerelease ? "Unstable" : "Stable"}
+                    </Badge>
                 </div>
                 <div className="release-download">
-                    <Button onClick={() => openUrl(release.url)}>Go to Release Page</Button>
+                    <Button onClick={() => openUrl(release.url)}>View release page</Button>
                 </div>
             </div>
 
