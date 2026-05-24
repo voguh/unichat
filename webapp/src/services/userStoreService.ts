@@ -10,7 +10,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 
-export class UserstoreService {
+export class UserStoreService {
     public async getItem<T>(key: string): Promise<T> {
         return invoke("get_userstore", { key });
     }
@@ -20,4 +20,4 @@ export class UserstoreService {
     }
 }
 
-export const userstoreService = new UserstoreService();
+export const userStoreService = new UserStoreService();
