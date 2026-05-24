@@ -57,7 +57,14 @@ pub struct UniChatRelease {
 }
 
 pub fn get_releases() -> Result<Vec<UniChatRelease>, Error> {
-    let cached_releases_path = properties::get_app_path(AppPaths::AppCache).join("cached_releases.json");
+    let app_cache_dir = properties::get_app_path(AppPaths::AppCache);
+    if !app_cache_dir.exists() {
+        fs::create_dir_all(&app_cache_dir)?;
+    }
+
+    /* ====================================================================== */
+
+    let cached_releases_path = app_cache_dir.join("cached_releases.json");
     if let Ok(metadata) = fs::metadata(&cached_releases_path) {
         let modified_at = metadata.modified()?;
         let now = SystemTime::now();
@@ -71,6 +78,8 @@ pub fn get_releases() -> Result<Vec<UniChatRelease>, Error> {
             return Ok(json_data);
         }
     }
+
+    /* ====================================================================== */
 
     log::info!("Fetching releases from UniChat API...");
     let mut releases = ureq::get("https://unichat.voguh.me/api/v1/unichat-releases").call()?;
