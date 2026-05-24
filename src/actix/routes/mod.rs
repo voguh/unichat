@@ -10,6 +10,6 @@
 
 pub mod assets;
 pub mod gallery;
+pub mod proxy;
 pub mod widget;
 pub mod ws;
-pub mod ytimg;

@@ -30,7 +30,7 @@ export function randomizeBadgeAndAuthorType(
         if (plt === "youtube") {
             badges.push({
                 code: "sponsor",
-                url: "/ytimg/gAq7jDekvG5e_Az-VnKhS-Sy-rZDgyHIdGQAhks2iWlN7rMkiTlxnW5ztMW96ynyEIG1hMe67LLLCP6q=s16-c-k" // prettier-ignore
+                url: "/proxy/aHR0cHM6Ly95dDMuZ2dwaHQuY29tL2dBcTdqRGVrdkc1ZV9Bei1WbktoUy1TeS1yWkRneUhJZEdRQWhrczJpV2xON3JNa2lUbHhuVzV6dE1XOTZ5bnlFSUcxaE1lNjdMTExDUDZxPXMxNi1jLWs=?referer=https://www.youtube.com/" // prettier-ignore
             });
         } else {
             badges.push({

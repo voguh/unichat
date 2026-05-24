@@ -11,6 +11,8 @@
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::utils::base64;
+
 pub mod author;
 pub mod message;
 
@@ -29,11 +31,5 @@ pub struct Thumbnail {
 }
 
 pub fn proxy_youtube_url(url: &str) -> String {
-    if url.contains("ggpht.com/") {
-        let path = url.split("ggpht.com/").collect::<Vec<&str>>()[1];
-
-        return format!("/ytimg/{}", path);
-    }
-
-    return url.to_string();
+    return format!("/proxy/{}?referer=https://www.youtube.com/", base64::url_safe_encode(url));
 }

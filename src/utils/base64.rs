@@ -28,3 +28,11 @@ pub fn encode<T: AsRef<[u8]>>(input: T) -> String {
 pub fn decode<T: AsRef<[u8]>>(input: T) -> Result<Vec<u8>, DecodeError> {
     return base64::engine::general_purpose::STANDARD.decode(input);
 }
+
+pub fn url_safe_encode<T: AsRef<[u8]>>(input: T) -> String {
+    return base64::engine::general_purpose::URL_SAFE.encode(input);
+}
+
+pub fn url_safe_decode<T: AsRef<[u8]>>(input: T) -> Result<Vec<u8>, DecodeError> {
+    return base64::engine::general_purpose::URL_SAFE.decode(input);
+}

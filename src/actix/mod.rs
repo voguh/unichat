@@ -32,12 +32,12 @@ impl ActixState {
 
             let http_server = actix_web::HttpServer::new(move || {
                 return actix_web::App::new().wrap(actix_web::middleware::Logger::default())
-                    .service(routes::ws::ws)
-                    .service(routes::ytimg::ytimg)
-                    .service(routes::gallery::gallery)
                     .service(routes::assets::get_assets)
+                    .service(routes::gallery::gallery)
+                    .service(routes::proxy::proxy)
                     .service(routes::widget::get_widget_assets)
-                    .service(routes::widget::get_widget);
+                    .service(routes::widget::get_widget)
+                    .service(routes::ws::ws);
             }).bind((host, BASE_REST_PORT)).expect("Failed to bind actix server to port");
 
             http_server.run().await.expect("An error occurred on run actix server")

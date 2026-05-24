@@ -60,7 +60,7 @@ export async function buildEmulatedEventData<T extends UniChatEvent>(
     const authorUsername = platform === "youtube" ? null : userDisplayName.toLowerCase();
     const authorDisplayName = userDisplayName;
     const authorDisplayColor = randomColorBySeed(userDisplayName);
-    const authorProfilePictureUrl = platform === "twitch" ? null : "/ytimg/qyk46Tghzh6pu38WDItFln1hnbDe1GGsTfXj0OQrYtzGkQ0IDrgHtxdY9tK1OQpS2Rbh9EiuXw=s160-c-k-c0x00ffffff-no-rj"; // prettier-ignore
+    const authorProfilePictureUrl = platform === "twitch" ? null : "/proxy/aHR0cHM6Ly95dDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tLzNzNmV2cHFBaURVOXRRUjRzQzJzaUppcHBiSDJSV1ZQbndIZ3lsNFYwdGgyaXVRejBWRFFaYlVoUUJHbXN4TFlvLW1qRzZUcVpRPXMxNjAtYy1rLWMweDAwZmZmZmZmLW5vLXJq?referer=https://www.youtube.com/"; // prettier-ignore
 
     const [authorBadges, authorType] = randomizeBadgeAndAuthorType(platform, rng);
 
