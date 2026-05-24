@@ -204,6 +204,10 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 log::info!("Migrating deprecated 'settings:tour-steps' to '{}'", current_tour_steps_key);
                 store.set(current_tour_steps_key, value);
                 store.delete("settings:tour-steps");
+            } else {
+                log::info!("Setting default value for '{}' setting", current_tour_steps_key);
+                let raw_value = serde_json::to_value(Vec::<String>::new())?;
+                store.set(current_tour_steps_key, raw_value);
             }
 
             let previous_tour_steps_key = "settings:previous-tour-steps";
@@ -211,6 +215,10 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 log::info!("Migrating deprecated 'settings:prev-tour-steps' to '{}'", previous_tour_steps_key);
                 store.set(previous_tour_steps_key, value);
                 store.delete("settings:prev-tour-steps");
+            } else {
+                log::info!("Setting default value for '{}' setting", previous_tour_steps_key);
+                let raw_value = serde_json::to_value(Vec::<String>::new())?;
+                store.set(previous_tour_steps_key, raw_value);
             }
 
             return Ok(());
@@ -224,9 +232,9 @@ fn migrate_store_version() -> Result<(), Error> {
     let mut current_version = get_store_version().unwrap_or(0);
     for (idx, migration) in MIGRATIONS.iter().enumerate() {
         let idx: u8 = idx.try_into()?;
+        let version = idx + 1;
 
-        if current_version <= idx {
-            let version = idx + 1;
+        if current_version < version {
 
             log::info!("Applying store migration for version {}", version);
             migration(store)?;
@@ -234,7 +242,7 @@ fn migrate_store_version() -> Result<(), Error> {
 
             let raw_value = serde_json::to_value(version)?;
             store.set(STORE_VERSION_KEY, raw_value);
-            current_version += version;
+            current_version = version;
         }
     }
 
