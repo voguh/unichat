@@ -1,6 +1,6 @@
 [package]
 name = "unichat"
-version = "1.5.0-alpha.0"
+version = "1.5.0-alpha.1"
 description = "A cross-platform chat integration without API keys, OAuth, or accounts."
 authors = ["Voguh <voguhofc@protonmail.com>"]
 homepage = "https://codeberg.org/unichat/unichat"
