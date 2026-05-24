@@ -75,10 +75,12 @@ jobs:
         include:
           - target: linux
             rust_target: x86_64-unknown-linux-gnu
+            release_path: target/release
             bundle_path: target/release/bundle
             build_command: cargo tauri build
           - target: windows
             rust_target: x86_64-pc-windows-msvc
+            release_path: target/x86_64-pc-windows-msvc/release
             bundle_path: target/x86_64-pc-windows-msvc/release/bundle
             build_command: cargo tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
     env:
@@ -143,6 +145,16 @@ jobs:
         working-directory: ${{ env.TAURI_FRONTEND_PATH }}
         run: |
           pnpm install --frozen-lockfile --prod
+
+      - name: Clean stale artifacts
+        run: |
+          rm -rf ${{ matrix.release_path }}/assets
+          rm -rf ${{ matrix.release_path }}/bundle
+          rm -rf ${{ matrix.release_path }}/examples
+          rm -rf ${{ matrix.release_path }}/icons
+          rm -rf ${{ matrix.release_path }}/plugins
+          rm -rf ${{ matrix.release_path }}/widgets
+          rm -rf ${{ matrix.release_path }}/LICENSE
 
       - name: Run build app
         run: ${{ matrix.build_command }}
