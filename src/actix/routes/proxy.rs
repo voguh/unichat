@@ -35,6 +35,22 @@ struct QueryString {
     referer: Option<String>
 }
 
+fn normalize_url(url: &str) -> String {
+    if url.starts_with("//") {
+        return format!("https:{}", url);
+    }
+
+    if url.starts_with("http://") {
+        return url.replacen("http://", "https://", 1);
+    }
+
+    if !url.starts_with("https://") {
+        return format!("https://{}", url);
+    }
+
+    return String::from(url);
+}
+
 #[get("/proxy/{path:.*}")]
 pub async fn proxy(path: Path<String>, query: Query<QueryString>) -> Result<impl Responder, actix_web::Error> {
     let encoded_url: String = path.into_inner();
@@ -44,7 +60,12 @@ pub async fn proxy(path: Path<String>, query: Query<QueryString>) -> Result<impl
 
     let url_path = base64::url_safe_decode(encoded_url).map_err(|e| ErrorBadRequest(format!("Failed to decode URL path: {:?}", e)))?;
     let url_path = String::from_utf8(url_path).map_err(|e| ErrorBadRequest(format!("Decoded URL path is not valid UTF-8: {:?}", e)))?;
-    let mut result = ureq::get(&url_path).header("User-Agent", USER_AGENT);
+    let normalized_url = normalize_url(&url_path);
+    if normalized_url.trim() == "https://" {
+        return Err(ErrorBadRequest("Decoded URL path cannot be empty"));
+    }
+
+    let mut result = ureq::get(&normalized_url).header("User-Agent", USER_AGENT);
     if let Some(referer) = &query.referer {
         result = result.header("Referer", referer);
     }
