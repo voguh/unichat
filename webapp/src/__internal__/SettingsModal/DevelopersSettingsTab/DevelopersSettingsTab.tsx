@@ -14,12 +14,14 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { Button } from "unichat/components/Button";
 import { FormGroup } from "unichat/components/forms/FormGroup";
 import { Switch } from "unichat/components/forms/Switch";
+import { useStorage } from "unichat/hooks/useStorage";
 import {
     ScraperEventsLogLevel as LogLevel,
     settingsService,
     UniChatSettings,
     UniChatSettingsKeys
 } from "unichat/services/settingsService";
+import { StorageKeys } from "unichat/services/storageService";
 
 import { DevelopersSettingsTabStyledContainer } from "./styled";
 
@@ -34,12 +36,15 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
     const createWebviewsHiddenRef = useRef<HTMLInputElement>(null);
     const [logEventsRef, setLogEventsRef] = useState(LogLevel.UNKNOWN_EVENTS);
 
+    const [requiresRestart, setRequiresRestart] = useStorage(StorageKeys.REQUIRES_RESTART);
+
     function changeLogEvents(logLevel: LogLevel): void {
         setLogEventsRef(logLevel);
         setDirty(true);
     }
 
     async function applySettings(): Promise<void> {
+        const beforeCreateWebviewsHidden = initialSettings[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN];
         const settingsCopy = { ...initialSettings };
 
         if (createWebviewsHiddenRef.current) {
@@ -52,6 +57,11 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
 
         await settingsService.setItems(settingsCopy);
         setInitialSettings(settingsCopy);
+        setDirty(false);
+
+        if (beforeCreateWebviewsHidden !== settingsCopy[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN]) {
+            setRequiresRestart(true);
+        }
     }
 
     useEffect(() => {
@@ -101,6 +111,17 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
                     label="Create webviews silent"
                     description="On startup, webviews will be created in background and only shown when requested."
                 />
+
+                {requiresRestart && (
+                    <div className="alert alert-primary">
+                        <div>
+                            <i className="fas fa-info-circle" />
+                        </div>
+                        <span>
+                            <strong>{UNICHAT_DISPLAY_NAME}</strong> must be restarted for this setting to take effect.
+                        </span>
+                    </div>
+                )}
             </div>
 
             <hr />

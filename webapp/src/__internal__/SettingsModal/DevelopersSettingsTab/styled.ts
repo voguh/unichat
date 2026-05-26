@@ -20,6 +20,20 @@ export const DevelopersSettingsTabStyledContainer: ComponentType<HTMLAttributes<
         ...tw`w-full`
     },
 
+    "> .create-webview-hidden-section": {
+        "> .alert": {
+            ...tw`mt-4 p-2 rounded border flex flex-nowrap gap-2`,
+
+            "&.alert-primary": {
+                ...tw`bg-red-800/25 text-stone-50 border-red-800`
+            },
+
+            "&.alert-warning": {
+                ...tw`bg-yellow-500/25 text-stone-50 border-yellow-500`
+            }
+        }
+    },
+
     "> .scraper-logging-section": {
         "> .scraperLogging_section--buttons": {
             ...tw`mt-4 flex flex-wrap gap-2`,
