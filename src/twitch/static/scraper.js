@@ -8,6 +8,11 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+HTMLIFrameElement.prototype.setAttribute = function(name, value) {
+    console.log("Blocked iframe with src:", value);
+    return;
+};
+
 async function uniChatHandleRewardRedemption(payload) {
     const redemption = payload.redemption;
     await uniChat.dispatchEvent({ type: "redemption", rewardRedemption: redemption })
@@ -67,18 +72,6 @@ function uniChatInit() {
     if (!window.location.href.startsWith("https://www.twitch.tv/")) {
         throw new Error("This scraper can only be initialized on Twitch pages.");
     }
-
-    const obs = new MutationObserver(muts => {
-        for (const m of muts) {
-            for (const n of m.addedNodes) {
-                if (n.tagName === "IFRAME" && n.src.includes("amazon-adsystem.com")) {
-                    n.remove();
-                }
-            }
-        }
-    });
-
-    obs.observe(document.documentElement, { childList: true, subtree: true });
 
     /* ====================================================================================================== */
 
