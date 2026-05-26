@@ -134,7 +134,7 @@ function registerIntermittentEventDispatcher(type) {
         await uniChat.dispatchEvent({ type });
     }
 
-    setInterval(dispatch, 5000);
+    setInterval(dispatch, 60000);
 }
 
 /* ================================================================================================================== */
