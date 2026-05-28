@@ -20,7 +20,7 @@ use crate::events;
 use crate::utils::userstore;
 
 async fn handle_socket(socket: WebSocket) {
-    let (mut sender, _) = socket.split();
+    let (mut sender, mut receiver) = socket.split();
 
     /* ====================================================================== */
 
@@ -50,20 +50,43 @@ async fn handle_socket(socket: WebSocket) {
 
     let mut rx = events::subscribe().unwrap();
     loop {
-        match rx.recv().await {
-            Ok(event) => {
-                let msg = serde_json::to_string(&event).unwrap();
-                if let Err(e) = sender.send(Message::Text(msg.into())).await {
-                    log::error!("Failed to send message over WebSocket: {:#?}", e);
-                    break;
+        tokio::select! {
+            event = rx.recv() => {
+                match event {
+                    Ok(event) => {
+                        match serde_json::to_string(&event) {
+                            Ok(msg) => {
+                                if let Err(e) = sender.send(Message::Text(msg.into())).await {
+                                    log::error!("Failed to send message over WebSocket: {:#?}", e);
+                                    break;
+                                }
+                            }
+                            Err(e) => {
+                                log::error!("Failed to serialize event for WebSocket: {:#?}", e);
+                            }
+                        }
+                    },
+                    Err(RecvError::Lagged(skipped)) => {
+                        log::warn!("Events broadcast lagged, skipped {} messages", skipped);
+                    },
+                    Err(RecvError::Closed) => {
+                        log::info!("Events broadcast channel closed");
+                        break;
+                    }
                 }
             },
-            Err(RecvError::Lagged(skipped)) => {
-                log::warn!("WebSocket receiver lagged, skipped {} messages", skipped);
-            },
-            Err(RecvError::Closed) => {
-                log::info!("WebSocket receiver closed");
-                break;
+            msg = receiver.next() => {
+                match msg {
+                    Some(Ok(Message::Close(_))) | None => {
+                        log::info!("WebSocket client disconnected");
+                        break;
+                    },
+                    Some(Err(e)) => {
+                        log::error!("WebSocket receive error: {:#?}", e);
+                        break;
+                    },
+                    _ => {}
+                }
             }
         }
     }
