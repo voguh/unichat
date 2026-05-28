@@ -43,11 +43,7 @@ fn choose_file_type_by_path(path: &PathBuf) -> String {
         }
     }
 
-    if matches!(item_type, "image" | "video" | "audio") {
-        return String::from(item_type);
-    }
-
-    return String::from("file");
+    return String::from(item_type);
 }
 
 fn get_file_url(file_name: &str) -> Result<Url, Error> {
