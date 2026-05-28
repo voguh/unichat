@@ -20,6 +20,7 @@ use serde::Serialize;
 use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatBadge;
 use crate::utils::random_color_by_seed;
+use crate::youtube::mapper::structs::Thumbnail;
 use crate::youtube::mapper::structs::proxy_youtube_url;
 use crate::youtube::mapper::structs::ThumbnailsWrapper;
 
@@ -30,6 +31,7 @@ pub struct AuthorNameWrapper {
 }
 
 pub type AuthorPhotoThumbnailsWrapper = ThumbnailsWrapper;
+pub type AuthorPhotoWrapper = Thumbnail;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -117,10 +119,13 @@ pub fn parse_author_name_str(name: String) -> Result<String, Error> {
     return Ok(username);
 }
 
-pub fn parse_author_photo(photo: &AuthorPhotoThumbnailsWrapper) -> Result<String, Error> {
-    let thumbnail = photo.thumbnails.last().ok_or(anyhow!("No thumbnails found in author photo"))?;
-
+pub fn parse_author_photo_vec(photos: &Vec<AuthorPhotoWrapper>) -> Result<String, Error> {
+    let thumbnail = photos.last().ok_or(anyhow!("No thumbnails found in author photo"))?;
     return Ok(proxy_youtube_url(&thumbnail.url));
+}
+
+pub fn parse_author_photo(photo: &AuthorPhotoThumbnailsWrapper) -> Result<String, Error> {
+    return parse_author_photo_vec(&photo.thumbnails);
 }
 
 pub fn parse_author_color(author_name: &str) -> Result<String, Error> {

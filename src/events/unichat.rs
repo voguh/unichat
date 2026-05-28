@@ -371,7 +371,7 @@ pub struct UniChatGiftEventPayload {
     pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_display_color: String,
-    pub author_profile_picture_url: Option<String>,
+    pub author_profile_picture_url: String,
     pub author_badges: Vec<UniChatBadge>,
     pub author_type: Option<UniChatAuthorType>,
 

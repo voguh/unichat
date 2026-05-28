@@ -22,7 +22,7 @@ export interface UniChatBadge {
     url: string;
 }
 
-export type UniChatEvent = UniChatEventClear | UniChatEventRemoveMessage | UniChatEventRemoveAuthor | UniChatEventMessage | UniChatEventRaid | UniChatEventSponsor | UniChatEventSponsorGift | UniChatEventDonate | UniChatEventRedemption;
+export type UniChatEvent = UniChatEventClear | UniChatEventRemoveMessage | UniChatEventRemoveAuthor | UniChatEventMessage | UniChatEventRaid | UniChatEventSponsor | UniChatEventSponsorGift | UniChatEventDonate | UniChatEventRedemption | UniChatEventGift;
 
 /* <============================================================================================> */
 
@@ -266,6 +266,49 @@ export interface UniChatEventRedemption {
 
         messageId: string;
         messageText: string | null;
+        emotes: UniChatEmote[];
+
+        timestamp: number;
+    }
+}
+
+/* <============================================================================================> */
+
+/** **Disclaimer:** This event is exclusive for YouTube */
+export interface UniChatEventGift {
+    type: "unichat:gift";
+    data: {
+        channelId: string;
+        /** **Disclaimer:** This field is always null. */
+        channelName: string | null;
+
+        platform: UniChatPlatform;
+        flags: Record<string, string | null>;
+
+        authorId: string;
+        /** **Disclaimer:** This field is null when name doesn't starts with `@`. */
+        authorUsername: string | null;
+        authorDisplayName: string;
+        authorDisplayColor: string;
+        authorProfilePictureUrl: string;
+        /** **Disclaimer:** This field is always an empty list. */
+        authorBadges: UniChatBadge[];
+        /** **Disclaimer:** This field is always null. */
+        authorType: UniChatAuthorType | null;
+
+        /** **Disclaimer:** This field is always null. */
+        giftId: string;
+        /** **Disclaimer:** This field is always null. */
+        giftTitle: string;
+        giftDescription: string | null;
+        /** **Disclaimer:** This field is always null. */
+        giftCost: number;
+        giftIconUrl: string;
+
+        messageId: string;
+        /** **Disclaimer:** This field is always null. */
+        messageText: string | null;
+        /** **Disclaimer:** This field is always an empty list. */
         emotes: UniChatEmote[];
 
         timestamp: number;
