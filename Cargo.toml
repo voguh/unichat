@@ -32,7 +32,7 @@ mlua = { version = "0.11.6", features = ["lua54", "vendored", "serde", "send"] }
 moka = { version = "0.12.15", features = ["sync"] }
 rand = "0.10.1"
 regex = "1.12.3"
-reqwest = { version = "0.13.4", default-features = false, features = ["charset", "native-tls", "stream", "system-proxy"] }
+reqwest = { version = "0.13.4", default-features = false, features = ["blocking", "charset", "json", "native-tls", "stream", "system-proxy"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.149", features = ["preserve_order"] }
 serde_plain = "1.0.2"
@@ -43,5 +43,4 @@ tauri-plugin-log = "=2.8.0"
 tauri-plugin-opener = "=2.5.4"
 tauri-plugin-store = "=2.4.3"
 tokio = { version = "1.52.2", features = ["full"] }
-ureq = { version = "3.3.0", default-features = false, features = ["json", "native-tls"] }
 url = { version = "2.5.7", features = ["serde"] }

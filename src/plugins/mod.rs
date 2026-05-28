@@ -232,7 +232,7 @@ fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, PluginM
                     continue;
                 }
 
-                log::info!("Loading plugin manifest from directory: {:?}", plugin_path);
+                log::debug!("Loading plugin manifest from directory: {:?}", plugin_path);
                 match load_manifest(&plugin_path) {
                     Ok(manifest) => {
                         loaded_manifests.push((plugin_path, manifest));

@@ -20,22 +20,30 @@ mod betterttv;
 mod frankerfacez;
 mod seventv;
 
-pub type EmotesParserResult = Result<HashMap<String, UniChatEmote>, Error>;
 pub static EMOTES_HASHSET: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
 pub fn fetch_global_shared_emotes() -> Result<(), Error> {
-    if let Ok(mut guard) = EMOTES_HASHSET.write() {
-        if guard.is_empty() {
-            log::info!("Fetching global shared emotes...");
-            let bbtv_emotes = betterttv::fetch_global_emotes();
-            let ffz_emotes = frankerfacez::fetch_global_emotes();
-            let stv_emotes = seventv::fetch_global_emotes();
+    tauri::async_runtime::spawn(async move {
+        let mut set = tokio::task::JoinSet::new();
+        set.spawn(betterttv::fetch_global_emotes());
+        set.spawn(frankerfacez::fetch_global_emotes());
+        set.spawn(seventv::fetch_global_emotes());
 
-            guard.extend(bbtv_emotes);
-            guard.extend(ffz_emotes);
-            guard.extend(stv_emotes);
+        let mut emotes: HashMap<String, UniChatEmote> = HashMap::new();
+        while let Some(result) = set.join_next().await {
+            match result {
+                Err(err) => log::error!("Failed to fetch global shared emotes: {:#?}", err),
+                Ok(Err(err)) => log::error!("Failed to fetch global shared emotes: {:#?}", err),
+                Ok(Ok(batch)) => {
+                    emotes.extend(batch);
+                }
+            }
         }
-    }
+
+        if let Ok(mut guard) = EMOTES_HASHSET.write() {
+            guard.extend(emotes);
+        }
+    });
 
     return Ok(());
 }
@@ -43,12 +51,28 @@ pub fn fetch_global_shared_emotes() -> Result<(), Error> {
 pub fn fetch_shared_emotes(platform: &str, channel_id: &str) -> Result<(), Error> {
     let platform = platform.to_string();
     let channel_id = channel_id.to_string();
-    let _ = tauri::async_runtime::spawn_blocking(move || {
+
+    tauri::async_runtime::spawn(async move {
+        log::info!("Fetching channel shared emotes ({}:{})...", platform, channel_id);
+
+        let mut set = tokio::task::JoinSet::new();
+        set.spawn(betterttv::fetch_channel_emotes(platform.clone(), channel_id.clone()));
+        set.spawn(frankerfacez::fetch_channel_emotes(platform.clone(), channel_id.clone()));
+        set.spawn(seventv::fetch_channel_emotes(platform.clone(), channel_id.clone()));
+
+        let mut emotes: HashMap<String, UniChatEmote> = HashMap::new();
+        while let Some(result) = set.join_next().await {
+            match result {
+                Err(err) => log::error!("Failed to fetch channel shared emotes ({}:{}): {:#?}", platform, channel_id, err),
+                Ok(Err(err)) => log::error!("Failed to fetch channel shared emotes ({}:{}): {:#?}", platform, channel_id, err),
+                Ok(Ok(batch)) => {
+                    emotes.extend(batch);
+                }
+            }
+        }
+
         if let Ok(mut guard) = EMOTES_HASHSET.write() {
-            log::info!("Fetching channel shared emotes ({}:{})...", platform, channel_id);
-            guard.extend(betterttv::fetch_channel_emotes(&platform, &channel_id));
-            guard.extend(frankerfacez::fetch_channel_emotes(&platform, &channel_id));
-            guard.extend(seventv::fetch_channel_emotes(&platform, &channel_id));
+            guard.extend(emotes);
         }
     });
 

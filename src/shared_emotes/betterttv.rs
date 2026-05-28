@@ -10,13 +10,12 @@
 
 use std::collections::HashMap;
 
+use anyhow::Error;
 use serde_json::Value;
 use serde::Deserialize;
 use serde::Serialize;
 
 use crate::events::unichat::UniChatEmote;
-use crate::shared_emotes::EmotesParserResult;
-use crate::utils::ureq;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -36,59 +35,42 @@ fn parse_emote(emote: &BetterTTVEmote) -> UniChatEmote {
     }
 }
 
-fn handle_request(url: &str, parser: fn(Value) -> EmotesParserResult) -> EmotesParserResult {
-    let mut response = ureq::get(url).call()?;
-    let data: Value = response.body_mut().read_json()?;
-
-    return parser(data);
-}
-
-pub fn fetch_global_emotes() -> HashMap<String, UniChatEmote> {
+pub async fn fetch_global_emotes() -> Result<HashMap<String, UniChatEmote>, Error> {
     let url = "https://api.betterttv.net/3/cached/emotes/global";
-    let parser = |data: Value| -> EmotesParserResult {
-        let emotes: Vec<BetterTTVEmote> = serde_json::from_value(data)?;
+    let response = reqwest::get(url).await?;
+    let response_body: Value = response.json().await?;
+    let emotes: Vec<BetterTTVEmote> = serde_json::from_value(response_body)?;
 
-        let mut parsed = HashMap::new();
-        for emote in emotes.iter() {
-            parsed.insert(emote.code.clone(), parse_emote(emote));
-        }
+    let mut parsed = HashMap::new();
+    for emote in emotes.iter() {
+        parsed.insert(emote.code.clone(), parse_emote(emote));
+    }
 
-        return Ok(parsed);
-    };
-
-    return handle_request(url, parser).unwrap_or_else(|err| {
-        log::error!("Failed to fetch global BetterTTV emotes: {:?}", err);
-        return HashMap::new();
-    });
+    return Ok(parsed);
 }
 
-pub fn fetch_channel_emotes(platform: &str, channel_id: &str) -> HashMap<String, UniChatEmote> {
+pub async fn fetch_channel_emotes(platform: String, channel_id: String) -> Result<HashMap<String, UniChatEmote>, Error> {
     let url = format!("https://api.betterttv.net/3/cached/users/{}/{}", platform, channel_id);
-    let parser = |data: Value| -> EmotesParserResult {
-        let mut emotes_list: Vec<Value> = Vec::new();
+    let response = reqwest::get(url).await?;
+    let response_body: Value = response.json().await?;
 
-        if let Some(emotes) = data.get("channelEmotes") {
-            let emotes = emotes.as_array().cloned().unwrap_or_default();
-            emotes_list.extend(emotes);
-        }
+    let mut emotes_list: Vec<Value> = Vec::new();
+    if let Some(emotes) = response_body.get("channelEmotes") {
+        let emotes = emotes.as_array().cloned().unwrap_or_default();
+        emotes_list.extend(emotes);
+    }
 
-        if let Some(emotes) = data.get("sharedEmotes") {
-            let emotes = emotes.as_array().cloned().unwrap_or_default();
-            emotes_list.extend(emotes);
-        }
+    if let Some(emotes) = response_body.get("sharedEmotes") {
+        let emotes = emotes.as_array().cloned().unwrap_or_default();
+        emotes_list.extend(emotes);
+    }
 
-        let emotes: Vec<BetterTTVEmote> = serde_json::from_value(Value::Array(emotes_list))?;
+    let emotes: Vec<BetterTTVEmote> = serde_json::from_value(Value::Array(emotes_list))?;
 
-        let mut parsed = HashMap::new();
-        for emote in emotes.iter() {
-            parsed.insert(emote.code.clone(), parse_emote(emote));
-        }
+    let mut parsed = HashMap::new();
+    for emote in emotes.iter() {
+        parsed.insert(emote.code.clone(), parse_emote(emote));
+    }
 
-        return Ok(parsed);
-    };
-
-    return handle_request(&url, parser).unwrap_or_else(|err| {
-        log::error!("Failed to fetch channel BetterTTV emotes ({}:{}): {:?}", platform, channel_id, err);
-        return HashMap::new();
-    });
+    return Ok(parsed);
 }

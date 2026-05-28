@@ -223,7 +223,6 @@ UniChatBadge = UniChatBadge or nil;
 
 ---@class UniChatHttpArgs
 ---@field headers table<string, string>?
----@field query_params table<string, string>?
 ---@field content_type string?
 ---@field basic_auth UniChatBasicAuth?
 
@@ -234,9 +233,8 @@ UniChatBadge = UniChatBadge or nil;
 ---@field headers table<string, string>
 ---@field url string
 ---@field header fun(self: UniChatHttpResponse, name: string): string?
----@field text fun(self: UniChatHttpResponse): string
----@field json fun(self: UniChatHttpResponse): table
----@field bytes fun(self: UniChatHttpResponse): number[]
+---@field text fun(self: UniChatHttpResponse): string?
+---@field json fun(self: UniChatHttpResponse): table?
 
 ---@class UniChatHttp
 ---@field get fun(self: UniChatHttp, uri: string, args?: UniChatHttpArgs): UniChatHttpResponse

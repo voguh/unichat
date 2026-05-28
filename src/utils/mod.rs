@@ -8,19 +8,15 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use std::fs;
 use std::path;
 use std::path::PathBuf;
 use std::sync::LazyLock;
-use std::time::Duration;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
 use anyhow::anyhow;
 use anyhow::Error;
 use url::Url;
-
-use crate::utils::properties::AppPaths;
 
 pub mod base64;
 pub mod constants;
@@ -31,65 +27,10 @@ pub mod render_emitter;
 #[cfg(test)] mod semver_test;
 pub mod semver;
 pub mod settings;
-pub mod ureq;
 pub mod userstore;
 
 pub fn is_dev() -> bool {
     return cfg!(debug_assertions) || tauri::is_dev();
-}
-
-/* ================================================================================================================== */
-
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct UniChatRelease {
-    pub id: u64,
-    pub name: String,
-    pub description: String,
-
-    pub url: String,
-    pub source_url: String,
-    pub prerelease: bool,
-
-    pub created_at: String,
-    pub updated_at: String,
-    pub published_at: Option<String>
-}
-
-pub fn get_releases() -> Result<Vec<UniChatRelease>, Error> {
-    let app_cache_dir = properties::get_app_path(AppPaths::AppCache);
-    if !app_cache_dir.exists() {
-        fs::create_dir_all(&app_cache_dir)?;
-    }
-
-    /* ====================================================================== */
-
-    let cached_releases_path = app_cache_dir.join("cached_releases.json");
-    if let Ok(metadata) = fs::metadata(&cached_releases_path) {
-        let modified_at = metadata.modified()?;
-        let now = SystemTime::now();
-        let duration = now.duration_since(modified_at)?;
-
-        if duration < Duration::from_secs(3600) {
-            log::info!("Using cached releases file (age: {} seconds)", duration.as_secs());
-            let data = fs::read_to_string(&cached_releases_path)?;
-            let json_data: Vec<UniChatRelease> = serde_json::from_str(&data)?;
-
-            return Ok(json_data);
-        }
-    }
-
-    /* ====================================================================== */
-
-    log::info!("Fetching releases from UniChat API...");
-    let mut releases = ureq::get("https://unichat.voguh.me/api/v1/unichat-releases").call()?;
-    let body = releases.body_mut();
-
-    let releases_string = body.read_to_string()?;
-    fs::write(&cached_releases_path, &releases_string)?;
-    let releases_json: Vec<UniChatRelease> = body.read_json()?;
-
-    return Ok(releases_json);
 }
 
 /* ================================================================================================================== */

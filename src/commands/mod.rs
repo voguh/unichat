@@ -8,10 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use std::fs;
 use std::net::Ipv4Addr;
+use std::time::Duration;
+use std::time::SystemTime;
 
-use if_addrs::IfAddr;
 use if_addrs::get_if_addrs;
+use if_addrs::IfAddr;
 use tauri::AppHandle;
 use tauri::Runtime;
 
@@ -20,9 +23,9 @@ use crate::UNICHAT_VERSION;
 use crate::events;
 use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
-use crate::utils;
-use crate::utils::UniChatRelease;
 use crate::utils::get_current_timestamp;
+use crate::utils::properties;
+use crate::utils::properties::AppPaths;
 use crate::utils::semver;
 
 pub mod emulator;
@@ -87,6 +90,22 @@ pub async fn get_system_hosts<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Stri
 
 /* ================================================================================================================== */
 
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+struct UniChatRelease {
+    id: u64,
+    name: String,
+    description: String,
+
+    url: String,
+    source_url: String,
+    prerelease: bool,
+
+    created_at: String,
+    updated_at: String,
+    published_at: Option<String>
+}
+
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatReleaseInfo {
@@ -97,9 +116,43 @@ pub struct UniChatReleaseInfo {
 
 #[tauri::command]
 pub async fn get_releases<R: Runtime>(_app: AppHandle<R>) -> Result<UniChatReleaseInfo, String> {
-    let mut releases = utils::get_releases().map_err(|e| format!("Failed to get releases: {:#?}", e))?;
-    releases.sort_by(|a, b| semver::rcompare(&a.name, &b.name));
+    let mut releases: Vec<UniChatRelease> = Vec::new();
+    let app_cache_dir = properties::get_app_path(AppPaths::AppCache);
+    if !app_cache_dir.exists() {
+        fs::create_dir_all(&app_cache_dir).map_err(|e| format!("{:#?}", e))?;
+    }
 
+    /* ====================================================================== */
+
+    let cached_releases_path = app_cache_dir.join("cached_releases.json");
+    if let Ok(metadata) = fs::metadata(&cached_releases_path) {
+        let modified_at = metadata.modified().map_err(|e| format!("{:#?}", e))?;
+        let now = SystemTime::now();
+        let duration = now.duration_since(modified_at).map_err(|e| format!("{:#?}", e))?;
+
+        if duration < Duration::from_secs(3600) {
+            log::info!("Using cached releases file (age: {} seconds)", duration.as_secs());
+            let data = fs::read_to_string(&cached_releases_path).map_err(|e| format!("{:#?}", e))?;
+            let json_data: Vec<UniChatRelease> = serde_json::from_str(&data).map_err(|e| format!("{:#?}", e))?;
+            releases = json_data;
+        }
+    }
+
+    /* ====================================================================== */
+
+    if releases.is_empty() {
+        log::info!("Fetching releases from UniChat API...");
+        let url = "https://unichat.voguh.me/api/v1/unichat-releases";
+        let response = reqwest::get(url).await.map_err(|e| format!("{:#?}", e))?;
+        let response_body = response.text().await.map_err(|e| format!("{:#?}", e))?;
+
+        fs::write(&cached_releases_path, &response_body).map_err(|e| format!("{:#?}", e))?;
+        releases = serde_json::from_str(&response_body).map_err(|e| format!("{:#?}", e))?;
+    }
+
+    /* ====================================================================== */
+
+    releases.sort_by(|a, b| semver::rcompare(&a.name, &b.name));
     let latest_stable = releases.iter().find(|r| !r.prerelease);
     let latest_unstable = releases.iter().find(|r| r.prerelease);
 
