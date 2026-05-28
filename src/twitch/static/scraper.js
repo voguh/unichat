@@ -8,14 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-HTMLIFrameElement.prototype.setAttribute = function(name, value) {
+HTMLIFrameElement.prototype.setAttribute = function (name, value) {
     console.log("Blocked iframe with src:", value);
-    return;
 };
 
 async function uniChatHandleRewardRedemption(payload) {
     const redemption = payload.redemption;
-    await uniChat.dispatchEvent({ type: "redemption", rewardRedemption: redemption })
+    await uniChat.dispatchEvent({ type: "redemption", rewardRedemption: redemption });
 }
 
 async function uniChatHandlePubSubNotification(pubsub) {
@@ -41,7 +40,7 @@ async function uniChatHandleGraphQLResponse(res) {
                 const data = item.data;
 
                 if (extensions.operationName === "GlobalBadges") {
-                    await uniChat.dispatchEvent({ type: "badges", badgesType: "global", badges: data.badges })
+                    await uniChat.dispatchEvent({ type: "badges", badgesType: "global", badges: data.badges });
                 } else if (extensions.operationName === "ChatList_Badges") {
                     await uniChat.dispatchEvent({ type: "badges", badgesType: "user", badges: data.user.broadcastBadges });
                 } else if (extensions.operationName === "BitsConfigContext_Global") {
@@ -75,7 +74,7 @@ function uniChatInit() {
 
     /* ====================================================================================================== */
 
-    uniChat.onWebSocketMessage = async function(event, { wsInstance, url, protocols }) {
+    uniChat.onWebSocketMessage = async function (event, { wsInstance, url, protocols }) {
         if (url.startsWith("wss://hermes.twitch.tv/v1")) {
             try {
                 const data = JSON.parse(event.data);
@@ -135,23 +134,23 @@ function uniChatInit() {
                     command: command
                 };
 
-                await uniChat.dispatchEvent({ type: "message", message: ircMessage } );
+                await uniChat.dispatchEvent({ type: "message", message: ircMessage });
             } catch (err) {
                 uniChatLogger.error("Failed to parse IRC message: {}\n\nRaw: {}", err.message, event.data, err);
             }
         }
-    }
+    };
 
-    uniChat.onFetchResponse = async function(res) {
+    uniChat.onFetchResponse = async function (res) {
         if (res.url.startsWith("https://gql.twitch.tv/gql")) {
             await uniChatHandleGraphQLResponse(res);
         }
-    }
+    };
 
     return new Promise((resolve, reject) => {
         const timeout = setTimeout(() => reject(new Error("Twitch scraper initialization timed out.")), 15000);
 
-        uniChat.onWebSocketSend = async function(data, { wsInstance, url, protocols}) {
+        uniChat.onWebSocketSend = async function (data, { wsInstance, url, protocols }) {
             if (url.startsWith("wss://hermes.twitch.tv/v1")) {
                 const dataObj = JSON.parse(data);
 
@@ -162,7 +161,7 @@ function uniChatInit() {
                         const pubsub = subscribe.pubsub;
 
                         if (pubsub.topic.startsWith("community-points-channel-v1")) {
-                            let splittedTopic = pubsub.topic.split(".");
+                            const splittedTopic = pubsub.topic.split(".");
                             const topicType = splittedTopic[0];
                             const channelId = splittedTopic[1];
 
@@ -172,6 +171,6 @@ function uniChatInit() {
                     }
                 }
             }
-        }
-    })
+        };
+    });
 }
