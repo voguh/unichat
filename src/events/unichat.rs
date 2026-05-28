@@ -34,6 +34,8 @@ pub enum UniChatEvent {
     Raid(UniChatRaidEventPayload),
     #[serde(rename = "unichat:redemption")]
     Redemption(UniChatRedemptionEventPayload),
+    #[serde(rename = "unichat:gift")]
+    Gift(UniChatGiftEventPayload),
     #[serde(rename = "unichat:userstore_update")]
     UserstoreUpdate(UniChatUserstoreUpdateEventPayload),
     #[serde(rename = "unichat:custom")]
@@ -346,6 +348,38 @@ pub struct UniChatRedemptionEventPayload {
     pub reward_description: Option<String>,
     pub reward_cost: u32,
     pub reward_icon_url: String,
+
+    pub message_id: String,
+    pub message_text: Option<String>,
+    pub emotes: Vec<UniChatEmote>,
+
+    pub timestamp: i64
+}
+
+/* <============================================================================================> */
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UniChatGiftEventPayload {
+    pub channel_id: String,
+    pub channel_name: Option<String>,
+
+    pub platform: UniChatPlatform,
+    pub flags: HashMap<String, Option<String>>,
+
+    pub author_id: String,
+    pub author_username: Option<String>,
+    pub author_display_name: String,
+    pub author_display_color: String,
+    pub author_profile_picture_url: Option<String>,
+    pub author_badges: Vec<UniChatBadge>,
+    pub author_type: Option<UniChatAuthorType>,
+
+    pub gift_id: Option<String>,
+    pub gift_title: Option<String>,
+    pub gift_description: Option<String>,
+    pub gift_cost: Option<u32>,
+    pub gift_icon_url: Option<String>,
 
     pub message_id: String,
     pub message_text: Option<String>,
