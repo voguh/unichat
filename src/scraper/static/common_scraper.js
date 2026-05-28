@@ -8,11 +8,30 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-class UniChatLogger {
-    get scraperId() {
-        return "{{SCRAPER_ID}}";
-    }
+/**
+ * @typedef {"trace" | "debug" | "info" | "warn" | "error"} LogLevel
+ */
 
+/** @type {Record<LogLevel, number>} */
+const logLevelsMap = {
+    trace: 1,
+    debug: 2,
+    info: 3,
+    warn: 4,
+    error: 5
+};
+
+/** @type {(level: LogLevel) => number} */
+function logLevelToNumber(level) {
+    return logLevelsMap[level] || logLevelsMap.info;
+}
+
+/** @type {(level: string) => level is LogLevel} */
+function logLevelGuard(level) {
+    return ["trace", "debug", "info", "warn", "error"].includes(level);
+}
+
+class UniChatLogger {
     trace(message, ...args) {
         const { formatted, throwable } = this.#format(message, args);
         this.#dispatchLog("trace", formatted)
@@ -64,17 +83,28 @@ class UniChatLogger {
     }
 
     #dispatchLog(level, message) {
-        if (!["trace", "debug", "info", "warn", "error"].includes(level)) {
+        if (!logLevelGuard(level)) {
             level = "info";
         }
 
-        __TAURI_PLUGIN_LOG__[level](`[UniChat Scraper - ${this.scraperId}] ${message}`).catch(console.error);
+        this.#emit(level, message);
         console[level](message);
     }
 
     #dispatchThrowable(throwable) {
-        __TAURI_PLUGIN_LOG__.error(`[UniChat Scraper - ${this.scraperId}] ${throwable.stack}`).catch(console.error);
+        this.#emit("error", throwable.stack);
         console.error(throwable);
+    }
+
+    #emit(level, data) {
+        __TAURI__.core.invoke("plugin:log|log", {
+            level: logLevelToNumber(level),
+            message: data,
+            location: "{{SCRAPER_ID}}",
+            file: null,
+            line: null,
+            keyValues: null
+        });
     }
 
     #format(message, args) {
