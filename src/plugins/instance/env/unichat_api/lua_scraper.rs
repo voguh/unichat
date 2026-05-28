@@ -159,7 +159,7 @@ impl UniChatScraper for LuaUniChatScraper {
         let lua = runtime::get()?;
         if matches!(event_type, "idle" | "ready" | "ping" | "error") {
             if let Err(err) = render_emitter::emit(event.clone()) {
-                log::error!("{:?}", err);
+                log::error!(target: &format!("scraper:{}", self.name), "{:#?}", err);
             }
 
             let table = lua.to_value(&event)?;
@@ -167,25 +167,25 @@ impl UniChatScraper for LuaUniChatScraper {
             if event_type == "idle" {
                 if let Some(on_idle) = &self.on_idle {
                     if let Err(err) = on_idle.call::<()>(table) {
-                        log::error!("An error occurred on '{}' scraper 'on_idle' callback: {}", self.id, err);
+                        log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper 'on_idle' callback: {:#?}", self.id, err);
                     }
                 }
             } else if event_type == "ready" {
                 if let Some(on_ready) = &self.on_ready {
                     if let Err(err) = on_ready.call::<()>(table) {
-                        log::error!("An error occurred on '{}' scraper 'on_ready' callback: {}", self.id, err);
+                        log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper 'on_ready' callback: {:#?}", self.id, err);
                     }
                 }
             } else if event_type == "ping" {
                 if let Some(on_ping) = &self.on_ping {
                     if let Err(err) = on_ping.call::<()>(table) {
-                        log::error!("An error occurred on '{}' scraper 'on_ping' callback: {}", self.id, err);
+                        log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper 'on_ping' callback: {:#?}", self.id, err);
                     }
                 }
             } else if event_type == "error" {
                 if let Some(on_error) = &self.on_error {
                     if let Err(err) = on_error.call::<()>(table) {
-                        log::error!("An error occurred on '{}' scraper 'on_error' callback: {}", self.id, err);
+                        log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper 'on_error' callback: {:#?}", self.id, err);
                     }
                 }
             }
@@ -207,7 +207,7 @@ impl UniChatScraper for LuaUniChatScraper {
                     }
 
                     if let Err(err) = events::emit(parsed) {
-                        log::error!("An error occurred on send unichat event: {}", err);
+                        log::error!(target: &format!("scraper:{}", self.name), "An error occurred on send unichat event: {:#?}", err);
                     }
                 },
                 Ok(None) => {
@@ -216,7 +216,7 @@ impl UniChatScraper for LuaUniChatScraper {
                     }
                 },
                 Err(err) => {
-                    log::error!("An error occurred on '{}' scraper 'on_event' callback: {}", self.id, err);
+                    log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper 'on_event' callback: {:#?}", self.id, err);
                     self.log_action("events-error.log", &format!("{} -- {:?}", err, event));
                 }
             }
