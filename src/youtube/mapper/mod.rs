@@ -14,6 +14,7 @@ use crate::events::unichat::UniChatEvent;
 
 mod add_banner_to_live_chat_command;
 mod add_chat_item_action;
+mod add_interactivity_widget_action;
 mod remove_chat_item_action;
 mod remove_chat_item_by_author_action;
 pub mod structs;
@@ -27,6 +28,8 @@ pub fn parse(payload: &serde_json::Value) -> Result<Option<UniChatEvent>, Error>
         return remove_chat_item_action::parse(value.clone());
     } else if let Some(value) = payload.get("removeChatItemByAuthorAction") {
         return remove_chat_item_by_author_action::parse(value.clone());
+    } else if let Some(value) = payload.get("addInteractivityWidgetAction") {
+        return add_interactivity_widget_action::parse(value.clone());
     }
 
     return Ok(None);
