@@ -69,7 +69,7 @@
                 function connect() {
                     let wsSchema = window.location.protocol === "https:" ? "wss" : "ws";
                     let wsHost = window.location.host;
-                    const socket = new WebSocket(`${wsSchema}://${wsHost}/events`);
+                    const socket = new WebSocket(`${wsSchema}://${wsHost}/ws`);
 
                     socket.addEventListener("open", () => {
                         console.log("Socket connected");
