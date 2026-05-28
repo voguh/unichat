@@ -46,6 +46,7 @@ impl UniChatAPI {
         let listeners: Arc<RwLock<Vec<(u64, mlua::Function)>>> = Arc::new(RwLock::new(Vec::new()));
         let next_id = Arc::new(AtomicU64::new(0));
 
+        let logger_name = plugin_name.to_string();
         let listeners_clone = listeners.clone();
         tauri::async_runtime::spawn(async move {
             let mut rx = events::subscribe().unwrap();
@@ -67,15 +68,15 @@ impl UniChatAPI {
 
                         for callback in callbacks.iter() {
                             if let Err(err) = callback.call::<()>(table.clone()) {
-                                log::error!("An error occurred on UniChatAPI event listener callback: {}", err);
+                                log::error!(target: &format!("plugin:{}", logger_name), "An error occurred on UniChatAPI event listener callback: {}", err);
                             }
                         }
                     }
                     Err(tokio::sync::broadcast::error::RecvError::Lagged(skipped)) => {
-                        log::warn!("EventEmitter lagged, skipped {} events", skipped);
+                        log::warn!(target: &format!("plugin:{}", logger_name), "EventEmitter lagged, skipped {} events", skipped);
                     }
                     Err(tokio::sync::broadcast::error::RecvError::Closed) => {
-                        log::warn!("EventEmitter channel closed, exiting event loop");
+                        log::warn!(target: &format!("plugin:{}", logger_name), "EventEmitter channel closed, exiting event loop");
                         break; // Exit the loop if the channel is closed
                     }
                 }
@@ -140,7 +141,7 @@ impl mlua::UserData for UniChatAPI {
             let key = format!("{}:{}", plugin_name, module_name);
 
             if let Err(err) = shared_modules::add(key, module_table) {
-                log::error!("Failed to expose shared module '{}' for plugin '{}': {}", module_name, plugin_name, err);
+                log::error!(target: &format!("plugin:{}", plugin_name), "Failed to expose shared module '{}' for plugin '{}': {}", module_name, plugin_name, err);
                 let msg = format!("Failed to expose shared module '{}': {}", module_name, err);
                 plugin.add_message(msg.clone());
                 return Err(mlua::Error::external(msg));
