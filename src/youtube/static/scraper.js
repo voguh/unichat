@@ -64,17 +64,17 @@ function uniChatInit() {
 
     /* ====================================================================================================== */
 
-    uniChat.onFetchResponse = async function(res) {
+    uniChat.onFetchResponse = async function (res) {
         if (res.url.startsWith("https://www.youtube.com/youtubei/v1/live_chat/get_live_chat") && res.ok) {
             await uniChatHandleScrapEvent(res);
         }
-    }
+    };
 
     /* ====================================================================================================== */
 
     // Select live chat instead top chat
     document.querySelector("#live-chat-view-selector-sub-menu #trigger")?.click();
-    document.querySelector("#live-chat-view-selector-sub-menu #dropdown a:nth-child(2)")?.click()
+    document.querySelector("#live-chat-view-selector-sub-menu #dropdown a:nth-child(2)")?.click();
 
     return { channelId };
 }
