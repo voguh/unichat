@@ -59,9 +59,9 @@ impl mlua::UserData for UniChatLoggerModule {
         methods.add_method("debug", move |lua, this, args: mlua::Variadic<mlua::Value>| {
             let (msg, err) = format_str(lua, args)?;
 
-            log::debug!(target: &this.plugin_name, "{}", msg);
+            log::debug!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
             if let Some(err) = err {
-                log::error!(target: &this.plugin_name, "{:?}", err);
+                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:?}", err);
             }
 
             return Ok(());
@@ -70,9 +70,9 @@ impl mlua::UserData for UniChatLoggerModule {
         methods.add_method("info", move |lua, this, args: mlua::Variadic<mlua::Value>| {
             let (msg, err) = format_str(lua, args)?;
 
-            log::info!(target: &this.plugin_name, "{}", msg);
+            log::info!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
             if let Some(err) = err {
-                log::error!(target: &this.plugin_name, "{:?}", err);
+                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:?}", err);
             }
 
             return Ok(());
@@ -81,9 +81,9 @@ impl mlua::UserData for UniChatLoggerModule {
         methods.add_method("warn", move |lua, this, args: mlua::Variadic<mlua::Value>| {
             let (msg, err) = format_str(lua, args)?;
 
-            log::warn!(target: &this.plugin_name, "{}", msg);
+            log::warn!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
             if let Some(err) = err {
-                log::error!(target: &this.plugin_name, "{:?}", err);
+                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:?}", err);
             }
 
             return Ok(());
@@ -92,9 +92,9 @@ impl mlua::UserData for UniChatLoggerModule {
         methods.add_method("error", move |lua, this, args: mlua::Variadic<mlua::Value>| {
             let (msg, err) = format_str(lua, args)?;
 
-            log::error!(target: &this.plugin_name, "{}", msg);
+            log::error!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
             if let Some(err) = err {
-                log::error!(target: &this.plugin_name, "{:?}", err);
+                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:?}", err);
             }
 
             return Ok(());
