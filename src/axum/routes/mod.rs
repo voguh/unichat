@@ -8,8 +8,17 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-pub mod assets;
-pub mod gallery;
-pub mod proxy;
-pub mod widget;
-pub mod ws;
+mod assets;
+mod gallery;
+mod proxy;
+mod rpc;
+mod widget;
+mod ws;
+
+pub use assets::assets;
+pub use gallery::gallery;
+pub use proxy::proxy;
+pub use rpc::rpc;
+pub use widget::get_widget;
+pub use widget::get_widget_assets;
+pub use ws::ws;

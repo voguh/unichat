@@ -29,7 +29,6 @@ use tauri_plugin_dialog::DialogExt as _;
 use tauri_plugin_dialog::MessageDialogButtons;
 use tauri_plugin_dialog::MessageDialogKind;
 
-use crate::actix::ActixState;
 use crate::utils::base64;
 use crate::utils::path_to_string;
 use crate::utils::properties;
@@ -38,7 +37,7 @@ use crate::utils::userstore::flush_userstore;
 
 include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 
-mod actix;
+mod axum;
 mod commands;
 mod events;
 mod plugins;
@@ -234,8 +233,7 @@ fn setup_inner() -> Result<(), Error> {
     /* ========================================================================================== */
 
     log_startup_process(&splash_screen, "[21/21] Initializing HTTP server...");
-    let http_server = actix::new();
-    app_handle.manage(http_server);
+    tauri::async_runtime::spawn(axum::start());
 
     /* ========================================================================================== */
 
@@ -334,12 +332,6 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
                 log::error!("Failed to flush userstore to disk: {:#?}", err);
             }
 
-            let http_server: Option<tauri::State<'_, ActixState>> = app.try_state();
-            if let Some(http_server) = http_server {
-                log::info!("Stopping HTTP server...");
-                http_server.stop();
-            }
-
             for (key, window) in app.webview_windows() {
                 if key != "main" {
                     if let Err(err) = window.destroy() {
@@ -359,10 +351,7 @@ fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     }
 }
 
-#[tokio::main]
-async fn main() {
-    tauri::async_runtime::set(tokio::runtime::Handle::current());
-
+fn main() {
     let log_level: log::LevelFilter;
     if let Ok(log_level_raw) = env::var("UNICHAT_LOG_LEVEL") {
         log_level = match log_level_raw.to_lowercase().as_str() {
@@ -378,11 +367,6 @@ async fn main() {
     } else {
         log_level = log::LevelFilter::Info;
     }
-
-    let _ = ctrlc::set_handler(|| {
-        let app_handle = get_app_handle();
-        app_handle.exit(0);
-    });
 
     tauri::Builder::default().setup(setup).on_window_event(on_window_event)
         .plugin(tauri_plugin_dialog::init())

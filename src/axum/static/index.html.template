@@ -24,10 +24,52 @@
         </style>
         <script defer>
             document.addEventListener("DOMContentLoaded", () => {
+                async function jsonrpcSendCommand(method, params) {
+                    const id = crypto.randomUUID();
+                    const body = { jsonrpc: "2.0", id, method, params }
+
+                    const response = await fetch("/rpc", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`RPC request failed with status ${response.status}`);
+                    }
+
+                    const responseData = await response.json();
+                    if (responseData.jsonrpc !== "2.0") {
+                        throw new Error(`Invalid RPC response: missing or incorrect jsonrpc version`);
+                    }
+
+                    if (responseData.id !== id) {
+                        throw new Error(`RPC response ID mismatch: expected ${id}, got ${responseData.id}`);
+                    }
+
+                    if (responseData.error != null) {
+                        const errorData = responseData.error;
+                        const error = new Error(errorData.message || "Unknown RPC error");
+                        error.code = errorData.code;
+                        error.data = errorData.data;
+                        throw error;
+                    } else {
+                        return responseData.result;
+                    }
+                }
+
+                globalThis.UniChatAPI = {
+                    getUserStoreItem: async (key) => {
+                        return jsonrpcSendCommand("userstore:get", [key]);
+                    }
+                }
+
+                /* ================================================================================================== */
+
                 function connect() {
                     let wsSchema = window.location.protocol === "https:" ? "wss" : "ws";
                     let wsHost = window.location.host;
-                    const socket = new WebSocket(`${wsSchema}://${wsHost}/ws`)
+                    const socket = new WebSocket(`${wsSchema}://${wsHost}/events`);
 
                     socket.addEventListener("open", () => {
                         console.log("Socket connected");
@@ -58,49 +100,11 @@
                         console.error("Socket encountered error: ", err.message, "Closing socket");
                         socket.close();
                     });
-
-                    function jsonrpcSendCommand(method, params) {
-                        return new Promise((resolve, reject) => {
-                            const id = crypto.randomUUID();
-                            const body = { jsonrpc: "2.0", id, method, params }
-
-                            socket.send(JSON.stringify(body));
-
-                            function handleResponse(message) {
-                                const event = JSON.parse(message.data);
-
-                                if (event.jsonrpc === "2.0" && event.id === id) {
-                                    socket.removeEventListener("message", handleResponse);
-
-                                    if (event.error) {
-                                        const error = new Error(event.error.message || "Unknown JSON-RPC error");
-                                        error.code = event.error.code;
-                                        error.data = event.error.data;
-                                        reject(error);
-                                    } else {
-                                        resolve(event.result);
-                                    }
-                                }
-                            }
-
-                            socket.addEventListener("message", handleResponse);
-                            setTimeout(() => {
-                                socket.removeEventListener("message", handleResponse);
-                                const error = new Error("Timeout waiting for userstore get response");
-                                error.code = -1;
-                                reject(error);
-                            }, 5000);
-                        });
-                    }
-
-                    globalThis.UniChatAPI = {
-                        getUserstoreItem: async function(key) {
-                            return jsonrpcSendCommand("userstore:get", [key]);
-                        }
-                    }
                 }
 
                 connect();
+
+                /* ================================================================================================== */
 
                 window.addEventListener("message", ({ data: event }) => {
                     if (event.type === "unichat:event") {
