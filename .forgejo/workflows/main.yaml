@@ -131,13 +131,13 @@ jobs:
 
       - name: Prepare build environment
         run: |
-          sudo apt update
-          sudo apt install --no-install-recommends --no-install-suggests -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev xdg-utils
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --no-install-suggests -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev xdg-utils
           jq '.build.beforeBuildCommand = ""' tauri.conf.json > tmp.json && mv tmp.json tauri.conf.json
           corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION}} --activate && corepack enable pnpm
           command -v cargo-tauri || cargo install --locked tauri-cli
           if [[ "${{ matrix.target }}" == "windows" ]]; then
-              sudo apt install --no-install-recommends --no-install-suggests -y nsis clang lld llvm
+              sudo apt-get install --no-install-recommends --no-install-suggests -y nsis clang lld llvm
               command -v cargo-xwin || cargo install --locked cargo-xwin
           fi
 
