@@ -34,7 +34,7 @@ function logLevelGuard(level) {
 class UniChatLogger {
     trace(message, ...args) {
         const { formatted, throwable } = this.#format(message, args);
-        this.#dispatchLog("trace", formatted)
+        this.#dispatchLog("trace", formatted);
 
         if (throwable) {
             this.#dispatchThrowable(throwable);
@@ -43,7 +43,7 @@ class UniChatLogger {
 
     debug(message, ...args) {
         const { formatted, throwable } = this.#format(message, args);
-        this.#dispatchLog("debug", formatted)
+        this.#dispatchLog("debug", formatted);
 
         if (throwable) {
             this.#dispatchThrowable(throwable);
@@ -52,7 +52,7 @@ class UniChatLogger {
 
     info(message, ...args) {
         const { formatted, throwable } = this.#format(message, args);
-        this.#dispatchLog("", formatted)
+        this.#dispatchLog("", formatted);
 
         if (throwable) {
             this.#dispatchThrowable(throwable);
@@ -61,7 +61,7 @@ class UniChatLogger {
 
     warn(message, ...args) {
         const { formatted, throwable } = this.#format(message, args);
-        this.#dispatchLog("warn", formatted)
+        this.#dispatchLog("warn", formatted);
 
         if (throwable) {
             this.#dispatchThrowable(throwable);
@@ -75,7 +75,7 @@ class UniChatLogger {
         }
 
         const { formatted, throwable } = this.#format(message, args);
-        this.#dispatchLog("error", formatted)
+        this.#dispatchLog("error", formatted);
 
         if (throwable) {
             this.#dispatchThrowable(throwable);
@@ -220,7 +220,7 @@ if (window.fetch.__WRAPPED__ !== true) {
 
     window.fetch = async function (...args) {
         if (typeof uniChat.preFetch === "function") {
-            args = await uniChat.preFetch(args) || args;
+            args = (await uniChat.preFetch(args)) || args;
         }
 
         try {
@@ -238,7 +238,7 @@ if (window.fetch.__WRAPPED__ !== true) {
         }
 
         return res;
-    }
+    };
 
     Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, writable: false });
 }
@@ -254,13 +254,13 @@ async function uniChatPreInit() {
         const scheme = window.location.protocol.split(":")[0];
         const host = window.location.hostname;
         const path = window.location.pathname;
-        if (["http", "tauri"].includes(scheme) && (["localhost", "tauri.localhost"].includes(host)) && path === "/scraper_idle.html") {
+        if (["http", "tauri"].includes(scheme) && ["localhost", "tauri.localhost"].includes(host) && path === "/scraper_idle.html") {
             uniChatLogger.info("Scraper is not running, setting up idle dispatch.");
             registerIntermittentEventDispatcher("idle");
             return;
         }
 
-        uniChatLogger.info("UniChat scraper initializing...")
+        uniChatLogger.info("UniChat scraper initializing...");
         const style = document.createElement("style");
         style.textContent = `
             html::before {
