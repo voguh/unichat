@@ -1,5 +1,7 @@
+saveExact: true
+savePrefix: ""
 minimumReleaseAge: 20160
-
-onlyBuiltDependencies:
-  - '@parcel/watcher'
-  - esbuild
+blockExoticSubdeps: true
+allowBuilds:
+  '@parcel/watcher': false
+  esbuild: false
