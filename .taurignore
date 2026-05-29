@@ -1,11 +1,12 @@
 /.forgejo
 /.vscode
-/docs
+/(un)released-notes
 /examples
-/node_modules
 /webapp
 /zztools
 /.editorconfig
+/.gitattributes
 /.gitignore
 /LICENSE
 /README.md
+/run.sh
