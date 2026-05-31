@@ -99,32 +99,27 @@ export function WidgetsModal(): PReact.ComponentChildren {
     }
 
     function formatWarnings(warnings: string[]): PReact.ComponentChildren {
-        return (
-            <>
-                {warnings.map((warning, idx) => {
-                    const formattedWarning = formatWarning(warning);
-                    if (formattedWarning == null) {
-                        return null;
-                    }
+        return warnings.map((warning) => {
+            const formattedWarning = formatWarning(warning);
+            if (formattedWarning == null) {
+                return null;
+            }
 
-                    const { message, details, variant } = formattedWarning;
-                    console.log(formattedWarning);
+            const { message, details, variant } = formattedWarning;
 
-                    return (
-                        <Tooltip key={idx} content={details} placement="bottom">
-                            <Badge variant={variant}>{message}</Badge>
-                        </Tooltip>
-                    );
-                })}
-            </>
-        );
+            return (
+                <Tooltip key={warning} content={details} placement="bottom">
+                    <Badge variant={variant}>{message}</Badge>
+                </Tooltip>
+            );
+        });
     }
 
     return (
         <div className="flex flex-col gap-2">
-            {widgets.map((widgetGroup, idx) => (
+            {widgets.map((widgetGroup) => (
                 <AccordionItem
-                    key={idx}
+                    key={widgetGroup.label}
                     open={openedWidgetGroup === widgetGroup.label}
                     toggle={() => setOpenedWidgetGroup((old) => (old === widgetGroup.label ? null : widgetGroup.label))}
                     header={widgetGroup.label}

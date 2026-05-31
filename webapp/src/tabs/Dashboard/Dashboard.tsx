@@ -63,9 +63,7 @@ export function Dashboard(): PReact.ComponentChildren {
                 {message}
                 <br />
                 <ul className="list-disc list-inside">
-                    {availableUrls.map((url, idx) => (
-                        <li key={idx}>{url}</li>
-                    ))}
+                    {availableUrls.map((url) => <li key={url}>{url}</li>)}
                 </ul>
                 <br />
                 You can enter the URL with or without the <Badge>www.</Badge> prefix.

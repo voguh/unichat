@@ -128,9 +128,9 @@ export function Select({ options = [], inputRef, id, ...props }: SelectProps): P
                 initialStyle={{ position: "fixed", visibility: "hidden", opacity: "0", transform: "translateX(-50%)" }}
             >
                 <SelectStyledDropdown>
-                    {options.map((item, idx) => (
+                    {options.map((item) => (
                         <DropdownItemRenderer
-                            key={idx}
+                            key={item.label}
                             item={item}
                             selectedOption={selectedOption}
                             onClick={(option) => {

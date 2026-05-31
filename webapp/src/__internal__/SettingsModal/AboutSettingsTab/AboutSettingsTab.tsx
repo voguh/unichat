@@ -64,10 +64,10 @@ export function AboutSettingsTab(_props: Props): PReact.ComponentChildren {
                     <div>
                         <div className="label">Developed by</div>
                         <div className="values">
-                            {UNICHAT_AUTHORS.split(";").map((author, index) => {
+                            {UNICHAT_AUTHORS.split(";").map((author) => {
                                 const [name, _email] = author.split("<");
 
-                                return <p key={index}>{name.trim()}</p>;
+                                return <p key={author}>{name.trim()}</p>;
                             })}
                         </div>
                     </div>

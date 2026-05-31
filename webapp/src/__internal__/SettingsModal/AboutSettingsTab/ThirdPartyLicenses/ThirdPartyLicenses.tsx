@@ -61,13 +61,13 @@ export function ThirdPartyLicenses(): PReact.ComponentChildren {
                                 </td>
                                 <td>
                                     <span>
-                                        {formatLicenses(pkg.licenses).map((l) => (
+                                        {formatLicenses(pkg.licenses).map((license) => (
                                             <Badge
-                                                key={l}
+                                                key={license}
                                                 variant="success"
-                                                onClick={() => openUrl(`https://opensource.org/license/${l}`)}
+                                                onClick={() => openUrl(`https://opensource.org/license/${license}`)}
                                             >
-                                                {l}
+                                                {license}
                                             </Badge>
                                         ))}
                                     </span>

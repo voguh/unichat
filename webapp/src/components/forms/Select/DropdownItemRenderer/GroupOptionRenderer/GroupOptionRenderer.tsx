@@ -26,9 +26,9 @@ export function GroupOptionRenderer({ group, onClick, selectedOption }: GroupOpt
         <GroupOptionRendererStyledContainer>
             <div className="group-label">{group.label}</div>
             <div className="group-items">
-                {group.options.map((option, idx) => (
+                {group.options.map((option) => (
                     <OptionRenderer
-                        key={idx}
+                        key={option.value}
                         onClick={onClick}
                         option={option}
                         selected={selectedOption?.value === option.value}
