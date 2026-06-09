@@ -27,11 +27,6 @@ interface Props {
 
 export function Tabs({ initialTab, tabs }: Props): PReact.ComponentChildren {
     const [selectedTab, setSelectedTab] = useState(initialTab ?? tabs[0].id);
-    console.log(
-        "Selected tab:",
-        selectedTab,
-        tabs.map((t) => t.id)
-    );
 
     function TabContent(): PReact.ComponentChildren {
         const tabToRender = tabs.find((tab) => tab.id === selectedTab);
