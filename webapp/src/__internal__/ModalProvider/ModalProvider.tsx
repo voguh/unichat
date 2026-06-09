@@ -13,7 +13,6 @@ import { useEffect, useRef, useState } from "preact/hooks";
 
 import { Modal } from "unichat/components/Modal";
 import { eventEmitter, RichModalWrapperProps } from "unichat/services/eventEmitter";
-import { OpenModalOptions } from "unichat/services/modalService";
 
 import { ModalContainerStyledContainer } from "./styled";
 
