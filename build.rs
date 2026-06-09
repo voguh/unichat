@@ -66,6 +66,32 @@ fn generate_resources(target_gen_dir: &Path) -> Result<(), Box<dyn std::error::E
 
 /* ================================================================================================================== */
 
+fn get_clean_env() -> HashMap<String, String> {
+    let mut clean_env: HashMap<String, String> = HashMap::new();
+
+    for (key, value) in env::vars() {
+        if key.starts_with("CARGO") {
+            continue;
+        } else if key == "DEBUG" {
+            continue;
+        } else if key.starts_with("DEP_TAURI") {
+            continue;
+        } else if matches!(key.as_str(), "HOST" | "LD_LIBRARY_PATH" | "MACOSX_DEPLOYMENT_TARGET" | "NUM_JOBS" | "OPT_LEVEL" | "OUT_DIR" | "PROFILE" | "RUSTC" | "RUSTDOC") {
+            continue;
+        } else if key.starts_with("RUSTUP") {
+            continue;
+        } else if matches!(key.as_str(), "RUST_RECURSION_COUNT" | "SSL_CERT_DIR" | "SSL_CERT_FILE" | "STATIC_VCRUNTIME" | "TARGET" | "TAURI_APP_PATH" | "TAURI_CLI_VERBOSITY" | "TAURI_FRONTEND_PATH") {
+            continue;
+        }
+
+        clean_env.insert(key, value);
+    }
+
+    return clean_env;
+}
+
+/* ========================================================================== */
+
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 struct FinalLicenseInfo {
     source: String,
@@ -90,20 +116,15 @@ struct CargoDependency {
     kind: Option<String>
 }
 
+#[cfg(windows)]
+const CARGO_BIN: &str = "cargo.exe";
+#[cfg(not(windows))]
+const CARGO_BIN: &str = "cargo";
+
 fn generate_crate_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::error::Error>> {
     let mut final_licenses: Vec<FinalLicenseInfo> = Vec::new();
-    let mut cargo_bin = env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
-    if cargo_bin.contains("cargo-xwin") || cargo_bin.contains("cargo-win") {
-        cargo_bin = String::from("cargo");
-    }
 
-    let metadata_output = Command::new(&cargo_bin)
-        .args(["metadata", "--format-version", "1"])
-        // Remove env vars that may force cross-target flags into rustc.
-        .env_remove("RUSTFLAGS")
-        .env_remove("CARGO_ENCODED_RUSTFLAGS")
-        .env_remove("CARGO")
-        .output()?;
+    let metadata_output = Command::new(CARGO_BIN).args(["metadata", "--format-version", "1"]).env_clear().envs(get_clean_env()).output()?;
     if !metadata_output.status.success() {
         return Err(format!("Failed to run metadata: {}", String::from_utf8_lossy(&metadata_output.stderr)).into());
     }
@@ -154,12 +175,16 @@ struct PNPMDependency {
     license: String
 }
 
+#[cfg(windows)]
+const PNPM_BIN: &str = "pnpm.cmd";
+#[cfg(not(windows))]
+const PNPM_BIN: &str = "pnpm";
+
 fn generate_npm_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::error::Error>> {
     let mut final_licenses: Vec<FinalLicenseInfo> = Vec::new();
 
     let webapp_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("webapp");
-    let pnpm_bin = env::var("PNPM_HOME").map(|h| format!("{}/pnpm", h)).unwrap_or_else(|_| "pnpm".to_string());
-    let metadata_output = Command::new(&pnpm_bin).args(["list", "--json", "--long", "--prod"]).current_dir(&webapp_path).output()?;
+    let metadata_output = Command::new(PNPM_BIN).args(["list", "--json", "--long", "--prod"]).current_dir(&webapp_path).env_clear().envs(get_clean_env()).output()?;
     if !metadata_output.status.success() {
         return Err(format!("Failed to run metadata: {}", String::from_utf8_lossy(&metadata_output.stderr)).into());
     }
@@ -210,16 +235,16 @@ fn main() {
 
     if !target_gen_dir.exists() {
         if let Err(err) = fs::create_dir_all(&target_gen_dir) {
-            panic!("Failed to create target gen directory: {:?}", err);
+            panic!("Failed to create target gen directory: {:#?}", err);
         }
     }
 
     if let Err(err) = generate_resources(&target_gen_dir) {
-        panic!("Failed to generate resources: {:?}", err);
+        panic!("Failed to generate resources: {:#?}", err);
     }
 
     if let Err(err) = generate_third_party_licenses(&target_gen_dir) {
-        panic!("Failed to generate third party licenses: {:?}", err);
+        panic!("Failed to generate third party licenses: {:#?}", err);
     }
 
     tauri_build::build();
