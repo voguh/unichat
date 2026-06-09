@@ -10,6 +10,6 @@
 
 /** @type {import('twin.macro').Config} */
 module.exports = {
-    preset: "styled-components",
+    preset: "goober",
     config: "tailwind.config.cjs"
 };
