@@ -16,6 +16,10 @@ env:
   RUST_VERSION: '1.95.0'
   YQ_VERSION: 'v4.53.2'
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   check_license_headers:
     runs-on: ubuntu-24.04
@@ -108,6 +112,7 @@ jobs:
         with:
           path: |
             ~/.cargo/bin/cargo-tauri
+            ~/.cargo/bin/cargo-tauri.exe
           key: cargo-bin-${{ matrix.os }}-${{ env.RUST_VERSION }}
 
       - name: Install linux dependencies
@@ -118,7 +123,7 @@ jobs:
 
       - name: Prepare repository
         run: |
-          node -e "const f='tauri.conf.json',j=require('./'+f);j.build.beforeBuildCommand='';require('fs').writeFileSync(f,JSON.stringify(j,null,4))"
+          jq '.build.beforeBuildCommand = ""' tauri.conf.json > tmp.json && mv tmp.json tauri.conf.json
           corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION}} --activate && corepack enable pnpm
           command -v cargo-tauri || cargo install --locked tauri-cli
 
@@ -128,13 +133,13 @@ jobs:
 
       - name: Clean stale artifacts
         run: |
-          rm -rf ${{ github.workspace }}/target/release/assets
-          rm -rf ${{ github.workspace }}/target/release/bundle
-          rm -rf ${{ github.workspace }}/target/release/examples
-          rm -rf ${{ github.workspace }}/target/release/icons
-          rm -rf ${{ github.workspace }}/target/release/plugins
-          rm -rf ${{ github.workspace }}/target/release/widgets
-          rm -rf ${{ github.workspace }}/target/release/LICENSE
+          rm -rf target/release/assets
+          rm -rf target/release/bundle
+          rm -rf target/release/examples
+          rm -rf target/release/icons
+          rm -rf target/release/plugins
+          rm -rf target/release/widgets
+          rm -rf target/release/LICENSE
 
       - name: Run build app
         run: cargo tauri build
@@ -143,7 +148,7 @@ jobs:
         uses: actions/upload-artifact@v7.0.1
         with:
           name: ${{ matrix.os }}-bundles
-          path: ${{ github.workspace }}/target/release/bundle
+          path: target/release/bundle
 
   publish:
     if: startsWith(github.ref, 'refs/tags/')
@@ -159,13 +164,13 @@ jobs:
         uses: actions/download-artifact@v8.0.1
         with:
           name: windows-2025-bundles
-          path: ${{ github.workspace }}/target/windows
+          path: target/windows
 
       - name: Download linux build artifacts
         uses: actions/download-artifact@v8.0.1
         with:
           name: ubuntu-24.04-bundles
-          path: ${{ github.workspace }}/target/linux
+          path: target/linux
 
       - name: Install yq
         run: |
@@ -191,12 +196,12 @@ jobs:
       - name: Move build artifacts
         run: |
           export VERSION="${{ github.ref_name }}"
-          mkdir -p ${{ github.workspace }}/dist
-          cp ${{ github.workspace }}/target/linux/appimage/*.AppImage ${{ github.workspace }}/dist/unichat-$VERSION.AppImage
-          cp ${{ github.workspace }}/target/linux/deb/*.deb ${{ github.workspace }}/dist/unichat-$VERSION.deb
-          cp ${{ github.workspace }}/target/linux/rpm/*.rpm ${{ github.workspace }}/dist/unichat-$VERSION.rpm
-          cp ${{ github.workspace }}/target/windows/nsis/*.exe ${{ github.workspace }}/dist/unichat-$VERSION-setup.exe
-          for file in ${{ github.workspace }}/dist/*; do
+          mkdir -p dist
+          cp target/linux/appimage/*.AppImage dist/unichat-$VERSION.AppImage
+          cp target/linux/deb/*.deb dist/unichat-$VERSION.deb
+          cp target/linux/rpm/*.rpm dist/unichat-$VERSION.rpm
+          cp target/windows/nsis/*.exe dist/unichat-$VERSION-setup.exe
+          for file in dist/*; do
             if [ -f "$file" ]; then
               (cd "$(dirname "$file")" && sha256sum "$(basename "$file")" > "$(basename "$file").sha256")
             fi
@@ -206,4 +211,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ github.ref_name }}" ${{ github.workspace }}/dist/* --prerelease;
+          gh release create "${{ github.ref_name }}" dist/* --prerelease;
