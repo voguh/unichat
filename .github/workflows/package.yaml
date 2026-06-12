@@ -1,0 +1,104 @@
+name: Package
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  TAURI_APP_PATH: .
+  TAURI_FRONTEND_PATH: webapp
+  NODE_VERSION: 24.16.0
+  PNPM_VERSION: 10.33.4
+  RUST_VERSION: 1.95.0
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check-license-headers:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6.0.3
+
+      - name: Check license headers
+        run: |
+          LOG_LEVEL=debug ./zztools/check-license-header.py
+
+  webapp-bundle:
+    runs-on: ubuntu-24.04
+    needs: [check-license-headers]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6.0.3
+
+      - name: Prepare environment
+        uses: ./.github/actions/webapp-setup
+        with:
+          tauri-frontend-path: ${{ env.TAURI_FRONTEND_PATH }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      - name: Run tests
+        working-directory: ${{ env.TAURI_FRONTEND_PATH }}
+        run: pnpm test run --ci --passWithNoTests --coverage
+
+      - name: Build webapp
+        working-directory: ${{ env.TAURI_FRONTEND_PATH }}
+        run: pnpm build:ui
+
+      - name: Upload webapp build artifacts
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: webapp-bundle
+          path: ${{ env.TAURI_FRONTEND_PATH }}/dist
+
+  package:
+    runs-on: ${{ matrix.os }}
+    needs: [webapp-bundle]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+    steps:
+      - id: vars
+        run: echo "os=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Checkout repository
+        uses: actions/checkout@v6.0.3
+
+      - name: Prepare environment
+        uses: ./.github/actions/tauri-setup
+        with:
+          tauri-app-path: ${{ env.TAURI_APP_PATH }}
+          tauri-frontend-path: ${{ env.TAURI_FRONTEND_PATH }}
+          rust-version: ${{ env.RUST_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      - name: Run tests
+        working-directory: ${{ env.TAURI_APP_PATH }}
+        run: cargo test --release
+
+      - name: Build app
+        working-directory: ${{ env.TAURI_APP_PATH }}
+        run: |
+          if [[ "${{ steps.vars.outputs.os }}" = "windows" ]]; then
+            VERSION="$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')"
+            if [[ "$VERSION" == *"-"* || "$VERSION" == *"+"* ]]; then
+              cargo tauri build --bundles "nsis"
+            else
+              cargo tauri build --bundles "nsis,msi"
+            fi
+          else
+            cargo tauri build
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: ${{ steps.vars.outputs.os }}-bundles
+          path: ./target/release/bundle
