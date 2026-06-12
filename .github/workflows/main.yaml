@@ -9,6 +9,8 @@ on:
   workflow_dispatch:
 
 env:
+  TAURI_APP_PATH: ${{ github.workspace }}
+  TAURI_FRONTEND_PATH: ${{ github.workspace }}/webapp
   NODE_VERSION: '24.16.0'
   PNPM_VERSION: '10.33.4'
   RUST_VERSION: '1.95.0'
@@ -17,12 +19,9 @@ env:
 jobs:
   check_license_headers:
     runs-on: ubuntu-24.04
-    env:
-      TAURI_APP_PATH: ${{ forgejo.workspace }}
-      TAURI_FRONTEND_PATH: ${{ forgejo.workspace }}/webapp
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
 
       - name: Check license headers
         run: |
@@ -30,14 +29,11 @@ jobs:
 
   bundle-webapp:
     runs-on: ubuntu-24.04
-    if: forgejo.event_name == 'workflow_dispatch' || forgejo.ref == 'refs/heads/main' || startsWith(forgejo.ref, 'refs/heads/stable/') || startsWith(forgejo.ref, 'refs/tags/')
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/stable/') || startsWith(github.ref, 'refs/tags/')
     needs: [check_license_headers]
-    env:
-      TAURI_APP_PATH: ${{ forgejo.workspace }}
-      TAURI_FRONTEND_PATH: ${{ forgejo.workspace }}/webapp
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4.1.0
@@ -62,45 +58,31 @@ jobs:
           pnpm build:ui
 
       - name: Upload webapp build artifacts
-        uses: forgejo/upload-artifact@v5
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: webapp-build
           path: ${{ env.TAURI_FRONTEND_PATH }}/dist
 
   package:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     needs: [bundle-webapp]
     strategy:
       matrix:
-        include:
-          - target: linux
-            rust_target: x86_64-unknown-linux-gnu
-            release_path: target/release
-            bundle_path: target/release/bundle
-            build_command: cargo tauri build
-          - target: windows
-            rust_target: x86_64-pc-windows-msvc
-            release_path: target/x86_64-pc-windows-msvc/release
-            bundle_path: target/x86_64-pc-windows-msvc/release/bundle
-            build_command: cargo tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
-    env:
-      TAURI_APP_PATH: ${{ forgejo.workspace }}
-      TAURI_FRONTEND_PATH: ${{ forgejo.workspace }}/webapp
+        os: [ubuntu-24.04, windows-2025]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
 
       - name: Download webapp build artifacts
-        uses: forgejo/download-artifact@v7
+        uses: actions/download-artifact@v8.0.1
         with:
           name: webapp-build
           path: ${{ env.TAURI_FRONTEND_PATH }}/dist
 
       - name: Rust toolchain setup
-        uses: ./.forgejo/actions/rust-toolchain
+        uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: ${{ env.RUST_VERSION }}
-          targets: ${{ matrix.rust_target }}
 
       - name: Cache cargo registry
         uses: actions/cache@v5.0.5
@@ -117,75 +99,73 @@ jobs:
         with:
           path: |
             target
-          key: cargo-target-${{ matrix.target }}-${{ env.RUST_VERSION }}-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-target-${{ matrix.os }}-${{ env.RUST_VERSION }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            cargo-target-${{ matrix.target }}-${{ env.RUST_VERSION }}-
+            cargo-target-${{ matrix.os }}-${{ env.RUST_VERSION }}-
 
       - name: Cache cargo bin
         uses: actions/cache@v5.0.5
         with:
           path: |
-            ~/.cargo/bin/cargo-xwin
             ~/.cargo/bin/cargo-tauri
-          key: cargo-bin-${{ matrix.target }}-${{ env.RUST_VERSION }}
+          key: cargo-bin-${{ matrix.os }}-${{ env.RUST_VERSION }}
 
-      - name: Prepare build environment
+      - name: Install linux dependencies
+        if: ${{ matrix.os == 'ubuntu-24.04' }}
         run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends --no-install-suggests -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev xdg-utils
+
+      - name: Prepare repository
+        run: |
           jq '.build.beforeBuildCommand = ""' tauri.conf.json > tmp.json && mv tmp.json tauri.conf.json
           corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION}} --activate && corepack enable pnpm
           command -v cargo-tauri || cargo install --locked tauri-cli
-          if [[ "${{ matrix.target }}" == "windows" ]]; then
-              sudo apt-get install --no-install-recommends --no-install-suggests -y nsis clang lld llvm
-              command -v cargo-xwin || cargo install --locked cargo-xwin
-          fi
 
       - name: Install Webapp production dependencies
         working-directory: ${{ env.TAURI_FRONTEND_PATH }}
-        run: |
-          pnpm install --frozen-lockfile --prod
+        run: pnpm install --frozen-lockfile --prod
 
       - name: Clean stale artifacts
         run: |
-          rm -rf ${{ matrix.release_path }}/assets
-          rm -rf ${{ matrix.release_path }}/bundle
-          rm -rf ${{ matrix.release_path }}/examples
-          rm -rf ${{ matrix.release_path }}/icons
-          rm -rf ${{ matrix.release_path }}/plugins
-          rm -rf ${{ matrix.release_path }}/widgets
-          rm -rf ${{ matrix.release_path }}/LICENSE
+          rm -rf ${{ github.workspace }}/target/release/assets
+          rm -rf ${{ github.workspace }}/target/release/bundle
+          rm -rf ${{ github.workspace }}/target/release/examples
+          rm -rf ${{ github.workspace }}/target/release/icons
+          rm -rf ${{ github.workspace }}/target/release/plugins
+          rm -rf ${{ github.workspace }}/target/release/widgets
+          rm -rf ${{ github.workspace }}/target/release/LICENSE
 
       - name: Run build app
-        run: ${{ matrix.build_command }}
+        run: cargo tauri build
 
       - name: Upload build artifacts
-        uses: forgejo/upload-artifact@v5
+        uses: actions/upload-artifact@v7.0.1
         with:
-          name: ${{ matrix.target }}-bundles
-          path: ${{ forgejo.workspace }}/${{ matrix.bundle_path }}
+          name: ${{ matrix.os }}-bundles
+          path: ${{ github.workspace }}/target/release/bundle
 
   publish:
-    if: startsWith(forgejo.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-24.04
     needs: [package]
     permissions:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
 
       - name: Download windows build artifacts
-        uses: forgejo/download-artifact@v7
+        uses: actions/download-artifact@v8.0.1
         with:
-          name: windows-bundles
-          path: ${{ forgejo.workspace }}/target/windows
+          name: windows-2025-bundles
+          path: ${{ github.workspace }}/target/windows
 
       - name: Download linux build artifacts
-        uses: forgejo/download-artifact@v7
+        uses: actions/download-artifact@v8.0.1
         with:
-          name: linux-bundles
-          path: ${{ forgejo.workspace }}/target/linux
+          name: ubuntu-24.04-bundles
+          path: ${{ github.workspace }}/target/linux
 
       - name: Install yq
         run: |
@@ -197,12 +177,12 @@ jobs:
           mkdir -p "$HOME/.local/bin"
           wget "https://github.com/mikefarah/yq/releases/download/${{ env.YQ_VERSION }}/yq_linux_${ARCH}" -O "$HOME/.local/bin/yq"
           chmod +x "$HOME/.local/bin/yq"
-          echo "$HOME/.local/bin" >> "$FORGEJO_PATH"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Check version consistency
         run: |
-          export CARGO_PACKAGE_VERSION="$(yq -oy '.package.version' Cargo.toml)"
-          TAG_NAME="${FORGEJO_REF#refs/tags/}"
+          export CARGO_PACKAGE_VERSION="$(yq -p toml -oy '.package.version' Cargo.toml)"
+          TAG_NAME="${{ github.ref_name }}"
           if [ "$CARGO_PACKAGE_VERSION" != "$TAG_NAME" ]; then
             echo "Error: The version in Cargo.toml ($CARGO_PACKAGE_VERSION) does not match the release tag ($TAG_NAME)."
             exit 1
@@ -210,21 +190,20 @@ jobs:
 
       - name: Move build artifacts
         run: |
-          export VERSION="${FORGEJO_REF#refs/tags/}"
-          mkdir -p ${{ forgejo.workspace }}/dist
-          cp ${{ forgejo.workspace }}/target/linux/appimage/*.AppImage ${{ forgejo.workspace }}/dist/unichat-$VERSION.AppImage
-          cp ${{ forgejo.workspace }}/target/linux/deb/*.deb ${{ forgejo.workspace }}/dist/unichat-$VERSION.deb
-          cp ${{ forgejo.workspace }}/target/linux/rpm/*.rpm ${{ forgejo.workspace }}/dist/unichat-$VERSION.rpm
-          cp ${{ forgejo.workspace }}/target/windows/nsis/*.exe ${{ forgejo.workspace }}/dist/unichat-$VERSION-setup.exe
-          for file in ${{ forgejo.workspace }}/dist/*; do
+          export VERSION="${{ github.ref_name }}"
+          mkdir -p ${{ github.workspace }}/dist
+          cp ${{ github.workspace }}/target/linux/appimage/*.AppImage ${{ github.workspace }}/dist/unichat-$VERSION.AppImage
+          cp ${{ github.workspace }}/target/linux/deb/*.deb ${{ github.workspace }}/dist/unichat-$VERSION.deb
+          cp ${{ github.workspace }}/target/linux/rpm/*.rpm ${{ github.workspace }}/dist/unichat-$VERSION.rpm
+          cp ${{ github.workspace }}/target/windows/nsis/*.exe ${{ github.workspace }}/dist/unichat-$VERSION-setup.exe
+          for file in ${{ github.workspace }}/dist/*; do
             if [ -f "$file" ]; then
               (cd "$(dirname "$file")" && sha256sum "$(basename "$file")" > "$(basename "$file").sha256")
             fi
           done
 
-      - name: Create and upload to Forgejo Release
-        uses: actions/forgejo-release@v2.11.3
-        with:
-          direction: upload
-          prerelease: true
-          release-dir: ${{ forgejo.workspace }}/dist
+      - name: Create and upload Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" ${{ github.workspace }}/dist/* --prerelease;
