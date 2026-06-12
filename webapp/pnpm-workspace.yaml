@@ -1,6 +1,6 @@
 saveExact: true
 savePrefix: ""
-minimumReleaseAge: 20160
+minimumReleaseAge: 10080
 blockExoticSubdeps: true
 allowBuilds:
   '@parcel/watcher': false
