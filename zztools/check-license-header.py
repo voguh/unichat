@@ -22,8 +22,8 @@ from utils.constants import ROOT_PATH
 # ============================================================================ #
 
 EXCLUDE_PATHS = {
-    ROOT_PATH / ".forgejo",
     ROOT_PATH / ".git",
+    ROOT_PATH / ".github",
     ROOT_PATH / ".vscode",
     ROOT_PATH / "(un)released-notes",
     ROOT_PATH / "capabilities",
