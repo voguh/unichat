@@ -118,7 +118,7 @@ jobs:
 
       - name: Prepare repository
         run: |
-          jq '.build.beforeBuildCommand = ""' tauri.conf.json > tmp.json && mv tmp.json tauri.conf.json
+          node -e "const f='tauri.conf.json',j=require('./'+f);j.build.beforeBuildCommand='';require('fs').writeFileSync(f,JSON.stringify(j,null,4))"
           corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION}} --activate && corepack enable pnpm
           command -v cargo-tauri || cargo install --locked tauri-cli
 
