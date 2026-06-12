@@ -45,7 +45,7 @@ jobs:
 
       - name: Run tests
         working-directory: ${{ env.TAURI_FRONTEND_PATH }}
-        run: pnpm test run --ci --passWithNoTests --coverage
+        run: pnpm test run --passWithNoTests --coverage
 
       - name: Build webapp
         working-directory: ${{ env.TAURI_FRONTEND_PATH }}
