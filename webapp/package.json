@@ -6,6 +6,7 @@
         "dev:ui": "cross-env NODE_ENV=development vite",
         "build:ui": "rimraf dist && cross-env NODE_ENV=production vite build",
         "preview": "cross-env NODE_ENV=production vite preview",
+        "test": "vitest",
         "lint": "eslint --ext .ts,.tsx,.js,.jsx ./src",
         "storybook": "storybook dev -p 6006",
         "build-storybook": "storybook build"
@@ -20,11 +21,15 @@
         "@tauri-apps/plugin-log": "2.8.0",
         "@tauri-apps/plugin-opener": "2.5.4",
         "@tauri-apps/plugin-store": "2.4.3",
+        "@testing-library/jest-dom": "6.9.1",
+        "@testing-library/preact": "3.2.4",
         "goober": "2.1.19",
+        "jsdom": "29.1.1",
         "lean-qr": "2.7.1",
         "marked": "18.0.4",
         "mitt": "3.0.1",
-        "preact": "10.29.2"
+        "preact": "10.29.2",
+        "vitest": "4.1.7"
     },
     "devDependencies": {
         "@preact/preset-vite": "2.10.5",
@@ -33,6 +38,7 @@
         "@types/node": "24.12.2",
         "@typescript-eslint/eslint-plugin": "8.59.4",
         "@typescript-eslint/parser": "8.59.4",
+        "@vitest/coverage-v8": "4.1.7",
         "autoprefixer": "10.5.0",
         "babel-plugin-macros": "3.1.0",
         "babel-plugin-transform-goober": "1.2.0",

@@ -16,8 +16,9 @@ import { glob } from "glob";
 import JSONC from "jsonc-parser";
 import sonda from "sonda/vite";
 import { CompilerOptions } from "typescript";
-import { defineConfig, Plugin, PluginOption } from "vite";
+import { Plugin, PluginOption } from "vite";
 import { ViteMinifyPlugin as minifyPlugin } from "vite-plugin-minify";
+import { defineConfig } from "vitest/config";
 
 const tsConfigRaw = fs.readFileSync(path.resolve(__dirname, "tsconfig.json"), { encoding: "utf-8" });
 const compilerOptions = (JSONC.parse(tsConfigRaw) || {}).compilerOptions as CompilerOptions;
@@ -178,6 +179,18 @@ export default defineConfig({
     resolve: {
         alias: {
             ...tsConfigPaths
+        }
+    },
+
+    test: {
+        environment: "jsdom",
+        globals: true,
+        setupFiles: path.resolve(__dirname, "__tests__", "setup.ts"),
+        coverage: {
+            provider: "v8",
+            reporter: ["lcov", "text", "html"],
+            include: [path.resolve(__dirname, "src/**/*.{ts,tsx}")],
+            exclude: ["**/*.d.ts"]
         }
     }
 });
