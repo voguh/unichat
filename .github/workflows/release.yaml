@@ -53,6 +53,12 @@ jobs:
           name: linux-bundles
           path: target/linux
 
+      - name: Download macos build artifacts
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: macos-bundles
+          path: target/macos
+
       - name: Move build artifacts
         run: |
           export VERSION="${{ github.ref_name }}"
