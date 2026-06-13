@@ -62,6 +62,7 @@ jobs:
           cp target/linux/rpm/*.rpm dist/unichat-$VERSION.rpm
           cp target/windows/nsis/*.exe dist/unichat-$VERSION-setup.exe
           cp target/windows/msi/*.msi dist/unichat-$VERSION-setup.msi || echo "No MSI installer found"
+          cp target/macos/dmg/*.dmg dist/unichat-$VERSION.dmg || echo "No DMG installer found"
           for file in dist/*; do
             if [ -f "$file" ]; then
               (cd "$(dirname "$file")" && sha256sum "$(basename "$file")" > "$(basename "$file").sha256")

@@ -70,8 +70,6 @@ jobs:
             target: windows
           - os: macos-26
             target: macos
-          - os: macos-26-intel
-            target: macos-intel
     steps:
       - id: vars
         run: echo "os=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
