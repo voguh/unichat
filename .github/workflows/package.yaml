@@ -63,7 +63,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-2025, macos-26]
+        include:
+          - os: ubuntu-24.04
+            target: linux
+          - os: windows-2025
+            target: windows
+          - os: macos-26
+            target: macos
+          - os: macos-26-intel
+            target: macos-intel
     steps:
       - id: vars
         run: echo "os=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
@@ -100,5 +108,5 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7.0.1
         with:
-          name: ${{ steps.vars.outputs.os }}-bundles
+          name: ${{ matrix.target }}-bundles
           path: ./target/release/bundle
