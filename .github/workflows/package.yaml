@@ -63,7 +63,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-2025]
+        os: [ubuntu-24.04, windows-2025, macos-26]
     steps:
       - id: vars
         run: echo "os=$(echo ${{ runner.os }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
