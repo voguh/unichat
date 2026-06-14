@@ -79,4 +79,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ github.ref_name }}" dist/* --prerelease
+          export VERSION="${{ github.ref_name }}"
+          if [[ "$VERSION" == *"-"* || "$VERSION" == *"+"* ]]; then
+            gh release create "$VERSION" dist/* --prerelease
+          else
+            gh release create "$VERSION" dist/*
+          fi
