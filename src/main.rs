@@ -392,7 +392,6 @@ fn main() {
             commands::store::settings_get_items,
             commands::store::settings_set_item,
             commands::store::settings_set_items,
-            commands::store::store_get_item,
             commands::tour::get_prev_tour_steps,
             commands::tour::get_tour_steps,
             commands::tour::set_tour_steps,
