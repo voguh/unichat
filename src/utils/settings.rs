@@ -42,6 +42,7 @@ pub const SETTINGS_TOUR_PREVIOUS_STEPS_KEY: &str = "settings:previous-tour-steps
 pub const SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY: &str = "settings:default-preview-widget";
 pub const SETTINGS_OPEN_TO_LAN_KEY: &str = "settings:open-to-lan";
 pub const SETTINGS_LOG_SCRAPER_EVENTS: &str = "settings:log-scraper-events";
+pub const SETTINGS_OPEN_SCRAPER_WEBVIEW_KEY: &str = "settings:open-scraper-webview";
 
 const SCRAPER_KEY_TEMPLATE: &str = "scraper:{}:{}";
 fn store_mount_scraper_key(scraper_id: &str, key: &str) -> String {
@@ -219,6 +220,16 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 log::info!("Setting default value for '{}' setting", previous_tour_steps_key);
                 let raw_value = serde_json::to_value(Vec::<String>::new())?;
                 store.set(previous_tour_steps_key, raw_value);
+            }
+
+            return Ok(());
+        }),
+        Box::new(|store| {
+            let open_scraper_webview_key = "settings:open-scraper-webview";
+            if store.get(open_scraper_webview_key).is_none() {
+                log::info!("Setting default value for '{}' setting", open_scraper_webview_key);
+                let raw_value = serde_json::to_value(false)?;
+                store.set(open_scraper_webview_key, raw_value);
             }
 
             return Ok(());

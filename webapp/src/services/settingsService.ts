@@ -24,6 +24,7 @@ export enum UniChatSettingsKeys {
     /* Developers settings */
     CREATE_WEBVIEW_HIDDEN = "create-webview-hidden",
     LOG_SCRAPER_EVENTS = "log-scraper-events",
+    OPEN_SCRAPER_WEBVIEW = "open-scraper-webview",
 
     /* Tour steps */
     PREVIOUS_TOUR_STEPS = "previous-tour-steps",
@@ -38,6 +39,7 @@ export interface UniChatSettings {
     /* Developers settings */
     [UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN]: boolean;
     [UniChatSettingsKeys.LOG_SCRAPER_EVENTS]: ScraperEventsLogLevel;
+    [UniChatSettingsKeys.OPEN_SCRAPER_WEBVIEW]: boolean;
 
     /* Tour steps */
     [UniChatSettingsKeys.CURRENT_TOUR_STEPS]: string[];

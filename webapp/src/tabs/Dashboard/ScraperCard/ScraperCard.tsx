@@ -21,6 +21,7 @@ import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
 import { notificationService } from "unichat/services/notificationService";
+import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
 import { UniChatScraper } from "unichat/types";
 import { IPCEvents, IPCStatusEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
@@ -44,6 +45,7 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
     const { editingTooltip, scraper, validateUrl } = props;
 
     const [loading, setLoading] = useState(false);
+    const [showOpenWebviewButton, setShowOpenWebviewButton] = useState(false);
     const [event, setEvent] = useState<IPCStatusEvent | null>({ ...DEFAULT_EVENT, scraperId: scraper.id });
 
     const scraperIsRunning = useMemo(() => event != null && ["ready", "ping"].includes(event.type), [event]);
@@ -103,6 +105,9 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
             setLoading(true);
 
             try {
+                const showWebviewButton = await settingsService.getItem(UniChatSettingsKeys.OPEN_SCRAPER_WEBVIEW);
+                setShowOpenWebviewButton(showWebviewButton);
+
                 const scraperStoredUrl = await commandService.getScraperStoredUrl(scraper.id);
                 const scraperWebviewUrl = await commandService.getScraperWebviewUrl(scraper.id);
 
@@ -172,6 +177,11 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
             data-loading={loading || scraperIsLoading ? "true" : "false"}
         >
             <div className="scraper-badges-wrapper">
+                {(showOpenWebviewButton || __IS_DEV__) && (
+                    <Badge variant="warning" onClick={() => commandService.toggleScraperWebview(scraper.id)}>
+                        Open Scraper Webview
+                    </Badge>
+                )}
                 {scraper.badges.map((badge) => (
                     <Badge key={badge} variant="secondary">
                         {badge.toUpperCase()}

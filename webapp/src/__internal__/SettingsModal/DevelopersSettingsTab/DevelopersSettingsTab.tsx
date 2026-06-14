@@ -35,6 +35,7 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
 
     const createWebviewsHiddenRef = useRef<HTMLInputElement>(null);
     const [logEventsRef, setLogEventsRef] = useState(LogLevel.UNKNOWN_EVENTS);
+    const openScraperWebviewRef = useRef<HTMLInputElement>(null);
 
     const [requiresRestart, setRequiresRestart] = useStorage(StorageKeys.REQUIRES_RESTART);
 
@@ -53,6 +54,10 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
 
         if (logEventsRef) {
             settingsCopy[UniChatSettingsKeys.LOG_SCRAPER_EVENTS] = logEventsRef;
+        }
+
+        if (openScraperWebviewRef.current) {
+            settingsCopy[UniChatSettingsKeys.OPEN_SCRAPER_WEBVIEW] = openScraperWebviewRef.current.checked;
         }
 
         await settingsService.setItems(settingsCopy);
@@ -89,7 +94,8 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
         async function init(): Promise<void> {
             const settings = await settingsService.getItems([
                 UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN,
-                UniChatSettingsKeys.LOG_SCRAPER_EVENTS
+                UniChatSettingsKeys.LOG_SCRAPER_EVENTS,
+                UniChatSettingsKeys.OPEN_SCRAPER_WEBVIEW
             ]);
 
             if (logEventsRef) {
@@ -109,7 +115,7 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
                     defaultChecked={initialSettings[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN] ?? false}
                     inputRef={createWebviewsHiddenRef}
                     label="Create webviews silent"
-                    description="On startup, webviews will be created in background and only shown when requested."
+                    description="On startup, webviews will be created in background and only shown when requested"
                 />
 
                 {requiresRestart && (
@@ -124,14 +130,29 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
                 )}
             </div>
 
+            <div className="open-scraper-webview-section">
+                <Switch
+                    defaultChecked={initialSettings[UniChatSettingsKeys.OPEN_SCRAPER_WEBVIEW] ?? false}
+                    inputRef={openScraperWebviewRef}
+                    disabled={__IS_DEV__}
+                    label="Open Scraper Webview"
+                    description={
+                        <>
+                            Adds a button to scraper cards that opens the scraper webview window
+                            {__IS_DEV__ && " (Developer mode is enabled, this feature is always available)"}
+                        </>
+                    }
+                />
+            </div>
+
             <hr />
 
             <FormGroup
                 label="Scraper log events"
                 description={
                     <>
-                        Choose the level of detail for scraper logging{" "}
-                        {__IS_DEV__ && "(Developer mode is enabled, so all events will be logged)"}.
+                        Choose the level of detail for scraper logging
+                        {__IS_DEV__ && " (Developer mode is enabled, all events will be logged)"}
                     </>
                 }
                 className="scraper-logging-section"
