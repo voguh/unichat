@@ -63,6 +63,10 @@ export const GlobalStyle = createGlobalStyles({
         width: "1.25em"
     },
 
+    hr: {
+        ...tw`border-t border-stone-800 my-2 w-full`
+    },
+
     "::-webkit-scrollbar": {
         width: "8px"
     },
