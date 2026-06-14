@@ -124,7 +124,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
                     defaultChecked={initialSettings[UniChatSettingsKeys.OPEN_TO_LAN] ?? false}
                     inputRef={openToLanRef}
                     label="Open to LAN"
-                    description="Allow other devices on your local network view widgets."
+                    description="Allow other devices on your local network view widgets"
                 />
 
                 {requiresRestart && (
