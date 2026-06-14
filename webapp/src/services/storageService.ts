@@ -10,8 +10,8 @@
 
 import mitt from "mitt";
 
-import { BooleanSerializer } from "./BooleanSerializer";
-import { StorageSerializer } from "./StorageSerializer";
+import { BooleanSerializer } from "unichat/utils/serializer/BooleanSerializer";
+import { StorageSerializer } from "unichat/utils/serializer/StorageSerializer";
 
 export interface StorageValues {
     "show-widget-preview": boolean;
@@ -33,7 +33,7 @@ export const StorageKeys = Object.freeze({
     REQUIRES_RESTART: buildEntry("requires-restart", new BooleanSerializer(), false)
 });
 
-const StorageEntries = new Set(Object.values(StorageKeys));
+const StorageEntries = new Set<StorageEntry<keyof StorageValues>>(Object.values(StorageKeys));
 function checkStorageEntry<K extends keyof StorageValues>(entry: StorageEntry<K>): void {
     if (entry == null) {
         throw new TypeError(`Unknown SessionStorage entry.`);
@@ -62,10 +62,6 @@ const storageListener = mitt<StorageEvents>();
 
 const PREFIX = "unichat";
 class StorageService {
-    public static get PREFIX(): string {
-        return PREFIX;
-    }
-
     public get<K extends keyof StorageValues>(entry: StorageEntry<K>): StorageValues[K] {
         checkStorageEntry(entry);
 
