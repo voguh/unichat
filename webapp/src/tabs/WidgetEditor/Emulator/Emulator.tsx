@@ -110,7 +110,11 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
                     </Button>
                     <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:redemption", "twitch")}>
                         <i className="fas fa-box" />
-                        Redemption
+                        Twitch Redemption
+                    </Button>
+                    <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:gift", "youtube")}>
+                        <i className="fas fa-box" />
+                        YouTube Gift
                     </Button>
                 </div>
             </div>

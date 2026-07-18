@@ -189,6 +189,29 @@ export async function buildEmulatedEventData<T extends UniChatEvent>(
                 messageText: withMessage ? messageText : null,
                 emotes: withMessage ? emotes : []
             };
+
+            break;
+        }
+        case "unichat:gift": {
+            data = {
+                ...data,
+                channelName: null,
+
+                authorBadges: [],
+                authorType: null,
+
+                giftId: null,
+                giftTitle: null,
+                giftDescription: "Sample Gift",
+                giftCost: null,
+                giftIconUrl: "https://www.gstatic.com/youtube/img/pdg/gift/assets/pastel.webp=w320-h320",
+
+                messageId: crypto.randomUUID(),
+                messageText: null,
+                emotes: []
+            };
+
+            break;
         }
     }
 
