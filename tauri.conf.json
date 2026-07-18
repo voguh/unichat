@@ -23,7 +23,8 @@
                 "maximizable": false,
                 "minimizable": false,
                 "closable": false,
-                "decorations": false
+                "decorations": false,
+                "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --lang=en-US"
             }
         ],
         "security": {

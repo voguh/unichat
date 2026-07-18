@@ -52,6 +52,16 @@ pub static UNICHAT_ICON_BYTES: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFE
 pub static THIRD_PARTY_LICENSES: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/third_party_licenses.json"));
 static APP_HANDLE: OnceLock<tauri::AppHandle<tauri::Wry>> = OnceLock::new();
 
+// All webviews share the same default WebView2 environment (one per user data folder), and its
+// AdditionalBrowserArguments are locked in by whichever webview is created first - which is
+// "splash-screen", built from `tauri.conf.json`. So this value must stay identical to that
+// window's `additionalBrowserArgs` entry and be applied to every other `WebviewWindowBuilder` in
+// the app, or later webview creations fail with WebView2 error 0x8007139F. Also note
+// `additional_browser_args` fully replaces wry's default Windows arguments, so they are repeated
+// here - see warning at:
+// https://docs.rs/tauri/2.11.2/tauri/webview/struct.WebviewWindowBuilder.html#method.additional_browser_args
+pub const WEBVIEW2_ADDITIONAL_BROWSER_ARGS: &str = "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --lang=en-US";
+
 pub fn get_app_handle() -> &'static tauri::AppHandle<tauri::Wry> {
     return APP_HANDLE.get().expect("APP_HANDLE is not initialized");
 }
@@ -283,6 +293,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
                 .maximizable(false)
                 .resizable(false)
                 .center()
+                .additional_browser_args(WEBVIEW2_ADDITIONAL_BROWSER_ARGS)
                 .initialization_script(format!(r#"
                     globalThis.__IS_DEV__ = {is_dev};
                     globalThis.__PLATFORM__ = "{platform}";
