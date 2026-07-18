@@ -83,9 +83,17 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
             createWebviewsHiddenRef.current.addEventListener("change", changeDirty);
         }
 
+        if (openScraperWebviewRef.current) {
+            openScraperWebviewRef.current.addEventListener("change", changeDirty);
+        }
+
         return () => {
             if (createWebviewsHiddenRef.current) {
                 createWebviewsHiddenRef.current.removeEventListener("change", changeDirty);
+            }
+
+            if (openScraperWebviewRef.current) {
+                openScraperWebviewRef.current.removeEventListener("change", changeDirty);
             }
         };
     }, [initialSettings]);
