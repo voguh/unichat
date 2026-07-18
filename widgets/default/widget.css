@@ -34,6 +34,9 @@
 
     --redemption-background-color: {{redemptionBackgroundColor}};
     --redemption-text-color: {{redemptionTextColor}};
+
+    --gift-background-color: {{giftBackgroundColor}};
+    --gift-text-color: {{giftTextColor}};
     /* <<== END FIELDS TO CSS VARIABLES ==>> */
 }
 
@@ -369,3 +372,53 @@ html, body {
     vertical-align: middle;
 }
 /* <========================================[ END REDEMPTION MESSAGE STYLE ]========================================> */
+
+/* <=============================================[ GIFT MESSAGE STYLE ]=============================================> */
+#main-container > .gift-item {
+    margin-top: var(--margin-top);
+    position: relative;
+}
+
+#main-container > .gift-item > .author-meta {
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#main-container > .gift-item > .message-wrapper {
+    padding: var(--margin-top) var(--general-padding) var(--general-padding) var(--general-padding);
+    border-radius: var(--general-border-radius);
+    background: var(--gift-background-color);
+    color: var(--gift-text-color);
+    box-shadow: var(--general-box-shadow);
+}
+
+#main-container > .gift-item > .message-wrapper > .gift-meta {
+    font-weight: bold;
+    text-align: center;
+}
+
+#main-container > .gift-item > .message-wrapper > .gift-meta > span {
+    font-weight: bolder;
+    color: var(--accent-color);
+}
+
+#main-container > .gift-item > .message-wrapper > .message {
+    width: calc(100vw - (var(--general-padding) * 6));
+    margin-top: var(--general-padding);
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: var(--general-border-radius);
+    padding: var(--general-padding);
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+}
+
+#main-container > .gift-item > .message-wrapper > .message:empty {
+    display: none;
+}
+
+#main-container > .gift-item > .message-wrapper > .message > img {
+    height: 128px;
+    vertical-align: middle;
+}
+/* <===========================================[ END GIFT MESSAGE STYLE ]===========================================> */

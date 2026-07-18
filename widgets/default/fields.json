@@ -255,5 +255,26 @@
         "group": "Redemption Event",
         "label": "Text color",
         "value": "#f8f9fa"
+    },
+
+
+
+    "giftTemplateMessage": {
+        "type": "textarea",
+        "group": "Gift Event",
+        "label": "Template message",
+        "value": "<span>{author_display_name}</span>, just gifted:"
+    },
+    "giftBackgroundColor": {
+        "type": "colorpicker",
+        "group": "Gift Event",
+        "label": "Background color",
+        "value": "#339af0"
+    },
+    "giftTextColor": {
+        "type": "colorpicker",
+        "group": "Gift Event",
+        "label": "Text color",
+        "value": "##f8f9fa"
     }
 }
