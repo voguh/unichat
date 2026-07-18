@@ -26,6 +26,12 @@ use crate::utils::is_dev;
 use crate::utils::settings;
 
 pub static COMMON_SCRAPER_JS: &str = include_str!("./static/common_scraper.js");
+
+// `additional_browser_args` fully replaces wry's default Windows arguments, so they are
+// repeated here - see warning at:
+// https://docs.rs/tauri/2.11.2/tauri/webview/struct.WebviewWindowBuilder.html#method.additional_browser_args
+const WEBVIEW2_ADDITIONAL_BROWSER_ARGS: &str = "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --lang=en-US";
+
 const LAZY_LOCK_NAME: &str = "Scraper::SCRAPERS";
 static SCRAPERS: LazyLock<RwLock<HashMap<String, Arc<dyn UniChatScraper + Send + Sync>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
@@ -150,6 +156,7 @@ pub fn register_scraper(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Resul
         .visible(!start_hidden)
         .resizable(false)
         .maximizable(false)
+        .additional_browser_args(WEBVIEW2_ADDITIONAL_BROWSER_ARGS)
         .on_page_load(move |window, payload| {
             if let Err(err) = on_page_load(&scraper_js, &window, payload) {
                 log::error!("Failed to handle page load event for scraper '{}': {:?}", window.label(), err);
