@@ -141,10 +141,10 @@ const availableEmotes: UniChatEmote[] = [];
 
 export async function randomizeMessage(rng: () => number): Promise<[string, UniChatEmote[]]> {
     if (availableEmotes.length === 0) {
-        const data = await fetch("https://api.betterttv.net/3/emotes/shared/top?limit=100");
+        const data = await fetch("https://api.betterttv.net/3/cached/emotes/global");
         const json = await data.json();
 
-        for (const { emote } of json) {
+        for (const emote of json) {
             availableEmotes.push({
                 id: emote.id,
                 code: emote.code,
