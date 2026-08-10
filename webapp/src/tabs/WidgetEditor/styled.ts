@@ -34,7 +34,7 @@ export const WidgetEditorStyledContainer: ComponentType<HTMLAttributes<HTMLDivEl
 
         "> .widget_editor--fields": {
             height: "var(--unichat-widget_editor-content-height)",
-            overflowY: "auto"
+            overflow: "hidden"
         },
 
         "> .widget_editor--preview": {

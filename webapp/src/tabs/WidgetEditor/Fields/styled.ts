@@ -14,10 +14,16 @@ import { styled } from "goober";
 import tw from "twin.macro";
 
 export const FieldsStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
+    "--unichat-fields-header-height": "46px", // 32px for button + 2 * 0.5rem (p-2)
+    "--unichat-fields-content-height":
+        "calc(var(--unichat-widget_editor-content-height) - var(--unichat-fields-header-height))",
+
     ...tw`relative`,
+    height: "var(--unichat-widget_editor-content-height)",
 
     "> .fields--header": {
         ...tw`w-full p-2 flex justify-between items-center`,
+        height: "var(--unichat-fields-header-height)",
 
         "> span": {
             ...tw`text-lg font-bold`
@@ -35,14 +41,15 @@ export const FieldsStyledContainer: ComponentType<HTMLAttributes<HTMLDivElement>
     },
 
     "> .fields--content": {
-        ...tw`w-full p-2 flex flex-col`,
+        ...tw`w-full p-2 flex flex-col overflow-y-auto`,
+        height: "var(--unichat-fields-content-height)",
 
         "> .empty-fields": {
             ...tw`w-full h-full flex flex-col justify-center items-center gap-2 text-stone-50/50`
         },
 
         "> .accordion-item": {
-            ...tw`rounded-none`,
+            ...tw`rounded-none shrink-0`,
 
             "&:nth-child(1)": {
                 ...tw`rounded-t`
