@@ -45,7 +45,7 @@ pub struct PurchaseAmountText {
     pub simple_text: String
 }
 
-pub fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(String, f32), Error> {
+pub fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(String, f64), Error> {
     let raw_text = purchase_amount_text.simple_text.trim();
 
     let first_digit = raw_text.find(|c: char| c.is_ascii_digit());

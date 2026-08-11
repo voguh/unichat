@@ -291,23 +291,23 @@ pub fn target() -> Option<String> {
 
 /* ================================================================================================================== */
 
-fn round_cents(value: f64) -> f32 {
-    return ((value * 100.0).round() / 100.0) as f32;
+fn round_cents(value: f64) -> f64 {
+    return (value * 100.0).round() / 100.0;
 }
 
-pub fn convert(value: f32, token: &str) -> Option<(f32, String)> {
+pub fn convert(value: f64, token: &str) -> Option<(f64, String)> {
     if let Ok(state) = STATE.read() {
         if let Some(target) = &state.target {
             let token = token.trim();
 
             if let Some(rate) = state.rates.get(&token.to_ascii_uppercase()) {
-                return Some((round_cents(value as f64 / rate), target.clone()));
+                return Some((round_cents(value / rate), target.clone()));
             }
 
             for currency in state.currencies.iter() {
                 if currency.symbol == token {
                     if let Some(rate) = state.rates.get(&currency.code) {
-                        return Some((round_cents(value as f64 / rate), target.clone()));
+                        return Some((round_cents(value / rate), target.clone()));
                     }
 
                     break;
@@ -319,7 +319,7 @@ pub fn convert(value: f32, token: &str) -> Option<(f32, String)> {
     return None;
 }
 
-pub fn apply(value: f32, currency: &str) -> (f32, String, Option<f32>, Option<String>) {
+pub fn apply(value: f64, currency: &str) -> (f64, String, Option<f64>, Option<String>) {
     if let Some((converted, target)) = convert(value, currency) {
         return (converted, target, Some(value), Some(currency.to_string()));
     }

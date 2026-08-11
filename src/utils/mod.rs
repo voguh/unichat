@@ -65,7 +65,7 @@ pub fn path_to_string(path: &PathBuf) -> String {
 
 /* ================================================================================================================== */
 
-pub fn normalize_value(value_raw: &str) -> Result<f32, Error> {
+pub fn normalize_value(value_raw: &str) -> Result<f64, Error> {
     let last_dot = value_raw.rfind('.');
     let last_comma = value_raw.rfind(',');
     let normalized = match(last_dot, last_comma) {
@@ -95,7 +95,7 @@ pub fn normalize_value(value_raw: &str) -> Result<f32, Error> {
         (None, None) => value_raw.to_string()
     };
 
-    let value: f32 = normalized.parse()?;
+    let value: f64 = normalized.parse()?;
 
     return Ok(value);
 }

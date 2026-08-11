@@ -231,10 +231,10 @@ pub struct UniChatDonateEventPayload {
     pub author_badges: Vec<UniChatBadge>,
     pub author_type: UniChatAuthorType,
 
-    pub value: f32,
+    pub value: f64,
     pub currency: String,
 
-    pub original_value: Option<f32>,
+    pub original_value: Option<f64>,
     pub original_currency: Option<String>,
 
     pub message_id: String,

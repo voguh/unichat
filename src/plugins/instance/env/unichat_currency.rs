@@ -25,7 +25,7 @@ impl mlua::UserData for UniChatCurrencyModule {
             return Ok(currency::target());
         });
 
-        methods.add_method("convert", |_lua, _this, (value, token): (f32, String)| -> mlua::Result<(Option<f32>, Option<String>)> {
+        methods.add_method("convert", |_lua, _this, (value, token): (f64, String)| -> mlua::Result<(Option<f64>, Option<String>)> {
             if let Some((converted, target)) = currency::convert(value, &token) {
                 return Ok((Some(converted), Some(target)));
             }

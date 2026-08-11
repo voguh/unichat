@@ -36,7 +36,7 @@ pub fn parse(channel: String, text: String, message: &IRCMessage, tags: HashMap<
     let author_badges = parse_author_badges(tags.get("badges"))?;
     let author_type = parse_author_type(&tags)?;
     let bits = tags.get("bits").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing bits tag"))?;
-    let bits_value: f32 = bits.parse()?;
+    let bits_value: f64 = bits.parse()?;
     let message_id = tags.get("id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing id tag"))?;
     let message = parse_message_string(&text)?;
     let emotes = parse_message_emotes(tags.get("emotes"), &text)?;
