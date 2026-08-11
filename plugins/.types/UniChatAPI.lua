@@ -39,7 +39,6 @@
 ---@class UniChatAuthorTypeFactory
 ---@field Viewer fun(self: UniChatAuthorTypeFactory): UniChatAuthorType
 ---@field Sponsor fun(self: UniChatAuthorTypeFactory): UniChatAuthorType
----@field Vip fun(self: UniChatAuthorTypeFactory): UniChatAuthorType
 ---@field Moderator fun(self: UniChatAuthorTypeFactory): UniChatAuthorType
 ---@field Broadcaster fun(self: UniChatAuthorTypeFactory): UniChatAuthorType
 ---@field Other fun(self: UniChatAuthorTypeFactory, type_name: string): UniChatAuthorType

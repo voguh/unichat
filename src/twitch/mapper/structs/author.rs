@@ -108,8 +108,6 @@ pub fn parse_author_type(tags: &HashMap<String, Option<String>>) -> Result<UniCh
             author_type = UniChatAuthorType::Broadcaster;
         } else if value.contains("moderator") {
             author_type = UniChatAuthorType::Moderator;
-        } else if value.contains("vip") {
-            author_type = UniChatAuthorType::Vip;
         } else if value.contains("subscriber") {
             author_type = UniChatAuthorType::Sponsor;
         }

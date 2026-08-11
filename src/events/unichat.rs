@@ -95,7 +95,6 @@ impl <'de> Deserialize<'de> for UniChatPlatform {
 pub enum UniChatAuthorType {
     Viewer,
     Sponsor,
-    Vip,
     Moderator,
     Broadcaster,
     Other(String)
@@ -106,7 +105,6 @@ impl Serialize for UniChatAuthorType {
         let s = match self {
             UniChatAuthorType::Viewer => "VIEWER",
             UniChatAuthorType::Sponsor => "SPONSOR",
-            UniChatAuthorType::Vip => "VIP",
             UniChatAuthorType::Moderator => "MODERATOR",
             UniChatAuthorType::Broadcaster => "BROADCASTER",
             UniChatAuthorType::Other(v) => v.as_str()
@@ -124,7 +122,6 @@ impl <'de> Deserialize<'de> for UniChatAuthorType {
         return Ok(match normalized.as_str() {
             "VIEWER" => UniChatAuthorType::Viewer,
             "SPONSOR" | "SUBSCRIBER" | "MEMBER" => UniChatAuthorType::Sponsor,
-            "VIP" => UniChatAuthorType::Vip,
             "MODERATOR" => UniChatAuthorType::Moderator,
             "BROADCASTER" => UniChatAuthorType::Broadcaster,
             _ => UniChatAuthorType::Other(normalized)

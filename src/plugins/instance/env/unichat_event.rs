@@ -186,11 +186,6 @@ impl mlua::UserData for LuaUniChatAuthorTypeFactory {
             return Ok(lv);
         });
 
-        methods.add_method("Vip", |_lua, _this, ()| {
-            let lv = serde_plain::to_string(&UniChatAuthorType::Vip).map_err(mlua::Error::external)?;
-            return Ok(lv);
-        });
-
         methods.add_method("Moderator", |_lua, _this, ()| {
             let lv = serde_plain::to_string(&UniChatAuthorType::Moderator).map_err(mlua::Error::external)?;
             return Ok(lv);
