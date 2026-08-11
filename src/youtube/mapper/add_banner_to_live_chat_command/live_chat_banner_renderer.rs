@@ -25,6 +25,7 @@ use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
 use crate::youtube::mapper::structs::author::parse_author_color;
 use crate::youtube::mapper::structs::author::parse_author_name_str;
 use crate::youtube::mapper::structs::author::parse_author_username_str;
+use crate::youtube::mapper::structs::proxy_youtube_url;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -91,7 +92,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
                     author_username: author_username,
                     author_display_name: author_name,
                     author_display_color: author_color,
-                    author_profile_picture_url: Some(author_photo.url.clone()),
+                    author_profile_picture_url: Some(proxy_youtube_url(&author_photo.url)),
                     author_badges: Vec::new(),
                     author_type: None,
 

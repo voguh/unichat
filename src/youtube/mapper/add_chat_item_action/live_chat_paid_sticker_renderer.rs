@@ -33,6 +33,7 @@ use crate::youtube::mapper::structs::author::parse_author_name;
 use crate::youtube::mapper::structs::author::parse_author_photo;
 use crate::youtube::mapper::structs::author::parse_author_type;
 use crate::youtube::mapper::structs::author::parse_author_username;
+use crate::youtube::mapper::structs::proxy_youtube_url;
 use crate::youtube::mapper::structs::ThumbnailsWrapper;
 
 
@@ -90,7 +91,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
         UniChatEmote {
             id: String::from("sticker"),
             code: String::from("sticker"),
-            url: sticker.url.clone()
+            url: proxy_youtube_url(&sticker.url)
         }
     ];
     let timestamp_usec = get_current_timestamp()?;
