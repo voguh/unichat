@@ -39,9 +39,9 @@
                 "style-src-elem": ["'self'", "'unsafe-inline'", "asset:", "http://asset.localhost"],
                 "style-src-attr": ["'unsafe-inline'"],
 
-                "img-src": ["'self'", "asset:", "blob:", "data:", "http://asset.localhost", "http://localhost:9527"],
-                "media-src": ["'self'", "asset:", "blob:", "data:", "http://asset.localhost", "http://localhost:9527"],
-                "connect-src": ["'self'", "ipc:", "http://ipc.localhost"],
+                "img-src": ["'self'", "blob:", "data:", "asset:", "http://asset.localhost", "http://localhost:9527", "https:"],
+                "media-src": ["'self'", "blob:", "data:", "asset:", "http://asset.localhost", "http://localhost:9527", "https:"],
+                "connect-src": ["'self'", "ipc:", "http://ipc.localhost", "https:"],
                 "frame-src": ["'self'", "http://localhost:9527"]
             }
         }
