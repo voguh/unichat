@@ -112,6 +112,9 @@ export async function buildEmulatedEventData<T extends UniChatEvent>(
                 value: value,
                 currency: platform === "youtube" ? "$" : "Bits",
 
+                originalValue: null,
+                originalCurrency: null,
+
                 messageId: crypto.randomUUID(),
                 messageText: messageText,
                 emotes: emotes

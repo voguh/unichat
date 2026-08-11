@@ -15,15 +15,17 @@ use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::currency;
 use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPER_STICKER;
 use crate::events::unichat::UniChatDonateEventPayload;
 use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::utils::get_current_timestamp;
-use crate::utils::normalize_value;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
+use crate::youtube::mapper::structs::PurchaseAmountText;
+use crate::youtube::mapper::structs::parse_purchase_amount;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
 use crate::youtube::mapper::structs::author::AuthorNameWrapper;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
@@ -53,26 +55,7 @@ struct LiveChatPaidStickerRenderer {
     timestamp_usec: String
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-struct PurchaseAmountText {
-    simple_text: String
-}
-
 /* <============================================================================================> */
-
-fn parse_purchase_amount(purchase_amount_text: &PurchaseAmountText) -> Result<(String, f32), Error> {
-    let raw_text = &purchase_amount_text.simple_text;
-
-    if let Some(index) = raw_text.find(|c: char| c.is_ascii_digit()) {
-        let (currency, value_raw) = raw_text.split_at(index);
-        let value = normalize_value(value_raw)?;
-
-        return Ok((currency.to_string(), value));
-    }
-
-    return Err(anyhow!("Invalid purchase amount text format"));
-}
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let parsed: LiveChatPaidStickerRenderer = serde_json::from_value(value)?;
@@ -86,6 +69,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let author_photo = parse_author_photo(&parsed.author_photo)?;
     let author_type = parse_author_type(&parsed.author_badges)?;
     let (purchase_currency, purchase_value) = parse_purchase_amount(&parsed.purchase_amount_text)?;
+    let (donate_value, donate_currency, original_value, original_currency) = currency::apply(purchase_value, &purchase_currency);
     let sticker = parsed.sticker.thumbnails.last().ok_or(anyhow!("No thumbnails found in author photo"))?;
     let emotes = vec![
         UniChatEmote {
@@ -111,8 +95,11 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
         author_profile_picture_url: Some(author_photo),
         author_type: author_type,
 
-        value: purchase_value,
-        currency: purchase_currency,
+        value: donate_value,
+        currency: donate_currency,
+
+        original_value: original_value,
+        original_currency: original_currency,
 
         message_id: parsed.id,
         message_text: Some(String::from("sticker")),

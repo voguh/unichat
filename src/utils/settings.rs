@@ -11,6 +11,7 @@
 use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::OnceLock;
+use std::sync::RwLock;
 
 use anyhow::anyhow;
 use anyhow::Error;
@@ -43,6 +44,7 @@ pub const SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY: &str = "settings:default-preview-
 pub const SETTINGS_OPEN_TO_LAN_KEY: &str = "settings:open-to-lan";
 pub const SETTINGS_LOG_SCRAPER_EVENTS: &str = "settings:log-scraper-events";
 pub const SETTINGS_OPEN_SCRAPER_WEBVIEW_KEY: &str = "settings:open-scraper-webview";
+pub const SETTINGS_CURRENCY_TARGET_KEY: &str = "settings:currency-target";
 
 const SCRAPER_KEY_TEMPLATE: &str = "scraper:{}:{}";
 fn store_mount_scraper_key(scraper_id: &str, key: &str) -> String {
@@ -233,6 +235,16 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
             }
 
             return Ok(());
+        }),
+        Box::new(|store| {
+            let currency_target_key = "settings:currency-target";
+            if store.get(currency_target_key).is_none() {
+                log::info!("Setting default value for '{}' setting", currency_target_key);
+                let raw_value = serde_json::to_value("")?;
+                store.set(currency_target_key, raw_value);
+            }
+
+            return Ok(());
         })
     ]
 });
@@ -258,6 +270,33 @@ fn migrate_store_version() -> Result<(), Error> {
     }
 
     return Ok(());
+}
+
+/* ====================================================================== */
+
+type SettingsChangeListener = Box<dyn Fn(&str, &serde_json::Value) + Send + Sync>;
+
+const LISTENERS_LOCK_NAME: &str = "Settings::LISTENERS";
+static LISTENERS: LazyLock<RwLock<Vec<(String, SettingsChangeListener)>>> = LazyLock::new(|| RwLock::new(Vec::new()));
+
+pub fn add_change_listener<F>(key: &str, listener: F) -> Result<(), Error>
+    where F: Fn(&str, &serde_json::Value) + Send + Sync + 'static {
+    let mut listeners = LISTENERS.write().map_err(|_| anyhow!("{} is poisoned", LISTENERS_LOCK_NAME))?;
+    listeners.push((key.to_string(), Box::new(listener)));
+
+    return Ok(());
+}
+
+fn notify_change_listeners(key: &str, value: &serde_json::Value) {
+    if let Ok(listeners) = LISTENERS.read() {
+        for (listener_key, listener) in listeners.iter() {
+            if listener_key == key {
+                listener(key, value);
+            }
+        }
+    } else {
+        log::error!("{} is poisoned, skipping change listeners of '{}'", LISTENERS_LOCK_NAME, key);
+    }
 }
 
 /* ====================================================================== */
@@ -308,7 +347,9 @@ pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &V) -> Result<(), Er
     let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
 
     let raw_value = serde_json::to_value(value)?;
-    store.set(key, raw_value);
+    store.set(key, raw_value.clone());
+
+    notify_change_listeners(key, &raw_value);
 
     return Ok(());
 }

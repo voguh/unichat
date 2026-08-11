@@ -60,6 +60,9 @@ pub fn parse(channel: String, text: String, message: &IRCMessage, tags: HashMap<
         value: bits_value,
         currency: String::from("Bits"),
 
+        original_value: None,
+        original_currency: None,
+
         message_id: message_id.to_owned(),
         message_text: Some(message),
         emotes: emotes,

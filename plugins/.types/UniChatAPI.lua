@@ -109,6 +109,8 @@
 ---@field authorType UniChatAuthorType
 ---@field value number
 ---@field currency string
+---@field originalValue? number
+---@field originalCurrency? string
 ---@field messageId string
 ---@field messageText? string
 ---@field emotes UniChatEmote[]
@@ -214,6 +216,12 @@ UniChatEmote = UniChatEmote or nil;
 ---@type UniChatBadgeFactory
 UniChatBadge = UniChatBadge or nil;
 -- =========================================[ End UniChat Standard Library ]========================================= --
+
+-- ===========================================[ UniChat Currency Library ]=========================================== --
+---@class UniChatCurrency
+---@field target fun(self: UniChatCurrency): string?
+---@field convert fun(self: UniChatCurrency, value: number, token: string): number?, string?
+-- =========================================[ End UniChat Currency Library ]========================================= --
 
 -- =============================================[ UniChat HTTP Library ]============================================= --
 ---@class UniChatBasicAuth

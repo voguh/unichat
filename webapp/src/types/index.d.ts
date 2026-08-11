@@ -50,6 +50,12 @@ export interface UniChatReleaseInfo {
     latestUnstable: UniChatRelease | null;
 }
 
+export interface UniChatCurrency {
+    code: string;
+    name: string;
+    symbol: string;
+}
+
 /* ========================================================================== */
 
 export interface GalleryItem {

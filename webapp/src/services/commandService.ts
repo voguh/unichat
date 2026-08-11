@@ -13,6 +13,7 @@ import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 import { UniChatEvent } from "unichat-widgets/unichat";
 import {
     GalleryItem,
+    UniChatCurrency,
     UniChatPluginMetadata,
     UniChatScraper,
     UniChatWidget,
@@ -52,6 +53,10 @@ export class CommandService {
 
     public async getSystemHosts(): Promise<string[]> {
         return invoke("get_system_hosts");
+    }
+
+    public async getCurrencies(): Promise<UniChatCurrency[]> {
+        return invoke<UniChatCurrency[]>("get_currencies");
     }
 
     public async getThirdPartyLicenses(): Promise<ThirdPartyLicenseInfo[]> {

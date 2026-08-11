@@ -15,6 +15,7 @@ use anyhow::Error;
 
 use crate::plugins::get_plugin;
 use crate::plugins::instance::env::unichat_api::UniChatAPI;
+use crate::plugins::instance::env::unichat_currency::UniChatCurrencyModule;
 use crate::plugins::instance::env::unichat_event::LuaUniChatAuthorTypeFactory;
 use crate::plugins::instance::env::unichat_event::LuaUniChatBadgeFactory;
 use crate::plugins::instance::env::unichat_event::LuaUniChatEmoteFactory;
@@ -32,6 +33,7 @@ use crate::utils::semver::Version;
 
 mod shared_modules;
 mod unichat_api;
+mod unichat_currency;
 mod unichat_event;
 mod unichat_http;
 mod unichat_json;
@@ -77,7 +79,9 @@ fn create_print_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Function,
 /* ========================================================================== */
 
 fn scoped_modules_require(lua: &mlua::Lua, plugin_env: &mlua::Table, plugin_name: &str, module: &str) -> mlua::Result<mlua::Value> {
-    if module == "unichat:http" {
+    if module == "unichat:currency" {
+        return UniChatCurrencyModule::new(lua);
+    } else if module == "unichat:http" {
         return UniChatHttpModule::new(lua);
     } else if module == "unichat:json" {
         return UniChatJsonModule::new(lua);

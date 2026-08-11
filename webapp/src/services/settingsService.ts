@@ -20,6 +20,7 @@ export enum UniChatSettingsKeys {
     /* General settings */
     DEFAULT_PREVIEW_WIDGET = "default-preview-widget",
     OPEN_TO_LAN = "open-to-lan",
+    CURRENCY_TARGET = "currency-target",
 
     /* Developers settings */
     CREATE_WEBVIEW_HIDDEN = "create-webview-hidden",
@@ -35,6 +36,7 @@ export interface UniChatSettings {
     /* General settings */
     [UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET]: string;
     [UniChatSettingsKeys.OPEN_TO_LAN]: boolean;
+    [UniChatSettingsKeys.CURRENCY_TARGET]: string;
 
     /* Developers settings */
     [UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN]: boolean;

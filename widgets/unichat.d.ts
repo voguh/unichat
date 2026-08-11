@@ -127,6 +127,11 @@ export interface UniChatEventDonate {
         value: number;
         currency: string;
 
+        /** **Disclaimer:** `null` when no conversion happened. */
+        originalValue: number | null;
+        /** **Disclaimer:** `null` when no conversion happened. */
+        originalCurrency: string | null;
+
         messageId: string;
         messageText: string | null;
         emotes: UniChatEmote[];

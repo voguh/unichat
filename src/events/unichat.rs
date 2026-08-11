@@ -234,6 +234,9 @@ pub struct UniChatDonateEventPayload {
     pub value: f32,
     pub currency: String,
 
+    pub original_value: Option<f32>,
+    pub original_currency: Option<String>,
+
     pub message_id: String,
     pub message_text: Option<String>,
     pub emotes: Vec<UniChatEmote>,

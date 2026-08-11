@@ -12,10 +12,11 @@ import * as PReact from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 
 import { Button } from "unichat/components/Button";
-import { Select } from "unichat/components/forms/Select";
+import { Option, Select } from "unichat/components/forms/Select";
 import { Switch } from "unichat/components/forms/Switch";
 import { useStorage } from "unichat/hooks/useStorage";
 import { useWidgets } from "unichat/hooks/useWidgets";
+import { commandService } from "unichat/services/commandService";
 import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
 import { settingsService, UniChatSettings, UniChatSettingsKeys } from "unichat/services/settingsService";
 import { StorageKeys } from "unichat/services/storageService";
@@ -23,17 +24,21 @@ import { toWidgetOptionGroup } from "unichat/utils/toWidgetOptionGroup";
 
 import { GeneralSettingsTabStyledContainer } from "./styled";
 
+const CURRENCY_DISABLED_OPTION: Option = { value: "", label: "Disabled" };
+
 interface Props {
     onClose: () => void;
 }
 
 export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren {
     const [widgets, _reloadWidgets] = useWidgets(toWidgetOptionGroup, []);
+    const [currencies, setCurrencies] = useState<Option[]>([CURRENCY_DISABLED_OPTION]);
 
     const [dirty, setDirty] = useState(false);
     const [initialSettings, setInitialSettings] = useState<Partial<UniChatSettings>>({});
     const selectRef = useRef<HTMLInputElement>(null);
     const openToLanRef = useRef<HTMLInputElement>(null);
+    const currencyRef = useRef<HTMLInputElement>(null);
 
     const [requiresRestart, setRequiresRestart] = useStorage(StorageKeys.REQUIRES_RESTART);
 
@@ -49,6 +54,11 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
             const checked = openToLanRef.current.checked;
 
             settingsCopy[UniChatSettingsKeys.OPEN_TO_LAN] = checked;
+        }
+
+        if (currencyRef.current != null) {
+            const value = currencyRef.current.value;
+            settingsCopy[UniChatSettingsKeys.CURRENCY_TARGET] = value;
         }
 
         await settingsService.setItems(settingsCopy);
@@ -83,6 +93,10 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
             openToLanRef.current.addEventListener("change", changeDirty);
         }
 
+        if (currencyRef.current) {
+            currencyRef.current.addEventListener("change", changeDirty);
+        }
+
         return () => {
             if (selectRef.current) {
                 selectRef.current.removeEventListener("change", changeDirty);
@@ -91,6 +105,10 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
             if (openToLanRef.current) {
                 openToLanRef.current.removeEventListener("change", changeDirty);
             }
+
+            if (currencyRef.current) {
+                currencyRef.current.removeEventListener("change", changeDirty);
+            }
         };
     }, [initialSettings]);
 
@@ -98,13 +116,29 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
         async function init(): Promise<void> {
             const settings = await settingsService.getItems([
                 UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET,
-                UniChatSettingsKeys.OPEN_TO_LAN
+                UniChatSettingsKeys.OPEN_TO_LAN,
+                UniChatSettingsKeys.CURRENCY_TARGET
             ]);
 
             setInitialSettings(settings);
         }
 
         init();
+    }, []);
+
+    useEffect(() => {
+        async function loadCurrencies(): Promise<void> {
+            try {
+                const items = await commandService.getCurrencies();
+                const options = items.map((item) => ({ value: item.code, label: `${item.code} / ${item.name}` }));
+
+                setCurrencies([CURRENCY_DISABLED_OPTION, ...options]);
+            } catch (error) {
+                console.error("Failed to load the currency list", error);
+            }
+        }
+
+        loadCurrencies();
     }, []);
 
     return (
@@ -115,6 +149,13 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
                 label="Default preview widget"
                 description="Select the default widget to be used in preview panels"
                 options={widgets}
+            />
+
+            <Select
+                defaultValue={initialSettings[UniChatSettingsKeys.CURRENCY_TARGET] ?? ""}
+                inputRef={currencyRef}
+                label="Donation target currency"
+                options={currencies}
             />
 
             <hr />

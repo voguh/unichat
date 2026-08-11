@@ -39,6 +39,7 @@ include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 
 mod axum;
 mod commands;
+mod currency;
 mod events;
 mod plugins;
 mod scraper;
@@ -124,14 +125,14 @@ fn setup_inner() -> Result<(), Error> {
 
     log_startup_process(&splash_screen, format!("Starting {} v{}...", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION));
 
-    log_startup_process(&splash_screen, "[01/21] Initializing properties...");
+    log_startup_process(&splash_screen, "[01/22] Initializing properties...");
     utils::properties::init()?;
-    log_startup_process(&splash_screen, "[02/21] Initializing settings...");
+    log_startup_process(&splash_screen, "[02/22] Initializing settings...");
     utils::settings::init()?;
 
     /* ========================================================================================== */
 
-    log_startup_process(&splash_screen, "[03/21] Setting up application plugins directory...");
+    log_startup_process(&splash_screen, "[03/22] Setting up application plugins directory...");
     let system_plugins_dir = properties::get_app_path(AppPaths::UniChatSystemPlugins);
     let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
     if !&user_plugins_dir.exists() {
@@ -139,17 +140,17 @@ fn setup_inner() -> Result<(), Error> {
         fs::create_dir_all(&user_plugins_dir)?;
     }
 
-    log_startup_process(&splash_screen, "[04/21] Copying plugin types to user plugins directory...");
+    log_startup_process(&splash_screen, "[04/22] Copying plugin types to user plugins directory...");
     let plugin_types_source = system_plugins_dir.join(".types");
     let plugin_types_dest = user_plugins_dir.join(".types");
     copy_wrapper(&plugin_types_source, &plugin_types_dest)?;
 
-    log_startup_process(&splash_screen, "[05/21] Copying plugin .luarc.json to user plugins directory...");
+    log_startup_process(&splash_screen, "[05/22] Copying plugin .luarc.json to user plugins directory...");
     let plugin_luarc_source = system_plugins_dir.join(".luarc.json");
     let plugin_luarc_dest = user_plugins_dir.join(".luarc.json");
     copy_wrapper(&plugin_luarc_source, &plugin_luarc_dest)?;
 
-    log_startup_process(&splash_screen, "[06/21] Creating README.md in user plugins directory...");
+    log_startup_process(&splash_screen, "[06/22] Creating README.md in user plugins directory...");
     let readme_path = user_plugins_dir.join("README.md");
     rm_util(&readme_path)?;
 
@@ -166,7 +167,7 @@ fn setup_inner() -> Result<(), Error> {
 
     /* ========================================================================================== */
 
-    log_startup_process(&splash_screen, "[07/21] Setting up application gallery directory...");
+    log_startup_process(&splash_screen, "[07/22] Setting up application gallery directory...");
     let gallery_dir = properties::get_app_path(AppPaths::UniChatGallery);
     if !&gallery_dir.exists() {
         log::info!("Creating gallery directory at {:?}", &gallery_dir);
@@ -175,7 +176,7 @@ fn setup_inner() -> Result<(), Error> {
 
     /* ========================================================================================== */
 
-    log_startup_process(&splash_screen, "[08/21] Setting up application widgets directory...");
+    log_startup_process(&splash_screen, "[08/22] Setting up application widgets directory...");
     let system_widgets_dir = properties::get_app_path(AppPaths::UniChatSystemWidgets);
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     if !&user_widgets_dir.exists() {
@@ -183,22 +184,22 @@ fn setup_inner() -> Result<(), Error> {
         fs::create_dir_all(&user_widgets_dir)?;
     }
 
-    log_startup_process(&splash_screen, "[09/21] Copying default widget to user widgets directory...");
+    log_startup_process(&splash_screen, "[09/22] Copying default widget to user widgets directory...");
     let example_widget_path_source = system_widgets_dir.join("default");
     let example_widget_path_dest = user_widgets_dir.join("example");
     copy_wrapper(&example_widget_path_source, &example_widget_path_dest)?;
 
-    log_startup_process(&splash_screen, "[10/21] Copying widget types to user widgets directory...");
+    log_startup_process(&splash_screen, "[10/22] Copying widget types to user widgets directory...");
     let unichat_d_ts_path_source = system_widgets_dir.join("unichat.d.ts");
     let unichat_d_ts_path_dest = user_widgets_dir.join("unichat.d.ts");
     copy_wrapper(&unichat_d_ts_path_source, &unichat_d_ts_path_dest)?;
 
-    log_startup_process(&splash_screen, "[11/21] Copying jsconfig.json to user widgets directory...");
+    log_startup_process(&splash_screen, "[11/22] Copying jsconfig.json to user widgets directory...");
     let jsconfig_json_path_source = system_widgets_dir.join("jsconfig.json");
     let jsconfig_json_path_dest = user_widgets_dir.join("jsconfig.json");
     copy_wrapper(&jsconfig_json_path_source, &jsconfig_json_path_dest)?;
 
-    log_startup_process(&splash_screen, "[12/21] Creating README.md in user widgets directory...");
+    log_startup_process(&splash_screen, "[12/22] Creating README.md in user widgets directory...");
     let readme_path = user_widgets_dir.join("README.md");
     rm_util(&readme_path)?;
 
@@ -215,34 +216,37 @@ fn setup_inner() -> Result<(), Error> {
 
     /* ========================================================================================== */
 
-    log_startup_process(&splash_screen, "[13/21] Initializing events emitter module...");
+    log_startup_process(&splash_screen, "[13/22] Initializing events emitter module...");
     events::init()?;
 
-    log_startup_process(&splash_screen, "[14/21] Fetching global shared emotes...");
+    log_startup_process(&splash_screen, "[14/22] Initializing currency module...");
+    currency::init()?;
+
+    log_startup_process(&splash_screen, "[15/22] Fetching global shared emotes...");
     shared_emotes::fetch_global_shared_emotes()?;
 
-    log_startup_process(&splash_screen, "[15/21] Initializing plugins module...");
+    log_startup_process(&splash_screen, "[16/22] Initializing plugins module...");
     plugins::init()?;
 
-    log_startup_process(&splash_screen, "[16/21] Initializing userstore module...");
+    log_startup_process(&splash_screen, "[17/22] Initializing userstore module...");
     utils::userstore::init()?;
 
-    log_startup_process(&splash_screen, "[17/21] Initializing widgets module...");
+    log_startup_process(&splash_screen, "[18/22] Initializing widgets module...");
     widgets::init()?;
 
     /* ========================================================================================== */
 
-    log_startup_process(&splash_screen, "[18/21] Registering Twitch integration...");
+    log_startup_process(&splash_screen, "[19/22] Registering Twitch integration...");
     twitch::init()?;
-    log_startup_process(&splash_screen, "[19/21] Registering YouTube integration...");
+    log_startup_process(&splash_screen, "[20/22] Registering YouTube integration...");
     youtube::init()?;
 
-    log_startup_process(&splash_screen, "[20/21] Loading plugins...");
+    log_startup_process(&splash_screen, "[21/22] Loading plugins...");
     plugins::load_plugins()?;
 
     /* ========================================================================================== */
 
-    log_startup_process(&splash_screen, "[21/21] Initializing HTTP server...");
+    log_startup_process(&splash_screen, "[22/22] Initializing HTTP server...");
     tauri::async_runtime::spawn(axum::start());
 
     /* ========================================================================================== */
@@ -395,6 +399,7 @@ fn main() {
             commands::get_releases,
             commands::get_system_hosts,
             commands::get_third_party_licenses,
+            commands::currency::get_currencies,
             commands::emulator::dispatch_emulated_event,
             commands::gallery::get_gallery_items,
             commands::gallery::upload_gallery_items,

@@ -28,6 +28,7 @@ use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::semver;
 
+pub mod currency;
 pub mod emulator;
 pub mod gallery;
 pub mod plugins;
