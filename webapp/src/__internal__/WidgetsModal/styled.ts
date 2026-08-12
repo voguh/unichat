@@ -53,8 +53,11 @@ export const WidgetsStyledTable = styled.table({
 
                         "> button": {
                             ...tw`py-0 px-4 flex justify-center items-center gap-2`,
+                            flexShrink: 0,
                             whiteSpace: "nowrap",
-                            height: "30px"
+                            width: "30px",
+                            height: "30px",
+                            padding: "0px"
                         }
                     }
                 }
