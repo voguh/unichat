@@ -20,6 +20,7 @@ import { Plugin, PluginOption } from "vite";
 import { ViteMinifyPlugin as minifyPlugin } from "vite-plugin-minify";
 import { defineConfig } from "vitest/config";
 
+const __dirname = import.meta.dirname;
 const tsConfigRaw = fs.readFileSync(path.resolve(__dirname, "tsconfig.json"), { encoding: "utf-8" });
 const compilerOptions = (JSONC.parse(tsConfigRaw) || {}).compilerOptions as CompilerOptions;
 const tsConfigPaths = Object.entries(compilerOptions?.paths ?? {}).reduce((acc, [key, value]) => {
