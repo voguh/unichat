@@ -11,6 +11,7 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 use std::sync::RwLock;
+use std::thread;
 
 use anyhow::Error;
 
@@ -22,27 +23,35 @@ mod seventv;
 
 pub static EMOTES_HASHSET: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
-pub fn fetch_global_shared_emotes() -> Result<(), Error> {
-    tauri::async_runtime::spawn(async move {
-        let mut set = tokio::task::JoinSet::new();
-        set.spawn(betterttv::fetch_global_emotes());
-        set.spawn(frankerfacez::fetch_global_emotes());
-        set.spawn(seventv::fetch_global_emotes());
+type EmotesResult = Result<HashMap<String, UniChatEmote>, Error>;
 
-        let mut emotes: HashMap<String, UniChatEmote> = HashMap::new();
-        while let Some(result) = set.join_next().await {
-            match result {
-                Err(err) => log::error!("Failed to fetch global shared emotes: {:#?}", err),
-                Ok(Err(err)) => log::error!("Failed to fetch global shared emotes: {:#?}", err),
-                Ok(Ok(batch)) => {
-                    emotes.extend(batch);
-                }
+fn join_emotes(results: Vec<EmotesResult>, context: &str) {
+    let mut emotes: HashMap<String, UniChatEmote> = HashMap::new();
+    for result in results.into_iter() {
+        match result {
+            Err(err) => log::error!("Failed to fetch {} shared emotes: {:#?}", context, err),
+            Ok(batch) => {
+                emotes.extend(batch);
             }
         }
+    }
 
-        if let Ok(mut guard) = EMOTES_HASHSET.write() {
-            guard.extend(emotes);
-        }
+    if let Ok(mut guard) = EMOTES_HASHSET.write() {
+        guard.extend(emotes);
+    }
+}
+
+pub fn fetch_global_shared_emotes() -> Result<(), Error> {
+    tauri::async_runtime::spawn_blocking(|| {
+        let results = thread::scope(|scope| {
+            let bttv = scope.spawn(betterttv::fetch_global_emotes);
+            let ffz = scope.spawn(frankerfacez::fetch_global_emotes);
+            let stv = scope.spawn(seventv::fetch_global_emotes);
+
+            return vec![bttv.join(), ffz.join(), stv.join()];
+        });
+
+        join_emotes(results.into_iter().flatten().collect(), "global");
     });
 
     return Ok(());
@@ -52,28 +61,18 @@ pub fn fetch_shared_emotes(platform: &str, channel_id: &str) -> Result<(), Error
     let platform = platform.to_string();
     let channel_id = channel_id.to_string();
 
-    tauri::async_runtime::spawn(async move {
+    tauri::async_runtime::spawn_blocking(move || {
         log::info!("Fetching channel shared emotes ({}:{})...", platform, channel_id);
 
-        let mut set = tokio::task::JoinSet::new();
-        set.spawn(betterttv::fetch_channel_emotes(platform.clone(), channel_id.clone()));
-        set.spawn(frankerfacez::fetch_channel_emotes(platform.clone(), channel_id.clone()));
-        set.spawn(seventv::fetch_channel_emotes(platform.clone(), channel_id.clone()));
+        let results = thread::scope(|scope| {
+            let bttv = scope.spawn(|| betterttv::fetch_channel_emotes(platform.clone(), channel_id.clone()));
+            let ffz = scope.spawn(|| frankerfacez::fetch_channel_emotes(platform.clone(), channel_id.clone()));
+            let stv = scope.spawn(|| seventv::fetch_channel_emotes(platform.clone(), channel_id.clone()));
 
-        let mut emotes: HashMap<String, UniChatEmote> = HashMap::new();
-        while let Some(result) = set.join_next().await {
-            match result {
-                Err(err) => log::error!("Failed to fetch channel shared emotes ({}:{}): {:#?}", platform, channel_id, err),
-                Ok(Err(err)) => log::error!("Failed to fetch channel shared emotes ({}:{}): {:#?}", platform, channel_id, err),
-                Ok(Ok(batch)) => {
-                    emotes.extend(batch);
-                }
-            }
-        }
+            return vec![bttv.join(), ffz.join(), stv.join()];
+        });
 
-        if let Ok(mut guard) = EMOTES_HASHSET.write() {
-            guard.extend(emotes);
-        }
+        join_emotes(results.into_iter().flatten().collect(), "channel");
     });
 
     return Ok(());

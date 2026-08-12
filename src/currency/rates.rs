@@ -22,6 +22,7 @@ use serde::Serialize;
 use crate::currency::UniChatCurrency;
 use crate::currency::currencies;
 use crate::currency::utils::cache_path;
+use crate::utils::ureq;
 
 #[derive(Default)]
 struct RatesStore {
@@ -123,8 +124,8 @@ pub fn fetch_rates(target: &str) -> Result<(), Error> {
 
     let url = format!("{}?base={}", RATES_URL, target);
     log::info!("Fetching currency rates from '{}'...", url);
-    let response = reqwest::blocking::get(url)?;
-    let entries: Vec<FrankfurterRate> = response.json()?;
+    let mut response = ureq::get(url).call()?;
+    let entries: Vec<FrankfurterRate> = response.body_mut().read_json()?;
 
     if let Ok(mut state) = RATES.write() {
         state.clear();

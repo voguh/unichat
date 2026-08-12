@@ -16,6 +16,8 @@ use axum::extract::Request;
 use axum::http::StatusCode;
 use axum::response::Response;
 
+use crate::axum::utils::CACHE_IMMUTABLE;
+use crate::axum::utils::CACHE_REVALIDATE;
 use crate::axum::utils::serve_partial_content;
 use crate::plugins;
 use crate::utils::properties;
@@ -23,18 +25,19 @@ use crate::utils::properties::AppPaths;
 use crate::utils::safe_guard_path;
 
 pub async fn assets(Path(mut asset_path): Path<String>, req: Request<Body>) -> Response {
-    let range = req.headers().get("Range").and_then(|r| r.to_str().ok());
-
-    let asset_base_path: PathBuf;
     let mut asset_path_parts = asset_path.split("/");
     let first_part = asset_path_parts.next().unwrap_or("");
+
+    let asset_base_path: PathBuf;
+    let cache_control: &str;
     let plugins = plugins::get_plugins().unwrap_or_default();
-    match plugins.iter().find(|p| p.name == first_part) {
-        Some(plugin) => {
-            asset_base_path = plugin.get_assets_path();
-            asset_path = asset_path_parts.collect::<Vec<&str>>().join("/");
-        },
-        None => asset_base_path = properties::get_app_path(AppPaths::UniChatAssets)
+    if let Some(plugin) = plugins.iter().find(|p| p.name == first_part) {
+        asset_base_path = plugin.get_assets_path();
+        asset_path = asset_path_parts.collect::<Vec<&str>>().join("/");
+        cache_control = CACHE_REVALIDATE;
+    } else {
+        asset_base_path = properties::get_app_path(AppPaths::UniChatAssets);
+        cache_control = CACHE_IMMUTABLE;
     }
 
     let asset_full_path: PathBuf;
@@ -58,5 +61,5 @@ pub async fn assets(Path(mut asset_path): Path<String>, req: Request<Body>) -> R
             .unwrap();
     }
 
-    return serve_partial_content(&asset_full_path, range);
+    return serve_partial_content(&asset_full_path, req.headers(), cache_control);
 }

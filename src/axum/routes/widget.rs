@@ -19,6 +19,7 @@ use axum::extract::Request;
 use axum::http::StatusCode;
 use axum::response::Response;
 
+use crate::axum::utils::CACHE_REVALIDATE;
 use crate::axum::utils::serve_partial_content;
 use crate::utils::constants::BASE_REST_PORT;
 use crate::utils::safe_guard_path;
@@ -54,7 +55,6 @@ fn load_fieldstate(widget: &WidgetMetadata) -> Result<HashMap<String, serde_json
 /* ================================================================================================================== */
 
 pub async fn get_widget_assets(Path((widget_name, asset_path)): Path<(String, String)>, req: Request<Body>) -> Response {
-    let range = req.headers().get("Range").and_then(|r| r.to_str().ok());
 
     let widget_metadata: WidgetMetadata;
     match get_widget_from_rest_path(&widget_name) {
@@ -87,7 +87,7 @@ pub async fn get_widget_assets(Path((widget_name, asset_path)): Path<(String, St
             .unwrap();
     }
 
-    return serve_partial_content(&asset_full_path, range);
+    return serve_partial_content(&asset_full_path, req.headers(), CACHE_REVALIDATE);
 }
 
 /* ================================================================================================================== */

@@ -17,6 +17,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::events::unichat::UniChatEmote;
+use crate::utils::ureq;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -36,10 +37,10 @@ fn parse_emote(emote: &SevenTVEmote) -> UniChatEmote {
     };
 }
 
-pub async fn fetch_global_emotes() -> Result<HashMap<String, UniChatEmote>, Error> {
+pub fn fetch_global_emotes() -> Result<HashMap<String, UniChatEmote>, Error> {
     let url = "https://7tv.io/v3/emote-sets/global";
-    let response = reqwest::get(url).await?;
-    let response_body: Value = response.json().await?;
+    let mut response = ureq::get(url).call()?;
+    let response_body: Value = response.body_mut().read_json()?;
     let emotes = response_body.get("emotes").and_then(|v| v.as_array()).cloned().unwrap_or_default();
     let emotes: Vec<SevenTVEmote> = serde_json::from_value(Value::Array(emotes))?;
 
@@ -51,10 +52,10 @@ pub async fn fetch_global_emotes() -> Result<HashMap<String, UniChatEmote>, Erro
     return Ok(parsed);
 }
 
-pub async fn fetch_channel_emotes(platform: String, channel_id: String) -> Result<HashMap<String, UniChatEmote>, Error> {
+pub fn fetch_channel_emotes(platform: String, channel_id: String) -> Result<HashMap<String, UniChatEmote>, Error> {
     let url = format!("https://7tv.io/v3/users/{}/{}", platform, channel_id);
-    let response = reqwest::get(url).await?;
-    let response_body: Value = response.json().await?;
+    let mut response = ureq::get(url).call()?;
+    let response_body: Value = response.body_mut().read_json()?;
     let emote_set = response_body.get("emote_set").ok_or(anyhow!("Emote set not found"))?;
     let emotes = emote_set.get("emotes").and_then(|v| v.as_array()).cloned().unwrap_or_default();
     let emotes: Vec<SevenTVEmote> = serde_json::from_value(Value::Array(emotes))?;

@@ -16,6 +16,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::events::unichat::UniChatEmote;
+use crate::utils::ureq;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -35,10 +36,10 @@ fn parse_emote(emote: &BetterTTVEmote) -> UniChatEmote {
     }
 }
 
-pub async fn fetch_global_emotes() -> Result<HashMap<String, UniChatEmote>, Error> {
+pub fn fetch_global_emotes() -> Result<HashMap<String, UniChatEmote>, Error> {
     let url = "https://api.betterttv.net/3/cached/emotes/global";
-    let response = reqwest::get(url).await?;
-    let response_body: Value = response.json().await?;
+    let mut response = ureq::get(url).call()?;
+    let response_body: Value = response.body_mut().read_json()?;
     let emotes: Vec<BetterTTVEmote> = serde_json::from_value(response_body)?;
 
     let mut parsed = HashMap::new();
@@ -49,10 +50,10 @@ pub async fn fetch_global_emotes() -> Result<HashMap<String, UniChatEmote>, Erro
     return Ok(parsed);
 }
 
-pub async fn fetch_channel_emotes(platform: String, channel_id: String) -> Result<HashMap<String, UniChatEmote>, Error> {
+pub fn fetch_channel_emotes(platform: String, channel_id: String) -> Result<HashMap<String, UniChatEmote>, Error> {
     let url = format!("https://api.betterttv.net/3/cached/users/{}/{}", platform, channel_id);
-    let response = reqwest::get(url).await?;
-    let response_body: Value = response.json().await?;
+    let mut response = ureq::get(url).call()?;
+    let response_body: Value = response.body_mut().read_json()?;
 
     let mut emotes_list: Vec<Value> = Vec::new();
     if let Some(emotes) = response_body.get("channelEmotes") {

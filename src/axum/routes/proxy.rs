@@ -8,9 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use std::sync::LazyLock;
-use std::time::Duration;
-
 use axum::body::Body;
 use axum::extract::Path;
 use axum::extract::Query;
@@ -19,24 +16,12 @@ use axum::http::StatusCode;
 use axum::response::Response;
 
 use crate::utils::base64;
+use crate::utils::ureq;
 
-#[cfg(target_os = "windows")]
-static USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0";
-
-#[cfg(target_os = "linux")]
-static USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64; rv:150.0) Gecko/20100101 Firefox/150.0";
-
-#[cfg(target_os = "macos")]
-static USER_AGENT: &str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14.0; rv:150.0) Gecko/20100101 Firefox/150.0";
-
-static REQWEST_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| {
-    let client_builder = reqwest::Client::builder()
-        .user_agent(USER_AGENT)
-        .redirect(reqwest::redirect::Policy::none())
-        .timeout(Duration::from_secs(30));
-
-    return client_builder.build().unwrap();
-});
+const FORWARDED_HEADERS: [&str; 10] = [
+    "Content-Type", "Content-Range", "Accept-Ranges", "Content-Length",
+    "Cache-Control", "ETag", "Last-Modified", "Expires", "Age", "Vary"
+];
 
 #[derive(serde::Deserialize)]
 pub struct QueryString {
@@ -84,35 +69,47 @@ pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryStr
             .unwrap();
     }
 
-    let mut request = REQWEST_CLIENT.get(&normalized_url);
+    let referer = query.referer.clone();
+    let range = req.headers().get("Range").and_then(|value| value.to_str().ok()).map(|value| value.to_string());
 
-    if let Some(referer) = &query.referer {
-        request = request.header("Referer", referer);
-    }
+    let fetched = tauri::async_runtime::spawn_blocking(move || {
+        let mut request = ureq::get(&normalized_url).config().max_redirects(0).build();
 
-    if let Some(range) = req.headers().get("Range") {
-        request = request.header("Range", range);
-    }
+        if let Some(referer) = referer {
+            request = request.header("Referer", &referer);
+        }
 
-    match request.send().await {
-        Ok(response) => {
-            let status = StatusCode::from_u16(response.status().as_u16()).unwrap_or(StatusCode::OK);
+        if let Some(range) = range {
+            request = request.header("Range", &range);
+        }
+
+        let mut response = request.call()?;
+        let body = response.body_mut().read_to_vec()?;
+
+        return Ok::<(ureq::http::response::Parts, Vec<u8>), ureq::Error>((response.into_parts().0, body));
+    }).await;
+
+    match fetched {
+        Ok(Ok((parts, body))) => {
+            let status = StatusCode::from_u16(parts.status.as_u16()).unwrap_or(StatusCode::OK);
 
             let mut builder = Response::builder().status(status);
-            for key in &["Content-Type", "Content-Range", "Accept-Ranges", "Content-Length"] {
-                if let Some(val) = response.headers().get(*key) {
+            for key in FORWARDED_HEADERS.iter() {
+                if let Some(val) = parts.headers.get(*key) {
                     builder = builder.header(*key, val);
                 }
             }
 
-            let stream = response.bytes_stream();
-            let body = Body::from_stream(stream);
-
-            return builder.body(body).unwrap();
+            return builder.body(Body::from(body)).unwrap();
+        }
+        Ok(Err(err)) => {
+            return Response::builder().status(502)
+                .body(format!("Failed to fetch proxied url: {:?}", err).into())
+                .unwrap();
         }
         Err(err) => {
-            return Response::builder().status(502)
-                .body(format!("Failed to fetch '{}': {:?}", normalized_url, err).into())
+            return Response::builder().status(500)
+                .body(format!("Proxy task failed: {:?}", err).into())
                 .unwrap();
         }
     }

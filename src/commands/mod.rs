@@ -27,6 +27,7 @@ use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::semver;
+use crate::utils::ureq;
 
 pub mod currency;
 pub mod emulator;
@@ -144,8 +145,8 @@ pub async fn get_releases<R: Runtime>(_app: AppHandle<R>) -> Result<UniChatRelea
     if releases.is_empty() {
         log::info!("Fetching releases from UniChat API...");
         let url = "https://unichat.voguh.me/api/v1/unichat-releases";
-        let response = reqwest::get(url).await.map_err(|e| format!("{:#?}", e))?;
-        let response_body = response.text().await.map_err(|e| format!("{:#?}", e))?;
+        let mut response = ureq::get(url).call().map_err(|e| format!("{:#?}", e))?;
+        let response_body = response.body_mut().read_to_string().map_err(|e| format!("{:#?}", e))?;
 
         fs::write(&cached_releases_path, &response_body).map_err(|e| format!("{:#?}", e))?;
         releases = serde_json::from_str(&response_body).map_err(|e| format!("{:#?}", e))?;

@@ -16,13 +16,13 @@ use axum::extract::Request;
 use axum::http::StatusCode;
 use axum::response::Response;
 
+use crate::axum::utils::CACHE_REVALIDATE;
 use crate::axum::utils::serve_partial_content;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::safe_guard_path;
 
 pub async fn gallery(Path(asset_path): Path<String>, req: Request<Body>) -> Response {
-    let range = req.headers().get("Range").and_then(|r| r.to_str().ok());
 
     let asset_full_path: PathBuf;
     let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
@@ -46,5 +46,5 @@ pub async fn gallery(Path(asset_path): Path<String>, req: Request<Body>) -> Resp
             .unwrap();
     }
 
-    return serve_partial_content(&asset_full_path, range);
+    return serve_partial_content(&asset_full_path, req.headers(), CACHE_REVALIDATE);
 }

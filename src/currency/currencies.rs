@@ -21,6 +21,7 @@ use serde::Serialize;
 
 use crate::currency::UniChatCurrency;
 use crate::currency::utils::cache_path;
+use crate::utils::ureq;
 
 // Currency symbols from CLDR `en-US` for the currencies whose symbol differs from their code.
 // Generated from `https://github.com/unicode-org/cldr-json/blob/main/cldr-json/cldr-numbers-full/main/en/currencies.json`
@@ -75,8 +76,8 @@ pub fn fetch_currencies() -> Result<(), Error> {
     }
 
     log::info!("Fetching currency list from '{}'...", CURRENCIES_URL);
-    let response = reqwest::blocking::get(CURRENCIES_URL)?;
-    let mut parsed: Vec<FrankfurterCurrency> = response.json()?;
+    let mut response = ureq::get(CURRENCIES_URL).call()?;
+    let mut parsed: Vec<FrankfurterCurrency> = response.body_mut().read_json()?;
 
     let mut claims: HashMap<String, Vec<String>> = HashMap::new();
     for currency in parsed.iter_mut() {
