@@ -279,12 +279,12 @@ type SettingsChangeListener = Box<dyn Fn(&str, &serde_json::Value) + Send + Sync
 const LISTENERS_LOCK_NAME: &str = "Settings::LISTENERS";
 static LISTENERS: LazyLock<RwLock<Vec<(String, SettingsChangeListener)>>> = LazyLock::new(|| RwLock::new(Vec::new()));
 
-pub fn add_change_listener<F>(key: &str, listener: F) -> Result<(), Error>
-    where F: Fn(&str, &serde_json::Value) + Send + Sync + 'static {
-    let mut listeners = LISTENERS.write().map_err(|_| anyhow!("{} is poisoned", LISTENERS_LOCK_NAME))?;
-    listeners.push((key.to_string(), Box::new(listener)));
-
-    return Ok(());
+pub fn add_change_listener<F: Fn(&str, &serde_json::Value) + Send + Sync + 'static>(key: &str, listener: F) {
+    if let Ok(mut listeners) = LISTENERS.write() {
+        listeners.push((key.to_string(), Box::new(listener)));
+    } else {
+        log::error!("{} is poisoned, skipping adding change listener for '{}'", LISTENERS_LOCK_NAME, key);
+    }
 }
 
 fn notify_change_listeners(key: &str, value: &serde_json::Value) {

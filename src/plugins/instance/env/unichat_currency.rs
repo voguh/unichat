@@ -22,7 +22,7 @@ impl UniChatCurrencyModule {
 impl mlua::UserData for UniChatCurrencyModule {
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("target", |_lua, _this, ()| -> mlua::Result<Option<String>> {
-            return Ok(currency::target());
+            return Ok(currency::target_currency().map(|currency| currency.code));
         });
 
         methods.add_method("convert", |_lua, _this, (value, token): (f64, String)| -> mlua::Result<(Option<f64>, Option<String>)> {
