@@ -30,8 +30,19 @@ function parseTimeago(timestamp) {
     return "now";
 }
 
+function escapeText(text) {
+    return String(text ?? "")
+        .replace(/&/g, '&amp;')
+        .replace(/\</g, '&lt;')
+        .replace(/\>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/\{/g, '&#123;')
+        .replace(/\}/g, '&#125;');
+}
+
 function parseTierName(platform, tier) {
-    if (platform === "twitch" && tier.toLowerCase() !== "prime") {
+    if (tier != null && platform === "twitch" && tier.toLowerCase() !== "prime") {
         return `T${parseInt(tier, 10) / 1000}`;
     }
 
@@ -43,15 +54,14 @@ function buildMessage(message, emotes) {
         return "";
     }
 
-    let safeMessage = (message ?? "").replace(/\</g, '&lt;').replace(/\>/g, '&gt;');
     if (!emotes || !Array.isArray(emotes) || emotes.length === 0) {
-        return safeMessage;
+        return escapeText(message);
     }
 
     const emotesMap = new Map(emotes.map(emote => [emote.code, emote.url]));
-    const processedWords = safeMessage.split(' ').map(word => {
+    const processedWords = message.split(' ').map(word => {
         const emoteUrl = emotesMap.get(word);
-        return emoteUrl ? `<img src="${emoteUrl}" />` : word;
+        return emoteUrl ? `<img src="${emoteUrl}" />` : escapeText(word);
     });
 
     return processedWords.join(' ');
@@ -186,7 +196,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         } else {
             htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data, [`${data.value}x`, "#0ca678"], ["Bits", "#0ca67880"]));
         }
-        htmlTemplate = htmlTemplate.replace("{details}", data.authorDisplayName);
+        htmlTemplate = htmlTemplate.replace("{details}", escapeText(data.authorDisplayName));
         htmlTemplate = htmlTemplate.replace("{timestmap}", (new Date(data.timestamp)).toLocaleString());
         htmlTemplate = wrapMessage(htmlTemplate, data.messageText, data.emotes);
     } else if (event.type === "unichat:sponsor") {
@@ -197,7 +207,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         htmlTemplate = htmlTemplate.replace("{platform}", data.platform);
         htmlTemplate = htmlTemplate.replace("{message_id}", data.messageId);
         htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data, [`${data.months}mo`, "#f59f00", "#212529"], [parseTierName(data.platform, data.tier), "#f59f0080"]));
-        htmlTemplate = htmlTemplate.replace("{details}", data.authorDisplayName);
+        htmlTemplate = htmlTemplate.replace("{details}", escapeText(data.authorDisplayName));
         htmlTemplate = htmlTemplate.replace("{timestmap}", (new Date(data.timestamp)).toLocaleString());
         htmlTemplate = wrapMessage(htmlTemplate, data.messageText, data.emotes);
     } else if (event.type === "unichat:sponsor_gift") {
@@ -208,7 +218,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         htmlTemplate = htmlTemplate.replace("{platform}", data.platform);
         htmlTemplate = htmlTemplate.replace("{message_id}", data.messageId);
         htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data, [`${data.count}x`, "#f59f00", "#212529"], [parseTierName(data.platform, data.tier), "#f59f0080"]));
-        htmlTemplate = htmlTemplate.replace("{details}", data.authorDisplayName);
+        htmlTemplate = htmlTemplate.replace("{details}", escapeText(data.authorDisplayName));
         htmlTemplate = htmlTemplate.replace("{timestmap}", (new Date(data.timestamp)).toLocaleString());
         htmlTemplate = wrapMessage(htmlTemplate, data.messageText, data.emotes);
     } else if (event.type === "unichat:raid") {
@@ -223,7 +233,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         } else {
             htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data, [data.viewerCount, "#7048e8"], ["Raiders", "#7048e880"]));
         }
-        htmlTemplate = htmlTemplate.replace("{details}", data.authorDisplayName);
+        htmlTemplate = htmlTemplate.replace("{details}", escapeText(data.authorDisplayName));
         htmlTemplate = htmlTemplate.replace("{timestmap}", (new Date(data.timestamp)).toLocaleString());
         htmlTemplate = wrapMessage(htmlTemplate, data.messageText, data.emotes);
     } else if (event.type === "unichat:redemption") {
@@ -234,7 +244,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         htmlTemplate = htmlTemplate.replace("{platform}", data.platform);
         htmlTemplate = htmlTemplate.replace("{message_id}", data.messageId);
         htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data, [data.rewardTitle, "#4263eb"]));
-        htmlTemplate = htmlTemplate.replace("{details}", data.authorDisplayName);
+        htmlTemplate = htmlTemplate.replace("{details}", escapeText(data.authorDisplayName));
         htmlTemplate = htmlTemplate.replace("{timestmap}", (new Date(data.timestamp)).toLocaleString());
         htmlTemplate = wrapMessage(htmlTemplate, data.messageText, data.emotes);
     }

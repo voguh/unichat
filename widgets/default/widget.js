@@ -11,6 +11,7 @@ const SPONSOR_GIFT_TEMPLATE_MESSAGE = "{{sponsorGiftTemplateMessage}}";
 const RAID_TEMPLATE_MESSAGE = "{{raidTemplateMessage}}";
 const RAID_VIEWERS_DEFAULT_TEXT = "{{raidViewersDefaultText}}";
 const REDEMPTION_TEMPLATE_MESSAGE = "{{redemptionTemplateMessage}}";
+const GIFT_TEMPLATE_MESSAGE = "{{giftTemplateMessage}}";
 /* <<== END FIELDS TO JS VARIABLES ==>> */
 
 const MAIN_CONTAINER = document.querySelector("#main-container");
@@ -21,6 +22,17 @@ const SPONSOR_GIFT_TEMPLATE = document.querySelector("#sponsor-gift_item").inner
 const RAID_TEMPLATE = document.querySelector("#raid_item").innerHTML;
 const REDEMPTION_TEMPLATE = document.querySelector("#redemption_item").innerHTML;
 const GIFT_TEMPLATE = document.querySelector("#gift_item").innerHTML;
+
+function escapeText(text) {
+    return String(text ?? "")
+        .replace(/&/g, '&amp;')
+        .replace(/\</g, '&lt;')
+        .replace(/\>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/\{/g, '&#123;')
+        .replace(/\}/g, '&#125;');
+}
 
 function buildBadges(badges) {
     let badgeJoin = ''
@@ -37,21 +49,24 @@ function buildMessage(message, emotes) {
         return "";
     }
 
-    let safeMessage = (message ?? "").replace(/\</g, '&lt;').replace(/\>/g, '&gt;');
     if (!emotes || !Array.isArray(emotes) || emotes.length === 0) {
-        return safeMessage;
+        return escapeText(message);
     }
 
     const emotesMap = new Map(emotes.map(emote => [emote.code, emote.url]));
-    const processedWords = safeMessage.split(' ').map(word => {
+    const processedWords = message.split(' ').map(word => {
         const emoteUrl = emotesMap.get(word);
-        return emoteUrl ? `<img src="${emoteUrl}" />` : word;
+        return emoteUrl ? `<img src="${emoteUrl}" />` : escapeText(word);
     });
 
     return processedWords.join(' ');
 }
 
 function parseTierName(platform, tier) {
+    if (tier == null) {
+        return "";
+    }
+
     if (platform === "twitch" && tier.toLowerCase() !== "prime") {
         return parseInt(tier, 10) / 1000
     }
@@ -67,14 +82,16 @@ function enrichMessage(text, data) {
         const snakeKey = key.replace(/([A-Z])/g, "_$1").toLowerCase();
 
         if (rawKey === "tier") {
-            enrichedText = enrichedText.replaceAll(key, parseTierName(data.platform, value));
-            enrichedText = enrichedText.replaceAll(snakeKey, parseTierName(data.platform, value));
+            const tierName = parseTierName(data.platform, value);
+            enrichedText = enrichedText.replaceAll(key, tierName);
+            enrichedText = enrichedText.replaceAll(snakeKey, tierName);
         } else if (rawKey === "platform") {
             enrichedText = enrichedText.replaceAll(key, value);
             enrichedText = enrichedText.replaceAll(snakeKey, value);
         } else if (rawKey === "viewerCount") {
-            enrichedText = enrichedText.replaceAll(key, value > 1 ? value : RAID_VIEWERS_DEFAULT_TEXT);
-            enrichedText = enrichedText.replaceAll(snakeKey, value > 1 ? value : RAID_VIEWERS_DEFAULT_TEXT);
+            const viewerCount = value > 1 ? value : RAID_VIEWERS_DEFAULT_TEXT;
+            enrichedText = enrichedText.replaceAll(key, viewerCount);
+            enrichedText = enrichedText.replaceAll(snakeKey, viewerCount);
         } else if (rawKey === "messageText") {
             enrichedText = enrichedText.replaceAll(key, buildMessage(value, data.emotes));
             enrichedText = enrichedText.replaceAll(snakeKey, buildMessage(value, data.emotes));
@@ -82,8 +99,9 @@ function enrichMessage(text, data) {
             enrichedText = enrichedText.replaceAll(key, buildBadges(value));
             enrichedText = enrichedText.replaceAll(snakeKey, buildBadges(value));
         } else {
-            enrichedText = enrichedText.replaceAll(key, value);
-            enrichedText = enrichedText.replaceAll(snakeKey, value);
+            const safeValue = escapeText(value);
+            enrichedText = enrichedText.replaceAll(key, safeValue);
+            enrichedText = enrichedText.replaceAll(snakeKey, safeValue);
         }
     }
 
@@ -130,7 +148,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
     if (event.type === 'unichat:remove_message') {
         /** @type {import("../unichat").UniChatEventRemoveMessage['data']} */
         const data = event.data;
-        MAIN_CONTAINER.querySelector(`div[data-id="${event.data.messageId}"]`)?.remove();
+        MAIN_CONTAINER.querySelector(`div[data-id="${data.messageId}"]`)?.remove();
     } else if (event.type === 'unichat:remove_author') {
         /** @type {import("../unichat").UniChatEventRemoveAuthor['data']} */
         const data = event.data;
@@ -183,6 +201,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
             const data = event.data;
 
             htmlTemplate = enrichMessage(GIFT_TEMPLATE, data);
+            htmlTemplate = htmlTemplate.replace("{gift_meta}", enrichMessage(GIFT_TEMPLATE_MESSAGE, data));
         }
 
         if (htmlTemplate != null && MAIN_CONTAINER.querySelector(`div[data-id="${event.data.messageId}"]`) == null) {

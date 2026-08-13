@@ -12,7 +12,22 @@ const RAID_DISPLAY_DURATION = parseInt("{{duration}}", 10);
 const MAIN_CONTAINER = document.querySelector("#main-container");
 const RAIDER_INFO_TEMPLATE = document.querySelector("#raider_info").innerHTML;
 
+function escapeText(text) {
+    return String(text ?? "")
+        .replace(/&/g, '&amp;')
+        .replace(/\</g, '&lt;')
+        .replace(/\>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/\{/g, '&#123;')
+        .replace(/\}/g, '&#125;');
+}
+
 function parseTierName(platform, tier) {
+    if (tier == null) {
+        return "";
+    }
+
     if (platform === "twitch" && tier.toLowerCase() !== "prime") {
         return parseInt(tier, 10) / 1000
     }
@@ -31,7 +46,8 @@ function enrichMessage(message, params) {
             const viewerCount = params[key] ?? RAID_VIEWER_COUNT_MISSING;
             richMessage = richMessage.replaceAll(`{${key}}`, viewerCount).replace(`{${snakeKey}}`, viewerCount);
         } else {
-            richMessage = richMessage.replaceAll(`{${key}}`, params[key]).replace(`{${snakeKey}}`, params[key]);
+            const safeValue = escapeText(params[key]);
+            richMessage = richMessage.replaceAll(`{${key}}`, safeValue).replace(`{${snakeKey}}`, safeValue);
         }
     }
 
@@ -52,7 +68,7 @@ async function processQueue() {
         const data = event.data;
 
         if (data.authorProfilePictureUrl == null && data.platform === "twitch") {
-            const authorProfilePictureUrl = await fetch(`https://decapi.me/twitch/avatar/${data.authorUsername}`);
+            const authorProfilePictureUrl = await fetch(`https://decapi.me/twitch/avatar/${encodeURIComponent(data.authorUsername)}`);
             if (authorProfilePictureUrl.ok) {
                 data.authorProfilePictureUrl = await authorProfilePictureUrl.text();
             }

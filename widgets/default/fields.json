@@ -275,6 +275,6 @@
         "type": "colorpicker",
         "group": "Gift Event",
         "label": "Text color",
-        "value": "##f8f9fa"
+        "value": "#f8f9fa"
     }
 }
