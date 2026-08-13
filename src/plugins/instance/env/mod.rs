@@ -26,6 +26,7 @@ use crate::plugins::instance::env::unichat_json::UniChatJsonModule;
 use crate::plugins::instance::env::unichat_logger::UniChatLoggerModule;
 use crate::plugins::instance::env::unichat_strings::UniChatStringsModule;
 use crate::plugins::instance::env::unichat_time::UniChatTimeModule;
+use crate::plugins::instance::env::unichat_utils::UniChatUtilsModule;
 use crate::plugins::instance::env::unichat_yaml::UniChatYamlModule;
 use crate::plugins::runtime;
 use crate::utils::safe_guard_path;
@@ -40,6 +41,7 @@ mod unichat_json;
 mod unichat_logger;
 mod unichat_strings;
 mod unichat_time;
+mod unichat_utils;
 mod unichat_yaml;
 mod utils;
 
@@ -91,6 +93,8 @@ fn scoped_modules_require(lua: &mlua::Lua, plugin_env: &mlua::Table, plugin_name
         return UniChatStringsModule::new(lua);
     } else if module == "unichat:time" {
         return UniChatTimeModule::new(lua);
+    } else if module == "unichat:utils" {
+        return UniChatUtilsModule::new(lua);
     } else if module == "unichat:yaml" {
         return UniChatYamlModule::new(lua);
     }
