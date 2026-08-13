@@ -20,6 +20,7 @@ use unichat::UniChatEvent;
 
 use crate::events::unichat::UNICHAT_FLAG_EMULATOR_GENERATED;
 
+#[cfg(test)] mod unichat_parity_test;
 pub mod unichat;
 
 const ONCE_LOCK_NAME: &str = "Events::INSTANCE";
@@ -38,6 +39,7 @@ fn event_is_emulated(event: &UniChatEvent) -> bool {
         UniChatEvent::SponsorGift(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
         UniChatEvent::Raid(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
         UniChatEvent::Redemption(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
+        UniChatEvent::Gift(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
         _ => false
     }
 }

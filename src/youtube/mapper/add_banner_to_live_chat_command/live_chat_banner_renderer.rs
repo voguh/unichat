@@ -15,6 +15,7 @@ use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRaidEventPayload;
@@ -88,13 +89,16 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
                     platform: UniChatPlatform::YouTube,
                     flags: HashMap::new(),
 
-                    author_id: None,
+                    // TODO: the YouTube raid banner carries no authorExternalChannelId, so the
+                    // action id stands in as a temporary value. Replace it once we find where the
+                    // raider id can be extracted from.
+                    author_id: parsed.action_id.clone(),
                     author_username: author_username,
                     author_display_name: author_name,
                     author_display_color: author_color,
                     author_profile_picture_url: Some(proxy_youtube_url(&author_photo.url)),
                     author_badges: Vec::new(),
-                    author_type: None,
+                    author_type: UniChatAuthorType::Viewer,
 
                     message_id: parsed.action_id,
                     viewer_count: None,

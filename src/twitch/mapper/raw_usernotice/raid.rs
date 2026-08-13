@@ -45,13 +45,13 @@ pub fn parse(channel: String, tags: &HashMap<String, Option<String>>) -> Result<
         platform: UniChatPlatform::Twitch,
         flags: inject_raw_tags(&tags),
 
-        author_id: Some(author_id.to_owned()),
+        author_id: author_id.to_owned(),
         author_username: author_username,
         author_display_name: author_name,
         author_display_color: author_color,
         author_profile_picture_url: Some(author_profile_picture_url.clone()),
         author_badges: author_badges,
-        author_type: Some(author_type),
+        author_type: author_type,
 
         message_id: message_id.to_owned(),
         viewer_count: Some(count),

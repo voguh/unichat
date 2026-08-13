@@ -14,6 +14,7 @@ use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::events::unichat::UniChatRedemptionEventPayload;
@@ -83,13 +84,13 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
         author_display_color: display_color,
         author_profile_picture_url: None,
         author_badges: Vec::new(),
-        author_type: None,
+        author_type: UniChatAuthorType::Viewer,
 
         reward_id: parsed.reward.id,
         reward_title: parsed.reward.title,
         reward_description: parsed.reward.prompt,
         reward_cost: parsed.reward.cost,
-        reward_icon_url: icon_url,
+        reward_icon_url: Some(icon_url),
 
         message_id: parsed.id,
         message_text: parsed.user_input.clone(),

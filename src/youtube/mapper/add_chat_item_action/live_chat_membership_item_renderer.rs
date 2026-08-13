@@ -63,24 +63,17 @@ struct HeaderSubtext {
 
 /* <============================================================================================> */
 
-// Following the examples 7 and 8, when headerSubtext contains a simpleText, it is the tier
-// of the membership.
+// The membership tier only exists on the milestone format, where headerSubtext is a simpleText
+// holding the tier name (e.g. "Cliente Tier 1").
+//
+// On the new member format headerSubtext is a runs list reading "Welcome to <channel>!", so runs[1]
+// is the channel name, NOT the tier. That format carries no tier information at all, hence None.
 fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> Result<Option<String>, Error> {
-    let mut tier = None;
-
     if let Some(simple_text) = &parsed.header_subtext.simple_text {
-        tier = Some(simple_text.clone());
-    } else if let Some(runs) = &parsed.header_subtext.runs {
-        let run = runs.get(1).ok_or(anyhow!("No second run found in header primary text"))?;
-        match run {
-            MessageRun::Text { text } => {
-                tier = Some(text.clone());
-            }
-            MessageRun::Emoji { .. } => return Err(anyhow!("Unexpected emoji in header subtext"))
-        }
+        return Ok(Some(simple_text.clone()));
     }
 
-    return Ok(tier);
+    return Ok(None);
 }
 
 static MONTHS_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"\d+").unwrap());

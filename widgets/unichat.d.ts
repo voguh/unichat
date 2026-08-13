@@ -22,7 +22,7 @@ export interface UniChatBadge {
     url: string;
 }
 
-export type UniChatEvent = UniChatEventClear | UniChatEventRemoveMessage | UniChatEventRemoveAuthor | UniChatEventMessage | UniChatEventRaid | UniChatEventSponsor | UniChatEventSponsorGift | UniChatEventDonate | UniChatEventRedemption | UniChatEventGift;
+export type UniChatEvent = UniChatEventClear | UniChatEventRemoveMessage | UniChatEventRemoveAuthor | UniChatEventMessage | UniChatEventRaid | UniChatEventSponsor | UniChatEventSponsorGift | UniChatEventDonate | UniChatEventRedemption | UniChatEventGift | UniChatEventUserstoreUpdate | UniChatEventCustom;
 
 /* <============================================================================================> */
 
@@ -30,7 +30,7 @@ export interface UniChatEventClear {
     type: "unichat:clear";
     data: {
         /** When filled, indicates that some platform triggered the clear. */
-        platform: string | null;
+        platform: UniChatPlatform | null;
 
         timestamp: number;
     };
@@ -162,7 +162,7 @@ export interface UniChatEventSponsor {
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
 
-        /** **Disclaimer:** On YouTube, this field could be null. */
+        /** **Disclaimer:** On YouTube, this field is null for new members; it is only present on membership milestone events. */
         tier: string | null;
         months: number;
 
@@ -196,7 +196,7 @@ export interface UniChatEventSponsorGift {
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
 
-        /** **Disclaimer:** On YouTube, this field could be null. */
+        /** **Disclaimer:** On YouTube, this field is always null. */
         tier: string | null;
         count: number;
 
@@ -218,8 +218,8 @@ export interface UniChatEventRaid {
         platform: UniChatPlatform;
         flags: Record<string, string | null>;
 
-        /** **Disclaimer:** On YouTube, this field is always null. */
-        authorId: string | null;
+        /** **Disclaimer:** On YouTube, the raid banner carries no channel id, so this field holds a temporary value derived from the event itself. */
+        authorId: string;
         /** **Disclaimer:** On YouTube, this field is null when name doesn't starts with `@`. */
         authorUsername: string | null;
         authorDisplayName: string;
@@ -227,8 +227,7 @@ export interface UniChatEventRaid {
         authorProfilePictureUrl: string | null;
         /** **Disclaimer:** On YouTube, this field is an empty list. */
         authorBadges: UniChatBadge[];
-        /** **Disclaimer:** On YouTube, this field is always null. */
-        authorType: UniChatAuthorType | null;
+        authorType: UniChatAuthorType;
 
         messageId: string;
         /** **Disclaimer:** On YouTube, this field is always null. */
@@ -245,7 +244,7 @@ export interface UniChatEventRedemption {
     type: "unichat:redemption";
     data: {
         channelId: string;
-        /** **Disclaimer:** This field is always null. */
+        /** **Disclaimer:** On Twitch, this field is only filled on rewards that require a message from the viewer; it is null otherwise. */
         channelName: string | null;
 
         platform: UniChatPlatform;
@@ -258,16 +257,16 @@ export interface UniChatEventRedemption {
         authorDisplayColor: string;
         /** **Disclaimer:** On Twitch, this field is always null. */
         authorProfilePictureUrl: string | null;
-        /** **Disclaimer:** On Twitch, this field is an empty list. */
+        /** **Disclaimer:** On Twitch, this list is only filled on rewards that require a message from the viewer; it is empty otherwise. */
         authorBadges: UniChatBadge[];
-        /** **Disclaimer:** On Twitch, this field is always null. */
-        authorType: UniChatAuthorType | null;
+        /** **Disclaimer:** On Twitch, the real type is only known on rewards that require a message from the viewer; it falls back to `VIEWER` otherwise. */
+        authorType: UniChatAuthorType;
 
         rewardId: string;
         rewardTitle: string;
         rewardDescription: string | null;
         rewardCost: number;
-        rewardIconUrl: string;
+        rewardIconUrl: string | null;
 
         messageId: string;
         messageText: string | null;
@@ -284,38 +283,56 @@ export interface UniChatEventGift {
     type: "unichat:gift";
     data: {
         channelId: string;
-        /** **Disclaimer:** This field is always null. */
+        /** **Disclaimer:** On YouTube, this field is always null. */
         channelName: string | null;
 
         platform: UniChatPlatform;
         flags: Record<string, string | null>;
 
         authorId: string;
-        /** **Disclaimer:** This field is null when name doesn't starts with `@`. */
+        /** **Disclaimer:** On YouTube, this field is null when name doesn't starts with `@`. */
         authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
-        authorProfilePictureUrl: string;
-        /** **Disclaimer:** This field is always an empty list. */
+        authorProfilePictureUrl: string | null;
+        /** **Disclaimer:** On YouTube, this field is always an empty list. */
         authorBadges: UniChatBadge[];
-        /** **Disclaimer:** This field is always null. */
-        authorType: UniChatAuthorType | null;
+        authorType: UniChatAuthorType;
 
-        /** **Disclaimer:** This field is always null. */
-        giftId: string;
-        /** **Disclaimer:** This field is always null. */
-        giftTitle: string;
+        /** **Disclaimer:** On YouTube, derived from the gift asset filename. Stable per gift type, but not an id issued by the platform. */
+        giftId: string | null;
+        /** **Disclaimer:** On YouTube, derived from the gift asset filename - an approximation of the real name. */
+        giftTitle: string | null;
         giftDescription: string | null;
-        /** **Disclaimer:** This field is always null. */
-        giftCost: number;
-        giftIconUrl: string;
+        /** **Disclaimer:** On YouTube, this field is always null. */
+        giftCost: number | null;
+        giftIconUrl: string | null;
 
         messageId: string;
-        /** **Disclaimer:** This field is always null. */
+        /** **Disclaimer:** On YouTube, this field is always null. */
         messageText: string | null;
-        /** **Disclaimer:** This field is always an empty list. */
+        /** **Disclaimer:** On YouTube, this field is always an empty list. */
         emotes: UniChatEmote[];
 
         timestamp: number;
     }
+}
+
+/* <============================================================================================> */
+
+export interface UniChatEventUserstoreUpdate {
+    type: "unichat:userstore_update";
+    data: {
+        key: string;
+        /** **Disclaimer:** `null` means the key was removed. */
+        value: string | null;
+    }
+}
+
+/* <============================================================================================> */
+
+/** **Disclaimer:** The payload is whatever the emitting plugin decided to send. */
+export interface UniChatEventCustom {
+    type: "unichat:custom";
+    data: Record<string, unknown>;
 }

@@ -47,7 +47,7 @@ fn merge_redemption_events(redemption_event: UniChatRedemptionEventPayload, mess
         author_display_color: message_event.author_display_color,
         author_profile_picture_url: message_event.author_profile_picture_url,
         author_badges: message_event.author_badges,
-        author_type: Some(message_event.author_type),
+        author_type: message_event.author_type,
 
         reward_id: redemption_event.reward_id,
         reward_title: redemption_event.reward_title,

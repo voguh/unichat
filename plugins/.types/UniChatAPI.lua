@@ -56,10 +56,11 @@
 ---@field SponsorGift fun(self: UniChatEventFactory, data: UniChatSponsorGiftEventPayload): UniChatEvent
 ---@field Raid fun(self: UniChatEventFactory, data: UniChatRaidEventPayload): UniChatEvent
 ---@field Redemption fun(self: UniChatEventFactory, data: UniChatRedemptionEventPayload): UniChatEvent
----@field Other fun(self: UniChatEventFactory, data: table): UniChatEvent
+---@field Gift fun(self: UniChatEventFactory, data: UniChatGiftEventPayload): UniChatEvent
+---@field Custom fun(self: UniChatEventFactory, data: table): UniChatEvent
 
 ---@class UniChatClearEventPayload
----@field platform? UniChatAuthorType
+---@field platform? UniChatPlatform
 ---@field timestamp number
 
 ---@class UniChatRemoveMessageEventPayload
@@ -157,15 +158,15 @@
 ---@field channelName? string
 ---@field platform UniChatPlatform
 ---@field flags table<string, string|nil>
----@field authorId? string
+---@field authorId string
 ---@field authorUsername? string
 ---@field authorDisplayName string
 ---@field authorDisplayColor string
 ---@field authorProfilePictureUrl? string
 ---@field authorBadges UniChatBadge[]
----@field authorType? UniChatAuthorType
+---@field authorType UniChatAuthorType
 ---@field messageId string
----@field viewer_count? number
+---@field viewerCount? number
 ---@field timestamp number
 
 ---@class UniChatRedemptionEventPayload
@@ -189,6 +190,32 @@
 ---@field messageText? string
 ---@field emotes UniChatEmote[]
 ---@field timestamp number
+
+---@class UniChatGiftEventPayload
+---@field channelId string
+---@field channelName? string
+---@field platform UniChatPlatform
+---@field flags table<string, string|nil>
+---@field authorId string
+---@field authorUsername? string
+---@field authorDisplayName string
+---@field authorDisplayColor string
+---@field authorProfilePictureUrl? string
+---@field authorBadges UniChatBadge[]
+---@field authorType UniChatAuthorType
+---@field giftId? string
+---@field giftTitle? string
+---@field giftDescription? string
+---@field giftCost? number
+---@field giftIconUrl? string
+---@field messageId string
+---@field messageText? string
+---@field emotes UniChatEmote[]
+---@field timestamp number
+
+---@class UniChatUserstoreUpdateEventPayload
+---@field key string
+---@field value? string
 
 
 
@@ -295,6 +322,11 @@ UniChatBadge = UniChatBadge or nil;
 ---@class UniChatTime
 ---@field now fun(self: UniChatTime): number
 -- ===========================================[ End UniChat Time Library ]=========================================== --
+
+-- ============================================[ UniChat Utils Library ]============================================= --
+---@class UniChatUtils
+---@field random_color_by_seed fun(self: UniChatUtils, seed: string): string
+-- ==========================================[ End UniChat Utils Library ]=========================================== --
 
 -- =============================================[ UniChat YAML Library ]============================================= --
 ---@class UniChatYaml

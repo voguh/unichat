@@ -100,6 +100,12 @@ impl mlua::UserData for LuaUniChatEventFactory {
             return lua.create_userdata(LuaUniChatEvent { inner: event });
         });
 
+        methods.add_method("Gift", |lua, _this, data: mlua::Value| {
+            let payload = lua.from_value(data)?;
+            let event = UniChatEvent::Gift(payload);
+            return lua.create_userdata(LuaUniChatEvent { inner: event });
+        });
+
         methods.add_method("Custom", |lua, _this, data: mlua::Value| {
             let payload = lua.from_value(data)?;
             let event = UniChatEvent::Custom(payload);

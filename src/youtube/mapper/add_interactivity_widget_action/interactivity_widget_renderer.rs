@@ -9,11 +9,13 @@
  ******************************************************************************/
 
 use std::collections::HashMap;
+use std::sync::LazyLock;
 
 use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatGiftEventPayload;
 use crate::events::unichat::UniChatPlatform;
@@ -131,6 +133,45 @@ struct Position {
     special_placement: String
 }
 
+static GIFT_ASSET_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"/assets/([^./]+)\.").unwrap());
+
+const GIFT_A11Y_LABEL_SEPARATOR: &str = " sent a gift, ";
+
+// The gift asset filename is the only per-gift discriminator the widget carries, e.g.
+// "//www.gstatic.com/youtube/img/pdg/gift/assets/pastel.webp=w80-h80" -> "pastel".
+//
+// It is stable per gift type, but it is not an id issued by YouTube.
+fn parse_gift_id(gift: &GiftAttributionItemViewModel) -> Option<String> {
+    let url = gift.attribution_image.sources.first()?;
+    let captures = GIFT_ASSET_REGEX.captures(&url.url)?;
+    return Some(captures.get(1)?.as_str().to_owned());
+}
+
+// The widget has no field holding the gift name, so it is approximated from the asset slug:
+// "gaming_capybara" -> "Gaming capybara". Sentence case matches YouTube's own naming style.
+fn parse_gift_title(gift_id: &Option<String>) -> Option<String> {
+    let slug = gift_id.as_ref()?;
+    let spaced = slug.replace('_', " ");
+
+    let mut chars = spaced.chars();
+    let first = chars.next()?;
+
+    return Some(format!("{}{}", first.to_uppercase(), chars.as_str()));
+}
+
+// 'detailText' is the constant "Sent a gift" on every event, so it carries no information.
+// The actual description sits in the accessibility label, after the "<author> sent a gift, " prefix.
+fn parse_gift_description(gift: &GiftAttributionItemViewModel) -> Option<String> {
+    let (_, description) = gift.gift_a11y_label.split_once(GIFT_A11Y_LABEL_SEPARATOR)?;
+    let description = description.trim();
+
+    if description.is_empty() {
+        return None;
+    }
+
+    return Some(description.to_owned());
+}
+
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let parsed: InteractivityWidgetRenderer = serde_json::from_value(value)?;
 
@@ -144,7 +185,9 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
         let author_color = parse_author_color(&author_name)?;
         let author_photo = parse_author_photo_vec(&gift.author_avatar.avatar_view_model.image.sources)?;
 
-        let gift_description = Some(gift.detail_text.content);
+        let gift_id = parse_gift_id(&gift);
+        let gift_title = parse_gift_title(&gift_id);
+        let gift_description = parse_gift_description(&gift);
         let gift_icon_url = gift.attribution_image.sources.last().map(|thumb| proxy_youtube_url(&thumb.url));
 
         let message_id = gift.id;
@@ -163,11 +206,11 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
             author_display_name: author_name,
             author_display_color: author_color,
             author_badges: Vec::new(),
-            author_profile_picture_url: author_photo,
-            author_type: None,
+            author_profile_picture_url: Some(author_photo),
+            author_type: UniChatAuthorType::Viewer,
 
-            gift_id: None,
-            gift_title: None,
+            gift_id: gift_id,
+            gift_title: gift_title,
             gift_description: gift_description,
             gift_cost: None,
             gift_icon_url: gift_icon_url,

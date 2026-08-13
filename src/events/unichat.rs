@@ -310,13 +310,13 @@ pub struct UniChatRaidEventPayload {
     pub platform: UniChatPlatform,
     pub flags: HashMap<String, Option<String>>,
 
-    pub author_id: Option<String>,
+    pub author_id: String,
     pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_display_color: String,
     pub author_profile_picture_url: Option<String>,
     pub author_badges: Vec<UniChatBadge>,
-    pub author_type: Option<UniChatAuthorType>,
+    pub author_type: UniChatAuthorType,
 
     pub message_id: String,
     pub viewer_count: Option<u16>,
@@ -341,13 +341,13 @@ pub struct UniChatRedemptionEventPayload {
     pub author_display_color: String,
     pub author_profile_picture_url: Option<String>,
     pub author_badges: Vec<UniChatBadge>,
-    pub author_type: Option<UniChatAuthorType>,
+    pub author_type: UniChatAuthorType,
 
     pub reward_id: String,
     pub reward_title: String,
     pub reward_description: Option<String>,
     pub reward_cost: u32,
-    pub reward_icon_url: String,
+    pub reward_icon_url: Option<String>,
 
     pub message_id: String,
     pub message_text: Option<String>,
@@ -371,9 +371,9 @@ pub struct UniChatGiftEventPayload {
     pub author_username: Option<String>,
     pub author_display_name: String,
     pub author_display_color: String,
-    pub author_profile_picture_url: String,
+    pub author_profile_picture_url: Option<String>,
     pub author_badges: Vec<UniChatBadge>,
-    pub author_type: Option<UniChatAuthorType>,
+    pub author_type: UniChatAuthorType,
 
     pub gift_id: Option<String>,
     pub gift_title: Option<String>,
