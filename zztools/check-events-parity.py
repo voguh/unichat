@@ -21,7 +21,6 @@ RUST_PATH = ROOT_PATH / "src" / "events" / "unichat.rs"
 TYPESCRIPT_PATH = ROOT_PATH / "widgets" / "unichat.d.ts"
 LUA_PATH = ROOT_PATH / "plugins" / ".types" / "UniChatAPI.lua"
 
-# Payloads under parity, as (Rust struct, TypeScript interface, Lua class).
 PAYLOADS = [
     ("UniChatClearEventPayload", "UniChatEventClear", "UniChatClearEventPayload"),
     ("UniChatRemoveMessageEventPayload", "UniChatEventRemoveMessage", "UniChatRemoveMessageEventPayload"),
@@ -36,7 +35,6 @@ PAYLOADS = [
     ("UniChatUserstoreUpdateEventPayload", "UniChatEventUserstoreUpdate", "UniChatUserstoreUpdateEventPayload")
 ]
 
-# The userstore update is emitted by the core, never by a plugin.
 VARIANTS_WITHOUT_FACTORY = {"UserstoreUpdate"}
 
 # ============================================================================ #
@@ -75,12 +73,9 @@ def parse_typescript(source: str, interface_name: str) -> dict[str, bool]:
             continue
 
         name, _, kind = line.rstrip(";").partition(": ")
-        # 'type' is the discriminant and 'data' only opens the payload object.
         if not kind or name in ("type", "data"):
             continue
 
-        # Anchored at the end on purpose: 'Record<string, string | null>' is a non-nullable field
-        # whose *values* are nullable.
         fields[name] = kind.endswith("| null")
 
     return fields
@@ -113,8 +108,6 @@ def compare(payload: str, left_name: str, left: dict[str, bool], right_name: str
 
     return problems
 
-# A variant without a factory exists but no plugin can emit it, which is how 'unichat:gift' stayed
-# unreachable until 1.5.0.
 def missing_factories(rust_source: str, lua_source: str) -> list[str]:
     factories = block(lua_source, LUA_PATH, "---@class UniChatEventFactory\n", "\n\n")
 
