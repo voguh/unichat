@@ -20,7 +20,6 @@ use unichat::UniChatEvent;
 
 use crate::events::unichat::UNICHAT_FLAG_EMULATOR_GENERATED;
 
-#[cfg(test)] mod unichat_parity_test;
 pub mod unichat;
 
 const ONCE_LOCK_NAME: &str = "Events::INSTANCE";

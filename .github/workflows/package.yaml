@@ -19,7 +19,7 @@ defaults:
     shell: bash
 
 jobs:
-  check-license-headers:
+  static-checks:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
@@ -29,9 +29,13 @@ jobs:
         run: |
           LOG_LEVEL=debug ./zztools/check-license-header.py
 
+      - name: Check event contract parity
+        run: |
+          LOG_LEVEL=debug ./zztools/check-events-parity.py
+
   webapp-bundle:
     runs-on: ubuntu-24.04
-    needs: [check-license-headers]
+    needs: [static-checks]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6.0.3
