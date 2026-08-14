@@ -23,7 +23,6 @@ use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::Thumbnail;
-use crate::youtube::mapper::structs::ThumbnailsWrapper;
 use crate::youtube::mapper::structs::author::AuthorPhotoWrapper;
 use crate::youtube::mapper::structs::author::parse_author_color;
 use crate::youtube::mapper::structs::author::parse_author_name_str;
@@ -34,24 +33,7 @@ use crate::youtube::mapper::structs::proxy_youtube_url;
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct InteractivityWidgetRenderer {
-    id: String,
-    #[serde(rename = "type")]
-    widget_type: String,
-    preload_images: Vec<PreloadImage>,
-    content: Content,
-    position: Position,
-    timeout_ms: u64,
-    enter_animation: String,
-    exit_animation: String,
-    priority: i32
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-struct PreloadImage {
-    image: ThumbnailsWrapper,
-    image_display_width: u32,
-    image_display_height: u32
+    content: Content
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -67,7 +49,6 @@ struct GiftAttributionItemViewModel {
     id: String,
     author_name: TextContent,
     author_avatar: AuthorAvatar,
-    detail_text: TextContent,
     attribution_image: SourceImage,
     gift_a11y_label: String
 }
@@ -86,25 +67,12 @@ struct AuthorAvatar {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct AvatarViewModel {
-    image: AvatarImage,
-    avatar_image_size: String
+    image: AvatarImage
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 struct AvatarImage {
-    sources: Vec<AuthorPhotoWrapper>,
-    processor: ImageProcessor
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-struct ImageProcessor {
-    border_image_processor: BorderImageProcessor
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct BorderImageProcessor {
-    circular: bool
+    sources: Vec<AuthorPhotoWrapper>
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -121,16 +89,7 @@ struct ElementRenderer {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct CompatibilityOptions {
-    live_chat_id: String,
     live_chat_author_external_channel_id: String
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-struct Position {
-    width: String,
-    height: String,
-    special_placement: String
 }
 
 static GIFT_ASSET_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"/assets/([^./]+)\.").unwrap());
@@ -138,7 +97,7 @@ static GIFT_ASSET_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex:
 const GIFT_A11Y_LABEL_SEPARATOR: &str = " sent a gift, ";
 
 // The gift asset filename is the only per-gift discriminator the widget carries, e.g.
-// "//www.gstatic.com/youtube/img/pdg/gift/assets/pastel.webp=w80-h80" -> "pastel".
+// "[...]/assets/pastel.webp=w80-h80" -> "pastel".
 //
 // It is stable per gift type, but it is not an id issued by YouTube.
 fn parse_gift_id(gift: &GiftAttributionItemViewModel) -> Option<String> {
@@ -148,7 +107,7 @@ fn parse_gift_id(gift: &GiftAttributionItemViewModel) -> Option<String> {
 }
 
 // The widget has no field holding the gift name, so it is approximated from the asset slug:
-// "gaming_capybara" -> "Gaming capybara". Sentence case matches YouTube's own naming style.
+// "gaming_capybara" -> "Gaming capybara".
 fn parse_gift_title(gift_id: &Option<String>) -> Option<String> {
     let slug = gift_id.as_ref()?;
     let spaced = slug.replace('_', " ");
@@ -159,8 +118,6 @@ fn parse_gift_title(gift_id: &Option<String>) -> Option<String> {
     return Some(format!("{}{}", first.to_uppercase(), chars.as_str()));
 }
 
-// 'detailText' is the constant "Sent a gift" on every event, so it carries no information.
-// The actual description sits in the accessibility label, after the "<author> sent a gift, " prefix.
 fn parse_gift_description(gift: &GiftAttributionItemViewModel) -> Option<String> {
     let (_, description) = gift.gift_a11y_label.split_once(GIFT_A11Y_LABEL_SEPARATOR)?;
     let description = description.trim();
@@ -173,9 +130,10 @@ fn parse_gift_description(gift: &GiftAttributionItemViewModel) -> Option<String>
 }
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
-    let parsed: InteractivityWidgetRenderer = serde_json::from_value(value)?;
+    let widget_type = value.get("type").and_then(|widget_type| widget_type.as_str());
 
-    if parsed.widget_type == "INTERACTIVITY_WIDGET_TYPE_GIFT" {
+    if widget_type == Some("INTERACTIVITY_WIDGET_TYPE_GIFT") {
+        let parsed: InteractivityWidgetRenderer = serde_json::from_value(value)?;
         let gift = parsed.content.gift_attribution_item_view_model;
 
         let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;

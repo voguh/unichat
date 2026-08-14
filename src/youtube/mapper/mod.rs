@@ -28,7 +28,7 @@ pub fn parse(payload: &serde_json::Value) -> Result<Option<UniChatEvent>, Error>
         return remove_chat_item_action::parse(value.clone());
     } else if let Some(value) = payload.get("removeChatItemByAuthorAction") {
         return remove_chat_item_by_author_action::parse(value.clone());
-    } else if let Some(value) = payload.get("addInteractivityWidgetAction") {
+    } else if let Some(value) = payload.get("addInteractivityWidgetAction").or_else(|| payload.get("updateOrAddInteractivityWidgetAction")) {
         return add_interactivity_widget_action::parse(value.clone());
     }
 
