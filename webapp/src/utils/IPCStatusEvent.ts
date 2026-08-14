@@ -12,34 +12,25 @@ export enum IPCEvents {
     STATUS_EVENT = "unichat://status:event"
 }
 
-export interface IPCStatusIdleEvent {
-    type: "idle";
-    scraperId: string;
-    timestamp: number;
+export enum ScraperStatus {
+    IDLE = "idle",
+    READY = "ready",
+    PING = "ping",
+    ERROR = "error",
+    FATAL = "fatal"
 }
 
-export interface IPCStatusReadyEvent {
-    type: "ready";
-    scraperId: string;
-    timestamp: number;
-}
+export const SCRAPER_LIFECYCLE_STATUSES = [ScraperStatus.IDLE, ScraperStatus.READY, ScraperStatus.PING];
+export const SCRAPER_RUNNING_STATUSES = [ScraperStatus.READY, ScraperStatus.PING];
 
-export interface IPCStatusPingEvent {
-    type: "ping";
-    scraperId: string;
-    timestamp: number;
-}
-
-export interface IPCStatusErrorEvent {
-    type: "error" | "fatal";
+export interface IPCStatusEvent {
+    type: ScraperStatus;
     scraperId: string;
     timestamp: number;
 
-    message: string;
-    stack: string;
+    message: string | null;
+    stack: string | null;
 }
-
-export type IPCStatusEvent = IPCStatusIdleEvent | IPCStatusReadyEvent | IPCStatusPingEvent | IPCStatusErrorEvent;
 
 export interface IPCNotificationEvent {
     title: string;

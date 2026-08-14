@@ -21,6 +21,11 @@ RUST_PATH = ROOT_PATH / "src" / "events" / "unichat.rs"
 TYPESCRIPT_PATH = ROOT_PATH / "widgets" / "unichat.d.ts"
 LUA_PATH = ROOT_PATH / "plugins" / ".types" / "UniChatAPI.lua"
 
+STATUS_RUST_PATH = ROOT_PATH / "src" / "scraper" / "status.rs"
+STATUS_TYPESCRIPT_PATH = ROOT_PATH / "webapp" / "src" / "utils" / "IPCStatusEvent.ts"
+
+STATUS_RUST_ONLY_FIELDS = ("status", "extra")
+
 PAYLOADS = [
     ("UniChatClearEventPayload", "UniChatEventClear", "UniChatClearEventPayload"),
     ("UniChatRemoveMessageEventPayload", "UniChatEventRemoveMessage", "UniChatRemoveMessageEventPayload"),
@@ -52,9 +57,9 @@ def block(source: str, path: Path, header: str, closer: str) -> str:
 
 # ============================================================================ #
 
-def parse_rust(source: str, struct_name: str) -> dict[str, bool]:
+def parse_rust(source: str, struct_name: str, path: Path = RUST_PATH) -> dict[str, bool]:
     fields = {}
-    for line in block(source, RUST_PATH, f"pub struct {struct_name} {{\n", "\n}").splitlines():
+    for line in block(source, path, f"pub struct {struct_name} {{\n", "\n}").splitlines():
         line = line.strip()
         if not line.startswith("pub "):
             continue
@@ -65,9 +70,9 @@ def parse_rust(source: str, struct_name: str) -> dict[str, bool]:
 
     return fields
 
-def parse_typescript(source: str, interface_name: str) -> dict[str, bool]:
+def parse_typescript(source: str, interface_name: str, path: Path = TYPESCRIPT_PATH) -> dict[str, bool]:
     fields = {}
-    for line in block(source, TYPESCRIPT_PATH, f"export interface {interface_name} {{\n", "\n}").splitlines():
+    for line in block(source, path, f"export interface {interface_name} {{\n", "\n}").splitlines():
         line = line.strip()
         if line.startswith(("/*", "*", "//")):
             continue
@@ -127,7 +132,7 @@ def missing_factories(rust_source: str, lua_source: str) -> list[str]:
 def main():
     logger.info("Checking event contract parity...")
 
-    for path in (RUST_PATH, TYPESCRIPT_PATH, LUA_PATH):
+    for path in (RUST_PATH, TYPESCRIPT_PATH, LUA_PATH, STATUS_RUST_PATH, STATUS_TYPESCRIPT_PATH):
         if not path.is_file():
             logger.error(f"Contract file is missing: ./{path.relative_to(ROOT_PATH)}")
             sys.exit(1)
@@ -143,6 +148,12 @@ def main():
         rust = parse_rust(rust_source, rust_name)
         problems += compare(rust_name, "rust", rust, "typescript", parse_typescript(typescript_source, typescript_name))
         problems += compare(rust_name, "rust", rust, "lua", parse_lua(lua_source, lua_name))
+
+    logger.debug("Checking ScraperStatusEvent...")
+    status_rust = parse_rust(STATUS_RUST_PATH.read_text(encoding="utf-8"), "ScraperStatusEvent", STATUS_RUST_PATH)
+    status_rust = {name: optional for name, optional in status_rust.items() if name not in STATUS_RUST_ONLY_FIELDS}
+    status_typescript = parse_typescript(STATUS_TYPESCRIPT_PATH.read_text(encoding="utf-8"), "IPCStatusEvent", STATUS_TYPESCRIPT_PATH)
+    problems += compare("ScraperStatusEvent", "rust", status_rust, "typescript", status_typescript)
 
     logger.debug("Checking UniChatEventFactory...")
     for variant in missing_factories(rust_source, lua_source):

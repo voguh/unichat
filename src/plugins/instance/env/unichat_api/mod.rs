@@ -202,7 +202,7 @@ impl mlua::UserData for UniChatAPI {
         });
 
         methods.add_method("notify", |_lua, this, message: String| {
-            render_emitter::emit_notification(&this.plugin_name, &message).map_err(mlua::Error::external)?;
+            render_emitter::emit_notification(&this.plugin_name, &message);
             return Ok(());
         });
     }

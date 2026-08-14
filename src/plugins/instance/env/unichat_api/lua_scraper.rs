@@ -11,7 +11,6 @@
 use std::fs;
 use std::io::Write as _;
 
-use anyhow::anyhow;
 use anyhow::Error;
 use mlua::LuaSerdeExt as _;
 
@@ -19,9 +18,10 @@ use crate::events;
 use crate::plugins::instance::env::unichat_event::LuaUniChatEvent;
 use crate::plugins::runtime;
 use crate::scraper::UniChatScraper;
+use crate::scraper::status::ScraperStatus;
+use crate::scraper::status::ScraperStatusEvent;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
-use crate::utils::render_emitter;
 use crate::utils::settings;
 use crate::utils::settings::SettingLogEventLevel;
 
@@ -57,7 +57,8 @@ pub struct LuaUniChatScraper {
     on_idle: Option<mlua::Function>,
     on_ready: Option<mlua::Function>,
     on_ping: Option<mlua::Function>,
-    on_error: Option<mlua::Function>
+    on_error: Option<mlua::Function>,
+    on_fatal: Option<mlua::Function>
 }
 
 impl LuaUniChatScraper {
@@ -72,6 +73,7 @@ impl LuaUniChatScraper {
         let on_ready = get_optional_table_property(&opts, "on_ready")?;
         let on_ping = get_optional_table_property(&opts, "on_ping")?;
         let on_error = get_optional_table_property(&opts, "on_error")?;
+        let on_fatal = get_optional_table_property(&opts, "on_fatal")?;
 
         if id.trim().is_empty() || id.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') || !id.trim().ends_with("-chat") {
             return Err(mlua::Error::external(format!("Scraper 'id' must be a non-empty alphanumeric ASCII string and end with '-chat'")));
@@ -95,7 +97,8 @@ impl LuaUniChatScraper {
             on_idle: on_idle,
             on_ready: on_ready,
             on_ping: on_ping,
-            on_error: on_error
+            on_error: on_error,
+            on_fatal: on_fatal
         });
     }
 
@@ -109,6 +112,16 @@ impl LuaUniChatScraper {
         let log_file = scraper_log_dir.join(file_name);
         let mut file = fs::OpenOptions::new().create(true).append(true).open(log_file).unwrap();
         writeln!(file, "{content}").unwrap();
+    }
+
+    fn status_callback(&self, status: ScraperStatus) -> Option<&mlua::Function> {
+        return match status {
+            ScraperStatus::Idle => self.on_idle.as_ref(),
+            ScraperStatus::Ready => self.on_ready.as_ref(),
+            ScraperStatus::Ping => self.on_ping.as_ref(),
+            ScraperStatus::Error => self.on_error.as_ref(),
+            ScraperStatus::Fatal => self.on_fatal.as_ref()
+        };
     }
 }
 
@@ -147,79 +160,51 @@ impl UniChatScraper for LuaUniChatScraper {
     }
 
     fn on_event(&self, event: serde_json::Value) -> Result<(), Error> {
-        let scraper_id = event.get("scraperId").and_then(|v| v.as_str())
-            .ok_or(anyhow!("Missing or invalid 'scraperId' field in {} raw event payload", self.id))?;
-        let event_type = event.get("type").and_then(|v| v.as_str())
-            .ok_or(anyhow!("Missing or invalid 'type' field in {} raw event payload", self.id))?;
+        let lua = runtime::get()?;
+        let log_events = settings::get_scraper_events_log_level();
 
-        if scraper_id != self.id {
-            return Ok(());
+        if log_events == SettingLogEventLevel::AllEvents {
+            self.log_action("events-raw.log", &event);
         }
 
+        let table = lua.to_value(&event)?;
+
+        match self.on_event.call::<Option<LuaUniChatEvent>>(table) {
+            Ok(Some(parsed_event)) => {
+                let parsed = parsed_event.inner;
+                if log_events == SettingLogEventLevel::AllEvents {
+                    let str = serde_json::to_string(&parsed)?;
+                    self.log_action("events-parsed.log", &str);
+                }
+
+                if let Err(err) = events::emit(parsed) {
+                    log::error!(target: &format!("scraper:{}", self.name), "An error occurred on send unichat event: {:#?}", err);
+                }
+            },
+            Ok(None) => {
+                if [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
+                    self.log_action("events-unknown.log", &event);
+                }
+            },
+            Err(err) => {
+                log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper 'on_event' callback: {:#?}", self.id, err);
+                self.log_action("events-error.log", &format!("{} -- {:?}", err, event));
+            }
+        }
+
+        return Ok(());
+    }
+
+    fn on_status(&self, event: &ScraperStatusEvent) -> Result<(), Error> {
+        let Some(callback) = self.status_callback(event.status) else {
+            return Ok(());
+        };
+
         let lua = runtime::get()?;
-        if matches!(event_type, "idle" | "ready" | "ping" | "error") {
-            if let Err(err) = render_emitter::emit(event.clone()) {
-                log::error!(target: &format!("scraper:{}", self.name), "{:#?}", err);
-            }
+        let table = lua.to_value(event)?;
 
-            let table = lua.to_value(&event)?;
-
-            if event_type == "idle" {
-                if let Some(on_idle) = &self.on_idle {
-                    if let Err(err) = on_idle.call::<()>(table) {
-                        log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper 'on_idle' callback: {:#?}", self.id, err);
-                    }
-                }
-            } else if event_type == "ready" {
-                if let Some(on_ready) = &self.on_ready {
-                    if let Err(err) = on_ready.call::<()>(table) {
-                        log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper 'on_ready' callback: {:#?}", self.id, err);
-                    }
-                }
-            } else if event_type == "ping" {
-                if let Some(on_ping) = &self.on_ping {
-                    if let Err(err) = on_ping.call::<()>(table) {
-                        log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper 'on_ping' callback: {:#?}", self.id, err);
-                    }
-                }
-            } else if event_type == "error" {
-                if let Some(on_error) = &self.on_error {
-                    if let Err(err) = on_error.call::<()>(table) {
-                        log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper 'on_error' callback: {:#?}", self.id, err);
-                    }
-                }
-            }
-        } else {
-            let log_events = settings::get_scraper_events_log_level();
-
-            if log_events == SettingLogEventLevel::AllEvents {
-                self.log_action("events-raw.log", &event);
-            }
-
-            let table = lua.to_value(&event)?;
-
-            match self.on_event.call::<Option<LuaUniChatEvent>>(table) {
-                Ok(Some(event)) => {
-                    let parsed = event.inner;
-                    if log_events == SettingLogEventLevel::AllEvents {
-                        let str = serde_json::to_string(&parsed)?;
-                        self.log_action("events-parsed.log", &str);
-                    }
-
-                    if let Err(err) = events::emit(parsed) {
-                        log::error!(target: &format!("scraper:{}", self.name), "An error occurred on send unichat event: {:#?}", err);
-                    }
-                },
-                Ok(None) => {
-                    if [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
-                        self.log_action("events-unknown.log", &event);
-                    }
-                },
-                Err(err) => {
-                    log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper 'on_event' callback: {:#?}", self.id, err);
-                    self.log_action("events-error.log", &format!("{} -- {:?}", err, event));
-                }
-            }
+        if let Err(err) = callback.call::<()>(table) {
+            log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper '{:?}' status callback: {:#?}", self.id, event.status, err);
         }
 
         return Ok(());

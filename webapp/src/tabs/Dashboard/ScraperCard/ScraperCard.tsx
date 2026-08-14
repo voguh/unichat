@@ -23,7 +23,13 @@ import { modalService } from "unichat/services/modalService";
 import { notificationService } from "unichat/services/notificationService";
 import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
 import { UniChatScraper } from "unichat/types";
-import { IPCEvents, IPCStatusEvent } from "unichat/utils/IPCStatusEvent";
+import {
+    IPCEvents,
+    IPCStatusEvent,
+    SCRAPER_LIFECYCLE_STATUSES,
+    SCRAPER_RUNNING_STATUSES,
+    ScraperStatus
+} from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
 
 import { ScraperCardContainer, ScraperLabel } from "./styled";
@@ -35,9 +41,11 @@ interface Props {
 }
 
 const DEFAULT_EVENT: IPCStatusEvent = {
-    type: "idle",
+    type: ScraperStatus.IDLE,
     scraperId: "youtube-chat",
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    message: null,
+    stack: null
 };
 
 const _logger = LoggerFactory.getLogger("ScraperCard");
@@ -48,7 +56,7 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
     const [showOpenWebviewButton, setShowOpenWebviewButton] = useState(false);
     const [event, setEvent] = useState<IPCStatusEvent | null>({ ...DEFAULT_EVENT, scraperId: scraper.id });
 
-    const scraperIsRunning = useMemo(() => event != null && ["ready", "ping"].includes(event.type), [event]);
+    const scraperIsRunning = useMemo(() => event != null && SCRAPER_RUNNING_STATUSES.includes(event.type), [event]);
     const scraperIsLoading = useMemo(() => event == null, [event]);
 
     const inputRef = useRef<HTMLInputElement>(null);
@@ -112,7 +120,7 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                 const scraperWebviewUrl = await commandService.getScraperWebviewUrl(scraper.id);
 
                 if (scraperWebviewUrl === scraperStoredUrl) {
-                    setEvent({ type: "ready", scraperId: scraper.id, timestamp: Date.now() });
+                    setEvent({ ...DEFAULT_EVENT, type: ScraperStatus.READY, scraperId: scraper.id });
                 }
 
                 if (inputRef.current != null && !Strings.isNullOrEmpty(scraperStoredUrl)) {
@@ -134,8 +142,8 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                 return;
             }
 
-            if (["idle", "ready", "ping"].includes(payload.type)) {
-                if (payload.type === "ready") {
+            if (SCRAPER_LIFECYCLE_STATUSES.includes(payload.type)) {
+                if (payload.type === ScraperStatus.READY) {
                     notificationService.success({
                         title: `${scraper.name} scraper is ready`,
                         message: "The scraper has started successfully."
@@ -143,12 +151,12 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                 }
 
                 setEvent(payload);
-            } else if (payload.type === "error") {
+            } else if (payload.type === ScraperStatus.ERROR) {
                 notificationService.error({
                     title: `Error on ${scraper.name} scraper execution`,
                     message: payload.message ?? "An unknown error occurred in the scraper."
                 });
-            } else if (payload.type === "fatal") {
+            } else if (payload.type === ScraperStatus.FATAL) {
                 setEvent({ ...DEFAULT_EVENT, scraperId: scraper.id });
                 modalService.openModal({
                     size: "lg",

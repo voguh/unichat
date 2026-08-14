@@ -21,9 +21,14 @@ use tauri::WebviewWindow;
 use tauri::WebviewWindowBuilder;
 
 use crate::get_app_handle;
+use crate::scraper::status::ScraperStatusEvent;
 use crate::utils::decode_scraper_url;
+use crate::utils::get_current_timestamp;
 use crate::utils::is_dev;
+use crate::utils::render_emitter;
 use crate::utils::settings;
+
+pub mod status;
 
 pub static COMMON_SCRAPER_JS: &str = include_str!("./static/common_scraper.js");
 
@@ -43,6 +48,7 @@ pub trait UniChatScraper {
     fn validate_url(&self, url: String) -> Result<String, Error>;
     fn scraper_js(&self) -> &str;
     fn on_event(&self, event: serde_json::Value) -> Result<(), Error>;
+    fn on_status(&self, _event: &ScraperStatusEvent) -> Result<(), Error>;
 }
 
 /* ============================================================================================== */
@@ -72,13 +78,30 @@ pub fn get_scraper(id: &str) -> Result<Option<Arc<dyn UniChatScraper + Send + Sy
 }
 
 fn handle_event(payload: &str) -> Result<(), Error> {
-    let payload: serde_json::Value = serde_json::from_str(payload)?;
-    let scraper_id = payload.get("scraperId").and_then(|v| v.as_str())
-        .ok_or(anyhow!("Missing or invalid 'scraperId' field in Twitch raw event payload"))?;
+    let mut payload: serde_json::Value = serde_json::from_str(payload)?;
 
-    let scrapers = SCRAPERS.read().map_err(|_| anyhow!("{} lock poisoned", LAZY_LOCK_NAME))?;
-    let scraper = scrapers.get(scraper_id).ok_or(anyhow!("Scraper with ID '{}' not found", scraper_id))?;
-    scraper.on_event(payload)?;
+    let scraper_id = payload.get("scraperId").and_then(|v| v.as_str())
+        .ok_or(anyhow!("Missing or invalid 'scraperId' field in scraper event payload"))?.to_string();
+    let event_type = payload.get("type").and_then(|v| v.as_str())
+        .ok_or(anyhow!("Missing or invalid 'type' field in scraper event payload"))?.to_string();
+
+    let scraper = get_scraper(&scraper_id)?.ok_or(anyhow!("Scraper with ID '{}' not found", scraper_id))?;
+
+    if status::parse_status(&event_type).is_none() {
+        return scraper.on_event(payload);
+    }
+
+    if payload.get("timestamp").is_none() {
+        payload["timestamp"] = serde_json::json!(get_current_timestamp()?);
+    }
+
+    let event: ScraperStatusEvent = serde_json::from_value(payload)?;
+
+    if let Err(err) = scraper.on_status(&event) {
+        log::error!(target: &format!("scraper:{}", scraper_id), "An error occurred on '{}' scraper status hook: {:#?}", scraper_id, err);
+    }
+
+    render_emitter::emit_status(&event);
 
     return Ok(());
 }

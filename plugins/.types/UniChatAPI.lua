@@ -11,7 +11,7 @@
 -- ===========================================[ UniChat Standard Library ]=========================================== --
 ---@class UniChatAPI
 ---@field get_version fun(self: UniChatAPI): string
----@field register_scraper fun(self: UniChatAPI, id: string, name: string, scraper_js_path: string, on_event: function, opts?: table)
+---@field register_scraper fun(self: UniChatAPI, id: string, name: string, scraper_js_path: string, on_event: function, opts?: UniChatScraperOptions)
 ---@field fetch_shared_emotes fun(self: UniChatAPI, platform: string, channel_id: string)
 ---@field get_shared_emotes fun(self: UniChatAPI): table<string, UniChatEmote>
 ---@field expose_module fun(self: UniChatAPI, module_name: string, module_table: table)
@@ -20,6 +20,26 @@
 ---@field get_userstore_item fun(self: UniChatAPI, key: string): string?
 ---@field set_userstore_item fun(self: UniChatAPI, key: string, value: string | nil)
 ---@field notify fun(self: UniChatAPI, message: string)
+
+---@class UniChatScraperOptions
+---@field validate_url fun(url: string): string
+---@field editing_tooltip_message? string
+---@field editing_tooltip_urls? string[]
+---@field placeholder_text? string
+---@field badges? string[]
+---@field icon? string
+---@field on_idle? fun(event: UniChatScraperStatusEvent)
+---@field on_ready? fun(event: UniChatScraperStatusEvent)
+---@field on_ping? fun(event: UniChatScraperStatusEvent)
+---@field on_error? fun(event: UniChatScraperStatusEvent)
+---@field on_fatal? fun(event: UniChatScraperStatusEvent)
+
+---@class UniChatScraperStatusEvent
+---@field type "idle" | "ready" | "ping" | "error" | "fatal"
+---@field scraperId string
+---@field timestamp integer
+---@field message string?
+---@field stack string?
 
 ---@class UniChatBadge
 ---@class UniChatBadgeFactory

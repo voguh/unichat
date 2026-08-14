@@ -12,8 +12,6 @@ use std::fs;
 use std::io::Write;
 use std::sync::Arc;
 use std::sync::LazyLock;
-use std::time::SystemTime;
-use std::time::UNIX_EPOCH;
 
 use anyhow::anyhow;
 use anyhow::Error;
@@ -22,13 +20,14 @@ use serde_json::Value;
 use crate::events;
 use crate::scraper;
 use crate::scraper::UniChatScraper;
+use crate::scraper::status::ScraperStatus;
+use crate::scraper::status::ScraperStatusEvent;
 use crate::shared_emotes;
 use crate::utils::is_valid_youtube_channel_id;
 use crate::utils::is_valid_youtube_video_id;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::properties::PropertiesKey;
-use crate::utils::render_emitter;
 use crate::utils::settings;
 use crate::utils::settings::SettingLogEventLevel;
 
@@ -39,42 +38,18 @@ static SCRAPER_JS: &str = include_str!("./static/scraper.js");
 
 /* ================================================================================================================== */
 
-fn dispatch_event(mut payload: Value) -> Result<(), Error> {
-    if payload.get("type").is_none() {
-        return Err(anyhow!("Missing 'type' field in YouTube raw event payload"));
-    }
-
-    if payload.get("scraperId").is_none() {
-        payload["scraperId"] = serde_json::json!(SCRAPER_ID);
-    }
-
-    if payload.get("timestamp").is_none() {
-        let now = SystemTime::now().duration_since(UNIX_EPOCH)?;
-        payload["timestamp"] = serde_json::json!(now.as_millis());
-    }
-
-    return render_emitter::emit(payload);
-}
-
-/* ================================================================================================================== */
-
-fn handle_ready_event(event_type: &str, payload: &Value) -> Result<(), Error> {
-    let channel_id = payload.get("channelId").and_then(|v| v.as_str())
-        .ok_or_else(|| anyhow!("Missing or invalid 'channelId' field in YouTube '{event_type}' payload"))?;
+fn handle_ready_status(event: &ScraperStatusEvent) -> Result<(), Error> {
+    let channel_id = event.extra_str("channelId")
+        .ok_or_else(|| anyhow!("Missing or invalid 'channelId' field in YouTube 'ready' payload"))?;
 
     if !is_valid_youtube_channel_id(channel_id) {
-        return Err(anyhow!("Invalid YouTube channel ID '{}' in '{event_type}' event payload", channel_id));
+        return Err(anyhow!("Invalid YouTube channel ID '{}' in 'ready' event payload", channel_id));
     }
 
     properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))?;
     shared_emotes::fetch_shared_emotes("youtube", channel_id)?;
 
-    return dispatch_event(payload.clone());
-}
-
-
-fn handle_idle_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
-    return dispatch_event(payload.clone());
+    return Ok(());
 }
 
 /* ================================================================================================================== */
@@ -210,20 +185,19 @@ impl UniChatScraper for YouTubeUniChatScraper {
     }
 
     fn on_event(&self, event: serde_json::Value) -> Result<(), Error> {
-        let scraper_id = event.get("scraperId").and_then(|v| v.as_str())
-            .ok_or_else(|| anyhow!("Missing or invalid 'scraperId' field in YouTube raw event payload"))?;
         let event_type = event.get("type").and_then(|v| v.as_str())
             .ok_or_else(|| anyhow!("Missing or invalid 'type' field in YouTube raw event payload"))?;
 
-        if scraper_id != SCRAPER_ID {
-            return Ok(());
-        }
-
         return match event_type {
-            "ready" => handle_ready_event(event_type, &event),
-            "idle" => handle_idle_event(event_type, &event),
             "message" => handle_message_event(event_type, &event),
-            _ => dispatch_event(event.clone())
+            _ => Ok(())
+        };
+    }
+
+    fn on_status(&self, event: &ScraperStatusEvent) -> Result<(), Error> {
+        return match event.status {
+            ScraperStatus::Ready => handle_ready_status(event),
+            _ => Ok(())
         };
     }
 }
