@@ -145,7 +145,7 @@ class UniChat {
         }
 
         payload.scraperId = this.scraperId;
-        payload.timestamp = Math.floor(Date.now() / 1000);
+        payload.timestamp = Date.now();
 
         uniChatLogger.debug("Dispatching event of type '{}'", payload.type);
         await __TAURI__.event.emitTo(this.scraperId, "unichat://scraper_event", payload)
