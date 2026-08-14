@@ -40,9 +40,7 @@ struct LiveChatSponsorshipsGiftPurchaseAnnouncementRenderer {
 
     author_external_channel_id: String,
 
-    header: Header,
-
-    timestamp_usec: String
+    header: Header
 }
 
 #[derive(Serialize, Deserialize, Debug)]

@@ -28,9 +28,7 @@ pub struct ThumbnailsWrapper {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Thumbnail {
-    pub url: String,
-    pub width: Option<u32>,
-    pub height: Option<u32>
+    pub url: String
 }
 
 pub fn proxy_youtube_url(url: &str) -> String {

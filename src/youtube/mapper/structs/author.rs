@@ -44,12 +44,10 @@ pub struct AuthorBadgeWrapper {
 pub enum AuthorBadgeRenderer {
     #[serde(rename_all = "camelCase")]
     Custom {
-        tooltip: String,
         custom_thumbnail: AuthorBadgeThumbnailsWrapper
     },
     #[serde(rename_all = "camelCase")]
     Internal {
-        tooltip: String,
         icon: AuthorBadgeIconWrapper
     }
 }
@@ -142,14 +140,14 @@ pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_cont
     if let Some(badges) = badges {
         for badge in badges {
             match &badge.live_chat_author_badge_renderer {
-                AuthorBadgeRenderer::Custom { custom_thumbnail, .. } => {
+                AuthorBadgeRenderer::Custom { custom_thumbnail } => {
                     let thumbnail = custom_thumbnail.thumbnails.last().ok_or(anyhow!("No thumbnails found in custom thumbnail"))?;
                     parsed_badges.push(UniChatBadge {
                         code: String::from("sponsor"),
                         url: proxy_youtube_url(&thumbnail.url)
                     });
                 },
-                AuthorBadgeRenderer::Internal { icon, .. } => {
+                AuthorBadgeRenderer::Internal { icon } => {
                     match icon.icon_type.as_str() {
                         "OWNER" => parsed_badges.push(UniChatBadge {
                             code: String::from("broadcaster"),
@@ -215,7 +213,7 @@ fn expect_badge_type(badges: &[AuthorBadgeWrapper], badge_type: &str) -> bool {
 
     return badges.iter().any(|badge| matches!(
         badge.live_chat_author_badge_renderer,
-        AuthorBadgeRenderer::Internal { ref icon, .. } if icon.icon_type == *badge_type
+        AuthorBadgeRenderer::Internal { ref icon } if icon.icon_type == *badge_type
     ));
 }
 

@@ -50,9 +50,7 @@ struct LiveChatPaidStickerRenderer {
     author_badges: Option<Vec<AuthorBadgeWrapper>>,
 
     purchase_amount_text: PurchaseAmountText,
-    sticker: ThumbnailsWrapper,
-
-    timestamp_usec: String
+    sticker: ThumbnailsWrapper
 }
 
 /* <============================================================================================> */

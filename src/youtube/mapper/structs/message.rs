@@ -43,8 +43,7 @@ pub enum Emoji {
     #[serde(rename_all = "camelCase")]
     Custom {
         emoji_id: String,
-        is_custom_emoji: bool, // Always true for custom emojis
-        search_terms: Vec<String>,
+        is_custom_emoji: bool,
         shortcuts: Vec<String>,
         image: CustomEmojiThumbnailsWrapper
     },

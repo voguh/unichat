@@ -49,9 +49,7 @@ struct LiveChatMembershipItemRenderer {
 
     header_primary_text: Option<MessageRunsWrapper>,
     header_subtext: HeaderSubtext,
-    message: Option<MessageRunsWrapper>,
-
-    timestamp_usec: String
+    message: Option<MessageRunsWrapper>
 }
 
 #[derive(Serialize, Deserialize, Debug)]

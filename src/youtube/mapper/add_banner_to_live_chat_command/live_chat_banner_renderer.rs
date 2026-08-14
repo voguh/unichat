@@ -33,8 +33,6 @@ use crate::youtube::mapper::structs::proxy_youtube_url;
 struct LiveChatBannerRenderer {
     action_id: String,
     banner_type: String,
-    target_id: String,
-    is_stackable: bool,
     contents: LiveChatBannerRedirectRendererWrapper
 }
 
@@ -61,9 +59,7 @@ struct BannerMessage {
 #[serde(rename_all = "camelCase")]
 struct BannerMessageRuns {
     text: String,
-    bold: Option<bool>,
-    font_face: Option<String>,
-    text_color: Option<u32>
+    bold: Option<bool>
 }
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {

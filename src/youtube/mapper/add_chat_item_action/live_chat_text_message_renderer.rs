@@ -46,9 +46,7 @@ struct LiveChatTextMessageRenderer {
 
     message: MessageRunsWrapper,
 
-    before_content_buttons: Option<Vec<BeforeContentButton>>,
-
-    timestamp_usec: String
+    before_content_buttons: Option<Vec<BeforeContentButton>>
 }
 
 /* <============================================================================================> */

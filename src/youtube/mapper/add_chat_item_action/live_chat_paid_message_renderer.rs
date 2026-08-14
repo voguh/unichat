@@ -61,9 +61,7 @@ struct LiveChatPaidMessageRenderer {
     header_background_color: Option<u32>,
     header_text_color: Option<u32>,
     body_background_color: Option<u32>,
-    body_text_color: Option<u32>,
-
-    timestamp_usec: String
+    body_text_color: Option<u32>
 }
 
 /* <============================================================================================> */
