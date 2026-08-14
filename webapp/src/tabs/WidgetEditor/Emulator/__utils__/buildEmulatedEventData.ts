@@ -180,7 +180,7 @@ export async function buildEmulatedEventData<T extends UniChatEvent>(
                 channelName: null,
 
                 authorBadges: [],
-                authorType: null,
+                authorType: "VIEWER",
 
                 rewardId: crypto.randomUUID(),
                 rewardTitle: "Sample Reward",
@@ -198,13 +198,12 @@ export async function buildEmulatedEventData<T extends UniChatEvent>(
         case "unichat:gift": {
             data = {
                 ...data,
-                channelName: null,
 
                 authorBadges: [],
-                authorType: null,
+                authorType: "VIEWER",
 
-                giftId: null,
-                giftTitle: null,
+                giftId: crypto.randomUUID(),
+                giftTitle: "Pastel",
                 giftDescription: "Sample Gift",
                 giftCost: null,
                 giftIconUrl: "https://www.gstatic.com/youtube/img/pdg/gift/assets/pastel.webp=w320-h320",
