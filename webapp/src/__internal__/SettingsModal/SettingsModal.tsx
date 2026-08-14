@@ -98,12 +98,14 @@ export function SettingsModal({ externalActiveTab, onHide, show }: Props): PReac
             size="xl"
             title="Settings"
             CustomModalBody={SettingsModalStyledContainer}
+            data-tour="settings-modal"
         >
             <div className="settings_modal--sidebar">
                 <div className="settings_modal--sidebar_items">
                     {Object.entries(settingsItems).map(([key, item]) => (
                         <Button
                             key={key}
+                            data-tour={`settings-${key}-tab`}
                             variant={key === activeTab ? "secondary" : "default"}
                             onClick={() => setActiveTab(key)}
                         >

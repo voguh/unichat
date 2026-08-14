@@ -20,6 +20,7 @@ import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter"
 
 import { dashboardStageBuilder } from "./stages/dashboardStageBuilder";
 import { modalStageBuilder } from "./stages/modalStageBuilder";
+import { settingsModalStageBuilder } from "./stages/settingsModalStageBuilder";
 import { stageBuilder } from "./stages/stageBuilder";
 import { welcomeStageBuilder } from "./stages/welcomeStageBuilder";
 import { widgetEditorStageBuilder } from "./stages/widgetEditorStageBuilder";
@@ -162,6 +163,15 @@ const steps: TourStep[] = [
         )
     },
     {
+        id: "0f8c1d34-9a2b-4f57-8c61-7bd0e5a94c12",
+        builder: settingsModalStageBuilder(
+            "currency-target",
+            "Donation target currency",
+            "Converts donation amounts to the currency you pick.",
+            "bottom"
+        )
+    },
+    {
         id: "d4ea3587-6b7d-4ae9-9717-53c7253037aa",
         builder: stageBuilder(
             "plugins-modal-toggle",
@@ -190,6 +200,14 @@ export function Tour(_props: Props): PReact.ComponentChildren {
     const svgRef = useRef<HTMLDivElement>(null);
 
     async function endTour(): Promise<void> {
+        try {
+            if (stepCleanupCallback != null) {
+                stepCleanupCallback();
+            }
+        } catch (error) {
+            _logger.error("Error in endTourCleanupCallback", error);
+        }
+
         setStepsToRun([]);
         setCurrentStep(-1);
         commandService.setTourSteps(steps.map((s) => s.id));

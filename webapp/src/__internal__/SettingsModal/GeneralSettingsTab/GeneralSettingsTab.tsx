@@ -156,6 +156,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
                 inputRef={currencyRef}
                 label="Donation target currency"
                 options={currencies}
+                data-tour="currency-target"
             />
 
             <hr />
