@@ -87,6 +87,8 @@ pub fn parse_author_username(name: &AuthorNameWrapper) -> Result<Option<String>,
 }
 
 pub fn parse_author_username_str(name: String) -> Result<Option<String>, Error> {
+    let name = name.trim().to_owned();
+
     if let Some(cached_username) = USERNAME_CACHE.get(&name) {
         return Ok(cached_username.clone());
     }
@@ -109,11 +111,13 @@ pub fn parse_author_name(name: &AuthorNameWrapper) -> Result<String, Error> {
 }
 
 pub fn parse_author_name_str(name: String) -> Result<String, Error> {
+    let name = name.trim();
+
     let username: String;
     if name.starts_with("@") {
         username = name.replacen("@", "", 1);
     } else {
-        username = name;
+        username = name.to_owned();
     }
 
     return Ok(username);
