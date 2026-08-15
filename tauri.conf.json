@@ -10,23 +10,7 @@
     },
     "app": {
         "withGlobalTauri": true,
-        "windows": [
-            {
-                "label": "splash-screen",
-                "title": "UniChat Splash Screen",
-                "url": "splash-screen.html",
-                "width": 500,
-                "height": 300,
-                "center": true,
-                "focus": true,
-                "resizable": false,
-                "maximizable": false,
-                "minimizable": false,
-                "closable": false,
-                "decorations": false,
-                "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --lang=en-US"
-            }
-        ],
+        "windows": [],
         "security": {
             "csp": {
                 "default-src": ["'self'", "asset:", "http://asset.localhost"],

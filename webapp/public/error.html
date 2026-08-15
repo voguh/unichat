@@ -1,0 +1,222 @@
+<!--
+ * Copyright (c) 2026 Voguh
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+-->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+        <title>UniChat</title>
+
+        <style>
+            html, body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                box-sizing: border-box;
+            }
+
+            *, *::before, *::after {
+                box-sizing: inherit;
+            }
+
+            body {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                padding: 24px;
+                background-color: #26262b;
+                color: #ffffff;
+                font: 400 14px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+                user-select: none;
+            }
+
+            h1 {
+                margin: 0;
+                font-size: 18px;
+                font-weight: 600;
+            }
+
+            #stage {
+                margin-top: 4px;
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.5);
+            }
+
+            #message {
+                padding: 12px;
+                border: 1px solid rgba(184, 49, 63, 0.4);
+                border-left-width: 3px;
+                border-radius: 4px;
+                background-color: rgba(184, 49, 63, 0.12);
+                color: #f3b4bb;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+                font-size: 12px;
+                word-break: break-word;
+                user-select: text;
+            }
+
+            details {
+                flex: 1;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+            }
+
+            summary {
+                cursor: pointer;
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.5);
+            }
+
+            summary:hover {
+                color: rgba(255, 255, 255, 0.75);
+            }
+
+            #detail {
+                flex: 1;
+                min-height: 0;
+                margin: 8px 0 0;
+                padding: 12px;
+                border-radius: 4px;
+                background-color: rgba(0, 0, 0, 0.25);
+                color: rgba(255, 255, 255, 0.7);
+                font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+                font-size: 11px;
+                white-space: pre-wrap;
+                overflow: auto;
+                user-select: text;
+            }
+
+            footer {
+                display: flex;
+                justify-content: flex-end;
+                gap: 8px;
+                margin-top: auto;
+            }
+
+            button {
+                padding: 8px 16px;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 4px;
+                background-color: transparent;
+                color: inherit;
+                font: inherit;
+                font-size: 13px;
+                cursor: pointer;
+            }
+
+            button:hover {
+                background-color: rgba(255, 255, 255, 0.08);
+            }
+
+            button[data-primary] {
+                border-color: #b8313f;
+                background-color: #b8313f;
+            }
+
+            button[data-primary]:hover {
+                background-color: #cb3746;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>UniChat could not start</h1>
+            <div id="stage"></div>
+        </header>
+
+        <div id="message"></div>
+
+        <details>
+            <summary>Technical details</summary>
+            <pre id="detail"></pre>
+        </details>
+
+        <footer>
+            <button id="copy" type="button">Copy error</button>
+            <button id="logs" type="button">Open logs folder</button>
+            <button id="close" type="button" data-primary>Close</button>
+        </footer>
+
+        <script>
+            function legacyCopyText(text) {
+                var textarea = document.createElement("textarea");
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textarea);
+            }
+
+            function copyText(text) {
+                if (navigator.clipboard == null) {
+                    return Promise.resolve(legacyCopyText(text));
+                }
+
+                return navigator.clipboard.writeText(text).catch(function () {
+                    legacyCopyText(text);
+                });
+            }
+
+            function init() {
+                var error = globalThis.__UNICHAT_ERROR__ || {};
+
+                var stage = document.getElementById("stage");
+                var message = document.getElementById("message");
+                var detail = document.getElementById("detail");
+                var copyButton = document.getElementById("copy");
+                var logsButton = document.getElementById("logs");
+                var closeButton = document.getElementById("close");
+
+                stage.textContent = "v" + error.version + " • step " + error.step + " of " + error.total + ": " + error.stageMessage;
+                message.textContent = error.message;
+                detail.textContent = error.detail;
+
+                copyButton.addEventListener("click", function () {
+                    var text = [
+                        error.displayName + " v" + error.version,
+                        "Step " + error.step + "/" + error.total + ": " + error.stageMessage,
+                        "",
+                        error.detail
+                    ].join("\n");
+
+                    copyText(text).then(function () {
+                        copyButton.textContent = "Copied";
+                        setTimeout(function () { copyButton.textContent = "Copy error"; }, 2000);
+                    });
+                });
+
+                if (error.logFile == null) {
+                    logsButton.remove();
+                } else {
+                    logsButton.addEventListener("click", function () {
+                        __TAURI__.core.invoke("plugin:opener|reveal_item_in_dir", { paths: [error.logFile] }).catch(function () {
+                            copyText(error.logFile);
+                            logsButton.textContent = "Path copied";
+                        });
+                    });
+                }
+
+                closeButton.addEventListener("click", function () {
+                    __TAURI__.window.getCurrentWindow().close();
+                });
+            }
+
+            if (document.readyState === "interactive" || document.readyState === "complete") {
+                init();
+            } else {
+                document.addEventListener("DOMContentLoaded", init);
+            }
+        </script>
+    </body>
+</html>

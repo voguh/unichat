@@ -14,11 +14,12 @@ use tauri::Manager as _;
 
 use crate::get_app_handle;
 use crate::scraper::status::ScraperStatusEvent;
+use crate::wm::main_window::MAIN_WINDOW_LABEL;
 
 pub fn emit_notification(title:&str, message: &str) {
     let app_handle = get_app_handle();
 
-    if let Some(window) = app_handle.get_webview_window("main") {
+    if let Some(window) = app_handle.get_webview_window(MAIN_WINDOW_LABEL) {
         if let Err(err) = window.emit("unichat://notification", json!({ "title": title, "message": message })) {
             log::error!("An error occurred on emit notification: {:#?}", err);
         }
@@ -28,7 +29,7 @@ pub fn emit_notification(title:&str, message: &str) {
 pub fn emit_status(event: &ScraperStatusEvent) {
     let app_handle = get_app_handle();
 
-    if let Some(window) = app_handle.get_webview_window("main") {
+    if let Some(window) = app_handle.get_webview_window(MAIN_WINDOW_LABEL) {
         if let Err(err) = window.emit("unichat://status:event", event) {
             log::error!("An error occurred on emit scraper status: {:#?}", err);
         }

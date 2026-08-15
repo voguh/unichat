@@ -1,6 +1,6 @@
 {
     "$schema": "../gen/schemas/desktop-schema.json",
     "identifier": "default-capability",
-    "windows": ["main", "splash-screen"],
+    "windows": ["main", "splash-screen", "error"],
     "permissions": ["core:default", "dialog:default", "log:default", "opener:default"]
 }

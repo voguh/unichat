@@ -9,7 +9,6 @@
  ******************************************************************************/
 
 use std::collections::HashMap;
-use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::RwLock;
@@ -17,18 +16,20 @@ use std::sync::RwLock;
 use anyhow::anyhow;
 use anyhow::Error;
 use tauri::Listener as _;
+use tauri::webview::PageLoadPayload;
 use tauri::WebviewWindow;
-use tauri::WebviewWindowBuilder;
+use tauri::Wry;
 
-use crate::get_app_handle;
 use crate::scraper::status::ScraperStatusEvent;
-use crate::utils::decode_scraper_url;
+use crate::scraper::utils::decode_url;
 use crate::utils::get_current_timestamp;
 use crate::utils::is_dev;
 use crate::utils::render_emitter;
 use crate::utils::settings;
+use crate::wm::window;
 
 pub mod status;
+pub mod utils;
 
 pub static COMMON_SCRAPER_JS: &str = include_str!("./static/common_scraper.js");
 
@@ -108,41 +109,34 @@ fn handle_event(payload: &str) -> Result<(), Error> {
 
 /* ================================================================================================================== */
 
-fn on_page_load(scraper_js: &str, window: &tauri::WebviewWindow, payload: tauri::webview::PageLoadPayload<'_>) -> Result<(), Error> {
-    let scraper_id = window.label();
-    let event = payload.event();
+fn build_scraper_initialization_script(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> String {
+    return COMMON_SCRAPER_JS
+        .replace("{{SCRAPER_JS}}", &scraper.scraper_js())
+        .replace("{{IS_DEV}}", &is_dev().to_string())
+        .replace("{{SCRAPER_ID}}", scraper.id());
+}
 
-    match event {
-        tauri::webview::PageLoadEvent::Started => {
-            log::debug!("Scraper webview '{}' started loading: {:}", scraper_id, payload.url());
-            let stored_url: String = settings::get_scraper_property(scraper_id, "url").unwrap_or_default();
-            let stored_url = url::Url::parse(&stored_url).ok();
-            let current_url = payload.url();
+fn on_scraper_page_load(webview: WebviewWindow<Wry>, payload: PageLoadPayload<'_>) {
+    let scraper_id = webview.label();
 
-            let is_remote = stored_url.is_some_and(|stored_url| stored_url.scheme() == current_url.scheme() && stored_url.host() == current_url.host() && stored_url.path() == current_url.path());
-            let is_local = matches!(current_url.scheme(), "http" | "tauri") && matches!(current_url.host_str(), Some("localhost") | Some("tauri.localhost")) && current_url.path() == "/scraper_idle.html";
-
-            if is_local || is_remote {
-                log::info!("Injecting scraper JS into scraper '{}'", scraper_id);
-                let formatted_js = COMMON_SCRAPER_JS
-                    .replace("{{SCRAPER_JS}}", &scraper_js)
-                    .replace("{{IS_DEV}}", &is_dev().to_string())
-                    .replace("{{SCRAPER_ID}}", scraper_id);
-                window.eval(&formatted_js)?;
-            } else {
-                log::warn!("Blocked navigation attempt in scraper '{}': {}", scraper_id, current_url);
-                window.eval("window.stop();")?;
-
-                let idle_url = decode_scraper_url("about:blank")?;
-                window.navigate(idle_url)?;
-            }
-        }
-        tauri::webview::PageLoadEvent::Finished => {
-            log::debug!("Scraper webview '{}' finished loading: {:}", window.label(), payload.url());
-        }
+    if utils::is_navigation_allowed(scraper_id, payload.url()) {
+        return;
     }
 
-    return Ok(());
+    log::warn!(target: &format!("scraper:{}", scraper_id), "Blocked navigation attempt in scraper '{}': {}", scraper_id, payload.url());
+
+    if let Err(err) = webview.eval("window.stop();") {
+        log::error!(target: &format!("scraper:{}", scraper_id), "Failed to stop blocked page in scraper '{}': {:#?}", scraper_id, err);
+    }
+
+    match decode_url("") {
+        Ok(idle_url) => {
+            if let Err(err) = webview.navigate(idle_url) {
+                log::error!(target: &format!("scraper:{}", scraper_id), "Failed to send scraper '{}' back to the idle page: {:#?}", scraper_id, err);
+            }
+        }
+        Err(err) => log::error!(target: &format!("scraper:{}", scraper_id), "Failed to resolve the idle page URL: {:#?}", err)
+    }
 }
 
 pub fn register_scraper(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Result<WebviewWindow, Error> {
@@ -164,22 +158,12 @@ pub fn register_scraper(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Resul
     /* ========================================================================================== */
 
     let start_hidden: bool = settings::get_item(settings::SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY)?;
-    let webview_url = tauri::WebviewUrl::App(PathBuf::from("scraper_idle.html"));
-    let scraper_js = scraper.scraper_js().to_string();
-
-    let app_handle = get_app_handle();
-    let window = WebviewWindowBuilder::new(app_handle, scraper.id(), webview_url)
+    let window = window::new(scraper.id(), "scraper_idle.html")
         .title(format!("UniChat - Scraper ({})", scraper.name()))
         .inner_size(400.0, 576.0)
         .visible(!start_hidden)
-        .resizable(false)
-        .maximizable(false)
-        .additional_browser_args(crate::WEBVIEW2_ADDITIONAL_BROWSER_ARGS)
-        .on_page_load(move |window, payload| {
-            if let Err(err) = on_page_load(&scraper_js, &window, payload) {
-                log::error!("Failed to handle page load event for scraper '{}': {:?}", window.label(), err);
-            }
-        })
+        .initialization_script(build_scraper_initialization_script(scraper.clone()))
+        .on_page_load(on_scraper_page_load)
         .build()?;
 
     /* ========================================================================================== */

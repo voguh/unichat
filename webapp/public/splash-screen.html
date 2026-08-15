@@ -29,7 +29,7 @@
                 position: relative;
                 width: 100vw;
                 height: 100vh;
-                background: url('/assets/UniChatSplashScreen.png') center center / contain no-repeat;
+                background: #26262b url('/assets/UniChatSplashScreen.png') center center / contain no-repeat;
 
                 display: flex;
                 justify-content: center;
@@ -37,13 +37,59 @@
                 padding: 16px;
                 color: #ffffff;
             }
-        </style>
 
-        <script defer>
-            async function init() {
-                await __TAURI__.event.listen("unichat://splashscreen:update", ({ payload }) => {
-                    document.body.textContent = payload;
-                })
+            #progress {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                font: 400 12px/1 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            }
+
+            #progress-stage {
+                height: 12px;
+                opacity: 0.75;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            #progress-track {
+                width: 100%;
+                height: 4px;
+                border-radius: 2px;
+                background-color: rgba(255, 255, 255, 0.15);
+                overflow: hidden;
+            }
+
+            #progress-bar {
+                width: 0;
+                height: 100%;
+                border-radius: inherit;
+                background-color: #b8313f;
+                transition: width 200ms ease-out;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="progress">
+            <span id="progress-stage"></span>
+            <div id="progress-track"><div id="progress-bar"></div></div>
+        </div>
+
+        <script>
+            function init() {
+                var stage = document.getElementById("progress-stage");
+                var bar = document.getElementById("progress-bar");
+
+                function ready() {
+                    __TAURI__.event.emitTo("splash-screen", "unichat://splashscreen:ready");
+                }
+
+                __TAURI__.event.listen("unichat://splashscreen:update", function (event) {
+                    stage.textContent = event.payload.message;
+                    bar.style.width = (event.payload.step / event.payload.total) * 100 + "%";
+                }).then(ready, ready);
             }
 
             if (document.readyState === "interactive" || document.readyState === "complete") {
@@ -52,6 +98,5 @@
                 document.addEventListener("DOMContentLoaded", init);
             }
         </script>
-    </head>
-    <body></body>
+    </body>
 </html>

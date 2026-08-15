@@ -16,7 +16,6 @@ use std::time::UNIX_EPOCH;
 
 use anyhow::anyhow;
 use anyhow::Error;
-use url::Url;
 
 pub mod base64;
 pub mod constants;
@@ -40,22 +39,6 @@ pub fn get_current_timestamp() -> Result<i64, Error> {
     let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?;
     let timestamp_sec = timestamp.as_millis() as i64;
     return Ok(timestamp_sec);
-}
-
-/* ================================================================================================================== */
-
-pub fn decode_scraper_url(url: &str) -> Result<Url, Error> {
-    let mut url = url.trim();
-    if url.is_empty() || !url.starts_with("https://") {
-        if is_dev() {
-            url = "http://localhost:1421/scraper_idle.html";
-        } else {
-            url = "tauri://localhost/scraper_idle.html";
-        }
-    }
-
-    let url = Url::parse(url)?;
-    return Ok(url);
 }
 
 /* ================================================================================================================== */

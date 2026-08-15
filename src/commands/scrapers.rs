@@ -14,7 +14,8 @@ use tauri::Runtime;
 
 use crate::scraper;
 use crate::scraper::serialize_scraper;
-use crate::utils::decode_scraper_url;
+use crate::scraper::utils::decode_url;
+use crate::scraper::utils::is_local_url;
 use crate::utils::settings;
 
 #[tauri::command]
@@ -78,14 +79,15 @@ pub fn set_scraper_webview_url<R: Runtime>(app: AppHandle<R>, scraper_id: &str, 
     log::info!("Setting scraper webview '{}' to URL '{}'", scraper_id, url);
     let webview_window = app.get_webview_window(scraper_id).ok_or(format!("Scraper webview '{}' not found", scraper_id))?;
 
-    let parsed_url = decode_scraper_url(url).map_err(|e| format!("An error occurred on decode scraper URL: {:#?}", e))?;
-    webview_window.navigate(parsed_url.clone()).map_err(|e| format!("An error occurred on navigate scraper webview to URL: {:#?}", e))?;
+    let parsed_url = decode_url(url).map_err(|e| format!("An error occurred on decode scraper URL: {:#?}", e))?;
 
-    if matches!(parsed_url.scheme(), "http" | "tauri") && parsed_url.host_str() == Some("localhost") && parsed_url.path() == "/scraper_idle.html" {
+    if is_local_url(scraper_id, &parsed_url) {
         webview_window.hide().map_err(|e| format!("An error occurred on hide scraper webview: {:#?}", e))?;
     } else {
         settings::set_scraper_property(scraper_id, "url", &parsed_url.to_string()).map_err(|e| format!("An error occurred on store scraper URL: {:#?}", e))?;
     }
+
+    webview_window.navigate(parsed_url).map_err(|e| format!("An error occurred on navigate scraper webview to URL: {:#?}", e))?;
 
     return Ok(());
 }
