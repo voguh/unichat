@@ -34,7 +34,6 @@ async function uniChatHandleScrapEvent(response) {
 }
 
 function uniChatInit() {
-    // Retrieve channel ID from YouTube initial data
     const ytInitialData = window.ytInitialData;
     const timedContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.timedContinuationData?.continuation;
     const invalidationContinuationData = ytInitialData?.contents?.liveChatRenderer?.continuations[0]?.invalidationContinuationData?.continuation;

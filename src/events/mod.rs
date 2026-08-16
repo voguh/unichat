@@ -70,7 +70,7 @@ pub fn init() -> Result<(), Error> {
                 }
                 Err(tokio::sync::broadcast::error::RecvError::Closed) => {
                     log::warn!("EventEmitter channel closed, exiting event loop");
-                    break; // Exit the loop if the channel is closed
+                    break;
                 }
             }
         }

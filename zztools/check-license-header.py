@@ -88,7 +88,6 @@ def check_epl_header(path: Path) -> LicenseHeaderChecker:
         if len(lines) < 9:
             return LicenseHeaderChecker.MISSING_HEADER
 
-        # Check second line if matches copyright pattern
         match_copyright = re.search(r"Copyright \(c\) (\d{4}(?:-\d{4})?) \w+", lines[1])
         if not match_copyright:
             return LicenseHeaderChecker.MISSING_COPYRIGHT

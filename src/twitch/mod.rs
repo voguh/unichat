@@ -68,7 +68,6 @@ fn handle_badges_event(event_type: &str, payload: &Value) -> Result<(), Error> {
         for twitch_badge in twitch_badges {
             let mut code = format!("{}/{}", twitch_badge.set_id, twitch_badge.version);
             if badges_type == "global" && ["bits", "subscriber"].contains(&twitch_badge.set_id.as_str()) {
-                // For global badges, we need to prepend "global/" to the code as a fallback
                 code = format!("global/{}", code);
             }
 
