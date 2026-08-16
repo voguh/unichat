@@ -185,11 +185,6 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
             data-loading={loading || scraperIsLoading ? "true" : "false"}
         >
             <div className="scraper-badges-wrapper">
-                {(showOpenWebviewButton || __IS_DEV__) && (
-                    <Badge variant="warning" onClick={() => commandService.toggleScraperWebview(scraper.id)}>
-                        Open Scraper Webview
-                    </Badge>
-                )}
                 {scraper.badges.map((badge) => (
                     <Badge key={badge} variant="secondary">
                         {badge.toUpperCase()}
@@ -229,6 +224,16 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                     {handleStatusIcon()}
                     {handleStatusLabel()}
                 </Button>
+                {(showOpenWebviewButton || __IS_DEV__) && (
+                    <Button
+                        variant="default"
+                        onClick={() => commandService.toggleScraperWebview(scraper.id)}
+                        disabled={loading || scraperIsLoading}
+                        style={{ width: 36 }}
+                    >
+                        <i className="fas fa-window-restore" />
+                    </Button>
+                )}
             </div>
         </ScraperCardContainer>
     );

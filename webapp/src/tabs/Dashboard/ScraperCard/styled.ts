@@ -14,7 +14,7 @@ import { styled } from "goober";
 import tw from "twin.macro";
 
 export const ScraperCardContainer: ComponentType<HTMLAttributes<HTMLDivElement>> = styled.div({
-    ...tw`relative bg-stone-900 border border-stone-800 rounded p-4 shadow-md`,
+    ...tw`relative bg-stone-900 border border-stone-800 rounded p-2 shadow-md`,
 
     "&[data-active=true]": {
         ...tw`bg-green-500/10 border-green-500/50`
@@ -25,7 +25,8 @@ export const ScraperCardContainer: ComponentType<HTMLAttributes<HTMLDivElement>>
     },
 
     "> .scraper-badges-wrapper": {
-        ...tw`flex flex-nowrap items-center mb-2 absolute top-2 right-2`,
+        ...tw`flex flex-nowrap items-center absolute top-2 right-2`,
+        height: "28px",
 
         "> div": {
             "&:not(:first-child)": {
