@@ -18,7 +18,7 @@ import { Switch } from "unichat/components/forms/Switch";
 import { Tooltip } from "unichat/components/Tooltip";
 import { commandService } from "unichat/services/commandService";
 
-import { buildEmulatedEventData } from "./__utils__/buildEmulatedEventData";
+import { buildEmulatedEventData, EmulatedEventType } from "./__utils__/buildEmulatedEventData";
 import { EmulatorStyledContainer } from "./styled";
 
 const opModeOptions: Option[] = [
@@ -35,15 +35,15 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
     const [emulationMode, setEmulationMode] = useState<UniChatPlatform | "mixed">("mixed");
     const [emulatorOnly, setEmulatorOnly] = useState(true);
 
-    async function dispatchEmulatedEvent<T extends UniChatEvent>(
-        eventType: T["type"],
+    async function dispatchEmulatedEvent<K extends EmulatedEventType>(
+        eventType: K,
         requirePlatform?: UniChatPlatform
     ): Promise<void> {
         if (requirePlatform == null && emulationMode !== "mixed") {
             requirePlatform = emulationMode as UniChatPlatform;
         }
 
-        const data = await buildEmulatedEventData<T>(eventType, requirePlatform);
+        const data = await buildEmulatedEventData(eventType, requirePlatform);
 
         if (emulatorOnly) {
             dispatchEvent({ type: eventType, data } as UniChatEvent);
