@@ -58,11 +58,11 @@ const CURRENCIES_FILE_TTL: Duration = Duration::from_secs(60 * 60 * 24 * 30);
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct FrankfurterCurrency {
     pub iso_code: String,
-    pub iso_numeric: String,
+    // pub iso_numeric: String,
     pub name: String,
     pub symbol: String,
-    pub start_date: String,
-    pub end_date: String
+    // pub start_date: String,
+    // pub end_date: String
 }
 
 pub fn fetch_currencies() -> Result<(), Error> {
@@ -77,23 +77,35 @@ pub fn fetch_currencies() -> Result<(), Error> {
 
     log::info!("Fetching currency list from '{}'...", CURRENCIES_URL);
     let mut response = ureq::get(CURRENCIES_URL).call()?;
-    let mut parsed: Vec<FrankfurterCurrency> = response.body_mut().read_json()?;
+    let entries: Vec<serde_json::Value> = response.body_mut().read_json()?;
 
+    let mut parsed: Vec<FrankfurterCurrency> = Vec::new();
     let mut claims: HashMap<String, Vec<String>> = HashMap::new();
-    for currency in parsed.iter_mut() {
-        if let Some(symbol) = ICU_SYMBOLS.get(currency.iso_code.as_str()) {
-            currency.symbol = symbol.to_string();
-        } else if let Some(code) = ICU_TAKEN.get(currency.symbol.as_str()) {
-            if currency.iso_code != *code {
-                currency.symbol = currency.iso_code.clone();
+    for entry in entries.iter() {
+        let iso_code = entry.get("iso_code").and_then(|v| v.as_str()).unwrap_or_default();
+        let name = entry.get("name").and_then(|v| v.as_str()).unwrap_or_default();
+        if iso_code.is_empty() || name.is_empty() {
+            log::warn!("Skipping invalid currency entry: {}", entry);
+            continue;
+        }
+
+        let mut symbol = entry.get("symbol").and_then(|v| v.as_str()).unwrap_or(iso_code).to_string();
+
+        if let Some(icu_symbol) = ICU_SYMBOLS.get(iso_code) {
+            symbol = icu_symbol.to_string();
+        } else if let Some(code) = ICU_TAKEN.get(symbol.as_str()) {
+            if iso_code != *code {
+                symbol = iso_code.to_string();
             }
         }
 
-        if let Some(codes) = claims.get_mut(&currency.symbol) {
-            codes.push(currency.iso_code.clone());
+        if let Some(codes) = claims.get_mut(&symbol) {
+            codes.push(iso_code.to_string());
         } else {
-            claims.insert(currency.symbol.clone(), vec![currency.iso_code.clone()]);
+            claims.insert(symbol.clone(), vec![iso_code.to_string()]);
         }
+
+        parsed.push(FrankfurterCurrency { iso_code: iso_code.to_string(), name: name.to_string(), symbol });
     }
 
     let mut list: Vec<UniChatCurrency> = Vec::new();
