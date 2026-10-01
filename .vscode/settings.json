@@ -15,7 +15,6 @@
 
     "json.schemaDownload.enable": true,
     "json.schemaDownload.trustedDomains": {
-        "https://codeberg.org/": true,
         "https://raw.githubusercontent.com/": true,
         "https://schema.tauri.app": true
     },

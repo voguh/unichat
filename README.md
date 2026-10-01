@@ -18,7 +18,7 @@ UniChat is a tool for streamers who broadcast on YouTube and Twitch, providing a
 
 ## 🚀 Installation
 
-You can download the latest version for Windows and Linux directly from the project's [Releases page](https://codeberg.org/unichat/unichat/releases).
+You can download the latest version for Windows and Linux directly from the project's [Releases page](https://github.com/voguh/unichat/releases).
 
 -   **Windows:** Download the `.exe` installer.
 -   **Linux:** Choose the ideal package for your distribution (`.deb`, `.rpm`, or `.AppImage`).

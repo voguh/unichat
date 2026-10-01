@@ -107,9 +107,9 @@ const steps: TourStep[] = [
                 <div className="mt-2 flex justify-center">
                     <Button
                         variant="info"
-                        onClick={() => openUrl("https://codeberg.org/unichat-community/unichat-plugin-kick/releases")}
+                        onClick={() => openUrl("https://github.com/unichat-community/unichat-plugin-kick/releases")}
                     >
-                        View on Codeberg
+                        View on GitHub
                     </Button>
                 </div>
             </div>
