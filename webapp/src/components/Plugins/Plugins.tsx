@@ -119,7 +119,7 @@ export function PluginsActions(_props: Props): React.ReactNode {
                 color="gray"
                 size="xs"
                 leftSection={<i className="fas fa-book" />}
-                onClick={() => openUrl("https://voguh.github.io/unichat/#/plugins/getting_started")}
+                onClick={() => openUrl("https://unichat.voguh.me/docs/plugins/getting_started")}
             >
                 Read the Docs
             </Button>
