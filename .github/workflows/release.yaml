@@ -22,7 +22,7 @@ jobs:
       - name: Check version consistency
         run: |
           export CARGO_PACKAGE_VERSION="$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')"
-          TAG_NAME="${{ github.ref_name }}"
+          TAG_NAME="$GITHUB_REF_NAME"
           if [ "$CARGO_PACKAGE_VERSION" != "$TAG_NAME" ]; then
             echo "Error: The version in Cargo.toml ($CARGO_PACKAGE_VERSION) does not match the release tag ($TAG_NAME)."
             exit 1
@@ -61,7 +61,8 @@ jobs:
           cp target/linux/deb/*.deb dist/unichat-$VERSION.deb
           cp target/linux/rpm/*.rpm dist/unichat-$VERSION.rpm
           cp target/windows/nsis/*.exe dist/unichat-$VERSION-setup.exe
-          cp target/windows/msi/*.msi dist/unichat-$VERSION-setup.msi || echo "No MSI installer found"          for file in dist/*; do
+          cp target/windows/msi/*.msi dist/unichat-$VERSION-setup.msi || echo "No MSI installer found"
+          for file in dist/*; do
             if [ -f "$file" ]; then
               (cd "$(dirname "$file")" && sha256sum "$(basename "$file")" > "$(basename "$file").sha256")
             fi
@@ -77,3 +78,15 @@ jobs:
           else
             gh release create "$VERSION" dist/*
           fi
+
+      - name: Upload release assets to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_S3_ENDPOINT: ${{ vars.AWS_S3_ENDPOINT }}
+          AWS_S3_BUCKET_NAME: ${{ vars.AWS_S3_BUCKET_NAME }}
+          AWS_S3_PATH: ${{ vars.AWS_S3_PATH }}
+        run: |
+          export VERSION="${{ github.ref_name }}"
+          aws s3 cp dist/ "s3://$AWS_S3_BUCKET_NAME/$AWS_S3_PATH/$VERSION/" --recursive
