@@ -85,3 +85,15 @@ jobs:
           else
             gh release create "$VERSION" dist/*
           fi
+
+      - name: Upload release assets to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_S3_ENDPOINT: ${{ vars.AWS_S3_ENDPOINT }}
+          AWS_S3_BUCKET_NAME: ${{ vars.AWS_S3_BUCKET_NAME }}
+          AWS_S3_PATH: ${{ vars.AWS_S3_PATH }}
+        run: |
+          export VERSION="${{ github.ref_name }}"
+          aws s3 cp dist/ "s3://$AWS_S3_BUCKET_NAME/$AWS_S3_PATH/$VERSION/" --recursive
