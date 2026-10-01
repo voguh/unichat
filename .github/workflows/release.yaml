@@ -89,4 +89,4 @@ jobs:
           AWS_S3_PATH: ${{ vars.AWS_S3_PATH }}
         run: |
           export VERSION="${{ github.ref_name }}"
-          aws s3 cp dist/ "s3://$AWS_S3_BUCKET_NAME/$AWS_S3_PATH/$VERSION/" --recursive
+          aws s3 cp dist/ "s3://$AWS_S3_BUCKET_NAME/$AWS_S3_PATH/$VERSION/" --recursive --endpoint-url "$AWS_S3_ENDPOINT"
