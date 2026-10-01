@@ -170,7 +170,13 @@ impl mlua::UserData for LuaUniChatPlatformFactory {
         });
 
         methods.add_method("Other", |_lua, _this, str: String| {
-            let lv = serde_plain::to_string(&UniChatPlatform::Other(str)).map_err(mlua::Error::external)?;
+            let str = str.trim();
+            if str.is_empty() {
+                return Err(mlua::Error::external("String cannot be empty"));
+            }
+
+            let obj: UniChatPlatform = serde_plain::from_str(&str).map_err(mlua::Error::external)?;
+            let lv = serde_plain::to_string(&obj).map_err(mlua::Error::external)?;
             return Ok(lv);
         });
     }
@@ -203,7 +209,13 @@ impl mlua::UserData for LuaUniChatAuthorTypeFactory {
         });
 
         methods.add_method("Other", |_lua, _this, str: String| {
-            let lv = serde_plain::to_string(&UniChatAuthorType::Other(str)).map_err(mlua::Error::external)?;
+            let str = str.trim();
+            if str.is_empty() {
+                return Err(mlua::Error::external("String cannot be empty"));
+            }
+
+            let obj: UniChatAuthorType = serde_plain::from_str(&str).map_err(mlua::Error::external)?;
+            let lv = serde_plain::to_string(&obj).map_err(mlua::Error::external)?;
             return Ok(lv);
         });
     }
