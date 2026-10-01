@@ -50,6 +50,7 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
 
         switch (builder.type) {
             case "checkbox":
+            case "switch":
                 return (
                     <Switch
                         key={key}
