@@ -1,0 +1,33 @@
+name: setup webapp environment
+description: Set up the webapp environment
+
+inputs:
+  tauri-frontend-path:
+    description: Working directory for the webapp
+    required: true
+  node-version:
+    description: Node.JS version to install
+    required: true
+  pnpm-version:
+    description: PNPM version to install
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install PNPM
+      uses: pnpm/action-setup@v6.0.8
+      with:
+        version: ${{ inputs.pnpm-version }}
+
+    - name: Install Node.JS
+      uses: actions/setup-node@v6.4.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: pnpm
+        cache-dependency-path: ${{ inputs.tauri-frontend-path }}/pnpm-lock.yaml
+
+    - name: Install dependencies
+      working-directory: ${{ inputs.tauri-frontend-path }}
+      shell: bash
+      run: pnpm install --frozen-lockfile

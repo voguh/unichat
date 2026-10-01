@@ -1,0 +1,8 @@
+saveExact: true
+savePrefix: ""
+minimumReleaseAge: 10080
+blockExoticSubdeps: true
+allowBuilds:
+  '@fortawesome/fontawesome-free': false
+  '@swc/core': false
+  esbuild: false
