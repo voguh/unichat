@@ -13,14 +13,22 @@ use std::fmt::Display;
 use anyhow::anyhow;
 use anyhow::Error;
 
+fn parse_number(value: &str) -> Result<u32, Error> {
+    if value.is_empty() || !value.bytes().all(|b| b.is_ascii_digit()) {
+        return Err(anyhow!("Invalid number: '{}'", value));
+    } else if value.len() > 1 && value.starts_with('0') {
+        return Err(anyhow!("Leading zeros are not allowed: '{}'", value));
+    }
+
+    return value.parse().map_err(|e| anyhow!("Failed to parse number '{}': {}", value, e));
+}
+
 fn parse_optional_u32(value: Option<&str>) -> Result<Option<u32>, Error> {
     if let Some(value) = value {
-        if value.trim().is_empty() {
-            return Ok(None);
+        if !value.is_empty() {
+            let parsed: u32 = parse_number(value)?;
+            return Ok(Some(parsed));
         }
-
-        let parsed: u32 = value.parse()?;
-        return Ok(Some(parsed));
     }
 
     return Ok(None);
@@ -102,7 +110,7 @@ impl Display for PreReleaseType {
 
 /* ================================================================================================================== */
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Version {
     major: u32,
     minor: u32,
@@ -113,13 +121,15 @@ pub struct Version {
 
 impl Version {
     pub fn parse(value: &str) -> Result<Self, Error> {
-        let mut main_and_meta = value.split('+');
-        let main_part = main_and_meta.next().ok_or(anyhow!("Invalid version string"))?;
-        let build_metadata = main_and_meta.next();
+        let (main_part, build_metadata) = match value.split_once('+') {
+            Some((main_part, metadata)) => (main_part, if metadata.is_empty() { None } else { Some(metadata) }),
+            None => (value, None)
+        };
 
-        let mut main_and_pre = main_part.split('-');
-        let version_numbers = main_and_pre.next().ok_or(anyhow!("Invalid version string"))?;
-        let pre_release_parts = main_and_pre.next();
+        let (version_numbers, pre_release_parts) = match main_part.split_once('-') {
+            Some((version_numbers, pre_release_parts)) => (version_numbers, Some(pre_release_parts)),
+            None => (main_part, None)
+        };
 
         /* ================================================================== */
 
@@ -127,6 +137,9 @@ impl Version {
         let major = numbers_iter.next().ok_or(anyhow!("Invalid version string"))?;
         let minor = numbers_iter.next().ok_or(anyhow!("Invalid version string"))?;
         let patch = numbers_iter.next().ok_or(anyhow!("Invalid version string"))?;
+        if numbers_iter.next().is_some() {
+            return Err(anyhow!("Invalid version string, expected MAJOR.MINOR.PATCH"));
+        }
 
         /* ================================================================== */
 
@@ -136,6 +149,9 @@ impl Version {
 
             let pre_release_type = pre_release_split.next().map(|s| PreReleaseType::new(s)).transpose()?;
             let pre_release_number = parse_optional_u32(pre_release_split.next())?;
+            if pre_release_split.next().is_some() {
+                return Err(anyhow!("Invalid pre-release, expected TYPE.NUMBER"));
+            }
 
             if let Some(pre_release_type) = pre_release_type {
                 pre_release = Some((pre_release_type, pre_release_number.unwrap_or(0)));
@@ -143,9 +159,9 @@ impl Version {
         }
 
         return Ok(Version {
-            major: major.parse()?,
-            minor: minor.parse()?,
-            patch: patch.parse()?,
+            major: parse_number(major)?,
+            minor: parse_number(minor)?,
+            patch: parse_number(patch)?,
             pre_release: pre_release,
             build_metadata: build_metadata.map(|s| s.to_string()),
         });
@@ -198,6 +214,14 @@ impl Ord for Version {
     }
 }
 
+impl PartialEq for Version {
+    fn eq(&self, other: &Self) -> bool {
+        self.cmp(other) == std::cmp::Ordering::Equal
+    }
+}
+
+impl Eq for Version {}
+
 impl PartialOrd for Version {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
@@ -235,7 +259,7 @@ pub struct VersionRange {
 
 impl VersionRange {
     pub fn parse(value: &str) -> Result<Self, Error> {
-        let mut value: String = value.chars().filter(|c| !c.is_whitespace()).collect();
+        let mut value: String = value.trim().to_string();
         if value.is_empty() {
             return Err(anyhow!("Empty version range string"));
         }
@@ -285,7 +309,7 @@ impl VersionRange {
             return Err(anyhow!("Minimum version part cannot be empty with only ["));
         } else if min_part != EXCLUSIVE_START {
             let bound = BoundType::new(&min_part[0..1])?;
-            let version_str = Version::parse(&min_part[1..])?;
+            let version_str = Version::parse(min_part[1..].trim())?;
 
             min_bound = Some(bound);
             min_version = Some(version_str);
@@ -298,7 +322,7 @@ impl VersionRange {
             return Err(anyhow!("Maximum version part cannot be empty with only ]"));
         } else if max_part != EXCLUSIVE_END {
             let bound = BoundType::new(&max_part[max_part.len() - 1..])?;
-            let version_str = Version::parse(&max_part[..max_part.len() - 1])?;
+            let version_str = Version::parse(max_part[..max_part.len() - 1].trim())?;
 
             max_bound = Some(bound);
             max_version = Some(version_str);
@@ -306,6 +330,21 @@ impl VersionRange {
 
         if min_version.is_none() && max_version.is_none() {
             return Err(anyhow!("At least one of minimum or maximum version must be specified"));
+        }
+
+        if let (Some(min_version), Some(max_version)) = (&min_version, &max_version) {
+            match min_version.cmp(max_version) {
+                std::cmp::Ordering::Greater => {
+                    return Err(anyhow!("Minimum version is greater than maximum version"));
+                },
+                std::cmp::Ordering::Equal => {
+                    let both_inclusive = min_bound == Some(BoundType::Inclusive) && max_bound == Some(BoundType::Inclusive);
+                    if !both_inclusive {
+                        return Err(anyhow!("Equal bounds require [x] (both inclusive)"));
+                    }
+                },
+                _ => {}
+            }
         }
 
         let mut min = None;
