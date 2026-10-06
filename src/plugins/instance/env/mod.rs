@@ -30,7 +30,7 @@ use crate::plugins::instance::env::unichat_utils::UniChatUtilsModule;
 use crate::plugins::instance::env::unichat_yaml::UniChatYamlModule;
 use crate::plugins::runtime;
 use crate::utils::safe_guard_path;
-use crate::utils::semver::Version;
+use crate::utils::semver::version::Version;
 
 mod shared_modules;
 mod unichat_api;

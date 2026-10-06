@@ -24,13 +24,14 @@ use crate::plugins::UniChatPlugin;
 use crate::plugins::manifest::PluginManifestYAML;
 use crate::plugins::runtime;
 use crate::utils::get_current_timestamp;
-use crate::utils::semver;
+use crate::utils::semver::version::Version;
+use crate::utils::semver::version_range::VersionRange;
 use crate::widgets;
 
 mod env;
 
-fn parse_dependencies(raw_dependencies: &Vec<String>) -> Result<Vec<(String, semver::VersionRange)>, Error> {
-    let mut dependencies: Vec<(String, semver::VersionRange)> = Vec::new();
+fn parse_dependencies(raw_dependencies: &Vec<String>) -> Result<Vec<(String, VersionRange)>, Error> {
+    let mut dependencies: Vec<(String, VersionRange)> = Vec::new();
 
     for dep in raw_dependencies {
         let parts: Vec<&str> = dep.splitn(2, '@').collect();
@@ -40,7 +41,7 @@ fn parse_dependencies(raw_dependencies: &Vec<String>) -> Result<Vec<(String, sem
 
         let name = parts[0].trim().to_string();
         let version = parts[1].trim();
-        let version_req = semver::VersionRange::parse(version)?;
+        let version_req = VersionRange::parse(version)?;
 
         dependencies.push((name, version_req));
     }
@@ -82,7 +83,7 @@ pub fn create(plugin_path: &Path, manifest: &PluginManifestYAML) -> Result<(), E
 
     for (key, version_req) in plugin.dependencies.iter() {
         if key == "unichat" {
-            let unichat_version = semver::Version::parse(UNICHAT_VERSION)?;
+            let unichat_version = Version::parse(UNICHAT_VERSION)?;
             if !version_req.matches(&unichat_version) {
                 plugin.add_message(format!("Required {} version '{}' does not satisfy the current version '{}'", UNICHAT_DISPLAY_NAME, version_req, unichat_version));
                 is_valid = false;

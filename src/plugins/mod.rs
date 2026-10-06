@@ -23,7 +23,8 @@ use crate::plugins::manifest::PluginManifestYAML;
 use crate::plugins::manifest::load_manifest;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
-use crate::utils::semver;
+use crate::utils::semver::version::Version;
+use crate::utils::semver::version_range::VersionRange;
 
 mod instance;
 mod manifest;
@@ -67,11 +68,11 @@ pub enum PluginStatus {
 pub struct UniChatPlugin {
     pub name: String,
     pub description: Option<String>,
-    pub version: semver::Version,
+    pub version: Version,
     pub author: Option<String>,
     pub license: Option<String>,
     pub homepage: Option<String>,
-    pub dependencies: Vec<(String, semver::VersionRange)>,
+    pub dependencies: Vec<(String, VersionRange)>,
 
     status: RwLock<PluginStatus>,
     messages: RwLock<Vec<String>>,
@@ -82,8 +83,8 @@ pub struct UniChatPlugin {
 }
 
 impl UniChatPlugin {
-    pub(in crate::plugins) fn new(plugin_path: &Path, manifest: &PluginManifestYAML, dependencies: Vec<(String, semver::VersionRange)>) -> Result<Self, Error> {
-        let version = semver::Version::parse(&manifest.version)?;
+    pub(in crate::plugins) fn new(plugin_path: &Path, manifest: &PluginManifestYAML, dependencies: Vec<(String, VersionRange)>) -> Result<Self, Error> {
+        let version = Version::parse(&manifest.version)?;
 
         let lua = runtime::get()?;
         let env = lua.create_table()?;

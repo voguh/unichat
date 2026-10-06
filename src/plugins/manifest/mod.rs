@@ -22,7 +22,7 @@ use crate::UNICHAT_LICENSE_CODE;
 use crate::UNICHAT_VERSION;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
-use crate::utils::semver;
+use crate::utils::semver::version::Version;
 
 #[derive(Serialize, Deserialize, Hash, Clone, Debug)]
 pub struct PluginManifestYAML {
@@ -58,7 +58,7 @@ pub fn load_manifest(plugin_path: &Path) -> Result<PluginManifestYAML, Error> {
         }
     }
 
-    if let Err(err) = semver::Version::parse(&manifest.version) {
+    if let Err(err) = Version::parse(&manifest.version) {
         return Err(anyhow!("Invalid version '{}' for plugin '{}': {:?}", manifest.version, manifest.name, err));
     }
 
