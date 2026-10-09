@@ -95,7 +95,7 @@ impl mlua::UserData for UreqResponse {
 /* ============================================================================================== */
 
 fn apply_args<B>(builder: RequestBuilder<B>, args: Option<mlua::Table>) -> Result<RequestBuilder<B>, mlua::Error> {
-    let mut builder = builder;
+    let mut builder = builder.config().http_status_as_error(false).build();
 
     if let Some(args) = args {
         if let Ok(headers) = args.get::<mlua::Table>("headers") {
