@@ -166,6 +166,7 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
             const data = event.data;
 
             htmlTemplate = enrichMessage(MESSAGE_TEMPLATE, data);
+            htmlTemplate = htmlTemplate.replace("{twitch_gif}", data.flags["unichat:twitch_gif"] ?? "false");
         } else if (event.type === "unichat:donate") {
             /** @type {import("../unichat").UniChatEventDonate['data']} */
             const data = event.data;

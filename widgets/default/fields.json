@@ -276,5 +276,11 @@
         "group": "Gift Event",
         "label": "Text color",
         "value": "#f8f9fa"
+    },
+    "giftImageSize": {
+        "type": "number",
+        "group": "Gift Event",
+        "label": "Gift image size (pixels)",
+        "value": 128
     }
 }

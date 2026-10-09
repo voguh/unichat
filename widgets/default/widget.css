@@ -37,6 +37,7 @@
 
     --gift-background-color: {{giftBackgroundColor}};
     --gift-text-color: {{giftTextColor}};
+    --gift-image-size: {{giftImageSize}}px;
     /* <<== END FIELDS TO CSS VARIABLES ==>> */
 }
 
@@ -149,6 +150,10 @@ html, body {
 #main-container > .message-item > .message > img {
     height: var(--emote-size);
     vertical-align: middle;
+}
+
+#main-container > .message-item[data-twitch-gif="true"] > .message > img {
+    height: var(--gift-image-size);
 }
 /* <==========================================[ END SIMPLE MESSAGE STYLE ]==========================================> */
 
@@ -418,7 +423,7 @@ html, body {
 }
 
 #main-container > .gift-item > .message-wrapper > .message > img {
-    height: 128px;
+    height: var(--gift-image-size);
     vertical-align: middle;
 }
 /* <===========================================[ END GIFT MESSAGE STYLE ]===========================================> */
