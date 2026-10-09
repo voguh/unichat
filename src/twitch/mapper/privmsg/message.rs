@@ -13,6 +13,8 @@ use std::collections::HashMap;
 use anyhow::anyhow;
 use anyhow::Error;
 
+use crate::events::unichat::UNICHAT_FLAG_TWITCH_GIF;
+use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatMessageEventPayload;
 use crate::events::unichat::UniChatPlatform;
@@ -41,27 +43,64 @@ pub fn parse(channel: String, text: String, message: &IRCMessage, tags: HashMap<
     let emotes = parse_message_emotes(tags.get("emotes"), &text)?;
     let timestamp_usec = get_current_timestamp()?;
 
-    let event_payload = UniChatMessageEventPayload {
-        channel_id: room_id.to_owned(),
-        channel_name: Some(channel),
+    let event_payload: UniChatMessageEventPayload;
+    if let Some(Some(gif_str)) = tags.get("gifs") {
+        let mut it = gif_str.splitn(3, "|");
+        let _gif_pos = it.next().ok_or(anyhow!("Missing gif position"))?;
+        let gif_id = it.next().ok_or(anyhow!("Missing gif id"))?;
+        let gif_url = it.next().ok_or(anyhow!("Missing gif url"))?;
 
-        platform: UniChatPlatform::Twitch,
-        flags: inject_raw_tags(&tags),
+        let mut flags = inject_raw_tags(&tags);
+        flags.insert(String::from(UNICHAT_FLAG_TWITCH_GIF), Some(String::from("true")));
 
-        author_id: author_id.to_owned(),
-        author_username: author_username,
-        author_display_name: author_name,
-        author_display_color: author_color,
-        author_profile_picture_url: None,
-        author_badges: author_badges,
-        author_type: author_type,
+        event_payload = UniChatMessageEventPayload {
+            channel_id: room_id.to_owned(),
+            channel_name: Some(channel),
 
-        message_id: message_id.to_owned(),
-        message_text: message,
-        emotes: emotes,
+            platform: UniChatPlatform::Twitch,
+            flags: flags,
 
-        timestamp: timestamp_usec
-    };
+            author_id: author_id.to_owned(),
+            author_username: author_username,
+            author_display_name: author_name,
+            author_display_color: author_color,
+            author_profile_picture_url: None,
+            author_badges: author_badges,
+            author_type: author_type,
+
+            message_id: message_id.to_owned(),
+            message_text: String::from(gif_id),
+            emotes: vec![UniChatEmote {
+                id: gif_id.to_owned(),
+                code: gif_id.to_owned(),
+                url: gif_url.to_owned()
+            }],
+
+            timestamp: timestamp_usec
+        };
+    } else {
+        event_payload = UniChatMessageEventPayload {
+            channel_id: room_id.to_owned(),
+            channel_name: Some(channel),
+
+            platform: UniChatPlatform::Twitch,
+            flags: inject_raw_tags(&tags),
+
+            author_id: author_id.to_owned(),
+            author_username: author_username,
+            author_display_name: author_name,
+            author_display_color: author_color,
+            author_profile_picture_url: None,
+            author_badges: author_badges,
+            author_type: author_type,
+
+            message_id: message_id.to_owned(),
+            message_text: message,
+            emotes: emotes,
+
+            timestamp: timestamp_usec
+        };
+    }
 
     if let Some(reward_id) = tags.get("custom-reward-id").and_then(|v| v.as_ref()) {
         if let Some(redemption_payload) = handle_redemption_message_event(&reward_id, event_payload) {

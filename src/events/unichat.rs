@@ -45,6 +45,7 @@ pub enum UniChatEvent {
 /* <============================================================================================> */
 
 pub const UNICHAT_FLAG_TWITCH_STREAK_DAYS: &str = "unichat:twitch_streak_days";
+pub const UNICHAT_FLAG_TWITCH_GIF: &str = "unichat:twitch_gif";
 
 pub const UNICHAT_FLAG_YOUTUBE_SUPER_STICKER: &str = "unichat:youtube_super_sticker";
 pub const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_TIER: &str = "unichat:youtube_superchat_tier";

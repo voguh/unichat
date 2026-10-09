@@ -13,7 +13,7 @@ use std::collections::HashMap;
 pub mod author;
 pub mod message;
 
-const DROPPED_TAGS: [&str; 24] = [
+const DROPPED_TAGS: [&str; 25] = [
     "badge-info",
     "badges",
     "bits",
@@ -37,7 +37,8 @@ const DROPPED_TAGS: [&str; 24] = [
     "tmi-sent-ts",
     "turbo",
     "user-id",
-    "user-type"
+    "user-type",
+    "gifs"
 ];
 
 const DROPPED_TAG_PREFIXES: [&str; 3] = ["msg-param-", "reply-", "source-"];
