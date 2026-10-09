@@ -104,7 +104,6 @@ struct UniChatRelease {
     prerelease: bool,
 
     created_at: String,
-    updated_at: String,
     published_at: Option<String>
 }
 
@@ -145,11 +144,14 @@ pub async fn get_releases<R: Runtime>(_app: AppHandle<R>) -> Result<UniChatRelea
     if releases.is_empty() {
         log::info!("Fetching releases from UniChat API...");
         let url = "https://unichat.voguh.me/api/v1/unichat-releases";
-        let mut response = ureq::get(url).call().map_err(|e| format!("{:#?}", e))?;
+        let mut response = ureq::get(url)
+            .header("User-Agent", format!("UniChat/{}", UNICHAT_VERSION))
+            .call()
+            .map_err(|e| format!("{:#?}", e))?;
         let response_body = response.body_mut().read_to_string().map_err(|e| format!("{:#?}", e))?;
 
-        fs::write(&cached_releases_path, &response_body).map_err(|e| format!("{:#?}", e))?;
         releases = serde_json::from_str(&response_body).map_err(|e| format!("{:#?}", e))?;
+        fs::write(&cached_releases_path, &response_body).map_err(|e| format!("{:#?}", e))?;
     }
 
     /* ====================================================================== */
