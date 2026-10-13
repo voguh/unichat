@@ -16,8 +16,8 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::events::unichat::UniChatAuthorType;
+use crate::events::unichat::UniChatCheerEventPayload;
 use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatGiftEventPayload;
 use crate::events::unichat::UniChatPlatform;
 use crate::utils::get_current_timestamp;
 use crate::utils::properties;
@@ -152,7 +152,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
 
         let timestamp_usec = get_current_timestamp()?;
 
-        let event = UniChatEvent::Gift(UniChatGiftEventPayload {
+        let event = UniChatEvent::Cheer(UniChatCheerEventPayload {
             channel_id: channel_id,
             channel_name: None,
 
@@ -167,11 +167,13 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
             author_profile_picture_url: Some(author_photo),
             author_type: UniChatAuthorType::Viewer,
 
-            gift_id: gift_id,
-            gift_title: gift_title,
-            gift_description: gift_description,
-            gift_cost: None,
-            gift_icon_url: gift_icon_url,
+            value: None,
+            currency: Some(String::from("Jewels")),
+
+            cheer_id: gift_id,
+            cheer_title: gift_title,
+            cheer_description: gift_description,
+            cheer_icon_url: gift_icon_url,
 
             message_id: message_id,
             message_text: None,

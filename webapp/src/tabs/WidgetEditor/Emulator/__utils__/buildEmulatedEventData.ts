@@ -136,38 +136,25 @@ const EMULATED_EVENT_BUILDERS: {
     }),
 
     "unichat:donate": (ctx) => {
-        const flags = { ...ctx.flags };
-        const withMessage = ctx.platform === "twitch" || ctx.rng() < 0.6;
+        const withMessage = ctx.rng() < 0.6;
+        const purchaseValue = Number((ctx.rng() * 500 + 1).toFixed(2));
 
-        let value: number;
-        let currency: string;
+        let value = purchaseValue;
         let originalValue: number | null = null;
         let originalCurrency: string | null = null;
 
-        if (ctx.platform === "youtube") {
-            const purchaseValue = Number((ctx.rng() * 500 + 1).toFixed(2));
-
-            if (ctx.rng() < 0.5) {
-                originalValue = purchaseValue;
-                originalCurrency = "R$";
-                value = Number((purchaseValue / 5.4).toFixed(2));
-            } else {
-                value = purchaseValue;
-            }
-
-            currency = "$";
-            flags[UNICHAT_FLAG_YOUTUBE_SUPERCHAT_TIER] = fakeSuperChatTier(purchaseValue);
-        } else {
-            value = Math.floor(ctx.rng() * 10000) + 100;
-            currency = "Bits";
+        if (ctx.rng() < 0.5) {
+            originalValue = purchaseValue;
+            originalCurrency = "R$";
+            value = Number((purchaseValue / 5.4).toFixed(2));
         }
 
         return {
             ...buildCommonData(ctx),
-            flags: flags,
+            flags: { ...ctx.flags, [UNICHAT_FLAG_YOUTUBE_SUPERCHAT_TIER]: fakeSuperChatTier(purchaseValue) },
 
             value: value,
-            currency: currency,
+            currency: "$",
 
             originalValue: originalValue,
             originalCurrency: originalCurrency,
@@ -243,7 +230,25 @@ const EMULATED_EVENT_BUILDERS: {
         };
     },
 
-    "unichat:gift": (ctx) => {
+    "unichat:cheer": (ctx) => {
+        if (ctx.platform === "twitch") {
+            return {
+                ...buildCommonData(ctx),
+
+                value: Math.floor(ctx.rng() * 10000) + 100,
+                currency: "Bits",
+
+                cheerId: null,
+                cheerTitle: null,
+                cheerDescription: null,
+                cheerIconUrl: null,
+
+                messageId: crypto.randomUUID(),
+                messageText: ctx.messageText,
+                emotes: ctx.emotes
+            };
+        }
+
         const giftId = "pastel";
 
         return {
@@ -252,11 +257,13 @@ const EMULATED_EVENT_BUILDERS: {
             authorBadges: [],
             authorType: "VIEWER",
 
-            giftId: giftId,
-            giftTitle: fakeGiftTitle(giftId),
-            giftDescription: ctx.rng() < 0.5 ? "Sample Gift" : null,
-            giftCost: null,
-            giftIconUrl: proxyYouTubeUrl(DUMMY_YOUTUBE_GIFT_ASSET_URL),
+            value: null,
+            currency: "Jewels",
+
+            cheerId: giftId,
+            cheerTitle: fakeGiftTitle(giftId),
+            cheerDescription: ctx.rng() < 0.5 ? "Sample Gift" : null,
+            cheerIconUrl: proxyYouTubeUrl(DUMMY_YOUTUBE_GIFT_ASSET_URL),
 
             messageId: crypto.randomUUID(),
             messageText: null,

@@ -152,6 +152,11 @@ if (toggleDonateButton != null) {
     toggleDonateButton.addEventListener("click", () => toggleEventTypeView(toggleDonateButton, "unichat:donate"));
 }
 
+const toggleCheerButton = document.querySelector("#main-container > .actions-container > .toggle-btn-cheer");
+if (toggleCheerButton != null) {
+    toggleCheerButton.addEventListener("click", () => toggleEventTypeView(toggleCheerButton, "unichat:cheer"));
+}
+
 const toggleSponsorButton = document.querySelector("#main-container > .actions-container > .toggle-btn-sponsor");
 if (toggleSponsorButton != null) {
     toggleSponsorButton.addEventListener("click", () => toggleEventTypeView(toggleSponsorButton, "unichat:sponsor"));
@@ -191,11 +196,18 @@ window.addEventListener("unichat:event", function ({ detail: event }) {
         htmlTemplate = FEED_ITEM_TEMPLATE.replace("{author_id}", data.authorId);
         htmlTemplate = htmlTemplate.replace("{platform}", data.platform);
         htmlTemplate = htmlTemplate.replace("{message_id}", data.messageId);
-        if (data.platform === "youtube") {
-            htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data, [`${data.currency}${data.value}`, "#0ca678"], ["Super chat", "#0ca67880"]));
-        } else {
-            htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data, [`${data.value}x`, "#0ca678"], ["Bits", "#0ca67880"]));
-        }
+        htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data, [`${data.currency}${data.value}`, "#0ca678"], ["Super chat", "#0ca67880"]));
+        htmlTemplate = htmlTemplate.replace("{details}", escapeText(data.authorDisplayName));
+        htmlTemplate = htmlTemplate.replace("{timestmap}", (new Date(data.timestamp)).toLocaleString());
+        htmlTemplate = wrapMessage(htmlTemplate, data.messageText, data.emotes);
+    } else if (event.type === "unichat:cheer") {
+        /** @type {import("../unichat").UniChatEventCheer['data']} */
+        const data = event.data;
+
+        htmlTemplate = FEED_ITEM_TEMPLATE.replace("{author_id}", data.authorId);
+        htmlTemplate = htmlTemplate.replace("{platform}", data.platform);
+        htmlTemplate = htmlTemplate.replace("{message_id}", data.messageId);
+        htmlTemplate = htmlTemplate.replace("{badges}", buildBadges(data, [data.value != null ? `${data.value}x` : escapeText(data.cheerTitle), "#ae3ec9"], [escapeText(data.currency), "#ae3ec980"]));
         htmlTemplate = htmlTemplate.replace("{details}", escapeText(data.authorDisplayName));
         htmlTemplate = htmlTemplate.replace("{timestmap}", (new Date(data.timestamp)).toLocaleString());
         htmlTemplate = wrapMessage(htmlTemplate, data.messageText, data.emotes);

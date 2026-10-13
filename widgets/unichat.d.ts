@@ -22,7 +22,7 @@ export interface UniChatBadge {
     url: string;
 }
 
-export type UniChatEvent = UniChatEventClear | UniChatEventRemoveMessage | UniChatEventRemoveAuthor | UniChatEventMessage | UniChatEventRaid | UniChatEventSponsor | UniChatEventSponsorGift | UniChatEventDonate | UniChatEventRedemption | UniChatEventGift | UniChatEventUserstoreUpdate | UniChatEventCustom;
+export type UniChatEvent = UniChatEventClear | UniChatEventRemoveMessage | UniChatEventRemoveAuthor | UniChatEventMessage | UniChatEventRaid | UniChatEventSponsor | UniChatEventSponsorGift | UniChatEventDonate | UniChatEventRedemption | UniChatEventCheer | UniChatEventUserstoreUpdate | UniChatEventCustom;
 
 /* <============================================================================================> */
 
@@ -104,6 +104,7 @@ export interface UniChatEventMessage {
 
 /* <============================================================================================> */
 
+/** **Disclaimer:** Natively emitted only for YouTube Super Chats and Super Stickers. */
 export interface UniChatEventDonate {
     type: "unichat:donate";
     data: {
@@ -119,7 +120,6 @@ export interface UniChatEventDonate {
         authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
-        /** **Disclaimer:** On Twitch, this field is always null. */
         authorProfilePictureUrl: string | null;
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
@@ -278,9 +278,8 @@ export interface UniChatEventRedemption {
 
 /* <============================================================================================> */
 
-/** **Disclaimer:** This event is exclusive for YouTube */
-export interface UniChatEventGift {
-    type: "unichat:gift";
+export interface UniChatEventCheer {
+    type: "unichat:cheer";
     data: {
         channelId: string;
         /** **Disclaimer:** On YouTube, this field is always null. */
@@ -294,19 +293,24 @@ export interface UniChatEventGift {
         authorUsername: string | null;
         authorDisplayName: string;
         authorDisplayColor: string;
+        /** **Disclaimer:** On Twitch, this field is always null. */
         authorProfilePictureUrl: string | null;
         /** **Disclaimer:** On YouTube, this field is always an empty list. */
         authorBadges: UniChatBadge[];
         authorType: UniChatAuthorType;
 
-        /** **Disclaimer:** On YouTube, derived from the gift asset filename. Stable per gift type, but not an id issued by the platform. */
-        giftId: string | null;
-        /** **Disclaimer:** On YouTube, derived from the gift asset filename - an approximation of the real name. */
-        giftTitle: string | null;
-        giftDescription: string | null;
         /** **Disclaimer:** On YouTube, this field is always null. */
-        giftCost: number | null;
-        giftIconUrl: string | null;
+        value: number | null;
+        currency: string | null;
+
+        /** **Disclaimer:** On Twitch, this field is always null. On YouTube, derived from the gift asset filename. Stable per gift type, but not an id issued by the platform. */
+        cheerId: string | null;
+        /** **Disclaimer:** On Twitch, this field is always null. On YouTube, derived from the gift asset filename - an approximation of the real name. */
+        cheerTitle: string | null;
+        /** **Disclaimer:** On Twitch, this field is always null. */
+        cheerDescription: string | null;
+        /** **Disclaimer:** On Twitch, this field is always null. */
+        cheerIconUrl: string | null;
 
         messageId: string;
         /** **Disclaimer:** On YouTube, this field is always null. */

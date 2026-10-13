@@ -259,28 +259,28 @@
 
 
 
-    "giftTemplateMessage": {
+    "cheerTemplateMessage": {
         "type": "textarea",
-        "group": "Gift Event",
+        "group": "Cheer Event",
         "label": "Template message",
-        "value": "<span>{author_display_name}</span>, just gifted:"
+        "value": "<span>{author_display_name}</span>, just cheered <span>{value} {currency}</span>!"
     },
-    "giftBackgroundColor": {
+    "cheerBackgroundColor": {
         "type": "colorpicker",
-        "group": "Gift Event",
+        "group": "Cheer Event",
         "label": "Background color",
         "value": "#339af0"
     },
-    "giftTextColor": {
+    "cheerTextColor": {
         "type": "colorpicker",
-        "group": "Gift Event",
+        "group": "Cheer Event",
         "label": "Text color",
         "value": "#f8f9fa"
     },
-    "giftImageSize": {
+    "cheerImageSize": {
         "type": "number",
-        "group": "Gift Event",
-        "label": "Gift image size (pixels)",
+        "group": "Cheer Event",
+        "label": "Image size (pixels)",
         "value": 128
     }
 }

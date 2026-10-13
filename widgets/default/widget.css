@@ -35,9 +35,9 @@
     --redemption-background-color: {{redemptionBackgroundColor}};
     --redemption-text-color: {{redemptionTextColor}};
 
-    --gift-background-color: {{giftBackgroundColor}};
-    --gift-text-color: {{giftTextColor}};
-    --gift-image-size: {{giftImageSize}}px;
+    --cheer-background-color: {{cheerBackgroundColor}};
+    --cheer-text-color: {{cheerTextColor}};
+    --cheer-image-size: {{cheerImageSize}}px;
     /* <<== END FIELDS TO CSS VARIABLES ==>> */
 }
 
@@ -153,7 +153,7 @@ html, body {
 }
 
 #main-container > .message-item[data-twitch-gif="true"] > .message > img {
-    height: var(--gift-image-size);
+    height: var(--cheer-image-size);
 }
 /* <==========================================[ END SIMPLE MESSAGE STYLE ]==========================================> */
 
@@ -378,36 +378,36 @@ html, body {
 }
 /* <========================================[ END REDEMPTION MESSAGE STYLE ]========================================> */
 
-/* <=============================================[ GIFT MESSAGE STYLE ]=============================================> */
-#main-container > .gift-item {
+/* <============================================[ CHEER MESSAGE STYLE ]=============================================> */
+#main-container > .cheer-item {
     margin-top: var(--margin-top);
     position: relative;
 }
 
-#main-container > .gift-item > .author-meta {
+#main-container > .cheer-item > .author-meta {
     left: 50%;
     transform: translate(-50%, -50%);
 }
 
-#main-container > .gift-item > .message-wrapper {
+#main-container > .cheer-item > .message-wrapper {
     padding: var(--margin-top) var(--general-padding) var(--general-padding) var(--general-padding);
     border-radius: var(--general-border-radius);
-    background: var(--gift-background-color);
-    color: var(--gift-text-color);
+    background: var(--cheer-background-color);
+    color: var(--cheer-text-color);
     box-shadow: var(--general-box-shadow);
 }
 
-#main-container > .gift-item > .message-wrapper > .gift-meta {
+#main-container > .cheer-item > .message-wrapper > .cheer-meta {
     font-weight: bold;
     text-align: center;
 }
 
-#main-container > .gift-item > .message-wrapper > .gift-meta > span {
+#main-container > .cheer-item > .message-wrapper > .cheer-meta > span {
     font-weight: bolder;
     color: var(--accent-color);
 }
 
-#main-container > .gift-item > .message-wrapper > .message {
+#main-container > .cheer-item > .message-wrapper > .message {
     width: calc(100vw - (var(--general-padding) * 6));
     margin-top: var(--general-padding);
     background: rgba(0, 0, 0, 0.25);
@@ -418,12 +418,16 @@ html, body {
     word-break: break-word;
 }
 
-#main-container > .gift-item > .message-wrapper > .message:empty {
+#main-container > .cheer-item > .message-wrapper > .message:empty {
     display: none;
 }
 
-#main-container > .gift-item > .message-wrapper > .message > img {
-    height: var(--gift-image-size);
+#main-container > .cheer-item > .message-wrapper > .message > img {
+    height: var(--emote-size);
     vertical-align: middle;
 }
-/* <===========================================[ END GIFT MESSAGE STYLE ]===========================================> */
+
+#main-container > .cheer-item > .message-wrapper > .message > img.cheer-icon {
+    height: var(--cheer-image-size);
+}
+/* <==========================================[ END CHEER MESSAGE STYLE ]===========================================> */

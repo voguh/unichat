@@ -76,7 +76,7 @@
 ---@field SponsorGift fun(self: UniChatEventFactory, data: UniChatSponsorGiftEventPayload): UniChatEvent
 ---@field Raid fun(self: UniChatEventFactory, data: UniChatRaidEventPayload): UniChatEvent
 ---@field Redemption fun(self: UniChatEventFactory, data: UniChatRedemptionEventPayload): UniChatEvent
----@field Gift fun(self: UniChatEventFactory, data: UniChatGiftEventPayload): UniChatEvent
+---@field Cheer fun(self: UniChatEventFactory, data: UniChatCheerEventPayload): UniChatEvent
 ---@field Custom fun(self: UniChatEventFactory, data: table): UniChatEvent
 
 ---@class UniChatClearEventPayload
@@ -211,7 +211,7 @@
 ---@field emotes UniChatEmote[]
 ---@field timestamp number
 
----@class UniChatGiftEventPayload
+---@class UniChatCheerEventPayload
 ---@field channelId string
 ---@field channelName? string
 ---@field platform UniChatPlatform
@@ -223,11 +223,12 @@
 ---@field authorProfilePictureUrl? string
 ---@field authorBadges UniChatBadge[]
 ---@field authorType UniChatAuthorType
----@field giftId? string
----@field giftTitle? string
----@field giftDescription? string
----@field giftCost? number
----@field giftIconUrl? string
+---@field value? number
+---@field currency? string
+---@field cheerId? string
+---@field cheerTitle? string
+---@field cheerDescription? string
+---@field cheerIconUrl? string
 ---@field messageId string
 ---@field messageText? string
 ---@field emotes UniChatEmote[]

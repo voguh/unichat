@@ -92,7 +92,7 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
                         <i className="fas fa-comment" />
                         Message
                     </Button>
-                    <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:donate")}>
+                    <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:donate", "youtube")}>
                         <i className="fas fa-money-bill-wave" />
                         Donate
                     </Button>
@@ -110,11 +110,11 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
                     </Button>
                     <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:redemption", "twitch")}>
                         <i className="fas fa-box" />
-                        Twitch Redemption
+                        Redemption
                     </Button>
-                    <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:gift", "youtube")}>
+                    <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:cheer")}>
                         <i className="fas fa-gem" />
-                        YouTube Jewels
+                        Cheer
                     </Button>
                 </div>
             </div>

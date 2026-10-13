@@ -13,7 +13,7 @@ use std::collections::HashMap;
 use anyhow::anyhow;
 use anyhow::Error;
 
-use crate::events::unichat::UniChatDonateEventPayload;
+use crate::events::unichat::UniChatCheerEventPayload;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
 use crate::twitch::mapper::structs::author::parse_author_badges;
@@ -36,13 +36,13 @@ pub fn parse(channel: String, text: String, message: &IRCMessage, tags: HashMap<
     let author_badges = parse_author_badges(tags.get("badges"))?;
     let author_type = parse_author_type(&tags)?;
     let bits = tags.get("bits").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing bits tag"))?;
-    let bits_value: f64 = bits.parse()?;
+    let bits_value: u32 = bits.parse()?;
     let message_id = tags.get("id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing id tag"))?;
     let message = parse_message_string(&text)?;
     let emotes = parse_message_emotes(tags.get("emotes"), &text)?;
     let timestamp_usec = get_current_timestamp()?;
 
-    let event = UniChatEvent::Donate(UniChatDonateEventPayload {
+    let event = UniChatEvent::Cheer(UniChatCheerEventPayload {
         channel_id: room_id.to_owned(),
         channel_name: Some(channel),
 
@@ -57,11 +57,13 @@ pub fn parse(channel: String, text: String, message: &IRCMessage, tags: HashMap<
         author_badges: author_badges,
         author_type: author_type,
 
-        value: bits_value,
-        currency: String::from("Bits"),
+        value: Some(bits_value),
+        currency: Some(String::from("Bits")),
 
-        original_value: None,
-        original_currency: None,
+        cheer_id: None,
+        cheer_title: None,
+        cheer_description: None,
+        cheer_icon_url: None,
 
         message_id: message_id.to_owned(),
         message_text: Some(message),

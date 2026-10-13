@@ -36,7 +36,7 @@ PAYLOADS = [
     ("UniChatSponsorGiftEventPayload", "UniChatEventSponsorGift", "UniChatSponsorGiftEventPayload"),
     ("UniChatRaidEventPayload", "UniChatEventRaid", "UniChatRaidEventPayload"),
     ("UniChatRedemptionEventPayload", "UniChatEventRedemption", "UniChatRedemptionEventPayload"),
-    ("UniChatGiftEventPayload", "UniChatEventGift", "UniChatGiftEventPayload"),
+    ("UniChatCheerEventPayload", "UniChatEventCheer", "UniChatCheerEventPayload"),
     ("UniChatUserstoreUpdateEventPayload", "UniChatEventUserstoreUpdate", "UniChatUserstoreUpdateEventPayload")
 ]
 

@@ -38,7 +38,7 @@ fn event_is_emulated(event: &UniChatEvent) -> bool {
         UniChatEvent::SponsorGift(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
         UniChatEvent::Raid(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
         UniChatEvent::Redemption(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
-        UniChatEvent::Gift(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
+        UniChatEvent::Cheer(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
         _ => false
     }
 }

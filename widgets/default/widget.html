@@ -68,16 +68,16 @@
     </div>
 </script>
 
-<script type="text/template" id="gift_item">
-    <div class="gift-item" data-from="{author_id}" data-platform="{platform}" data-id="{message_id}">
+<script type="text/template" id="cheer_item">
+    <div class="cheer-item" data-from="{author_id}" data-platform="{platform}" data-id="{message_id}">
         <div class="author-meta">
             <span class="badges">{author_badges}</span>
             <span class="name">{author_display_name}</span>
         </div>
 
         <div class="message-wrapper">
-            <div class="gift-meta">{gift_meta}</div>
-            <div class="message"><img src="{giftIconUrl}" alt="{giftDescription}" onerror="this.style.display='none'"></div>
+            <div class="cheer-meta">{cheer_meta}</div>
+            <div class="message">{message_text}<img class="cheer-icon" src="{cheer_icon_url}" alt="{cheer_description}" onerror="this.remove()"></div>
         </div>
     </div>
 </script>
