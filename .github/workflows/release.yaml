@@ -59,6 +59,26 @@ jobs:
           name: macos-bundles
           path: target/macos
 
+      - name: Pack widget types
+        run: |
+          export VERSION="${{ github.ref_name }}"
+          mkdir -p dist target/widget-types
+          cp widgets/unichat.d.ts widgets/fields-schema.json target/widget-types/
+          printf '/// <reference types="jquery" />\nexport * from "./unichat";\n' > target/widget-types/index.d.ts
+          jq -n --arg version "$VERSION" '{
+            name: "@voguh/unichat-widgets",
+            version: $version,
+            license: "EPL-2.0",
+            repository: { type: "git", url: "https://github.com/voguh/unichat" },
+            types: "./index.d.ts",
+            exports: {
+              ".": { types: "./index.d.ts" },
+              "./fields-schema.json": "./fields-schema.json"
+            },
+            dependencies: { "@types/jquery": "3.5.32" }
+          }' > target/widget-types/package.json
+          npm pack ./target/widget-types --pack-destination dist
+
       - name: Move build artifacts
         run: |
           export VERSION="${{ github.ref_name }}"
