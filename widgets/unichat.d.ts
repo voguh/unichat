@@ -104,7 +104,6 @@ export interface UniChatEventMessage {
 
 /* <============================================================================================> */
 
-/** **Disclaimer:** Natively emitted only for YouTube Super Chats and Super Stickers. */
 export interface UniChatEventDonate {
     type: "unichat:donate";
     data: {
@@ -239,7 +238,6 @@ export interface UniChatEventRaid {
 
 /* <============================================================================================> */
 
-/** **Disclaimer:** This event is exclusive for Twitch */
 export interface UniChatEventRedemption {
     type: "unichat:redemption";
     data: {
