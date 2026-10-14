@@ -8,6 +8,19 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+declare global {
+    var UniChatAPI: {
+        getUserStoreItem: (key: string) => string | null;
+    }
+
+    interface WindowEventMap {
+        "unichat:connected": CustomEvent<{ userstore: Record<string, string> }>;
+        "unichat:event": CustomEvent<UniChatEvent>;
+    }
+}
+
+/* <============================================================================================> */
+
 export type UniChatPlatform = "twitch" | "youtube" | (string & {});
 export type UniChatAuthorType = "VIEWER" | "SPONSOR" | "MODERATOR" | "BROADCASTER" | (string & {});
 
