@@ -83,7 +83,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
         channel_name: None,
 
         platform: UniChatPlatform::YouTube,
-        flags: HashMap::from([(String::from(UNICHAT_FLAG_YOUTUBE_SUPER_STICKER), None)]),
+        flags: HashMap::from([(String::from(UNICHAT_FLAG_YOUTUBE_SUPER_STICKER), Some(String::from("true")))]),
 
         author_id: author_id,
         author_username: author_username,
