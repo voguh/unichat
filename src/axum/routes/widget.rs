@@ -11,8 +11,6 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use anyhow::anyhow;
-use anyhow::Error;
 use axum::body::Body;
 use axum::extract::Path;
 use axum::extract::Request;
@@ -28,34 +26,49 @@ use crate::widgets::get_widget_from_rest_path;
 
 static WIDGET_TEMPLATE: &str = include_str!("./../static/index.html.template");
 
-fn load_fieldstate(widget: &WidgetMetadata) -> Result<HashMap<String, serde_json::Value>, Error> {
-    let fields_map = widget.fields();
+fn fill_fieldstate(template: &str, widget: &WidgetMetadata) -> String {
+    let mut template = String::from(template);
+
+    /* ====================================================================== */
+
+    let mut fieldstate: HashMap<String, serde_json::Value> = HashMap::new();
+
     let fieldstate_map = widget.fieldstate();
-
-    let mut final_fieldstate: HashMap<String, serde_json::Value> = HashMap::new();
-
-    for (key, value) in fields_map.iter() {
+    for (key, value) in widget.fields().iter() {
         if !value.is_object() {
             continue;
         }
 
         if let Some(state_value) = fieldstate_map.get(key) {
-            final_fieldstate.insert(key.clone(), state_value.clone());
-        } else {
-            let obj = value.as_object().ok_or(anyhow!("Invalid field definition"))?;
+            fieldstate.insert(key.clone(), state_value.clone());
+        } else if let Some(obj) = value.as_object() {
             if let Some(default_value) = obj.get("value") {
-                final_fieldstate.insert(key.clone(), default_value.clone());
+                fieldstate.insert(key.clone(), default_value.clone());
             }
         }
     }
 
-    return Ok(final_fieldstate);
+    /* ====================================================================== */
+
+    for (key, value) in fieldstate.iter() {
+        match serde_plain::to_string(value) {
+            Ok(value_str) => {
+                template = template.replace(&format!("{{{{{}}}}}", key), &value_str);
+                template = template.replace(&format!("{{{}}}", key), &value_str);
+            },
+            Err(err) => {
+                log::error!("Failed to serialize fieldstate value for key '{}': {:#?}", key, err);
+                continue;
+            }
+        }
+    }
+
+    return template;
 }
 
 /* ================================================================================================================== */
 
 pub async fn get_widget_assets(Path((widget_name, asset_path)): Path<(String, String)>, req: Request<Body>) -> Response {
-
     let widget_metadata: WidgetMetadata;
     match get_widget_from_rest_path(&widget_name) {
         Ok(widget) => widget_metadata = widget,
@@ -92,48 +105,57 @@ pub async fn get_widget_assets(Path((widget_name, asset_path)): Path<(String, St
 
 /* ================================================================================================================== */
 
+pub async fn get_widget_css(Path(widget_name): Path<String>) -> Response {
+    if let Ok(widget) = get_widget_from_rest_path(&widget_name) {
+        let content = fill_fieldstate(&widget.widget_css(), &widget);
+        return Response::builder().status(StatusCode::OK)
+            .header("Content-Type", "text/css; charset=utf-8")
+            .body(Body::from(content))
+            .unwrap();
+    }
+
+    return Response::builder().status(StatusCode::NOT_FOUND)
+        .header("Content-Type", "text/plain; charset=utf-8")
+        .body(Body::from(format!("Widget '{}' file 'widget.css' not found", widget_name)))
+        .unwrap();
+}
+
+pub async fn get_widget_js(Path(widget_name): Path<String>) -> Response {
+    if let Ok(widget) = get_widget_from_rest_path(&widget_name) {
+        let content = fill_fieldstate(&widget.widget_js(), &widget);
+        return Response::builder().status(StatusCode::OK)
+            .header("Content-Type", "text/javascript; charset=utf-8")
+            .body(Body::from(content))
+            .unwrap();
+    }
+
+    return Response::builder().status(StatusCode::NOT_FOUND)
+        .header("Content-Type", "text/plain; charset=utf-8")
+        .body(Body::from(format!("Widget '{}' file 'widget.js' not found", widget_name)))
+        .unwrap();
+}
+
 pub async fn get_widget(Path(widget_name): Path<String>, req: Request<Body>) -> Response {
-    let widget_metadata: WidgetMetadata;
-    match get_widget_from_rest_path(&widget_name) {
-        Ok(widget) => widget_metadata = widget,
-        Err(_) => {
-            return Response::builder().status(StatusCode::NOT_FOUND)
-                .body(Body::from(format!("Widget '{}' not found", widget_name)))
-                .unwrap();
-        }
+    if let Ok(widget) = get_widget_from_rest_path(&widget_name) {
+        let mut content = String::from(WIDGET_TEMPLATE);
+        content = content.replace("{{WIDGET_HTML}}", &widget.widget_html());
+
+        let uri = req.uri();
+        let scheme = uri.scheme_str().unwrap_or("http");
+        let host = uri.host().unwrap_or("localhost");
+        let base_url = format!("{}://{}:{}/widget/{}/", scheme, host, BASE_REST_PORT, widget_name);
+        content = content.replace("{{WIDGET_BASE_URL}}", &base_url);
+
+        content = fill_fieldstate(&content, &widget);
+
+        return Response::builder().status(StatusCode::OK)
+            .header("Content-Type", "text/html; charset=utf-8")
+            .body(Body::from(content))
+            .unwrap();
     }
 
-    let css = widget_metadata.widget_css();
-    let html = widget_metadata.widget_html();
-    let js = widget_metadata.widget_js();
-
-    let mut content = String::from(WIDGET_TEMPLATE);
-    content = content.replace("{{WIDGET_STYLE}}", &css);
-    content = content.replace("{{WIDGET_HTML}}", &html);
-    content = content.replace("{{WIDGET_SCRIPT}}", &js);
-
-    let uri = req.uri();
-    let scheme = uri.scheme_str().unwrap_or("http");
-    let host = uri.host().unwrap_or("localhost");
-    let base_url = format!("{}://{}:{}/widget/{}/", scheme, host, BASE_REST_PORT, widget_name);
-    content = content.replace("{{WIDGET_BASE_URL}}", &base_url);
-
-    let fieldstate = load_fieldstate(&widget_metadata).unwrap_or_default();
-    for (key, value) in fieldstate.iter() {
-        match serde_plain::to_string(value) {
-            Ok(value_str) => {
-                content = content.replace(&format!("{{{{{}}}}}", key), &value_str);
-                content = content.replace(&format!("{{{}}}", key), &value_str);
-            },
-            Err(err) => {
-                log::error!("Failed to serialize fieldstate value for key '{}': {:#?}", key, err);
-                continue;
-            }
-        }
-    }
-
-    return Response::builder().status(StatusCode::OK)
-        .header("Content-Type", "text/html; charset=utf-8")
-        .body(Body::from(content))
+    return Response::builder().status(StatusCode::NOT_FOUND)
+        .header("Content-Type", "text/plain; charset=utf-8")
+        .body(Body::from(format!("Widget '{}' entrypoint not found", widget_name)))
         .unwrap();
 }

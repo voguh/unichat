@@ -37,6 +37,8 @@ pub async fn start() -> Result<(), Error> {
         .route("/proxy/{*path}", get(routes::proxy))
         .route("/rpc", post(routes::rpc))
         .route("/widget/{name}", get(routes::get_widget))
+        .route("/widget/{name}/widget.css", get(routes::get_widget_css))
+        .route("/widget/{name}/widget.js", get(routes::get_widget_js))
         .route("/widget/{name}/assets/{*path}", get(routes::get_widget_assets))
         .route("/ws", get(routes::ws));
 
