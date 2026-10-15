@@ -20,6 +20,7 @@ declare global {
 
     var __IS_DEV__: boolean;
     var __PLATFORM__: "linux" | "macos" | "windows"; // Actually represents `std::env::consts::OS` from Rust (https://doc.rust-lang.org/std/env/consts/constant.OS.html)
+    var __PLUGINS_ENABLED__: boolean;
 
     var UNICHAT_DISPLAY_NAME: string;
     var UNICHAT_NAME: string;

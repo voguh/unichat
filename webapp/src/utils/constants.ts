@@ -40,7 +40,6 @@ export enum PluginStatus {
 
 export enum WidgetSourceType {
     SYSTEM = "SYSTEM",
-    SYSTEM_PLUGIN = "SYSTEM_PLUGIN",
     USER_PLUGIN = "USER_PLUGIN",
     USER = "USER"
 }

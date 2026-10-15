@@ -69,11 +69,6 @@ export function PluginsModal(): PReact.ComponentChildren {
                                 </td>
                                 <td className="plugin-badges">
                                     <div>
-                                        {Strings.isNullOrEmpty(plugin.pluginPath) && (
-                                            <Badge>
-                                                <i className="fas fa-code-branch" /> BUILT-IN
-                                            </Badge>
-                                        )}
                                         <Badge variant={handleBadgeVariant(plugin.status)}>{plugin.status}</Badge>
                                     </div>
                                 </td>

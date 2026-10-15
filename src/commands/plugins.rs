@@ -16,8 +16,6 @@ use tauri::Runtime;
 use crate::plugins;
 use crate::plugins::PluginStatus;
 use crate::utils::base64;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
 
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -42,10 +40,7 @@ pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Serialize
     let plugins = plugins::get_plugins().map_err(|e| format!("An error occurred on get plugins: {:#?}", e))?;
 
     for plugin in plugins {
-        let mut plugin_path = Some(plugin.get_plugin_path());
-        if plugin.get_plugin_path().starts_with(properties::get_app_path(AppPaths::UniChatSystemPlugins)) {
-            plugin_path = None;
-        }
+        let plugin_path = Some(plugin.get_plugin_path());
 
         let metadata = SerializedPluginMetadata {
             name: plugin.name.clone(),

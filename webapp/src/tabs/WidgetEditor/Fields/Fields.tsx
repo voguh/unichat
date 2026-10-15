@@ -24,7 +24,7 @@ import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { UniChatWidget, WidgetFields } from "unichat/types";
 import { Strings } from "unichat/utils/Strings";
-import { isGeneralUserWidget, isSystemPluginWidget, isSystemWidget } from "unichat/utils/widgetSourceTypeGuards";
+import { isGeneralUserWidget, isSystemWidget } from "unichat/utils/widgetSourceTypeGuards";
 
 import { FieldsStyledContainer } from "./styled";
 
@@ -142,8 +142,6 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
 
         if (isSystemWidget(widget)) {
             return <div className="empty-fields">No editable fields for system widgets.</div>;
-        } else if (isSystemPluginWidget(widget)) {
-            return <div className="empty-fields">No editable fields for system plugins widgets.</div>;
         } else if (fields == null || Object.keys(fields).length === 0) {
             return <div className="empty-fields">No fields defined for this widget.</div>;
         }

@@ -10,6 +10,7 @@
 
 use anyhow::Error;
 
+use crate::plugins;
 use crate::utils::base64;
 use crate::utils::is_dev;
 use crate::utils::path_to_string;
@@ -32,6 +33,7 @@ pub const MAIN_WINDOW_LABEL: &str = "main";
 pub fn create() -> Result<(), Error> {
     let is_dev = is_dev();
     let platform = std::env::consts::OS;
+    let plugins_enabled = plugins::runtime_initialized();
 
     let unichat_icon = format!("data:image/png;base64,{}", base64::encode(UNICHAT_ICON_BYTES));
 
@@ -47,6 +49,7 @@ pub fn create() -> Result<(), Error> {
         .initialization_script(format!(r#"
             globalThis.__IS_DEV__ = {is_dev};
             globalThis.__PLATFORM__ = "{platform}";
+            globalThis.__PLUGINS_ENABLED__ = {plugins_enabled};
 
             globalThis.UNICHAT_DISPLAY_NAME = "{UNICHAT_DISPLAY_NAME}";
             globalThis.UNICHAT_NAME = "{UNICHAT_NAME}";

@@ -254,12 +254,7 @@ pub fn add_plugin_widgets(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
         plugin.add_message(format!("Registered widget '{}' provided as 'http://localhost:{}/widget/{}'", metadata.name(), BASE_REST_PORT, metadata.rest_path));
     };
 
-    let system_plugins_path = properties::get_app_path(AppPaths::UniChatSystemPlugins);
-    if plugin.get_plugin_path().starts_with(&system_plugins_path) {
-        load_widgets_from_disk(&widgets_path, WidgetSource::SystemPlugin(plugin.name.clone()), callback)?;
-    } else {
-        load_widgets_from_disk(&widgets_path, WidgetSource::UserPlugin(plugin.name.clone()), callback)?;
-    }
+    load_widgets_from_disk(&widgets_path, WidgetSource::UserPlugin(plugin.name.clone()), callback)?;
 
     return Ok(());
 }

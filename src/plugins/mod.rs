@@ -33,6 +33,10 @@ mod runtime;
 const LOADED_PLUGINS_LAZY_LOCK_KEY: &str = "Plugins::LOADED_PLUGINS";
 static LOADED_PLUGINS: LazyLock<RwLock<HashMap<String, Arc<UniChatPlugin>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
+pub fn runtime_initialized() -> bool {
+    return runtime::get().is_ok();
+}
+
 /* ============================================================================================== */
 
 pub fn get_plugins() -> Result<Vec<Arc<UniChatPlugin>>, Error> {
@@ -253,10 +257,6 @@ fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, PluginM
 
 pub fn load_plugins() -> Result<(), Error> {
     let mut loaded_manifests: Vec<(PathBuf, PluginManifestYAML)> = Vec::new();
-
-    let system_plugins_dir = properties::get_app_path(AppPaths::UniChatSystemPlugins);
-    let system_plugins_manifests = load_plugins_from_disk(system_plugins_dir)?;
-    loaded_manifests.extend(system_plugins_manifests);
 
     let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
     let user_plugins_manifests = load_plugins_from_disk(user_plugins_dir)?;

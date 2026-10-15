@@ -52,16 +52,7 @@ pub fn get_app_handle() -> &'static tauri::AppHandle<tauri::Wry> {
     return APP_HANDLE.get().expect("APP_HANDLE is not initialized");
 }
 
-fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
-    APP_HANDLE.set(app.handle().clone()).map_err(|e| anyhow::anyhow!("Failed to set APP_HANDLE: {:#?}", e))?;
-
-    /* ====================================================================== */
-
-    let splash_screen = wm::splash_window::create()?;
-    splash_screen.once(wm::splash_window::SPLASH_WINDOW_READY_EVENT, |_| start_startup());
-
-    return Ok(());
-}
+/* ============================================================================================== */
 
 fn start_startup() {
     if STARTUP_STARTED.swap(true, Ordering::SeqCst) {
@@ -78,6 +69,45 @@ fn start_startup() {
 
         wm::splash_window::close();
     });
+}
+
+fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
+    APP_HANDLE.set(app.handle().clone()).map_err(|e| anyhow::anyhow!("Failed to set APP_HANDLE: {:#?}", e))?;
+
+    /* ====================================================================== */
+
+    let splash_screen = wm::splash_window::create()?;
+    splash_screen.once(wm::splash_window::SPLASH_WINDOW_READY_EVENT, |_| start_startup());
+
+    return Ok(());
+}
+
+/* ============================================================================================== */
+
+fn has_plugins() -> bool {
+    let mut has_plugins = false;
+    let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
+
+    if user_plugins_dir.exists() && user_plugins_dir.is_dir() {
+        if let Ok(entries) = fs::read_dir(&user_plugins_dir) {
+            for entry in entries {
+                if let Ok(entry) = entry {
+                    let path = entry.path();
+                    if path.is_dir() {
+                        let manifest = path.join("manifest.yaml").exists();
+                        let lua_entrypoint = path.join("data/main.lua").exists();
+
+                        if manifest && lua_entrypoint {
+                            has_plugins = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return has_plugins;
 }
 
 fn run_startup() -> Result<(), Error> {
@@ -130,8 +160,12 @@ fn run_startup() -> Result<(), Error> {
     wm::splash_window::stage(8, "Fetching global shared emotes...");
     shared_emotes::fetch_global_shared_emotes()?;
 
-    wm::splash_window::stage(9, "Initializing plugins module...");
-    plugins::init()?;
+    if has_plugins() {
+        wm::splash_window::stage(9, "Initializing plugins module...");
+        plugins::init()?;
+    } else {
+        wm::splash_window::notice(9, "No plugins found. Skipping plugins initialization.");
+    }
 
     wm::splash_window::stage(10, "Initializing userstore module...");
     utils::userstore::init()?;
@@ -147,8 +181,12 @@ fn run_startup() -> Result<(), Error> {
     wm::splash_window::stage(13, "Registering YouTube integration...");
     youtube::init()?;
 
-    wm::splash_window::stage(14, "Loading plugins...");
-    plugins::load_plugins()?;
+    if has_plugins() {
+        wm::splash_window::stage(14, "Loading plugins...");
+        plugins::load_plugins()?;
+    } else {
+        wm::splash_window::notice(14, "No plugins found. Skipping plugin loading.");
+    }
 
     /* ====================================================================== */
 

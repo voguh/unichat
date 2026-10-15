@@ -14,7 +14,6 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { Button } from "unichat/components/Button";
 import { UniChatPluginMetadata } from "unichat/types";
-import { Strings } from "unichat/utils/Strings";
 
 interface Props {
     plugin: UniChatPluginMetadata;
@@ -22,15 +21,9 @@ interface Props {
 
 export function PluginOverviewModalActions({ plugin: { pluginPath } }: Props): PReact.ComponentChildren {
     return (
-        <>
-            {Strings.isNullOrEmpty(pluginPath) ? (
-                <Button disabled>Built-In Plugin</Button>
-            ) : (
-                <Button onClick={() => revealItemInDir(pluginPath)}>
-                    <i className="fas fa-folder" />
-                    &nbsp;Show in Folder
-                </Button>
-            )}
-        </>
+        <Button onClick={() => revealItemInDir(pluginPath)}>
+            <i className="fas fa-folder" />
+            &nbsp;Show in Folder
+        </Button>
     );
 }

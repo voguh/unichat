@@ -79,7 +79,7 @@ export interface UniChatPluginMetadata {
     icon?: string;
     status: PluginStatus;
     messages: string[];
-    pluginPath?: string;
+    pluginPath: string;
 }
 
 /* ========================================================================== */

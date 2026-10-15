@@ -20,14 +20,6 @@ export function isSystemWidget(widget: UniChatWidget | null | undefined): boolea
     return widget.widgetSource.type === WidgetSourceType.SYSTEM;
 }
 
-export function isSystemPluginWidget(widget: UniChatWidget | null | undefined): boolean {
-    if (widget == null) {
-        return false;
-    }
-
-    return widget.widgetSource.type === WidgetSourceType.SYSTEM_PLUGIN;
-}
-
 export function isUserPluginWidget(widget: UniChatWidget | null | undefined): boolean {
     if (widget == null) {
         return false;
@@ -51,10 +43,7 @@ export function isGeneralSystemWidget(widget: UniChatWidget | null | undefined):
         return false;
     }
 
-    return (
-        widget.widgetSource.type === WidgetSourceType.SYSTEM ||
-        widget.widgetSource.type === WidgetSourceType.SYSTEM_PLUGIN
-    );
+    return widget.widgetSource.type === WidgetSourceType.SYSTEM;
 }
 
 export function isGeneralUserWidget(widget: UniChatWidget | null | undefined): boolean {
@@ -72,8 +61,5 @@ export function isGeneralPluginWidget(widget: UniChatWidget | null | undefined):
         return false;
     }
 
-    return (
-        widget.widgetSource.type === WidgetSourceType.SYSTEM_PLUGIN ||
-        widget.widgetSource.type === WidgetSourceType.USER_PLUGIN
-    );
+    return widget.widgetSource.type === WidgetSourceType.USER_PLUGIN;
 }
