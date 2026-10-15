@@ -24,7 +24,6 @@ axum = { version = "=0.8.9", features = ["ws"] }
 base64 = "=0.23.1"
 futures = "=0.3.34"
 if-addrs = "=0.15.0"
-indexmap = { version = "=2.14.2", features = ["serde"] }
 infer = "=0.22.0"
 log = "=0.4.34"
 mime_guess = "=2.0.5"

@@ -18,8 +18,8 @@ use std::sync::RwLock;
 
 use anyhow::anyhow;
 use anyhow::Error;
-use indexmap::IndexMap;
 use serde::Serialize;
+use serde_json::Map;
 
 use crate::plugins::UniChatPlugin;
 use crate::utils::constants::BASE_REST_PORT;
@@ -66,14 +66,14 @@ impl WidgetMetadata {
         return self.path.join("fields.json");
     }
 
-    pub fn fields(&self) -> IndexMap<String, serde_json::Value> {
+    pub fn fields(&self) -> Map<String, serde_json::Value> {
         let raw = fs::read_to_string(self.fields_path()).unwrap_or(String::from("{}"));
 
         return match serde_json::from_str(&raw) {
             Ok(map) => map,
             Err(err) => {
                 log::error!("Failed to parse fields.json for widget '{:?}': {:#?}", self.path, err);
-                return IndexMap::new();
+                return Map::new();
             }
         };
     }
@@ -90,7 +90,7 @@ impl WidgetMetadata {
         return match serde_json::from_str(&raw) {
             Ok(map) => map,
             Err(err) => {
-                log::error!("Failed to parse fields.json for widget '{:?}': {:#?}", self.path, err);
+                log::error!("Failed to parse fieldstate.json for widget '{:?}': {:#?}", self.path, err);
                 return HashMap::new();
             }
         };
