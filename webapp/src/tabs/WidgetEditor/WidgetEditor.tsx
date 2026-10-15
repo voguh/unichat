@@ -11,7 +11,7 @@
 import * as PReact from "preact";
 import { useRef, useState } from "preact/hooks";
 
-import { UniChatEvent } from "unichat-widgets/unichat";
+import { UniChatEvent } from "@voguh/unichat-api/widgets/events";
 import { Button } from "unichat/components/Button";
 import { Select } from "unichat/components/forms/Select";
 import { Tooltip } from "unichat/components/Tooltip";

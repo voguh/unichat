@@ -1,0 +1,23 @@
+{
+    "name": "@voguh/unichat-api",
+    "description": "UniChat API specification for widget and plugin development",
+    "version": "{{UNICHAT_VERSION}}",
+    "license": "{{UNICHAT_LICENSE}}",
+    "author": "{{UNICHAT_AUTHOR}}",
+    "homepage": "{{UNICHAT_HOMEPAGE}}",
+    "repository": { "type": "git", "url": "{{UNICHAT_HOMEPAGE}}" },
+    "files": ["widgets", "plugins"],
+    "exports": {
+        "./plugins/*.lua": "./plugins/*.lua",
+        "./plugins/*": {
+            "types": "./plugins/*.d.ts"
+        },
+        "./widgets/*.json": "./widgets/*.json",
+        "./widgets/*": {
+            "types": "./widgets/*.d.ts"
+        }
+    },
+    "dependencies": {
+        "@types/jquery": "3.5.32"
+    }
+}

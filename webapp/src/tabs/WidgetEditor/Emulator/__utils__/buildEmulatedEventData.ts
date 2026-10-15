@@ -14,7 +14,7 @@ import type {
     UniChatEmote,
     UniChatEvent,
     UniChatPlatform
-} from "unichat-widgets/unichat";
+} from "@voguh/unichat-api/widgets/events";
 import { randomColorBySeed } from "unichat/utils/randomColorBySeed";
 import { seededRandom } from "unichat/utils/seededRandom";
 

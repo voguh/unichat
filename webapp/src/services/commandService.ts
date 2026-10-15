@@ -10,7 +10,7 @@
 
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
-import { UniChatEvent } from "unichat-widgets/unichat";
+import { UniChatEvent } from "@voguh/unichat-api/widgets/events";
 import {
     GalleryItem,
     UniChatCurrency,

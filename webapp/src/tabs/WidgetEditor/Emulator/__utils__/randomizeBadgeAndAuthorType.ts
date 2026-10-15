@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import type { UniChatAuthorType, UniChatBadge, UniChatPlatform } from "unichat-widgets/unichat";
+import type { UniChatAuthorType, UniChatBadge, UniChatPlatform } from "@voguh/unichat-api/widgets/events";
 
 export function randomizeBadgeAndAuthorType(
     plt: UniChatPlatform,

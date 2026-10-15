@@ -72,6 +72,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 4.1.10
         version: 4.1.10(vitest@4.1.10)
+      '@voguh/unichat-api':
+        specifier: link:../unichat-api
+        version: link:../unichat-api
       autoprefixer:
         specifier: 10.5.4
         version: 10.5.4(postcss@8.5.25)

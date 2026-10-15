@@ -1,5 +1,5 @@
 {
-    "include": ["./__tests__/**/*", "./__stories__/**/*", "./.storybook/**/*", "./src/**/*", "./vite.config.ts"],
+    "include": ["./__tests__/**/*", "./src/**/*", "./vite.config.ts"],
     "compilerOptions": {
         /* Visit https://aka.ms/tsconfig to read more about this file */
 
@@ -112,7 +112,7 @@
         "baseUrl": ".",
         "paths": {
             "unichat/*": ["./src/*"],
-            "unichat-widgets/unichat": ["../widgets/unichat.d.ts"]
+            "@voguh/unichat-api/*": ["../unichat-api/*"]
         }
     }
 }

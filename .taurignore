@@ -2,6 +2,7 @@
 /.vscode
 /(un)released-notes
 /examples
+/unichat-api
 /webapp
 /zztools
 /.editorconfig

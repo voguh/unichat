@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import type { UniChatPlatform } from "unichat-widgets/unichat";
+import type { UniChatPlatform } from "@voguh/unichat-api/widgets/events";
 
 export function randomizeSponsorTier(plt: UniChatPlatform): string {
     let sponsorTier: string;

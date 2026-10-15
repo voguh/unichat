@@ -18,8 +18,9 @@ from utils.constants import ROOT_PATH
 # ============================================================================ #
 
 RUST_PATH = ROOT_PATH / "src" / "events" / "unichat.rs"
-TYPESCRIPT_PATH = ROOT_PATH / "widgets" / "unichat.d.ts"
-LUA_PATH = ROOT_PATH / "plugins" / ".types" / "UniChatAPI.lua"
+TYPESCRIPT_PATH = ROOT_PATH / "unichat-api" / "widgets" / "events.d.ts"
+LUA_PATH = ROOT_PATH / "unichat-api" / "plugins" / "events.d.lua"
+LUA_STD_PATH = ROOT_PATH / "unichat-api" / "plugins" / "plugin-std.d.lua"
 
 STATUS_RUST_PATH = ROOT_PATH / "src" / "scraper" / "status.rs"
 STATUS_TYPESCRIPT_PATH = ROOT_PATH / "webapp" / "src" / "utils" / "IPCStatusEvent.ts"
@@ -113,8 +114,8 @@ def compare(payload: str, left_name: str, left: dict[str, bool], right_name: str
 
     return problems
 
-def missing_factories(rust_source: str, lua_source: str) -> list[str]:
-    factories = block(lua_source, LUA_PATH, "---@class UniChatEventFactory\n", "\n\n")
+def missing_factories(rust_source: str, lua_std_source: str) -> list[str]:
+    factories = block(lua_std_source, LUA_STD_PATH, "---@class UniChatEventFactory\n", "\n\n")
 
     missing = []
     for line in block(rust_source, RUST_PATH, "pub enum UniChatEvent {\n", "\n}").splitlines():
@@ -132,7 +133,7 @@ def missing_factories(rust_source: str, lua_source: str) -> list[str]:
 def main():
     logger.info("Checking event contract parity...")
 
-    for path in (RUST_PATH, TYPESCRIPT_PATH, LUA_PATH, STATUS_RUST_PATH, STATUS_TYPESCRIPT_PATH):
+    for path in (RUST_PATH, TYPESCRIPT_PATH, LUA_PATH, LUA_STD_PATH, STATUS_RUST_PATH, STATUS_TYPESCRIPT_PATH):
         if not path.is_file():
             logger.error(f"Contract file is missing: ./{path.relative_to(ROOT_PATH)}")
             sys.exit(1)
@@ -140,6 +141,7 @@ def main():
     rust_source = RUST_PATH.read_text(encoding="utf-8")
     typescript_source = TYPESCRIPT_PATH.read_text(encoding="utf-8")
     lua_source = LUA_PATH.read_text(encoding="utf-8")
+    lua_std_source = LUA_STD_PATH.read_text(encoding="utf-8")
 
     problems = []
     for rust_name, typescript_name, lua_name in PAYLOADS:
@@ -156,7 +158,7 @@ def main():
     problems += compare("ScraperStatusEvent", "rust", status_rust, "typescript", status_typescript)
 
     logger.debug("Checking UniChatEventFactory...")
-    for variant in missing_factories(rust_source, lua_source):
+    for variant in missing_factories(rust_source, lua_std_source):
         problems.append(f"UniChatEvent::{variant}: no factory in UniChatEventFactory")
 
     if not problems:

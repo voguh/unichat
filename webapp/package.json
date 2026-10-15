@@ -33,6 +33,7 @@
         "@typescript-eslint/eslint-plugin": "8.66.0",
         "@typescript-eslint/parser": "8.66.0",
         "@vitest/coverage-v8": "4.1.10",
+        "@voguh/unichat-api": "link:../unichat-api",
         "autoprefixer": "10.5.4",
         "babel-plugin-macros": "3.1.0",
         "babel-plugin-transform-goober": "1.2.0",

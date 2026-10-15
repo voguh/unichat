@@ -8,19 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-declare global {
-    var UniChatAPI: {
-        getUserStoreItem: (key: string) => string | null;
-    }
-
-    interface WindowEventMap {
-        "unichat:connected": CustomEvent<{ userstore: Record<string, string> }>;
-        "unichat:event": CustomEvent<UniChatEvent>;
-    }
-}
-
-/* <============================================================================================> */
-
 export type UniChatPlatform = "twitch" | "youtube" | (string & {});
 export type UniChatAuthorType = "VIEWER" | "SPONSOR" | "MODERATOR" | "BROADCASTER" | (string & {});
 
@@ -37,7 +24,7 @@ export interface UniChatBadge {
 
 export type UniChatEvent = UniChatEventClear | UniChatEventRemoveMessage | UniChatEventRemoveAuthor | UniChatEventMessage | UniChatEventRaid | UniChatEventSponsor | UniChatEventSponsorGift | UniChatEventDonate | UniChatEventRedemption | UniChatEventCheer | UniChatEventUserstoreUpdate | UniChatEventCustom;
 
-/* <============================================================================================> */
+/* <========================================================================> */
 
 export interface UniChatEventClear {
     type: "unichat:clear";
@@ -49,7 +36,7 @@ export interface UniChatEventClear {
     };
 }
 
-/* <============================================================================================> */
+/* <========================================================================> */
 
 export interface UniChatEventRemoveMessage {
     type: "unichat:remove_message";
@@ -67,7 +54,7 @@ export interface UniChatEventRemoveMessage {
     };
 }
 
-/* <============================================================================================> */
+/* <========================================================================> */
 
 export interface UniChatEventRemoveAuthor {
     type: "unichat:remove_author";
@@ -85,7 +72,7 @@ export interface UniChatEventRemoveAuthor {
     };
 }
 
-/* <============================================================================================> */
+/* <========================================================================> */
 
 export interface UniChatEventMessage {
     type: "unichat:message";
@@ -115,7 +102,7 @@ export interface UniChatEventMessage {
     };
 }
 
-/* <============================================================================================> */
+/* <========================================================================> */
 
 export interface UniChatEventDonate {
     type: "unichat:donate";
@@ -152,7 +139,7 @@ export interface UniChatEventDonate {
     };
 }
 
-/* <============================================================================================> */
+/* <========================================================================> */
 
 export interface UniChatEventSponsor {
     type: "unichat:sponsor";
@@ -186,7 +173,7 @@ export interface UniChatEventSponsor {
     };
 }
 
-/* <============================================================================================> */
+/* <========================================================================> */
 
 export interface UniChatEventSponsorGift {
     type: "unichat:sponsor_gift";
@@ -218,7 +205,7 @@ export interface UniChatEventSponsorGift {
     };
 }
 
-/* <============================================================================================> */
+/* <========================================================================> */
 
 export interface UniChatEventRaid {
     type: "unichat:raid";
@@ -249,7 +236,7 @@ export interface UniChatEventRaid {
     };
 }
 
-/* <============================================================================================> */
+/* <========================================================================> */
 
 export interface UniChatEventRedemption {
     type: "unichat:redemption";
@@ -287,7 +274,7 @@ export interface UniChatEventRedemption {
     }
 }
 
-/* <============================================================================================> */
+/* <========================================================================> */
 
 export interface UniChatEventCheer {
     type: "unichat:cheer";
@@ -333,7 +320,7 @@ export interface UniChatEventCheer {
     }
 }
 
-/* <============================================================================================> */
+/* <========================================================================> */
 
 export interface UniChatEventUserstoreUpdate {
     type: "unichat:userstore_update";
@@ -344,7 +331,7 @@ export interface UniChatEventUserstoreUpdate {
     }
 }
 
-/* <============================================================================================> */
+/* <========================================================================> */
 
 /** **Disclaimer:** The payload is whatever the emitting plugin decided to send. */
 export interface UniChatEventCustom {

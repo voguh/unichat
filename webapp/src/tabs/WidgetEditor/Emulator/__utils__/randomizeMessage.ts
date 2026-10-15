@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import type { UniChatEmote } from "unichat-widgets/unichat";
+import type { UniChatEmote } from "@voguh/unichat-api/widgets/events";
 
 const nouns = [
     "cat",
