@@ -13,33 +13,16 @@ use mlua::LuaSerdeExt as _;
 use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatPlatform;
+use crate::plugins::instance::env::utils::from_lua_value;
 use crate::plugins::instance::env::utils::table_deep_readonly;
 
-pub struct LuaUniChatEvent {
-    pub inner: UniChatEvent
-}
+fn create_readonly_event(lua: &mlua::Lua, event: &UniChatEvent) -> Result<mlua::Table, mlua::Error> {
+    let mlua::Value::Table(table) = lua.to_value(event)? else {
+        return Err(mlua::Error::runtime("UniChatEvent must serialize to a table"));
+    };
 
-impl mlua::UserData for LuaUniChatEvent {
-    fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_meta_method(mlua::MetaMethod::ToString, |_lua, this, ()| {
-            let str = serde_json::to_string(&this.inner).map_err(mlua::Error::external)?;
-            return Ok(str);
-        });
-    }
-}
-
-impl mlua::FromLua for LuaUniChatEvent {
-    fn from_lua(value: mlua::Value, lua: &mlua::Lua) -> mlua::Result<Self> {
-        if let mlua::Value::UserData(userdata) = value {
-            let borrow = userdata.borrow::<LuaUniChatEvent>()?;
-            return Ok(LuaUniChatEvent { inner: borrow.inner.clone() });
-        } else {
-            let json: serde_json::Value = lua.from_value(value)?;
-            let event: UniChatEvent = serde_json::from_value(json).map_err(mlua::Error::external)?;
-
-            return Ok(LuaUniChatEvent { inner: event });
-        }
-    }
+    let table_name = lua.create_string("UniChatEvent")?;
+    return table_deep_readonly(lua, &mlua::Value::String(table_name), table);
 }
 
 pub struct LuaUniChatEventFactory;
@@ -47,69 +30,69 @@ pub struct LuaUniChatEventFactory;
 impl mlua::UserData for LuaUniChatEventFactory {
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("Clear", |lua, _this, data: mlua::Value| {
-            let payload = lua.from_value(data)?;
+            let payload = from_lua_value(lua, data)?;
             let event = UniChatEvent::Clear(payload);
-            return lua.create_userdata(LuaUniChatEvent { inner: event });
+            return create_readonly_event(lua, &event);
         });
 
         methods.add_method("RemoveMessage", |lua, _this, data: mlua::Value| {
-            let payload = lua.from_value(data)?;
+            let payload = from_lua_value(lua, data)?;
             let event = UniChatEvent::RemoveMessage(payload);
-            return lua.create_userdata(LuaUniChatEvent { inner: event });
+            return create_readonly_event(lua, &event);
         });
 
         methods.add_method("RemoveAuthor", |lua, _this, data: mlua::Value| {
-            let payload = lua.from_value(data)?;
+            let payload = from_lua_value(lua, data)?;
             let event = UniChatEvent::RemoveAuthor(payload);
-            return lua.create_userdata(LuaUniChatEvent { inner: event });
+            return create_readonly_event(lua, &event);
         });
 
         methods.add_method("Message", |lua, _this, data: mlua::Value| {
-            let payload = lua.from_value(data)?;
+            let payload = from_lua_value(lua, data)?;
             let event = UniChatEvent::Message(payload);
-            return lua.create_userdata(LuaUniChatEvent { inner: event });
+            return create_readonly_event(lua, &event);
         });
 
         methods.add_method("Donate", |lua, _this, data: mlua::Value| {
-            let payload = lua.from_value(data)?;
+            let payload = from_lua_value(lua, data)?;
             let event = UniChatEvent::Donate(payload);
-            return lua.create_userdata(LuaUniChatEvent { inner: event });
+            return create_readonly_event(lua, &event);
         });
 
         methods.add_method("Sponsor", |lua, _this, data: mlua::Value| {
-            let payload = lua.from_value(data)?;
+            let payload = from_lua_value(lua, data)?;
             let event = UniChatEvent::Sponsor(payload);
-            return lua.create_userdata(LuaUniChatEvent { inner: event });
+            return create_readonly_event(lua, &event);
         });
 
         methods.add_method("SponsorGift", |lua, _this, data: mlua::Value| {
-            let payload = lua.from_value(data)?;
+            let payload = from_lua_value(lua, data)?;
             let event = UniChatEvent::SponsorGift(payload);
-            return lua.create_userdata(LuaUniChatEvent { inner: event });
+            return create_readonly_event(lua, &event);
         });
 
         methods.add_method("Raid", |lua, _this, data: mlua::Value| {
-            let payload = lua.from_value(data)?;
+            let payload = from_lua_value(lua, data)?;
             let event = UniChatEvent::Raid(payload);
-            return lua.create_userdata(LuaUniChatEvent { inner: event });
+            return create_readonly_event(lua, &event);
         });
 
         methods.add_method("Redemption", |lua, _this, data: mlua::Value| {
-            let payload = lua.from_value(data)?;
+            let payload = from_lua_value(lua, data)?;
             let event = UniChatEvent::Redemption(payload);
-            return lua.create_userdata(LuaUniChatEvent { inner: event });
+            return create_readonly_event(lua, &event);
         });
 
         methods.add_method("Cheer", |lua, _this, data: mlua::Value| {
-            let payload = lua.from_value(data)?;
+            let payload = from_lua_value(lua, data)?;
             let event = UniChatEvent::Cheer(payload);
-            return lua.create_userdata(LuaUniChatEvent { inner: event });
+            return create_readonly_event(lua, &event);
         });
 
         methods.add_method("Custom", |lua, _this, data: mlua::Value| {
-            let payload = lua.from_value(data)?;
+            let payload = from_lua_value(lua, data)?;
             let event = UniChatEvent::Custom(payload);
-            return lua.create_userdata(LuaUniChatEvent { inner: event });
+            return create_readonly_event(lua, &event);
         });
     }
 }

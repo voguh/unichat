@@ -15,7 +15,8 @@ use anyhow::Error;
 use mlua::LuaSerdeExt as _;
 
 use crate::events;
-use crate::plugins::instance::env::unichat_event::LuaUniChatEvent;
+use crate::events::unichat::UniChatEvent;
+use crate::plugins::instance::env::utils::from_lua_value;
 use crate::plugins::runtime;
 use crate::scraper::UniChatScraper;
 use crate::scraper::status::ScraperStatus;
@@ -169,9 +170,11 @@ impl UniChatScraper for LuaUniChatScraper {
 
         let table = lua.to_value(&event)?;
 
-        match self.on_event.call::<Option<LuaUniChatEvent>>(table) {
+        match self.on_event.call::<Option<mlua::Value>>(table) {
             Ok(Some(parsed_event)) => {
-                let parsed = parsed_event.inner;
+                let json: serde_json::Value = from_lua_value(&lua, parsed_event)?;
+                let parsed: UniChatEvent = serde_json::from_value(json)?;
+
                 if log_events == SettingLogEventLevel::AllEvents {
                     let str = serde_json::to_string(&parsed)?;
                     self.log_action("events-parsed.log", &str);

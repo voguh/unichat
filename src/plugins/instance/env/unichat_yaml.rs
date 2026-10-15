@@ -10,6 +10,8 @@
 
 use mlua::LuaSerdeExt as _;
 
+use crate::plugins::instance::env::utils::from_lua_value;
+
 pub struct UniChatYamlModule;
 
 impl UniChatYamlModule {
@@ -22,7 +24,7 @@ impl UniChatYamlModule {
 impl mlua::UserData for UniChatYamlModule {
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("encode", |lua, _this, value: mlua::Value| {
-            let v: serde_json::Value = lua.from_value(value)?;
+            let v: serde_json::Value = from_lua_value(lua, value)?;
             let s = serde_saphyr::to_string(&v).map_err(mlua::Error::external)?;
             return Ok(s);
         });

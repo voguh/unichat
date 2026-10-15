@@ -10,6 +10,7 @@
 
 use mlua::LuaSerdeExt as _;
 
+use crate::plugins::instance::env::utils::from_lua_value;
 use crate::utils::base64;
 use crate::utils::ureq;
 use crate::utils::ureq::http::response::Response;
@@ -162,7 +163,7 @@ impl mlua::UserData for UniChatHttpModule {
                         response = request.send(&body).map_err(mlua::Error::external)?;
                     }
                     mlua::Value::Table(t) => {
-                        let value: serde_json::Value = lua.from_value(mlua::Value::Table(t))?;
+                        let value: serde_json::Value = from_lua_value(lua, mlua::Value::Table(t))?;
                         response = request.send_json(&value).map_err(mlua::Error::external)?;
                     }
                     _ => {
@@ -189,7 +190,7 @@ impl mlua::UserData for UniChatHttpModule {
                         response = request.send(&body).map_err(mlua::Error::external)?;
                     }
                     mlua::Value::Table(t) => {
-                        let value: serde_json::Value = lua.from_value(mlua::Value::Table(t))?;
+                        let value: serde_json::Value = from_lua_value(lua, mlua::Value::Table(t))?;
                         response = request.send_json(&value).map_err(mlua::Error::external)?;
                     }
                     _ => {
@@ -216,7 +217,7 @@ impl mlua::UserData for UniChatHttpModule {
                         response = request.send(&body).map_err(mlua::Error::external)?;
                     }
                     mlua::Value::Table(t) => {
-                        let value: serde_json::Value = lua.from_value(mlua::Value::Table(t))?;
+                        let value: serde_json::Value = from_lua_value(lua, mlua::Value::Table(t))?;
                         response = request.send_json(&value).map_err(mlua::Error::external)?;
                     }
                     _ => {
