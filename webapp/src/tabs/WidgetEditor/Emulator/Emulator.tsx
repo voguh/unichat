@@ -101,7 +101,7 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
                         Sponsor
                     </Button>
                     <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:sponsor_gift")}>
-                        <i className="fas fa-meteor" />
+                        <i class="fas fa-gift" />
                         Sponsor Gift
                     </Button>
                     <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:raid")}>
