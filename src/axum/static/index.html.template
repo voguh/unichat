@@ -20,8 +20,21 @@
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
         <link rel="stylesheet" href="widget.css" />
-        <script defer>
+        <script>
             (() => {
+                let value;
+                Object.defineProperty(globalThis, "__UNICHAT_WIDGET_INITIALIZED__", {
+                    configurable: false,
+                    get: () => value,
+                    set: (v) => {
+                        if (value != null) {
+                            throw new TypeError("__UNICHAT_WIDGET_INITIALIZED__ has already been set");
+                        }
+
+                        value = v;
+                    },
+                });
+
                 async function jsonrpcSendCommand(method, params) {
                     const id = crypto.randomUUID();
                     const body = { jsonrpc: "2.0", id, method, params }
@@ -65,9 +78,10 @@
 
             document.addEventListener("DOMContentLoaded", () => {
                 function connect() {
+                    let widgetName = "{{WIDGET_BASE_URL}}".split("/").filter(Boolean).pop();
                     let wsSchema = window.location.protocol === "https:" ? "wss" : "ws";
                     let wsHost = window.location.host;
-                    const socket = new WebSocket(`${wsSchema}://${wsHost}/ws`);
+                    const socket = new WebSocket(`${wsSchema}://${wsHost}/ws?widget=${widgetName}`);
 
                     socket.addEventListener("open", () => {
                         console.log("Socket connected");
@@ -78,6 +92,12 @@
 
                         if (event.type === "unichat:connected") {
                             window.dispatchEvent(new CustomEvent("unichat:connected", { detail: event.data }));
+
+                            if (globalThis.__UNICHAT_WIDGET_INITIALIZED__ !== true) {
+                                globalThis.__UNICHAT_WIDGET_INITIALIZED__ = true;
+                                console.log(event.data)
+                                window.dispatchEvent(new CustomEvent("unichat:loaded", { detail: event.data }));
+                            }
                         } else if (event.type === "unichat:history") {
                             for (const cachedEvent of event.data) {
                                 window.dispatchEvent(new CustomEvent("unichat:event", { detail: cachedEvent }));

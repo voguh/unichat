@@ -229,6 +229,17 @@ pub fn get_widgets() -> Result<Vec<WidgetMetadata>, Error> {
     return Ok(widgets.values().cloned().collect());
 }
 
+pub fn get_widget_from_name(name: &str) -> Result<WidgetMetadata, Error> {
+    let widgets = WIDGETS.read().map_err(|_| anyhow!("{} lock poisoned", WIDGETS_LAZY_LOCK_KEY))?;
+    for metadata in widgets.values() {
+        if metadata.name() == name {
+            return Ok(metadata.clone());
+        }
+    }
+
+    return Err(anyhow!("Widget not found"));
+}
+
 pub fn get_widget_from_rest_path(rest_path: &str) -> Result<WidgetMetadata, Error> {
     let widgets = WIDGETS.read().map_err(|_| anyhow!("{} lock poisoned", WIDGETS_LAZY_LOCK_KEY))?;
     if let Some(metadata) = widgets.get(rest_path) {

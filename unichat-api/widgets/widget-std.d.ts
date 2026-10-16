@@ -12,12 +12,27 @@
 import type { UniChatEvent } from "./events"
 
 declare global {
-    var UniChatAPI: {
+    declare interface UniChatAPI {
         getUserStoreItem: (key: string) => Promise<string | null>;
     }
 
+    declare interface UniChatCurrency {
+        code: string;
+        name: string;
+        symbol: string;
+    }
+
+    declare interface UniChatWidgetConnectedEvent {
+        userstore: Record<string, string>;
+        fieldstate: Record<string, any>;
+        currency: UniChatCurrency | null;
+    }
+
+    var UniChatAPI: UniChatAPI;
+
     interface WindowEventMap {
-        "unichat:connected": CustomEvent<{ userstore: Record<string, string> }>;
+        "unichat:loaded": CustomEvent<UniChatWidgetConnectedEvent>;
+        "unichat:connected": CustomEvent<UniChatWidgetConnectedEvent>;
         "unichat:event": CustomEvent<UniChatEvent>;
     }
 }
