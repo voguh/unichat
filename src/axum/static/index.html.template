@@ -95,7 +95,6 @@
 
                             if (globalThis.__UNICHAT_WIDGET_INITIALIZED__ !== true) {
                                 globalThis.__UNICHAT_WIDGET_INITIALIZED__ = true;
-                                console.log(event.data)
                                 window.dispatchEvent(new CustomEvent("unichat:loaded", { detail: event.data }));
                             }
                         } else if (event.type === "unichat:history") {
