@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'unichat-api/**'
+  workflow_dispatch:
 
 env:
   ZBELL_REGISTRY: https://zbell.voguh.me
@@ -21,10 +22,32 @@ jobs:
       contents: read
       id-token: write
     steps:
+      - name: Check branch
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/main" ]; then
+            echo "Error: Publish git only runs on main (got ${{ github.ref }})."
+            exit 1
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+
+      - name: Resolve version
+        id: version
+        run: |
+          CARGO_PACKAGE_VERSION="$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')"
+          VERSION="${CARGO_PACKAGE_VERSION%%-*}-dev.$(date -u +%Y%m%d%H%M%S).g$(git rev-parse --short HEAD)"
+          if npm view "@voguh/unichat-api@$VERSION" version --registry "$ZBELL_REGISTRY" > /dev/null 2>&1; then
+            echo "Error: @voguh/unichat-api@$VERSION is already published to zBell."
+            exit 1
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check license headers
+        run: |
+          LOG_LEVEL=debug ./zztools/check-license-header.py
 
       - name: Check event contract parity
         run: |
@@ -42,20 +65,15 @@ jobs:
           fi
 
       - name: Pack unichat-api
-        id: pack
         if: steps.changes.outputs.changed == 'true'
-        run: |
-          CARGO_PACKAGE_VERSION="$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')"
-          VERSION="${CARGO_PACKAGE_VERSION%%-*}-dev.$(date -u +%Y%m%d%H%M%S).g$(git rev-parse --short HEAD)"
-          ./zztools/build-npm-package.py "$VERSION"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        run: ./zztools/build-npm-package.py "${{ steps.version.outputs.version }}"
 
       - name: Publish to zBell
         if: steps.changes.outputs.changed == 'true'
         run: |
           TOKEN=$(curl -sSf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=$ZBELL_REGISTRY" | jq -r .value)
           echo "::add-mask::$TOKEN"
-          if ! npm publish "dist/unichat-api-${{ steps.pack.outputs.version }}.tgz" --registry "$ZBELL_REGISTRY" --tag "git" "--${ZBELL_REGISTRY#*:}/:_authToken=$TOKEN" --logs-dir npm-logs; then
+          if ! npm publish "dist/unichat-api-${{ steps.version.outputs.version }}.tgz" --registry "$ZBELL_REGISTRY" --tag "git" "--${ZBELL_REGISTRY#*:}/:_authToken=$TOKEN" --logs-dir npm-logs; then
             cat npm-logs/*.log
             exit 1
           fi
