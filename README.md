@@ -1,48 +1,38 @@
 # Voguh's UniChat
 
-UniChat is a tool for streamers who broadcast on YouTube and Twitch, providing a chat widget with support for third-party emotes and customization via HTML/CSS/JS.
+Chat widget for YouTube and Twitch streamers, customizable via HTML/CSS/JS.
 
-<p align="center">
-  <img src="docs/screenshot1.png" alt="UniChat Screenshot" width="600"/>
-</p>
+## Features
 
+- Twitch and YouTube.
+- BetterTTV, FrankerFaceZ and 7TV emotes.
+- Messages, donations, subscriptions, raids and more.
+- Custom widgets and plugins.
 
-## ✨ Features
+## Installation
 
-- **Multi-platform:** Support for Twitch and YouTube.
-- **Third-Party Emotes:** Integration with BetterTTV, FrankerFaceZ, and 7TV.
-- **Chat Events:** Full support for messages, donations, subscriptions, raids, and more.
-- **Customizable Widgets:** Create and customize your own chat widgets using web technologies.
-- **Open Source:** Licensed under EPL-2.0, allowing contributions and modifications.
+Download from [Releases](https://github.com/voguh/unichat/releases):
 
+- **Windows:** `.exe` or `.msi`
+- **Linux:** `.deb`, `.rpm` or `.AppImage`
+- **macOS:** `.dmg`
 
-## 🚀 Installation
+## Usage
 
-You can download the latest version for Windows and Linux directly from the project's [Releases page](https://github.com/voguh/unichat/releases).
+1. Add the YouTube and/or Twitch channels.
+2. Copy the widget URL (globe icon, top right).
+3. Add it as a browser source in OBS or similar.
+4. Custom widgets go in the user widgets folder (folder icon, top right).
 
--   **Windows:** Download the `.exe` installer.
--   **Linux:** Choose the ideal package for your distribution (`.deb`, `.rpm`, or `.AppImage`).
+## Development
 
-For users who wish to compile from the source code, instructions are available in the [For Developers](#-for-developers) section.
+Widget and plugin docs: [unichat.voguh.me](https://unichat.voguh.me/docs/plugins/getting_started).
 
+Types and schemas: [`@voguh/unichat-api`](./unichat-api/).
 
-## ⚙️ How to Use
+### App directories
 
-1.  After launching the application, add the YouTube and/or Twitch channels you want to monitor.
-2.  The application will generate a URL for the chat widget (You can open the URL by clicking the globe icon in the top right corner).
-3.  Add this URL as a browser source in your streaming software (e.g., OBS Studio).
-4.  Customize your widgets in the user's widgets folder, which you can access by clicking the folder icon in the top right corner.
-
-
-## 👨‍💻 For Developers
-
-Interested in contributing? Great! Here's the information you need to get started.
-
-Widget and Plugin development documentation can be found in the [here](https://unichat.voguh.me/docs/plugins/getting_started).
-
-### App Directories
-
-| Directory Type       | Location on Linux             | Location on Windows           |
+| Directory            | Linux                         | Windows                       |
 |----------------------|-------------------------------|-------------------------------|
 | `app_cache_dir`      | `~/.cache/unichat`            | `%localappdata%\unichat`      |
 | `app_config_dir`     | `~/.config/unichat`           | `%appdata%\unichat`           |
@@ -50,44 +40,37 @@ Widget and Plugin development documentation can be found in the [here](https://u
 | `app_local_data_dir` | `~/.local/share/unichat`      | `%localappdata%\unichat`      |
 | `app_log_dir`        | `~/.local/share/unichat/logs` | `%localappdata%\unichat\logs` |
 
-### Building the Project
+### Requirements
 
-**Prerequisites:**
-- Rust v1.95.0;
-- Node.js v24.16.0;
-- PNPM v10.33.4;
-- Tauri v2 dependencies for your platform. Follow the [official guide](https://v2.tauri.app/start/prerequisites/);
-- Tauri CLI (You can install it with `cargo install tauri-cli --locked`);
+- Rust 1.95.0
+- Node.js 24.16.0
+- PNPM 10.33.4
+- [Tauri v2 prerequisites](https://v2.tauri.app/start/prerequisites/)
+- Tauri CLI: `cargo install tauri-cli --locked`
 
-**Steps to compile:**
+### Run
 
-1.  **Install frontend dependencies:**
-    ```sh
-    pnpm --dir="./webapp" install --frozen-lockfile
-    ```
+```sh
+./run.sh
+```
 
-2.  **Compile and run the application:**
-    ```sh
-    cargo tauri build
-    ```
+### Build
+
+```sh
+pnpm --dir="./webapp" install --frozen-lockfile
+cargo tauri build
+```
 
 > [!TIP]
-> If the build fails on macOS or Linux, try adding the `NO_STRIP=true` environment variable before the command. Ex: `NO_STRIP=true cargo tauri build`.
+> If the build fails on Linux or macOS: `NO_STRIP=true cargo tauri build`.
 
-### Known Issues
+### Known issues
 
--   **Wayland:** Tauri may have rendering and window scaling issues on Wayland. To work around this, run the application forcing the GDK backend to X11:
-    ```sh
-    GDK_BACKEND="x11" cargo tauri dev
-    ```
+- **Wayland:** rendering and scaling issues. Workaround: `GDK_BACKEND="x11"`.
 
+## License
 
-## 📜 License
-
-This project is licensed under the [Eclipse Public License, Version 2.0](./LICENSE).
+[EPL-2.0](./LICENSE).
 
 > [!IMPORTANT]
-> The widgets located in the [`widgets directory`](./widgets/) are licensed under the MIT license.
-
-> [!IMPORTANT]
-> The plugins located in the [`plugins directory`](./plugins/) are licensed under their respective licenses, as specified in their manifest/LICENSE files.
+> Widgets in [`widgets/`](./widgets/) are licensed under MIT.
