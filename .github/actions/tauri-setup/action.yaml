@@ -19,18 +19,18 @@ runs:
   using: composite
   steps:
     - name: Download webapp build artifacts
-      uses: actions/download-artifact@v8.0.1
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       with:
         name: webapp-bundle
         path: ${{ inputs.tauri-frontend-path }}/dist
 
     - name: Rust toolchain setup
-      uses: dtolnay/rust-toolchain@v1
+      uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
       with:
         toolchain: ${{ inputs.rust-version }}
 
     - name: Cache cargo registry
-      uses: actions/cache@v5.0.5
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ~/.cargo/registry
@@ -40,7 +40,7 @@ runs:
           cargo-registry-${{ inputs.rust-version }}-
 
     - name: Cache cargo target
-      uses: actions/cache@v5.0.5
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ${{ inputs.tauri-app-path }}/target
@@ -49,7 +49,7 @@ runs:
           cargo-target-${{ runner.os }}-${{ inputs.rust-version }}-
 
     - name: Cache cargo bin
-      uses: actions/cache@v5.0.5
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ~/.cargo/bin/cargo-tauri
