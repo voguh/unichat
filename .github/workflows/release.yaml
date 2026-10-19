@@ -11,6 +11,7 @@ defaults:
 
 env:
   YQ_VERSION: v4.53.2
+  ZBELL_REGISTRY: https://zbell.voguh.me
 
 jobs:
   prepare-release:
@@ -37,6 +38,7 @@ jobs:
     needs: [package]
     permissions:
       contents: write
+      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6.0.3
@@ -87,6 +89,20 @@ jobs:
             gh release create "$VERSION" dist/* --prerelease
           else
             gh release create "$VERSION" dist/*
+          fi
+
+      - name: Publish unichat-api to zBell
+        run: |
+          export VERSION="${{ github.ref_name }}"
+          NPM_TAG="latest"
+          if [[ "$VERSION" == *"-"* || "$VERSION" == *"+"* ]]; then
+            NPM_TAG="experimental"
+          fi
+          TOKEN=$(curl -sSf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=$ZBELL_REGISTRY" | jq -r .value)
+          echo "::add-mask::$TOKEN"
+          if ! npm publish "dist/unichat-api-$VERSION.tgz" --registry "$ZBELL_REGISTRY" --tag "$NPM_TAG" "--${ZBELL_REGISTRY#*:}/:_authToken=$TOKEN" --logs-dir npm-logs; then
+            cat npm-logs/*.log
+            exit 1
           fi
 
       - name: Upload release assets to S3

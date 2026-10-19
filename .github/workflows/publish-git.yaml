@@ -1,0 +1,61 @@
+name: Publish git
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'unichat-api/**'
+
+env:
+  ZBELL_REGISTRY: https://zbell.voguh.me
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  publish-git:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6.0.3
+        with:
+          fetch-depth: 0
+
+      - name: Check event contract parity
+        run: |
+          LOG_LEVEL=debug ./zztools/check-events-parity.py
+
+      - name: Check unichat-api changes
+        id: changes
+        run: |
+          PUBLISHED_VERSION="$(npm view @voguh/unichat-api@git version --registry "$ZBELL_REGISTRY" 2>/dev/null || true)"
+          PUBLISHED_SHA="${PUBLISHED_VERSION##*.g}"
+          if [ -n "$PUBLISHED_VERSION" ] && git cat-file -e "$PUBLISHED_SHA^{commit}" 2>/dev/null && git diff --quiet "$PUBLISHED_SHA" HEAD -- unichat-api/; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Pack unichat-api
+        id: pack
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          CARGO_PACKAGE_VERSION="$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')"
+          VERSION="${CARGO_PACKAGE_VERSION%%-*}-dev.$(date -u +%Y%m%d%H%M%S).g$(git rev-parse --short HEAD)"
+          ./zztools/build-npm-package.py "$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Publish to zBell
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          TOKEN=$(curl -sSf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=$ZBELL_REGISTRY" | jq -r .value)
+          echo "::add-mask::$TOKEN"
+          if ! npm publish "dist/unichat-api-${{ steps.pack.outputs.version }}.tgz" --registry "$ZBELL_REGISTRY" --tag "git" "--${ZBELL_REGISTRY#*:}/:_authToken=$TOKEN" --logs-dir npm-logs; then
+            cat npm-logs/*.log
+            exit 1
+          fi
