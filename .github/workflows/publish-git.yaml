@@ -73,7 +73,7 @@ jobs:
         run: |
           TOKEN=$(curl -sSf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=$ZBELL_REGISTRY" | jq -r .value)
           echo "::add-mask::$TOKEN"
-          if ! npm publish "dist/unichat-api-${{ steps.version.outputs.version }}.tgz" --registry "$ZBELL_REGISTRY" --tag "git" "--${ZBELL_REGISTRY#*:}/:_authToken=$TOKEN" --logs-dir npm-logs; then
+          if ! npm publish "./dist/unichat-api-${{ steps.version.outputs.version }}.tgz" --registry "$ZBELL_REGISTRY" --tag "git" "--${ZBELL_REGISTRY#*:}/:_authToken=$TOKEN" --logs-dir npm-logs; then
             cat npm-logs/*.log
             exit 1
           fi
