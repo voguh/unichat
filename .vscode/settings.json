@@ -4,13 +4,13 @@
     "biome.configurationPath": "./webapp/biome.json",
     "biome.lsp.bin": "./webapp/node_modules/.bin/biome",
 
-    "[javascript]": { "editor.defaultFormatter": "biomejs.biome" },
-    "[javascriptreact]": { "editor.defaultFormatter": "biomejs.biome" },
-    "[typescript]": { "editor.defaultFormatter": "biomejs.biome" },
-    "[typescriptreact]": { "editor.defaultFormatter": "biomejs.biome" },
-    "[json]": { "editor.defaultFormatter": "biomejs.biome" },
-    "[jsonc]": { "editor.defaultFormatter": "biomejs.biome" },
-    "[css]": { "editor.defaultFormatter": "biomejs.biome" },
+    "[javascript]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "always" } },
+    "[javascriptreact]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "always" } },
+    "[typescript]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "always" } },
+    "[typescriptreact]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "always" } },
+    "[json]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "always" } },
+    "[jsonc]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "always" } },
+    "[css]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "always" } },
 
     "terminal.integrated.env.linux": {
         "TAURI_APP_PATH": "${workspaceFolder}",
