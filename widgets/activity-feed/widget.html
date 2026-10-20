@@ -1,45 +1,103 @@
-<div id="main-container">
-    <div class="actions-container">
-        <button class="toggle-btn-donate toggle-btn-active">
-            DONATE
-        </button>
-        <button class="toggle-btn-cheer toggle-btn-active">
-            CHEER
-        </button>
-        <button class="toggle-btn-sponsor toggle-btn-active">
-            SPONSOR
-        </button>
-        <button class="toggle-btn-sponsor-gift toggle-btn-active">
-            SPONSOR GIFT
-        </button>
-        <button class="toggle-btn-raid toggle-btn-active">
-            RAID
-        </button>
-        <button class="toggle-btn-redemption toggle-btn-active">
-            REDEMPTION
-        </button>
-    </div>
-    <div class="feed-items-container"></div>
-</div>
+<main id="activity-feed" class="activity-feed">
+    <header class="feed-header">
+        <div class="feed-brandline">
+            <span class="brand-mark" aria-hidden="true">U</span>
+            <span class="feed-eyebrow">UNICHAT / LIVE</span>
+        </div>
+        <div class="feed-titleline">
+            <h1>Activity</h1>
+            <span id="activity-count" class="activity-count">00</span>
+        </div>
+        <div class="feed-controls">
+            <details class="filter-menu">
+                <summary class="filter-trigger">
+                    <span>Events</span>
+                    <span id="event-filter-summary" class="filter-summary">All events</span>
+                    <span class="filter-chevron" aria-hidden="true"></span>
+                </summary>
+                <div class="filter-popup" role="group" aria-label="Filter events">
+                    <label class="filter-option filter-all-option">
+                        <input type="checkbox" data-event-all checked>
+                        <span>All events</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" data-event-filter="streaks" checked>
+                        <span>Streaks</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" data-event-filter="sponsor" checked>
+                        <span>Sponsor</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" data-event-filter="sponsor-gift" checked>
+                        <span>Sponsor gift</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" data-event-filter="donations" checked>
+                        <span>Donations</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" data-event-filter="cheers" checked>
+                        <span>Cheers</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" data-event-filter="raids" checked>
+                        <span>Raids</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" data-event-filter="rewards" checked>
+                        <span>Channel rewards</span>
+                    </label>
+                </div>
+            </details>
+            <details class="filter-menu">
+                <summary class="filter-trigger">
+                    <span>Platforms</span>
+                    <span id="platform-filter-summary" class="filter-summary">All platforms</span>
+                    <span class="filter-chevron" aria-hidden="true"></span>
+                </summary>
+                <div class="filter-popup" role="group" aria-label="Filter platforms">
+                    <label class="filter-option filter-all-option">
+                        <input type="checkbox" data-platform-all checked>
+                        <span>All platforms</span>
+                    </label>
+                    <div id="platform-filter-options">
+                        <label class="filter-option">
+                            <input type="checkbox" data-platform-filter="youtube" checked>
+                            <span>YouTube</span>
+                        </label>
+                        <label class="filter-option">
+                            <input type="checkbox" data-platform-filter="twitch" checked>
+                            <span>Twitch</span>
+                        </label>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </header>
+    <section class="feed-scroll" aria-label="Activity history">
+        <ol id="activity-list" class="activity-list" aria-live="polite" aria-relevant="additions"></ol>
+        <div id="empty-state" class="empty-state">
+            <span class="empty-mark" aria-hidden="true">+</span>
+            <p id="empty-message">Waiting for activity</p>
+        </div>
+    </section>
+</main>
 
-<script type="text/template" id="feed_item">
-    <div class="feed-item {show_content}" data-event-type="{event_type}" data-from="{author_id}" data-platform="{platform}" data-id="{message_id}">
-        <div class="feed-item-header">
-            <div class="meta">
-                {badges}
+<template id="activity-template">
+    <li class="activity-entry">
+        <div class="entry-avatar">
+            <img class="entry-avatar-image" alt="" hidden>
+            <span class="entry-avatar-fallback" aria-hidden="true"></span>
+        </div>
+        <div class="entry-content">
+            <div class="entry-topline">
+                <span class="entry-kind"></span>
+                <span class="entry-platform"></span>
+                <time class="entry-time"></time>
             </div>
-            <span class="details">{details}</span>
-            <span class="timestmap">
-                <div class="timestamp-ago" data-timestamp="{raw_timestamp}">
-                    {timeago}
-                </div>
-                <div class="tooltip timestamp-tooltip">
-                    {timestmap}
-                </div>
-            </span>
+            <p class="entry-description"></p>
+            <p class="entry-message" hidden></p>
         </div>
-        <div class="feed-item-content">
-            {message_text}
-        </div>
-    </div>
-</script>
+    </li>
+</template>
