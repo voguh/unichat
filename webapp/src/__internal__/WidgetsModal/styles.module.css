@@ -12,10 +12,6 @@
     @apply gap-2;
 }
 
-.groupTitle {
-    @apply flex-1;
-}
-
 .table {
     @apply w-full border-collapse;
 

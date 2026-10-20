@@ -46,14 +46,11 @@ export function GalleryModalActions(): PReact.ComponentChildren {
                 <i className="fas fa-upload" />
                 Add to Gallery
             </Button>
-            <Tooltip.Root positioning={{ placement: "bottom" }}>
-                <Tooltip.Trigger asChild>
-                    <Button variant="secondary" onClick={() => revealItemInDir(UNICHAT_GALLERY_DIR)}>
-                        <i className="fas fa-folder" />
-                    </Button>
-                </Tooltip.Trigger>
-                <Tooltip.Content>Show Gallery Folder</Tooltip.Content>
-            </Tooltip.Root>
+            <Tooltip placement="bottom" content="Show Gallery Folder">
+                <Button variant="secondary" onClick={() => revealItemInDir(UNICHAT_GALLERY_DIR)}>
+                    <i className="fas fa-folder" />
+                </Button>
+            </Tooltip>
         </>
     );
 }

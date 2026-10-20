@@ -195,8 +195,12 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                 ))}
             </div>
             <div className={styles.body}>
-                <Popover.Root openOn="focus" positioning={{ placement: "bottom-start" }}>
-                    <Popover.Anchor data-tour={`${scraper.id}--url-input`}>
+                <Popover
+                    trigger="focus"
+                    placement="bottom-start"
+                    content={<div className={styles.popoverBody}>{editingTooltip}</div>}
+                >
+                    <div data-tour={`${scraper.id}--url-input`}>
                         <TextInput
                             label={
                                 <div className={styles.label}>
@@ -218,11 +222,8 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                             ref={inputRef}
                             disabled={loading || scraperIsLoading || scraperIsRunning}
                         />
-                    </Popover.Anchor>
-                    <Popover.Content>
-                        <div className={styles.popoverBody}>{editingTooltip}</div>
-                    </Popover.Content>
-                </Popover.Root>
+                    </div>
+                </Popover>
                 <Button
                     variant="secondary"
                     onClick={scraperIsRunning ? handleStop : handleStart}

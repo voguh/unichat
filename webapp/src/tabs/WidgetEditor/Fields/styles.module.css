@@ -53,10 +53,6 @@
     }
 }
 
-.accordionTitle {
-    @apply flex-1;
-}
-
 .accordionContent {
     @apply bg-stone-700/25;
     @apply p-2 flex flex-col gap-4;

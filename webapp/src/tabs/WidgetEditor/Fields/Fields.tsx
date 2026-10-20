@@ -57,7 +57,10 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         label={builder.label}
                         description={builder.description}
                         checked={value as boolean}
-                        onCheckedChange={({ checked }) => setFieldState((old) => ({ ...old, [key]: checked }))}
+                        onChange={(event) => {
+                            const checked = event.currentTarget.checked;
+                            setFieldState((old) => ({ ...old, [key]: checked }));
+                        }}
                     />
                 );
             case "colorpicker":
@@ -163,20 +166,18 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
         }
 
         return (
-            <Accordion.Root collapsible className={styles.accordion}>
+            <Accordion.Root className={styles.accordion}>
                 {Object.entries(groups)
                     .filter(([_, elements]) => elements.length > 0)
                     .map(([groupName, elements]) => (
-                        <Accordion.Item key={groupName} value={groupName} className={styles.accordionItem}>
-                            <Accordion.ItemTrigger>
-                                <span className={styles.accordionTitle}>{groupName}</span>
-                                <Accordion.ItemIndicator>
-                                    <i className="fas fa-chevron-down" />
-                                </Accordion.ItemIndicator>
-                            </Accordion.ItemTrigger>
-                            <Accordion.ItemContent className={styles.accordionContent}>
-                                {elements}
-                            </Accordion.ItemContent>
+                        <Accordion.Item
+                            key={groupName}
+                            name="widget-fields"
+                            title={groupName}
+                            className={styles.accordionItem}
+                            contentProps={{ className: styles.accordionContent }}
+                        >
+                            {elements}
                         </Accordion.Item>
                     ))}
             </Accordion.Root>

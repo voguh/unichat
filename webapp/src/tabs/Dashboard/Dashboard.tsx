@@ -147,23 +147,17 @@ export function Dashboard(): PReact.ComponentChildren {
                                 />
                             </div>
 
-                            <Tooltip.Root positioning={{ placement: "bottom" }}>
-                                <Tooltip.Trigger asChild>
-                                    <Button onClick={reloadIframe} data-tour="preview-reload">
-                                        <i className="fas fa-redo" />
-                                    </Button>
-                                </Tooltip.Trigger>
-                                <Tooltip.Content>Reload widget view</Tooltip.Content>
-                            </Tooltip.Root>
+                            <Tooltip placement="bottom" content="Reload widget view">
+                                <Button onClick={reloadIframe} data-tour="preview-reload">
+                                    <i className="fas fa-redo" />
+                                </Button>
+                            </Tooltip>
 
-                            <Tooltip.Root positioning={{ placement: "bottom" }}>
-                                <Tooltip.Trigger asChild>
-                                    <Button onClick={handleOpenInBrowser} data-tour="preview-open-in-browser">
-                                        <i className="fas fa-globe" />
-                                    </Button>
-                                </Tooltip.Trigger>
-                                <Tooltip.Content>{isOpenToLan ? "Open on device" : "Open in browser"}</Tooltip.Content>
-                            </Tooltip.Root>
+                            <Tooltip placement="bottom" content={isOpenToLan ? "Open on device" : "Open in browser"}>
+                                <Button onClick={handleOpenInBrowser} data-tour="preview-open-in-browser">
+                                    <i className="fas fa-globe" />
+                                </Button>
+                            </Tooltip>
                         </div>
 
                         <div className={styles.iframeWrapper}>

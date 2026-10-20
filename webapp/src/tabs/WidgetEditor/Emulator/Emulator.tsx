@@ -119,20 +119,20 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
             </div>
 
             <div className={styles.target} data-tour="widget-editor-emulator-target-selector">
-                <Tooltip.Root>
-                    <Tooltip.Trigger asChild>
-                        <div className={styles.targetTitle}>
-                            Emulation Target
-                            <i className="fas fa-info-circle" />
-                        </div>
-                    </Tooltip.Trigger>
-                    <Tooltip.Content>{buildTooltipContent()}</Tooltip.Content>
-                </Tooltip.Root>
+                <Tooltip content={buildTooltipContent()}>
+                    <div className={styles.targetTitle}>
+                        Emulation Target
+                        <i className="fas fa-info-circle" />
+                    </div>
+                </Tooltip>
 
                 <div className={styles.targetSelect}>
                     <div>Global</div>
                     <div>
-                        <Switch checked={emulatorOnly} onCheckedChange={({ checked }) => setEmulatorOnly(checked)} />
+                        <Switch
+                            checked={emulatorOnly}
+                            onChange={(event) => setEmulatorOnly(event.currentTarget.checked)}
+                        />
                     </div>
                     <div>Emulator Only</div>
                 </div>

@@ -12,7 +12,7 @@ import type * as PReact from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 
 import { Loading } from "@voguh/unichat-ui/components/Loading";
-import { Tabs } from "@voguh/unichat-ui/components/ui/Tabs";
+import { Tabs, type TabsItem } from "@voguh/unichat-ui/components/ui/Tabs";
 import { ModalContext } from "unichat/contexts/ModalContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
@@ -25,12 +25,6 @@ import { GalleyTabEmpty } from "./GalleyTabEmpty";
 import styles from "./styles.module.css";
 
 export type GalleryTabs = GalleryItem["type"] | "custom";
-
-interface Tab {
-    id: string;
-    title: string;
-    content: PReact.ComponentChild;
-}
 
 interface Props {
     showTabs?: Omit<GalleryTabs, "custom">[];
@@ -63,43 +57,43 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
         ));
     }
 
-    function buildTabs(): Tab[] {
-        const tabs: Tab[] = [];
+    function buildTabs(): TabsItem[] {
+        const tabs: TabsItem[] = [];
         if (showTabs.includes("image")) {
             tabs.push({
-                id: "image",
-                title: "Images",
+                value: "image",
+                label: "Images",
                 content: <div className={styles.tabContainer}>{printGalleryItems("image")}</div>
             });
         }
 
         if (showTabs.includes("video")) {
             tabs.push({
-                id: "video",
-                title: "Videos",
+                value: "video",
+                label: "Videos",
                 content: <div className={styles.tabContainer}>{printGalleryItems("video")}</div>
             });
         }
 
         if (showTabs.includes("audio")) {
             tabs.push({
-                id: "audio",
-                title: "Audios",
+                value: "audio",
+                label: "Audios",
                 content: <div className={styles.tabContainer}>{printGalleryItems("audio")}</div>
             });
         }
         if (showTabs.includes("file")) {
             tabs.push({
-                id: "file",
-                title: "Others",
+                value: "file",
+                label: "Others",
                 content: <div className={styles.tabContainer}>{printGalleryItems("file")}</div>
             });
         }
 
         if (typeof onSelectItem === "function") {
             tabs.push({
-                id: "custom",
-                title: "Custom",
+                value: "custom",
+                label: "Custom",
                 content: (
                     <div className={styles.tabContainer}>
                         <GalleyCustomDisplay selectedItem={selectedItem} onSelectItem={onSelectItem} />
@@ -131,25 +125,10 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
         }
     }, [sharedStore.uploading]);
 
-    const tabs = buildTabs();
-
     return (
         <>
             <Loading show={!!sharedStore.uploading} label="Uploading" />
-            <Tabs.Root defaultValue={startSelectedTab ?? tabs[0].id}>
-                <Tabs.List>
-                    {tabs.map((tab) => (
-                        <Tabs.Trigger key={tab.id} value={tab.id}>
-                            {tab.title}
-                        </Tabs.Trigger>
-                    ))}
-                </Tabs.List>
-                {tabs.map((tab) => (
-                    <Tabs.Content key={tab.id} value={tab.id}>
-                        {tab.content}
-                    </Tabs.Content>
-                ))}
-            </Tabs.Root>
+            <Tabs items={buildTabs()} defaultValue={startSelectedTab} />
         </>
     );
 }

@@ -29,26 +29,20 @@ export function WidgetEditorLeftSection(): PReact.ComponentChildren {
 
     return (
         <>
-            <Tooltip.Root positioning={{ placement: "right" }}>
-                <Tooltip.Trigger asChild>
-                    <Button
-                        variant="secondary"
-                        onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)}
-                        data-tour="user-widgets-directory"
-                    >
-                        <i className="fas fa-folder" />
-                    </Button>
-                </Tooltip.Trigger>
-                <Tooltip.Content>Open user widgets folder</Tooltip.Content>
-            </Tooltip.Root>
-            <Tooltip.Root positioning={{ placement: "right" }}>
-                <Tooltip.Trigger asChild>
-                    <Button variant="secondary" onClick={toggleGallery} data-tour="gallery-toggle">
-                        <i className="fas fa-images" />
-                    </Button>
-                </Tooltip.Trigger>
-                <Tooltip.Content>Gallery</Tooltip.Content>
-            </Tooltip.Root>
+            <Tooltip placement="right" content="Open user widgets folder">
+                <Button
+                    variant="secondary"
+                    onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)}
+                    data-tour="user-widgets-directory"
+                >
+                    <i className="fas fa-folder" />
+                </Button>
+            </Tooltip>
+            <Tooltip placement="right" content="Gallery">
+                <Button variant="secondary" onClick={toggleGallery} data-tour="gallery-toggle">
+                    <i className="fas fa-images" />
+                </Button>
+            </Tooltip>
         </>
     );
 }

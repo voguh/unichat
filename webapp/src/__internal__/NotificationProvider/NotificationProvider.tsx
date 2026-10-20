@@ -11,22 +11,22 @@
 import type * as PReact from "preact";
 import { useEffect } from "preact/hooks";
 
-import { Toaster, toaster } from "@voguh/unichat-ui/components/ui/Toast";
+import { Toaster, toaster, type ToastType as UIToastType } from "@voguh/unichat-ui/components/ui/Toast";
 import { eventEmitter } from "unichat/services/eventEmitter";
 import type { NotificationOptions, ToastType } from "unichat/services/notificationService";
 
-const ZAG_TOAST_TYPES: Record<ToastType, string> = {
+const TOAST_TYPES: Record<ToastType, UIToastType | undefined> = {
     success: "success",
     info: "info",
     error: "error",
     warn: "warning",
-    default: "default"
+    default: undefined
 };
 
 export function NotificationProvider(): PReact.ComponentChildren {
     useEffect(() => {
         function handleNotification({ type, title, message, icon }: NotificationOptions): void {
-            toaster.create({ type: ZAG_TOAST_TYPES[type], title, description: message, meta: { icon } });
+            toaster.create({ type: TOAST_TYPES[type], title, description: message, icon });
         }
 
         eventEmitter.on("notification:show", handleNotification);

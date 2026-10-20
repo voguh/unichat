@@ -27,38 +27,29 @@ export function DashboardLeftSection(): PReact.ComponentChildren {
 
     return (
         <>
-            <Tooltip.Root positioning={{ placement: "right" }}>
-                <Tooltip.Trigger asChild>
-                    <Button variant="secondary" onClick={handleClearChat} data-tour="clear-chat">
-                        <i className="fas fa-eraser" />
-                    </Button>
-                </Tooltip.Trigger>
-                <Tooltip.Content>Clear chat history</Tooltip.Content>
-            </Tooltip.Root>
-            <Tooltip.Root positioning={{ placement: "right" }}>
-                <Tooltip.Trigger asChild>
-                    <Button
-                        variant="secondary"
-                        onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)}
-                        data-tour="user-widgets-directory"
-                    >
-                        <i className="fas fa-folder" />
-                    </Button>
-                </Tooltip.Trigger>
-                <Tooltip.Content>Open user widgets folder</Tooltip.Content>
-            </Tooltip.Root>
-            <Tooltip.Root positioning={{ placement: "right" }}>
-                <Tooltip.Trigger asChild>
-                    <Button
-                        variant={showWidgetPreview ? "secondary" : undefined}
-                        onClick={() => setShowWidgetPreview((old) => !old)}
-                        data-tour="toggle-widget-preview"
-                    >
-                        {showWidgetPreview ? <i className="fas fa-eye" /> : <i className="fas fa-eye-slash" />}
-                    </Button>
-                </Tooltip.Trigger>
-                <Tooltip.Content>Toggle widget preview</Tooltip.Content>
-            </Tooltip.Root>
+            <Tooltip placement="right" content="Clear chat history">
+                <Button variant="secondary" onClick={handleClearChat} data-tour="clear-chat">
+                    <i className="fas fa-eraser" />
+                </Button>
+            </Tooltip>
+            <Tooltip placement="right" content="Open user widgets folder">
+                <Button
+                    variant="secondary"
+                    onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)}
+                    data-tour="user-widgets-directory"
+                >
+                    <i className="fas fa-folder" />
+                </Button>
+            </Tooltip>
+            <Tooltip placement="right" content="Toggle widget preview">
+                <Button
+                    variant={showWidgetPreview ? "secondary" : undefined}
+                    onClick={() => setShowWidgetPreview((old) => !old)}
+                    data-tour="toggle-widget-preview"
+                >
+                    {showWidgetPreview ? <i className="fas fa-eye" /> : <i className="fas fa-eye-slash" />}
+                </Button>
+            </Tooltip>
         </>
     );
 }

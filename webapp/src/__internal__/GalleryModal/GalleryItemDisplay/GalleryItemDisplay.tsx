@@ -45,12 +45,9 @@ export function GalleryItemDisplay(props: Props): PReact.ComponentChildren {
     return (
         <div className={styles.container}>
             <div className={styles.name}>
-                <Tooltip.Root positioning={{ placement: "top" }}>
-                    <Tooltip.Trigger asChild>
-                        <span>{title}</span>
-                    </Tooltip.Trigger>
-                    <Tooltip.Content>{title}</Tooltip.Content>
-                </Tooltip.Root>
+                <Tooltip content={title}>
+                    <span>{title}</span>
+                </Tooltip>
             </div>
             <div className={styles.preview}>{renderPreview()}</div>
             {!!onSelectItem && (

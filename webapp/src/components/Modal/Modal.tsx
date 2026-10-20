@@ -53,25 +53,22 @@ export function Modal({
     const [sharedStore, setSharedStore] = useState<Record<string, unknown>>({});
 
     return (
-        <Dialog.Root
-            open={show}
-            modal={false}
-            closeOnInteractOutside={false}
-            onOpenChange={({ open }) => !open && onHide()}
-        >
-            <ModalContext.Provider value={{ onClose: onHide, sharedStore, setSharedStore }}>
-                <Dialog.Content
-                    {...rest}
-                    size={fullscreen ? "fullscreen" : size}
-                    backdrop={backdrop}
-                    portal={withPortal}
-                >
-                    {(title != null || actions != null || withCloseButton) && (
-                        <Dialog.Header title={title} actions={actions} withCloseButton={withCloseButton} />
-                    )}
-                    {children && <Dialog.Body className={bodyClassName}>{children}</Dialog.Body>}
-                </Dialog.Content>
-            </ModalContext.Provider>
-        </Dialog.Root>
+        <ModalContext.Provider value={{ onClose: onHide, sharedStore, setSharedStore }}>
+            <Dialog
+                {...rest}
+                open={show}
+                onClose={onHide}
+                closeOnInteractOutside={false}
+                size={fullscreen ? "fullscreen" : size}
+                title={title}
+                actions={actions}
+                withCloseButton={withCloseButton}
+                backdrop={backdrop}
+                portal={withPortal}
+                bodyProps={{ className: bodyClassName }}
+            >
+                {children}
+            </Dialog>
+        </ModalContext.Provider>
     );
 }

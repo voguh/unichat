@@ -41,17 +41,13 @@ export function CheckUpdatesSettingsTab(_props: Props): PReact.ComponentChildren
     }
 
     return (
-        <Tabs.Root defaultValue="stable" className={styles.tabs}>
-            <Tabs.List>
-                <Tabs.Trigger value="stable">Latest Stable</Tabs.Trigger>
-                <Tabs.Trigger value="unstable">Latest Unstable</Tabs.Trigger>
-            </Tabs.List>
-            <Tabs.Content value="stable" className={styles.tabContent}>
-                <ReleaseNotes release={latestStable} />
-            </Tabs.Content>
-            <Tabs.Content value="unstable" className={styles.tabContent}>
-                <ReleaseNotes release={latestUnstable} />
-            </Tabs.Content>
-        </Tabs.Root>
+        <Tabs
+            className={styles.tabs}
+            contentProps={{ className: styles.tabContent }}
+            items={[
+                { value: "stable", label: "Latest Stable", content: <ReleaseNotes release={latestStable} /> },
+                { value: "unstable", label: "Latest Unstable", content: <ReleaseNotes release={latestUnstable} /> }
+            ]}
+        />
     );
 }

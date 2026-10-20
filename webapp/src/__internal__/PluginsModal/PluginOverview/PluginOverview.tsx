@@ -48,21 +48,15 @@ export function PluginOverviewModal({ plugin }: Props): PReact.ComponentChildren
                     </div>
                     <div className={styles.authors}>
                         <div className={styles.label}>Authors</div>
-                        <Tooltip.Root positioning={{ placement: "bottom" }}>
-                            <Tooltip.Trigger asChild>
-                                <div className={styles.value}>{plugin.author}</div>
-                            </Tooltip.Trigger>
-                            <Tooltip.Content>{plugin.author}</Tooltip.Content>
-                        </Tooltip.Root>
+                        <Tooltip placement="bottom" content={plugin.author}>
+                            <div className={styles.value}>{plugin.author}</div>
+                        </Tooltip>
                     </div>
                     <div className={styles.license}>
                         <div className={styles.label}>License</div>
-                        <Tooltip.Root positioning={{ placement: "bottom" }}>
-                            <Tooltip.Trigger asChild>
-                                <div className={styles.value}>{plugin.license}</div>
-                            </Tooltip.Trigger>
-                            <Tooltip.Content>{plugin.license}</Tooltip.Content>
-                        </Tooltip.Root>
+                        <Tooltip placement="bottom" content={plugin.license}>
+                            <div className={styles.value}>{plugin.license}</div>
+                        </Tooltip>
                     </div>
                     <div className={styles.homepage}>
                         <div className={styles.label}>Homepage</div>

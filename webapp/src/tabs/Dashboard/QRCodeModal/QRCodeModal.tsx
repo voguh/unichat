@@ -73,22 +73,8 @@ export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
             {selectedHostQrCodeUrl && (
                 <>
                     <div className={styles.label}>Scan this QR code with your device to open</div>
-                    <QrCode.Root value={selectedHostQrCodeUrl} className={styles.qrcode}>
-                        <QrCode.Frame />
-                    </QrCode.Root>
-                    <Clipboard.Root value={selectedHostQrCodeUrl} className={styles.fullWidth}>
-                        <Clipboard.Control>
-                            <Clipboard.Input />
-                            <Clipboard.Trigger>
-                                <Clipboard.Indicator copied>
-                                    <i className="fas fa-check" />
-                                </Clipboard.Indicator>
-                                <Clipboard.Indicator copied={false}>
-                                    <i className="fas fa-copy" />
-                                </Clipboard.Indicator>
-                            </Clipboard.Trigger>
-                        </Clipboard.Control>
-                    </Clipboard.Root>
+                    <QrCode value={selectedHostQrCodeUrl} alt="QR Code" className={styles.qrcode} />
+                    <Clipboard value={selectedHostQrCodeUrl} className={styles.fullWidth} />
                 </>
             )}
         </div>

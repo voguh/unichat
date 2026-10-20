@@ -146,50 +146,38 @@ export function App(): PReact.ComponentChildren {
             <div className="sidebar">
                 <div className="sidebar__tabs">
                     {Object.entries(tabs).map(([key, tab]) => (
-                        <Tooltip.Root key={key} positioning={{ placement: "right" }}>
-                            <Tooltip.Trigger asChild>
-                                <Button
-                                    data-tour={`tab-${key}-toggle`}
-                                    variant={selectedTab === key ? "primary" : undefined}
-                                    onClick={() => setSelectedTab(key)}
-                                >
-                                    {tab.icon}
-                                </Button>
-                            </Tooltip.Trigger>
-                            <Tooltip.Content>{tab.label}</Tooltip.Content>
-                        </Tooltip.Root>
+                        <Tooltip key={key} placement="right" content={tab.label}>
+                            <Button
+                                data-tour={`tab-${key}-toggle`}
+                                variant={selectedTab === key ? "primary" : undefined}
+                                onClick={() => setSelectedTab(key)}
+                            >
+                                {tab.icon}
+                            </Button>
+                        </Tooltip>
                     ))}
 
                     <TabLeftSection selectedTab={selectedTab} />
                 </div>
 
                 <div className="sidebar__footer">
-                    <Tooltip.Root positioning={{ placement: "right" }}>
-                        <Tooltip.Trigger asChild>
-                            <Button onClick={toggleWidgetsModal} data-tour="widgets-modal-toggle">
-                                <i className="fas fa-object-group" />
-                            </Button>
-                        </Tooltip.Trigger>
-                        <Tooltip.Content>Widgets</Tooltip.Content>
-                    </Tooltip.Root>
+                    <Tooltip placement="right" content="Widgets">
+                        <Button onClick={toggleWidgetsModal} data-tour="widgets-modal-toggle">
+                            <i className="fas fa-object-group" />
+                        </Button>
+                    </Tooltip>
 
-                    <Tooltip.Root positioning={{ placement: "right" }}>
-                        <Tooltip.Trigger asChild>
-                            <Button onClick={togglePluginsModal} data-tour="plugins-modal-toggle">
-                                <i className="fas fa-cubes" />
-                            </Button>
-                        </Tooltip.Trigger>
-                        <Tooltip.Content>Plugins</Tooltip.Content>
-                    </Tooltip.Root>
+                    <Tooltip placement="right" content="Plugins">
+                        <Button onClick={togglePluginsModal} data-tour="plugins-modal-toggle">
+                            <i className="fas fa-cubes" />
+                        </Button>
+                    </Tooltip>
 
-                    <Tooltip.Root positioning={{ placement: "right" }}>
-                        <Tooltip.Trigger asChild>
-                            <Button onClick={() => setOpenedSettingsModal(true)} data-tour="settings-modal-toggle">
-                                <i className="fas fa-sliders-h" />
-                            </Button>
-                        </Tooltip.Trigger>
-                        <Tooltip.Content>Settings</Tooltip.Content>
-                    </Tooltip.Root>
+                    <Tooltip placement="right" content="Settings">
+                        <Button onClick={() => setOpenedSettingsModal(true)} data-tour="settings-modal-toggle">
+                            <i className="fas fa-sliders-h" />
+                        </Button>
+                    </Tooltip>
                 </div>
             </div>
 

@@ -34,9 +34,7 @@ export function settingsModalStageBuilder(
         await builder(container);
 
         return () => {
-            document
-                .querySelector<HTMLButtonElement>("[data-tour='settings-modal'] [data-part='close-trigger']")
-                ?.click();
+            document.querySelector<HTMLButtonElement>("[data-tour='settings-modal'] [aria-label='Close']")?.click();
         };
     };
 }

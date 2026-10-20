@@ -16,7 +16,7 @@
         "@tauri-apps/plugin-log": "2.10.0",
         "@tauri-apps/plugin-opener": "2.7.0",
         "@tauri-apps/plugin-store": "2.5.0",
-        "@voguh/unichat-ui": "0.1.1",
+        "@voguh/unichat-ui": "0.2.0",
         "mitt": "3.0.1",
         "preact": "10.29.8"
     },
@@ -29,7 +29,7 @@
         "@tailwindcss/postcss": "4.3.3",
         "@tailwindcss/typography": "0.5.20",
         "@types/node": "24.12.2",
-        "@voguh/unichat-api": "link:^file:../unichat-api",
+        "@voguh/unichat-api": "file:../unichat-api",
         "cross-env": "10.1.0",
         "glob": "13.0.6",
         "postcss": "8.5.30",

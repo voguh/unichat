@@ -172,7 +172,7 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
                         className={styles.logLevels}
                         value={logEventsRef}
                         disabled={__IS_DEV__}
-                        onValueChange={({ value }) => value != null && changeLogEvents(value as LogLevel)}
+                        onChange={(event) => changeLogEvents(event.currentTarget.value as LogLevel)}
                         items={[
                             { value: LogLevel.ONLY_ERRORS, label: "Only Errors" },
                             { value: LogLevel.UNKNOWN_EVENTS, label: "Errors + Unknown Events" },
