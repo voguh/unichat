@@ -1,5 +1,5 @@
 /*!******************************************************************************
- * Copyright (c) 2026 Voguh
+ * Copyright (c) 2024-2026 Voguh
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -8,4 +8,16 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import "@testing-library/jest-dom/vitest";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+    @apply w-full h-full m-0 p-0 relative overflow-hidden;
+
+    font-size: 14px;
+}
+
+#root {
+    @apply bg-stone-950 text-stone-50 overflow-hidden;
+}

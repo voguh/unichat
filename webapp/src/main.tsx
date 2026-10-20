@@ -13,6 +13,7 @@ import { h, render } from "preact";
 import { setup } from "goober";
 
 import { App } from "unichat/App";
+import "unichat/styles/index.css";
 
 if (!__IS_DEV__) {
     window.addEventListener("contextmenu", async (event) => {
