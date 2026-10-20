@@ -12,11 +12,6 @@
     "[jsonc]": { "editor.defaultFormatter": "biomejs.biome" },
     "[css]": { "editor.defaultFormatter": "biomejs.biome" },
 
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-        "source.fixAll.biome": "always"
-    },
-
     "terminal.integrated.env.linux": {
         "TAURI_APP_PATH": "${workspaceFolder}",
         "TAURI_FRONTEND_PATH": "${workspaceFolder}/webapp"
