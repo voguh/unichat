@@ -40,6 +40,6 @@ tauri-plugin-dialog = "=2.8.2"
 tauri-plugin-log = "=2.10.1"
 tauri-plugin-opener = "=2.7.1"
 tauri-plugin-store = "=2.5.0"
-tokio = { version = "=1.53.2", features = ["full"] }
+tokio = { version = "=1.53.3", features = ["full"] }
 ureq = { version = "=3.4.2", default-features = false, features = ["json", "native-tls"] }
 url = { version = "=2.5.8", features = ["serde"] }

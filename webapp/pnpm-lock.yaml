@@ -18,17 +18,17 @@ importers:
         specifier: 8.0.2
         version: 8.0.2
       '@tauri-apps/api':
-        specifier: 2.12.1
-        version: 2.12.1
+        specifier: 2.12.3
+        version: 2.12.3
       '@tauri-apps/plugin-dialog':
-        specifier: 2.8.1
-        version: 2.8.1
+        specifier: 2.8.2
+        version: 2.8.2
       '@tauri-apps/plugin-log':
-        specifier: 2.10.0
-        version: 2.10.0
+        specifier: 2.10.1
+        version: 2.10.1
       '@tauri-apps/plugin-opener':
-        specifier: 2.7.0
-        version: 2.7.0
+        specifier: 2.7.1
+        version: 2.7.1
       '@tauri-apps/plugin-store':
         specifier: 2.5.0
         version: 2.5.0
@@ -47,16 +47,16 @@ importers:
         version: 2.5.15
       '@rsdoctor/rspack-plugin':
         specifier: 1.6.5
-        version: 1.6.5(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@rspack/core@2.2.8(@swc/helpers@0.5.23))
+        version: 1.6.5(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@rspack/core@2.2.9(@swc/helpers@0.5.23))
       '@rspack/cli':
-        specifier: 2.2.8
-        version: 2.2.8(@rspack/core@2.2.8(@swc/helpers@0.5.23))(@rspack/dev-server@2.2.1(@rspack/core@2.2.8(@swc/helpers@0.5.23)))
+        specifier: 2.2.9
+        version: 2.2.9(@rspack/core@2.2.9(@swc/helpers@0.5.23))(@rspack/dev-server@2.2.1(@rspack/core@2.2.9(@swc/helpers@0.5.23)))
       '@rspack/core':
-        specifier: 2.2.8
-        version: 2.2.8(@swc/helpers@0.5.23)
+        specifier: 2.2.9
+        version: 2.2.9(@swc/helpers@0.5.23)
       '@rspack/dev-server':
         specifier: 2.2.1
-        version: 2.2.1(@rspack/core@2.2.8(@swc/helpers@0.5.23))
+        version: 2.2.1(@rspack/core@2.2.9(@swc/helpers@0.5.23))
       '@tailwindcss/postcss':
         specifier: 4.3.3
         version: 4.3.3
@@ -67,8 +67,8 @@ importers:
         specifier: 24.12.2
         version: 24.12.2
       '@voguh/unichat-api':
-        specifier: file:../unichat-api
-        version: file:../unichat-api
+        specifier: link:../unichat-api
+        version: link:../unichat-api
       cross-env:
         specifier: 10.1.0
         version: 10.1.0
@@ -80,7 +80,7 @@ importers:
         version: 8.5.30
       postcss-loader:
         specifier: 8.2.1
-        version: 8.2.1(@rspack/core@2.2.8(@swc/helpers@0.5.23))(postcss@8.5.30)(typescript@7.0.2)
+        version: 8.2.1(@rspack/core@2.2.9(@swc/helpers@0.5.23))(postcss@8.5.30)(typescript@7.0.2)
       rimraf:
         specifier: 6.1.3
         version: 6.1.3
@@ -267,88 +267,88 @@ packages:
   '@rsdoctor/utils@1.6.5':
     resolution: {integrity: sha512-/Ybsk9krXapFwn0LBS7iKqjVBreRbv2siySAKxEhMJiAiHmaWP8vFsgfyaQHK+TnjqQwiNlN/JeOnh8NF7+tyQ==}
 
-  '@rspack/binding-darwin-arm64@2.2.8':
-    resolution: {integrity: sha512-d6GuY/k7kJk7SOXmruIz0m+2fIXaLv2SnBHEYsbvBzE7ZO6QXq7fSABWFWNnSnNu+brYHA5Dr/skV81bXgTTCw==}
+  '@rspack/binding-darwin-arm64@2.2.9':
+    resolution: {integrity: sha512-aIHkk/wngpwgWkwVQFz2AIkmG9WpWtWlkqy4BlYhs5a7l9z0BrB0kXnUb6VSbqZ7Tc3cRepKw7ipkGjKa8KKXw==}
     cpu: [arm64]
     os: [darwin]
 
-  '@rspack/binding-darwin-x64@2.2.8':
-    resolution: {integrity: sha512-xCVou/jJASjEAjwy1T3hPJcJqA5QZASJfUwHqEk+nA0v44MagwH8tM8lsOvRfhzR7N2+YFac1rfZOUT8uM3awg==}
+  '@rspack/binding-darwin-x64@2.2.9':
+    resolution: {integrity: sha512-QtUS7lyOE5oxdMm7RH/Fw176jqwdHiTW2qEsmbdCYzPw3t7QkmI5ohoyiuxOp3czJfaayXP6bVyvm2FqqnWPAw==}
     cpu: [x64]
     os: [darwin]
 
-  '@rspack/binding-linux-arm64-gnu@2.2.8':
-    resolution: {integrity: sha512-Zy/ss6YAQTjOWKDkcWrbKtu+pySltqT22wn68nlrWKygPWLNmMdU5anlsnwRTIuQ3MF0YJRS42ARauVtlqvRQw==}
+  '@rspack/binding-linux-arm64-gnu@2.2.9':
+    resolution: {integrity: sha512-GMKxtBJAMoqBPqXZVi0QanDkneWwgiKRpTgHW/pbKPY/2XMfZJ98thm4YlATO18XZJ2KET+GfsNfaf1o5Y+aaA==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@rspack/binding-linux-arm64-musl@2.2.8':
-    resolution: {integrity: sha512-lxgp5O8PhL3St9p82llHoNoeWzp9jltW5S9F00p00XPJZHUIuxbwfLSzn/6Wg86USEmafLoBkyD9CM8rBd3SNQ==}
+  '@rspack/binding-linux-arm64-musl@2.2.9':
+    resolution: {integrity: sha512-aW3fcM64R5mY2+ym6Q8okAo/pcVIjAliqxFOc9lf9hCyS7hHaabWo30smeMX3neEjsqw+iyNbzWMuH0G5AugTw==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@rspack/binding-linux-ppc64-gnu@2.2.8':
-    resolution: {integrity: sha512-MY+YqpT02tcDCMgHy+IewQsaz7ql4mbJaAqqMlTIqvQwAUl9dXEP7BL352OgCxm9VRebTldE5lK99A3wVd3zqA==}
+  '@rspack/binding-linux-ppc64-gnu@2.2.9':
+    resolution: {integrity: sha512-dVEiyZdANq+g/qugI64vKnxO+PCVicidu/GQ6sO0QEWGVzdSUbxHztHviSnMwdvRs6OLrN7Lwhaw536hJ/cU8w==}
     cpu: [ppc64]
     os: [linux]
     libc: [glibc]
 
-  '@rspack/binding-linux-riscv64-gnu@2.2.8':
-    resolution: {integrity: sha512-wmN9OigSGNGCKY+AOYaWI8LJcIi8qvs5KjueBueCKOnTV6MPIEujA75QZH1pehTTYKvdGv7r2EtUXUmWpn7/SQ==}
+  '@rspack/binding-linux-riscv64-gnu@2.2.9':
+    resolution: {integrity: sha512-uBHWmfMm502145le0EUOsBoV6bJ9XA5s3NQLL4smSMoSEuMbNrRhqDJ2+B1u8aXVfjfhxCPyNlMDmgbsdVaO0Q==}
     cpu: [riscv64]
     os: [linux]
     libc: [glibc]
 
-  '@rspack/binding-linux-riscv64-musl@2.2.8':
-    resolution: {integrity: sha512-ZcQMYR10hLh581zs9MFnFFn0F7wyt5fkDffyukeMHJEoPJrbkfl6cQtsUdpQnZ+mYGYS5KydD1DT9/eMH65jjw==}
+  '@rspack/binding-linux-riscv64-musl@2.2.9':
+    resolution: {integrity: sha512-MR7e6PP7KcG3jHYWznk17npBBvjUXQg7qQbS+yrAu0R3p/27wLp+aP5m/zk4ev1Iq93ccIBIAGVRGA3v1fSKew==}
     cpu: [riscv64]
     os: [linux]
     libc: [musl]
 
-  '@rspack/binding-linux-s390x-gnu@2.2.8':
-    resolution: {integrity: sha512-ahBiE+Ir1FMYvStYicihhSJlS2YRagxtry0jWH8zW287o7C0eiHJ+pteJHHC15T5RJqm0j6w5TuwYe+F9AYxxg==}
+  '@rspack/binding-linux-s390x-gnu@2.2.9':
+    resolution: {integrity: sha512-Tc9Nuv7XvkrAG79Ps/6F7vT4bxZqiaiQ3Rd3BidKUjVYiwTPJogk1W3gPXp7Lw+AMoN/dY63W22bMJ7Oh0FeZw==}
     cpu: [s390x]
     os: [linux]
     libc: [glibc]
 
-  '@rspack/binding-linux-x64-gnu@2.2.8':
-    resolution: {integrity: sha512-dncEI515NoPXh3zzWk06Rb3mhSV76myiFKqXiJ8K4fVAe5x/RlweMhvPhHhm7RnIMeBld7BeStzOqj38XFsWGA==}
+  '@rspack/binding-linux-x64-gnu@2.2.9':
+    resolution: {integrity: sha512-xQYhQwC8q3mSCzHV+yi76Gt2Lt9BhnmeJnQgXGjuhyvjZWBB9jFNp9Uj6umun7tlMliMRhoqTesqvK4Vo/kkcQ==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@rspack/binding-linux-x64-musl@2.2.8':
-    resolution: {integrity: sha512-pfFyU03PjD0GaQG8zOQOHwq51rrJZetXjTGpMmz7iA1hq/f9lChJsDWrC8/7VXeQLwBofLZlOODqe8OM8OBzgA==}
+  '@rspack/binding-linux-x64-musl@2.2.9':
+    resolution: {integrity: sha512-FfEYdFhOd1nZL+U/up8nlbcRTTyWX4ohXUQcApQMYKIZoR1EJ0g/oBhS915+TSray0DchA+NT6yVL1sqWJOFaQ==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@rspack/binding-wasm32-wasi@2.2.8':
-    resolution: {integrity: sha512-3mOJuZTrF56jOh/GD9chLMJKbzPZ6Ty2OIML7+lLz0Yk2XS/xWRfLn85Dmnkb/O6UF65x7+p8VPAIZlBtLTclw==}
+  '@rspack/binding-wasm32-wasi@2.2.9':
+    resolution: {integrity: sha512-+29JEBiUi2TMDOGYmT3Tm3JGk3f19+CbjxNEt1bVreR8axuZZj+wOSwB/sx85lKQkL5fuNPh0BhOZ7cdkDxQpA==}
     cpu: [wasm32]
 
-  '@rspack/binding-win32-arm64-msvc@2.2.8':
-    resolution: {integrity: sha512-Cu/RMZT/16s+67xhl6X1pswetL3GLSQl+LnugKRh08Ul21A/tR7vxC4g4aih4u9k5SXCAngxFUt8zAjKnHIBqA==}
+  '@rspack/binding-win32-arm64-msvc@2.2.9':
+    resolution: {integrity: sha512-x/BDAwQCkR+ANWAAWV+15PFWuae2z9DzL+QcVeb+5taOri+tHa/iQdG8e3GJ60d0amsR+u9BJ2CBtJLK1fQkxw==}
     cpu: [arm64]
     os: [win32]
 
-  '@rspack/binding-win32-ia32-msvc@2.2.8':
-    resolution: {integrity: sha512-H/erd6di8OapZhhM0raA/7XduPn9jusfLMeO1XF+AmF9WF3HzHgMjha1j+KwtPgQnaH69w6AhY+G2472VIwQmw==}
+  '@rspack/binding-win32-ia32-msvc@2.2.9':
+    resolution: {integrity: sha512-i622t0Mom3STiDi8VHLaX62LKwhbT2kg37fKjzv3wQT+9bJvQ/+St6QQzFZg9C7fV53LXqAw8jFi5yIPIjg0Qw==}
     cpu: [ia32]
     os: [win32]
 
-  '@rspack/binding-win32-x64-msvc@2.2.8':
-    resolution: {integrity: sha512-BziHSUlIQM0MliCqdcHuBXSkQGtPoHQTXJce7fsgnTAzQFgPeog92qTNezYI4IrQ7pQouyiVJ2HPieUbVPRKQQ==}
+  '@rspack/binding-win32-x64-msvc@2.2.9':
+    resolution: {integrity: sha512-K98FPCAv0VpDPAz5ZqZ0XI1CmdJu9Kw1FmUDl4rN/zQIt9iqYn+Hgxq6Nk6Zx7g938jiG7ABLwITXSIKGbs6aw==}
     cpu: [x64]
     os: [win32]
 
-  '@rspack/binding@2.2.8':
-    resolution: {integrity: sha512-c9flkSua3khHnOKBCRk8BkHGOwU9YB7niv+5JfQXiLZIvJmgKsZ7PD8QrFklMhsJT3oVAc6c9GN7/wy1YkACjA==}
+  '@rspack/binding@2.2.9':
+    resolution: {integrity: sha512-Y8wDJoRo8n0KXDGq6J3KGVekkUQcOcUHSppMHoJv8JLbNBEsyaaKiDx4ljNTGEDtTON0CRbMEWbSiLRe+bJxOQ==}
 
-  '@rspack/cli@2.2.8':
-    resolution: {integrity: sha512-6f5ITncKnqXUKZVHmD3qHMVZzQz+C07oCdci+eqBwLswA3n9AhNiM0LR4Es1ai528rv5SpiUDUFulziqSEl2Cw==}
+  '@rspack/cli@2.2.9':
+    resolution: {integrity: sha512-oaFot9B5oensD70w2ikkVRugqpXlAOUYu034JMFsAIrwurEHnoYcUJo+nw06M3Fv4Tx48QCcO7bBh0ynDiDKtw==}
     hasBin: true
     peerDependencies:
       '@rspack/core': ^2.0.0-0
@@ -357,8 +357,8 @@ packages:
       '@rspack/dev-server':
         optional: true
 
-  '@rspack/core@2.2.8':
-    resolution: {integrity: sha512-JugsVrnbMGNYzMH++7gR9enygpP/lAo9PbVRq3XmJg0ryIvCpST0XJjBcccaSjYaaPamsjrddihmgVLMFp+yXw==}
+  '@rspack/core@2.2.9':
+    resolution: {integrity: sha512-Tp6/ZdM5UrGB3BeLfvh69l1iX03PZ46IgXjKqubVEuJVAhnOjpshooH/YAxcxR0AymcBLKA997Z4v+LV2aXzCw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       '@module-federation/runtime-tools': ^0.24.1 || ^2.0.0
@@ -548,17 +548,17 @@ packages:
     peerDependencies:
       tailwindcss: '>=3.0.0 || >=4.0.0 || insiders'
 
-  '@tauri-apps/api@2.12.1':
-    resolution: {integrity: sha512-DeyFHa3wynpyoqTDikDEDGTJIq4LQ5USfolQGRmGIWT6JMADyxZBTDa5cAdT3tDg73rUXufPaCwN7aXBos4OnQ==}
+  '@tauri-apps/api@2.12.3':
+    resolution: {integrity: sha512-9s0PKw0p4r3kFq92jhpivYSp+cSht15o0gXpZxuQd0+dV9KCexEVkNaLELVoLdJWyoH4KlfQo5h3W2LIM8siJg==}
 
-  '@tauri-apps/plugin-dialog@2.8.1':
-    resolution: {integrity: sha512-/DtE3B62JgpYuWFL5ATXM6KOXUq7pca7cJWOgSqULhZsgyjLk0PWKek1dbRDvhNBW6flNsOfWphsKnb+738Dmw==}
+  '@tauri-apps/plugin-dialog@2.8.2':
+    resolution: {integrity: sha512-LFqp8OTx0bHOwhKRhMMDyRDlo/2IO5XxoOclpf8+yvjAfM2ytVdbB6tk63dBlicsR8pRw38maj/GxrU6cW8mXw==}
 
-  '@tauri-apps/plugin-log@2.10.0':
-    resolution: {integrity: sha512-IHMspJx/fDA+8q8O6MTbrKffkemSDa1I5iXRhnLrLVnOd7xK4bAosyQbWcjnpPA7E+c6BMkpsE2kESHhkiBrDg==}
+  '@tauri-apps/plugin-log@2.10.1':
+    resolution: {integrity: sha512-QYgxDunUZP+Cd3ev+8ItOc3Q6uUFkEhRHdTolxUtlC/8SGsc5IyVjGgFclprkAx736HUCUYfh2vqUr3qwNfTTw==}
 
-  '@tauri-apps/plugin-opener@2.7.0':
-    resolution: {integrity: sha512-mBorYfVKh9Lt7s4ZFtKbMUTxBw+Y/sVmSlKCtkkoBgMTC/DIbt/kaPm67L/2djAUqDI1wbixy5OHHVmipjuGMw==}
+  '@tauri-apps/plugin-opener@2.7.1':
+    resolution: {integrity: sha512-XkXdt30rontti9TII/gBBxFRXWfj8DiprFW7RgBFRBj1OhdfjBNVcFqSEWkkZ4hXafHnuEnB7F1sFsmu6uyywQ==}
 
   '@tauri-apps/plugin-store@2.5.0':
     resolution: {integrity: sha512-+ykjiQwMJCSk/U2enHA8peKBWgDKgrP7JfZnGwQpqzwA0nVtKTc0LCyxWr2whOrcQoQqtUdr9NVdDZpfKpT1Xw==}
@@ -575,14 +575,8 @@ packages:
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
 
-  '@types/jquery@3.5.32':
-    resolution: {integrity: sha512-b9Xbf4CkMqS02YH8zACqN1xzdxc3cO735Qe5AbSUFmyOiaWAbcpqh9Wna+Uk0vgACvoQHpWDg2rGdHkYPLmCiQ==}
-
   '@types/node@24.12.2':
     resolution: {integrity: sha512-A1sre26ke7HDIuY/M23nd9gfB+nrmhtYyMINbjI1zHJxYteKR6qSMX56FsmjMcDb3SMcjJg5BiRRgOCC/yBD0g==}
-
-  '@types/sizzle@2.3.10':
-    resolution: {integrity: sha512-TC0dmN0K8YcWEAEfiPi5gJP14eJe30TTGjkvek3iM/1NdHHsdCA/Td6GvNndMOo/iSnIsZ4HuuhrYPDAmbxzww==}
 
   '@types/tapable@2.3.0':
     resolution: {integrity: sha512-oMnbAXeVo+KUnje3hzdORXUbfnzTfqD0H92mLl19NE5hFqH9Q4ktq+xehNSxcNeeLm1COopYwa0zeP6Iz+oIXg==}
@@ -712,9 +706,6 @@ packages:
     engines: {node: '>=16.20.0'}
     cpu: [x64]
     os: [win32]
-
-  '@voguh/unichat-api@file:../unichat-api':
-    resolution: {directory: ../unichat-api, type: directory}
 
   '@voguh/unichat-ui@0.2.1':
     resolution: {integrity: sha512-JEbTNcudeyZqe5MjydK/uMswa91PAP2TJsKvyZ0JcraGfUybjqX6imdEQP/rZWd2Mz3vF5THiGD3e6XN0AjhPg==}
@@ -868,8 +859,8 @@ packages:
     resolution: {integrity: sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==}
     engines: {node: '>=6'}
 
-  caniuse-lite@1.0.30001815:
-    resolution: {integrity: sha512-uDybUEyfgbyJJ93J1vikTylBX31AkdVYeVPeffMQpf8XN7hSfr0oZOn4VFOIMNvtU5+rHvC5Udg2TgtJKHm23Q==}
+  caniuse-lite@1.0.30001816:
+    resolution: {integrity: sha512-+8Yx7BXCoqk6IF8yTicjfUR6D/ldJzdlsodlEOiOSPmhK844WIgk67/zIQaGAOxNkZyyvBlrRFnLvqKIoqbAFw==}
 
   cookie@0.7.2:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
@@ -947,8 +938,8 @@ packages:
   domutils@3.2.2:
     resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
 
-  electron-to-chromium@1.5.453:
-    resolution: {integrity: sha512-9r/nz9akllr3SZsHUhfK10ktUH6j0Dbo3cKdh91khw0FvR6HhXGnATmOq5X8ena2aq4GXLQ1koh3nvKaQJaNmQ==}
+  electron-to-chromium@1.5.454:
+    resolution: {integrity: sha512-NqD5GhkXnxJpDQVCmmpc546qjH6kei2VI9m45CTF+sQU7bcS7YeVt7ba0cnjueMH1AXGRu/driZUP9iYVSv7vg==}
 
   engine.io-parser@5.2.3:
     resolution: {integrity: sha512-HqD3yTBfnBxIrbnM1DoD6Pcq8NECnh8d4As1Qgh0z5Gg3jRRIqijury0CL3ghu/edArpUYiYqQiDUQBIs4np3Q==}
@@ -1495,13 +1486,13 @@ snapshots:
 
   '@rsdoctor/client@1.6.5': {}
 
-  '@rsdoctor/core@1.6.5(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@rspack/core@2.2.8(@swc/helpers@0.5.23))':
+  '@rsdoctor/core@1.6.5(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@rspack/core@2.2.9(@swc/helpers@0.5.23))':
     dependencies:
       '@rsbuild/plugin-check-syntax': 1.6.1
-      '@rsdoctor/graph': 1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
-      '@rsdoctor/sdk': 1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
-      '@rsdoctor/types': 1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
-      '@rsdoctor/utils': 1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
+      '@rsdoctor/graph': 1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
+      '@rsdoctor/sdk': 1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
+      '@rsdoctor/types': 1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
+      '@rsdoctor/utils': 1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
       '@rspack/resolver': 0.2.8(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)
       browserslist-load-config: 1.0.3
       enhanced-resolve: 5.26.0
@@ -1520,10 +1511,10 @@ snapshots:
       - utf-8-validate
       - webpack
 
-  '@rsdoctor/graph@1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))':
+  '@rsdoctor/graph@1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))':
     dependencies:
-      '@rsdoctor/types': 1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
-      '@rsdoctor/utils': 1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
+      '@rsdoctor/types': 1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
+      '@rsdoctor/utils': 1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
       es-toolkit: 1.52.0
       path-browserify: 1.0.1
       source-map: 0.7.6
@@ -1531,15 +1522,15 @@ snapshots:
       - '@rspack/core'
       - webpack
 
-  '@rsdoctor/rspack-plugin@1.6.5(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@rspack/core@2.2.8(@swc/helpers@0.5.23))':
+  '@rsdoctor/rspack-plugin@1.6.5(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@rspack/core@2.2.9(@swc/helpers@0.5.23))':
     dependencies:
-      '@rsdoctor/core': 1.6.5(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@rspack/core@2.2.8(@swc/helpers@0.5.23))
-      '@rsdoctor/graph': 1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
-      '@rsdoctor/sdk': 1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
-      '@rsdoctor/types': 1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
-      '@rsdoctor/utils': 1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
+      '@rsdoctor/core': 1.6.5(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@rspack/core@2.2.9(@swc/helpers@0.5.23))
+      '@rsdoctor/graph': 1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
+      '@rsdoctor/sdk': 1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
+      '@rsdoctor/types': 1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
+      '@rsdoctor/utils': 1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
     optionalDependencies:
-      '@rspack/core': 2.2.8(@swc/helpers@0.5.23)
+      '@rspack/core': 2.2.9(@swc/helpers@0.5.23)
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -1549,12 +1540,12 @@ snapshots:
       - utf-8-validate
       - webpack
 
-  '@rsdoctor/sdk@1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))':
+  '@rsdoctor/sdk@1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))':
     dependencies:
       '@rsdoctor/client': 1.6.5
-      '@rsdoctor/graph': 1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
-      '@rsdoctor/types': 1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
-      '@rsdoctor/utils': 1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
+      '@rsdoctor/graph': 1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
+      '@rsdoctor/types': 1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
+      '@rsdoctor/utils': 1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
       launch-editor: 2.14.2
       safer-buffer: 2.1.2
       socket.io: 4.8.1
@@ -1566,19 +1557,19 @@ snapshots:
       - utf-8-validate
       - webpack
 
-  '@rsdoctor/types@1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))':
+  '@rsdoctor/types@1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))':
     dependencies:
       '@types/connect': 3.4.38
       '@types/estree': 1.0.5
       '@types/tapable': 2.3.0
       source-map: 0.7.6
     optionalDependencies:
-      '@rspack/core': 2.2.8(@swc/helpers@0.5.23)
+      '@rspack/core': 2.2.9(@swc/helpers@0.5.23)
 
-  '@rsdoctor/utils@1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))':
+  '@rsdoctor/utils@1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))':
     dependencies:
       '@babel/code-frame': 7.26.2
-      '@rsdoctor/types': 1.6.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
+      '@rsdoctor/types': 1.6.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
       '@types/estree': 1.0.5
       acorn: 8.19.0
       acorn-import-attributes: 1.9.5(acorn@8.19.0)
@@ -1596,89 +1587,89 @@ snapshots:
       - '@rspack/core'
       - webpack
 
-  '@rspack/binding-darwin-arm64@2.2.8':
+  '@rspack/binding-darwin-arm64@2.2.9':
     optional: true
 
-  '@rspack/binding-darwin-x64@2.2.8':
+  '@rspack/binding-darwin-x64@2.2.9':
     optional: true
 
-  '@rspack/binding-linux-arm64-gnu@2.2.8':
+  '@rspack/binding-linux-arm64-gnu@2.2.9':
     optional: true
 
-  '@rspack/binding-linux-arm64-musl@2.2.8':
+  '@rspack/binding-linux-arm64-musl@2.2.9':
     optional: true
 
-  '@rspack/binding-linux-ppc64-gnu@2.2.8':
+  '@rspack/binding-linux-ppc64-gnu@2.2.9':
     optional: true
 
-  '@rspack/binding-linux-riscv64-gnu@2.2.8':
+  '@rspack/binding-linux-riscv64-gnu@2.2.9':
     optional: true
 
-  '@rspack/binding-linux-riscv64-musl@2.2.8':
+  '@rspack/binding-linux-riscv64-musl@2.2.9':
     optional: true
 
-  '@rspack/binding-linux-s390x-gnu@2.2.8':
+  '@rspack/binding-linux-s390x-gnu@2.2.9':
     optional: true
 
-  '@rspack/binding-linux-x64-gnu@2.2.8':
+  '@rspack/binding-linux-x64-gnu@2.2.9':
     optional: true
 
-  '@rspack/binding-linux-x64-musl@2.2.8':
+  '@rspack/binding-linux-x64-musl@2.2.9':
     optional: true
 
-  '@rspack/binding-wasm32-wasi@2.2.8':
+  '@rspack/binding-wasm32-wasi@2.2.9':
     dependencies:
       '@emnapi/core': 1.11.3
       '@emnapi/runtime': 1.11.3
       '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)
     optional: true
 
-  '@rspack/binding-win32-arm64-msvc@2.2.8':
+  '@rspack/binding-win32-arm64-msvc@2.2.9':
     optional: true
 
-  '@rspack/binding-win32-ia32-msvc@2.2.8':
+  '@rspack/binding-win32-ia32-msvc@2.2.9':
     optional: true
 
-  '@rspack/binding-win32-x64-msvc@2.2.8':
+  '@rspack/binding-win32-x64-msvc@2.2.9':
     optional: true
 
-  '@rspack/binding@2.2.8':
+  '@rspack/binding@2.2.9':
     optionalDependencies:
-      '@rspack/binding-darwin-arm64': 2.2.8
-      '@rspack/binding-darwin-x64': 2.2.8
-      '@rspack/binding-linux-arm64-gnu': 2.2.8
-      '@rspack/binding-linux-arm64-musl': 2.2.8
-      '@rspack/binding-linux-ppc64-gnu': 2.2.8
-      '@rspack/binding-linux-riscv64-gnu': 2.2.8
-      '@rspack/binding-linux-riscv64-musl': 2.2.8
-      '@rspack/binding-linux-s390x-gnu': 2.2.8
-      '@rspack/binding-linux-x64-gnu': 2.2.8
-      '@rspack/binding-linux-x64-musl': 2.2.8
-      '@rspack/binding-wasm32-wasi': 2.2.8
-      '@rspack/binding-win32-arm64-msvc': 2.2.8
-      '@rspack/binding-win32-ia32-msvc': 2.2.8
-      '@rspack/binding-win32-x64-msvc': 2.2.8
+      '@rspack/binding-darwin-arm64': 2.2.9
+      '@rspack/binding-darwin-x64': 2.2.9
+      '@rspack/binding-linux-arm64-gnu': 2.2.9
+      '@rspack/binding-linux-arm64-musl': 2.2.9
+      '@rspack/binding-linux-ppc64-gnu': 2.2.9
+      '@rspack/binding-linux-riscv64-gnu': 2.2.9
+      '@rspack/binding-linux-riscv64-musl': 2.2.9
+      '@rspack/binding-linux-s390x-gnu': 2.2.9
+      '@rspack/binding-linux-x64-gnu': 2.2.9
+      '@rspack/binding-linux-x64-musl': 2.2.9
+      '@rspack/binding-wasm32-wasi': 2.2.9
+      '@rspack/binding-win32-arm64-msvc': 2.2.9
+      '@rspack/binding-win32-ia32-msvc': 2.2.9
+      '@rspack/binding-win32-x64-msvc': 2.2.9
 
-  '@rspack/cli@2.2.8(@rspack/core@2.2.8(@swc/helpers@0.5.23))(@rspack/dev-server@2.2.1(@rspack/core@2.2.8(@swc/helpers@0.5.23)))':
+  '@rspack/cli@2.2.9(@rspack/core@2.2.9(@swc/helpers@0.5.23))(@rspack/dev-server@2.2.1(@rspack/core@2.2.9(@swc/helpers@0.5.23)))':
     dependencies:
-      '@rspack/core': 2.2.8(@swc/helpers@0.5.23)
+      '@rspack/core': 2.2.9(@swc/helpers@0.5.23)
     optionalDependencies:
-      '@rspack/dev-server': 2.2.1(@rspack/core@2.2.8(@swc/helpers@0.5.23))
+      '@rspack/dev-server': 2.2.1(@rspack/core@2.2.9(@swc/helpers@0.5.23))
 
-  '@rspack/core@2.2.8(@swc/helpers@0.5.23)':
+  '@rspack/core@2.2.9(@swc/helpers@0.5.23)':
     dependencies:
-      '@rspack/binding': 2.2.8
+      '@rspack/binding': 2.2.9
     optionalDependencies:
       '@swc/helpers': 0.5.23
 
-  '@rspack/dev-middleware@2.0.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))':
+  '@rspack/dev-middleware@2.0.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))':
     optionalDependencies:
-      '@rspack/core': 2.2.8(@swc/helpers@0.5.23)
+      '@rspack/core': 2.2.9(@swc/helpers@0.5.23)
 
-  '@rspack/dev-server@2.2.1(@rspack/core@2.2.8(@swc/helpers@0.5.23))':
+  '@rspack/dev-server@2.2.1(@rspack/core@2.2.9(@swc/helpers@0.5.23))':
     dependencies:
-      '@rspack/core': 2.2.8(@swc/helpers@0.5.23)
-      '@rspack/dev-middleware': 2.0.5(@rspack/core@2.2.8(@swc/helpers@0.5.23))
+      '@rspack/core': 2.2.9(@swc/helpers@0.5.23)
+      '@rspack/dev-middleware': 2.0.5(@rspack/core@2.2.9(@swc/helpers@0.5.23))
 
   '@rspack/resolver-binding-darwin-arm64@0.2.8':
     optional: true
@@ -1811,23 +1802,23 @@ snapshots:
       postcss-selector-parser: 6.0.10
       tailwindcss: 4.3.3
 
-  '@tauri-apps/api@2.12.1': {}
+  '@tauri-apps/api@2.12.3': {}
 
-  '@tauri-apps/plugin-dialog@2.8.1':
+  '@tauri-apps/plugin-dialog@2.8.2':
     dependencies:
-      '@tauri-apps/api': 2.12.1
+      '@tauri-apps/api': 2.12.3
 
-  '@tauri-apps/plugin-log@2.10.0':
+  '@tauri-apps/plugin-log@2.10.1':
     dependencies:
-      '@tauri-apps/api': 2.12.1
+      '@tauri-apps/api': 2.12.3
 
-  '@tauri-apps/plugin-opener@2.7.0':
+  '@tauri-apps/plugin-opener@2.7.1':
     dependencies:
-      '@tauri-apps/api': 2.12.1
+      '@tauri-apps/api': 2.12.3
 
   '@tauri-apps/plugin-store@2.5.0':
     dependencies:
-      '@tauri-apps/api': 2.12.1
+      '@tauri-apps/api': 2.12.3
 
   '@tybys/wasm-util@0.10.4':
     dependencies:
@@ -1844,15 +1835,9 @@ snapshots:
 
   '@types/estree@1.0.5': {}
 
-  '@types/jquery@3.5.32':
-    dependencies:
-      '@types/sizzle': 2.3.10
-
   '@types/node@24.12.2':
     dependencies:
       undici-types: 7.16.0
-
-  '@types/sizzle@2.3.10': {}
 
   '@types/tapable@2.3.0':
     dependencies:
@@ -1924,10 +1909,6 @@ snapshots:
 
   '@typescript/typescript-win32-x64@7.0.2':
     optional: true
-
-  '@voguh/unichat-api@file:../unichat-api':
-    dependencies:
-      '@types/jquery': 3.5.32
 
   '@voguh/unichat-ui@0.2.1(@internationalized/date@3.12.4)(@tailwindcss/typography@0.5.20(tailwindcss@4.3.3))(preact@10.29.8)(tailwindcss@4.3.3)':
     dependencies:
@@ -2157,14 +2138,14 @@ snapshots:
   browserslist@4.29.3:
     dependencies:
       baseline-browser-mapping: 2.11.28
-      caniuse-lite: 1.0.30001815
-      electron-to-chromium: 1.5.453
+      caniuse-lite: 1.0.30001816
+      electron-to-chromium: 1.5.454
       node-releases: 2.0.58
       update-browserslist-db: 1.3.4(browserslist@4.29.3)
 
   callsites@3.1.0: {}
 
-  caniuse-lite@1.0.30001815: {}
+  caniuse-lite@1.0.30001816: {}
 
   cookie@0.7.2: {}
 
@@ -2233,7 +2214,7 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 5.0.3
 
-  electron-to-chromium@1.5.453: {}
+  electron-to-chromium@1.5.454: {}
 
   engine.io-parser@5.2.3: {}
 
@@ -2442,14 +2423,14 @@ snapshots:
 
   picocolors@1.1.1: {}
 
-  postcss-loader@8.2.1(@rspack/core@2.2.8(@swc/helpers@0.5.23))(postcss@8.5.30)(typescript@7.0.2):
+  postcss-loader@8.2.1(@rspack/core@2.2.9(@swc/helpers@0.5.23))(postcss@8.5.30)(typescript@7.0.2):
     dependencies:
       cosmiconfig: 9.0.2(typescript@7.0.2)
       jiti: 2.7.0
       postcss: 8.5.30
       semver: 7.8.5
     optionalDependencies:
-      '@rspack/core': 2.2.8(@swc/helpers@0.5.23)
+      '@rspack/core': 2.2.9(@swc/helpers@0.5.23)
     transitivePeerDependencies:
       - typescript
 
