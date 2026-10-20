@@ -10,8 +10,11 @@
 
 use std::path::PathBuf;
 
+use tauri::webview::PageLoadEvent;
+use tauri::webview::PageLoadPayload;
 use tauri::AppHandle;
 use tauri::WebviewUrl;
+use tauri::WebviewWindow;
 use tauri::WebviewWindowBuilder;
 use url::Url;
 
@@ -41,4 +44,17 @@ pub fn new(label: &str, url: &str) -> WebviewWindowBuilder<'static, tauri::Wry, 
         .additional_browser_args(WEBVIEW2_ADDITIONAL_BROWSER_ARGS);
 
     return window_builder;
+}
+
+pub fn show_on_page_finished(window: &WebviewWindow<tauri::Wry>, payload: &PageLoadPayload<'_>) -> bool {
+    if payload.event() != PageLoadEvent::Finished {
+        return false;
+    }
+
+    if let Err(err) = window.show() {
+        log::error!("Failed to show window '{}': {:#?}", window.label(), err);
+        return false;
+    }
+
+    return true;
 }

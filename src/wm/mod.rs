@@ -12,6 +12,7 @@ use tauri::Manager as _;
 
 use crate::utils::userstore::flush_userstore;
 
+pub mod custom_event_window;
 pub mod error_window;
 pub mod main_window;
 pub mod splash_window;
@@ -47,11 +48,11 @@ pub fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
             }
         }
     } else if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-        if label.ends_with("-chat") {
+        if label.ends_with("-chat") || label == custom_event_window::CUSTOM_EVENT_WINDOW_LABEL {
             api.prevent_close();
 
             if let Err(err) = window.hide() {
-                log::error!("Failed to hide chat window '{}': {:#?}", label, err);
+                log::error!("Failed to hide window '{}': {:#?}", label, err);
             }
         }
     }

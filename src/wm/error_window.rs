@@ -10,7 +10,10 @@
 
 use anyhow::Error;
 use serde_json::json;
+use tauri::webview::PageLoadPayload;
 use tauri::Manager as _;
+use tauri::WebviewWindow;
+use tauri::Wry;
 
 use crate::get_app_handle;
 use crate::wm::splash_window;
@@ -20,6 +23,12 @@ use crate::UNICHAT_NAME;
 use crate::UNICHAT_VERSION;
 
 pub const ERROR_WINDOW_LABEL: &str = "error";
+
+fn on_page_load(window: WebviewWindow<Wry>, payload: PageLoadPayload<'_>) {
+    if window::show_on_page_finished(&window, &payload) {
+        splash_window::close();
+    }
+}
 
 fn resolve_log_file() -> Option<String> {
     let log_dir = get_app_handle().path().app_log_dir().ok()?;
@@ -47,8 +56,9 @@ pub fn open(err: &Error) {
     let result = window::new(ERROR_WINDOW_LABEL, "error.html")
         .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION))
         .inner_size(640.0, 460.0)
-        .center().focused(true).resizable(false).maximizable(false)
+        .center().focused(true).resizable(false).maximizable(false).visible(false)
         .initialization_script(format!("globalThis.__UNICHAT_ERROR__ = {};", serialized_payload))
+        .on_page_load(on_page_load)
         .build();
 
     if let Err(err) = result {

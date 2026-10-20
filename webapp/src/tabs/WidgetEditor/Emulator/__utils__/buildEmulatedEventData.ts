@@ -8,6 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+import { rand, randBoolean, randChanceBoolean, randFloat, randHex, randNumber, randUserName } from "@ngneat/falso";
+
 import type {
     UniChatAuthorType,
     UniChatBadge,
@@ -15,38 +17,32 @@ import type {
     UniChatEvent,
     UniChatPlatform
 } from "@voguh/unichat-api/widgets/events";
-import { randomColorBySeed } from "unichat/utils/randomColorBySeed";
-import { seededRandom } from "unichat/utils/seededRandom";
 
-import { randomizeAuthorDisplayName } from "./randomizeAuthorDisplayName";
 import { randomizeBadgeAndAuthorType } from "./randomizeBadgeAndAuthorType";
 import { randomizeMessage } from "./randomizeMessage";
 import { randomizeSponsorData, randomizeSponsorTier } from "./randomizeSponsorData";
 
-const DUMMY_YOUTUBE_CHANNEL_ID = "UCBR8-60-B28hp2BmDPdntcQ";
-const DUMMY_TWITCH_CHANNEL_ID = "12826";
-const DUMMY_TWITCH_CHANNEL_NAME = "Twitch";
+export const DUMMY_YOUTUBE_CHANNEL_ID = "UCBR8-60-B28hp2BmDPdntcQ";
+export const DUMMY_TWITCH_CHANNEL_ID = "12826";
+export const DUMMY_TWITCH_CHANNEL_NAME = "Twitch";
 
-const DUMMY_YOUTUBE_PROFILE_PICTURE_URL =
-    "/proxy/aHR0cHM6Ly95dDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tLzNzNmV2cHFBaURVOXRRUjRzQzJzaUppcHBiSDJSV1ZQbndIZ3lsNFYwdGgyaXVRejBWRFFaYlVoUUJHbXN4TFlvLW1qRzZUcVpRPXMxNjAtYy1rLWMweDAwZmZmZmZmLW5vLXJq?referer=https://www.youtube.com/"; // prettier-ignore
-const DUMMY_TWITCH_PROFILE_PICTURE_URL = "https://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_70x70.png";
+export const DUMMY_YOUTUBE_PROFILE_PICTURE_URL = "/proxy/aHR0cHM6Ly95dDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tLzNzNmV2cHFBaURVOXRRUjRzQzJzaUppcHBiSDJSV1ZQbndIZ3lsNFYwdGgyaXVRejBWRFFaYlVoUUJHbXN4TFlvLW1qRzZUcVpRPXMxNjAtYy1rLWMweDAwZmZmZmZmLW5vLXJq?referer=https://www.youtube.com/"; // prettier-ignore
+export const DUMMY_TWITCH_PROFILE_PICTURE_URL = "https://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_70x70.png";
 
-const DUMMY_TWITCH_REWARD_ICON_URL = "https://static-cdn.jtvnw.net/custom-reward-images/tree-4.png";
+export const DUMMY_TWITCH_REWARD_ICON_URL = "https://static-cdn.jtvnw.net/custom-reward-images/tree-4.png";
 const DUMMY_YOUTUBE_GIFT_ASSET_URL = "https://www.gstatic.com/youtube/img/pdg/gift/assets/pastel.webp=w320-h320";
 
-const UNICHAT_FLAG_EMULATOR_GENERATED = "unichat:emulator_generated";
-const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_TIER = "unichat:youtube_superchat_tier";
+export const UNICHAT_FLAG_EMULATOR_GENERATED = "unichat:emulator_generated";
+export const UNICHAT_FLAG_YOUTUBE_SUPERCHAT_TIER = "unichat:youtube_superchat_tier";
 
 export type EmulatedEventType = Exclude<
     UniChatEvent["type"],
     "unichat:remove_message" | "unichat:remove_author" | "unichat:userstore_update" | "unichat:custom"
 >;
 
-type EmulatedEventData<K extends EmulatedEventType> = Extract<UniChatEvent, { type: K }>["data"];
+export type EmulatedEventData<K extends EmulatedEventType> = Extract<UniChatEvent, { type: K }>["data"];
 
 interface EmulatorContext {
-    rng: () => number;
-
     requestedPlatform: UniChatPlatform | null;
     platform: UniChatPlatform;
     channelId: string;
@@ -73,7 +69,7 @@ function proxyYouTubeUrl(url: string): string {
     return `/proxy/${encoded}?referer=https://www.youtube.com/`;
 }
 
-function fakeSuperChatTier(value: number): string {
+export function fakeSuperChatTier(value: number): string {
     if (value >= 100) {
         return "7";
     } else if (value >= 50) {
@@ -137,14 +133,14 @@ const EMULATED_EVENT_BUILDERS: {
     }),
 
     "unichat:donate": (ctx) => {
-        const withMessage = ctx.rng() < 0.6;
-        const purchaseValue = Number((ctx.rng() * 500 + 1).toFixed(2));
+        const withMessage = randChanceBoolean({ chanceTrue: 0.6 });
+        const purchaseValue = randFloat({ min: 1, max: 501, fraction: 2 });
 
         let value = purchaseValue;
         let originalValue: number | null = null;
         let originalCurrency: string | null = null;
 
-        if (ctx.rng() < 0.5) {
+        if (randBoolean()) {
             originalValue = purchaseValue;
             originalCurrency = "R$";
             value = Number((purchaseValue / 5.4).toFixed(2));
@@ -168,8 +164,8 @@ const EMULATED_EVENT_BUILDERS: {
 
     "unichat:sponsor": (ctx) => {
         const [tier, months] = randomizeSponsorData(ctx.platform);
-        const isMilestone = ctx.platform === "twitch" || ctx.rng() < 0.5;
-        const withMessage = isMilestone && ctx.rng() < 0.5;
+        const isMilestone = ctx.platform === "twitch" || randBoolean();
+        const withMessage = isMilestone && randBoolean();
 
         return {
             ...buildCommonData(ctx),
@@ -187,7 +183,7 @@ const EMULATED_EVENT_BUILDERS: {
         ...buildCommonData(ctx),
 
         tier: ctx.platform === "twitch" ? randomizeSponsorTier(ctx.platform) : null,
-        count: Math.floor(ctx.rng() * 50 + 1),
+        count: randNumber({ min: 1, max: 50 }),
 
         messageId: crypto.randomUUID()
     }),
@@ -205,12 +201,12 @@ const EMULATED_EVENT_BUILDERS: {
             authorType: isYouTube ? "VIEWER" : ctx.authorType,
 
             messageId: actionId,
-            viewerCount: isYouTube ? null : Math.floor(ctx.rng() * 50 + 1)
+            viewerCount: isYouTube ? null : randNumber({ min: 1, max: 50 })
         };
     },
 
     "unichat:redemption": (ctx) => {
-        const withMessage = ctx.rng() < 0.7;
+        const withMessage = randChanceBoolean({ chanceTrue: 0.7 });
 
         return {
             ...buildCommonData(ctx),
@@ -221,9 +217,9 @@ const EMULATED_EVENT_BUILDERS: {
 
             rewardId: crypto.randomUUID(),
             rewardTitle: "Sample Reward",
-            rewardDescription: ctx.rng() < 0.5 ? "Sample reward prompt" : null,
-            rewardCost: Math.floor(ctx.rng() * 10000 + 100),
-            rewardIconUrl: ctx.rng() < 0.8 ? DUMMY_TWITCH_REWARD_ICON_URL : null,
+            rewardDescription: randBoolean() ? "Sample reward prompt" : null,
+            rewardCost: randNumber({ min: 100, max: 10099 }),
+            rewardIconUrl: randChanceBoolean({ chanceTrue: 0.8 }) ? DUMMY_TWITCH_REWARD_ICON_URL : null,
 
             messageId: crypto.randomUUID(),
             messageText: withMessage ? ctx.messageText : null,
@@ -236,7 +232,7 @@ const EMULATED_EVENT_BUILDERS: {
             return {
                 ...buildCommonData(ctx),
 
-                value: Math.floor(ctx.rng() * 10000) + 100,
+                value: randNumber({ min: 100, max: 10099 }),
                 currency: "Bits",
 
                 cheerId: null,
@@ -263,7 +259,7 @@ const EMULATED_EVENT_BUILDERS: {
 
             cheerId: giftId,
             cheerTitle: fakeGiftTitle(giftId),
-            cheerDescription: ctx.rng() < 0.5 ? "Sample Gift" : null,
+            cheerDescription: randBoolean() ? "Sample Gift" : null,
             cheerIconUrl: proxyYouTubeUrl(DUMMY_YOUTUBE_GIFT_ASSET_URL),
 
             messageId: crypto.randomUUID(),
@@ -277,16 +273,13 @@ export async function buildEmulatedEventData<K extends EmulatedEventType>(
     eventType: K,
     requirePlatform?: UniChatPlatform
 ): Promise<EmulatedEventData<K>> {
-    const userDisplayName = randomizeAuthorDisplayName();
-    const seededRng = seededRandom(userDisplayName);
+    const userDisplayName = randUserName();
 
-    const platform = requirePlatform ?? (seededRng() < 0.5 ? "youtube" : "twitch");
-    const [authorBadges, authorType] = randomizeBadgeAndAuthorType(platform, seededRng);
-    const [messageText, emotes] = await randomizeMessage(() => Math.random());
+    const platform = requirePlatform ?? rand(["youtube", "twitch"]);
+    const [authorBadges, authorType] = randomizeBadgeAndAuthorType(platform);
+    const [messageText, emotes] = await randomizeMessage();
 
     const ctx: EmulatorContext = {
-        rng: Math.random,
-
         requestedPlatform: requirePlatform ?? null,
         platform: platform,
         channelId: platform === "youtube" ? DUMMY_YOUTUBE_CHANNEL_ID : DUMMY_TWITCH_CHANNEL_ID,
@@ -296,7 +289,7 @@ export async function buildEmulatedEventData<K extends EmulatedEventType>(
         authorId: crypto.randomUUID(),
         authorUsername: platform === "youtube" ? null : userDisplayName.toLowerCase(),
         authorDisplayName: userDisplayName,
-        authorDisplayColor: randomColorBySeed(userDisplayName),
+        authorDisplayColor: randHex().toUpperCase(),
         authorProfilePictureUrl: platform === "twitch" ? null : DUMMY_YOUTUBE_PROFILE_PICTURE_URL,
         authorBadges: authorBadges,
         authorType: authorType,

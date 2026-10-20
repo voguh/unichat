@@ -8,138 +8,17 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+import { rand, randAdjective, randNoun, randNumber, randVerb } from "@ngneat/falso";
+
 import type { UniChatEmote } from "@voguh/unichat-api/widgets/events";
 
-const nouns = [
-    "cat",
-    "dog",
-    "house",
-    "car",
-    "tree",
-    "river",
-    "sun",
-    "moon",
-    "book",
-    "computer",
-    "person",
-    "friend",
-    "city",
-    "sea",
-    "mountain",
-    "flower",
-    "food",
-    "drink",
-    "time",
-    "music",
-    "bird",
-    "fish",
-    "star",
-    "cloud",
-    "road",
-    "bridge",
-    "garden",
-    "park",
-    "school",
-    "office",
-    "phone",
-    "table",
-    "chair",
-    "window",
-    "door",
-    "light",
-    "shadow",
-    "dream",
-    "idea",
-    "story"
-];
-const verbs = [
-    "runs",
-    "jumps",
-    "eats",
-    "drinks",
-    "sleeps",
-    "reads",
-    "writes",
-    "walks",
-    "sings",
-    "dances",
-    "plays",
-    "works",
-    "studies",
-    "travels",
-    "talks",
-    "thinks",
-    "feels",
-    "sees",
-    "hears",
-    "touches",
-    "loves",
-    "hates",
-    "likes",
-    "dislikes",
-    "wants",
-    "needs",
-    "has",
-    "gives",
-    "takes",
-    "makes"
-];
-const adjectives = [
-    "black",
-    "white",
-    "big",
-    "small",
-    "fast",
-    "slow",
-    "beautiful",
-    "ugly",
-    "happy",
-    "sad",
-    "hot",
-    "cold",
-    "tall",
-    "short",
-    "strong",
-    "weak",
-    "new",
-    "old",
-    "clean",
-    "dirty",
-    "red",
-    "blue",
-    "green",
-    "yellow",
-    "bright",
-    "dark",
-    "soft",
-    "hard",
-    "sweet",
-    "sour"
-];
-const adverbs = [
-    "quickly",
-    "slowly",
-    "happily",
-    "sadly",
-    "well",
-    "badly",
-    "always",
-    "never",
-    "here",
-    "there",
-    "today",
-    "yesterday",
-    "tomorrow",
-    "now",
-    "later",
-    "before"
-];
 const pronouns = ["I", "You", "He", "She", "We", "They"];
-const connectors = ["and", "but", "or", "because", "so", "although", "while", "if", "then", "yet"];
+const adverbs = ["quickly", "slowly", "happily", "sadly", "well", "badly", "always", "never", "today", "now", "later"];
+const conjunctions = ["and", "but", "or", "because", "so", "although", "while", "if", "then", "yet"];
 
 const availableEmotes: UniChatEmote[] = [];
 
-export async function randomizeMessage(rng: () => number): Promise<[string, UniChatEmote[]]> {
+export async function randomizeMessage(): Promise<[string, UniChatEmote[]]> {
     if (availableEmotes.length === 0) {
         const data = await fetch("https://api.betterttv.net/3/cached/emotes/global");
         const json = await data.json();
@@ -153,77 +32,58 @@ export async function randomizeMessage(rng: () => number): Promise<[string, UniC
         }
     }
 
-    const pRng = <T>(arr: T[]): T => arr[Math.floor(rng() * arr.length)];
-
-    const pickRandomEmotes = (): UniChatEmote[] => {
-        const count = Math.floor(rng() * 4 + 1);
-        const selected = [];
-        for (let i = 0; i < count; i++) {
-            selected.push(pRng(availableEmotes));
-        }
-
-        return selected;
-    };
+    const pronoun = (): string => rand(pronouns);
+    const adverb = (): string => rand(adverbs);
+    const conjunction = (): string => rand(conjunctions);
+    const noun = (): string => randNoun().toLowerCase();
+    const verb = (): string => randVerb().toLowerCase();
+    const adjective = (): string => randAdjective().toLowerCase();
+    const emote = (): UniChatEmote => rand(availableEmotes);
+    const emotesList = (): UniChatEmote[] => Array.from({ length: randNumber({ min: 1, max: 4 }) }, emote);
 
     const structures: Array<() => [string, UniChatEmote[]]> = [
+        () => [`${pronoun()} ${verb()} ${adjective()} ${noun()}.`, []],
+        () => [`The ${adjective()} ${noun()} ${verb()} ${adverb()}.`, []],
         () => {
-            const emotes: UniChatEmote[] = [];
+            const e = emote();
 
-            return [`${pRng(pronouns)} ${pRng(verbs)} ${pRng(adjectives)} ${pRng(nouns)}.`, emotes];
+            return [`${pronoun()} ${verb()} ${noun()} ${e.code} .`, [e]];
         },
         () => {
-            const emotes: UniChatEmote[] = [];
+            const e = emote();
 
-            return [`The ${pRng(adjectives)} ${pRng(nouns)} ${pRng(verbs)} ${pRng(adverbs)}.`, emotes];
+            return [`The ${adjective()} ${noun()} ${e.code} ${verb()} ${adverb()}.`, [e]];
         },
         () => {
-            const emote = pRng(availableEmotes);
-
-            return [`${pRng(pronouns)} ${pRng(verbs)} ${pRng(nouns)} ${emote.code} .`, [emote]];
-        },
-        () => {
-            const emote = pRng(availableEmotes);
-
-            return [`The ${pRng(adjectives)} ${pRng(nouns)} ${emote.code} ${pRng(verbs)} ${pRng(adverbs)}.`, [emote]];
-        },
-        () => {
-            const emote1 = pRng(availableEmotes);
-            const emote2 = pRng(availableEmotes);
+            const e1 = emote();
+            const e2 = emote();
 
             return [
-                `${pRng(pronouns)} ${pRng(verbs)} ${pRng(nouns)} ${pRng(connectors)} ${pRng(pronouns)} ${emote1.code} ${pRng(verbs)} ${emote2.code} .`,
-                [emote1, emote2]
+                `${pronoun()} ${verb()} ${noun()} ${conjunction()} ${pronoun()} ${e1.code} ${verb()} ${e2.code} .`,
+                [e1, e2]
             ];
         },
         () => {
-            const emote = pRng(availableEmotes);
+            const e = emote();
 
-            return [`Do ${pRng(pronouns)} ${pRng(verbs)} ${pRng(nouns)} ${emote.code} ?`, [emote]];
+            return [`Do ${pronoun()} ${verb()} ${noun()} ${e.code} ?`, [e]];
         },
         () => {
-            const emote = pRng(availableEmotes);
+            const e = emote();
 
-            return [`Wow, the ${pRng(adjectives)} ${pRng(nouns)} ${emote.code} !`, [emote]];
+            return [`Wow, the ${adjective()} ${noun()} ${e.code} !`, [e]];
         },
         () => {
-            const emotes = pickRandomEmotes();
-            const msg = emotes.map((e) => e.code).join(" ");
+            const emotes = emotesList();
 
-            return [msg, emotes];
+            return [emotes.map((e) => e.code).join(" "), emotes];
         },
         () => {
-            const emotes = pickRandomEmotes();
-            let msg = `${pRng(pronouns)} ${pRng(verbs)} ${pRng(nouns)}`;
-            for (const emote of emotes) {
-                msg += ` ${emote.code}`;
-            }
-            msg += " .";
+            const emotes = emotesList();
 
-            return [msg, emotes];
+            return [`${pronoun()} ${verb()} ${noun()} ${emotes.map((e) => e.code).join(" ")} .`, emotes];
         }
     ];
 
-    const chosenStructure = structures[Math.floor(rng() * structures.length)];
-
-    return chosenStructure();
+    return rand(structures)();
 }

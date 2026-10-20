@@ -39,10 +39,13 @@ class OrphanFilesPlugin {
 /** @type {import("@rspack/core").Configuration} */
 module.exports = {
     mode: isDev ? "development" : "production",
-    devtool: process.env.BUNDLE_ANALYZE ? "source-map" : false,
+    devtool: process.env.RSDOCTOR ? "source-map" : false,
     context: __dirname,
 
-    entry: { index: path.resolve(__dirname, "src/main.tsx") },
+    entry: {
+        index: path.resolve(__dirname, "src/main.tsx"),
+        customEvent: path.resolve(__dirname, "src/customEvent.tsx")
+    },
     output: {
         path: path.resolve(__dirname, "dist"),
         publicPath: "/",
@@ -110,7 +113,7 @@ module.exports = {
                 vendor: {
                     test: /[\\/]node_modules[\\/]/,
                     name: "vendor",
-                    chunks: "initial",
+                    chunks: (chunk) => chunk.name === "index",
                     enforce: true
                 }
             }
@@ -129,18 +132,28 @@ module.exports = {
     },
 
     plugins: [
-        process.env.BUNDLE_ANALYZE === "true" && new OrphanFilesPlugin(),
-        process.env.BUNDLE_ANALYZE === "true" && new RsdoctorRspackPlugin(),
-        process.env.BUNDLE_ANALYZE !== "true" &&
-            new SourceMapDevToolPlugin({ filename: "[file].map", exclude: /vendor/ }),
+        process.env.RSDOCTOR === "true" && new OrphanFilesPlugin(),
+        process.env.RSDOCTOR === "true" &&
+            new RsdoctorRspackPlugin({ output: { mode: "brief", options: { type: ["json"] } } }),
+        process.env.RSDOCTOR !== "true" && new SourceMapDevToolPlugin({ filename: "[file].map", exclude: /vendor/ }),
         new CopyRspackPlugin({
             patterns: [
                 {
                     from: path.resolve(__dirname, "public"),
-                    globOptions: { ignore: ["**/index.html"] }
+                    globOptions: { ignore: ["**/index.html", "**/custom-event.html"] }
                 }
             ]
         }),
-        new HtmlRspackPlugin({ template: path.resolve(__dirname, "public/index.html"), minify: !isDev })
+        new HtmlRspackPlugin({
+            template: path.resolve(__dirname, "public/index.html"),
+            chunks: ["index"],
+            minify: !isDev
+        }),
+        new HtmlRspackPlugin({
+            template: path.resolve(__dirname, "public/custom-event.html"),
+            filename: "custom-event.html",
+            chunks: ["customEvent"],
+            minify: !isDev
+        })
     ].filter(Boolean)
 };

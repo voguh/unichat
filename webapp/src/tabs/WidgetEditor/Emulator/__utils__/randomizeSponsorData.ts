@@ -8,36 +8,17 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+import { rand, randNumber } from "@ngneat/falso";
+
 import type { UniChatPlatform } from "@voguh/unichat-api/widgets/events";
 
-export function randomizeSponsorTier(plt: UniChatPlatform): string {
-    let sponsorTier: string;
-    if (plt === "twitch") {
-        const tierRoll = Math.random();
-        if (tierRoll < 0.33) {
-            sponsorTier = "1000";
-        } else if (tierRoll < 0.66) {
-            sponsorTier = "2000";
-        } else {
-            sponsorTier = "3000";
-        }
-    } else {
-        const tierRoll = Math.random();
-        if (tierRoll < 0.33) {
-            sponsorTier = "Tier 1";
-        } else if (tierRoll < 0.66) {
-            sponsorTier = "Tier 2";
-        } else {
-            sponsorTier = "Tier 3";
-        }
-    }
+export const TWITCH_SPONSOR_TIERS = ["1000", "2000", "3000"];
+const YOUTUBE_SPONSOR_TIERS = ["Tier 1", "Tier 2", "Tier 3"];
 
-    return sponsorTier;
+export function randomizeSponsorTier(plt: UniChatPlatform): string {
+    return rand(plt === "twitch" ? TWITCH_SPONSOR_TIERS : YOUTUBE_SPONSOR_TIERS);
 }
 
 export function randomizeSponsorData(plt: UniChatPlatform): [string, number] {
-    const sponsorTier = randomizeSponsorTier(plt);
-    const sponsorMonths = Math.floor(Math.random() * 12) + 1;
-
-    return [sponsorTier, sponsorMonths];
+    return [randomizeSponsorTier(plt), randNumber({ min: 1, max: 12 })];
 }

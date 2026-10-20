@@ -8,40 +8,56 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+import { randBoolean, randFloat } from "@ngneat/falso";
+
 import type { UniChatAuthorType, UniChatBadge, UniChatPlatform } from "@voguh/unichat-api/widgets/events";
 
-export function randomizeBadgeAndAuthorType(
-    plt: UniChatPlatform,
-    rng: () => number
-): [UniChatBadge[], UniChatAuthorType] {
+const TWITCH_MODERATOR_BADGE: UniChatBadge = {
+    code: "moderator/1",
+    url: "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3"
+};
+
+const TWITCH_SUBSCRIBER_BADGE: UniChatBadge = {
+    code: "subscriber/6",
+    url: "https://static-cdn.jtvnw.net/badges/v1/ed51a614-2c44-4a60-80b6-62908436b43a/3"
+};
+
+const YOUTUBE_MODERATOR_BADGE: UniChatBadge = {
+    code: "moderator",
+    url: "/assets/youtube/YouTubeModeratorV2.png"
+};
+
+const YOUTUBE_SPONSOR_BADGE: UniChatBadge = {
+    code: "sponsor",
+    url: "/proxy/aHR0cHM6Ly95dDMuZ2dwaHQuY29tL2dBcTdqRGVrdkc1ZV9Bei1WbktoUy1TeS1yWkRneUhJZEdRQWhrczJpV2xON3JNa2lUbHhuVzV6dE1XOTZ5bnlFSUcxaE1lNjdMTExDUDZxPXMxNi1jLWs=?referer=https://www.youtube.com/" // prettier-ignore
+};
+
+export function badgesForAuthorType(plt: UniChatPlatform, authorType: UniChatAuthorType): UniChatBadge[] {
+    if (authorType === "MODERATOR") {
+        return plt === "twitch" ? [TWITCH_MODERATOR_BADGE] : plt === "youtube" ? [YOUTUBE_MODERATOR_BADGE] : [];
+    } else if (authorType === "SPONSOR") {
+        return plt === "twitch" ? [TWITCH_SUBSCRIBER_BADGE] : plt === "youtube" ? [YOUTUBE_SPONSOR_BADGE] : [];
+    }
+
+    return [];
+}
+
+export function randomizeBadgeAndAuthorType(plt: UniChatPlatform): [UniChatBadge[], UniChatAuthorType] {
     let authorType: UniChatAuthorType = "VIEWER";
     const badges: UniChatBadge[] = [];
 
-    if (plt === "twitch" && rng() < 0.5) {
+    if (plt === "twitch" && randBoolean()) {
         authorType = "MODERATOR";
-        badges.push({
-            code: "moderator/1",
-            url: "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3"
-        });
+        badges.push(TWITCH_MODERATOR_BADGE);
     }
 
-    if (rng() < 0.5) {
+    if (randBoolean()) {
         authorType = "SPONSOR";
-        if (plt === "youtube") {
-            badges.push({
-                code: "sponsor",
-                url: "/proxy/aHR0cHM6Ly95dDMuZ2dwaHQuY29tL2dBcTdqRGVrdkc1ZV9Bei1WbktoUy1TeS1yWkRneUhJZEdRQWhrczJpV2xON3JNa2lUbHhuVzV6dE1XOTZ5bnlFSUcxaE1lNjdMTExDUDZxPXMxNi1jLWs=?referer=https://www.youtube.com/" // prettier-ignore
-            });
-        } else {
-            badges.push({
-                code: "subscriber/6",
-                url: "https://static-cdn.jtvnw.net/badges/v1/ed51a614-2c44-4a60-80b6-62908436b43a/3"
-            });
-        }
+        badges.push(plt === "youtube" ? YOUTUBE_SPONSOR_BADGE : TWITCH_SUBSCRIBER_BADGE);
     }
 
     if (plt === "twitch") {
-        const roll = rng();
+        const roll = randFloat({ min: 0, max: 1 });
 
         if (roll < 0.5) {
             badges.push({
@@ -56,16 +72,13 @@ export function randomizeBadgeAndAuthorType(
         }
     }
 
-    if (plt === "youtube" && rng() < 0.5) {
+    if (plt === "youtube" && randBoolean()) {
         authorType = "MODERATOR";
-        badges.push({
-            code: "moderator",
-            url: "/assets/youtube/YouTubeModeratorV2.png"
-        });
+        badges.push(YOUTUBE_MODERATOR_BADGE);
     }
 
     if (plt === "youtube") {
-        const roll = rng();
+        const roll = randFloat({ min: 0, max: 1 });
 
         if (roll < 0.5) {
             badges.push({

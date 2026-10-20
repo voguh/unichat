@@ -69,6 +69,14 @@ export class CommandService {
         await invoke("dispatch_emulated_event", { event });
     }
 
+    public async openCustomEventWindow(): Promise<void> {
+        await invoke("open_custom_event_window");
+    }
+
+    public async closeCustomEventWindow(): Promise<void> {
+        await invoke("close_custom_event_window");
+    }
+
     /* ========================================================================================== */
 
     public async getGalleryItems(): Promise<GalleryItem[]> {

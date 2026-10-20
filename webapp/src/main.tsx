@@ -8,10 +8,10 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+import "unichat/styles/global.css";
 import { render } from "preact";
 
 import { App } from "unichat/App";
-import "unichat/styles/global.css";
 
 if (!__IS_DEV__) {
     window.addEventListener("contextmenu", async (event) => {

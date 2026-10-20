@@ -9,7 +9,9 @@
  ******************************************************************************/
 
 import type * as PReact from "preact";
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
+
+import * as eventService from "@tauri-apps/api/event";
 
 import type { UniChatEvent, UniChatPlatform } from "@voguh/unichat-api/widgets/events";
 import { Select } from "@voguh/unichat-ui/components/forms/Select";
@@ -20,6 +22,7 @@ import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
 import { commandService } from "unichat/services/commandService";
 
 import { buildEmulatedEventData, type EmulatedEventType } from "./__utils__/buildEmulatedEventData";
+import { CUSTOM_EVENT_EMIT_EVENT } from "./CustomEventEditor";
 import styles from "./styles.module.css";
 
 const opModeOptions: SelectItem[] = [
@@ -52,6 +55,28 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
             await commandService.dispatchEmulatedEvent({ type: eventType, data } as UniChatEvent);
         }
     }
+
+    useEffect(() => {
+        commandService.closeCustomEventWindow();
+
+        return () => {
+            commandService.closeCustomEventWindow();
+        };
+    }, []);
+
+    useEffect(() => {
+        const unListenerPromise = eventService.listen<UniChatEvent>(CUSTOM_EVENT_EMIT_EVENT, async ({ payload }) => {
+            if (emulatorOnly) {
+                dispatchEvent(payload);
+            } else {
+                await commandService.dispatchEmulatedEvent(payload);
+            }
+        });
+
+        return () => {
+            unListenerPromise.then((unlisten) => unlisten());
+        };
+    }, [emulatorOnly, dispatchEvent]);
 
     function buildTooltipContent(): PReact.ComponentChildren {
         return (
@@ -114,6 +139,10 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
                     <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:cheer")}>
                         <i className="fas fa-gem" />
                         Cheer
+                    </Button>
+                    <Button variant="default" onClick={() => commandService.openCustomEventWindow()}>
+                        <i className="fas fa-sliders-h" />
+                        Custom event
                     </Button>
                 </div>
             </div>

@@ -66,8 +66,6 @@ fn start_startup() {
             log::error!("An error occurred on startup process: {:#?}", err);
             wm::error_window::open(&err);
         }
-
-        wm::splash_window::close();
     });
 }
 
@@ -242,7 +240,9 @@ fn main() {
             commands::get_system_hosts,
             commands::get_third_party_licenses,
             commands::currency::get_currencies,
+            commands::emulator::close_custom_event_window,
             commands::emulator::dispatch_emulated_event,
+            commands::emulator::open_custom_event_window,
             commands::gallery::get_gallery_items,
             commands::gallery::upload_gallery_items,
             commands::plugins::get_plugins,
