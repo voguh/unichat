@@ -33,6 +33,7 @@ pub async fn start() -> Result<(), Error> {
 
     let app = Router::new()
         .route("/assets/{*path}", get(routes::assets))
+        .route("/fontawesome/{*path}", get(routes::fontawesome))
         .route("/gallery/{path}", get(routes::gallery))
         .route("/proxy/{*path}", get(routes::proxy))
         .route("/rpc", post(routes::rpc))
@@ -40,7 +41,8 @@ pub async fn start() -> Result<(), Error> {
         .route("/widget/{name}/widget.css", get(routes::get_widget_css))
         .route("/widget/{name}/widget.js", get(routes::get_widget_js))
         .route("/widget/{name}/assets/{*path}", get(routes::get_widget_assets))
-        .route("/ws", get(routes::ws));
+        .route("/ws", get(routes::ws))
+        .fallback(routes::not_found);
 
     let listener = TcpListener::bind(host).await?;
     axum::serve(listener, app).await?;
