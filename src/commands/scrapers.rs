@@ -19,14 +19,14 @@ use crate::scraper::utils::is_local_url;
 use crate::utils::settings;
 
 #[tauri::command]
-pub fn get_scrapers<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<serde_json::Value>, String> {
+pub async fn get_scrapers<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<serde_json::Value>, String> {
     let scrapers = scraper::get_scrapers().map_err(|e| format!("An error occurred on get scrapers: {:#?}", e))?;
     let serialized_scrapers: Vec<serde_json::Value> = scrapers.iter().map(|s| serialize_scraper(s)).collect();
     return Ok(serialized_scrapers);
 }
 
 #[tauri::command]
-pub fn get_scraper<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) -> Result<Option<serde_json::Value>, String> {
+pub async fn get_scraper<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) -> Result<Option<serde_json::Value>, String> {
     let scraper = scraper::get_scraper(scraper_id).map_err(|e| format!("An error occurred on get scraper: {:#?}", e))?;
     if let Some(scraper) = scraper {
         let serialized_scraper = serialize_scraper(&scraper);
@@ -37,7 +37,7 @@ pub fn get_scraper<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) -> Result<O
 }
 
 #[tauri::command]
-pub fn validate_scraper_url<R: Runtime>(_app: AppHandle<R>, scraper_id: &str, url: String) -> Result<String, String> {
+pub async fn validate_scraper_url<R: Runtime>(_app: AppHandle<R>, scraper_id: &str, url: String) -> Result<String, String> {
     let scraper = scraper::get_scraper(scraper_id).map_err(|e| format!("An error occurred on get scraper: {:#?}", e))?;
     if let Some(scraper) = &scraper {
         return scraper.validate_url(url).map_err(|e| format!("An error occurred on validate scraper URL: {:#?}", e))
@@ -49,7 +49,7 @@ pub fn validate_scraper_url<R: Runtime>(_app: AppHandle<R>, scraper_id: &str, ur
 /* ============================================================================================== */
 
 #[tauri::command]
-pub fn get_scraper_stored_url<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) -> Result<Option<String>, String> {
+pub async fn get_scraper_stored_url<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) -> Result<Option<String>, String> {
     if !scraper_id.ends_with("-chat") {
         return Err(format!("Scraper webview '{}' not recognized", scraper_id));
     }
@@ -59,7 +59,7 @@ pub fn get_scraper_stored_url<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) 
 }
 
 #[tauri::command]
-pub fn get_scraper_webview_url<R: Runtime>(app: AppHandle<R>, scraper_id: &str) -> Result<String, String> {
+pub async fn get_scraper_webview_url<R: Runtime>(app: AppHandle<R>, scraper_id: &str) -> Result<String, String> {
     if !scraper_id.ends_with("-chat") {
         return Err(format!("Webview window '{}' not recognized", scraper_id));
     }
@@ -71,7 +71,7 @@ pub fn get_scraper_webview_url<R: Runtime>(app: AppHandle<R>, scraper_id: &str) 
 }
 
 #[tauri::command]
-pub fn set_scraper_webview_url<R: Runtime>(app: AppHandle<R>, scraper_id: &str, url: &str) -> Result<(), String> {
+pub async fn set_scraper_webview_url<R: Runtime>(app: AppHandle<R>, scraper_id: &str, url: &str) -> Result<(), String> {
     if !scraper_id.ends_with("-chat") {
         return Err(format!("Scraper webview '{}' not recognized", scraper_id));
     }
@@ -93,7 +93,7 @@ pub fn set_scraper_webview_url<R: Runtime>(app: AppHandle<R>, scraper_id: &str, 
 }
 
 #[tauri::command]
-pub fn toggle_scraper_webview<R: Runtime>(app: AppHandle<R>, scraper_id: &str) -> Result<(), String> {
+pub async fn toggle_scraper_webview<R: Runtime>(app: AppHandle<R>, scraper_id: &str) -> Result<(), String> {
     if !scraper_id.ends_with("-chat") {
         return Err(format!("Scraper webview '{}' not recognized", scraper_id));
     }
