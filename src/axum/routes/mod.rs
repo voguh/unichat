@@ -9,14 +9,18 @@
  ******************************************************************************/
 
 mod assets;
+mod fontawesome;
 mod gallery;
+mod not_found;
 mod proxy;
 mod rpc;
 mod widget;
 mod ws;
 
 pub use assets::assets;
+pub use fontawesome::fontawesome;
 pub use gallery::gallery;
+pub use not_found::not_found;
 pub use proxy::proxy;
 pub use rpc::rpc;
 pub use widget::get_widget_assets;
