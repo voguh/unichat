@@ -1,0 +1,9 @@
+{
+    "include": ["./**/*.js", "../unichat-api/widgets"],
+    "compilerOptions": {
+        "checkJs": true,
+        "paths": {
+            "@voguh/unichat-api/*": ["../unichat-api/*"]
+        }
+    }
+}
