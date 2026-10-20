@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { UniChatWidget } from "unichat/types";
+import type { UniChatWidget } from "unichat/types";
 
 import { WidgetSourceType } from "./constants";
 

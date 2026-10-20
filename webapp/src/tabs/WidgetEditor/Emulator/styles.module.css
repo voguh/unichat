@@ -1,0 +1,87 @@
+/*!******************************************************************************
+ * Copyright (c) 2026 Voguh
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ******************************************************************************/
+
+.container {
+    @apply relative h-full p-4;
+}
+
+.header {
+    @apply text-lg font-bold;
+    @apply w-full text-center;
+}
+
+.operationMode {
+    @apply flex justify-center items-end gap-2 mt-2;
+
+    > :first-child {
+        @apply flex-1;
+    }
+
+    > button[data-size] {
+        @apply px-0 w-10 shrink-0;
+    }
+}
+
+.events {
+    @apply mt-4;
+}
+
+.eventsTitle {
+    @apply text-stone-300 font-medium;
+    @apply mb-1;
+}
+
+.buttonGroup {
+    @apply bg-stone-700 rounded;
+    @apply flex flex-col p-px gap-px;
+
+    > button {
+        @apply rounded-none border-0;
+
+        &:first-child {
+            @apply rounded-t;
+        }
+
+        &:last-child {
+            @apply rounded-b;
+        }
+    }
+}
+
+.target {
+    @apply absolute bottom-4 left-4 right-4;
+}
+
+.targetTitle {
+    @apply text-stone-300 font-medium;
+    @apply mb-1 flex justify-start items-center gap-1;
+}
+
+.targetSelect {
+    @apply flex items-center gap-2;
+
+    > div {
+        @apply flex justify-center items-center gap-2 h-10;
+
+        &:nth-child(1) {
+            @apply text-stone-400 text-sm;
+            @apply justify-end;
+        }
+
+        &:nth-child(2) {
+            @apply w-10;
+        }
+
+        &:nth-child(3) {
+            @apply text-stone-400 text-sm;
+            @apply justify-start;
+        }
+    }
+}

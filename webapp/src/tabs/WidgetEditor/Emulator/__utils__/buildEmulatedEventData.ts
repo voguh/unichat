@@ -27,7 +27,8 @@ const DUMMY_YOUTUBE_CHANNEL_ID = "UCBR8-60-B28hp2BmDPdntcQ";
 const DUMMY_TWITCH_CHANNEL_ID = "12826";
 const DUMMY_TWITCH_CHANNEL_NAME = "Twitch";
 
-const DUMMY_YOUTUBE_PROFILE_PICTURE_URL = "/proxy/aHR0cHM6Ly95dDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tLzNzNmV2cHFBaURVOXRRUjRzQzJzaUppcHBiSDJSV1ZQbndIZ3lsNFYwdGgyaXVRejBWRFFaYlVoUUJHbXN4TFlvLW1qRzZUcVpRPXMxNjAtYy1rLWMweDAwZmZmZmZmLW5vLXJq?referer=https://www.youtube.com/"; // prettier-ignore
+const DUMMY_YOUTUBE_PROFILE_PICTURE_URL =
+    "/proxy/aHR0cHM6Ly95dDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tLzNzNmV2cHFBaURVOXRRUjRzQzJzaUppcHBiSDJSV1ZQbndIZ3lsNFYwdGgyaXVRejBWRFFaYlVoUUJHbXN4TFlvLW1qRzZUcVpRPXMxNjAtYy1rLWMweDAwZmZmZmZmLW5vLXJq?referer=https://www.youtube.com/"; // prettier-ignore
 const DUMMY_TWITCH_PROFILE_PICTURE_URL = "https://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_70x70.png";
 
 const DUMMY_TWITCH_REWARD_ICON_URL = "https://static-cdn.jtvnw.net/custom-reward-images/tree-4.png";

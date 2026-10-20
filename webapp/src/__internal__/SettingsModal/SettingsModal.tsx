@@ -8,10 +8,10 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 
-import { Button } from "unichat/components/Button";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
 import { Modal } from "unichat/components/Modal";
 import { ModalContext } from "unichat/contexts/ModalContext";
 
@@ -19,7 +19,7 @@ import { AboutSettingsTab } from "./AboutSettingsTab";
 import { CheckUpdatesSettingsTab } from "./CheckUpdatesSettingsTab";
 import { DevelopersSettingsTab } from "./DevelopersSettingsTab";
 import { GeneralSettingsTab } from "./GeneralSettingsTab";
-import { SettingsModalStyledContainer } from "./styled";
+import styles from "./styles.module.css";
 
 /* ========================================================================== */
 
@@ -97,11 +97,12 @@ export function SettingsModal({ externalActiveTab, onHide, show }: Props): PReac
             onHide={onHide}
             size="xl"
             title="Settings"
-            CustomModalBody={SettingsModalStyledContainer}
+            className={styles.dialog}
+            bodyClassName={styles.container}
             data-tour="settings-modal"
         >
-            <div className="settings_modal--sidebar">
-                <div className="settings_modal--sidebar_items">
+            <div className={styles.sidebar}>
+                <div className={styles.sidebarItems}>
                     {Object.entries(settingsItems).map(([key, item]) => (
                         <Button
                             key={key}
@@ -114,13 +115,13 @@ export function SettingsModal({ externalActiveTab, onHide, show }: Props): PReac
                         </Button>
                     ))}
                 </div>
-                <div className="settings_modal--sidebar_footer">
+                <div className={styles.sidebarFooter}>
                     <span>
                         <strong>{UNICHAT_DISPLAY_NAME}</strong> {UNICHAT_VERSION}
                     </span>
                 </div>
             </div>
-            <div className="settings_modal--content">
+            <div className={styles.content}>
                 <TabContent selectedItem={activeTab} />
             </div>
         </Modal>

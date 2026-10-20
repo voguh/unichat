@@ -1,7 +1,7 @@
 saveExact: true
 savePrefix: ""
 minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - "@voguh/*"
 blockExoticSubdeps: true
-allowBuilds:
-  '@parcel/watcher': false
-  esbuild: false
+allowBuilds: {}

@@ -8,10 +8,9 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-/* eslint-disable @typescript-eslint/no-require-imports */
-
 const path = require("node:path");
 
+const { RsdoctorRspackPlugin } = require("@rsdoctor/rspack-plugin");
 const { CopyRspackPlugin, HtmlRspackPlugin, SourceMapDevToolPlugin } = require("@rspack/core");
 const { glob } = require("glob");
 
@@ -40,7 +39,7 @@ class OrphanFilesPlugin {
 /** @type {import("@rspack/core").Configuration} */
 module.exports = {
     mode: isDev ? "development" : "production",
-    devtool: false,
+    devtool: process.env.BUNDLE_ANALYZE ? "source-map" : false,
     context: __dirname,
 
     entry: { index: path.resolve(__dirname, "src/main.tsx") },
@@ -63,6 +62,7 @@ module.exports = {
 
     module: {
         parser: { "css/auto": { namedExports: false, dashedIdents: false } },
+        generator: { "css/auto": { localIdentName: "[hash:base64:8]" } },
         rules: [
             {
                 test: /\.tsx?$/,
@@ -76,16 +76,6 @@ module.exports = {
                                 parser: { syntax: "typescript", tsx: true },
                                 transform: { react: { runtime: "automatic", importSource: "preact" } }
                             }
-                        }
-                    },
-                    {
-                        loader: "babel-loader",
-                        options: {
-                            babelrc: false,
-                            configFile: false,
-                            parserOpts: { plugins: ["typescript"] },
-                            overrides: [{ test: /\.tsx$/, parserOpts: { plugins: ["jsx", "typescript"] } }],
-                            plugins: ["babel-plugin-macros", "babel-plugin-transform-goober"]
                         }
                     }
                 ]
@@ -129,12 +119,20 @@ module.exports = {
 
     resolve: {
         extensions: [".ts", ".tsx", ".js", ".jsx"],
-        tsConfig: path.resolve(__dirname, "tsconfig.json")
+        tsConfig: path.resolve(__dirname, "tsconfig.json"),
+        alias: {
+            react: "preact/compat",
+            "react-dom/test-utils": "preact/test-utils",
+            "react-dom": "preact/compat",
+            "react/jsx-runtime": "preact/jsx-runtime"
+        }
     },
 
     plugins: [
         process.env.BUNDLE_ANALYZE === "true" && new OrphanFilesPlugin(),
-        new SourceMapDevToolPlugin({ filename: "[file].map", exclude: /vendor/ }),
+        process.env.BUNDLE_ANALYZE === "true" && new RsdoctorRspackPlugin(),
+        process.env.BUNDLE_ANALYZE !== "true" &&
+            new SourceMapDevToolPlugin({ filename: "[file].map", exclude: /vendor/ }),
         new CopyRspackPlugin({
             patterns: [
                 {

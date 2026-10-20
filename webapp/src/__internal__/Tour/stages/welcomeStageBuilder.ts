@@ -8,10 +8,10 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { TourBuilder } from "../Tour";
+import type { TourBuilder } from "../Tour";
 
 export function welcomeStageBuilder(title: string, subTitle: string | string[]): TourBuilder {
-    return async function (container) {
+    return async (container) => {
         container.innerHTML = "";
         const overlay = document.createElement("div");
         overlay.classList.add("tour-backdrop");

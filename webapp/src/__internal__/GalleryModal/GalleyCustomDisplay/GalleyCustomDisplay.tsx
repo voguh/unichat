@@ -8,15 +8,15 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
 
-import { Button } from "unichat/components/Button";
-import { TextInput } from "unichat/components/forms/TextInput";
+import { TextInput } from "@voguh/unichat-ui/components/forms/TextInput";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
 import { ModalContext } from "unichat/contexts/ModalContext";
-import { GalleryItem } from "unichat/types";
+import type { GalleryItem } from "unichat/types";
 
-import { GalleyCustomDisplayStyledContainer } from "./styled";
+import styles from "./styles.module.css";
 
 interface Props {
     selectedItem?: string;
@@ -27,11 +27,11 @@ function testImage(url: string): Promise<boolean> {
     return new Promise((resolve) => {
         const img = document.createElement("img");
 
-        img.onload = function () {
+        img.onload = () => {
             resolve(true);
         };
 
-        img.onerror = function () {
+        img.onerror = () => {
             resolve(false);
         };
 
@@ -43,10 +43,10 @@ function testVideo(url: string): Promise<boolean> {
     return new Promise((resolve) => {
         const video = document.createElement("video");
 
-        video.onloadeddata = function () {
+        video.onloadeddata = () => {
             resolve(true);
         };
-        video.onerror = function () {
+        video.onerror = () => {
             resolve(false);
         };
 
@@ -58,10 +58,10 @@ function testAudio(url: string): Promise<boolean> {
     return new Promise((resolve) => {
         const audio = document.createElement("audio");
 
-        audio.onloadeddata = function () {
+        audio.onloadeddata = () => {
             resolve(true);
         };
-        audio.onerror = function () {
+        audio.onerror = () => {
             resolve(false);
         };
 
@@ -115,11 +115,12 @@ export function GalleyCustomDisplay(props: Props): PReact.ComponentChildren {
             }
         }
 
-        return <img src="https://placehold.co/600x400?text=No+Preview" alt="No Preview Available" />;
+        return <img src="https://placehold.co/600x400?text=No+Preview" />;
     }
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: componentDidMount
     useEffect(() => {
-        if (selectedItem && selectedItem.startsWith("http")) {
+        if (selectedItem != null && selectedItem.startsWith("http")) {
             if (inputRef.current) {
                 inputRef.current.value = selectedItem;
                 handleApply();
@@ -128,10 +129,10 @@ export function GalleyCustomDisplay(props: Props): PReact.ComponentChildren {
     }, []);
 
     return (
-        <GalleyCustomDisplayStyledContainer>
-            <div className="media-wrapper">{renderPreview()}</div>
+        <div className={styles.container}>
+            <div className={styles.mediaWrapper}>{renderPreview()}</div>
 
-            <div className="input-wrapper">
+            <div className={styles.inputWrapper}>
                 <TextInput ref={inputRef} label="Media URL" placeholder="Enter media URL" defaultValue={tempURL} />
                 <Button onClick={handleApply}>
                     <i className="fas fa-check" />
@@ -150,6 +151,6 @@ export function GalleyCustomDisplay(props: Props): PReact.ComponentChildren {
                     Select
                 </Button>
             )}
-        </GalleyCustomDisplayStyledContainer>
+        </div>
     );
 }

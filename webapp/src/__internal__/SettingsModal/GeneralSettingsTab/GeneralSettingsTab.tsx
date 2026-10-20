@@ -8,23 +8,24 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 
-import { Button } from "unichat/components/Button";
-import { Option, Select } from "unichat/components/forms/Select";
-import { Switch } from "unichat/components/forms/Switch";
+import { Select } from "@voguh/unichat-ui/components/forms/Select";
+import { Switch } from "@voguh/unichat-ui/components/forms/Switch";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import type { SelectItem } from "@voguh/unichat-ui/components/ui/Select";
 import { useStorage } from "unichat/hooks/useStorage";
 import { useWidgets } from "unichat/hooks/useWidgets";
 import { commandService } from "unichat/services/commandService";
-import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
-import { settingsService, UniChatSettings, UniChatSettingsKeys } from "unichat/services/settingsService";
+import { type EventEmitterEvents, eventEmitter } from "unichat/services/eventEmitter";
+import { settingsService, type UniChatSettings, UniChatSettingsKeys } from "unichat/services/settingsService";
 import { StorageKeys } from "unichat/services/storageService";
 import { toWidgetOptionGroup } from "unichat/utils/toWidgetOptionGroup";
 
-import { GeneralSettingsTabStyledContainer } from "./styled";
+import styles from "./styles.module.css";
 
-const CURRENCY_DISABLED_OPTION: Option = { value: "", label: "Disabled" };
+const CURRENCY_DISABLED_OPTION: SelectItem = { value: "", label: "Disabled" };
 
 interface Props {
     onClose: () => void;
@@ -32,13 +33,13 @@ interface Props {
 
 export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren {
     const [widgets, _reloadWidgets] = useWidgets(toWidgetOptionGroup, []);
-    const [currencies, setCurrencies] = useState<Option[]>([CURRENCY_DISABLED_OPTION]);
+    const [currencies, setCurrencies] = useState<SelectItem[]>([CURRENCY_DISABLED_OPTION]);
 
     const [dirty, setDirty] = useState(false);
     const [initialSettings, setInitialSettings] = useState<Partial<UniChatSettings>>({});
-    const selectRef = useRef<HTMLInputElement>(null);
+    const selectRef = useRef<HTMLSelectElement>(null);
     const openToLanRef = useRef<HTMLInputElement>(null);
-    const currencyRef = useRef<HTMLInputElement>(null);
+    const currencyRef = useRef<HTMLSelectElement>(null);
 
     const [requiresRestart, setRequiresRestart] = useStorage(StorageKeys.REQUIRES_RESTART);
 
@@ -80,7 +81,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
             return;
         }
 
-        function changeDirty(this: HTMLInputElement): void {
+        function changeDirty(this: HTMLElement): void {
             setDirty(true);
             this.removeEventListener("change", changeDirty);
         }
@@ -142,76 +143,80 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
     }, []);
 
     return (
-        <GeneralSettingsTabStyledContainer key={Object.keys(initialSettings).length === 0 ? "loading" : "loaded"}>
-            <Select
-                defaultValue={initialSettings[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET] ?? ""}
-                inputRef={selectRef}
-                label="Default preview widget"
-                description="Select the default widget to be used in preview panels"
-                options={widgets}
-            />
-
-            <Select
-                defaultValue={initialSettings[UniChatSettingsKeys.CURRENCY_TARGET] ?? ""}
-                inputRef={currencyRef}
-                label="Donation target currency"
-                options={currencies}
-                data-tour="currency-target"
-            />
-
-            <hr />
-
-            <div className="openToLan-section">
-                <Switch
-                    defaultChecked={initialSettings[UniChatSettingsKeys.OPEN_TO_LAN] ?? false}
-                    inputRef={openToLanRef}
-                    label="Open to LAN"
-                    description="Allow other devices on your local network view widgets"
+        <div className={styles.container} key={Object.keys(initialSettings).length === 0 ? "loading" : "loaded"}>
+            <div className={styles.body}>
+                <Select
+                    defaultValue={[initialSettings[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET] ?? ""]}
+                    ref={selectRef}
+                    label="Default preview widget"
+                    description="Select the default widget to be used in preview panels"
+                    items={widgets}
                 />
 
-                {requiresRestart && (
-                    <div className="alert alert-primary">
-                        <div>
-                            <i className="fas fa-info-circle" />
-                        </div>
-                        <span>
-                            <strong>{UNICHAT_DISPLAY_NAME}</strong> must be restarted for this setting to take effect.
-                        </span>
-                    </div>
-                )}
-                {openToLanRef.current?.checked && (
-                    <div className="alert alert-warning">
-                        <div>
-                            <i className="fas fa-info-circle" />
-                        </div>
-                        <span>
-                            Make sure your firewall allows incoming connections on port <strong>9527</strong>.
-                        </span>
-                    </div>
-                )}
-            </div>
+                <div data-tour="currency-target">
+                    <Select
+                        defaultValue={[initialSettings[UniChatSettingsKeys.CURRENCY_TARGET] ?? ""]}
+                        ref={currencyRef}
+                        label="Donation target currency"
+                        items={currencies}
+                    />
+                </div>
 
-            <hr />
+                <hr />
 
-            <div className="tour-section">
-                Tour
-                <div className="tour-section--buttons">
-                    <Button variant="default" onClick={() => dispatchTour("full")}>
-                        <i className="fas fa-compass" />
-                        View Tour
-                    </Button>
-                    <Button variant="default" onClick={() => dispatchTour("whats-new")}>
-                        <i className="fas fa-map" />
-                        What&apos;s New?
-                    </Button>
+                <div>
+                    <Switch
+                        defaultChecked={initialSettings[UniChatSettingsKeys.OPEN_TO_LAN] ?? false}
+                        ref={openToLanRef}
+                        label="Open to LAN"
+                        description="Allow other devices on your local network view widgets"
+                    />
+
+                    {requiresRestart && (
+                        <div className={styles.alert} data-variant="primary">
+                            <div>
+                                <i className="fas fa-info-circle" />
+                            </div>
+                            <span>
+                                <strong>{UNICHAT_DISPLAY_NAME}</strong> must be restarted for this setting to take
+                                effect.
+                            </span>
+                        </div>
+                    )}
+                    {openToLanRef.current?.checked && (
+                        <div className={styles.alert} data-variant="warning">
+                            <div>
+                                <i className="fas fa-info-circle" />
+                            </div>
+                            <span>
+                                Make sure your firewall allows incoming connections on port <strong>9527</strong>.
+                            </span>
+                        </div>
+                    )}
+                </div>
+
+                <hr />
+
+                <div>
+                    Tour
+                    <div className={styles.tourButtons}>
+                        <Button variant="default" onClick={() => dispatchTour("full")}>
+                            <i className="fas fa-compass" />
+                            View Tour
+                        </Button>
+                        <Button variant="default" onClick={() => dispatchTour("whats-new")}>
+                            <i className="fas fa-map" />
+                            What&apos;s New?
+                        </Button>
+                    </div>
                 </div>
             </div>
 
-            <div className="general_settings--footer">
+            <div className={styles.footer}>
                 <Button variant="success" disabled={!dirty} onClick={applySettings}>
                     Apply
                 </Button>
             </div>
-        </GeneralSettingsTabStyledContainer>
+        </div>
     );
 }

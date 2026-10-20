@@ -8,16 +8,15 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { Button } from "unichat/components/Button";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
 import { modalService } from "unichat/services/modalService";
-import { clsx } from "unichat/utils/clsx";
 
-import { AboutSettingsTabStyledContainer } from "./styled";
+import styles from "./styles.module.css";
 import { ThirdPartyLicenses } from "./ThirdPartyLicenses";
 
 interface Props {
@@ -36,22 +35,22 @@ export function AboutSettingsTab(_props: Props): PReact.ComponentChildren {
     }
 
     return (
-        <AboutSettingsTabStyledContainer>
-            <div className="app-image">
+        <div className={styles.container}>
+            <div className={styles.image}>
                 <img src={UNICHAT_ICON} />
             </div>
-            <div className="app-name">{UNICHAT_DISPLAY_NAME}</div>
-            <div className="app-version">{UNICHAT_VERSION}</div>
-            <div className="app-homepage">
+            <div className={styles.name}>{UNICHAT_DISPLAY_NAME}</div>
+            <div className={styles.version}>{UNICHAT_VERSION}</div>
+            <div className={styles.homepage}>
                 <span onClick={() => openUrl(UNICHAT_HOMEPAGE)}>Website</span>
             </div>
-            <div className="app-description">
+            <div className={styles.description}>
                 This program comes with absolutely no warranty.
                 <br />
                 See the <span onClick={() => openUrl(UNICHAT_LICENSE_URL)}>{UNICHAT_LICENSE_NAME}</span> license for
                 details.
             </div>
-            <div className="app-footer">
+            <div className={styles.footer}>
                 <Button variant="default" onClick={() => setIsCreditsOpen(true)}>
                     Credits
                 </Button>
@@ -59,11 +58,11 @@ export function AboutSettingsTab(_props: Props): PReact.ComponentChildren {
                     Third Party Licenses
                 </Button>
             </div>
-            <div className={clsx("app-credits", { isCreditsOpen })}>
-                <div className="credits-data">
+            <div className={styles.credits} data-open={isCreditsOpen}>
+                <div className={styles.creditsData}>
                     <div>
-                        <div className="label">Developed by</div>
-                        <div className="values">
+                        <div className={styles.creditsLabel}>Developed by</div>
+                        <div className={styles.creditsValues}>
                             {UNICHAT_AUTHORS.split(";").map((author) => {
                                 const [name, _email] = author.split("<");
 
@@ -72,12 +71,12 @@ export function AboutSettingsTab(_props: Props): PReact.ComponentChildren {
                         </div>
                     </div>
                 </div>
-                <div className="credits-footer">
+                <div className={styles.creditsFooter}>
                     <Button variant="default" onClick={() => setIsCreditsOpen(false)}>
                         Close
                     </Button>
                 </div>
             </div>
-        </AboutSettingsTabStyledContainer>
+        </div>
     );
 }

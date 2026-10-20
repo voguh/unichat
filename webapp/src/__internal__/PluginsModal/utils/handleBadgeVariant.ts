@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { BadgeVariant } from "unichat/components/Badge";
+import type { BadgeVariant } from "@voguh/unichat-ui/components/ui/Badge";
 
 export function handleBadgeVariant(status: string): BadgeVariant {
     switch (status) {

@@ -15,7 +15,7 @@ export function seededRandom(seed: string): () => number {
         h = Math.imul(h, 16777619);
     }
 
-    return function () {
+    return () => {
         h += h << 13;
         h ^= h >>> 7;
         h += h << 3;

@@ -8,13 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useRef, useState } from "preact/hooks";
 
-import { UniChatEvent } from "@voguh/unichat-api/widgets/events";
-import { Button } from "unichat/components/Button";
-import { Select } from "unichat/components/forms/Select";
-import { Tooltip } from "unichat/components/Tooltip";
+import type { UniChatEvent } from "@voguh/unichat-api/widgets/events";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { Select } from "@voguh/unichat-ui/components/ui/Select";
+import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
 import { useWidgets } from "unichat/hooks/useWidgets";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
@@ -25,7 +25,7 @@ import { toWidgetOptionGroup } from "unichat/utils/toWidgetOptionGroup";
 
 import { Emulator } from "./Emulator";
 import { Fields } from "./Fields";
-import { WidgetEditorStyledContainer } from "./styled";
+import styles from "./styles.module.css";
 
 const _logger = LoggerFactory.getLogger("WidgetEditor");
 export function WidgetEditor(): PReact.ComponentChildren {
@@ -83,23 +83,27 @@ export function WidgetEditor(): PReact.ComponentChildren {
     }
 
     return (
-        <WidgetEditorStyledContainer>
-            <div className="widget_editor--header">
+        <div className={styles.container}>
+            <div className={styles.header}>
                 <Select
-                    value={selectedWidget}
-                    options={toWidgetOptionGroup(widgets.values())}
-                    onChange={(evt) => setSelectedWidget(evt.currentTarget.value)}
+                    className={styles.widgetSelector}
+                    value={[selectedWidget]}
+                    items={toWidgetOptionGroup(widgets.values())}
+                    onValueChange={({ value }) => setSelectedWidget(value[0])}
                 />
 
-                <Tooltip content="Reload widget view" placement="bottom">
-                    <Button onClick={reloadIframe}>
-                        <i className="fas fa-sync" />
-                    </Button>
-                </Tooltip>
+                <Tooltip.Root positioning={{ placement: "bottom" }}>
+                    <Tooltip.Trigger asChild>
+                        <Button onClick={reloadIframe}>
+                            <i className="fas fa-sync" />
+                        </Button>
+                    </Tooltip.Trigger>
+                    <Tooltip.Content>Reload widget view</Tooltip.Content>
+                </Tooltip.Root>
             </div>
 
-            <div className="widget_editor--content">
-                <div className="widget_editor--fields">
+            <div className={styles.content}>
+                <div className={styles.fields}>
                     <Fields
                         handleApply={handleApply}
                         handleReset={handleReset}
@@ -107,13 +111,18 @@ export function WidgetEditor(): PReact.ComponentChildren {
                         widgets={widgets}
                     />
                 </div>
-                <div className="widget_editor--preview">
-                    <iframe ref={iframeRef} src={`${WIDGET_URL_PREFIX}/${selectedWidget}`} sandbox="allow-scripts" />
+                <div className={styles.preview}>
+                    <iframe
+                        ref={iframeRef}
+                        src={`${WIDGET_URL_PREFIX}/${selectedWidget}`}
+                        sandbox="allow-scripts"
+                        title="Widget Preview"
+                    />
                 </div>
-                <div className="widget_editor--emulator">
+                <div>
                     <Emulator dispatchEvent={dispatchEvent} />
                 </div>
             </div>
-        </WidgetEditorStyledContainer>
+        </div>
     );
 }

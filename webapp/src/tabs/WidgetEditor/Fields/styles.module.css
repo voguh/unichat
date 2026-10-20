@@ -1,0 +1,63 @@
+/*!******************************************************************************
+ * Copyright (c) 2026 Voguh
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ******************************************************************************/
+
+.container {
+    @apply relative h-full flex flex-col;
+}
+
+.header {
+    @apply w-full p-2 flex justify-between items-center shrink-0;
+
+    > span {
+        @apply text-lg font-bold;
+    }
+}
+
+.actions {
+    @apply flex gap-2;
+
+    > button[data-size] {
+        @apply px-2 min-w-8 flex justify-center items-center;
+    }
+}
+
+.content {
+    @apply w-full flex-1 min-h-0 p-2 flex flex-col overflow-y-auto;
+}
+
+.empty {
+    @apply text-stone-50/50;
+    @apply w-full h-full flex flex-col justify-center items-center gap-2;
+}
+
+.accordion {
+    @apply gap-0;
+}
+
+.accordionItem {
+    @apply rounded-none shrink-0;
+
+    &:first-child {
+        @apply rounded-t;
+    }
+
+    &:last-child {
+        @apply rounded-b;
+    }
+}
+
+.accordionTitle {
+    @apply flex-1;
+}
+
+.accordionContent {
+    @apply bg-stone-700/25;
+    @apply p-2 flex flex-col gap-4;
+}

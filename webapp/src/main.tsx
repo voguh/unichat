@@ -8,12 +8,10 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { h, render } from "preact";
-
-import { setup } from "goober";
+import { render } from "preact";
 
 import { App } from "unichat/App";
-import "unichat/styles/index.css";
+import "unichat/styles/global.css";
 
 if (!__IS_DEV__) {
     window.addEventListener("contextmenu", async (event) => {
@@ -26,5 +24,4 @@ if (documentRoot == null) {
     throw new Error("Root element not found");
 }
 
-setup(h);
 render(<App />, documentRoot);

@@ -10,16 +10,16 @@
 
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
-import { UniChatEvent } from "@voguh/unichat-api/widgets/events";
-import {
+import type { UniChatEvent } from "@voguh/unichat-api/widgets/events";
+import type {
     GalleryItem,
+    ThirdPartyLicenseInfo,
     UniChatCurrency,
     UniChatPluginMetadata,
+    UniChatReleaseInfo,
     UniChatScraper,
     UniChatWidget,
-    WidgetFields,
-    ThirdPartyLicenseInfo,
-    UniChatReleaseInfo
+    WidgetFields
 } from "unichat/types";
 
 async function invoke<T>(cmd: string, args?: Record<string, any>): Promise<T> {

@@ -8,15 +8,15 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { Badge } from "unichat/components/Badge";
-import { Button } from "unichat/components/Button";
-import { Select } from "unichat/components/forms/Select";
-import { Tooltip } from "unichat/components/Tooltip";
+import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { Select } from "@voguh/unichat-ui/components/ui/Select";
+import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
 import { useScrapers } from "unichat/hooks/useScrapers";
 import { useStorage } from "unichat/hooks/useStorage";
 import { useWidgets } from "unichat/hooks/useWidgets";
@@ -25,13 +25,13 @@ import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
 import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
 import { StorageKeys } from "unichat/services/storageService";
-import { UniChatScraper } from "unichat/types";
+import type { UniChatScraper } from "unichat/types";
 import { scraperPriority, WIDGET_URL_PREFIX } from "unichat/utils/constants";
 import { toWidgetOptionGroup } from "unichat/utils/toWidgetOptionGroup";
 
 import { QRCodeModal } from "./QRCodeModal";
 import { ScraperCard } from "./ScraperCard";
-import { DashboardStyledContainer } from "./styled";
+import styles from "./styles.module.css";
 
 function sortScrapers(scrapers: UniChatScraper[]): UniChatScraper[] {
     return scrapers.sort((a, b) => {
@@ -63,12 +63,15 @@ export function Dashboard(): PReact.ComponentChildren {
                 {message}
                 <br />
                 <ul className="list-disc list-inside">
-                    {availableUrls.map((url) => <li key={url}>{url}</li>)}
+                    {availableUrls.map((url) => (
+                        <li key={url}>{url}</li>
+                    ))}
                 </ul>
                 <br />
                 You can enter the URL with or without the <Badge>www.</Badge> prefix.
                 <br />
-                You can also include or omit the <Badge variant="success">https://</Badge> or <Badge variant="danger">http://</Badge> prefix.
+                You can also include or omit the <Badge variant="success">https://</Badge> or{" "}
+                <Badge variant="danger">http://</Badge> prefix.
             </>
         );
     }
@@ -121,66 +124,69 @@ export function Dashboard(): PReact.ComponentChildren {
     }, []);
 
     return (
-        <>
-            <DashboardStyledContainer>
-                <div className="scrapers">
-                    {scrapers.map((s) => (
-                        <ScraperCard
-                            key={s.id}
-                            editingTooltip={mountEditingTooltip(s.editingTooltipMessage, s.editingTooltipUrls)}
-                            validateUrl={(value) => commandService.validateScraperUrl(s.id, value)}
-                            scraper={s}
-                        />
-                    ))}
-                </div>
-                <div className="preview">
-                    {showWidgetPreview ? (
-                        <>
-                            <div className="preview__header">
+        <div className={styles.container}>
+            <div className={styles.scrapers}>
+                {scrapers.map((s) => (
+                    <ScraperCard
+                        key={s.id}
+                        editingTooltip={mountEditingTooltip(s.editingTooltipMessage, s.editingTooltipUrls)}
+                        validateUrl={(value) => commandService.validateScraperUrl(s.id, value)}
+                        scraper={s}
+                    />
+                ))}
+            </div>
+            <div className={styles.preview}>
+                {showWidgetPreview ? (
+                    <>
+                        <div className={styles.previewHeader}>
+                            <div className={styles.widgetSelector} data-tour="widgets-selector">
                                 <Select
-                                    options={widgets}
-                                    onChange={(evt) => setSelectedWidget(evt.currentTarget.value)}
-                                    value={selectedWidget}
-                                    data-tour="widgets-selector"
+                                    items={widgets}
+                                    value={[selectedWidget]}
+                                    onValueChange={({ value }) => setSelectedWidget(value[0])}
                                 />
+                            </div>
 
-                                <Tooltip content="Reload widget view" placement="bottom">
+                            <Tooltip.Root positioning={{ placement: "bottom" }}>
+                                <Tooltip.Trigger asChild>
                                     <Button onClick={reloadIframe} data-tour="preview-reload">
                                         <i className="fas fa-redo" />
                                     </Button>
-                                </Tooltip>
+                                </Tooltip.Trigger>
+                                <Tooltip.Content>Reload widget view</Tooltip.Content>
+                            </Tooltip.Root>
 
-                                <Tooltip
-                                    content={isOpenToLan ? "Open on device" : "Open in browser"}
-                                    placement="bottom"
-                                >
+                            <Tooltip.Root positioning={{ placement: "bottom" }}>
+                                <Tooltip.Trigger asChild>
                                     <Button onClick={handleOpenInBrowser} data-tour="preview-open-in-browser">
                                         <i className="fas fa-globe" />
                                     </Button>
-                                </Tooltip>
-                            </div>
-
-                            <div className="preview__iframe-wrapper">
-                                <iframe
-                                    ref={iframeRef}
-                                    src={`${WIDGET_URL_PREFIX}/${selectedWidget}`}
-                                    sandbox="allow-scripts"
-                                />
-                            </div>
-                        </>
-                    ) : (
-                        <div className="preview__disabled">
-                            <div>
-                                <div className="preview__disabled-icons">
-                                    <i className="fas fa-desktop fa-3x" />
-                                    <i className="fas fa-times fa-2x" />
-                                </div>
-                                <div className="preview__disabled-text">Widget preview is disabled.</div>
-                            </div>
+                                </Tooltip.Trigger>
+                                <Tooltip.Content>{isOpenToLan ? "Open on device" : "Open in browser"}</Tooltip.Content>
+                            </Tooltip.Root>
                         </div>
-                    )}
-                </div>
-            </DashboardStyledContainer>
-        </>
+
+                        <div className={styles.iframeWrapper}>
+                            <iframe
+                                ref={iframeRef}
+                                src={`${WIDGET_URL_PREFIX}/${selectedWidget}`}
+                                sandbox="allow-scripts"
+                                title="Widget Preview"
+                            />
+                        </div>
+                    </>
+                ) : (
+                    <div className={styles.previewDisabled}>
+                        <div>
+                            <div className={styles.previewDisabledIcons}>
+                                <i className="fas fa-desktop fa-3x" />
+                                <i className="fas fa-times fa-2x" />
+                            </div>
+                            <div className={styles.previewDisabledText}>Widget preview is disabled.</div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }

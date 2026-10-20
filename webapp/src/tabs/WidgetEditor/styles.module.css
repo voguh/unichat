@@ -1,0 +1,50 @@
+/*!******************************************************************************
+ * Copyright (c) 2025-2026 Voguh
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ******************************************************************************/
+
+.container {
+    @apply flex flex-col h-full;
+}
+
+.header {
+    @apply bg-stone-900 border-b border-stone-800;
+    @apply relative p-2 flex gap-2 shrink-0;
+
+    > button[data-size] {
+        @apply p-0 w-10 flex justify-center items-center shrink-0;
+    }
+}
+
+.widgetSelector {
+    @apply flex-1 min-w-0;
+}
+
+.content {
+    @apply flex-1 min-h-0;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) --spacing(100) --spacing(75);
+    grid-template-rows: minmax(0, 1fr);
+}
+
+.fields {
+    @apply h-full overflow-hidden;
+}
+
+.preview {
+    @apply bg-stone-900 border-x border-stone-800;
+    @apply relative h-full;
+
+    grid-column: 2;
+
+    > iframe {
+        @apply bg-white;
+        @apply w-full h-full border-none pointer-events-none;
+    }
+}

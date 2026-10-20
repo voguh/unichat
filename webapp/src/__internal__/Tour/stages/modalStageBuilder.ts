@@ -8,14 +8,14 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { ComponentChildren } from "preact";
+import type { ComponentChildren } from "preact";
 
 import { modalService } from "unichat/services/modalService";
 
-import { TourBuilder } from "../Tour";
+import type { TourBuilder } from "../Tour";
 
 export function modalStageBuilder(title: string, subTitle: ComponentChildren): TourBuilder {
-    return async function (container) {
+    return async (container) => {
         container.innerHTML = "";
         const overlay = document.createElement("div");
         overlay.classList.add("tour-backdrop");

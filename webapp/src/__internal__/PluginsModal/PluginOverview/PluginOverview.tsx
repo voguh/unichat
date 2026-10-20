@@ -8,17 +8,17 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 
+import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
+import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
 import { getPluginIconDataUrl } from "unichat/__internal__/PluginsModal/utils/getPluginIconDataUrl";
 import { handleBadgeVariant } from "unichat/__internal__/PluginsModal/utils/handleBadgeVariant";
-import { Badge } from "unichat/components/Badge";
-import { Tooltip } from "unichat/components/Tooltip";
-import { UniChatPluginMetadata } from "unichat/types";
+import type { UniChatPluginMetadata } from "unichat/types";
 
-import { PluginOverviewStyledContainer } from "./styled";
+import styles from "./styles.module.css";
 
 interface Props {
     plugin: UniChatPluginMetadata;
@@ -26,51 +26,57 @@ interface Props {
 
 export function PluginOverviewModal({ plugin }: Props): PReact.ComponentChildren {
     return (
-        <PluginOverviewStyledContainer>
-            <div className="plugin-details">
-                <div className="plugin-icon">
-                    <img src={getPluginIconDataUrl(plugin)} alt="Plugin Icon" />
+        <div className={styles.container}>
+            <div className={styles.details}>
+                <div className={styles.icon}>
+                    <img src={getPluginIconDataUrl(plugin)} />
                 </div>
-                <div className="plugin-meta">
-                    <div className="plugin-name">
-                        <div className="details-label">Name</div>
-                        <div className="details-value">{plugin.name}</div>
+                <div className={styles.meta}>
+                    <div className={styles.name}>
+                        <div className={styles.label}>Name</div>
+                        <div className={styles.value}>{plugin.name}</div>
                     </div>
-                    <div className="plugin-version">
-                        <div className="details-label">Version</div>
-                        <div className="details-value">{plugin.version}</div>
+                    <div className={styles.version}>
+                        <div className={styles.label}>Version</div>
+                        <div className={styles.value}>{plugin.version}</div>
                     </div>
-                    <div className="plugin-status">
-                        <div className="details-label">Status</div>
-                        <div className="details-value">
+                    <div className={styles.status}>
+                        <div className={styles.label}>Status</div>
+                        <div className={styles.value}>
                             <Badge variant={handleBadgeVariant(plugin.status)}>{plugin.status}</Badge>
                         </div>
                     </div>
-                    <div className="plugin-authors">
-                        <div className="details-label">Authors</div>
-                        <Tooltip placement="bottom" content={plugin.author}>
-                            <div className="details-value">{plugin.author}</div>
-                        </Tooltip>
+                    <div className={styles.authors}>
+                        <div className={styles.label}>Authors</div>
+                        <Tooltip.Root positioning={{ placement: "bottom" }}>
+                            <Tooltip.Trigger asChild>
+                                <div className={styles.value}>{plugin.author}</div>
+                            </Tooltip.Trigger>
+                            <Tooltip.Content>{plugin.author}</Tooltip.Content>
+                        </Tooltip.Root>
                     </div>
-                    <div className="plugin-license">
-                        <div className="details-label">License</div>
-                        <Tooltip placement="bottom" content={plugin.license}>
-                            <div className="details-value">{plugin.license}</div>
-                        </Tooltip>
+                    <div className={styles.license}>
+                        <div className={styles.label}>License</div>
+                        <Tooltip.Root positioning={{ placement: "bottom" }}>
+                            <Tooltip.Trigger asChild>
+                                <div className={styles.value}>{plugin.license}</div>
+                            </Tooltip.Trigger>
+                            <Tooltip.Content>{plugin.license}</Tooltip.Content>
+                        </Tooltip.Root>
                     </div>
-                    <div className="plugin-homepage">
-                        <div className="details-label">Homepage</div>
-                        <div className="details-value" onClick={() => plugin.homepage && openUrl(plugin.homepage)}>
+                    <div className={styles.homepage}>
+                        <div className={styles.label}>Homepage</div>
+                        <div className={styles.value} onClick={() => plugin.homepage && openUrl(plugin.homepage)}>
                             {plugin.homepage}
                         </div>
                     </div>
-                    <div className="plugin-description">
-                        <div className="details-label">Description</div>
-                        <div className="details-value">{plugin.description}</div>
+                    <div className={styles.description}>
+                        <div className={styles.label}>Description</div>
+                        <div className={styles.value}>{plugin.description}</div>
                     </div>
                 </div>
             </div>
-            <pre className="plugin-messages">{plugin.messages.join("\n")}</pre>
-        </PluginOverviewStyledContainer>
+            <pre className={styles.messages}>{plugin.messages.join("\n")}</pre>
+        </div>
     );
 }

@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { RefCallback, RefObject } from "preact";
+import type { RefCallback, RefObject } from "preact";
 
 export type Ref<T> = RefObject<T> | RefCallback<T> | null | undefined;
 

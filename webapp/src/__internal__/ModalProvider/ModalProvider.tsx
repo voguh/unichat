@@ -8,13 +8,11 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
-import { useEffect, useRef, useState } from "preact/hooks";
+import type * as PReact from "preact";
+import { useEffect, useState } from "preact/hooks";
 
 import { Modal } from "unichat/components/Modal";
-import { eventEmitter, RichModalWrapperProps } from "unichat/services/eventEmitter";
-
-import { ModalContainerStyledContainer } from "./styled";
+import { eventEmitter, type RichModalWrapperProps } from "unichat/services/eventEmitter";
 
 interface Props {
     size?: "sm" | "md" | "lg" | "xl";
@@ -24,13 +22,12 @@ interface Props {
 export function ModalProvider(defaultProps: Props): PReact.ComponentChildren {
     const [openedModals, setOpenedModals] = useState<RichModalWrapperProps[]>([]);
 
-    const modalContainerRef = useRef<HTMLDivElement>(null);
-
     function requestClose(id: string): void {
         setOpenedModals((prev) => prev.filter((modal) => modal.modalId !== id));
         eventEmitter.emit("modal:closed", { modalId: id });
     }
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: componentDidMount
     useEffect(() => {
         function requestOpenModal(modalOptions: RichModalWrapperProps): void {
             setOpenedModals((prev) => [...prev, modalOptions]);
@@ -50,7 +47,7 @@ export function ModalProvider(defaultProps: Props): PReact.ComponentChildren {
     }, []);
 
     return (
-        <ModalContainerStyledContainer className="modal-container" ref={modalContainerRef}>
+        <div className="modal-container">
             {openedModals.map(({ modalId, ...modalProps }) => (
                 <Modal
                     {...defaultProps}
@@ -61,6 +58,6 @@ export function ModalProvider(defaultProps: Props): PReact.ComponentChildren {
                     onHide={() => requestClose(modalId)}
                 />
             ))}
-        </ModalContainerStyledContainer>
+        </div>
     );
 }

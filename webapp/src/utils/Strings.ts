@@ -36,7 +36,7 @@ export class Strings {
      * @throws {TypeError} If the string is null or undefined.
      */
     public static requireNonNull(str: string | null | undefined, message?: string): string {
-        if (this.isNullOrEmpty(str)) {
+        if (Strings.isNullOrEmpty(str)) {
             throw new TypeError(message ?? "Required string is null or undefined.");
         }
 

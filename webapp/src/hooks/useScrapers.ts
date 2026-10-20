@@ -11,7 +11,7 @@
 import { useEffect, useState } from "preact/hooks";
 
 import { commandService } from "unichat/services/commandService";
-import { UniChatScraper } from "unichat/types";
+import type { UniChatScraper } from "unichat/types";
 
 type Transformer<T = UniChatScraper> = (scrapers: UniChatScraper[]) => T;
 
@@ -35,6 +35,7 @@ export function useScrapers<T = UniChatScraper>(
         setTransformedData(transformedValue);
     }
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: componentDidMount
     useEffect(() => {
         updateScrapers();
     }, []);

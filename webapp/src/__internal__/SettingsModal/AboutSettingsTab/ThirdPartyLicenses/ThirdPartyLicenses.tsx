@@ -8,17 +8,16 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { Badge } from "unichat/components/Badge";
+import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
 import { commandService } from "unichat/services/commandService";
-import { ThirdPartyLicenseInfo } from "unichat/types";
-import { clsx } from "unichat/utils/clsx";
+import type { ThirdPartyLicenseInfo } from "unichat/types";
 
-import { ThirdPartyLicensesStyledContainer } from "./styled";
+import styles from "./styles.module.css";
 
 export function ThirdPartyLicenses(): PReact.ComponentChildren {
     const [thirdPartyLicenses, setThirdPartyLicenses] = useState<ThirdPartyLicenseInfo[]>([]);
@@ -40,8 +39,8 @@ export function ThirdPartyLicenses(): PReact.ComponentChildren {
     }, []);
 
     return (
-        <ThirdPartyLicensesStyledContainer>
-            <table>
+        <div>
+            <table className={styles.table}>
                 <thead>
                     <tr>
                         <th>Package</th>
@@ -52,7 +51,7 @@ export function ThirdPartyLicenses(): PReact.ComponentChildren {
                     {thirdPartyLicenses
                         .sort((a, b) => `${a.source}:${a.name}`.localeCompare(`${b.source}:${b.name}`))
                         .map((pkg) => (
-                            <tr key={pkg.name} className={clsx({ withLink: !!pkg.repository })}>
+                            <tr key={pkg.name} data-with-link={!!pkg.repository}>
                                 <td onClick={() => pkg.repository && openUrl(pkg.repository)}>
                                     <span>
                                         <Badge>{pkg.source}</Badge>
@@ -76,6 +75,6 @@ export function ThirdPartyLicenses(): PReact.ComponentChildren {
                         ))}
                 </tbody>
             </table>
-        </ThirdPartyLicensesStyledContainer>
+        </div>
     );
 }

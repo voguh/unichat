@@ -1,5 +1,22 @@
 {
     "js/ts.tsdk.path": "./webapp/node_modules/typescript/lib",
+
+    "biome.configurationPath": "./webapp/biome.json",
+    "biome.lsp.bin": "./webapp/node_modules/.bin/biome",
+
+    "[javascript]": { "editor.defaultFormatter": "biomejs.biome" },
+    "[javascriptreact]": { "editor.defaultFormatter": "biomejs.biome" },
+    "[typescript]": { "editor.defaultFormatter": "biomejs.biome" },
+    "[typescriptreact]": { "editor.defaultFormatter": "biomejs.biome" },
+    "[json]": { "editor.defaultFormatter": "biomejs.biome" },
+    "[jsonc]": { "editor.defaultFormatter": "biomejs.biome" },
+    "[css]": { "editor.defaultFormatter": "biomejs.biome" },
+
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.biome": "always"
+    },
+
     "terminal.integrated.env.linux": {
         "TAURI_APP_PATH": "${workspaceFolder}",
         "TAURI_FRONTEND_PATH": "${workspaceFolder}/webapp"
@@ -17,17 +34,5 @@
     "json.schemaDownload.trustedDomains": {
         "https://raw.githubusercontent.com/": true,
         "https://schema.tauri.app": true
-    },
-
-    "tailwindCSS.experimental.classRegex": [
-        "tw`([^`]*)", // tw`...`
-        "tw=\"([^\"]*)", // <div tw="..." />
-        "tw={\"([^\"}]*)", // <div tw={"..."} />
-        "tw\\.\\w+`([^`]*)", // tw.xxx`...`
-        "tw\\(.*?\\)`([^`]*)" // tw(Component)`...`
-    ],
-    "tailwindCSS.includeLanguages": {
-        "typescript": "javascript",
-        "typescriptreact": "javascript"
     }
 }

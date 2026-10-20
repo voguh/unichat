@@ -8,25 +8,26 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
-import { AccordionItem } from "unichat/components/AccordionItem";
-import { Button } from "unichat/components/Button";
-import { ColorPicker } from "unichat/components/forms/ColorPicker";
+import { ColorPicker } from "@voguh/unichat-ui/components/forms/ColorPicker";
+import { NumberInput } from "@voguh/unichat-ui/components/forms/NumberInput";
+import { Select } from "@voguh/unichat-ui/components/forms/Select";
+import { Switch } from "@voguh/unichat-ui/components/forms/Switch";
+import { Textarea } from "@voguh/unichat-ui/components/forms/Textarea";
+import { TextInput } from "@voguh/unichat-ui/components/forms/TextInput";
+import { Accordion } from "@voguh/unichat-ui/components/ui/Accordion";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { parseColor } from "@voguh/unichat-ui/utils/colorUtils";
 import { GalleryFileInput } from "unichat/components/forms/GalleryFileInput";
-import { NumberInput } from "unichat/components/forms/NumberInput";
-import { Select } from "unichat/components/forms/Select";
-import { Switch } from "unichat/components/forms/Switch";
-import { Textarea } from "unichat/components/forms/Textarea";
-import { TextInput } from "unichat/components/forms/TextInput";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
-import { UniChatWidget, WidgetFields } from "unichat/types";
+import type { UniChatWidget, WidgetFields } from "unichat/types";
 import { Strings } from "unichat/utils/Strings";
 import { isGeneralUserWidget, isSystemWidget } from "unichat/utils/widgetSourceTypeGuards";
 
-import { FieldsStyledContainer } from "./styled";
+import styles from "./styles.module.css";
 
 interface Props {
     widgets: Map<string, UniChatWidget>;
@@ -39,7 +40,6 @@ const _logger = LoggerFactory.getLogger("Fields");
 export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Props): PReact.ComponentChildren {
     const [fields, setFields] = useState<Record<string, WidgetFields> | null>(null);
     const [fieldState, setFieldState] = useState<Record<string, unknown> | null>(null);
-    const [openedItem, setOpenedItem] = useState<string | null>(null);
 
     function buildField(key: string, builder: WidgetFields): PReact.ComponentChildren {
         if (fieldState == null) {
@@ -57,7 +57,7 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         label={builder.label}
                         description={builder.description}
                         checked={value as boolean}
-                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.checked }))}
+                        onCheckedChange={({ checked }) => setFieldState((old) => ({ ...old, [key]: checked }))}
                     />
                 );
             case "colorpicker":
@@ -66,9 +66,11 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         key={key}
                         label={builder.label}
                         description={builder.description}
-                        value={value as string}
+                        value={value ? parseColor(value as string) : undefined}
                         swatches={builder.swatches ?? []}
-                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                        onValueChange={({ valueAsString }) =>
+                            setFieldState((old) => ({ ...old, [key]: valueAsString }))
+                        }
                     />
                 );
             case "dropdown": {
@@ -77,9 +79,9 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         key={key}
                         label={builder.label}
                         description={builder.description}
-                        value={value as string}
-                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
-                        options={Object.entries(builder.options).map(([value, label]) => ({ value, label }))}
+                        value={[value as string]}
+                        onValueChange={({ value }) => setFieldState((old) => ({ ...old, [key]: value[0] }))}
+                        items={Object.entries(builder.options).map(([value, label]) => ({ value, label }))}
                     />
                 );
             }
@@ -92,8 +94,8 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         min={builder.min}
                         max={builder.max}
                         step={builder.step}
-                        value={value as number | undefined}
-                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                        value={value != null ? String(value) : undefined}
+                        onValueChange={({ value }) => setFieldState((old) => ({ ...old, [key]: value }))}
                     />
                 );
             case "textarea":
@@ -141,9 +143,9 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
         const widget = widgets.get(selectedWidget);
 
         if (isSystemWidget(widget)) {
-            return <div className="empty-fields">No editable fields for system widgets.</div>;
+            return <div className={styles.empty}>No editable fields for system widgets.</div>;
         } else if (fields == null || Object.keys(fields).length === 0) {
-            return <div className="empty-fields">No fields defined for this widget.</div>;
+            return <div className={styles.empty}>No fields defined for this widget.</div>;
         }
 
         const groups: Record<string, PReact.ComponentChild[]> = {
@@ -160,20 +162,25 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
             groups[group].push(buildField(key, value));
         }
 
-        return Object.entries(groups)
-            .filter(([_, elements]) => elements.length > 0)
-            .map(([groupName, elements]) => {
-                return (
-                    <AccordionItem
-                        key={groupName}
-                        header={groupName}
-                        open={openedItem === groupName}
-                        toggle={() => setOpenedItem((old) => (old === groupName ? null : groupName))}
-                    >
-                        {elements}
-                    </AccordionItem>
-                );
-            });
+        return (
+            <Accordion.Root collapsible className={styles.accordion}>
+                {Object.entries(groups)
+                    .filter(([_, elements]) => elements.length > 0)
+                    .map(([groupName, elements]) => (
+                        <Accordion.Item key={groupName} value={groupName} className={styles.accordionItem}>
+                            <Accordion.ItemTrigger>
+                                <span className={styles.accordionTitle}>{groupName}</span>
+                                <Accordion.ItemIndicator>
+                                    <i className="fas fa-chevron-down" />
+                                </Accordion.ItemIndicator>
+                            </Accordion.ItemTrigger>
+                            <Accordion.ItemContent className={styles.accordionContent}>
+                                {elements}
+                            </Accordion.ItemContent>
+                        </Accordion.Item>
+                    ))}
+            </Accordion.Root>
+        );
     }
 
     async function handleFetchWidgetData(): Promise<void> {
@@ -194,26 +201,27 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
         await handleFetchWidgetData();
     }
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: componentDidMount
     useEffect(() => {
         handleFetchWidgetData();
     }, [selectedWidget]);
 
     return (
-        <FieldsStyledContainer>
-            <div className="fields--header">
+        <div className={styles.container}>
+            <div className={styles.header}>
                 <span>Fields Editor</span>
                 {fields != null && Object.keys(fields).length > 0 && (
-                    <div className="fields--actions">
-                        <Button variant="default" onClick={() => wrappedReset()}>
+                    <div className={styles.actions}>
+                        <Button variant="default" size="sm" onClick={() => wrappedReset()}>
                             <i className="fas fa-undo" />
                         </Button>
-                        <Button variant="primary" onClick={() => handleApply(fieldState ?? {})}>
+                        <Button variant="primary" size="sm" onClick={() => handleApply(fieldState ?? {})}>
                             Apply
                         </Button>
                     </div>
                 )}
             </div>
-            <div className="fields--content">{buildFieldsEditor()}</div>
-        </FieldsStyledContainer>
+            <div className={styles.content}>{buildFieldsEditor()}</div>
+        </div>
     );
 }

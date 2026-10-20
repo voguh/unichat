@@ -8,9 +8,9 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { Side } from "@floating-ui/dom";
+import type { Side } from "@floating-ui/dom";
 
-import { TourBuilder } from "../Tour";
+import type { TourBuilder } from "../Tour";
 import { stageBuilder } from "./stageBuilder";
 
 export function widgetEditorStageBuilder(
@@ -21,7 +21,7 @@ export function widgetEditorStageBuilder(
 ): TourBuilder {
     const builder = stageBuilder(selector, title, subTitle, placement);
 
-    return async function (container) {
+    return async (container) => {
         const btn = document.querySelector<HTMLButtonElement>("[data-tour='tab-widgetEditor-toggle']");
         if (btn != null && !btn.classList.contains("btn-success")) {
             btn.click();

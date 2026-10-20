@@ -8,9 +8,9 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { Side } from "@floating-ui/dom";
+import type { Side } from "@floating-ui/dom";
 
-import { TourBuilder } from "../Tour";
+import type { TourBuilder } from "../Tour";
 import { stageBuilder } from "./stageBuilder";
 
 export function dashboardStageBuilder(
@@ -22,7 +22,7 @@ export function dashboardStageBuilder(
 ): TourBuilder {
     const builder = stageBuilder(selector, title, subTitle, placement, ignorePrefix);
 
-    return async function (container) {
+    return async (container) => {
         const btn = document.querySelector<HTMLButtonElement>("[data-tour='tab-dashboard-toggle']");
         if (btn != null && !btn.classList.contains("btn-success")) {
             btn.click();

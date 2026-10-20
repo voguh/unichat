@@ -1,7 +1,7 @@
 {
     "name": "@voguh/unichat-api",
     "description": "UniChat API specification for widget and plugin development",
-    "version": "{{UNICHAT_VERSION}}",
+    "version": "0.0.0",
     "license": "{{UNICHAT_LICENSE}}",
     "author": "{{UNICHAT_AUTHOR}}",
     "homepage": "{{UNICHAT_HOMEPAGE}}",

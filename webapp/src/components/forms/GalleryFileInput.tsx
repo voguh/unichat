@@ -8,24 +8,27 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useRef, useState } from "preact/hooks";
 
-import { GalleryModalActions, GalleryModal, GalleryTabs } from "unichat/__internal__/GalleryModal";
+import { TextInput, type TextInputProps } from "@voguh/unichat-ui/components/forms/TextInput";
+import { GalleryModal, GalleryModalActions, type GalleryTabs } from "unichat/__internal__/GalleryModal";
 import { modalService } from "unichat/services/modalService";
 import { mergeRefs } from "unichat/utils/mergeRefs";
 
-import { splitProperties } from "./__utils__/splitProperties";
-import { FormGroup, FormGroupBaseProps } from "./FormGroup";
-
-type VanillaProps = Omit<PReact.InputHTMLAttributes<HTMLInputElement>, "type">;
-interface GalleryInputProps extends VanillaProps, FormGroupBaseProps {
+interface GalleryInputProps extends Omit<TextInputProps, "type"> {
     showTabs?: GalleryTabs[];
     inputRef?: PReact.Ref<HTMLInputElement>;
 }
 
-export function GalleryFileInput({ showTabs, inputRef, id, ...props }: GalleryInputProps): PReact.ComponentChildren {
-    const [formGroupProps, dataProps, { value, defaultValue, onClick, ...inputProps }] = splitProperties(props);
+export function GalleryFileInput({
+    showTabs,
+    inputRef,
+    value,
+    defaultValue,
+    onClick,
+    ...props
+}: GalleryInputProps): PReact.ComponentChildren {
     const isControlled = value !== undefined;
 
     const [innerValue, setInnerValue] = useState(() => value ?? defaultValue ?? "");
@@ -87,17 +90,13 @@ export function GalleryFileInput({ showTabs, inputRef, id, ...props }: GalleryIn
     }
 
     return (
-        <FormGroup id={id} {...formGroupProps} {...dataProps}>
-            <div className="GalleryFileInput-container">
-                <input
-                    {...inputProps}
-                    value={currentValue}
-                    ref={mergeRefs(inputRef, innerRef)}
-                    readOnly
-                    type="text"
-                    onClick={handleClick}
-                />
-            </div>
-        </FormGroup>
+        <TextInput
+            {...props}
+            value={currentValue}
+            ref={mergeRefs(inputRef, innerRef)}
+            readOnly
+            type="text"
+            onClick={handleClick}
+        />
     );
 }

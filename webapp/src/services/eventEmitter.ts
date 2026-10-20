@@ -10,8 +10,8 @@
 
 import mitt from "mitt";
 
-import { OpenModalOptions } from "./modalService";
-import { NotificationOptions } from "./notificationService";
+import type { OpenModalOptions } from "./modalService";
+import type { NotificationOptions } from "./notificationService";
 
 export interface RichModalWrapperProps extends OpenModalOptions {
     modalId: string;

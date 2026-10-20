@@ -214,7 +214,9 @@ export async function randomizeMessage(rng: () => number): Promise<[string, UniC
         () => {
             const emotes = pickRandomEmotes();
             let msg = `${pRng(pronouns)} ${pRng(verbs)} ${pRng(nouns)}`;
-            emotes.forEach((e) => (msg += ` ${e.code}`));
+            for (const emote of emotes) {
+                msg += ` ${emote.code}`;
+            }
             msg += " .";
 
             return [msg, emotes];

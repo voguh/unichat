@@ -1,0 +1,92 @@
+/*!******************************************************************************
+ * Copyright (c) 2024-2026 Voguh
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ******************************************************************************/
+
+@import "@voguh/unichat-ui/styles/global.css";
+
+html,
+body,
+#root {
+    @apply w-full h-full m-0 p-0 relative overflow-hidden;
+}
+
+body,
+#root {
+    @apply bg-stone-950 text-stone-50 overflow-hidden;
+}
+
+#root {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+
+    > .sidebar {
+        @apply bg-stone-900 border-r border-stone-800;
+        @apply flex flex-col justify-between p-2;
+
+        grid-column: 1;
+
+        button {
+            @apply p-0 size-10 flex justify-center items-center;
+        }
+
+        > .sidebar__tabs {
+            @apply flex flex-col items-center gap-2;
+
+            > .sidebar__left-section {
+                @apply flex flex-col items-center gap-2;
+
+                > .sidebar__divider {
+                    @apply w-full border-t border-stone-700 my-2;
+                }
+            }
+        }
+
+        > .sidebar__footer {
+            @apply flex flex-col items-center gap-2;
+        }
+    }
+
+    > .content {
+        grid-column: 2;
+    }
+}
+
+.fa,
+.fas,
+.far,
+.fal,
+.fab,
+.fa-solid,
+.fa-regular,
+.fa-light,
+.fa-brands {
+    text-align: center;
+    width: 1.25em;
+}
+
+hr {
+    @apply border-t border-stone-800 my-2 w-full;
+}
+
+::-webkit-scrollbar {
+    @apply w-2;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-stone-700;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-stone-950/50 rounded-xs;
+
+    &:hover {
+        @apply bg-stone-950/75;
+    }
+}

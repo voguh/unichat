@@ -8,15 +8,15 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useContext } from "preact/hooks";
 
-import { Button } from "unichat/components/Button";
-import { Tooltip } from "unichat/components/Tooltip";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
 import { ModalContext } from "unichat/contexts/ModalContext";
-import { GalleryItem } from "unichat/types";
+import type { GalleryItem } from "unichat/types";
 
-import { GalleryItemDisplayStyledContainer } from "./styled";
+import styles from "./styles.module.css";
 
 interface Props extends GalleryItem {
     selected?: boolean;
@@ -31,7 +31,7 @@ export function GalleryItemDisplay(props: Props): PReact.ComponentChildren {
     function renderPreview(): PReact.ComponentChildren {
         if ((previewUrl ?? "").trim().length > 0) {
             if (type === "image") {
-                return <img src={previewUrl} alt={title} />;
+                return <img src={previewUrl} />;
             } else if (type === "video") {
                 return <video src={previewUrl} controls />;
             } else if (type === "audio") {
@@ -39,19 +39,22 @@ export function GalleryItemDisplay(props: Props): PReact.ComponentChildren {
             }
         }
 
-        return <img src="https://placehold.co/600x400?text=No+Preview" alt="No Preview Available" />;
+        return <img src="https://placehold.co/600x400?text=No+Preview" />;
     }
 
     return (
-        <GalleryItemDisplayStyledContainer>
-            <div className="gallery-item--name">
-                <Tooltip content={title} placement="top">
-                    <span>{title}</span>
-                </Tooltip>
+        <div className={styles.container}>
+            <div className={styles.name}>
+                <Tooltip.Root positioning={{ placement: "top" }}>
+                    <Tooltip.Trigger asChild>
+                        <span>{title}</span>
+                    </Tooltip.Trigger>
+                    <Tooltip.Content>{title}</Tooltip.Content>
+                </Tooltip.Root>
             </div>
-            <div className="gallery-item--preview">{renderPreview()}</div>
+            <div className={styles.preview}>{renderPreview()}</div>
             {!!onSelectItem && (
-                <div className="gallery-item--footer">
+                <div className={styles.footer}>
                     <Button
                         variant={selected ? "success" : "secondary"}
                         disabled={selected}
@@ -61,6 +64,6 @@ export function GalleryItemDisplay(props: Props): PReact.ComponentChildren {
                     </Button>
                 </div>
             )}
-        </GalleryItemDisplayStyledContainer>
+        </div>
     );
 }

@@ -8,47 +8,32 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
-import { openUrl } from "@tauri-apps/plugin-opener";
-import { generate } from "lean-qr";
-
-import { Button } from "unichat/components/Button";
-import { Option, Select } from "unichat/components/forms/Select";
-import { TextInput } from "unichat/components/forms/TextInput";
-import { Tooltip } from "unichat/components/Tooltip";
+import { Select } from "@voguh/unichat-ui/components/forms/Select";
+import { Clipboard } from "@voguh/unichat-ui/components/ui/Clipboard";
+import { QrCode } from "@voguh/unichat-ui/components/ui/QrCode";
+import type { SelectItem } from "@voguh/unichat-ui/components/ui/Select";
 import { commandService } from "unichat/services/commandService";
 
-import { QRCodeModalStyledContainer } from "./styled";
+import styles from "./styles.module.css";
 
 interface Props {
     baseUrl: string;
 }
 
 export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
-    const [systemHosts, setSystemHosts] = useState<Option[]>([]);
+    const [systemHosts, setSystemHosts] = useState<SelectItem[]>([]);
     const [selectedHost, setSelectedHost] = useState<string>("localhost");
     const [selectedHostQrCodeUrl, setSelectedHostQrCodeUrl] = useState<string>(baseUrl);
-    const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
-
-    function encodeQR(hostUrl: string): void {
-        if (hostUrl == null) {
-            return;
-        }
-
-        const qrCode = generate(hostUrl);
-        const dataUrl = qrCode.toDataURL({ scale: 10, pad: 1 });
-        setQrCodeDataUrl(dataUrl);
-    }
 
     function onSelectHost(value: string): void {
-        const hostUrl = baseUrl.replace("localhost", value);
-        setSelectedHostQrCodeUrl(hostUrl);
+        setSelectedHostQrCodeUrl(baseUrl.replace("localhost", value));
         setSelectedHost(value);
-        encodeQR(hostUrl);
     }
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: componentDidMount
     useEffect(() => {
         async function init(): Promise<void> {
             const systemHosts = await commandService.getSystemHosts();
@@ -68,36 +53,44 @@ export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
 
     if (!systemHosts || systemHosts.length === 0) {
         return (
-            <QRCodeModalStyledContainer>
-                <div className="qrcode-label">No available network interfaces found to generate QR code.</div>
-            </QRCodeModalStyledContainer>
+            <div className={styles.container}>
+                <div className={styles.label}>No available network interfaces found to generate QR code.</div>
+            </div>
         );
     }
 
     return (
-        <QRCodeModalStyledContainer>
+        <div className={styles.container}>
             {systemHosts.length > 1 && (
                 <Select
                     label="Select Network Interface"
-                    options={systemHosts}
-                    value={selectedHost}
-                    onChange={(evt) => onSelectHost(evt.currentTarget.value)}
+                    groupProps={{ className: styles.fullWidth }}
+                    items={systemHosts}
+                    value={[selectedHost]}
+                    onValueChange={({ value }) => onSelectHost(value[0])}
                 />
             )}
             {selectedHostQrCodeUrl && (
                 <>
-                    <div className="qrcode-label">Scan this QR code with your device to open</div>
-                    <div className="qrcode">{qrCodeDataUrl && <img src={qrCodeDataUrl} alt="QR Code" />}</div>
-                    <div className="qrcode-url">
-                        <TextInput value={selectedHostQrCodeUrl} readonly onClick={(e) => e.currentTarget.select()} />
-                        <Tooltip placement="left" content="Open in browser">
-                            <Button onClick={() => openUrl(selectedHostQrCodeUrl)}>
-                                <i className="fas fa-external-link-alt" />
-                            </Button>
-                        </Tooltip>
-                    </div>
+                    <div className={styles.label}>Scan this QR code with your device to open</div>
+                    <QrCode.Root value={selectedHostQrCodeUrl} className={styles.qrcode}>
+                        <QrCode.Frame />
+                    </QrCode.Root>
+                    <Clipboard.Root value={selectedHostQrCodeUrl} className={styles.fullWidth}>
+                        <Clipboard.Control>
+                            <Clipboard.Input />
+                            <Clipboard.Trigger>
+                                <Clipboard.Indicator copied>
+                                    <i className="fas fa-check" />
+                                </Clipboard.Indicator>
+                                <Clipboard.Indicator copied={false}>
+                                    <i className="fas fa-copy" />
+                                </Clipboard.Indicator>
+                            </Clipboard.Trigger>
+                        </Clipboard.Control>
+                    </Clipboard.Root>
                 </>
             )}
-        </QRCodeModalStyledContainer>
+        </div>
     );
 }

@@ -8,15 +8,15 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { Button } from "unichat/components/Button";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
-import { eventEmitter, EventEmitterEvents } from "unichat/services/eventEmitter";
+import { type EventEmitterEvents, eventEmitter } from "unichat/services/eventEmitter";
 
 import { dashboardStageBuilder } from "./stages/dashboardStageBuilder";
 import { modalStageBuilder } from "./stages/modalStageBuilder";
@@ -24,7 +24,7 @@ import { settingsModalStageBuilder } from "./stages/settingsModalStageBuilder";
 import { stageBuilder } from "./stages/stageBuilder";
 import { welcomeStageBuilder } from "./stages/welcomeStageBuilder";
 import { widgetEditorStageBuilder } from "./stages/widgetEditorStageBuilder";
-import { TourStyledContainer } from "./styled";
+import styles from "./styles.module.css";
 
 interface Props {
     children?: PReact.ComponentChildren;
@@ -284,10 +284,12 @@ export function Tour(_props: Props): PReact.ComponentChildren {
         init(completedSteps);
     }
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: run stepHandler whenever currentStep changes
     useEffect(() => {
         stepHandler();
     }, [currentStep]);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: componentDidMount
     useEffect(() => {
         commandService.getTourSteps().then(async (completedSteps) => {
             await new Promise((resolve) => setTimeout(resolve, 500));
@@ -302,31 +304,31 @@ export function Tour(_props: Props): PReact.ComponentChildren {
     }, []);
 
     return (
-        <TourStyledContainer style={{ visibility: currentStep === -1 ? "hidden" : "visible" }}>
-            <div className="tour-container" ref={svgRef}></div>
-            <div className="tour-actions">
-                <Button disabled={currentStep === 0} onClick={previousStage} className="tour-prev">
+        <div style={{ visibility: currentStep === -1 ? "hidden" : "visible" }}>
+            <div className={styles.stage} ref={svgRef}></div>
+            <div className={styles.actions}>
+                <Button disabled={currentStep === 0} onClick={previousStage}>
                     <i className="fas fa-chevron-left" />
                     Previous
                 </Button>
 
-                <Button disabled={currentStep === stepsToRun.length - 1} onClick={nextStage} className="tour-next">
+                <Button disabled={currentStep === stepsToRun.length - 1} onClick={nextStage}>
                     Next
                     <i className="fas fa-chevron-right" />
                 </Button>
             </div>
 
             {stepsToRun.length === 1 || currentStep === stepsToRun.length - 1 ? (
-                <Button variant="success" onClick={endTour} className="tour-end">
+                <Button variant="success" onClick={endTour} className={styles.skip}>
                     <i className="fas fa-check" />
                     End Tour
                 </Button>
             ) : (
-                <Button onClick={endTour} className="tour-skip">
+                <Button onClick={endTour} className={styles.skip}>
                     <i className="fas fa-times" />
                     Skip Tour
                 </Button>
             )}
-        </TourStyledContainer>
+        </div>
     );
 }

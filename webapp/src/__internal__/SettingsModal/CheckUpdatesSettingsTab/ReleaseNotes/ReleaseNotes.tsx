@@ -8,16 +8,16 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { Badge } from "unichat/components/Badge";
-import { Button } from "unichat/components/Button";
-import { Markdown } from "unichat/components/Markdown";
-import { UniChatRelease } from "unichat/types";
+import { Markdown } from "@voguh/unichat-ui/components/Markdown";
+import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import type { UniChatRelease } from "unichat/types";
 
-import { ReleaseNotesWrapper } from "./styled";
+import styles from "./styles.module.css";
 
 interface Props {
     release: UniChatRelease | null;
@@ -25,24 +25,24 @@ interface Props {
 
 export function ReleaseNotes({ release }: Props): PReact.ComponentChildren {
     if (release == null) {
-        return <div style={{ padding: "16px" }}>No stable release available.</div>;
+        return <div className={styles.empty}>No stable release available.</div>;
     }
 
     return (
-        <ReleaseNotesWrapper>
-            <div className="release-name">
-                <div className="release-data">
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <div className={styles.name}>
                     {release.name}
                     <Badge variant={release.prerelease ? "warning" : "success"}>
                         {release.prerelease ? "Unstable" : "Stable"}
                     </Badge>
                 </div>
-                <div className="release-download">
+                <div>
                     <Button onClick={() => openUrl(release.url)}>View release page</Button>
                 </div>
             </div>
 
-            <Markdown className="release-notes" content={release.description} />
-        </ReleaseNotesWrapper>
+            <Markdown content={release.description} />
+        </div>
     );
 }

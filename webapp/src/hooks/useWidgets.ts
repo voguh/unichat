@@ -11,7 +11,7 @@
 import { useEffect, useState } from "preact/hooks";
 
 import { commandService } from "unichat/services/commandService";
-import { UniChatWidget } from "unichat/types";
+import type { UniChatWidget } from "unichat/types";
 
 type Transformer<T = UniChatWidget> = (widgets: UniChatWidget[]) => T;
 
@@ -32,6 +32,7 @@ export function useWidgets<T = UniChatWidget>(transformer: Transformer<T>, defau
         setTransformedData(transformedValue);
     }
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: componentDidMount
     useEffect(() => {
         updateWidgets();
     }, []);

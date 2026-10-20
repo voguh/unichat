@@ -8,7 +8,12 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { originalPositionFor, TraceMap, InvalidOriginalMapping, OriginalMapping } from "@jridgewell/trace-mapping";
+import {
+    type InvalidOriginalMapping,
+    type OriginalMapping,
+    originalPositionFor,
+    TraceMap
+} from "@jridgewell/trace-mapping";
 
 import { Strings } from "unichat/utils/Strings";
 

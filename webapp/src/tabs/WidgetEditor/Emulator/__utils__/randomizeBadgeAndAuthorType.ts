@@ -41,12 +41,14 @@ export function randomizeBadgeAndAuthorType(
     }
 
     if (plt === "twitch") {
-        if (rng() < 0.5) {
+        const roll = rng();
+
+        if (roll < 0.5) {
             badges.push({
                 code: "partner/1",
                 url: "https://static-cdn.jtvnw.net/badges/v1/d12a2e27-16f6-41d0-ab77-b780518f00a3/3"
             });
-        } else if (rng() < 0.5) {
+        } else if (roll < 0.75) {
             badges.push({
                 code: "twitch-dj/1",
                 url: "https://static-cdn.jtvnw.net/badges/v1/cf91bbc0-0332-413a-a7f3-e36bac08b624/3"
@@ -63,12 +65,14 @@ export function randomizeBadgeAndAuthorType(
     }
 
     if (plt === "youtube") {
-        if (rng() < 0.5) {
+        const roll = rng();
+
+        if (roll < 0.5) {
             badges.push({
                 code: "verified",
                 url: "/assets/youtube/YouTubeVerified.png"
             });
-        } else if (rng() < 0.5) {
+        } else if (roll < 0.75) {
             badges.push({
                 code: "verified-artist",
                 url: "/assets/youtube/YouTubeArtist.png"

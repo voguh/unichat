@@ -8,15 +8,23 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { Option, OptionGroupBase } from "unichat/components/forms/Select";
-import { UniChatWidget } from "unichat/types";
+import type { SelectItem, SelectItemGroup } from "@voguh/unichat-ui/components/ui/Select";
+import type { UniChatWidget } from "unichat/types";
 
 import { isSystemWidget, isUserWidget } from "./widgetSourceTypeGuards";
 
-export function toWidgetOptionGroup(widgets: Iterable<UniChatWidget>): OptionGroupBase<Option>[] {
-    const systemWidgets = [];
-    const userWidgets = [];
-    const pluginWidgets = [];
+export interface WidgetSelectItem extends SelectItem {
+    warnings: string[];
+}
+
+export interface WidgetSelectItemGroup extends SelectItemGroup {
+    items: WidgetSelectItem[];
+}
+
+export function toWidgetOptionGroup(widgets: Iterable<UniChatWidget>): WidgetSelectItemGroup[] {
+    const systemWidgets: WidgetSelectItem[] = [];
+    const userWidgets: WidgetSelectItem[] = [];
+    const pluginWidgets: WidgetSelectItem[] = [];
 
     for (const widget of widgets) {
         if (widget.restPath === "example") {
@@ -32,26 +40,26 @@ export function toWidgetOptionGroup(widgets: Iterable<UniChatWidget>): OptionGro
         }
     }
 
-    const options: OptionGroupBase<Option>[] = [];
+    const options: WidgetSelectItemGroup[] = [];
 
     if (systemWidgets.length > 0) {
         options.push({
             label: "System Widgets",
-            options: systemWidgets.sort((a, b) => a.label.localeCompare(b.label))
+            items: systemWidgets.sort((a, b) => a.label.localeCompare(b.label))
         });
     }
 
     if (userWidgets.length > 0) {
         options.push({
             label: "User Widgets",
-            options: userWidgets.sort((a, b) => a.label.localeCompare(b.label))
+            items: userWidgets.sort((a, b) => a.label.localeCompare(b.label))
         });
     }
 
     if (pluginWidgets.length > 0) {
         options.push({
             label: "Plugin Widgets",
-            options: pluginWidgets.sort((a, b) => a.label.localeCompare(b.label))
+            items: pluginWidgets.sort((a, b) => a.label.localeCompare(b.label))
         });
     }
 

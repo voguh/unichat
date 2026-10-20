@@ -8,23 +8,29 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 
-import { LoadingOverlay } from "unichat/components/LoadingOverlay";
-import { Tab, Tabs } from "unichat/components/Tabs";
+import { Loading } from "@voguh/unichat-ui/components/Loading";
+import { Tabs } from "@voguh/unichat-ui/components/ui/Tabs";
 import { ModalContext } from "unichat/contexts/ModalContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { notificationService } from "unichat/services/notificationService";
-import { GalleryItem } from "unichat/types";
+import type { GalleryItem } from "unichat/types";
 
 import { GalleryItemDisplay } from "./GalleryItemDisplay";
 import { GalleyCustomDisplay } from "./GalleyCustomDisplay";
 import { GalleyTabEmpty } from "./GalleyTabEmpty";
-import { GalleryModalStyledContainer, GalleryTabContainer } from "./styled";
+import styles from "./styles.module.css";
 
 export type GalleryTabs = GalleryItem["type"] | "custom";
+
+interface Tab {
+    id: string;
+    title: string;
+    content: PReact.ComponentChild;
+}
 
 interface Props {
     showTabs?: Omit<GalleryTabs, "custom">[];
@@ -63,7 +69,7 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
             tabs.push({
                 id: "image",
                 title: "Images",
-                content: <GalleryTabContainer>{printGalleryItems("image")}</GalleryTabContainer>
+                content: <div className={styles.tabContainer}>{printGalleryItems("image")}</div>
             });
         }
 
@@ -71,7 +77,7 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
             tabs.push({
                 id: "video",
                 title: "Videos",
-                content: <GalleryTabContainer>{printGalleryItems("video")}</GalleryTabContainer>
+                content: <div className={styles.tabContainer}>{printGalleryItems("video")}</div>
             });
         }
 
@@ -79,14 +85,14 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
             tabs.push({
                 id: "audio",
                 title: "Audios",
-                content: <GalleryTabContainer>{printGalleryItems("audio")}</GalleryTabContainer>
+                content: <div className={styles.tabContainer}>{printGalleryItems("audio")}</div>
             });
         }
         if (showTabs.includes("file")) {
             tabs.push({
                 id: "file",
                 title: "Others",
-                content: <GalleryTabContainer>{printGalleryItems("file")}</GalleryTabContainer>
+                content: <div className={styles.tabContainer}>{printGalleryItems("file")}</div>
             });
         }
 
@@ -95,9 +101,9 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
                 id: "custom",
                 title: "Custom",
                 content: (
-                    <GalleryTabContainer>
+                    <div className={styles.tabContainer}>
                         <GalleyCustomDisplay selectedItem={selectedItem} onSelectItem={onSelectItem} />
-                    </GalleryTabContainer>
+                    </div>
                 )
             });
         }
@@ -105,30 +111,45 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
         return tabs;
     }
 
-    async function handleFetchGalleryItems(): Promise<void> {
-        try {
-            const items = await commandService.getGalleryItems();
-            setGalleryItems(items);
-        } catch (error) {
-            _logger.error("An error occurred on fetch gallery items", error);
-
-            notificationService.error({
-                title: "Fetch Error",
-                message: "An error occurred while fetching gallery items."
-            });
-        }
-    }
-
     useEffect(() => {
+        async function handleFetchGalleryItems(): Promise<void> {
+            try {
+                const items = await commandService.getGalleryItems();
+                setGalleryItems(items);
+            } catch (error) {
+                _logger.error("An error occurred on fetch gallery items", error);
+
+                notificationService.error({
+                    title: "Fetch Error",
+                    message: "An error occurred while fetching gallery items."
+                });
+            }
+        }
+
         if (!sharedStore.uploading) {
             handleFetchGalleryItems();
         }
     }, [sharedStore.uploading]);
 
+    const tabs = buildTabs();
+
     return (
-        <GalleryModalStyledContainer>
-            <LoadingOverlay visible={sharedStore.uploading} />
-            <Tabs initialTab={startSelectedTab} tabs={buildTabs()} />
-        </GalleryModalStyledContainer>
+        <>
+            <Loading show={!!sharedStore.uploading} label="Uploading" />
+            <Tabs.Root defaultValue={startSelectedTab ?? tabs[0].id}>
+                <Tabs.List>
+                    {tabs.map((tab) => (
+                        <Tabs.Trigger key={tab.id} value={tab.id}>
+                            {tab.title}
+                        </Tabs.Trigger>
+                    ))}
+                </Tabs.List>
+                {tabs.map((tab) => (
+                    <Tabs.Content key={tab.id} value={tab.id}>
+                        {tab.content}
+                    </Tabs.Content>
+                ))}
+            </Tabs.Root>
+        </>
     );
 }

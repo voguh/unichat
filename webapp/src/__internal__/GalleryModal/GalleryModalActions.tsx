@@ -8,14 +8,14 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useContext } from "preact/hooks";
 
 import * as dialog from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
-import { Button } from "unichat/components/Button";
-import { Tooltip } from "unichat/components/Tooltip";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
 import { ModalContext } from "unichat/contexts/ModalContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
@@ -46,11 +46,14 @@ export function GalleryModalActions(): PReact.ComponentChildren {
                 <i className="fas fa-upload" />
                 Add to Gallery
             </Button>
-            <Tooltip placement="bottom" content="Show Gallery Folder">
-                <Button variant="secondary" onClick={() => revealItemInDir(UNICHAT_GALLERY_DIR)}>
-                    <i className="fas fa-folder" />
-                </Button>
-            </Tooltip>
+            <Tooltip.Root positioning={{ placement: "bottom" }}>
+                <Tooltip.Trigger asChild>
+                    <Button variant="secondary" onClick={() => revealItemInDir(UNICHAT_GALLERY_DIR)}>
+                        <i className="fas fa-folder" />
+                    </Button>
+                </Tooltip.Trigger>
+                <Tooltip.Content>Show Gallery Folder</Tooltip.Content>
+            </Tooltip.Root>
         </>
     );
 }

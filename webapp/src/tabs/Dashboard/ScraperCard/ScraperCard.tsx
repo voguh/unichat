@@ -8,31 +8,31 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 
 import * as eventService from "@tauri-apps/api/event";
 
-import { Badge } from "unichat/components/Badge";
-import { Button } from "unichat/components/Button";
-import { TextInput } from "unichat/components/forms/TextInput";
-import { Popover } from "unichat/components/Popover";
+import { TextInput } from "@voguh/unichat-ui/components/forms/TextInput";
+import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { Popover } from "@voguh/unichat-ui/components/ui/Popover";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
 import { notificationService } from "unichat/services/notificationService";
 import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
-import { UniChatScraper } from "unichat/types";
+import type { UniChatScraper } from "unichat/types";
 import {
     IPCEvents,
-    IPCStatusEvent,
+    type IPCStatusEvent,
     SCRAPER_LIFECYCLE_STATUSES,
     SCRAPER_RUNNING_STATUSES,
     ScraperStatus
 } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
 
-import { ScraperCardContainer, ScraperLabel } from "./styled";
+import styles from "./styles.module.css";
 
 interface Props {
     editingTooltip: PReact.ComponentChildren;
@@ -108,6 +108,7 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
         }
     }
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: componentDidMount
     useEffect(() => {
         async function init(): Promise<void> {
             setLoading(true);
@@ -136,6 +137,7 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
         init();
     }, []);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: componentDidMount
     useEffect(() => {
         const unListen = eventService.listen<IPCStatusEvent>(IPCEvents.STATUS_EVENT, ({ payload }) => {
             if (payload.scraperId !== scraper.id) {
@@ -180,42 +182,47 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
     }, []);
 
     return (
-        <ScraperCardContainer
+        <div
+            className={styles.card}
             data-active={scraperIsRunning ? "true" : "false"}
             data-loading={loading || scraperIsLoading ? "true" : "false"}
         >
-            <div className="scraper-badges-wrapper">
+            <div className={styles.badges}>
                 {scraper.badges.map((badge) => (
                     <Badge key={badge} variant="secondary">
                         {badge.toUpperCase()}
                     </Badge>
                 ))}
             </div>
-            <div className="scraper-card-body">
-                <Popover content={editingTooltip} placement="bottom-start" trigger="focus">
-                    <TextInput
-                        label={
-                            <ScraperLabel>
-                                <div
-                                    className="scraper-icon"
-                                    data-active={scraperIsRunning ? "true" : "false"}
-                                    data-loading={loading || scraperIsLoading ? "true" : "false"}
-                                >
-                                    {scraper.icon.startsWith("data:") ? (
-                                        <img src={scraper.icon} />
-                                    ) : (
-                                        <i className={scraper.icon} />
-                                    )}
+            <div className={styles.body}>
+                <Popover.Root openOn="focus" positioning={{ placement: "bottom-start" }}>
+                    <Popover.Anchor data-tour={`${scraper.id}--url-input`}>
+                        <TextInput
+                            label={
+                                <div className={styles.label}>
+                                    <div
+                                        className={styles.icon}
+                                        data-active={scraperIsRunning ? "true" : "false"}
+                                        data-loading={loading || scraperIsLoading ? "true" : "false"}
+                                    >
+                                        {scraper.icon.startsWith("data:") ? (
+                                            <img src={scraper.icon} />
+                                        ) : (
+                                            <i className={scraper.icon} />
+                                        )}
+                                    </div>
+                                    {`${scraper.name} chat URL`}
                                 </div>
-                                {`${scraper.name} chat URL`}
-                            </ScraperLabel>
-                        }
-                        placeholder={scraper.placeholderText}
-                        inputRef={inputRef}
-                        disabled={loading || scraperIsLoading || scraperIsRunning}
-                        data-tour={`${scraper.id}--url-input`}
-                    />
-                </Popover>
+                            }
+                            placeholder={scraper.placeholderText}
+                            ref={inputRef}
+                            disabled={loading || scraperIsLoading || scraperIsRunning}
+                        />
+                    </Popover.Anchor>
+                    <Popover.Content>
+                        <div className={styles.popoverBody}>{editingTooltip}</div>
+                    </Popover.Content>
+                </Popover.Root>
                 <Button
                     variant="secondary"
                     onClick={scraperIsRunning ? handleStop : handleStart}
@@ -229,12 +236,12 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                         variant="default"
                         onClick={() => commandService.toggleScraperWebview(scraper.id)}
                         disabled={loading || scraperIsLoading}
-                        style={{ width: 36 }}
+                        className={styles.iconButton}
                     >
                         <i className="fas fa-window-restore" />
                     </Button>
                 )}
             </div>
-        </ScraperCardContainer>
+        </div>
     );
 }

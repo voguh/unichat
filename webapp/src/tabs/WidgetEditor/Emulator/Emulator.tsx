@@ -8,20 +8,21 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useState } from "preact/hooks";
 
-import { UniChatEvent, UniChatPlatform } from "@voguh/unichat-api/widgets/events";
-import { Button } from "unichat/components/Button";
-import { Option, Select } from "unichat/components/forms/Select";
-import { Switch } from "unichat/components/forms/Switch";
-import { Tooltip } from "unichat/components/Tooltip";
+import type { UniChatEvent, UniChatPlatform } from "@voguh/unichat-api/widgets/events";
+import { Select } from "@voguh/unichat-ui/components/forms/Select";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import type { SelectItem } from "@voguh/unichat-ui/components/ui/Select";
+import { Switch } from "@voguh/unichat-ui/components/ui/Switch";
+import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
 import { commandService } from "unichat/services/commandService";
 
-import { buildEmulatedEventData, EmulatedEventType } from "./__utils__/buildEmulatedEventData";
-import { EmulatorStyledContainer } from "./styled";
+import { buildEmulatedEventData, type EmulatedEventType } from "./__utils__/buildEmulatedEventData";
+import styles from "./styles.module.css";
 
-const opModeOptions: Option[] = [
+const opModeOptions: SelectItem[] = [
     { value: "mixed", label: "Mixed" },
     { value: "twitch", label: "Twitch Only" },
     { value: "youtube", label: "YouTube Only" }
@@ -54,40 +55,38 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
 
     function buildTooltipContent(): PReact.ComponentChildren {
         return (
-            <>
-                <ul>
-                    <li>
-                        <strong>Global</strong>: The events emitted by this emulator will be dispatched globally and can
-                        be received by other widgets as well.
-                    </li>
-                    <li>
-                        <strong>Emulator Only</strong>: The events emitted by this emulator will only be dispatched to
-                        the emulator itself.
-                    </li>
-                </ul>
-            </>
+            <ul>
+                <li>
+                    <strong>Global</strong>: The events emitted by this emulator will be dispatched globally and can be
+                    received by other widgets as well.
+                </li>
+                <li>
+                    <strong>Emulator Only</strong>: The events emitted by this emulator will only be dispatched to the
+                    emulator itself.
+                </li>
+            </ul>
         );
     }
 
     return (
-        <EmulatorStyledContainer>
-            <div className="emulator--header">Emulator</div>
+        <div className={styles.container}>
+            <div className={styles.header}>Emulator</div>
 
-            <div className="emulator--operation-mode-select">
+            <div className={styles.operationMode}>
                 <Select
                     label="Emulation Mode"
-                    value={emulationMode}
-                    options={opModeOptions}
-                    onChange={(evt) => setEmulationMode(evt.currentTarget.value)}
+                    value={[emulationMode]}
+                    items={opModeOptions}
+                    onValueChange={({ value }) => setEmulationMode(value[0])}
                 />
                 <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:clear")}>
                     <i className="fas fa-eraser" />
                 </Button>
             </div>
 
-            <div className="emulator--events-dispatcher" data-tour="widget-editor-emulator-events-dispatcher">
-                <div className="emulator--events-title">Emit Events</div>
-                <div className="emulator--button_group">
+            <div className={styles.events} data-tour="widget-editor-emulator-events-dispatcher">
+                <div className={styles.eventsTitle}>Emit Events</div>
+                <div className={styles.buttonGroup}>
                     <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:message")}>
                         <i className="fas fa-comment" />
                         Message
@@ -119,22 +118,25 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
                 </div>
             </div>
 
-            <div className="emulator--emulation-target" data-tour="widget-editor-emulator-target-selector">
-                <Tooltip content={buildTooltipContent()}>
-                    <div className="emulator--target-title">
-                        Emulation Target
-                        <i className="fas fa-info-circle" />
-                    </div>
-                </Tooltip>
+            <div className={styles.target} data-tour="widget-editor-emulator-target-selector">
+                <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                        <div className={styles.targetTitle}>
+                            Emulation Target
+                            <i className="fas fa-info-circle" />
+                        </div>
+                    </Tooltip.Trigger>
+                    <Tooltip.Content>{buildTooltipContent()}</Tooltip.Content>
+                </Tooltip.Root>
 
-                <div className="emulator--emulation-target-select">
+                <div className={styles.targetSelect}>
                     <div>Global</div>
                     <div>
-                        <Switch checked={emulatorOnly} onChange={(evt) => setEmulatorOnly(evt.currentTarget.checked)} />
+                        <Switch checked={emulatorOnly} onCheckedChange={({ checked }) => setEmulatorOnly(checked)} />
                     </div>
                     <div>Emulator Only</div>
                 </div>
             </div>
-        </EmulatorStyledContainer>
+        </div>
     );
 }

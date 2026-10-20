@@ -8,20 +8,20 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
-import { Badge } from "unichat/components/Badge";
-import { Button } from "unichat/components/Button";
+import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { EmptyState } from "@voguh/unichat-ui/components/ui/EmptyState";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
 import { notificationService } from "unichat/services/notificationService";
-import { UniChatPluginMetadata } from "unichat/types";
-import { Strings } from "unichat/utils/Strings";
+import type { UniChatPluginMetadata } from "unichat/types";
 
 import { PluginOverviewModal, PluginOverviewModalActions } from "./PluginOverview";
-import { PluginsStyledContainer } from "./styled";
+import styles from "./styles.module.css";
 import { getPluginIconDataUrl } from "./utils/getPluginIconDataUrl";
 import { handleBadgeVariant } from "./utils/handleBadgeVariant";
 
@@ -38,47 +38,54 @@ export function PluginsModal(): PReact.ComponentChildren {
         });
     }
 
-    async function handleFetchPlugins(): Promise<void> {
-        try {
-            const items = await commandService.getPlugins();
-            setPlugins(items);
-        } catch (error) {
-            _logger.error("An error occurred on fetch plugins", error);
-
-            notificationService.error({ title: "Fetch Error", message: "An error occurred while fetching plugins." });
-        }
-    }
-
     useEffect(() => {
+        async function handleFetchPlugins(): Promise<void> {
+            try {
+                const items = await commandService.getPlugins();
+                setPlugins(items);
+            } catch (error) {
+                _logger.error("An error occurred on fetch plugins", error);
+
+                notificationService.error({
+                    title: "Fetch Error",
+                    message: "An error occurred while fetching plugins."
+                });
+            }
+        }
+
         handleFetchPlugins();
     }, []);
 
+    if (plugins.length === 0) {
+        return <EmptyState icon={<i className="fas fa-cubes" />} title="No plugins installed" />;
+    }
+
     return (
-        <PluginsStyledContainer>
-            <table>
+        <div className={styles.container}>
+            <table className={styles.table}>
                 <tbody>
                     {plugins
                         .sort((a, b) => a.name.localeCompare(b.name))
                         .map((plugin) => (
                             <tr key={plugin.name}>
-                                <td className="plugin-icon">
+                                <td className={styles.icon}>
                                     <img src={getPluginIconDataUrl(plugin)} />
                                 </td>
-                                <td className="plugin-name">
+                                <td>
                                     <span>{plugin.name}</span>
                                 </td>
-                                <td className="plugin-badges">
+                                <td className={styles.badges}>
                                     <div>
                                         <Badge variant={handleBadgeVariant(plugin.status)}>{plugin.status}</Badge>
                                     </div>
                                 </td>
-                                <td className="plugin-actions">
+                                <td className={styles.actions}>
                                     <Button onClick={() => openPluginDetails(plugin)}>Details</Button>
                                 </td>
                             </tr>
                         ))}
                 </tbody>
             </table>
-        </PluginsStyledContainer>
+        </div>
     );
 }

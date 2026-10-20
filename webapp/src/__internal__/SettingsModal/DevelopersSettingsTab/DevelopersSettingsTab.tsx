@@ -8,22 +8,23 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 
-import { Button } from "unichat/components/Button";
-import { FormGroup } from "unichat/components/forms/FormGroup";
-import { Switch } from "unichat/components/forms/Switch";
+import { FormGroup } from "@voguh/unichat-ui/components/forms/FormGroup";
+import { Switch } from "@voguh/unichat-ui/components/forms/Switch";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { SegmentedControl } from "@voguh/unichat-ui/components/ui/SegmentedControl";
 import { useStorage } from "unichat/hooks/useStorage";
 import {
     ScraperEventsLogLevel as LogLevel,
     settingsService,
-    UniChatSettings,
+    type UniChatSettings,
     UniChatSettingsKeys
 } from "unichat/services/settingsService";
 import { StorageKeys } from "unichat/services/storageService";
 
-import { DevelopersSettingsTabStyledContainer } from "./styled";
+import styles from "./styles.module.css";
 
 interface Props {
     onClose: () => void;
@@ -98,6 +99,7 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
         };
     }, [initialSettings]);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: componentDidMount
     useEffect(() => {
         async function init(): Promise<void> {
             const settings = await settingsService.getItems([
@@ -117,84 +119,74 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
     }, []);
 
     return (
-        <DevelopersSettingsTabStyledContainer key={Object.keys(initialSettings).length === 0 ? "loading" : "loaded"}>
-            <div className="create-webview-hidden-section">
-                <Switch
-                    defaultChecked={initialSettings[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN] ?? false}
-                    inputRef={createWebviewsHiddenRef}
-                    label="Create webviews silent"
-                    description="On startup, webviews will be created in background and only shown when requested"
-                />
+        <div className={styles.container} key={Object.keys(initialSettings).length === 0 ? "loading" : "loaded"}>
+            <div className={styles.body}>
+                <div>
+                    <Switch
+                        defaultChecked={initialSettings[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN] ?? false}
+                        ref={createWebviewsHiddenRef}
+                        label="Create webviews silent"
+                        description="On startup, webviews will be created in background and only shown when requested"
+                    />
 
-                {requiresRestart && (
-                    <div className="alert alert-primary">
-                        <div>
-                            <i className="fas fa-info-circle" />
+                    {requiresRestart && (
+                        <div className={styles.alert}>
+                            <div>
+                                <i className="fas fa-info-circle" />
+                            </div>
+                            <span>
+                                <strong>{UNICHAT_DISPLAY_NAME}</strong> must be restarted for this setting to take
+                                effect.
+                            </span>
                         </div>
-                        <span>
-                            <strong>{UNICHAT_DISPLAY_NAME}</strong> must be restarted for this setting to take effect.
-                        </span>
-                    </div>
-                )}
-            </div>
+                    )}
+                </div>
 
-            <div className="open-scraper-webview-section">
-                <Switch
-                    defaultChecked={initialSettings[UniChatSettingsKeys.OPEN_SCRAPER_WEBVIEW] ?? false}
-                    inputRef={openScraperWebviewRef}
-                    disabled={__IS_DEV__}
-                    label="Open Scraper Webview"
+                <div>
+                    <Switch
+                        defaultChecked={initialSettings[UniChatSettingsKeys.OPEN_SCRAPER_WEBVIEW] ?? false}
+                        ref={openScraperWebviewRef}
+                        disabled={__IS_DEV__}
+                        label="Open Scraper Webview"
+                        description={
+                            <>
+                                Adds a button to scraper cards that opens the scraper webview window
+                                {__IS_DEV__ && " (Developer mode is enabled, this feature is always available)"}
+                            </>
+                        }
+                    />
+                </div>
+
+                <hr />
+
+                <FormGroup
+                    label="Scraper log events"
                     description={
                         <>
-                            Adds a button to scraper cards that opens the scraper webview window
-                            {__IS_DEV__ && " (Developer mode is enabled, this feature is always available)"}
+                            Choose the level of detail for scraper logging
+                            {__IS_DEV__ && " (Developer mode is enabled, all events will be logged)"}
                         </>
                     }
-                />
+                >
+                    <SegmentedControl
+                        className={styles.logLevels}
+                        value={logEventsRef}
+                        disabled={__IS_DEV__}
+                        onValueChange={({ value }) => value != null && changeLogEvents(value as LogLevel)}
+                        items={[
+                            { value: LogLevel.ONLY_ERRORS, label: "Only Errors" },
+                            { value: LogLevel.UNKNOWN_EVENTS, label: "Errors + Unknown Events" },
+                            { value: LogLevel.ALL_EVENTS, label: "Errors + All Events" }
+                        ]}
+                    />
+                </FormGroup>
             </div>
 
-            <hr />
-
-            <FormGroup
-                label="Scraper log events"
-                description={
-                    <>
-                        Choose the level of detail for scraper logging
-                        {__IS_DEV__ && " (Developer mode is enabled, all events will be logged)"}
-                    </>
-                }
-                className="scraper-logging-section"
-            >
-                <div className="scraperLogging_section--buttons">
-                    <Button
-                        variant={logEventsRef === LogLevel.ONLY_ERRORS ? "primary" : "default"}
-                        disabled={__IS_DEV__ || logEventsRef === "ONLY_ERRORS"}
-                        onClick={() => changeLogEvents(LogLevel.ONLY_ERRORS)}
-                    >
-                        Only Errors
-                    </Button>
-                    <Button
-                        variant={logEventsRef === LogLevel.UNKNOWN_EVENTS ? "primary" : "default"}
-                        disabled={__IS_DEV__ || logEventsRef === LogLevel.UNKNOWN_EVENTS}
-                        onClick={() => changeLogEvents(LogLevel.UNKNOWN_EVENTS)}
-                    >
-                        Errors + Unknown Events
-                    </Button>
-                    <Button
-                        variant={logEventsRef === LogLevel.ALL_EVENTS ? "primary" : "default"}
-                        disabled={__IS_DEV__ || logEventsRef === LogLevel.ALL_EVENTS}
-                        onClick={() => changeLogEvents(LogLevel.ALL_EVENTS)}
-                    >
-                        Errors + All Events
-                    </Button>
-                </div>
-            </FormGroup>
-
-            <div className="developers_settings--footer">
+            <div className={styles.footer}>
                 <Button variant="success" disabled={!dirty} onClick={applySettings}>
                     Apply
                 </Button>
             </div>
-        </DevelopersSettingsTabStyledContainer>
+        </div>
     );
 }

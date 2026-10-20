@@ -8,20 +8,19 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
-import { useState } from "preact/hooks";
+import type * as PReact from "preact";
 
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 
-import { AccordionItem } from "unichat/components/AccordionItem";
-import { Badge } from "unichat/components/Badge";
-import { Button } from "unichat/components/Button";
-import { Tooltip } from "unichat/components/Tooltip";
+import { Accordion } from "@voguh/unichat-ui/components/ui/Accordion";
+import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
 import { useWidgets } from "unichat/hooks/useWidgets";
-import { Variants } from "unichat/types";
+import type { Variants } from "unichat/types";
 import { toWidgetOptionGroup } from "unichat/utils/toWidgetOptionGroup";
 
-import { WidgetsStyledTable } from "./styled";
+import styles from "./styles.module.css";
 
 interface WidgetWarning {
     message: string | PReact.ComponentChildren;
@@ -30,7 +29,6 @@ interface WidgetWarning {
 }
 
 export function WidgetsModal(): PReact.ComponentChildren {
-    const [openedWidgetGroup, setOpenedWidgetGroup] = useState<string | null>(null);
     const [widgets, _reloadWidgets] = useWidgets(toWidgetOptionGroup, []);
 
     function formatWarning(warning: string): WidgetWarning | undefined {
@@ -108,62 +106,77 @@ export function WidgetsModal(): PReact.ComponentChildren {
             const { message, details, variant } = formattedWarning;
 
             return (
-                <Tooltip key={warning} content={details} placement="bottom">
-                    <Badge variant={variant}>{message}</Badge>
-                </Tooltip>
+                <Tooltip.Root key={warning} positioning={{ placement: "bottom" }}>
+                    <Tooltip.Trigger asChild>
+                        <Badge variant={variant}>{message}</Badge>
+                    </Tooltip.Trigger>
+                    <Tooltip.Content>{details}</Tooltip.Content>
+                </Tooltip.Root>
             );
         });
     }
 
     return (
-        <div className="flex flex-col gap-2">
+        <Accordion.Root collapsible className={styles.accordion}>
             {widgets.map((widgetGroup) => (
-                <AccordionItem
-                    key={widgetGroup.label}
-                    open={openedWidgetGroup === widgetGroup.label}
-                    toggle={() => setOpenedWidgetGroup((old) => (old === widgetGroup.label ? null : widgetGroup.label))}
-                    header={widgetGroup.label}
-                >
-                    <WidgetsStyledTable>
-                        <tbody>
-                            {widgetGroup.options
-                                .sort((a, b) => a.label.localeCompare(b.label))
-                                .map((widget) => (
-                                    <tr key={widget.label}>
-                                        <td className="widget-name">
-                                            <span>{widget.label}</span>
-                                        </td>
-                                        <td className="plugin-actions">
-                                            <div>
-                                                {formatWarnings(widget.warnings)}
-                                                {widgetGroup.label === "User Widgets" && (
-                                                    <Tooltip content="Reveal in Folder" placement="bottom">
-                                                        <Button
-                                                            variant="default"
-                                                            onClick={() =>
-                                                                revealItemInDir(
-                                                                    `${UNICHAT_WIDGETS_DIR}/${widget.label}`
-                                                                )
-                                                            }
-                                                        >
-                                                            <i className="fas fa-folder" />
-                                                        </Button>
-                                                    </Tooltip>
-                                                )}
+                <Accordion.Item key={widgetGroup.label} value={widgetGroup.label}>
+                    <Accordion.ItemTrigger>
+                        <span className={styles.groupTitle}>{widgetGroup.label}</span>
+                        <Accordion.ItemIndicator>
+                            <i className="fas fa-chevron-down" />
+                        </Accordion.ItemIndicator>
+                    </Accordion.ItemTrigger>
+                    <Accordion.ItemContent>
+                        <table className={styles.table}>
+                            <tbody>
+                                {widgetGroup.items
+                                    .sort((a, b) => a.label.localeCompare(b.label))
+                                    .map((widget) => (
+                                        <tr key={widget.label}>
+                                            <td className={styles.name}>
+                                                <span>{widget.label}</span>
+                                            </td>
+                                            <td className={styles.actions}>
+                                                <div>
+                                                    {formatWarnings(widget.warnings)}
+                                                    {widgetGroup.label === "User Widgets" && (
+                                                        <Tooltip.Root positioning={{ placement: "bottom" }}>
+                                                            <Tooltip.Trigger asChild>
+                                                                <Button
+                                                                    variant="default"
+                                                                    onClick={() =>
+                                                                        revealItemInDir(
+                                                                            `${UNICHAT_WIDGETS_DIR}/${widget.label}`
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <i className="fas fa-folder" />
+                                                                </Button>
+                                                            </Tooltip.Trigger>
+                                                            <Tooltip.Content>Reveal in Folder</Tooltip.Content>
+                                                        </Tooltip.Root>
+                                                    )}
 
-                                                <Tooltip content="Open in Browser" placement="bottom">
-                                                    <Button variant="default" onClick={() => openUrl(widget.label)}>
-                                                        <i className="fas fa-external-link-alt" />
-                                                    </Button>
-                                                </Tooltip>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </WidgetsStyledTable>
-                </AccordionItem>
+                                                    <Tooltip.Root positioning={{ placement: "bottom" }}>
+                                                        <Tooltip.Trigger asChild>
+                                                            <Button
+                                                                variant="default"
+                                                                onClick={() => openUrl(widget.label)}
+                                                            >
+                                                                <i className="fas fa-external-link-alt" />
+                                                            </Button>
+                                                        </Tooltip.Trigger>
+                                                        <Tooltip.Content>Open in Browser</Tooltip.Content>
+                                                    </Tooltip.Root>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                            </tbody>
+                        </table>
+                    </Accordion.ItemContent>
+                </Accordion.Item>
             ))}
-        </div>
+        </Accordion.Root>
     );
 }

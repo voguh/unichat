@@ -1,0 +1,47 @@
+/*!******************************************************************************
+ * Copyright (c) 2026 Voguh
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ******************************************************************************/
+
+.table {
+    @apply w-full border-collapse;
+
+    > thead {
+        @apply bg-stone-950;
+
+        > tr > th {
+            @apply border-b border-stone-700;
+            @apply text-left px-4 py-2;
+        }
+    }
+
+    > tbody > tr {
+        @apply bg-stone-900;
+
+        &:nth-child(even) {
+            @apply bg-stone-800;
+        }
+
+        &[data-with-link="true"] {
+            cursor: pointer;
+        }
+
+        > td {
+            @apply border-b border-stone-700;
+            @apply px-4 py-2;
+
+            > span {
+                @apply flex items-center gap-2;
+            }
+
+            &:last-child {
+                @apply w-px whitespace-nowrap;
+            }
+        }
+    }
+}

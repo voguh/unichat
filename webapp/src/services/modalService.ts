@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { ModalProps } from "unichat/components/Modal";
+import type { ModalProps } from "unichat/components/Modal";
 
 import { eventEmitter } from "./eventEmitter";
 

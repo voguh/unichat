@@ -1,0 +1,75 @@
+/*!******************************************************************************
+ * Copyright (c) 2025-2026 Voguh
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ******************************************************************************/
+
+.card {
+    @apply bg-stone-900 border border-stone-800 rounded shadow-md;
+    @apply relative p-2;
+
+    &[data-active="true"] {
+        @apply bg-green-500/10 border-green-500/50;
+    }
+
+    &[data-loading="true"] {
+        @apply bg-yellow-500/10 border-yellow-500/50;
+    }
+}
+
+.badges {
+    @apply flex flex-nowrap items-center gap-2 absolute top-2 right-2 h-7;
+}
+
+.body {
+    @apply flex flex-nowrap items-end gap-2;
+
+    > div {
+        @apply flex-1;
+
+        > div {
+            @apply flex-1;
+        }
+    }
+
+    > button {
+        @apply flex justify-center items-center gap-2;
+    }
+
+    > button.iconButton {
+        @apply p-0 w-10 shrink-0;
+    }
+}
+
+.popoverBody {
+    @apply text-sm;
+}
+
+.label {
+    @apply flex flex-nowrap items-center gap-2 mb-2;
+}
+
+.icon {
+    @apply bg-stone-500/50 border border-stone-500 rounded;
+    @apply shrink-0 size-7 flex justify-center items-center;
+
+    &[data-active="true"] {
+        @apply bg-green-500/50 border-green-500/50;
+    }
+
+    &[data-loading="true"] {
+        @apply bg-yellow-500/50 border-yellow-500/50;
+    }
+
+    > i {
+        @apply size-4.5 flex justify-center items-center;
+    }
+
+    > img {
+        @apply size-4.5 object-contain;
+    }
+}

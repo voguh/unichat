@@ -11,7 +11,7 @@
 import mitt from "mitt";
 
 import { BooleanSerializer } from "unichat/utils/serializer/BooleanSerializer";
-import { StorageSerializer } from "unichat/utils/serializer/StorageSerializer";
+import type { StorageSerializer } from "unichat/utils/serializer/StorageSerializer";
 
 export interface StorageValues {
     "show-widget-preview": boolean;

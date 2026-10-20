@@ -1,0 +1,88 @@
+{
+    "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+    "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true, "root": "../" },
+    "files": {
+        "includes": [
+            "**",
+            "!!**/{dist,coverage,public,node_modules}/**"
+        ]
+    },
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "lineWidth": 120,
+        "lineEnding": "lf"
+    },
+    "linter": {
+        "enabled": true,
+        "domains": {  "react": "recommended" },
+        "rules": {
+            "preset": "recommended",
+            "a11y": {
+                "useAltText": "off",
+                "useMediaCaption": "off",
+                "noStaticElementInteractions": "off",
+                "useKeyWithClickEvents": "off"
+            },
+            "complexity": {
+                "noUselessConstructor": "off",
+                "useOptionalChain": "off",
+                "noStaticOnlyClass": "off"
+            },
+            "correctness": {
+                "noUnusedVariables": "warn"
+            },
+            "style": {
+                "useConst": "warn",
+                "noNonNullAssertion": "off",
+                "noDescendingSpecificity": "off"
+            },
+            "suspicious": {
+                "noExplicitAny": "off",
+                "noEmptyBlockStatements": "off",
+                "noConfusingVoidType": "off"
+            }
+        }
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "double",
+            "semicolons": "always",
+            "arrowParentheses": "always",
+            "trailingCommas": "none"
+        },
+        "globals": ["navigator", "window", "document"]
+    },
+    "css": {
+        "parser": {
+            "cssModules": true,
+            "tailwindDirectives": true
+        }
+    },
+    "json": {
+        "formatter": { "enabled": false },
+        "linter": { "enabled": false }
+    },
+    "assist": {
+        "enabled": true,
+        "actions": {
+            "source": {
+                "organizeImports": {
+                    "level": "on",
+                    "options": {
+                        "groups": [
+                            ["preact", "preact/**", ":NODE:"],
+                            ":BLANK_LINE:",
+                            [":PACKAGE:", "!@voguh*/**", "!unichat*/**", "!preact", "!preact/**"],
+                            ":BLANK_LINE:",
+                            ["@voguh*/**", "unichat*/**"],
+                            ":BLANK_LINE:",
+                            ["./**", "../**"]
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

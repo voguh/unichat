@@ -8,9 +8,14 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { Dispatch, StateUpdater, useEffect, useState } from "preact/hooks";
+import { type Dispatch, type StateUpdater, useEffect, useState } from "preact/hooks";
 
-import { StorageChangeEvent, StorageEntry, storageService, StorageValues } from "unichat/services/storageService";
+import {
+    type StorageChangeEvent,
+    type StorageEntry,
+    type StorageValues,
+    storageService
+} from "unichat/services/storageService";
 
 export function useStorage<K extends keyof StorageValues>(
     entry: StorageEntry<K>
@@ -30,6 +35,7 @@ export function useStorage<K extends keyof StorageValues>(
         storageService.set(entry, finalValue);
     }
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: componentDidMount
     useEffect(() => {
         function handler(event: StorageChangeEvent<K>): void {
             setValue(event.value);

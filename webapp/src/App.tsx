@@ -8,29 +8,28 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
 import * as eventService from "@tauri-apps/api/event";
 
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
 import { ModalProvider } from "unichat/__internal__/ModalProvider";
 import { NotificationProvider } from "unichat/__internal__/NotificationProvider";
 import { PluginsModal, PluginsModalActions } from "unichat/__internal__/PluginsModal";
 import { SettingsModal } from "unichat/__internal__/SettingsModal";
 import { Tour } from "unichat/__internal__/Tour";
 import { WidgetsModal, WidgetsModalActions } from "unichat/__internal__/WidgetsModal";
-import { Button } from "unichat/components/Button";
-import { Tooltip } from "unichat/components/Tooltip";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
 import { notificationService } from "unichat/services/notificationService";
 import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
 import { StorageKeys, storageService } from "unichat/services/storageService";
-import { GlobalStyle } from "unichat/styles/GlobalStyles";
 import { Dashboard, DashboardLeftSection } from "unichat/tabs/Dashboard";
 import { WidgetEditor, WidgetEditorLeftSection } from "unichat/tabs/WidgetEditor";
-import { IPCNotificationEvent } from "unichat/utils/IPCStatusEvent";
+import type { IPCNotificationEvent } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
 
 interface TabOptions {
@@ -103,26 +102,26 @@ export function App(): PReact.ComponentChildren {
 
     /* ========================================================================================== */
 
-    async function init(): Promise<void> {
-        storageService.set(StorageKeys.REQUIRES_RESTART, false);
-
-        const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
-        if (isOpenToLan) {
-            notificationService.warn({
-                title: `${UNICHAT_DISPLAY_NAME} is open to LAN`,
-                message: "Your widgets are accessible by other devices on the same local network."
-            });
-        }
-
-        /* ====================================================================================== */
-
-        const releaseInfo = await commandService.getReleases();
-        if (releaseInfo.hasUpdate) {
-            setOpenedSettingsModal("check-updates");
-        }
-    }
-
     useEffect(() => {
+        async function init(): Promise<void> {
+            storageService.set(StorageKeys.REQUIRES_RESTART, false);
+
+            const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
+            if (isOpenToLan) {
+                notificationService.warn({
+                    title: `${UNICHAT_DISPLAY_NAME} is open to LAN`,
+                    message: "Your widgets are accessible by other devices on the same local network."
+                });
+            }
+
+            /* ====================================================================================== */
+
+            const releaseInfo = await commandService.getReleases();
+            if (releaseInfo.hasUpdate) {
+                setOpenedSettingsModal("check-updates");
+            }
+        }
+
         init();
 
         /* ====================================================================================== */
@@ -144,42 +143,53 @@ export function App(): PReact.ComponentChildren {
 
     return (
         <>
-            <GlobalStyle />
             <div className="sidebar">
                 <div className="sidebar__tabs">
                     {Object.entries(tabs).map(([key, tab]) => (
-                        <Tooltip key={key} content={tab.label} placement="right">
-                            <Button
-                                data-tour={`tab-${key}-toggle`}
-                                variant={selectedTab === key ? "primary" : undefined}
-                                onClick={() => setSelectedTab(key)}
-                            >
-                                {tab.icon}
-                            </Button>
-                        </Tooltip>
+                        <Tooltip.Root key={key} positioning={{ placement: "right" }}>
+                            <Tooltip.Trigger asChild>
+                                <Button
+                                    data-tour={`tab-${key}-toggle`}
+                                    variant={selectedTab === key ? "primary" : undefined}
+                                    onClick={() => setSelectedTab(key)}
+                                >
+                                    {tab.icon}
+                                </Button>
+                            </Tooltip.Trigger>
+                            <Tooltip.Content>{tab.label}</Tooltip.Content>
+                        </Tooltip.Root>
                     ))}
 
                     <TabLeftSection selectedTab={selectedTab} />
                 </div>
 
                 <div className="sidebar__footer">
-                    <Tooltip content="Widgets" placement="right">
-                        <Button onClick={toggleWidgetsModal} data-tour="widgets-modal-toggle">
-                            <i className="fas fa-object-group" />
-                        </Button>
-                    </Tooltip>
+                    <Tooltip.Root positioning={{ placement: "right" }}>
+                        <Tooltip.Trigger asChild>
+                            <Button onClick={toggleWidgetsModal} data-tour="widgets-modal-toggle">
+                                <i className="fas fa-object-group" />
+                            </Button>
+                        </Tooltip.Trigger>
+                        <Tooltip.Content>Widgets</Tooltip.Content>
+                    </Tooltip.Root>
 
-                    <Tooltip content="Plugins" placement="right">
-                        <Button onClick={togglePluginsModal} data-tour="plugins-modal-toggle">
-                            <i className="fas fa-cubes" />
-                        </Button>
-                    </Tooltip>
+                    <Tooltip.Root positioning={{ placement: "right" }}>
+                        <Tooltip.Trigger asChild>
+                            <Button onClick={togglePluginsModal} data-tour="plugins-modal-toggle">
+                                <i className="fas fa-cubes" />
+                            </Button>
+                        </Tooltip.Trigger>
+                        <Tooltip.Content>Plugins</Tooltip.Content>
+                    </Tooltip.Root>
 
-                    <Tooltip content="Settings" placement="right">
-                        <Button onClick={() => setOpenedSettingsModal(true)} data-tour="settings-modal-toggle">
-                            <i className="fas fa-sliders-h" />
-                        </Button>
-                    </Tooltip>
+                    <Tooltip.Root positioning={{ placement: "right" }}>
+                        <Tooltip.Trigger asChild>
+                            <Button onClick={() => setOpenedSettingsModal(true)} data-tour="settings-modal-toggle">
+                                <i className="fas fa-sliders-h" />
+                            </Button>
+                        </Tooltip.Trigger>
+                        <Tooltip.Content>Settings</Tooltip.Content>
+                    </Tooltip.Root>
                 </div>
             </div>
 

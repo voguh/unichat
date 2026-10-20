@@ -44,7 +44,7 @@ pub fn create() -> Result<(), Error> {
 
     window::new(MAIN_WINDOW_LABEL, "index.html")
         .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION))
-        .inner_size(1024.0, 576.0)
+        .inner_size(1180.0, 640.0)
         .maximizable(false).resizable(false).center()
         .initialization_script(format!(r#"
             globalThis.__IS_DEV__ = {is_dev};

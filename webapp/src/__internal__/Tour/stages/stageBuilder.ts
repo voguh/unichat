@@ -8,9 +8,9 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { computePosition, flip, offset, Placement, shift, Side } from "@floating-ui/dom";
+import { computePosition, flip, offset, type Placement, type Side, shift } from "@floating-ui/dom";
 
-import { TourBuilder } from "../Tour";
+import type { TourBuilder } from "../Tour";
 
 export const ELEMENT_PADDING = 4;
 
@@ -21,7 +21,7 @@ export function stageBuilder(
     placement: Side,
     ignorePrefix = false
 ): TourBuilder {
-    return async function (container) {
+    return async (container) => {
         container.innerHTML = "";
 
         const dataTourItem = document.querySelector(ignorePrefix ? selector : `[data-tour='${selector}']`);

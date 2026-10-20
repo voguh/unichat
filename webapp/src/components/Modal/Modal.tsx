@@ -8,27 +8,23 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 import { useState } from "preact/hooks";
 
-import { Button } from "unichat/components/Button";
-import { Portal } from "unichat/components/Portal";
+import { Dialog, type DialogSize } from "@voguh/unichat-ui/components/ui/Dialog";
 import { ModalContext } from "unichat/contexts/ModalContext";
 
-import { ModalStyledBackdrop, ModalStyledContainer } from "./styled";
-
-export interface ModalProps extends Omit<PReact.HTMLAttributes<HTMLDivElement>, "title"> {
+export interface ModalProps extends Omit<PReact.HTMLAttributes<HTMLDivElement>, "title" | "size"> {
     withPortal?: boolean;
 
     onHide: () => void;
     show?: boolean;
-    autoFocus?: boolean;
 
-    size?: "sm" | "md" | "lg" | "xl";
+    size?: Exclude<DialogSize, "fullscreen">;
     fullscreen?: boolean;
 
     backdrop?: boolean;
-    CustomModalBody?: PReact.ComponentType<PReact.HTMLAttributes<HTMLDivElement>>;
+    bodyClassName?: string;
 
     title?: PReact.ComponentChildren;
     actions?: PReact.ComponentChildren;
@@ -40,13 +36,12 @@ export function Modal({
 
     onHide,
     show = true,
-    autoFocus = true,
 
     size = "md",
     fullscreen = false,
 
     backdrop = true,
-    CustomModalBody = ({ children, ...props }) => <div {...props}>{children}</div>,
+    bodyClassName,
 
     title,
     actions,
@@ -57,45 +52,26 @@ export function Modal({
 }: ModalProps): PReact.ComponentChildren {
     const [sharedStore, setSharedStore] = useState<Record<string, unknown>>({});
 
-    const content = (
-        <>
-            {show && (
-                <>
-                    {backdrop && <ModalStyledBackdrop />}
-                    <ModalContext.Provider value={{ onClose: onHide, sharedStore, setSharedStore }}>
-                        <ModalStyledContainer
-                            {...rest}
-                            data-size={fullscreen ? "fullscreen" : size}
-                            autoFocus={autoFocus}
-                        >
-                            <div className="modal-content">
-                                {(title != null || actions != null || withCloseButton) && (
-                                    <div className="modal-header">
-                                        {title != null && <div className="modal-title">{title}</div>}
-                                        {(actions != null || withCloseButton) && (
-                                            <div className="modal-header-actions">
-                                                {actions}
-                                                {withCloseButton && (
-                                                    <Button className="close-button" onClick={onHide}>
-                                                        <i className="fas fa-times" />
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                                {children && <CustomModalBody className="modal-body">{children}</CustomModalBody>}
-                            </div>
-                        </ModalStyledContainer>
-                    </ModalContext.Provider>
-                </>
-            )}
-        </>
+    return (
+        <Dialog.Root
+            open={show}
+            modal={false}
+            closeOnInteractOutside={false}
+            onOpenChange={({ open }) => !open && onHide()}
+        >
+            <ModalContext.Provider value={{ onClose: onHide, sharedStore, setSharedStore }}>
+                <Dialog.Content
+                    {...rest}
+                    size={fullscreen ? "fullscreen" : size}
+                    backdrop={backdrop}
+                    portal={withPortal}
+                >
+                    {(title != null || actions != null || withCloseButton) && (
+                        <Dialog.Header title={title} actions={actions} withCloseButton={withCloseButton} />
+                    )}
+                    {children && <Dialog.Body className={bodyClassName}>{children}</Dialog.Body>}
+                </Dialog.Content>
+            </ModalContext.Provider>
+        </Dialog.Root>
     );
-
-    if (withPortal) {
-        return <Portal>{content}</Portal>;
-    } else {
-        return content;
-    }
 }

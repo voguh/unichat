@@ -8,9 +8,9 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { Side } from "@floating-ui/dom";
+import type { Side } from "@floating-ui/dom";
 
-import { TourBuilder } from "../Tour";
+import type { TourBuilder } from "../Tour";
 import { stageBuilder } from "./stageBuilder";
 
 export function settingsModalStageBuilder(
@@ -22,7 +22,7 @@ export function settingsModalStageBuilder(
 ): TourBuilder {
     const builder = stageBuilder(selector, title, subTitle, placement);
 
-    return async function (container) {
+    return async (container) => {
         if (document.querySelector("[data-tour='settings-modal']") == null) {
             document.querySelector<HTMLButtonElement>("[data-tour='settings-modal-toggle']")?.click();
             await new Promise((resolve) => setTimeout(resolve, 50));
@@ -34,7 +34,9 @@ export function settingsModalStageBuilder(
         await builder(container);
 
         return () => {
-            document.querySelector<HTMLButtonElement>("[data-tour='settings-modal'] .close-button")?.click();
+            document
+                .querySelector<HTMLButtonElement>("[data-tour='settings-modal'] [data-part='close-trigger']")
+                ?.click();
         };
     };
 }

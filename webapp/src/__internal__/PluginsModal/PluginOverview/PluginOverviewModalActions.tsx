@@ -8,12 +8,12 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import * as PReact from "preact";
+import type * as PReact from "preact";
 
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
-import { Button } from "unichat/components/Button";
-import { UniChatPluginMetadata } from "unichat/types";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import type { UniChatPluginMetadata } from "unichat/types";
 
 interface Props {
     plugin: UniChatPluginMetadata;

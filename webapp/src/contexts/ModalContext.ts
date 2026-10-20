@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 import { createContext } from "preact";
-import { Dispatch, StateUpdater } from "preact/hooks";
+import type { Dispatch, StateUpdater } from "preact/hooks";
 
 export interface ModalContextType {
     onClose: () => void;

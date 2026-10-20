@@ -8,11 +8,11 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { ComponentChildren } from "preact";
-
-import { ToastType } from "unichat/components/Toast";
+import type { ComponentChildren } from "preact";
 
 import { eventEmitter } from "./eventEmitter";
+
+export type ToastType = "success" | "info" | "error" | "warn" | "default";
 
 export interface NotificationOptions {
     type: ToastType;

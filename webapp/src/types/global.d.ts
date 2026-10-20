@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
-/* eslint-disable no-var */
 
 declare global {
     var __TAURI__: typeof import("@tauri-apps/api");

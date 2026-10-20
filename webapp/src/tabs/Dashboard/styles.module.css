@@ -1,0 +1,78 @@
+/*!******************************************************************************
+ * Copyright (c) 2024-2026 Voguh
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ******************************************************************************/
+
+.container {
+    @apply relative w-full h-full;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) --spacing(100);
+    grid-template-rows: minmax(0, 1fr);
+}
+
+.scrapers {
+    @apply p-2 flex flex-col gap-2;
+
+    grid-column: 1;
+}
+
+.preview {
+    @apply bg-stone-900 border-l border-stone-800;
+    @apply relative flex flex-col min-h-0;
+
+    grid-column: 2;
+}
+
+.previewHeader {
+    @apply p-2 relative flex gap-2 shrink-0;
+
+    > button[data-size] {
+        @apply p-0 w-10 flex justify-center items-center shrink-0;
+    }
+}
+
+.widgetSelector {
+    @apply flex-1 min-w-0;
+}
+
+.iframeWrapper {
+    @apply flex-1 min-h-0;
+
+    > iframe {
+        @apply bg-white;
+        @apply w-full h-full border-none pointer-events-none;
+    }
+}
+
+.previewDisabled {
+    @apply flex-1 flex justify-center items-center;
+
+    > div {
+        @apply flex flex-col justify-center items-center gap-4 text-center;
+    }
+}
+
+.previewDisabledIcons {
+    @apply relative;
+
+    > :global(.fa-desktop) {
+        @apply text-stone-600/70;
+    }
+
+    > :global(.fa-times) {
+        @apply text-stone-500;
+        @apply absolute top-1/2 left-1/2;
+
+        transform: translate(-50%, calc(-50% - --spacing(0.75)));
+    }
+}
+
+.previewDisabledText {
+    @apply text-stone-300;
+}
