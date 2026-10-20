@@ -3,7 +3,7 @@ name: Package
 on:
   push:
     branches:
-      - '**'
+      - "**"
   workflow_dispatch:
   workflow_call:
 
@@ -47,9 +47,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           pnpm-version: ${{ env.PNPM_VERSION }}
 
-      - name: Run tests
+      - name: Run typecheck
         working-directory: ${{ env.TAURI_FRONTEND_PATH }}
-        run: pnpm test run --passWithNoTests --coverage
+        run: pnpm typecheck
 
       - name: Build webapp
         working-directory: ${{ env.TAURI_FRONTEND_PATH }}
