@@ -1,8 +1,8 @@
 :root {
 	color-scheme: dark;
-	font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+	font-family: system-ui, "Segoe UI", Ubuntu, "Noto Sans", sans-serif;
 	color: #e8e8e8;
-	background: #151515;
+	background: #141317;
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
 }
@@ -19,11 +19,7 @@ body {
 	min-width: 320px;
 	min-height: 100vh;
 	margin: 0;
-	background: #151515;
-}
-
-button {
-	font: inherit;
+	background: #141317;
 }
 
 .activity-feed {
@@ -33,85 +29,34 @@ button {
 	min-height: 320px;
 	flex-direction: column;
 	overflow: hidden;
-	border: 1px solid #363636;
-	background: #151515;
+	border: 1px solid #24222a;
+	background: #141317;
 }
 
 .feed-header {
 	flex: 0 0 auto;
-	padding: 14px 14px 12px;
-	border-bottom: 1px solid #363636;
-	background: #202020;
+	padding: 10px 10px 8px;
+	background: #141317;
 }
 
-.feed-brandline,
-.feed-titleline,
-.entry-topline {
-	display: flex;
-	align-items: center;
-}
-
-.feed-brandline {
-	gap: 8px;
-}
-
-.brand-mark {
-	display: grid;
-	width: 22px;
-	height: 22px;
-	place-items: center;
-	border: 1px solid #d2d2d2;
-	border-radius: 4px;
-	color: #d2d2d2;
-	font-size: 12px;
-	font-weight: 800;
-}
-
-.feed-eyebrow,
-.connection-state,
-.entry-kind,
-.entry-platform {
-	font-size: 10px;
-	font-weight: 700;
-	letter-spacing: 0.08em;
-}
-
-.feed-eyebrow {
-	color: #a8a8a8;
-}
-
-.feed-titleline {
-	gap: 10px;
-	margin-top: 10px;
-}
-
-.feed-titleline h1 {
+.feed-header h1 {
 	margin: 0;
 	color: #f0f0f0;
-	font-size: 22px;
-	font-weight: 650;
-	letter-spacing: 0;
+	font-size: 16px;
+	font-weight: 700;
 	line-height: 1;
-}
-
-.activity-count {
-	padding: 3px 6px;
-	border: 1px solid #424242;
-	border-radius: 3px;
-	color: #c5c5c5;
-	font-size: 10px;
-	font-variant-numeric: tabular-nums;
 }
 
 .feed-controls {
 	display: flex;
-	gap: 8px;
-	margin-top: 13px;
+	gap: 6px;
+	margin-top: 8px;
 }
 
 .filter-menu {
 	position: relative;
 	min-width: 0;
+	flex: 1 1 0;
 }
 
 .filter-menu:last-child .filter-popup {
@@ -121,17 +66,15 @@ button {
 
 .filter-trigger {
 	display: flex;
-	min-width: 148px;
-	min-height: 34px;
+	min-height: 28px;
 	align-items: center;
 	gap: 9px;
 	padding: 0 10px;
-	border: 1px solid #424242;
-	border-radius: 3px;
-	background: transparent;
+	border-radius: 4px;
+	background: #1f1d24;
 	color: #b8b8b8;
 	cursor: pointer;
-	font-size: 12px;
+	font-size: 11px;
 	list-style: none;
 }
 
@@ -141,14 +84,20 @@ button {
 
 .filter-trigger:hover,
 .filter-menu[open] .filter-trigger {
-	border-color: #909090;
+	background: #2a2730;
 	color: #f0f0f0;
+}
+
+.filter-trigger:focus-visible {
+	outline: 2px solid #9f0712;
+	outline-offset: 2px;
 }
 
 .filter-summary {
 	margin-left: auto;
 	color: #909090;
 	font-size: 10px;
+	white-space: nowrap;
 }
 
 .filter-chevron {
@@ -164,31 +113,26 @@ button {
 	transform: translateY(2px) rotate(225deg);
 }
 
-.filter-trigger:focus-visible {
-	outline: 2px solid #9f0712;
-	outline-offset: 2px;
-}
-
 .filter-popup {
 	position: absolute;
 	top: calc(100% + 5px);
 	left: 0;
 	z-index: 5;
 	width: max-content;
-	min-width: 210px;
-	max-width: calc(100vw - 28px);
-	max-height: min(320px, calc(100vh - 160px));
+	min-width: 190px;
+	max-width: calc(100vw - 20px);
+	max-height: min(320px, calc(100vh - 120px));
 	overflow: auto;
 	padding: 6px;
-	border: 1px solid #484848;
+	border: 1px solid #2e2b35;
 	border-radius: 4px;
-	background: #242424;
+	background: #1f1d24;
 	box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
 }
 
 .filter-option {
 	display: flex;
-	min-height: 36px;
+	min-height: 32px;
 	align-items: center;
 	gap: 10px;
 	padding: 5px 8px;
@@ -199,7 +143,7 @@ button {
 }
 
 .filter-option:hover {
-	background: #333;
+	background: #2a2730;
 }
 
 .filter-option input {
@@ -212,7 +156,7 @@ button {
 
 .filter-all-option {
 	margin-bottom: 4px;
-	border-bottom: 1px solid #414141;
+	border-bottom: 1px solid #2e2b35;
 	border-radius: 0;
 }
 
@@ -226,39 +170,70 @@ button {
 	flex: 1 1 auto;
 	overflow: auto;
 	overscroll-behavior: contain;
-	scrollbar-color: #5a5a5a transparent;
+	scrollbar-color: #3a3640 transparent;
 	scrollbar-width: thin;
 }
 
 .activity-list {
 	display: flex;
 	flex-direction: column;
-	gap: 1px;
+	gap: 4px;
 	margin: 0;
-	padding: 4px 10px 12px;
+	padding: 2px 8px 10px;
 	list-style: none;
 }
 
 .activity-entry {
+	--cat: #c9c9c9;
+
 	display: grid;
-	grid-template-columns: 38px minmax(0, 1fr);
-	gap: 10px;
-	padding: 10px 8px;
-	border-bottom: 1px solid #303030;
+	grid-template-columns: 24px minmax(0, 1fr);
+	gap: 8px;
+	padding: 7px 8px;
+	border: 1px solid #26232c;
+	border-radius: 4px;
+	background: #1b1920;
 	animation: entry-arrive 180ms ease-out both;
+}
+
+.activity-entry[data-event-filter="streaks"] {
+	--cat: #f2a516;
+}
+
+.activity-entry[data-event-filter="sponsor"] {
+	--cat: #b07cf0;
+}
+
+.activity-entry[data-event-filter="sponsor-gift"] {
+	--cat: #e862a8;
+}
+
+.activity-entry[data-event-filter="donations"] {
+	--cat: #3fbf6b;
+}
+
+.activity-entry[data-event-filter="cheers"] {
+	--cat: #2fb8d0;
+}
+
+.activity-entry[data-event-filter="raids"] {
+	--cat: #f0773a;
+}
+
+.activity-entry[data-event-filter="rewards"] {
+	--cat: #5b8ef0;
 }
 
 .entry-avatar {
 	display: grid;
-	width: 38px;
-	height: 38px;
+	width: 24px;
+	height: 24px;
 	overflow: hidden;
 	place-items: center;
-	border: 1px solid #454545;
-	border-radius: 50%;
-	background: #262626;
+	border-radius: 4px;
+	background: #2a2730;
 	color: #c8c8c8;
-	font-size: 13px;
+	font-size: 10px;
 }
 
 .entry-avatar-image {
@@ -272,19 +247,28 @@ button {
 }
 
 .entry-topline {
+	display: flex;
 	min-width: 0;
+	align-items: center;
 	gap: 7px;
 }
 
+.entry-kind,
+.entry-platform {
+	font-weight: 700;
+	letter-spacing: 0.08em;
+}
+
 .entry-kind {
-	color: #c9c9c9;
+	color: var(--cat);
+	font-size: 9px;
 	text-transform: uppercase;
 }
 
 .entry-platform {
 	overflow: hidden;
-	color: #7d7d7d;
-	font-size: 9px;
+	color: #8a8494;
+	font-size: 8px;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
@@ -292,25 +276,31 @@ button {
 .entry-time {
 	flex: 0 0 auto;
 	margin-left: auto;
-	color: #858585;
-	font-size: 10px;
+	color: #8a8494;
+	font-size: 9px;
 	font-variant-numeric: tabular-nums;
 }
 
 .entry-description,
 .entry-message {
-	margin: 4px 0 0;
 	overflow-wrap: anywhere;
-	font-size: 13px;
-	line-height: 1.4;
+	line-height: 1.3;
 }
 
 .entry-description {
-	color: #e1e1e1;
+	margin: 3px 0 0;
+	color: #f1eef5;
+	font-size: 12px;
+	font-weight: 600;
 }
 
 .entry-message {
-	color: #b0b0b0;
+	margin: 5px 0 0;
+	padding: 5px 8px;
+	border-radius: 3px;
+	background: #141317;
+	color: #b9b3c2;
+	font-size: 11px;
 	white-space: pre-wrap;
 }
 
@@ -328,7 +318,7 @@ button {
 	align-content: center;
 	justify-items: center;
 	gap: 10px;
-	color: #a2a2a2;
+	color: #8a8494;
 	pointer-events: none;
 }
 
@@ -337,10 +327,10 @@ button {
 	width: 34px;
 	height: 34px;
 	place-items: center;
-	border: 1px solid #424242;
-	border-radius: 50%;
-	color: #d2d2d2;
-	font-size: 21px;
+	border-radius: 4px;
+	background: #1f1d24;
+	color: #b9b3c2;
+	font-size: 14px;
 }
 
 .empty-state p {
@@ -356,41 +346,6 @@ button {
 	to {
 		opacity: 1;
 		transform: translateY(0);
-	}
-}
-
-@media (max-width: 480px) {
-	.feed-header {
-		padding: 14px 12px 12px;
-	}
-
-	.feed-titleline h1 {
-		font-size: 24px;
-	}
-
-	.feed-controls {
-		gap: 6px;
-	}
-
-	.filter-trigger {
-		min-width: 0;
-		gap: 6px;
-		padding-right: 8px;
-		padding-left: 8px;
-		font-size: 11px;
-	}
-
-	.filter-summary {
-		font-size: 9px;
-	}
-
-	.filter-popup {
-		min-width: 190px;
-	}
-
-	.activity-list {
-		padding-right: 8px;
-		padding-left: 8px;
 	}
 }
 

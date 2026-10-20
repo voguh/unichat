@@ -4,7 +4,6 @@ const knownPlatforms = new Set(["youtube", "twitch"]);
 
 const activityList = /** @type {HTMLOListElement} */ (document.getElementById("activity-list"));
 const activityTemplate = /** @type {HTMLTemplateElement} */ (document.getElementById("activity-template"));
-const activityCount = /** @type {HTMLElement} */ (document.getElementById("activity-count"));
 const emptyState = /** @type {HTMLElement} */ (document.getElementById("empty-state"));
 const emptyMessage = /** @type {HTMLElement} */ (document.getElementById("empty-message"));
 const eventFilterSummary = /** @type {HTMLElement} */ (document.getElementById("event-filter-summary"));
@@ -59,7 +58,6 @@ function updateFeedState() {
         }
     }
 
-    activityCount.textContent = String(totalActivities).padStart(2, "0");
     emptyState.toggleAttribute("hidden", visibleActivities > 0);
     if (totalActivities > 0 && visibleActivities === 0) {
         emptyMessage.textContent = "No activity in these filters";
@@ -134,6 +132,21 @@ for (const option of platformCheckboxes) {
         }
 
         updateFeedState();
+    });
+}
+
+const filterMenus = /** @type {NodeListOf<HTMLDetailsElement>} */ (document.querySelectorAll("details.filter-menu"));
+for (const menu of filterMenus) {
+    menu.addEventListener("toggle", () => {
+        if (!menu.open) {
+            return;
+        }
+
+        for (const otherMenu of filterMenus) {
+            if (otherMenu !== menu) {
+                otherMenu.open = false;
+            }
+        }
     });
 }
 
