@@ -48,14 +48,6 @@ runs:
         restore-keys: |
           cargo-target-${{ runner.os }}-${{ inputs.rust-version }}-
 
-    - name: Cache cargo bin
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      with:
-        path: |
-          ~/.cargo/bin/cargo-tauri
-          ~/.cargo/bin/cargo-tauri.exe
-        key: cargo-bin-${{ runner.os }}-${{ inputs.rust-version }}
-
     - name: Install linux dependencies
       if: ${{ runner.os == 'Linux' }}
       shell: bash
@@ -69,7 +61,8 @@ runs:
       run: |
         jq '.build.beforeBuildCommand = ""' tauri.conf.json > tmp.json && mv tmp.json tauri.conf.json
         corepack enable && corepack prepare pnpm@${{ inputs.pnpm-version }} --activate && corepack enable pnpm
-        command -v cargo-tauri || cargo install --locked tauri-cli
+        npm install -g @tauri-apps/cli@2.12.2
+        tauri --version
 
     - name: Install Webapp production dependencies
       working-directory: ${{ inputs.tauri-frontend-path }}

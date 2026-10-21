@@ -46,7 +46,7 @@ Types and schemas: [`@voguh/unichat-api`](./unichat-api/).
 - Node.js 24.16.0
 - PNPM 10.33.4
 - [Tauri v2 prerequisites](https://v2.tauri.app/start/prerequisites/)
-- Tauri CLI: `cargo install tauri-cli --locked`
+- Tauri CLI: `npm install -g @tauri-apps/cli@2.12.2`
 
 ### Run
 
@@ -58,11 +58,11 @@ Types and schemas: [`@voguh/unichat-api`](./unichat-api/).
 
 ```sh
 pnpm --dir="./webapp" install --frozen-lockfile
-cargo tauri build
+tauri build
 ```
 
 > [!TIP]
-> If the build fails on Linux or macOS: `NO_STRIP=true cargo tauri build`.
+> If the build fails on Linux or macOS: `NO_STRIP=true tauri build`.
 
 ### Known issues
 

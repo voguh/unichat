@@ -93,12 +93,12 @@ jobs:
           if [[ "${{ steps.vars.outputs.os }}" = "windows" ]]; then
             VERSION="$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')"
             if [[ "$VERSION" == *"-"* || "$VERSION" == *"+"* ]]; then
-              cargo tauri build --bundles "nsis"
+              tauri build --bundles "nsis"
             else
-              cargo tauri build --bundles "nsis,msi"
+              tauri build --bundles "nsis,msi"
             fi
           else
-            cargo tauri build
+            tauri build
           fi
 
       - name: Upload build artifacts

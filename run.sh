@@ -7,4 +7,4 @@ export TAURI_APP_PATH="$ROOT_PATH"
 export TAURI_FRONTEND_PATH="$ROOT_PATH/webapp"
 
 (cd "$TAURI_FRONTEND_PATH" && pnpm --prefix "$TAURI_FRONTEND_PATH" install --frozen-lockfile);
-cargo tauri dev;
+tauri dev;
