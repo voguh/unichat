@@ -237,8 +237,11 @@ export function CustomEventEditor(): PReact.ComponentChildren {
     function numberField(key: keyof CustomEventForm, label: string, optional = false): PReact.ComponentChildren {
         return (
             <NumberInput
-                label={label}
-                description={optional ? "Optional" : undefined}
+                label={
+                    <>
+                        {label} {optional && <small>(Optional)</small>}
+                    </>
+                }
                 value={String(form[key])}
                 onValueChange={({ value }) => update({ [key]: value })}
             />
@@ -253,8 +256,11 @@ export function CustomEventEditor(): PReact.ComponentChildren {
         return (
             <TextInput
                 groupProps={opts.wide ? { className: styles.wide } : undefined}
-                label={label}
-                description={opts.optional ? "Optional" : undefined}
+                label={
+                    <>
+                        {label} {opts.optional && <small>(Optional)</small>}
+                    </>
+                }
                 value={String(form[key])}
                 onChange={(event) => update({ [key]: event.currentTarget.value })}
             />
