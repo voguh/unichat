@@ -4826,7 +4826,7 @@ checksum = "357cc3acc6a036009fd6c973ed009037c732d60d0b4f6c673e9041497482a28f"
 
 [[package]]
 name = "unichat"
-version = "1.5.0-rc.0"
+version = "1.5.0-rc.1"
 dependencies = [
  "anyhow",
  "axum",
