@@ -30,7 +30,7 @@ use crate::utils::properties::AppPaths;
 #[serde(tag = "type", content = "value", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum WidgetSource {
     System,
-    SystemPlugin(String),
+    // SystemPlugin(String),
     UserPlugin(String),
     User
 }
