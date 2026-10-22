@@ -40,7 +40,6 @@ pub enum AppPaths {
     UniChatGallery,
     UniChatSystemWidgets,
     UniChatUserWidgets,
-    // UniChatSystemPlugins,
     UniChatUserPlugins,
     UniChatLogoIcon,
     UniChatLicense
@@ -70,7 +69,6 @@ pub fn init() -> Result<(), Error> {
     let gallery_dir = path.resolve("gallery", BaseDirectory::AppData)?;
     let system_widgets_dir = path.resolve("widgets", BaseDirectory::Resource)?;
     let user_widgets_dir = path.resolve("widgets", BaseDirectory::AppData)?;
-    // let system_plugins_dir = path.resolve("plugins", BaseDirectory::Resource)?;
     let user_plugins_dir = path.resolve("plugins", BaseDirectory::AppData)?;
     let logo_icon_file = path.resolve("icons/icon.png", BaseDirectory::Resource)?;
     let license_file = path.resolve("LICENSE", BaseDirectory::Resource)?;
@@ -84,7 +82,6 @@ pub fn init() -> Result<(), Error> {
     let gallery_path = gallery_dir.to_string_lossy().to_string();
     let system_widgets_path = system_widgets_dir.to_string_lossy().to_string();
     let user_widgets_path = user_widgets_dir.to_string_lossy().to_string();
-    // let system_plugins_path = system_plugins_dir.to_string_lossy().to_string();
     let user_plugins_path = user_plugins_dir.to_string_lossy().to_string();
     let logo_icon_path = logo_icon_file.to_string_lossy().to_string();
     let license_path = license_file.to_string_lossy().to_string();
@@ -99,7 +96,6 @@ pub fn init() -> Result<(), Error> {
     properties.insert(serialize_key(AppPaths::UniChatGallery), gallery_path);
     properties.insert(serialize_key(AppPaths::UniChatSystemWidgets), system_widgets_path);
     properties.insert(serialize_key(AppPaths::UniChatUserWidgets), user_widgets_path);
-    // properties.insert(serialize_key(AppPaths::UniChatSystemPlugins), system_plugins_path);
     properties.insert(serialize_key(AppPaths::UniChatUserPlugins), user_plugins_path);
     properties.insert(serialize_key(AppPaths::UniChatLogoIcon), logo_icon_path);
     properties.insert(serialize_key(AppPaths::UniChatLicense), license_path);

@@ -30,7 +30,6 @@ use crate::utils::properties::AppPaths;
 #[serde(tag = "type", content = "value", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum WidgetSource {
     System,
-    // SystemPlugin(String),
     UserPlugin(String),
     User
 }
@@ -198,9 +197,7 @@ fn load_widgets_from_disk(widgets_path: &Path, source_type: WidgetSource, cb: im
             }
 
             let rest_path;
-            if let WidgetSource::SystemPlugin(plugin_name) = &source_type {
-                rest_path = format!("{}::{}", plugin_name, widget_name);
-            } else if let WidgetSource::UserPlugin(plugin_name) = &source_type {
+            if let WidgetSource::UserPlugin(plugin_name) = &source_type {
                 rest_path = format!("{}::{}", plugin_name, widget_name);
             } else {
                 rest_path = widget_name
