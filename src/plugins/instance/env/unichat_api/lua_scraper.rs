@@ -13,9 +13,11 @@ use std::io::Write as _;
 
 use anyhow::Error;
 use mlua::LuaSerdeExt as _;
+use serde::Deserialize;
 
 use crate::events;
 use crate::events::unichat::UniChatEvent;
+use crate::events::unichat::UniChatPlatform;
 use crate::plugins::instance::env::utils::from_lua_value;
 use crate::plugins::runtime;
 use crate::scraper::UniChatScraper;
@@ -173,6 +175,26 @@ impl UniChatScraper for LuaUniChatScraper {
         match self.on_event.call::<Option<mlua::Value>>(table) {
             Ok(Some(parsed_event)) => {
                 let json: serde_json::Value = from_lua_value(&lua, parsed_event)?;
+
+                let event_type = json.get("type").and_then(|v| v.as_str()).unwrap_or_default();
+                if event_type == "unichat:userstore_update" {
+                    log::warn!(target: &format!("scraper:{}", self.name), "Event 'unichat:userstore_update' is not allowed");
+                    return Ok(());
+                }
+
+                if event_type != "unichat:custom" {
+                    let platform: Option<UniChatPlatform> = json.pointer("/data/platform").and_then(|v| UniChatPlatform::deserialize(v).ok());
+                    if let Some(platform) = &platform {
+                        if !matches!(platform, UniChatPlatform::Other(_)) {
+                            log::warn!(target: &format!("scraper:{}", self.name), "Event '{}' with reserved platform {:?} is not allowed", event_type, platform);
+                            return Ok(());
+                        }
+                    } else {
+                        log::warn!(target: &format!("scraper:{}", self.name), "Event '{}' without platform is not allowed", event_type);
+                        return Ok(());
+                    }
+                }
+
                 let parsed: UniChatEvent = serde_json::from_value(json)?;
 
                 if log_events == SettingLogEventLevel::AllEvents {
