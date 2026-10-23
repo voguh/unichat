@@ -10,6 +10,12 @@
 
 @import "@voguh/unichat-ui/styles/global.css";
 
+@theme {
+  --text-base: 0.875rem;
+  --text-sm: 0.75rem;
+  --text-xs: 0.625rem;
+}
+
 html,
 body,
 #root {
@@ -19,6 +25,7 @@ body,
 body,
 #root {
     @apply bg-stone-950 text-stone-50 overflow-hidden;
+    @apply text-base;
 }
 
 #root {
