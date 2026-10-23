@@ -80,15 +80,15 @@ fn fetch(id: &str) -> Result<CommunityWidgetData, Error> {
     return cache::get_or_fetch(&key, COMMUNITY_WIDGETS_FILE_TTL, || api::get(&path));
 }
 
-fn find_local_widget(name: &str) -> Result<Option<WidgetMetadata>, Error> {
-    let local_widgets = widgets::get_widgets()?;
+fn find_local_widget(name: &str) -> Option<WidgetMetadata> {
+    let local_widgets = widgets::get_widgets();
     let local_widget = local_widgets.into_iter().find(|w| w.widget_source == WidgetSource::User && w.name == name);
 
-    return Ok(local_widget);
+    return local_widget;
 }
 
-fn build(data: CommunityWidgetData, local_widget: Option<WidgetMetadata>, releases: &[AddonRelease]) -> Result<CommunityWidget, Error> {
-    let compatible = is_compatible(&data.requires_unichat)?;
+fn build(data: CommunityWidgetData, local_widget: Option<WidgetMetadata>, releases: &[AddonRelease]) -> CommunityWidget {
+    let compatible = is_compatible(&data.requires_unichat);
     let preview_url = api::url(&format!("{}/{}/preview", COMMUNITY_WIDGETS_PATH, data.id));
     let mut installed_version = None;
     let mut update_available = false;
@@ -100,14 +100,14 @@ fn build(data: CommunityWidgetData, local_widget: Option<WidgetMetadata>, releas
         installed_version = Some(local_widget.version);
     }
 
-    return Ok(CommunityWidget {
+    return CommunityWidget {
         data: data,
         preview_url: preview_url,
         installed_version: installed_version,
         compatible: compatible,
         has_update: update_available,
         warnings: warnings
-    });
+    };
 }
 
 /* ========================================================================== */
@@ -117,7 +117,7 @@ pub fn list() -> Result<Vec<CommunityWidget>, Error> {
 
     let mut community_widgets = Vec::new();
     for item in items {
-        let local_widget = find_local_widget(&item.name)?;
+        let local_widget = find_local_widget(&item.name);
 
         let mut releases = Vec::new();
         if local_widget.is_some() {
@@ -125,7 +125,7 @@ pub fn list() -> Result<Vec<CommunityWidget>, Error> {
             releases = detail.releases.unwrap_or_default();
         }
 
-        let community_widget = build(item, local_widget, &releases)?;
+        let community_widget = build(item, local_widget, &releases);
         community_widgets.push(community_widget);
     }
 
@@ -135,9 +135,9 @@ pub fn list() -> Result<Vec<CommunityWidget>, Error> {
 pub fn get(id: &str) -> Result<CommunityWidget, Error> {
     let data = fetch(id)?;
     let releases = data.releases.clone().unwrap_or_default();
-    let local_widget = find_local_widget(&data.name)?;
+    let local_widget = find_local_widget(&data.name);
 
-    return build(data, local_widget, &releases);
+    return Ok(build(data, local_widget, &releases));
 }
 
 pub fn install(id: &str, release: &str) -> Result<(), Error> {
@@ -145,7 +145,7 @@ pub fn install(id: &str, release: &str) -> Result<(), Error> {
     let releases = data.releases.clone().unwrap_or_default();
     let selected_release = releases.iter().find(|r| r.name == release).ok_or(anyhow!("Release '{}' not found for widget '{}'", release, data.name))?;
 
-    let compatible = is_compatible(&data.requires_unichat)?;
+    let compatible = is_compatible(&data.requires_unichat);
     if selected_release.name == data.version && !compatible {
         return Err(anyhow!("Widget '{}' {} requires UniChat {}", data.name, release, data.requires_unichat.unwrap_or_default()));
     }

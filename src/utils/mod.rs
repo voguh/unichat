@@ -36,10 +36,10 @@ pub fn is_dev() -> bool {
 
 /* ========================================================================== */
 
-pub fn get_current_timestamp() -> Result<i64, Error> {
-    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?;
+pub fn get_current_timestamp() -> i64 {
+    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).expect("System clock is before UNIX epoch");
     let timestamp_sec = timestamp.as_millis() as i64;
-    return Ok(timestamp_sec);
+    return timestamp_sec;
 }
 
 /* ========================================================================== */
@@ -53,32 +53,35 @@ pub fn path_to_string(path: &PathBuf) -> String {
 pub fn normalize_value(value_raw: &str) -> Result<f64, Error> {
     let last_dot = value_raw.rfind('.');
     let last_comma = value_raw.rfind(',');
-    let normalized = match(last_dot, last_comma) {
+    let normalized: String;
+    match(last_dot, last_comma) {
         (Some(dot_index), Some(comma_index)) => {
             if dot_index > comma_index {
-                value_raw.replace(",", "")
+                normalized = value_raw.replace(",", "");
             } else {
-                value_raw.replace(".", "").replace(",", ".")
+                normalized = value_raw.replace(".", "").replace(",", ".");
             }
         }
         (Some(dot_index), None) => {
             let digits_after_dot = value_raw.len() - dot_index - 1;
             if value_raw.matches(".").count() == 1 && digits_after_dot <= 2 {
-                value_raw.to_string()
+                normalized = value_raw.to_string();
             } else {
-                value_raw.replace(".", "")
+                normalized = value_raw.replace(".", "");
             }
         }
         (None, Some(comma_index)) => {
             let digits_after_comma = value_raw.len() - comma_index -1;
             if value_raw.matches(",").count() == 1 && digits_after_comma <= 2 {
-                value_raw.replace(",", ".")
+                normalized = value_raw.replace(",", ".");
             } else {
-                value_raw.replace(",", "")
+                normalized = value_raw.replace(",", "");
             }
-        },
-        (None, None) => value_raw.to_string()
-    };
+        }
+        (None, None) => {
+            normalized = value_raw.to_string();
+        }
+    }
 
     let value: f64 = normalized.parse()?;
 
@@ -96,7 +99,7 @@ pub fn parse_u32_to_rgba(color: u32) -> (u8, u8, u8, f32) {
     return (r, g, b, a as f32 / 255.0);
 }
 
-pub fn random_color_by_seed(seed: &str) -> Result<String, Error> {
+pub fn random_color_by_seed(seed: &str) -> String {
     let mut hash: u32 = 2166136261;
     for byte in seed.as_bytes() {
         hash ^= *byte as u32;
@@ -107,14 +110,14 @@ pub fn random_color_by_seed(seed: &str) -> Result<String, Error> {
     let g = ((hash >> 8) & 0xFF) as u8;
     let b = (hash & 0xFF) as u8;
 
-    return Ok(format!("#{:02X}{:02X}{:02X}", r, g, b));
+    return format!("#{:02X}{:02X}{:02X}", r, g, b);
 }
 
 /* ========================================================================== */
 
 // Thanks to Glenn Slayden which explained the YouTube channel ID format
 // on https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video/101153#101153
-static YOUTUBE_CHANNEL_ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^UC[0-9A-Za-z_-]{21}[AQgw]$").unwrap());
+static YOUTUBE_CHANNEL_ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^UC[0-9A-Za-z_-]{21}[AQgw]$").expect("Invalid YouTube channel ID regex"));
 pub fn is_valid_youtube_channel_id(channel_id: &str) -> bool {
     if channel_id.is_empty() {
         return false;
@@ -125,7 +128,7 @@ pub fn is_valid_youtube_channel_id(channel_id: &str) -> bool {
 
 // Thanks to Glenn Slayden which explained the YouTube video ID format
 // on https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video/101153#101153
-static YOUTUBE_VIDEO_ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[0-9A-Za-z_-]{10}[048AEIMQUYcgkosw]$").unwrap());
+static YOUTUBE_VIDEO_ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[0-9A-Za-z_-]{10}[048AEIMQUYcgkosw]$").expect("Invalid YouTube video ID regex"));
 pub fn is_valid_youtube_video_id(video_id: &str) -> bool {
     if video_id.is_empty() || video_id.len() != 11 {
         return false;
@@ -134,7 +137,7 @@ pub fn is_valid_youtube_video_id(video_id: &str) -> bool {
     return YOUTUBE_VIDEO_ID_REGEX.is_match(video_id);
 }
 
-static TWITCH_CHANNEL_NAME_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[0-9A-Za-z_]+$").unwrap());
+static TWITCH_CHANNEL_NAME_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[0-9A-Za-z_]+$").expect("Invalid Twitch channel name regex"));
 pub fn is_valid_twitch_channel_name(channel_name: &str) -> bool {
     if channel_name.is_empty() || channel_name.len() < 4 || channel_name.len() > 25 {
         return false;

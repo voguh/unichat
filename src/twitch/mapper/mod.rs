@@ -11,6 +11,7 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 use std::sync::Mutex;
+use std::sync::MutexGuard;
 
 use anyhow::anyhow;
 use anyhow::Error;
@@ -31,7 +32,18 @@ pub mod structs;
 /* ========================================================================== */
 
 static REDEMPTION_EVENT_CACHE: LazyLock<Mutex<HashMap<String, HashMap<String, UniChatRedemptionEventPayload>>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+fn lock_redemption_event_cache() -> MutexGuard<'static, HashMap<String, HashMap<String, UniChatRedemptionEventPayload>>> {
+    return REDEMPTION_EVENT_CACHE.lock().expect("TwitchMapper::REDEMPTION_EVENT_CACHE lock poisoned");
+}
+
+/* ========================================================================== */
+
 static REDEMPTION_MESSAGE_EVENT_CACHE: LazyLock<Mutex<HashMap<String, HashMap<String, UniChatMessageEventPayload>>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+fn lock_redemption_message_event_cache() -> MutexGuard<'static, HashMap<String, HashMap<String, UniChatMessageEventPayload>>> {
+    return REDEMPTION_MESSAGE_EVENT_CACHE.lock().expect("TwitchMapper::REDEMPTION_MESSAGE_EVENT_CACHE lock poisoned");
+}
+
+/* ========================================================================== */
 
 fn merge_redemption_events(redemption_event: UniChatRedemptionEventPayload, message_event: UniChatMessageEventPayload) -> UniChatRedemptionEventPayload {
     return UniChatRedemptionEventPayload {
@@ -59,39 +71,35 @@ fn merge_redemption_events(redemption_event: UniChatRedemptionEventPayload, mess
         message_text: Some(message_event.message_text),
         emotes: message_event.emotes,
 
-        timestamp: redemption_event.timestamp,
+        timestamp: redemption_event.timestamp
     };
 }
 
 pub fn handle_redemption_event(redemption_event: UniChatRedemptionEventPayload) -> Option<UniChatRedemptionEventPayload> {
-    if let Ok(mut message_event_cache) = REDEMPTION_MESSAGE_EVENT_CACHE.lock() {
-        if let Some(reward_message_events) = message_event_cache.get_mut(&redemption_event.reward_id) {
-            if let Some(message_event) = reward_message_events.remove(&redemption_event.author_id) {
-                return Some(merge_redemption_events(redemption_event, message_event))
-            }
-        } else {
-            if let Ok(mut redemption_event_cache) = REDEMPTION_EVENT_CACHE.lock() {
-                let reward_redemption_events = redemption_event_cache.entry(redemption_event.reward_id.clone()).or_insert_with(HashMap::new);
-                reward_redemption_events.insert(redemption_event.author_id.clone(), redemption_event);
-            }
+    let mut message_event_cache = lock_redemption_message_event_cache();
+    if let Some(reward_message_events) = message_event_cache.get_mut(&redemption_event.reward_id) {
+        if let Some(message_event) = reward_message_events.remove(&redemption_event.author_id) {
+            return Some(merge_redemption_events(redemption_event, message_event))
         }
+    } else {
+        let mut redemption_event_cache = lock_redemption_event_cache();
+        let reward_redemption_events = redemption_event_cache.entry(redemption_event.reward_id.clone()).or_insert_with(HashMap::new);
+        reward_redemption_events.insert(redemption_event.author_id.clone(), redemption_event);
     }
 
     return None;
 }
 
 pub fn handle_redemption_message_event(reward_id: &str, message_event: UniChatMessageEventPayload) -> Option<UniChatRedemptionEventPayload> {
-    if let Ok(mut redemption_event_cache) = REDEMPTION_EVENT_CACHE.lock() {
-        if let Some(redemption_event) = redemption_event_cache.get_mut(reward_id) {
-            if let Some(redemption_event) = redemption_event.remove(&message_event.author_id) {
-                return Some(merge_redemption_events(redemption_event, message_event))
-            }
-        } else {
-            if let Ok(mut message_event_cache) = REDEMPTION_MESSAGE_EVENT_CACHE.lock() {
-                let reward_message_events = message_event_cache.entry(reward_id.to_string()).or_insert_with(HashMap::new);
-                reward_message_events.insert(message_event.author_id.clone(), message_event);
-            }
+    let mut redemption_event_cache = lock_redemption_event_cache();
+    if let Some(redemption_event) = redemption_event_cache.get_mut(reward_id) {
+        if let Some(redemption_event) = redemption_event.remove(&message_event.author_id) {
+            return Some(merge_redemption_events(redemption_event, message_event))
         }
+    } else {
+        let mut message_event_cache = lock_redemption_message_event_cache();
+        let reward_message_events = message_event_cache.entry(reward_id.to_string()).or_insert_with(HashMap::new);
+        reward_message_events.insert(message_event.author_id.clone(), message_event);
     }
 
     return None;

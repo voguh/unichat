@@ -11,24 +11,27 @@
 use std::sync::Arc;
 use std::sync::OnceLock;
 
-use anyhow::anyhow;
 use anyhow::Error;
 
 /* ========================================================================== */
 
-const LUA_RUNTIME_ONCE_LOCK_KEY: &str = "Plugins::LUA_RUNTIME";
 static LUA_RUNTIME: OnceLock<Arc<mlua::Lua>> = OnceLock::new();
+pub fn get() -> Arc<mlua::Lua> {
+    let lua = LUA_RUNTIME.get().expect("Plugins::LUA_RUNTIME was not initialized");
+    return lua.clone();
+}
 
-pub fn get() -> Result<Arc<mlua::Lua>, Error> {
-    let lua = LUA_RUNTIME.get().ok_or(anyhow!("{} was not initialized", LUA_RUNTIME_ONCE_LOCK_KEY))?;
-    return Ok(lua.clone());
+fn set(lua: Arc<mlua::Lua>) {
+    LUA_RUNTIME.set(lua).expect("Plugins::LUA_RUNTIME was already initialized");
+}
+
+/* ========================================================================== */
+
+pub fn initialized() -> bool {
+    return LUA_RUNTIME.get().is_some();
 }
 
 pub fn new() -> Result<(), Error> {
-    if LUA_RUNTIME.get().is_some() {
-        return Err(anyhow!("{} is already initialized", LUA_RUNTIME_ONCE_LOCK_KEY));
-    }
-
     log::info!("Configuring LUA runtime");
     let lua = mlua::Lua::new();
     let _globals = lua.globals();
@@ -72,6 +75,8 @@ pub fn new() -> Result<(), Error> {
     lua.set_globals(_globals)?;
     log::debug!("LUA runtime configured successfully");
 
-    return LUA_RUNTIME.set(Arc::new(lua)).map_err(|_| anyhow!("{} was already initialized", LUA_RUNTIME_ONCE_LOCK_KEY));
+    set(Arc::new(lua));
+
+    return Ok(());
 }
 

@@ -24,7 +24,7 @@ impl UniChatTimeModule {
 impl mlua::UserData for UniChatTimeModule {
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("now", |_lua, _this, ()| -> mlua::Result<mlua::Integer> {
-            let timestamp = get_current_timestamp().map_err(mlua::Error::runtime)?;
+            let timestamp = get_current_timestamp();
 
             return Ok(timestamp);
         });

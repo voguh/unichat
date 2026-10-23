@@ -13,7 +13,7 @@ use anyhow::Error;
 
 use crate::events::unichat::UniChatEmote;
 use crate::shared_emotes;
-use crate::twitch::TWITCH_CHEERMOTES;
+use crate::twitch::read_cheermotes;
 
 /* ========================================================================== */
 
@@ -27,8 +27,8 @@ fn normalize_message_text(message_raw: &str) -> String {
 }
 
 fn parse_delimiter(start: &str, end: &str) -> Result<(usize, usize), Error> {
-    let start = start.parse::<usize>()?;
-    let end = end.parse::<usize>()?;
+    let start: usize = start.parse()?;
+    let end: usize = end.parse()?;
     return Ok((start, end));
 }
 
@@ -38,11 +38,10 @@ pub fn parse_message_emotes(raw_emotes: Option<&Option<String>>, message_text: &
     let message_text = normalize_message_text(message_text);
     let mut emotes = Vec::new();
 
-    if let Ok(custom_emotes) = shared_emotes::EMOTES_HASHSET.read() {
-        for word in message_text.split_whitespace() {
-            if let Some(emote) = custom_emotes.get(word) {
-                emotes.push(emote.clone());
-            }
+    let custom_emotes = shared_emotes::read();
+    for word in message_text.split_whitespace() {
+        if let Some(emote) = custom_emotes.get(word) {
+            emotes.push(emote.clone());
         }
     }
 
@@ -71,22 +70,21 @@ pub fn parse_message_emotes(raw_emotes: Option<&Option<String>>, message_text: &
     return Ok(emotes);
 }
 
-pub fn parse_message_string(message_raw: &String) -> Result<String, Error> {
+pub fn parse_message_string(message_raw: &String) -> String {
     let message_raw = normalize_message_text(message_raw);
     let mut str_message = Vec::new();
 
-    if let Ok(cheermotes) = TWITCH_CHEERMOTES.read() {
-        for word in message_raw.split_whitespace() {
-            let prefix_end = word.find(|c: char| c.is_digit(10)).unwrap_or(word.len());
-            let prefix = &word[..prefix_end];
-            let suffix = &word[prefix_end..];
-            let amount: u32 = suffix.parse().unwrap_or(0);
+    let cheermotes = read_cheermotes();
+    for word in message_raw.split_whitespace() {
+        let prefix_end = word.find(|c: char| c.is_digit(10)).unwrap_or(word.len());
+        let prefix = &word[..prefix_end];
+        let suffix = &word[prefix_end..];
+        let amount: u32 = suffix.parse().unwrap_or(0);
 
-            if !cheermotes.contains(prefix) || (amount < 1 || amount > 100000) {
-                str_message.push(word);
-            }
+        if !cheermotes.contains(prefix) || (amount < 1 || amount > 100000) {
+            str_message.push(word);
         }
     }
 
-    return Ok(str_message.join(" "));
+    return str_message.join(" ");
 }

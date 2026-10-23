@@ -17,7 +17,7 @@ use serde::Serialize;
 
 use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatBadge;
-use crate::twitch::TWITCH_BADGES;
+use crate::twitch::read_badges;
 use crate::utils::irc::IRCPrefix;
 use crate::utils::random_color_by_seed;
 
@@ -43,14 +43,14 @@ pub struct TwitchRawBadge {
 
 /* <================================================================================================================> */
 
-pub fn parse_author_username(prefix: &Option<IRCPrefix>) -> Result<Option<String>, Error> {
+pub fn parse_author_username(prefix: &Option<IRCPrefix>) -> Option<String> {
     if let Some(prefix) = prefix {
         if let IRCPrefix::Nick(_nickname, username, _hostname) = prefix.to_owned() {
-            return Ok(Some(username));
+            return Some(username);
         }
     }
 
-    return Ok(None);
+    return None;
 }
 
 pub fn parse_author_username_str(login: Option<&Option<String>>) -> Result<Option<String>, Error> {
@@ -80,29 +80,28 @@ pub fn parse_author_color(color: Option<&Option<String>>, author_name: &Option<S
         return Ok(color.to_owned());
     } else {
         let username = author_name.as_ref().ok_or(anyhow!("Missing author name"))?;
-        return random_color_by_seed(&username);
+        return Ok(random_color_by_seed(&username));
     }
 }
 
 
-pub fn parse_author_badges(badges: Option<&Option<String>>) -> Result<Vec<UniChatBadge>, Error> {
+pub fn parse_author_badges(badges: Option<&Option<String>>) -> Vec<UniChatBadge> {
     let badges = badges.and_then(|v| v.as_ref());
 
     let mut parsed_badges = Vec::new();
     if let Some(badge_str) = badges {
-        if let Ok(twitch_badges) = TWITCH_BADGES.read() {
-            for badge in badge_str.split(',') {
-                if let Some(twitch_badge) = twitch_badges.get(badge).or_else(|| twitch_badges.get(&format!("global/{}", badge))) {
-                    parsed_badges.push(twitch_badge.to_owned());
-                }
+        let twitch_badges = read_badges();
+        for badge in badge_str.split(',') {
+            if let Some(twitch_badge) = twitch_badges.get(badge).or_else(|| twitch_badges.get(&format!("global/{}", badge))) {
+                parsed_badges.push(twitch_badge.to_owned());
             }
         }
     }
 
-    return Ok(parsed_badges);
+    return parsed_badges;
 }
 
-pub fn parse_author_type(tags: &HashMap<String, Option<String>>) -> Result<UniChatAuthorType, Error> {
+pub fn parse_author_type(tags: &HashMap<String, Option<String>>) -> UniChatAuthorType {
     let mut author_type = UniChatAuthorType::Viewer;
 
     if let Some(value) = tags.get("badges").and_then(|v| v.as_ref()) {
@@ -115,5 +114,5 @@ pub fn parse_author_type(tags: &HashMap<String, Option<String>>) -> Result<UniCh
         }
     }
 
-    return Ok(author_type);
+    return author_type;
 }

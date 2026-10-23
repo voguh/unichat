@@ -48,6 +48,8 @@ fn generate_resources(target_gen_dir: &Path) -> Result<(), Box<dyn std::error::E
     let homepage = env!("CARGO_PKG_HOMEPAGE");
     let license_code = env!("CARGO_PKG_LICENSE");
     let (license_name, license_url) = get_license_info(license_code)?;
+    let icon_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("icons").join("icon.png");
+    let licenses_path = target_gen_dir.join("third_party_licenses.json");
 
     #[rustfmt::skip]
     let metadata = format!(r#"
@@ -60,6 +62,9 @@ fn generate_resources(target_gen_dir: &Path) -> Result<(), Box<dyn std::error::E
         pub const UNICHAT_LICENSE_CODE: &str = "{license_code}";
         pub const UNICHAT_LICENSE_NAME: &str = "{license_name}";
         pub const UNICHAT_LICENSE_URL: &str = "{license_url}";
+
+        pub static UNICHAT_ICON_BYTES: &[u8] = include_bytes!({icon_path:?});
+        pub static THIRD_PARTY_LICENSES: &str = include_str!({licenses_path:?});
     "#);
 
     fs::write(metadata_file_path, metadata)?;
@@ -87,7 +92,7 @@ const EQUALS_ENV: [&str; 18] = [
     "TARGET",
     "TAURI_APP_PATH",
     "TAURI_CLI_VERBOSITY",
-    "TAURI_FRONTEND_PATH",
+    "TAURI_FRONTEND_PATH"
 ];
 
 const STARTS_WITH_ENV: [&str; 3] = ["CARGO", "DEP_TAURI", "RUSTUP"];
@@ -98,7 +103,10 @@ fn get_clean_env() -> HashMap<String, String> {
     for (key, value) in env::vars() {
         if EQUALS_ENV.contains(&key.as_str()) {
             continue;
-        } else if STARTS_WITH_ENV.iter().any(|prefix| key.starts_with(prefix)) {
+        } else if STARTS_WITH_ENV
+            .iter()
+            .any(|prefix| key.starts_with(prefix))
+        {
             continue;
         }
 
@@ -142,7 +150,11 @@ const CARGO_BIN: &str = "cargo";
 fn generate_crate_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::error::Error>> {
     let mut final_licenses: Vec<FinalLicenseInfo> = Vec::new();
 
-    let metadata_output = Command::new(CARGO_BIN).args(["metadata", "--format-version", "1"]).env_clear().envs(get_clean_env()).output()?;
+    let metadata_output = Command::new(CARGO_BIN)
+        .args(["metadata", "--format-version", "1"])
+        .env_clear()
+        .envs(get_clean_env())
+        .output()?;
     if !metadata_output.status.success() {
         return Err(format!("Failed to run metadata: {}", String::from_utf8_lossy(&metadata_output.stderr)).into());
     }
@@ -151,7 +163,8 @@ fn generate_crate_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::
     let cargo_metadata: serde_json::Value = serde_json::from_str(&cargo_metadata_json)?;
 
     let packages: Vec<CargoPackage> = serde_json::from_value(cargo_metadata["packages"].clone())?;
-    let packages_map: HashMap<String, CargoPackage> = packages.into_iter()
+    let packages_map: HashMap<String, CargoPackage> = packages
+        .into_iter()
         .map(|pkg| (pkg.name.clone(), pkg.clone()))
         .collect();
 
@@ -202,7 +215,12 @@ fn generate_npm_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::er
     let mut final_licenses: Vec<FinalLicenseInfo> = Vec::new();
 
     let webapp_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("webapp");
-    let metadata_output = Command::new(PNPM_BIN).args(["list", "--json", "--long", "--prod"]).current_dir(&webapp_path).env_clear().envs(get_clean_env()).output()?;
+    let metadata_output = Command::new(PNPM_BIN)
+        .args(["list", "--json", "--long", "--prod"])
+        .current_dir(&webapp_path)
+        .env_clear()
+        .envs(get_clean_env())
+        .output()?;
     if !metadata_output.status.success() {
         return Err(format!("Failed to run metadata: {}", String::from_utf8_lossy(&metadata_output.stderr)).into());
     }
@@ -210,7 +228,8 @@ fn generate_npm_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::er
     let pnpm_metadata_json = String::from_utf8(metadata_output.stdout)?;
     let pnpm_metadata: Vec<PNPMPackage> = serde_json::from_str(&pnpm_metadata_json)?;
 
-    let packages_map: HashMap<String, PNPMPackage> = pnpm_metadata.into_iter()
+    let packages_map: HashMap<String, PNPMPackage> = pnpm_metadata
+        .into_iter()
         .map(|pkg| (pkg.name.clone(), pkg.clone()))
         .collect();
 

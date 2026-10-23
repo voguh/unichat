@@ -12,6 +12,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::RwLock;
+use std::sync::RwLockReadGuard;
+use std::sync::RwLockWriteGuard;
 
 use anyhow::anyhow;
 use anyhow::Error;
@@ -35,8 +37,16 @@ pub mod utils;
 
 pub static COMMON_SCRAPER_JS: &str = include_str!("./static/common_scraper.js");
 
-const LAZY_LOCK_NAME: &str = "Scraper::SCRAPERS";
+/* ========================================================================== */
+
 static SCRAPERS: LazyLock<RwLock<HashMap<String, Arc<dyn UniChatScraper + Send + Sync>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+fn read() -> RwLockReadGuard<'static, HashMap<String, Arc<dyn UniChatScraper + Send + Sync>>> {
+    return SCRAPERS.read().expect("Scraper::SCRAPERS lock poisoned");
+}
+
+fn write() -> RwLockWriteGuard<'static, HashMap<String, Arc<dyn UniChatScraper + Send + Sync>>> {
+    return SCRAPERS.write().expect("Scraper::SCRAPERS lock poisoned");
+}
 
 /* ========================================================================== */
 
@@ -64,20 +74,20 @@ pub fn serialize_scraper(scraper: &Arc<dyn UniChatScraper + Send + Sync>) -> ser
         "editingTooltipUrls": scraper.editing_tooltip_urls(),
         "placeholderText": scraper.placeholder_text(),
         "badges": scraper.badges(),
-        "icon": scraper.icon(),
+        "icon": scraper.icon()
     });
 
     return serialized;
 }
 
-pub fn get_scrapers() -> Result<Vec<Arc<dyn UniChatScraper + Send + Sync>>, Error> {
-    let scrapers = SCRAPERS.read().map_err(|_| anyhow!("{} lock poisoned", LAZY_LOCK_NAME))?;
-    return Ok(scrapers.values().cloned().collect());
+pub fn get_scrapers() -> Vec<Arc<dyn UniChatScraper + Send + Sync>> {
+    let scrapers = read();
+    return scrapers.values().cloned().collect();
 }
 
-pub fn get_scraper(id: &str) -> Result<Option<Arc<dyn UniChatScraper + Send + Sync>>, Error> {
-    let scrapers = SCRAPERS.read().map_err(|_| anyhow!("{} lock poisoned", LAZY_LOCK_NAME))?;
-    return Ok(scrapers.get(id).cloned());
+pub fn get_scraper(id: &str) -> Option<Arc<dyn UniChatScraper + Send + Sync>> {
+    let scrapers = read();
+    return scrapers.get(id).cloned();
 }
 
 fn handle_event(payload: &str) -> Result<(), Error> {
@@ -88,15 +98,14 @@ fn handle_event(payload: &str) -> Result<(), Error> {
     let event_type = payload.get("type").and_then(|v| v.as_str())
         .ok_or(anyhow!("Missing or invalid 'type' field in scraper event payload"))?.to_string();
 
-    let scraper = get_scraper(&scraper_id)?.ok_or(anyhow!("Scraper with ID '{}' not found", scraper_id))?;
+    let scraper = get_scraper(&scraper_id).ok_or(anyhow!("Scraper with ID '{}' not found", scraper_id))?;
 
     if status::parse_status(&event_type).is_none() {
         return scraper.on_event(payload);
     }
 
     if payload.get("timestamp").is_none() {
-        let timestamp = get_current_timestamp()?;
-        payload["timestamp"] = serde_json::json!(timestamp);
+        payload["timestamp"] = serde_json::json!(get_current_timestamp());
     }
 
     let event: ScraperStatusEvent = serde_json::from_value(payload)?;
@@ -153,7 +162,7 @@ pub fn register_scraper(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Resul
 
     /* ====================================================================== */
 
-    let mut scrapers = SCRAPERS.write().map_err(|_| anyhow!("{} lock poisoned", LAZY_LOCK_NAME))?;
+    let mut scrapers = write();
     if scrapers.contains_key(scraper.id()) {
         return Err(anyhow!("Scraper with ID '{}' is already registered", scraper.id()));
     }

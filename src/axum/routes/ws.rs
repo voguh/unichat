@@ -50,7 +50,7 @@ async fn handle_socket(socket: WebSocket, widget: Option<String>) {
 
     /* ====================================================================== */
 
-    let userstore_data = userstore::get_all_items().unwrap_or_default();
+    let userstore_data = userstore::get_all_items();
     let fieldstate_data = resolve_fieldstate(widget);
     let currency_data = currency::target_currency();
     let userstore_event = serde_json::json!({
@@ -84,7 +84,7 @@ async fn handle_socket(socket: WebSocket, widget: Option<String>) {
 
     /* ====================================================================== */
 
-    let mut rx = events::subscribe().unwrap();
+    let mut rx = events::subscribe();
     loop {
         tokio::select! {
             event = rx.recv() => {

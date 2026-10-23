@@ -30,16 +30,12 @@ use crate::utils::settings::SettingLogEventLevel;
 
 /* ========================================================================== */
 
-fn get_optional_table_property<R: mlua::FromLua>(table: &mlua::Table, key: &str) -> Result<Option<R>, mlua::Error> {
-    if let Ok(value) = table.get(key) {
-        return Ok(Some(value));
-    }
-
-    return Ok(None);
+fn get_optional_table_property<R: mlua::FromLua>(table: &mlua::Table, key: &str) -> Option<R> {
+    return table.get(key).ok();
 }
 
 fn get_table_property<R: mlua::FromLua>(table: &mlua::Table, key: &str, default_value: Option<R>) -> Result<R, mlua::Error> {
-    if let Some(value) = get_optional_table_property::<R>(table, key)? {
+    if let Some(value) = get_optional_table_property(table, key) {
         return Ok(value);
     } else if let Some(default_value) = default_value {
         return Ok(default_value);
@@ -74,11 +70,11 @@ impl LuaUniChatScraper {
         let badges = get_table_property(&opts, "badges", Some(Vec::new()))?;
         let icon = get_table_property(&opts, "icon", Some(String::from("fas fa-video")))?;
         let validate_url = get_table_property(&opts, "validate_url", None)?;
-        let on_idle = get_optional_table_property(&opts, "on_idle")?;
-        let on_ready = get_optional_table_property(&opts, "on_ready")?;
-        let on_ping = get_optional_table_property(&opts, "on_ping")?;
-        let on_error = get_optional_table_property(&opts, "on_error")?;
-        let on_fatal = get_optional_table_property(&opts, "on_fatal")?;
+        let on_idle = get_optional_table_property(&opts, "on_idle");
+        let on_ready = get_optional_table_property(&opts, "on_ready");
+        let on_ping = get_optional_table_property(&opts, "on_ping");
+        let on_error = get_optional_table_property(&opts, "on_error");
+        let on_fatal = get_optional_table_property(&opts, "on_fatal");
 
         if id.trim().is_empty() || id.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') || !id.trim().ends_with("-chat") {
             return Err(mlua::Error::external(format!("Scraper 'id' must be a non-empty alphanumeric ASCII string and end with '-chat'")));
@@ -111,12 +107,12 @@ impl LuaUniChatScraper {
         let app_log_dir = properties::get_app_path(AppPaths::AppLog);
         let scraper_log_dir = app_log_dir.join(&self.id);
         if !scraper_log_dir.exists() {
-            fs::create_dir_all(&scraper_log_dir).unwrap()
+            fs::create_dir_all(&scraper_log_dir).expect("Failed to create scraper log directory")
         }
 
         let log_file = scraper_log_dir.join(file_name);
-        let mut file = fs::OpenOptions::new().create(true).append(true).open(log_file).unwrap();
-        writeln!(file, "{content}").unwrap();
+        let mut file = fs::OpenOptions::new().create(true).append(true).open(log_file).expect("Failed to open scraper log file");
+        writeln!(file, "{content}").expect("Failed to write scraper log file");
     }
 
     fn status_callback(&self, status: ScraperStatus) -> Option<&mlua::Function> {
@@ -165,7 +161,7 @@ impl UniChatScraper for LuaUniChatScraper {
     }
 
     fn on_event(&self, event: serde_json::Value) -> Result<(), Error> {
-        let lua = runtime::get()?;
+        let lua = runtime::get();
         let log_events = settings::get_scraper_events_log_level();
 
         if log_events == SettingLogEventLevel::AllEvents {
@@ -215,7 +211,7 @@ impl UniChatScraper for LuaUniChatScraper {
             },
             Err(err) => {
                 log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper 'on_event' callback: {:#?}", self.id, err);
-                self.log_action("events-error.log", &format!("{} -- {:?}", err, event));
+                self.log_action("events-error.log", &format!("{:#?} -- {:?}", err, event));
             }
         }
 
@@ -224,7 +220,7 @@ impl UniChatScraper for LuaUniChatScraper {
 
     fn on_status(&self, event: &ScraperStatusEvent) -> Result<(), Error> {
         if let Some(callback) = self.status_callback(event.status) {
-            let lua = runtime::get()?;
+            let lua = runtime::get();
             let table = lua.to_value(event)?;
 
             if let Err(err) = callback.call::<()>(table) {

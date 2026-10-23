@@ -57,11 +57,6 @@ pub fn table_deep_readonly(lua: &mlua::Lua, table_name: &mlua::Value, table: mlu
     return Ok(proxy);
 }
 
-pub fn from_lua_value<T: DeserializeOwned>(lua: &mlua::Lua, value: mlua::Value) -> Result<T, mlua::Error> {
-    let unwrapped = table_deep_unwrap(lua, value, &mut HashSet::new())?;
-    return lua.from_value(unwrapped);
-}
-
 fn table_deep_unwrap(lua: &mlua::Lua, value: mlua::Value, visiting: &mut HashSet<*const c_void>) -> Result<mlua::Value, mlua::Error> {
     if !value.is_table() {
         return Ok(value);
@@ -95,4 +90,9 @@ fn table_deep_unwrap(lua: &mlua::Lua, value: mlua::Value, visiting: &mut HashSet
     visiting.remove(&pointer);
 
     return Ok(mlua::Value::Table(copy));
+}
+
+pub fn from_lua_value<T: DeserializeOwned>(lua: &mlua::Lua, value: mlua::Value) -> Result<T, mlua::Error> {
+    let unwrapped = table_deep_unwrap(lua, value, &mut HashSet::new())?;
+    return lua.from_value(unwrapped);
 }

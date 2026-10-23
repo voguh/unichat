@@ -11,6 +11,7 @@
 use std::fs;
 use std::sync::Arc;
 use std::sync::RwLock;
+use std::sync::RwLockWriteGuard;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering;
 
@@ -49,7 +50,7 @@ impl UniChatAPI {
         let logger_name = plugin_name.to_string();
         let listeners_clone = listeners.clone();
         tauri::async_runtime::spawn(async move {
-            let mut rx = events::subscribe().unwrap();
+            let mut rx = events::subscribe();
 
             loop {
                 let received = rx.recv().await;
@@ -57,18 +58,17 @@ impl UniChatAPI {
                 match received {
                     Ok(event) => {
                         let callbacks: Vec<mlua::Function>;
-                        if let Ok(listeners) = listeners_clone.read() {
-                            callbacks = listeners.clone().iter().map(|(_id, function)| function.clone()).collect();
-                        } else {
-                            callbacks = Vec::new();
+                        {
+                            let listeners = listeners_clone.read().expect("Event listeners lock poisoned");
+                            callbacks = listeners.iter().map(|(_id, function)| function.clone()).collect();
                         }
 
-                        let lua = runtime::get().unwrap();
-                        let table = lua.to_value(&event).unwrap();
+                        let lua = runtime::get();
+                        let table = lua.to_value(&event).expect("Failed to convert UniChatEvent to Lua value");
 
                         for callback in callbacks.iter() {
                             if let Err(err) = callback.call::<()>(table.clone()) {
-                                log::error!(target: &format!("plugin:{}", logger_name), "An error occurred on UniChatAPI event listener callback: {}", err);
+                                log::error!(target: &format!("plugin:{}", logger_name), "An error occurred on UniChatAPI event listener callback: {:#?}", err);
                             }
                         }
                     }
@@ -88,6 +88,10 @@ impl UniChatAPI {
             event_listeners: listeners,
             next_listener_id: next_id
         };
+    }
+
+    fn write_event_listeners(&self) -> RwLockWriteGuard<'_, Vec<(u64, mlua::Function)>> {
+        return self.event_listeners.write().expect("Event listeners lock poisoned");
     }
 }
 
@@ -113,23 +117,21 @@ impl mlua::UserData for UniChatAPI {
         });
 
         methods.add_method("fetch_shared_emotes", |_lua, _this, (platform, channel_id): (String, String)| {
-            shared_emotes::fetch_shared_emotes(&platform, &channel_id).map_err(mlua::Error::external)?;
+            shared_emotes::fetch_shared_emotes(&platform, &channel_id);
             return Ok(());
         });
 
         methods.add_method("get_shared_emotes", |lua, _this, ()| {
             let emotes_table = lua.create_table()?;
-            if let Ok(custom_emotes) = shared_emotes::EMOTES_HASHSET.read() {
-                for (code, emote) in custom_emotes.iter() {
-                    let emote_table = lua.create_table()?;
-                    emote_table.set("id", emote.id.clone())?;
-                    emote_table.set("code", emote.code.clone())?;
-                    emote_table.set("url", emote.url.clone())?;
+            for (code, emote) in shared_emotes::read().iter() {
+                let emote_table = lua.create_table()?;
+                emote_table.set("id", emote.id.clone())?;
+                emote_table.set("code", emote.code.clone())?;
+                emote_table.set("url", emote.url.clone())?;
 
-                    let table_name = lua.create_string("UniChatEmote")?;
-                    let locked_emote = table_deep_readonly(lua, &mlua::Value::String(table_name), emote_table)?;
-                    emotes_table.set(code.clone(), locked_emote)?;
-                }
+                let table_name = lua.create_string("UniChatEmote")?;
+                let locked_emote = table_deep_readonly(lua, &mlua::Value::String(table_name), emote_table)?;
+                emotes_table.set(code.clone(), locked_emote)?;
             }
 
             return Ok(emotes_table);
@@ -141,8 +143,8 @@ impl mlua::UserData for UniChatAPI {
             let key = format!("{}:{}", plugin_name, module_name);
 
             if let Err(err) = shared_modules::add(key, module_table) {
-                log::error!(target: &format!("plugin:{}", plugin_name), "Failed to expose shared module '{}' for plugin '{}': {}", module_name, plugin_name, err);
-                let msg = format!("Failed to expose shared module '{}': {}", module_name, err);
+                log::error!(target: &format!("plugin:{}", plugin_name), "Failed to expose shared module '{}' for plugin '{}': {:#?}", module_name, plugin_name, err);
+                let msg = format!("Failed to expose shared module '{}': {:#?}", module_name, err);
                 plugin.add_message(msg.clone());
                 return Err(mlua::Error::external(msg));
             }
@@ -156,7 +158,7 @@ impl mlua::UserData for UniChatAPI {
             let plugin = get_plugin(&this.plugin_name).map_err(mlua::Error::external)?;
 
             let id = this.next_listener_id.fetch_add(1, Ordering::SeqCst);
-            let mut listeners = this.event_listeners.write().map_err(|_| mlua::Error::external("event_listeners lock poisoned"))?;
+            let mut listeners = this.write_event_listeners();
             listeners.push((id, callback));
 
             plugin.add_message(format!("Added event listener '{:?}'.", id));
@@ -167,7 +169,7 @@ impl mlua::UserData for UniChatAPI {
         methods.add_method("remove_event_listener", |_lua, this, listener_id: u64| {
             let plugin = get_plugin(&this.plugin_name).map_err(mlua::Error::external)?;
 
-            let mut listeners = this.event_listeners.write().map_err(|_| mlua::Error::external("event_listeners lock poisoned"))?;
+            let mut listeners = this.write_event_listeners();
             listeners.retain(|(id, _)| *id != listener_id);
 
             plugin.add_message(format!("Removed event listener '{:?}'.", listener_id));

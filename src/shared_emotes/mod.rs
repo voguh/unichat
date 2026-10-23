@@ -11,6 +11,7 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 use std::sync::RwLock;
+use std::sync::RwLockReadGuard;
 use std::thread;
 
 use anyhow::Error;
@@ -23,7 +24,17 @@ mod seventv;
 
 /* ========================================================================== */
 
-pub static EMOTES_HASHSET: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+static EMOTES_HASHSET: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+pub fn read() -> RwLockReadGuard<'static, HashMap<String, UniChatEmote>> {
+    return EMOTES_HASHSET.read().expect("SharedEmotes::EMOTES_HASHSET lock poisoned");
+}
+
+fn write(emotes: HashMap<String, UniChatEmote>) {
+    let mut guard = EMOTES_HASHSET.write().expect("SharedEmotes::EMOTES_HASHSET lock poisoned");
+    guard.extend(emotes);
+}
+
+/* ========================================================================== */
 
 type EmotesResult = Result<HashMap<String, UniChatEmote>, Error>;
 
@@ -38,12 +49,10 @@ fn join_emotes(results: Vec<EmotesResult>, context: &str) {
         }
     }
 
-    if let Ok(mut guard) = EMOTES_HASHSET.write() {
-        guard.extend(emotes);
-    }
+    write(emotes);
 }
 
-pub fn fetch_global_shared_emotes() -> Result<(), Error> {
+pub fn fetch_global_shared_emotes() {
     tauri::async_runtime::spawn_blocking(|| {
         let results = thread::scope(|scope| {
             let bttv = scope.spawn(betterttv::fetch_global_emotes);
@@ -55,11 +64,9 @@ pub fn fetch_global_shared_emotes() -> Result<(), Error> {
 
         join_emotes(results.into_iter().flatten().collect(), "global");
     });
-
-    return Ok(());
 }
 
-pub fn fetch_shared_emotes(platform: &str, channel_id: &str) -> Result<(), Error> {
+pub fn fetch_shared_emotes(platform: &str, channel_id: &str) {
     let platform = platform.to_string();
     let channel_id = channel_id.to_string();
 
@@ -76,6 +83,4 @@ pub fn fetch_shared_emotes(platform: &str, channel_id: &str) -> Result<(), Error
 
         join_emotes(results.into_iter().flatten().collect(), "channel");
     });
-
-    return Ok(());
 }

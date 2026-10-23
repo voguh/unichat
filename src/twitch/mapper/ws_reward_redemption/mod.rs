@@ -32,14 +32,14 @@ struct WsRewardRedemption {
     channel_id: String,
     reward: WsRewardRedemptionReward,
     user_input: Option<String>,
-    redeemed_at: String,
+    redeemed_at: String
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 struct WsRewardRedemptionUser {
     id: String,
     login: String,
-    display_name: String,
+    display_name: String
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -49,29 +49,29 @@ struct WsRewardRedemptionReward {
     prompt: Option<String>,
     cost: u32,
     image: Option<HashMap<String, String>>,
-    default_image: HashMap<String, String>,
+    default_image: HashMap<String, String>
 }
 
-fn parse_reward_icon_url(reward: &WsRewardRedemptionReward) -> Result<String, Error> {
+fn parse_reward_icon_url(reward: &WsRewardRedemptionReward) -> String {
     if let Some(images) = &reward.image {
         if let Some(url) = images.get("url_1x") {
-            return Ok(url.to_owned());
+            return url.to_owned();
         }
     } else {
         if let Some(url) = reward.default_image.get("url_1x") {
-            return Ok(url.to_owned());
+            return url.to_owned();
         }
     }
 
-    return Ok(String::new());
+    return String::new();
 }
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let parsed: WsRewardRedemption = serde_json::from_value(value)?;
 
     let display_color = parse_author_color(None, &Some(parsed.user.login.clone()))?;
-    let icon_url = parse_reward_icon_url(&parsed.reward)?;
-    let timestamp_usec = get_current_timestamp()?;
+    let icon_url = parse_reward_icon_url(&parsed.reward);
+    let timestamp_usec = get_current_timestamp();
 
     let event_payload = UniChatRedemptionEventPayload {
         channel_id: parsed.channel_id,

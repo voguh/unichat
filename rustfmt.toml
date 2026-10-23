@@ -1,0 +1,6 @@
+max_width = 120
+use_small_heuristics = "Max"
+chain_width = 40
+
+unstable_features = true
+trailing_comma = "Never"

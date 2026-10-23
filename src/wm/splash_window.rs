@@ -10,6 +10,7 @@
 
 use std::sync::LazyLock;
 use std::sync::RwLock;
+use std::sync::RwLockReadGuard;
 
 use anyhow::Error;
 use tauri::Emitter as _;
@@ -27,15 +28,26 @@ pub const SPLASH_WINDOW_LABEL: &str = "splash-screen";
 pub const SPLASH_WINDOW_READY_EVENT: &str = "unichat://splashscreen:ready";
 pub const TOTAL_STAGES: u8 = 15;
 
-const LAZY_LOCK_NAME: &str = "SplashWindow::CURRENT_STAGE";
+/* ========================================================================== */
+
 static CURRENT_STAGE: LazyLock<RwLock<(u8, String)>> = LazyLock::new(|| RwLock::new((0, String::new())));
+fn read() -> RwLockReadGuard<'static, (u8, String)> {
+    return CURRENT_STAGE.read().expect("SplashWindow::CURRENT_STAGE lock poisoned");
+}
+
+fn write(step: u8, message: String) {
+    let mut current_stage = CURRENT_STAGE.write().expect("SplashWindow::CURRENT_STAGE lock poisoned");
+    *current_stage = (step, message);
+}
+
+/* ========================================================================== */
 
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 struct SplashProgressEvent {
     step: u8,
     total: u8,
-    message: String,
+    message: String
 }
 
 /* ========================================================================== */
@@ -67,10 +79,7 @@ pub fn close() {
 /* ========================================================================== */
 
 fn report(step: u8, message: &str) {
-    match CURRENT_STAGE.write() {
-        Ok(mut current_stage) => *current_stage = (step, message.to_string()),
-        Err(_) => log::error!("{} lock poisoned", LAZY_LOCK_NAME),
-    }
+    write(step, message.to_string());
 
     if let Some(window) = get_app_handle().get_webview_window(SPLASH_WINDOW_LABEL) {
         let event = SplashProgressEvent {
@@ -104,8 +113,5 @@ pub fn end(message: impl Into<String>) {
 }
 
 pub fn current_stage() -> (u8, String) {
-    match CURRENT_STAGE.read() {
-        Ok(current_stage) => return (*current_stage).clone(),
-        Err(_) => return (0, String::new()),
-    }
+    return read().clone();
 }

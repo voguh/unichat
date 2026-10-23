@@ -34,7 +34,7 @@ pub enum IRCCommand {
     /// PRIVMSG chatroom :message
     PRIVMSG(String, String),
     /// A raw IRC command unknown to the crate.
-    Raw(String, Vec<String>),
+    Raw(String, Vec<String>)
 }
 
 
@@ -42,7 +42,7 @@ impl IRCMessage {
     pub fn parse(value: Option<&serde_json::Value>) -> Result<Self, Error> {
         if let Some(value) = value {
             let raw = value.get("raw").and_then(|r| r.as_str()).ok_or(anyhow!("Missing raw IRC message"))?;
-            let tags = Self::parse_tags(value.get("tags"))?;
+            let tags = Self::parse_tags(value.get("tags"));
             let prefix = Self::parse_prefix(value.get("prefix"))?;
             let command = Self::parse_command(value.get("command"))?;
 
@@ -57,7 +57,7 @@ impl IRCMessage {
         }
     }
 
-    fn parse_tags(tags_obj: Option<&serde_json::Value>) -> Result<HashMap<String, Option<String>>, Error> {
+    fn parse_tags(tags_obj: Option<&serde_json::Value>) -> HashMap<String, Option<String>> {
         let mut tags = HashMap::new();
 
         if let Some(tags_obj) = tags_obj.and_then(|tags| tags.as_object()) {
@@ -67,7 +67,7 @@ impl IRCMessage {
             }
         }
 
-        return Ok(tags);
+        return tags;
     }
 
     fn parse_prefix(prefix_arr: Option<&serde_json::Value>) -> Result<Option<IRCPrefix>, Error> {

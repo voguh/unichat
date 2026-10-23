@@ -96,7 +96,7 @@ pub async fn get_releases<R: Runtime>(_app: AppHandle<R>) -> Result<UniChatRelea
 
 #[tauri::command]
 pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), String> {
-    let timestamp_usec = get_current_timestamp().map_err(|e| format!("An error occurred on get current timestamp: {:#?}", e))?;
+    let timestamp_usec = get_current_timestamp();
 
     let event = UniChatEvent::Clear(UniChatClearEventPayload {
         platform: None,

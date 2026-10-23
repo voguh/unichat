@@ -33,7 +33,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let parsed: RemoveChatItemByAuthorAction = serde_json::from_value(value)?;
 
     let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
-    let timestamp_usec = get_current_timestamp()?;
+    let timestamp_usec = get_current_timestamp();
 
     let event = UniChatEvent::RemoveAuthor(UniChatRemoveAuthorEventPayload {
         channel_id: channel_id,

@@ -16,8 +16,6 @@
 
 use std::env;
 use std::fs;
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::Ordering;
 use std::sync::OnceLock;
 use std::thread;
 use std::time::Instant;
@@ -48,22 +46,18 @@ mod youtube;
 
 /* ========================================================================== */
 
-pub static UNICHAT_ICON_BYTES: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/icons/icon.png"));
-pub static THIRD_PARTY_LICENSES: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/third_party_licenses.json"));
 static APP_HANDLE: OnceLock<tauri::AppHandle<tauri::Wry>> = OnceLock::new();
-static STARTUP_STARTED: AtomicBool = AtomicBool::new(false);
-
 pub fn get_app_handle() -> &'static tauri::AppHandle<tauri::Wry> {
     return APP_HANDLE.get().expect("APP_HANDLE is not initialized");
+}
+
+fn set_app_handle(app_handle: tauri::AppHandle<tauri::Wry>) {
+    APP_HANDLE.set(app_handle).expect("APP_HANDLE was already initialized");
 }
 
 /* ========================================================================== */
 
 fn start_startup() {
-    if STARTUP_STARTED.swap(true, Ordering::SeqCst) {
-        return;
-    }
-
     // Runs off the event loop thread, otherwise the splash screen would freeze instead of showing
     // the progress it is being fed.
     thread::spawn(|| {
@@ -75,7 +69,7 @@ fn start_startup() {
 }
 
 fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Error>> {
-    APP_HANDLE.set(app.handle().clone()).map_err(|e| anyhow::anyhow!("Failed to set APP_HANDLE: {:#?}", e))?;
+    set_app_handle(app.handle().clone());
 
     /* ====================================================================== */
 
@@ -161,7 +155,7 @@ fn run_startup() -> Result<(), Error> {
     currency::init()?;
 
     wm::splash_window::stage(8, "Fetching global shared emotes...");
-    shared_emotes::fetch_global_shared_emotes()?;
+    shared_emotes::fetch_global_shared_emotes();
 
     if has_plugins() {
         wm::splash_window::stage(9, "Initializing plugins module...");
@@ -274,7 +268,7 @@ fn main() {
             commands::widgets::get_widget_fields,
             commands::widgets::get_widget_fieldstate,
             commands::widgets::get_widgets,
-            commands::widgets::set_widget_fieldstate,
+            commands::widgets::set_widget_fieldstate
         ])
         .run(tauri::generate_context!())
         .unwrap_or_else(|e| panic!("Failed to run {} v{}!\n{:#?}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION, e));

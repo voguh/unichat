@@ -14,6 +14,8 @@ use std::path;
 use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::RwLock;
+use std::sync::RwLockReadGuard;
+use std::sync::RwLockWriteGuard;
 use std::time::Duration;
 use std::time::Instant;
 
@@ -32,8 +34,18 @@ use crate::utils::properties::AppPaths;
 
 static USERSTORE_PATH: LazyLock<path::PathBuf> = LazyLock::new(|| properties::get_app_path(AppPaths::AppData).join("userstore.json"));
 
-const USERSTORE_INSTANCE_NAME: &str = "UserStore::CACHE_INSTANCE";
+/* ========================================================================== */
+
 static USERSTORE_CACHE: LazyLock<Arc<RwLock<HashMap<String, String>>>> = LazyLock::new(|| Arc::new(RwLock::new(HashMap::new())));
+fn read() -> RwLockReadGuard<'static, HashMap<String, String>> {
+    return USERSTORE_CACHE.read().expect("UserStore::USERSTORE_CACHE lock poisoned");
+}
+
+fn write() -> RwLockWriteGuard<'static, HashMap<String, String>> {
+    return USERSTORE_CACHE.write().expect("UserStore::USERSTORE_CACHE lock poisoned");
+}
+
+/* ========================================================================== */
 
 fn compute_wait(last_event: Option<Instant>, first_event: Option<Instant>, debounce: Duration, max_wait: Duration) -> Duration {
     if let (Some(last), Some(first)) = (last_event, first_event) {
@@ -96,11 +108,10 @@ static USERSTORE_WRITE_TX: LazyLock<UnboundedSender<()>> = LazyLock::new(|| {
 /* ========================================================================== */
 
 pub fn flush_userstore() -> Result<(), Error> {
-    if let Ok(store) = USERSTORE_CACHE.read() {
-        let store_path = USERSTORE_PATH.as_path();
-        let raw_data = serde_json::to_string(&*store)?;
-        fs::write(store_path, raw_data)?;
-    }
+    let store = read();
+    let store_path = USERSTORE_PATH.as_path();
+    let raw_data = serde_json::to_string(&*store)?;
+    fs::write(store_path, raw_data)?;
 
     return Ok(());
 }
@@ -115,17 +126,16 @@ pub fn init() -> Result<(), Error> {
 
     let raw_data = fs::read_to_string(store_path)?;
     let data: HashMap<String, String> = serde_json::from_str(&raw_data)?;
-    let mut cache = USERSTORE_CACHE.write().map_err(|_| anyhow!("Failed to acquire UserStore cache write lock"))?;
-    *cache = data;
+    let mut store = write();
+    *store = data;
 
     return Ok(());
 }
 
 /* ========================================================================== */
 
-pub fn get_all_items() -> Result<HashMap<String, String>, Error> {
-    let store = USERSTORE_CACHE.read().map_err(|_| anyhow!("{} cache lock poisoned", USERSTORE_INSTANCE_NAME))?;
-    return Ok(store.clone());
+pub fn get_all_items() -> HashMap<String, String> {
+    return read().clone();
 }
 
 pub fn get_item<R: serde::de::DeserializeOwned>(key: &str) -> Result<Option<R>, Error> {
@@ -134,7 +144,7 @@ pub fn get_item<R: serde::de::DeserializeOwned>(key: &str) -> Result<Option<R>, 
         return Err(anyhow!("Store key cannot be empty"));
     }
 
-    let store = USERSTORE_CACHE.read().map_err(|_| anyhow!("{} cache lock poisoned", USERSTORE_INSTANCE_NAME))?;
+    let store = read();
 
     let raw_value = store.get(key);
     if let Some(raw_value) = raw_value {
@@ -159,7 +169,7 @@ pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &Option<V>) -> Resul
         return Err(anyhow!("Store key cannot be empty"));
     }
 
-    let mut store = USERSTORE_CACHE.write().map_err(|_| anyhow!("{} cache lock poisoned", USERSTORE_INSTANCE_NAME))?;
+    let mut store = write();
 
     if let Some(value) = value {
         let raw_value: String;

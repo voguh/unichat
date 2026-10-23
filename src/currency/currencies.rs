@@ -13,7 +13,6 @@ use std::sync::LazyLock;
 use std::sync::OnceLock;
 use std::time::Duration;
 
-use anyhow::anyhow;
 use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
@@ -40,10 +39,10 @@ static ICU_TAKEN: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::new(
     return ICU_SYMBOLS.iter().map(|(code, symbol)| (*symbol, *code)).collect();
 });
 
-// const CURRENCIES_LOCK_NAME: &str = "Currency::CURRENCIES";
-pub static CURRENCIES: OnceLock<Vec<UniChatCurrency>> = OnceLock::new();
+/* ========================================================================== */
 
-pub fn list() -> Vec<UniChatCurrency> {
+static CURRENCIES: OnceLock<Vec<UniChatCurrency>> = OnceLock::new();
+pub fn get() -> Vec<UniChatCurrency> {
     if let Some(currencies) = CURRENCIES.get() {
         return currencies.clone();
     }
@@ -51,25 +50,24 @@ pub fn list() -> Vec<UniChatCurrency> {
     return Vec::new();
 }
 
+fn set(currencies: Vec<UniChatCurrency>) {
+    CURRENCIES.set(currencies).expect("Currency::CURRENCIES already set");
+}
+
 /* ========================================================================== */
 
 const CURRENCIES_URL: &str = "https://api.frankfurter.dev/v2/currencies";
 const CURRENCIES_FILE_TTL: Duration = Duration::from_secs(60 * 60 * 24 * 30);
 
+#[rustfmt::skip]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct FrankfurterCurrency {
     pub iso_code: String,
     // pub iso_numeric: String,
     pub name: String,
-    pub symbol: String,
+    pub symbol: String
     // pub start_date: String,
     // pub end_date: String
-}
-
-pub fn fetch_currencies() -> Result<(), Error> {
-    let list: Vec<UniChatCurrency> = cache::get_or_fetch("currency_list", CURRENCIES_FILE_TTL, fetch_currency_list)?;
-
-    return CURRENCIES.set(list).map_err(|_| anyhow!("Failed to set currencies list"));
 }
 
 fn fetch_currency_list() -> Result<Vec<UniChatCurrency>, Error> {
@@ -118,4 +116,11 @@ fn fetch_currency_list() -> Result<Vec<UniChatCurrency>, Error> {
     }
 
     return Ok(list);
+}
+
+pub fn init() -> Result<(), Error> {
+    let list: Vec<UniChatCurrency> = cache::get_or_fetch("currency_list", CURRENCIES_FILE_TTL, fetch_currency_list)?;
+    set(list);
+
+    return Ok(());
 }

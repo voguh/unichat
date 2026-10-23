@@ -54,19 +54,19 @@ pub struct AddonRelease {
 
 /* ========================================================================== */
 
-pub fn is_compatible(requires_unichat: &Option<String>) -> Result<bool, Error> {
+pub fn is_compatible(requires_unichat: &Option<String>) -> bool {
     if let Some(requires_unichat) = requires_unichat {
-        let unichat_version = Version::parse(UNICHAT_VERSION)?;
+        let unichat_version = Version::parse(UNICHAT_VERSION).expect("UNICHAT_VERSION is not a valid version");
         match VersionRange::parse(requires_unichat) {
-            Ok(range) => return Ok(range.matches(&unichat_version)),
+            Ok(range) => return range.matches(&unichat_version),
             Err(e) => {
                 log::warn!("Invalid UniChat version range '{}': {:#?}", requires_unichat, e);
-                return Ok(false);
+                return false;
             }
         }
     }
 
-    return Ok(true);
+    return true;
 }
 
 pub fn has_update(installed_version: &str, releases: &[AddonRelease]) -> bool {

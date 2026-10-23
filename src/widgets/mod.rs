@@ -15,6 +15,8 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::RwLock;
+use std::sync::RwLockReadGuard;
+use std::sync::RwLockWriteGuard;
 
 use anyhow::anyhow;
 use anyhow::Error;
@@ -145,8 +147,14 @@ impl WidgetMetadata {
     }
 }
 
-const WIDGETS_LAZY_LOCK_KEY: &str = "Widgets::WIDGETS";
 static WIDGETS: LazyLock<RwLock<HashMap<String, WidgetMetadata>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+fn read() -> RwLockReadGuard<'static, HashMap<String, WidgetMetadata>> {
+    return WIDGETS.read().expect("Widgets::WIDGETS lock poisoned");
+}
+
+fn write() -> RwLockWriteGuard<'static, HashMap<String, WidgetMetadata>> {
+    return WIDGETS.write().expect("Widgets::WIDGETS lock poisoned");
+}
 
 /* ========================================================================== */
 
@@ -187,7 +195,7 @@ fn load_widgets_from_disk(widgets_path: &Path, source_type: WidgetSource, cb: im
         return Ok(());
     }
 
-    let mut widgets = WIDGETS.write().map_err(|_| anyhow!("{} lock poisoned", WIDGETS_LAZY_LOCK_KEY))?;
+    let mut widgets = write();
     widgets.retain(|_, v| v.widget_source != source_type);
 
     for entry in fs::read_dir(widgets_path)? {
@@ -259,13 +267,13 @@ fn load_widgets_from_disk(widgets_path: &Path, source_type: WidgetSource, cb: im
 
 /* ========================================================================== */
 
-pub fn get_widgets() -> Result<Vec<WidgetMetadata>, Error> {
-    let widgets = WIDGETS.read().map_err(|_| anyhow!("{} lock poisoned", WIDGETS_LAZY_LOCK_KEY))?;
-    return Ok(widgets.values().cloned().collect());
+pub fn get_widgets() -> Vec<WidgetMetadata> {
+    let widgets = read();
+    return widgets.values().cloned().collect();
 }
 
 pub fn get_widget_from_name(name: &str) -> Result<WidgetMetadata, Error> {
-    let widgets = WIDGETS.read().map_err(|_| anyhow!("{} lock poisoned", WIDGETS_LAZY_LOCK_KEY))?;
+    let widgets = read();
     for metadata in widgets.values() {
         if metadata.name == name {
             return Ok(metadata.clone());
@@ -276,7 +284,7 @@ pub fn get_widget_from_name(name: &str) -> Result<WidgetMetadata, Error> {
 }
 
 pub fn get_widget_from_rest_path(rest_path: &str) -> Result<WidgetMetadata, Error> {
-    let widgets = WIDGETS.read().map_err(|_| anyhow!("{} lock poisoned", WIDGETS_LAZY_LOCK_KEY))?;
+    let widgets = read();
     if let Some(metadata) = widgets.get(rest_path) {
         return Ok(metadata.clone());
     }

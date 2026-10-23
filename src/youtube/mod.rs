@@ -48,8 +48,8 @@ fn handle_ready_status(event: &ScraperStatusEvent) -> Result<(), Error> {
         return Err(anyhow!("Invalid YouTube channel ID '{}' in 'ready' event payload", channel_id));
     }
 
-    properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id))?;
-    shared_emotes::fetch_shared_emotes("youtube", channel_id)?;
+    properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id));
+    shared_emotes::fetch_shared_emotes("youtube", channel_id);
 
     return Ok(());
 }
@@ -60,12 +60,12 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     let app_log_dir = properties::get_app_path(AppPaths::AppLog);
     let youtube_log_dir = app_log_dir.join(SCRAPER_ID);
     if !youtube_log_dir.exists() {
-        fs::create_dir_all(&youtube_log_dir).unwrap();
+        fs::create_dir_all(&youtube_log_dir).expect("Failed to create YouTube log directory");
     }
 
     let log_file = youtube_log_dir.join(file_name);
-    let mut file = fs::OpenOptions::new().create(true).append(true).open(log_file).unwrap();
-    writeln!(file, "{content}").unwrap();
+    let mut file = fs::OpenOptions::new().create(true).append(true).open(log_file).expect("Failed to open YouTube log file");
+    writeln!(file, "{content}").expect("Failed to write YouTube log file");
 }
 
 fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> {
@@ -82,11 +82,11 @@ fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> 
         match mapper::parse(action) {
             Ok(Some(parsed)) => {
                 if log_events == SettingLogEventLevel::AllEvents {
-                    log_action("events-parsed.log", &serde_json::to_string(&parsed).unwrap());
+                    log_action("events-parsed.log", &serde_json::to_string(&parsed).expect("Failed to serialize UniChatEvent"));
                 }
 
                 if let Err(err) = events::emit(parsed) {
-                    log::error!("An error occurred on send unichat event: {}", err);
+                    log::error!("An error occurred on send unichat event: {:#?}", err);
                 }
             }
 
@@ -97,7 +97,7 @@ fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> 
             }
 
             Err(err) => {
-                log_action("events-error.log", &format!("{} -- {}", err, action));
+                log_action("events-error.log", &format!("{:#?} -- {}", err, action));
             }
         }
     }
@@ -112,7 +112,7 @@ static YOUTUBE_VALID_URLS: LazyLock<Vec<String>> = LazyLock::new(|| vec![
     String::from("https://www.youtube.com/live_chat?v={VIDEO_ID}"),
     String::from("https://youtu.be/{VIDEO_ID}"),
     String::from("https://www.youtube.com/live/{VIDEO_ID}"),
-    String::from("https://www.youtube.com/shorts/{VIDEO_ID}"),
+    String::from("https://www.youtube.com/shorts/{VIDEO_ID}")
 ]);
 
 #[derive(Default)]

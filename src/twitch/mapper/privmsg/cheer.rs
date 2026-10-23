@@ -32,17 +32,17 @@ use crate::utils::irc::IRCMessage;
 pub fn parse(channel: String, text: String, message: &IRCMessage, tags: HashMap<String, Option<String>>) -> Result<Option<UniChatEvent>, Error> {
     let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing room-id tag"))?;
     let author_id = tags.get("user-id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing user-id tag"))?;
-    let author_username = parse_author_username(&message.prefix)?;
+    let author_username = parse_author_username(&message.prefix);
     let author_name = parse_author_name(tags.get("display-name"))?;
     let author_color = parse_author_color(tags.get("color"), &author_username)?;
-    let author_badges = parse_author_badges(tags.get("badges"))?;
-    let author_type = parse_author_type(&tags)?;
+    let author_badges = parse_author_badges(tags.get("badges"));
+    let author_type = parse_author_type(&tags);
     let bits = tags.get("bits").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing bits tag"))?;
     let bits_value: u32 = bits.parse()?;
     let message_id = tags.get("id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing id tag"))?;
-    let message = parse_message_string(&text)?;
+    let message = parse_message_string(&text);
     let emotes = parse_message_emotes(tags.get("emotes"), &text)?;
-    let timestamp_usec = get_current_timestamp()?;
+    let timestamp_usec = get_current_timestamp();
 
     let event = UniChatEvent::Cheer(UniChatCheerEventPayload {
         channel_id: room_id.to_owned(),

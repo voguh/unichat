@@ -10,6 +10,7 @@
 
 use std::sync::LazyLock;
 use std::sync::RwLock;
+use std::sync::RwLockReadGuard;
 
 use anyhow::Error;
 use anyhow::anyhow;
@@ -31,21 +32,24 @@ pub struct UniChatCurrency {
     pub symbol: String
 }
 
-const TARGET_CURRENCY_LOCK_NAME: &str = "Currency::TARGET_CURRENCY";
 static TARGET_CURRENCY: LazyLock<RwLock<Option<UniChatCurrency>>> = LazyLock::new(|| RwLock::new(None));
+fn read() -> RwLockReadGuard<'static, Option<UniChatCurrency>> {
+    return TARGET_CURRENCY.read().expect("Currency::TARGET_CURRENCY lock poisoned");
+}
+
+fn write(new_value: Option<UniChatCurrency>) {
+    let mut guard = TARGET_CURRENCY.write().expect("Currency::TARGET_CURRENCY lock poisoned");
+    *guard = new_value;
+}
 
 /* ========================================================================== */
 
 pub fn currencies() -> Vec<UniChatCurrency> {
-    return currencies::list();
+    return currencies::get();
 }
 
 pub fn target_currency() -> Option<UniChatCurrency> {
-    if let Ok(state) = TARGET_CURRENCY.read() {
-        return state.clone();
-    }
-
-    return None;
+    return read().clone();
 }
 
 fn refresh_rates(value: serde_json::Value) -> Result<(), Error> {
@@ -53,12 +57,7 @@ fn refresh_rates(value: serde_json::Value) -> Result<(), Error> {
     let code = code.to_ascii_uppercase();
     if code.is_empty() || code.len() != 3 {
         rates::clear_rates();
-
-        if let Ok(mut state) = TARGET_CURRENCY.write() {
-            *state = None;
-        } else {
-            log::error!("{} is poisoned", TARGET_CURRENCY_LOCK_NAME);
-        }
+        write(None);
 
         return Ok(());
     }
@@ -67,7 +66,7 @@ fn refresh_rates(value: serde_json::Value) -> Result<(), Error> {
         return Ok(());
     }
 
-    let currencies_list = currencies::list();
+    let currencies_list = currencies::get();
     if currencies_list.is_empty() {
         return Err(anyhow!("Currencies list is empty, cannot refresh rates"));
     }
@@ -78,14 +77,10 @@ fn refresh_rates(value: serde_json::Value) -> Result<(), Error> {
     }
 
     if let Err(err) = rates::fetch_rates(&code) {
-        return Err(anyhow!("Failed to fetch rates for '{}': {}", code, err));
+        return Err(anyhow!("Failed to fetch rates for '{}': {:#?}", code, err));
     }
 
-    if let Ok(mut state) = TARGET_CURRENCY.write() {
-        *state = target_currency;
-    } else {
-        log::error!("{} is poisoned", TARGET_CURRENCY_LOCK_NAME);
-    }
+    write(target_currency);
 
     return Ok(());
 }
@@ -95,12 +90,12 @@ pub fn init() -> Result<(), Error> {
         let move_value = value.clone();
         tauri::async_runtime::spawn_blocking(move || {
             if let Err(err) = refresh_rates(move_value) {
-                log::error!("Failed to refresh rates: {}", err);
+                log::error!("Failed to refresh rates: {:#?}", err);
             }
         });
     });
 
-    currencies::fetch_currencies()?;
+    currencies::init()?;
 
     if let Ok(code) = settings::get_item::<serde_json::Value>(SETTINGS_CURRENCY_TARGET_KEY) {
         refresh_rates(code)?;

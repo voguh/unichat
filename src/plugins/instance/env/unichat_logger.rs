@@ -27,7 +27,7 @@ fn format_str(lua: &mlua::Lua, args: mlua::Variadic<mlua::Value>) -> Result<(Str
 
     let mut error: Option<Box<mlua::Error>> = None;
     if args.last().is_some_and(|v| v.is_error()) {
-        let last_arg = args.pop().unwrap();
+        let last_arg = args.pop().expect("Last argument is checked above");
         if let mlua::Value::Error(e) = last_arg {
             error = Some(e);
         }
@@ -46,7 +46,7 @@ fn format_str(lua: &mlua::Lua, args: mlua::Variadic<mlua::Value>) -> Result<(Str
 }
 
 pub struct UniChatLoggerModule {
-    plugin_name: String,
+    plugin_name: String
 }
 
 impl UniChatLoggerModule {

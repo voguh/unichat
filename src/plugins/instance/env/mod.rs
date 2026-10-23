@@ -123,14 +123,14 @@ fn create_require_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Functio
             return Ok(cached_module);
         }
 
-        let plugin_env = plugin.get_plugin_env().map_err(mlua::Error::external)?;
+        let plugin_env = plugin.get_plugin_env();
         if module.contains(':') && !module.starts_with("unichat:") {
             if let Some(shared_module) = shared_modules::get(&module).map_err(mlua::Error::external)? {
                 return Ok(shared_module);
             }
         } else {
             let result = scoped_modules_require(lua, &plugin_env, &plugin_name, &module)?;
-            let saved_module = plugin.set_cached_loaded_module(&module, result).map_err(mlua::Error::external)?;
+            let saved_module = plugin.set_cached_loaded_module(&module, result);
             return Ok(saved_module);
         }
 
@@ -143,7 +143,7 @@ fn create_require_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Functio
 /* ========================================================================== */
 
 pub fn load_env(plugin_name:&str, plugin_version: &Version, plugin_env: mlua::Table) -> Result<(), Error> {
-    let lua = runtime::get()?;
+    let lua = runtime::get();
 
     /* <======================[ LUA Standard Library ]======================> */
     let print_func = create_print_fn(&lua, plugin_name)?;

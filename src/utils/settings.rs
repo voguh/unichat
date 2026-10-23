@@ -12,6 +12,7 @@ use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::OnceLock;
 use std::sync::RwLock;
+use std::sync::RwLockReadGuard;
 
 use anyhow::anyhow;
 use anyhow::Error;
@@ -35,8 +36,7 @@ pub enum SettingLogEventLevel {
     AllEvents
 }
 
-const ONCE_LOCK_NAME: &str = "Settings::INSTANCE";
-static INSTANCE: OnceLock<Arc<Store<tauri::Wry>>> = OnceLock::new();
+/* ========================================================================== */
 
 pub const STORE_VERSION_KEY: &str = "store:version";
 pub const SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY: &str = "settings:create-webview-hidden";
@@ -55,18 +55,32 @@ fn store_mount_scraper_key(scraper_id: &str, key: &str) -> String {
 
 /* ========================================================================== */
 
-pub fn init() -> Result<(), Error> {
-    let app_handle = get_app_handle();
-
-    let store_path = properties::get_app_path(AppPaths::AppConfig).join("settings.json");
-
-    let store = app_handle.store(store_path)?;
-    INSTANCE.set(store).map_err(|_| anyhow!("{} was already initialized", ONCE_LOCK_NAME))?;
-
-    migrate_store_version()?;
-
-    return Ok(());
+static INSTANCE: OnceLock<Arc<Store<tauri::Wry>>> = OnceLock::new();
+fn get_instance() -> &'static Arc<Store<tauri::Wry>> {
+    return INSTANCE.get().expect("Settings::INSTANCE was not initialized");
 }
+
+fn set_instance(store: Arc<Store<tauri::Wry>>) {
+    if INSTANCE.set(store).is_err() {
+        panic!("Settings::INSTANCE was already initialized");
+    }
+}
+
+/* ========================================================================== */
+
+type SettingsChangeListener = Box<dyn Fn(&str, &serde_json::Value) + Send + Sync>;
+
+static LISTENERS: LazyLock<RwLock<Vec<(String, SettingsChangeListener)>>> = LazyLock::new(|| RwLock::new(Vec::new()));
+fn read_listeners() -> RwLockReadGuard<'static, Vec<(String, SettingsChangeListener)>> {
+    return LISTENERS.read().expect("Settings::LISTENERS lock poisoned");
+}
+
+fn write_listeners(key: String, listener: SettingsChangeListener) {
+    let mut listeners = LISTENERS.write().expect("Settings::LISTENERS lock poisoned");
+    listeners.push((key, listener));
+}
+
+/* ========================================================================== */
 
 static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<(), Error> + Send + Sync>>> = LazyLock::new(|| {
     return vec![
@@ -76,12 +90,12 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 log::info!("Migrating legacy 'twitch-channel-name' to new key '{}'", twitch_url_key);
                 let channel_name_str: String = serde_json::from_value(value)?;
                 let value_str = format!("https://www.twitch.tv/popout/{}/chat", channel_name_str);
-                let value_raw = serde_json::to_value(value_str)?;
+                let value_raw = serde_json::json!(value_str);
                 store.set(&twitch_url_key, value_raw);
                 store.delete("twitch-channel-name");
             } else {
                 log::info!("Setting default value for '{}' setting", twitch_url_key);
-                let raw_value = serde_json::to_value("")?;
+                let raw_value = serde_json::json!("");
                 store.set(&twitch_url_key, raw_value);
             }
 
@@ -90,12 +104,12 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 log::info!("Migrating legacy 'youtube-video-id' to new key '{}'", youtube_url_key);
                 let video_id_str: String = serde_json::from_value(value)?;
                 let value_str = format!("https://www.youtube.com/live_chat?v={}", video_id_str);
-                let value_raw = serde_json::to_value(value_str)?;
+                let value_raw = serde_json::json!(value_str);
                 store.set(&youtube_url_key, value_raw);
                 store.delete("youtube-video-id");
             } else {
                 log::info!("Setting default value for '{}' setting", youtube_url_key);
-                let raw_value = serde_json::to_value("")?;
+                let raw_value = serde_json::json!("");
                 store.set(&youtube_url_key, raw_value);
             }
 
@@ -108,7 +122,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.delete("settings.log-twitch-events");
             } else {
                 log::info!("Setting default value for '{}' setting", twitch_log_level_key);
-                let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
+                let raw_value = serde_json::json!(SettingLogEventLevel::OnlyErrors);
                 store.set(&twitch_log_level_key, raw_value);
             }
 
@@ -119,7 +133,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.delete("settings.log-youtube-events");
             } else {
                 log::info!("Setting default value for '{}' setting", youtube_log_level_key);
-                let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
+                let raw_value = serde_json::json!(SettingLogEventLevel::OnlyErrors);
                 store.set(&youtube_log_level_key, raw_value);
             }
 
@@ -132,7 +146,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.delete("settings.create-webview-hidden");
             } else {
                 log::info!("Setting default value for '{}' setting", create_webview_hidden_key);
-                let raw_value = serde_json::to_value(true)?;
+                let raw_value = serde_json::json!(true);
                 store.set(create_webview_hidden_key, raw_value);
             }
 
@@ -145,7 +159,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.delete("settings.tour-steps");
             } else {
                 log::info!("Setting default value for '{}' setting", current_tour_steps_key);
-                let raw_value = serde_json::to_value(Vec::<String>::new())?;
+                let raw_value = serde_json::json!([]);
                 store.set(current_tour_steps_key, raw_value);
             }
 
@@ -156,7 +170,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.delete("settings.prev-tour-steps");
             } else {
                 log::info!("Setting default value for '{}' setting", previous_tour_steps_key);
-                let raw_value = serde_json::to_value(Vec::<String>::new())?;
+                let raw_value = serde_json::json!([]);
                 store.set(previous_tour_steps_key, raw_value);
             }
 
@@ -168,7 +182,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
             let default_preview_widget_key = "settings:default-preview-widget";
             if store.get(default_preview_widget_key).is_none() {
                 log::info!("Setting default value for '{}' setting", default_preview_widget_key);
-                let raw_value = serde_json::to_value("default")?;
+                let raw_value = serde_json::json!("default");
                 store.set(default_preview_widget_key, raw_value);
             }
 
@@ -177,7 +191,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
             let open_to_lan_key = "settings:open-to-lan";
             if store.get(open_to_lan_key).is_none() {
                 log::info!("Setting default value for '{}' setting", open_to_lan_key);
-                let raw_value = serde_json::to_value(false)?;
+                let raw_value = serde_json::json!(false);
                 store.set(open_to_lan_key, raw_value);
             }
 
@@ -186,7 +200,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
             let log_scraper_events_key = "settings:log-scraper-events";
             if store.get(log_scraper_events_key).is_none() {
                 log::info!("Setting default value for '{}' setting", log_scraper_events_key);
-                let raw_value = serde_json::to_value(SettingLogEventLevel::OnlyErrors)?;
+                let raw_value = serde_json::json!(SettingLogEventLevel::OnlyErrors);
                 store.set(log_scraper_events_key, raw_value);
             }
 
@@ -211,7 +225,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.delete("settings:tour-steps");
             } else {
                 log::info!("Setting default value for '{}' setting", current_tour_steps_key);
-                let raw_value = serde_json::to_value(Vec::<String>::new())?;
+                let raw_value = serde_json::json!([]);
                 store.set(current_tour_steps_key, raw_value);
             }
 
@@ -222,7 +236,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.delete("settings:prev-tour-steps");
             } else {
                 log::info!("Setting default value for '{}' setting", previous_tour_steps_key);
-                let raw_value = serde_json::to_value(Vec::<String>::new())?;
+                let raw_value = serde_json::json!([]);
                 store.set(previous_tour_steps_key, raw_value);
             }
 
@@ -232,7 +246,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
             let open_scraper_webview_key = "settings:open-scraper-webview";
             if store.get(open_scraper_webview_key).is_none() {
                 log::info!("Setting default value for '{}' setting", open_scraper_webview_key);
-                let raw_value = serde_json::to_value(false)?;
+                let raw_value = serde_json::json!(false);
                 store.set(open_scraper_webview_key, raw_value);
             }
 
@@ -242,7 +256,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
             let currency_target_key = "settings:currency-target";
             if store.get(currency_target_key).is_none() {
                 log::info!("Setting default value for '{}' setting", currency_target_key);
-                let raw_value = serde_json::to_value("")?;
+                let raw_value = serde_json::json!("");
                 store.set(currency_target_key, raw_value);
             }
 
@@ -251,8 +265,22 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
     ]
 });
 
+/* ========================================================================== */
+
+pub fn get_store_version() -> Result<u8, Error> {
+    let store = get_instance();
+
+    let raw_value = store.get(STORE_VERSION_KEY);
+    if let Some(value) = raw_value {
+        let version: u8 = serde_json::from_value(value)?;
+        return Ok(version);
+    } else {
+        return Err(anyhow!("Store version not found"));
+    }
+}
+
 fn migrate_store_version() -> Result<(), Error> {
-    let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+    let store = get_instance();
 
     let mut current_version = get_store_version().unwrap_or(0);
     for (idx, migration) in MIGRATIONS.iter().enumerate() {
@@ -265,7 +293,7 @@ fn migrate_store_version() -> Result<(), Error> {
             migration(store)?;
             log::info!("Store migrated to version {}", version);
 
-            let raw_value = serde_json::to_value(version)?;
+            let raw_value = serde_json::json!(version);
             store.set(STORE_VERSION_KEY, raw_value);
             current_version = version;
         }
@@ -274,46 +302,34 @@ fn migrate_store_version() -> Result<(), Error> {
     return Ok(());
 }
 
+pub fn init() -> Result<(), Error> {
+    let app_handle = get_app_handle();
+
+    let store_path = properties::get_app_path(AppPaths::AppConfig).join("settings.json");
+
+    let store = app_handle.store(store_path)?;
+    set_instance(store);
+
+    migrate_store_version()?;
+
+    return Ok(());
+}
+
 /* ========================================================================== */
 
-type SettingsChangeListener = Box<dyn Fn(&str, &serde_json::Value) + Send + Sync>;
-
-const LISTENERS_LOCK_NAME: &str = "Settings::LISTENERS";
-static LISTENERS: LazyLock<RwLock<Vec<(String, SettingsChangeListener)>>> = LazyLock::new(|| RwLock::new(Vec::new()));
-
 pub fn add_change_listener<F: Fn(&str, &serde_json::Value) + Send + Sync + 'static>(key: &str, listener: F) {
-    if let Ok(mut listeners) = LISTENERS.write() {
-        listeners.push((key.to_string(), Box::new(listener)));
-    } else {
-        log::error!("{} is poisoned, skipping adding change listener for '{}'", LISTENERS_LOCK_NAME, key);
-    }
+    write_listeners(key.to_string(), Box::new(listener));
 }
 
 fn notify_change_listeners(key: &str, value: &serde_json::Value) {
-    if let Ok(listeners) = LISTENERS.read() {
-        for (listener_key, listener) in listeners.iter() {
-            if listener_key == key {
-                listener(key, value);
-            }
+    for (listener_key, listener) in read_listeners().iter() {
+        if listener_key == key {
+            listener(key, value);
         }
-    } else {
-        log::error!("{} is poisoned, skipping change listeners of '{}'", LISTENERS_LOCK_NAME, key);
     }
 }
 
 /* ========================================================================== */
-
-pub fn get_store_version() -> Result<u8, Error> {
-    let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
-
-    let raw_value = store.get(STORE_VERSION_KEY);
-    if let Some(value) = raw_value {
-        let version: u8 = serde_json::from_value(value)?;
-        return Ok(version);
-    } else {
-        return Err(anyhow!("Store version not found"));
-    }
-}
 
 pub fn get_item<R: serde::de::DeserializeOwned>(key: &str) -> Result<R, Error> {
     let key = key.trim();
@@ -325,7 +341,7 @@ pub fn get_item<R: serde::de::DeserializeOwned>(key: &str) -> Result<R, Error> {
         return Err(anyhow!("Keys starting with 'store' are reserved for internal use"));
     }
 
-    let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+    let store = get_instance();
 
     let raw_value = store.get(key);
     if let Some(value) = raw_value {
@@ -346,7 +362,7 @@ pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &V) -> Result<(), Er
         return Err(anyhow!("Keys starting with 'store' are reserved for internal use"));
     }
 
-    let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+    let store = get_instance();
 
     let raw_value = serde_json::to_value(value)?;
     store.set(key, raw_value.clone());
@@ -371,7 +387,7 @@ pub fn get_scraper_property<R: serde::de::DeserializeOwned>(scraper_id: &str, pr
         return Err(anyhow!("Scraper property cannot be empty"));
     }
 
-    let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+    let store = get_instance();
 
     let key = store_mount_scraper_key(scraper_id, property);
     let raw_value = store.get(key);
@@ -397,7 +413,7 @@ pub fn set_scraper_property<V: serde::ser::Serialize>(scraper_id: &str, property
         return Err(anyhow!("Scraper property cannot be empty"));
     }
 
-    let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+    let store = get_instance();
 
     let key = store_mount_scraper_key(scraper_id, property);
     let raw_value = serde_json::to_value(value)?;

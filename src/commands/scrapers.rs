@@ -22,14 +22,14 @@ use crate::utils::settings;
 
 #[tauri::command]
 pub async fn get_scrapers<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<serde_json::Value>, String> {
-    let scrapers = scraper::get_scrapers().map_err(|e| format!("An error occurred on get scrapers: {:#?}", e))?;
+    let scrapers = scraper::get_scrapers();
     let serialized_scrapers: Vec<serde_json::Value> = scrapers.iter().map(|s| serialize_scraper(s)).collect();
     return Ok(serialized_scrapers);
 }
 
 #[tauri::command]
 pub async fn get_scraper<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) -> Result<Option<serde_json::Value>, String> {
-    let scraper = scraper::get_scraper(scraper_id).map_err(|e| format!("An error occurred on get scraper: {:#?}", e))?;
+    let scraper = scraper::get_scraper(scraper_id);
     if let Some(scraper) = scraper {
         let serialized_scraper = serialize_scraper(&scraper);
         return Ok(Some(serialized_scraper));
@@ -40,7 +40,7 @@ pub async fn get_scraper<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) -> Re
 
 #[tauri::command]
 pub async fn validate_scraper_url<R: Runtime>(_app: AppHandle<R>, scraper_id: &str, url: String) -> Result<String, String> {
-    let scraper = scraper::get_scraper(scraper_id).map_err(|e| format!("An error occurred on get scraper: {:#?}", e))?;
+    let scraper = scraper::get_scraper(scraper_id);
     if let Some(scraper) = &scraper {
         return scraper.validate_url(url).map_err(|e| format!("An error occurred on validate scraper URL: {:#?}", e))
     }

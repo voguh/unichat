@@ -61,12 +61,12 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
 
     let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
     let author_id = parsed.author_external_channel_id;
-    let author_username = parse_author_username(&parsed.author_name)?;
-    let author_name = parse_author_name(&parsed.author_name)?;
-    let author_color = parse_author_color(&author_name)?;
+    let author_username = parse_author_username(&parsed.author_name);
+    let author_name = parse_author_name(&parsed.author_name);
+    let author_color = parse_author_color(&author_name);
     let author_badges = parse_author_badges(&parsed.author_badges, &None)?;
     let author_photo = parse_author_photo(&parsed.author_photo)?;
-    let author_type = parse_author_type(&parsed.author_badges)?;
+    let author_type = parse_author_type(&parsed.author_badges);
     let (purchase_currency, purchase_value) = parse_purchase_amount(&parsed.purchase_amount_text)?;
     let (donate_value, donate_currency, original_value, original_currency) = currency::apply(purchase_value, &purchase_currency);
     let sticker = parsed.sticker.thumbnails.last().ok_or(anyhow!("No thumbnails found in author photo"))?;
@@ -77,7 +77,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
             url: proxy_youtube_url(&sticker.url)
         }
     ];
-    let timestamp_usec = get_current_timestamp()?;
+    let timestamp_usec = get_current_timestamp();
 
     let event = UniChatEvent::Donate(UniChatDonateEventPayload {
         channel_id: channel_id,

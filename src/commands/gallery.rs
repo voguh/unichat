@@ -11,7 +11,6 @@
 use std::fs;
 use std::path::PathBuf;
 
-use anyhow::Error;
 use tauri::AppHandle;
 use tauri::Runtime;
 use tauri::Url;
@@ -48,17 +47,17 @@ fn choose_file_type_by_path(path: &PathBuf) -> String {
     return String::from(item_type);
 }
 
-fn get_file_url(file_name: &str) -> Result<Url, Error> {
+fn get_file_url(file_name: &str) -> Url {
     let raw_path = format!("/gallery/{}", file_name);
     let segments: Vec<&str> = raw_path.split("/").collect();
-    let mut abs = Url::parse(&format!("http://localhost:{}", BASE_REST_PORT))?;
+    let mut abs = Url::parse(&format!("http://localhost:{}", BASE_REST_PORT)).expect("Local REST URL is not a valid URL");
     {
-        let mut p = abs.path_segments_mut().map_err(|_| url::ParseError::SetHostOnCannotBeABaseUrl)?;
+        let mut p = abs.path_segments_mut().expect("Local REST URL cannot be a base");
         p.clear();
         p.extend(segments.iter().cloned());
     }
 
-    return Ok(abs);
+    return abs;
 }
 
 #[tauri::command]
@@ -75,7 +74,7 @@ pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Gal
                 let title = path.file_name().and_then(|n| n.to_str()).ok_or("An error occurred on parse gallery item title")?;
                 let item_type = choose_file_type_by_path(&path);
 
-                let file_url = get_file_url(title).map_err(|e| format!("An error occurred on generate gallery item URL: {:#?}", e))?;
+                let file_url = get_file_url(title);
                 let preview_url = file_url.clone().into();
                 let url = file_url.path().into();
 

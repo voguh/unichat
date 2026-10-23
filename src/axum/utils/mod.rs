@@ -34,8 +34,8 @@ fn split_range(range: &str) -> (Option<usize>, Option<usize>) {
         return (None, None);
     }
 
-    let start = parts[0].parse::<usize>().ok();
-    let end = parts[1].parse::<usize>().ok();
+    let start: Option<usize> = parts[0].parse().ok();
+    let end: Option<usize> = parts[1].parse().ok();
 
     return (start, end);
 }
@@ -49,7 +49,7 @@ pub fn serve_partial_content(path: &Path, headers: &HeaderMap, cache_control: &s
                 .header("ETag", etag)
                 .header("Cache-Control", cache_control)
                 .body(Body::empty())
-                .unwrap();
+                .expect("Failed to build HTTP response");
         }
     }
 
@@ -62,7 +62,7 @@ pub fn serve_partial_content(path: &Path, headers: &HeaderMap, cache_control: &s
             log::error!("Failed to read file '{}': {:#?}", path.display(), e);
             return Response::builder().status(500)
                 .body("Failed to read file".into())
-                .unwrap();
+                .expect("Failed to build HTTP response");
         }
     }
 
@@ -77,7 +77,7 @@ pub fn serve_partial_content(path: &Path, headers: &HeaderMap, cache_control: &s
                 return Response::builder().status(416)
                     .header("Content-Range", format!("bytes */{}", content_len))
                     .body("Requested range not satisfiable".into())
-                    .unwrap();
+                    .expect("Failed to build HTTP response");
             }
         }
 
@@ -86,7 +86,7 @@ pub fn serve_partial_content(path: &Path, headers: &HeaderMap, cache_control: &s
                 return Response::builder().status(416)
                     .header("Content-Range", format!("bytes */{}", content_len))
                     .body("Requested range not satisfiable".into())
-                    .unwrap();
+                    .expect("Failed to build HTTP response");
             }
         }
 
@@ -98,7 +98,7 @@ pub fn serve_partial_content(path: &Path, headers: &HeaderMap, cache_control: &s
                     return Response::builder().status(416)
                         .header("Content-Range", format!("bytes */{}", content_len))
                         .body("Requested range not satisfiable".into())
-                        .unwrap();
+                        .expect("Failed to build HTTP response");
                 }
 
                 partial_content = Some(content[start..=end].to_vec());
@@ -118,13 +118,13 @@ pub fn serve_partial_content(path: &Path, headers: &HeaderMap, cache_control: &s
 
         if let Some(partial_content) = partial_content {
             return Response::builder().status(206)
-                .header("Content-Range", response_range.unwrap())
+                .header("Content-Range", response_range.expect("Content range is set with partial content"))
                 .header("Content-Length", partial_content.len().to_string())
                 .header("Content-Type", content_type)
                 .header("Cache-Control", cache_control)
                 .header("ETag", etag.unwrap_or_default())
                 .body(partial_content.into())
-                .unwrap();
+                .expect("Failed to build HTTP response");
         }
     }
 
@@ -134,5 +134,5 @@ pub fn serve_partial_content(path: &Path, headers: &HeaderMap, cache_control: &s
             .header("Cache-Control", cache_control)
             .header("ETag", etag.unwrap_or_default())
             .body(content.into())
-            .unwrap();
+            .expect("Failed to build HTTP response");
 }

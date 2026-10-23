@@ -79,18 +79,18 @@ pub struct ButtonViewModel {
 
 /* <================================================================================================================> */
 
-static USERNAME_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[\p{L}\p{N}_\.-]{3,30}$").unwrap());
+static USERNAME_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[\p{L}\p{N}_\.-]{3,30}$").expect("Invalid username regex"));
 static USERNAME_CACHE: LazyLock<Cache<String, Option<String>>> = LazyLock::new(|| Cache::builder().time_to_idle(Duration::from_secs(60 * 10)).build());
 
-pub fn parse_author_username(name: &AuthorNameWrapper) -> Result<Option<String>, Error> {
+pub fn parse_author_username(name: &AuthorNameWrapper) -> Option<String> {
     return parse_author_username_str(name.simple_text.clone());
 }
 
-pub fn parse_author_username_str(name: String) -> Result<Option<String>, Error> {
+pub fn parse_author_username_str(name: String) -> Option<String> {
     let name = name.trim().to_owned();
 
     if let Some(cached_username) = USERNAME_CACHE.get(&name) {
-        return Ok(cached_username.clone());
+        return cached_username.clone();
     }
 
     if name.starts_with("@") {
@@ -98,19 +98,19 @@ pub fn parse_author_username_str(name: String) -> Result<Option<String>, Error> 
 
         if USERNAME_REGEX.is_match(&username) {
             USERNAME_CACHE.insert(name, Some(username.clone()));
-            return Ok(Some(username));
+            return Some(username);
         }
     }
 
     USERNAME_CACHE.insert(name, None);
-    return Ok(None);
+    return None;
 }
 
-pub fn parse_author_name(name: &AuthorNameWrapper) -> Result<String, Error> {
+pub fn parse_author_name(name: &AuthorNameWrapper) -> String {
     return parse_author_name_str(name.simple_text.clone());
 }
 
-pub fn parse_author_name_str(name: String) -> Result<String, Error> {
+pub fn parse_author_name_str(name: String) -> String {
     let name = name.trim();
 
     let username: String;
@@ -120,7 +120,7 @@ pub fn parse_author_name_str(name: String) -> Result<String, Error> {
         username = name.to_owned();
     }
 
-    return Ok(username);
+    return username;
 }
 
 pub fn parse_author_photo_vec(photos: &Vec<AuthorPhotoWrapper>) -> Result<String, Error> {
@@ -132,8 +132,8 @@ pub fn parse_author_photo(photo: &AuthorPhotoThumbnailsWrapper) -> Result<String
     return parse_author_photo_vec(&photo.thumbnails);
 }
 
-pub fn parse_author_color(author_name: &str) -> Result<String, Error> {
-    return random_color_by_seed(author_name)
+pub fn parse_author_color(author_name: &str) -> String {
+    return random_color_by_seed(author_name);
 }
 
 pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_content: &Option<Vec<BeforeContentButton>>) -> Result<Vec<UniChatBadge>, Error> {
@@ -219,7 +219,7 @@ fn expect_badge_type(badges: &[AuthorBadgeWrapper], badge_type: &str) -> bool {
     ));
 }
 
-pub fn parse_author_type(badges: &Option<Vec<AuthorBadgeWrapper>>) -> Result<UniChatAuthorType, Error> {
+pub fn parse_author_type(badges: &Option<Vec<AuthorBadgeWrapper>>) -> UniChatAuthorType {
     let mut author_type = UniChatAuthorType::Viewer;
 
     if let Some(badges) = badges {
@@ -232,5 +232,5 @@ pub fn parse_author_type(badges: &Option<Vec<AuthorBadgeWrapper>>) -> Result<Uni
         }
     }
 
-    return Ok(author_type);
+    return author_type;
 }

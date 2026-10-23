@@ -15,6 +15,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::RwLock;
+use std::sync::RwLockReadGuard;
 
 use anyhow::anyhow;
 use anyhow::Error;
@@ -31,28 +32,43 @@ mod runtime;
 
 /* ========================================================================== */
 
-const LOADED_PLUGINS_LAZY_LOCK_KEY: &str = "Plugins::LOADED_PLUGINS";
 static LOADED_PLUGINS: LazyLock<RwLock<HashMap<String, Arc<UniChatPlugin>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+fn read() -> RwLockReadGuard<'static, HashMap<String, Arc<UniChatPlugin>>> {
+    return LOADED_PLUGINS.read().expect("Plugins::LOADED_PLUGINS lock poisoned");
+}
 
-pub fn runtime_initialized() -> bool {
-    return runtime::get().is_ok();
+pub(in crate::plugins) fn write(plugin: Arc<UniChatPlugin>) -> Result<(), Error> {
+    let mut loaded_plugins = LOADED_PLUGINS.write().expect("Plugins::LOADED_PLUGINS lock poisoned");
+    if loaded_plugins.contains_key(&plugin.name) {
+        return Err(anyhow!("Plugin with name '{}' is already loaded", plugin.name));
+    }
+
+    loaded_plugins.insert(plugin.name.clone(), plugin);
+
+    return Ok(());
 }
 
 /* ========================================================================== */
 
-pub fn get_plugins() -> Result<Vec<Arc<UniChatPlugin>>, Error> {
-    let envs = LOADED_PLUGINS.read().map_err(|_| anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
+pub fn runtime_initialized() -> bool {
+    return runtime::initialized();
+}
+
+/* ========================================================================== */
+
+pub fn get_plugins() -> Vec<Arc<UniChatPlugin>> {
+    let envs = read();
 
     let mut plugins: Vec<Arc<UniChatPlugin>> = Vec::new();
     for (_name, manifest) in envs.iter() {
         plugins.push(manifest.clone());
     }
 
-    return Ok(plugins);
+    return plugins;
 }
 
 pub fn get_plugin(plugin_name: &str) -> Result<Arc<UniChatPlugin>, Error> {
-    let envs = LOADED_PLUGINS.read().map_err(|_| anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
+    let envs = read();
     let manifest = envs.get(plugin_name).ok_or(anyhow!("Plugin '{}' is not loaded", plugin_name))?;
     return Ok(manifest.clone());
 }
@@ -65,7 +81,7 @@ pub enum PluginStatus {
     Loaded,
     Invalid,
     Active,
-    Error,
+    Error
 }
 
 /* ========================================================================== */
@@ -84,14 +100,14 @@ pub struct UniChatPlugin {
 
     plugin_path: PathBuf,
     plugin_env: mlua::Table,
-    loaded_modules_cache: RwLock<HashMap<String, mlua::Value>>,
+    loaded_modules_cache: RwLock<HashMap<String, mlua::Value>>
 }
 
 impl UniChatPlugin {
     pub(in crate::plugins) fn new(plugin_path: &Path, manifest: &UniChatAddonManifest, dependencies: Vec<(String, VersionRange)>) -> Result<Self, Error> {
         let version = Version::parse(&manifest.version)?;
 
-        let lua = runtime::get()?;
+        let lua = runtime::get();
         let env = lua.create_table()?;
 
         return Ok(Self {
@@ -115,38 +131,38 @@ impl UniChatPlugin {
     /* ====================================================================== */
 
     pub fn get_status(&self) -> PluginStatus {
-        let status = self.status.read().unwrap();
+        let status = self.status.read().expect("Plugin status lock poisoned");
         return status.clone();
     }
 
     pub(in crate::plugins) fn set_status(&self, status: PluginStatus) {
-        let mut current_status = self.status.write().unwrap();
+        let mut current_status = self.status.write().expect("Plugin status lock poisoned");
         *current_status = status;
     }
 
     /* ====================================================================== */
 
     pub fn get_messages(&self) -> Vec<String> {
-        let messages = self.messages.read().unwrap();
+        let messages = self.messages.read().expect("Plugin messages lock poisoned");
         return messages.clone();
     }
 
     pub fn add_message<S: Into<String>>(&self, message: S) {
         let message = message.into();
-        let mut messages = self.messages.write().unwrap();
+        let mut messages = self.messages.write().expect("Plugin messages lock poisoned");
         messages.push(message);
     }
 
     /* ====================================================================== */
 
-    pub(in crate::plugins) fn get_plugin_env(&self) -> Result<mlua::Table, Error> {
-        return Ok(self.plugin_env.clone());
+    pub(in crate::plugins) fn get_plugin_env(&self) -> mlua::Table {
+        return self.plugin_env.clone();
     }
 
     /* ====================================================================== */
 
     pub(in crate::plugins) fn get_cached_loaded_module(&self, module_name: &str) -> Result<mlua::Value, Error> {
-        let cache = self.loaded_modules_cache.read().map_err(|_| anyhow!("Failed to acquire read lock on loaded modules cache"))?;
+        let cache = self.loaded_modules_cache.read().expect("Loaded modules cache lock poisoned");
         if let Some(cached_module) = cache.get(module_name) {
             return Ok(cached_module.clone());
         }
@@ -154,12 +170,11 @@ impl UniChatPlugin {
         return Err(anyhow!("Module '{}' is not cached", module_name));
     }
 
-    pub(in crate::plugins) fn set_cached_loaded_module(&self, module_name: &str, module: mlua::Value) -> Result<mlua::Value, Error> {
-        let mut cache = self.loaded_modules_cache.write().map_err(|_| anyhow!("Failed to acquire write lock on loaded modules cache"))?;
-        cache.insert(module_name.to_string(), module);
+    pub(in crate::plugins) fn set_cached_loaded_module(&self, module_name: &str, module: mlua::Value) -> mlua::Value {
+        let mut cache = self.loaded_modules_cache.write().expect("Loaded modules cache lock poisoned");
+        cache.insert(module_name.to_string(), module.clone());
 
-        let cached_module = cache.get(module_name).ok_or(anyhow!("Failed to retrieve module '{}' from cache after insertion", module_name))?;
-        return Ok(cached_module.clone());
+        return module;
     }
 
     /* ====================================================================== */

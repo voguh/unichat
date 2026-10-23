@@ -10,8 +10,10 @@
 
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::OnceLock;
+use std::sync::LazyLock;
 use std::sync::RwLock;
+use std::sync::RwLockReadGuard;
+use std::sync::RwLockWriteGuard;
 
 use anyhow::anyhow;
 use anyhow::Error;
@@ -47,8 +49,18 @@ pub enum AppPaths {
     UniChatLicense
 }
 
-const ONCE_LOCK_NAME: &str = "Properties::INSTANCE";
-static INSTANCE: OnceLock<RwLock<HashMap<String, String>>> = OnceLock::new();
+/* ========================================================================== */
+
+static INSTANCE: LazyLock<RwLock<HashMap<String, String>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+fn read() -> RwLockReadGuard<'static, HashMap<String, String>> {
+    return INSTANCE.read().expect("Properties::INSTANCE lock poisoned");
+}
+
+fn write() -> RwLockWriteGuard<'static, HashMap<String, String>> {
+    return INSTANCE.write().expect("Properties::INSTANCE lock poisoned");
+}
+
+/* ========================================================================== */
 
 fn serialize_key<S: serde::ser::Serialize>(key: S) -> String {
     if let Ok(key_str) = serde_plain::to_string(&key) {
@@ -88,7 +100,7 @@ pub fn init() -> Result<(), Error> {
     let logo_icon_path = logo_icon_file.to_string_lossy().to_string();
     let license_path = license_file.to_string_lossy().to_string();
 
-    let mut properties = HashMap::new();
+    let mut properties = write();
     properties.insert(serialize_key(AppPaths::AppCache), app_cache_path);
     properties.insert(serialize_key(AppPaths::AppConfig), app_config_path);
     properties.insert(serialize_key(AppPaths::AppData), app_data_path);
@@ -102,24 +114,17 @@ pub fn init() -> Result<(), Error> {
     properties.insert(serialize_key(AppPaths::UniChatLogoIcon), logo_icon_path);
     properties.insert(serialize_key(AppPaths::UniChatLicense), license_path);
 
-    INSTANCE.set(RwLock::new(properties)).map_err(|_| anyhow!("{} was already initialized", ONCE_LOCK_NAME))?;
-
     return Ok(());
 }
 
 fn get_item_raw<S: serde::ser::Serialize> (key: S) -> Result<String, Error> {
-    let props = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
+    let props = read();
+    let key = serialize_key(key);
 
-    if let Ok(props) = props.read() {
-        let key = serialize_key(key);
-
-        if let Some(value) = props.get(&key) {
-            return Ok(value.clone());
-        } else {
-            return Err(anyhow!("Property key '{}' not found", key));
-        }
+    if let Some(value) = props.get(&key) {
+        return Ok(value.clone());
     } else {
-        return Err(anyhow!("Failed to acquire read lock on properties"));
+        return Err(anyhow!("Property key '{}' not found", key));
     }
 }
 
@@ -127,17 +132,9 @@ pub fn get_item(key: PropertiesKey) -> Result<String, Error> {
     return get_item_raw(key);
 }
 
-pub fn set_item(key: PropertiesKey, value: String) -> Result<(), Error> {
-    let props = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
-
-    if let Ok(mut props) = props.write() {
-        let key = serde_plain::to_string(&key)?;
-        props.insert(key, value);
-
-        return Ok(());
-    } else {
-        return Err(anyhow!("Failed to acquire write lock on properties"));
-    }
+pub fn set_item(key: PropertiesKey, value: String) {
+    let mut properties = write();
+    properties.insert(serialize_key(key), value);
 }
 
 pub fn get_app_path(key: AppPaths) -> PathBuf {

@@ -11,6 +11,7 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 use std::sync::RwLock;
+use std::sync::RwLockReadGuard;
 use std::time::Duration;
 
 use anyhow::anyhow;
@@ -31,9 +32,6 @@ struct RatesStore {
     by_code: HashMap<String, usize>,
     by_symbol: HashMap<String, usize>
 }
-
-const RATES_LOCK_NAME: &str = "Currency::RATES";
-static RATES: LazyLock<RwLock<RatesStore>> = LazyLock::new(|| RwLock::new(RatesStore::default()));
 
 impl RatesStore {
     pub fn add(&mut self, code: String, symbol: String, rate: f64) {
@@ -56,38 +54,30 @@ impl RatesStore {
     fn get_by_symbol(&self, symbol: &str) -> Option<&(String, String, f64)> {
         return self.by_symbol.get(symbol).map(|&index| &self.items[index]);
     }
+}
 
-    fn clear(&mut self) {
-        self.items.clear();
-        self.by_code.clear();
-        self.by_symbol.clear();
-    }
+static RATES: LazyLock<RwLock<RatesStore>> = LazyLock::new(|| RwLock::new(RatesStore::default()));
+fn read() -> RwLockReadGuard<'static, RatesStore> {
+    return RATES.read().expect("Currency::RATES lock poisoned");
+}
+
+fn write(new_value: RatesStore) {
+    let mut guard = RATES.write().expect("Currency::RATES lock poisoned");
+    *guard = new_value;
 }
 
 /* ========================================================================== */
 
 pub fn get_rate_by_code(code: &str) -> Option<f64> {
-    if let Ok(lock) = RATES.read() {
-        return lock.get_by_code(code).map(|(_, _, rate)| *rate);
-    }
-
-    return None;
+    return read().get_by_code(code).map(|(_, _, rate)| *rate);
 }
 
 pub fn get_rate_by_symbol(symbol: &str) -> Option<f64> {
-    if let Ok(lock) = RATES.read() {
-        return lock.get_by_symbol(symbol).map(|(_, _, rate)| *rate);
-    }
-
-    return None;
+    return read().get_by_symbol(symbol).map(|(_, _, rate)| *rate);
 }
 
 pub fn clear_rates() {
-    if let Ok(mut lock) = RATES.write() {
-        lock.clear();
-    } else {
-        log::error!("{} is poisoned", RATES_LOCK_NAME);
-    }
+    write(RatesStore::default());
 }
 
 /* ========================================================================== */
@@ -103,20 +93,8 @@ pub struct FrankfurterRate {
     pub rate: f64
 }
 
-pub fn fetch_rates(target: &str) -> Result<(), Error> {
-    let key = format!("currency_rates_{}", target);
-    let rates: Vec<(String, String, f64)> = cache::get_or_fetch(&key, RATES_FILE_TTL, || fetch_rate_list(target))?;
-
-    if let Ok(mut state) = RATES.write() {
-        state.clear();
-        state.add_all(rates);
-    }
-
-    return Ok(());
-}
-
 fn fetch_rate_list(target: &str) -> Result<Vec<(String, String, f64)>, Error> {
-    let currencies_list: HashMap<String, UniChatCurrency> = currencies::list().iter().map(|c| (c.code.clone(), c.clone())).collect();
+    let currencies_list: HashMap<String, UniChatCurrency> = currencies::get().iter().map(|c| (c.code.clone(), c.clone())).collect();
     if currencies_list.is_empty() {
         return Err(anyhow!("Currency list is empty. Please update the currency list first."));
     }
@@ -134,4 +112,15 @@ fn fetch_rate_list(target: &str) -> Result<Vec<(String, String, f64)>, Error> {
     }
 
     return Ok(rates);
+}
+
+pub fn fetch_rates(target: &str) -> Result<(), Error> {
+    let key = format!("currency_rates_{}", target);
+    let rates: Vec<(String, String, f64)> = cache::get_or_fetch(&key, RATES_FILE_TTL, || fetch_rate_list(target))?;
+
+    let mut new_state = RatesStore::default();
+    new_state.add_all(rates);
+    write(new_state);
+
+    return Ok(());
 }

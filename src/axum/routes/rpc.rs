@@ -68,24 +68,24 @@ pub async fn rpc(body: Bytes) -> Response {
         Ok(req) => rpc_request = req,
         Err(e) => {
             let error_response = JsonRPCError::parse_error(None, Some(format!("{:#?}", e)));
-            let body_str = serde_json::to_string(&error_response).unwrap();
+            let body_str = serde_json::to_string(&error_response).expect("Failed to serialize JSON-RPC error");
             return Response::builder()
                 .status(200)
                 .header("Content-Type", "application/json")
                 .body(Body::from(body_str))
-                .unwrap();
+                .expect("Failed to build HTTP response");
         }
     }
 
     let body_str: String;
     match process_rpc_request(rpc_request) {
-        Ok(response) => body_str = serde_json::to_string(&response).unwrap(),
-        Err(err) => body_str = serde_json::to_string(&err).unwrap()
+        Ok(response) => body_str = serde_json::to_string(&response).expect("Failed to serialize JSON-RPC response"),
+        Err(err) => body_str = serde_json::to_string(&err).expect("Failed to serialize JSON-RPC error")
     }
 
     return Response::builder()
         .status(200)
         .header("Content-Type", "application/json")
         .body(Body::from(body_str))
-        .unwrap();
+        .expect("Failed to build HTTP response");
 }

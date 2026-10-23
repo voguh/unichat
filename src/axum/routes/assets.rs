@@ -32,10 +32,11 @@ pub async fn assets(Path(mut asset_path): Path<String>, req: Request<Body>) -> R
 
     let asset_base_path: PathBuf;
     let cache_control: &str;
-    let plugins = plugins::get_plugins().unwrap_or_default();
+    let plugins = plugins::get_plugins();
     if let Some(plugin) = plugins.iter().find(|p| p.name == first_part) {
         asset_base_path = plugin.get_assets_path();
-        asset_path = asset_path_parts.collect::<Vec<&str>>().join("/");
+        let remaining_parts: Vec<&str> = asset_path_parts.collect();
+        asset_path = remaining_parts.join("/");
         cache_control = CACHE_REVALIDATE;
     } else {
         asset_base_path = properties::get_app_path(AppPaths::UniChatAssets);
@@ -49,18 +50,18 @@ pub async fn assets(Path(mut asset_path): Path<String>, req: Request<Body>) -> R
             log::error!("Invalid asset path '{}' for assets: {:#?}", asset_path, err);
             return Response::builder().status(StatusCode::BAD_REQUEST)
                 .body(Body::from("Invalid asset path"))
-                .unwrap();
+                .expect("Failed to build HTTP response");
         }
     }
 
     if !asset_full_path.exists() {
         return Response::builder().status(StatusCode::NOT_FOUND)
             .body(Body::from(format!("Asset '{}' not found in gallery", asset_path)))
-            .unwrap();
+            .expect("Failed to build HTTP response");
     } else if asset_full_path.is_dir() {
         return Response::builder().status(StatusCode::BAD_REQUEST)
             .body(Body::from(format!("Asset '{}' is a directory, not a file", asset_path)))
-            .unwrap();
+            .expect("Failed to build HTTP response");
     }
 
     return serve_partial_content(&asset_full_path, req.headers(), cache_control);

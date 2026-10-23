@@ -94,7 +94,7 @@ struct CompatibilityOptions {
     live_chat_author_external_channel_id: String
 }
 
-static GIFT_ASSET_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"/assets/([^./]+)\.").unwrap());
+static GIFT_ASSET_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"/assets/([^./]+)\.").expect("Invalid gift asset regex"));
 
 const GIFT_A11Y_LABEL_SEPARATOR: &str = " sent a gift, ";
 
@@ -140,9 +140,9 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
 
         let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
         let author_id = parsed.content.element_renderer.compatibility_options.live_chat_author_external_channel_id;
-        let author_username = parse_author_username_str(gift.author_name.content.clone())?;
-        let author_name = parse_author_name_str(gift.author_name.content.clone())?;
-        let author_color = parse_author_color(&author_name)?;
+        let author_username = parse_author_username_str(gift.author_name.content.clone());
+        let author_name = parse_author_name_str(gift.author_name.content.clone());
+        let author_color = parse_author_color(&author_name);
         let author_photo = parse_author_photo_vec(&gift.author_avatar.avatar_view_model.image.sources)?;
 
         let gift_id = parse_gift_id(&gift);
@@ -152,7 +152,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
 
         let message_id = gift.id;
 
-        let timestamp_usec = get_current_timestamp()?;
+        let timestamp_usec = get_current_timestamp();
 
         let event = UniChatEvent::Cheer(UniChatCheerEventPayload {
             channel_id: channel_id,

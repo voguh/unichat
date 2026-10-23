@@ -50,7 +50,7 @@ pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryStr
     if encoded_url.trim().is_empty() {
         return Response::builder().status(400)
             .body("Encoded URL path cannot be empty".into())
-            .unwrap();
+            .expect("Failed to build HTTP response");
     }
 
     let url_path: String;
@@ -60,7 +60,7 @@ pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryStr
             log::error!("Failed to decode URL path: {:#?}", e);
             return Response::builder().status(400)
                 .body(format!("Failed to decode URL path: {:#?}", e).into())
-                .unwrap();
+                .expect("Failed to build HTTP response");
         }
     }
 
@@ -68,7 +68,7 @@ pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryStr
     if normalized_url.trim() == "https://" {
         return Response::builder().status(400)
             .body("Decoded URL cannot be empty".into())
-            .unwrap();
+            .expect("Failed to build HTTP response");
     }
 
     let referer = query.referer.clone();
@@ -102,17 +102,17 @@ pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryStr
                 }
             }
 
-            return builder.body(Body::from(body)).unwrap();
+            return builder.body(Body::from(body)).expect("Failed to build HTTP response");
         }
         Ok(Err(err)) => {
             return Response::builder().status(502)
                 .body(format!("Failed to fetch proxied url: {:#?}", err).into())
-                .unwrap();
+                .expect("Failed to build HTTP response");
         }
         Err(err) => {
             return Response::builder().status(500)
                 .body(format!("Proxy task failed: {:#?}", err).into())
-                .unwrap();
+                .expect("Failed to build HTTP response");
         }
     }
 }

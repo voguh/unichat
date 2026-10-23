@@ -63,14 +63,15 @@ struct LiveChatSponsorshipsHeaderRenderer {
 
 fn parse_count(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<u16, Error> {
     let run = render.primary_text.runs.get(1).ok_or(anyhow!("No count run found"))?;
-    let raw_count = match run {
-        MessageRun::Text { text } => text,
-        MessageRun::Emoji { .. } => return Err(anyhow!("Unexpected emoji in count run")),
-    };
-
-    let count: u16 = raw_count.parse()?;
-
-    return Ok(count);
+    match run {
+        MessageRun::Text { text } => {
+            let count: u16 = text.parse()?;
+            return Ok(count);
+        }
+        MessageRun::Emoji { .. } => {
+            return Err(anyhow!("Unexpected emoji in count run"));
+        }
+    }
 }
 
 /* <============================================================================================> */
@@ -81,14 +82,14 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
     let author_id = parsed.author_external_channel_id;
     let render = parsed.header.live_chat_sponsorships_header_renderer;
-    let author_username = parse_author_username(&render.author_name)?;
-    let author_name = parse_author_name(&render.author_name)?;
-    let author_color = parse_author_color(&author_name)?;
+    let author_username = parse_author_username(&render.author_name);
+    let author_name = parse_author_name(&render.author_name);
+    let author_color = parse_author_color(&author_name);
     let author_badges = parse_author_badges(&render.author_badges, &None)?;
     let author_photo = parse_author_photo(&render.author_photo)?;
-    let author_type = parse_author_type(&render.author_badges)?;
+    let author_type = parse_author_type(&render.author_badges);
     let count = parse_count(&render)?;
-    let timestamp_usec = get_current_timestamp()?;
+    let timestamp_usec = get_current_timestamp();
 
     let event = UniChatEvent::SponsorGift(UniChatSponsorGiftEventPayload {
         channel_id: channel_id,

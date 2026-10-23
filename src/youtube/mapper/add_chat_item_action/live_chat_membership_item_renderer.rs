@@ -68,15 +68,15 @@ struct HeaderSubtext {
 //
 // On the new member format headerSubtext is a runs list reading "Welcome to <channel>!", so runs[1]
 // is the channel name, NOT the tier. That format carries no tier information at all, hence None.
-fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> Result<Option<String>, Error> {
+fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> Option<String> {
     if let Some(simple_text) = &parsed.header_subtext.simple_text {
-        return Ok(Some(simple_text.clone()));
+        return Some(simple_text.clone());
     }
 
-    return Ok(None);
+    return None;
 }
 
-static MONTHS_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"\d+").unwrap());
+static MONTHS_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"\d+").expect("Invalid months regex"));
 
 // I was able to detect two types of membership events (examples 7 and 8).
 // The event without a message and with 'runs' in the headerSubtext I am assuming is the first month
@@ -133,17 +133,17 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
 
     let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
     let author_id = parsed.author_external_channel_id.clone();
-    let author_username = parse_author_username(&parsed.author_name)?;
-    let author_name = parse_author_name(&parsed.author_name)?;
-    let author_color = parse_author_color(&author_name)?;
+    let author_username = parse_author_username(&parsed.author_name);
+    let author_name = parse_author_name(&parsed.author_name);
+    let author_color = parse_author_color(&author_name);
     let author_badges = parse_author_badges(&parsed.author_badges, &None)?;
     let author_photo = parse_author_photo(&parsed.author_photo)?;
-    let author_type = parse_author_type(&parsed.author_badges)?;
-    let tier = parse_tier(&parsed)?;
+    let author_type = parse_author_type(&parsed.author_badges);
+    let tier = parse_tier(&parsed);
     let months = parse_months(&parsed)?;
     let message = optional_build_message(&parsed.message)?;
     let emotes = optional_build_emotes(&parsed.message)?;
-    let timestamp_usec = get_current_timestamp()?;
+    let timestamp_usec = get_current_timestamp();
 
     let event = UniChatEvent::Sponsor(UniChatSponsorEventPayload {
         channel_id: channel_id,

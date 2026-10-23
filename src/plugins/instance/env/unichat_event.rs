@@ -144,12 +144,12 @@ pub struct LuaUniChatPlatformFactory;
 impl mlua::UserData for LuaUniChatPlatformFactory {
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("Twitch", |_lua, _this, ()| {
-            let lv = serde_plain::to_string(&UniChatPlatform::Twitch).map_err(mlua::Error::external)?;
+            let lv = serde_plain::to_string(&UniChatPlatform::Twitch).expect("Failed to serialize UniChatPlatform");
             return Ok(lv);
         });
 
         methods.add_method("YouTube", |_lua, _this, ()| {
-            let lv = serde_plain::to_string(&UniChatPlatform::YouTube).map_err(mlua::Error::external)?;
+            let lv = serde_plain::to_string(&UniChatPlatform::YouTube).expect("Failed to serialize UniChatPlatform");
             return Ok(lv);
         });
 
@@ -160,7 +160,7 @@ impl mlua::UserData for LuaUniChatPlatformFactory {
             }
 
             let obj: UniChatPlatform = serde_plain::from_str(&str).map_err(mlua::Error::external)?;
-            let lv = serde_plain::to_string(&obj).map_err(mlua::Error::external)?;
+            let lv = serde_plain::to_string(&obj).expect("Failed to serialize UniChatPlatform");
             return Ok(lv);
         });
     }
@@ -173,22 +173,22 @@ pub struct LuaUniChatAuthorTypeFactory;
 impl mlua::UserData for LuaUniChatAuthorTypeFactory {
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("Viewer", |_lua, _this, ()| {
-            let lv = serde_plain::to_string(&UniChatAuthorType::Viewer).map_err(mlua::Error::external)?;
+            let lv = serde_plain::to_string(&UniChatAuthorType::Viewer).expect("Failed to serialize UniChatAuthorType");
             return Ok(lv);
         });
 
         methods.add_method("Sponsor", |_lua, _this, ()| {
-            let lv = serde_plain::to_string(&UniChatAuthorType::Sponsor).map_err(mlua::Error::external)?;
+            let lv = serde_plain::to_string(&UniChatAuthorType::Sponsor).expect("Failed to serialize UniChatAuthorType");
             return Ok(lv);
         });
 
         methods.add_method("Moderator", |_lua, _this, ()| {
-            let lv = serde_plain::to_string(&UniChatAuthorType::Moderator).map_err(mlua::Error::external)?;
+            let lv = serde_plain::to_string(&UniChatAuthorType::Moderator).expect("Failed to serialize UniChatAuthorType");
             return Ok(lv);
         });
 
         methods.add_method("Broadcaster", |_lua, _this, ()| {
-            let lv = serde_plain::to_string(&UniChatAuthorType::Broadcaster).map_err(mlua::Error::external)?;
+            let lv = serde_plain::to_string(&UniChatAuthorType::Broadcaster).expect("Failed to serialize UniChatAuthorType");
             return Ok(lv);
         });
 
@@ -199,7 +199,7 @@ impl mlua::UserData for LuaUniChatAuthorTypeFactory {
             }
 
             let obj: UniChatAuthorType = serde_plain::from_str(&str).map_err(mlua::Error::external)?;
-            let lv = serde_plain::to_string(&obj).map_err(mlua::Error::external)?;
+            let lv = serde_plain::to_string(&obj).expect("Failed to serialize UniChatAuthorType");
             return Ok(lv);
         });
     }

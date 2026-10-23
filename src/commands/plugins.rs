@@ -39,7 +39,7 @@ pub struct SerializedPluginMetadata {
 #[tauri::command]
 pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<SerializedPluginMetadata>, String> {
     let mut serialized_plugins: Vec<SerializedPluginMetadata> = Vec::new();
-    let plugins = plugins::get_plugins().map_err(|e| format!("An error occurred on get plugins: {:#?}", e))?;
+    let plugins = plugins::get_plugins();
 
     for plugin in plugins {
         let metadata = SerializedPluginMetadata {
@@ -54,7 +54,7 @@ pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Serialize
             path: plugin.get_plugin_path(),
             icon: plugin.get_icon().map(|bytes| format!("data:image/png;base64,{}", base64::encode(bytes))),
             status: plugin.get_status(),
-            messages: plugin.get_messages(),
+            messages: plugin.get_messages()
         };
 
         serialized_plugins.push(metadata);

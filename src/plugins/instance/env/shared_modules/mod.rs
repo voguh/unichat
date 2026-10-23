@@ -11,21 +11,31 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 use std::sync::RwLock;
+use std::sync::RwLockReadGuard;
+use std::sync::RwLockWriteGuard;
 
 use anyhow::anyhow;
 use anyhow::Error;
 
 /* ========================================================================== */
 
-const SHARED_MODULES_LAZY_LOCK_KEY: &str = "Plugins::SHARED_MODULES";
 static SHARED_MODULES: LazyLock<RwLock<HashMap<String, mlua::Value>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+fn read() -> RwLockReadGuard<'static, HashMap<String, mlua::Value>> {
+    return SHARED_MODULES.read().expect("Plugins::SHARED_MODULES lock poisoned");
+}
+
+fn write() -> RwLockWriteGuard<'static, HashMap<String, mlua::Value>> {
+    return SHARED_MODULES.write().expect("Plugins::SHARED_MODULES lock poisoned");
+}
+
+/* ========================================================================== */
 
 pub fn get(module_name: &str) -> Result<Option<mlua::Value>, Error> {
     if module_name.is_empty() || !module_name.contains(":") {
         return Err(anyhow!("Invalid module name '{}'. Module names must be in the format 'plugin_name:module_name'", module_name));
     }
 
-    let shared_modules = SHARED_MODULES.read().map_err(|_| anyhow!("{} lock poisoned", SHARED_MODULES_LAZY_LOCK_KEY))?;
+    let shared_modules = read();
     return Ok(shared_modules.get(module_name).cloned());
 }
 
@@ -34,7 +44,7 @@ pub fn add(module_name: String, module_table: mlua::Value) -> Result<(), Error> 
         return Err(anyhow!("Invalid module name '{}'. Module names must be in the format 'plugin_name:module_name'", module_name));
     }
 
-    let mut shared_modules = SHARED_MODULES.write().map_err(|_| anyhow!("{} lock poisoned", SHARED_MODULES_LAZY_LOCK_KEY))?;
+    let mut shared_modules = write();
     if shared_modules.contains_key(&module_name) {
         return Err(anyhow!("Module '{}' is already exposed", module_name));
     }
@@ -48,7 +58,7 @@ pub fn remove(module_name: &str) -> Result<(), Error> {
         return Err(anyhow!("Invalid module name '{}'. Module names must be in the format 'plugin_name:module_name'", module_name));
     }
 
-    let mut shared_modules = SHARED_MODULES.write().map_err(|_| anyhow!("{} lock poisoned", SHARED_MODULES_LAZY_LOCK_KEY))?;
+    let mut shared_modules = write();
     if !shared_modules.contains_key(module_name) {
         return Err(anyhow!("Module '{}' is not exposed", module_name));
     }
@@ -57,8 +67,7 @@ pub fn remove(module_name: &str) -> Result<(), Error> {
     return Ok(());
 }
 
-pub fn clear() -> Result<(), Error> {
-    let mut shared_modules = SHARED_MODULES.write().map_err(|_| anyhow!("{} lock poisoned", SHARED_MODULES_LAZY_LOCK_KEY))?;
+pub fn clear() {
+    let mut shared_modules = write();
     shared_modules.clear();
-    return Ok(());
 }

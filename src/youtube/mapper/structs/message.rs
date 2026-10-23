@@ -53,7 +53,7 @@ pub enum Emoji {
     FontBased {
         emoji_id: String,
         image: FontBaseEmojiThumbnailsWrapper
-    },
+    }
 
 }
 
@@ -86,40 +86,39 @@ pub fn parse_super_chat_tier(primary_superchat_background_color: &str) -> Option
 pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<UniChatEmote>, Error> {
     let mut emotes = Vec::new();
 
-    if let Ok(custom_emotes) = shared_emotes::EMOTES_HASHSET.read() {
-        for run in &message_runs.runs {
-            match run {
-                MessageRun::Text { text } => {
-                    if text.is_empty() {
-                        continue;
-                    }
+    let custom_emotes = shared_emotes::read();
+    for run in &message_runs.runs {
+        match run {
+            MessageRun::Text { text } => {
+                if text.is_empty() {
+                    continue;
+                }
 
-                    for word in text.split_whitespace() {
-                        if let Some(emote) = custom_emotes.get(word) {
-                            emotes.push(emote.clone());
-                        }
+                for word in text.split_whitespace() {
+                    if let Some(emote) = custom_emotes.get(word) {
+                        emotes.push(emote.clone());
                     }
-                },
-                MessageRun::Emoji { emoji } => {
-                    match emoji {
-                        Emoji::Custom { emoji_id, image, shortcuts, .. } => {
-                            let shortcut = shortcuts.first().ok_or(anyhow!("No shortcuts found for custom emoji"))?;
-                            let last_image = image.thumbnails.last().ok_or(anyhow!("No thumbnails found for font-based emoji"))?;
+                }
+            },
+            MessageRun::Emoji { emoji } => {
+                match emoji {
+                    Emoji::Custom { emoji_id, image, shortcuts, .. } => {
+                        let shortcut = shortcuts.first().ok_or(anyhow!("No shortcuts found for custom emoji"))?;
+                        let last_image = image.thumbnails.last().ok_or(anyhow!("No thumbnails found for font-based emoji"))?;
 
-                            emotes.push(UniChatEmote {
-                                id: emoji_id.clone(),
-                                code: shortcut.clone(),
-                                url: proxy_youtube_url(&last_image.url)
-                            });
-                        },
-                        Emoji::FontBased { emoji_id, image, .. } => {
-                            let last_image = image.thumbnails.last().ok_or(anyhow!("No thumbnails found for font-based emoji"))?;
-                            emotes.push(UniChatEmote {
-                                id: emoji_id.clone(),
-                                code: emoji_id.clone(),
-                                url: proxy_youtube_url(&last_image.url)
-                            });
-                        }
+                        emotes.push(UniChatEmote {
+                            id: emoji_id.clone(),
+                            code: shortcut.clone(),
+                            url: proxy_youtube_url(&last_image.url)
+                        });
+                    },
+                    Emoji::FontBased { emoji_id, image, .. } => {
+                        let last_image = image.thumbnails.last().ok_or(anyhow!("No thumbnails found for font-based emoji"))?;
+                        emotes.push(UniChatEmote {
+                            id: emoji_id.clone(),
+                            code: emoji_id.clone(),
+                            url: proxy_youtube_url(&last_image.url)
+                        });
                     }
                 }
             }

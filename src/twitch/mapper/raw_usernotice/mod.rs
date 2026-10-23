@@ -12,6 +12,7 @@ use anyhow::anyhow;
 use anyhow::Error;
 
 use crate::events::unichat::UniChatEvent;
+use crate::utils::irc::IRCCommand;
 use crate::utils::irc::IRCMessage;
 
 mod announcement;
@@ -22,6 +23,13 @@ mod subscription;
 mod watch_streak;
 
 /* ========================================================================== */
+
+fn parse_command(message: &IRCMessage) -> Result<(String, Option<String>), Error> {
+    return match &message.command {
+        IRCCommand::Raw(_, payload) => Ok((payload[0].clone(), payload.get(1).cloned())),
+        _ => Err(anyhow!("Invalid message command type"))
+    };
+}
 
 pub fn parse(channel_name: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let tags = message.tags.clone();

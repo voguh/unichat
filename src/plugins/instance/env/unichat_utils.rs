@@ -24,7 +24,7 @@ impl UniChatUtilsModule {
 impl mlua::UserData for UniChatUtilsModule {
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("random_color_by_seed", |_lua, _this, seed: String| -> mlua::Result<String> {
-            let color = random_color_by_seed(&seed).map_err(mlua::Error::runtime)?;
+            let color = random_color_by_seed(&seed);
             return Ok(color);
         });
     }

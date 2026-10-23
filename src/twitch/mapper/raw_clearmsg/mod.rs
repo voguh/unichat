@@ -25,7 +25,7 @@ pub fn parse(channel: String, message: &IRCMessage) -> Result<Option<UniChatEven
 
     let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing room-id tag"))?;
     let target_msg_id = tags.get("target-msg-id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing target-msg-id tag"))?;
-    let timestamp_usec = get_current_timestamp()?;
+    let timestamp_usec = get_current_timestamp();
 
     let event = UniChatEvent::RemoveMessage(UniChatRemoveMessageEventPayload {
         channel_id: room_id.to_owned(),

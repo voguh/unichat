@@ -68,6 +68,6 @@ pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
 #[tauri::command]
 pub async fn get_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<WidgetMetadata>, String> {
     reload_user_widgets().map_err(|e| format!("Failed to reload user widgets: {:#?}", e))?;
-    let widgets = widgets::get_widgets().map_err(|e| format!("Failed to get widgets list: {:#?}", e))?;
+    let widgets = widgets::get_widgets();
     return Ok(widgets);
 }

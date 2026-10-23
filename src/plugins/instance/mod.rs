@@ -18,8 +18,7 @@ use anyhow::Error;
 use crate::UNICHAT_DISPLAY_NAME;
 use crate::UNICHAT_VERSION;
 use crate::addons::manifest::UniChatAddonManifest;
-use crate::plugins::LOADED_PLUGINS;
-use crate::plugins::LOADED_PLUGINS_LAZY_LOCK_KEY;
+use crate::plugins;
 use crate::plugins::PluginStatus;
 use crate::plugins::UniChatPlugin;
 use crate::plugins::runtime;
@@ -54,17 +53,17 @@ fn parse_dependencies(raw_dependencies: &Vec<String>) -> Result<Vec<(String, Ver
 /* ========================================================================== */
 
 fn start(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
-    let lua = runtime::get()?;
-    let plugin_env = plugin.get_plugin_env()?;
+    let lua = runtime::get();
+    let plugin_env = plugin.get_plugin_env();
     env::load_env(&plugin.name, &plugin.version, plugin_env.clone())?;
 
     /* ====================================================================== */
 
-    let start_ms = get_current_timestamp()?;
+    let start_ms = get_current_timestamp();
     log::info!("Executing plugin entrypoint for plugin: {} v{}", plugin.name, plugin.version);
     let entrypoint_code = fs::read_to_string(plugin.get_entrypoint_path())?;
     lua.load(&entrypoint_code).set_environment(plugin_env.clone()).exec()?;
-    let end_ms = get_current_timestamp()?;
+    let end_ms = get_current_timestamp();
     log::info!("Plugin '{}' initialized in {} ms", plugin.name, end_ms - start_ms);
     plugin.add_message(format!("Initialization finished in {}ms", end_ms - start_ms));
 
@@ -86,7 +85,7 @@ pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(),
 
     for (key, version_req) in plugin.dependencies.iter() {
         if key == "unichat" {
-            let unichat_version = Version::parse(UNICHAT_VERSION)?;
+            let unichat_version = Version::parse(UNICHAT_VERSION).expect("UNICHAT_VERSION is not a valid version");
             if !version_req.matches(&unichat_version) {
                 plugin.add_message(format!("Required {} version '{}' does not satisfy the current version '{}'", UNICHAT_DISPLAY_NAME, version_req, unichat_version));
                 is_valid = false;
@@ -94,14 +93,7 @@ pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(),
         }
     }
 
-    {
-        let mut loaded_plugins = LOADED_PLUGINS.write().map_err(|_| anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
-        if loaded_plugins.contains_key(&plugin.name) {
-            return Err(anyhow!("Plugin with name '{}' is already loaded", plugin.name));
-        }
-
-        loaded_plugins.insert(plugin.name.clone(), plugin.clone());
-    }
+    plugins::write(plugin.clone())?;
 
     if !is_valid {
         plugin.set_status(PluginStatus::Invalid);

@@ -52,15 +52,15 @@ pub fn parse(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let channel = channel.ok_or(anyhow!("Missing channel name"))?;
     let mut flags = inject_raw_tags(&tags);
     let author_id = tags.get("user-id").and_then(|v| v.to_owned()).ok_or(anyhow!("Missing user-id tag"))?;
-    let author_username = parse_author_username(&message.prefix)?;
+    let author_username = parse_author_username(&message.prefix);
     let author_name = parse_author_name(tags.get("display-name"))?;
     let author_color = parse_author_color(tags.get("color"), &author_username)?;
-    let author_badges = parse_author_badges(tags.get("badges"))?;
-    let author_type = parse_author_type(&tags)?;
+    let author_badges = parse_author_badges(tags.get("badges"));
+    let author_type = parse_author_type(&tags);
     let message_id = tags.get("id").and_then(|v| v.to_owned()).ok_or(anyhow!("Missing id tag"))?;
-    let message = parse_message_string(&text)?;
+    let message = parse_message_string(&text);
     let emotes = parse_message_emotes(tags.get("emotes"), &text)?;
-    let timestamp_usec = get_current_timestamp()?;
+    let timestamp_usec = get_current_timestamp();
 
     let streak_days = tags.get("msg-param-value").and_then(|v| v.to_owned()).ok_or(anyhow!("Missing msg-param-value tag"))?;
     flags.insert(String::from(UNICHAT_FLAG_TWITCH_STREAK_DAYS), Some(streak_days));

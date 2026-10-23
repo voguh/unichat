@@ -33,12 +33,12 @@ pub fn parse(channel: String, tags: &HashMap<String, Option<String>>) -> Result<
     let author_name = parse_author_name(tags.get("display-name"))?;
     let author_color = parse_author_color(tags.get("color"), &author_username)?;
     let author_profile_picture_url = tags.get("msg-param-profileImageURL").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing msg-param-profileImageURL tag"))?;
-    let author_badges = parse_author_badges(tags.get("badges"))?;
-    let author_type = parse_author_type(&tags)?;
+    let author_badges = parse_author_badges(tags.get("badges"));
+    let author_type = parse_author_type(&tags);
     let message_id = tags.get("id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing id tag"))?;
     let count_str = tags.get("msg-param-viewerCount").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing msg-param-viewerCount tag"))?;
     let count: u16 = count_str.parse()?;
-    let timestamp_usec = get_current_timestamp()?;
+    let timestamp_usec = get_current_timestamp();
 
     let event = UniChatEvent::Raid(UniChatRaidEventPayload {
         channel_id: room_id.to_owned(),

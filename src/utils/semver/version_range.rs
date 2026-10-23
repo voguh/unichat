@@ -176,12 +176,12 @@ impl VersionRange {
 
         let mut min = None;
         if let Some(min_version) = &min_version {
-            min = Some((min_bound.unwrap(), min_version.clone()));
+            min = Some((min_bound.expect("Minimum bound is set with minimum version"), min_version.clone()));
         }
 
         let mut max = None;
         if let Some(max_version) = &max_version {
-            max = Some((max_bound.unwrap(), max_version.clone()));
+            max = Some((max_bound.expect("Maximum bound is set with maximum version"), max_version.clone()));
         }
 
         return Ok(VersionRange::new(min, max));

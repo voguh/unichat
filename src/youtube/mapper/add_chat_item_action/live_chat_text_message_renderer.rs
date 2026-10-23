@@ -58,15 +58,15 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
 
     let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
     let author_id = parsed.author_external_channel_id;
-    let author_username = parse_author_username(&parsed.author_name)?;
-    let author_name = parse_author_name(&parsed.author_name)?;
-    let author_color = parse_author_color(&author_name)?;
+    let author_username = parse_author_username(&parsed.author_name);
+    let author_name = parse_author_name(&parsed.author_name);
+    let author_color = parse_author_color(&author_name);
     let author_badges = parse_author_badges(&parsed.author_badges, &parsed.before_content_buttons)?;
     let author_photo = parse_author_photo(&parsed.author_photo)?;
-    let author_type = parse_author_type(&parsed.author_badges)?;
+    let author_type = parse_author_type(&parsed.author_badges);
     let message = parse_message_string(&parsed.message)?;
     let emotes = parse_message_emojis(&parsed.message)?;
-    let timestamp_usec = get_current_timestamp()?;
+    let timestamp_usec = get_current_timestamp();
 
     let event = UniChatEvent::Message(UniChatMessageEventPayload {
         channel_id: channel_id,
