@@ -8,8 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import type { PluginStatus, WidgetSourceType } from "unichat/utils/constants";
-
 export interface UniChatAddonManifest {
     name: string;
     description: string | null;
@@ -18,45 +16,6 @@ export interface UniChatAddonManifest {
     license: string | null;
     homepage: string | null;
     dependencies: string[];
-}
-
-/* ========================================================================== */
-
-export interface UniChatLocalWidget {
-    name: string;
-    description: string | null;
-    version: string;
-    author: string | null;
-    license: string | null;
-    homepage: string | null;
-    dependencies: string[];
-
-    path: string;
-    restPath: string;
-    widgetSource: UniChatLocalWidgetSource;
-    warnings: string[];
-}
-
-export interface UniChatLocalWidgetSource {
-    type: WidgetSourceType;
-    value?: string;
-}
-
-/* ========================================================================== */
-
-export interface UniChatLocalPlugin {
-    name: string;
-    description: string | null;
-    version: string;
-    author: string | null;
-    license: string | null;
-    homepage: string | null;
-    dependencies: string[];
-
-    path: string;
-    icon: string | null;
-    status: PluginStatus;
-    messages: string[];
 }
 
 /* ========================================================================== */

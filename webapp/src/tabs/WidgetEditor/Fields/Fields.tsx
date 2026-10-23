@@ -24,14 +24,14 @@ import { GalleryFileInput } from "unichat/components/forms/GalleryFileInput";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import type { WidgetFields } from "unichat/types";
-import type { UniChatLocalWidget } from "unichat/types/addons";
+import type { WidgetMetadata } from "unichat/types/widgets";
 import { Strings } from "unichat/utils/Strings";
 import { isGeneralUserWidget, isSystemWidget } from "unichat/utils/widgetSourceTypeGuards";
 
 import styles from "./styles.module.css";
 
 interface Props {
-    widgets: Map<string, UniChatLocalWidget>;
+    widgets: Map<string, WidgetMetadata>;
     selectedWidget: string;
     handleReset: () => Promise<void>;
     handleApply: (values: Record<string, unknown>) => Promise<void>;

@@ -17,7 +17,7 @@ import { Button, IconButton } from "@voguh/unichat-ui/components/ui/Button";
 import { Popover } from "@voguh/unichat-ui/components/ui/Popover";
 import { formatWarnings } from "unichat/__internal__/WidgetsModal/utils/formatWarnings";
 import { useWidgets } from "unichat/hooks/useWidgets";
-import type { UniChatLocalWidget } from "unichat/types/addons";
+import type { WidgetMetadata } from "unichat/types/widgets";
 import { isSystemWidget, isUserPluginWidget, isUserWidget } from "unichat/utils/widgetSourceTypeGuards";
 
 import styles from "./styles.module.css";
@@ -45,7 +45,7 @@ export function OtherWidgetsPopover({ communityWidgetNames }: Props): PReact.Com
     ].filter((group) => group.items.length > 0);
     const count = groups.reduce((total, group) => total + group.items.length, 0);
 
-    function renderSubtitle(widget: UniChatLocalWidget): string | undefined {
+    function renderSubtitle(widget: WidgetMetadata): string | undefined {
         if (isSystemWidget(widget)) {
             return "UniChat";
         } else if (isUserPluginWidget(widget)) {
@@ -55,7 +55,7 @@ export function OtherWidgetsPopover({ communityWidgetNames }: Props): PReact.Com
         return `v${widget.version}`;
     }
 
-    function renderWidget(widget: UniChatLocalWidget): PReact.ComponentChildren {
+    function renderWidget(widget: WidgetMetadata): PReact.ComponentChildren {
         const local = isUserWidget(widget);
 
         return (

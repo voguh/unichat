@@ -13,10 +13,10 @@ import type * as PReact from "preact";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import type { UniChatLocalPlugin } from "unichat/types/addons";
+import type { PluginMetadata } from "unichat/types/plugins";
 
 interface Props {
-    plugin: UniChatLocalPlugin;
+    plugin: PluginMetadata;
 }
 
 export function PluginOverviewModalActions({ plugin: { path } }: Props): PReact.ComponentChildren {

@@ -16,12 +16,12 @@ import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
 import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
 import { getPluginIconDataUrl } from "unichat/__internal__/PluginsModal/utils/getPluginIconDataUrl";
 import { handleBadgeVariant } from "unichat/__internal__/PluginsModal/utils/handleBadgeVariant";
-import type { UniChatLocalPlugin } from "unichat/types/addons";
+import type { PluginMetadata } from "unichat/types/plugins";
 
 import styles from "./styles.module.css";
 
 interface Props {
-    plugin: UniChatLocalPlugin;
+    plugin: PluginMetadata;
 }
 
 export function PluginOverviewModal({ plugin }: Props): PReact.ComponentChildren {

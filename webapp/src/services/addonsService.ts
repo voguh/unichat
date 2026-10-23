@@ -8,18 +8,20 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import type { CommunityWidget, UniChatLocalPlugin, UniChatLocalWidget } from "unichat/types/addons";
+import type { CommunityWidget } from "unichat/types/addons";
+import type { PluginMetadata } from "unichat/types/plugins";
+import type { WidgetMetadata } from "unichat/types/widgets";
 import { invoke } from "unichat/utils/invoke";
 
 export class AddonsService {
-    public async getLocalPlugins(): Promise<UniChatLocalPlugin[]> {
+    public async getLocalPlugins(): Promise<PluginMetadata[]> {
         return invoke("get_plugins");
     }
 
     /* ========================================================================================== */
 
-    public async getLocalWidgets(): Promise<UniChatLocalWidget[]> {
-        return invoke<UniChatLocalWidget[]>("get_widgets");
+    public async getLocalWidgets(): Promise<WidgetMetadata[]> {
+        return invoke<WidgetMetadata[]>("get_widgets");
     }
 
     public async getCommunityWidgets(): Promise<CommunityWidget[]> {

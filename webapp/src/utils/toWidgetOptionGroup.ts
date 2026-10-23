@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 import type { SelectItem, SelectItemGroup } from "@voguh/unichat-ui/components/ui/Select";
-import type { UniChatLocalWidget } from "unichat/types/addons";
+import type { WidgetMetadata } from "unichat/types/widgets";
 
 import { isSystemWidget, isUserWidget } from "./widgetSourceTypeGuards";
 
@@ -21,7 +21,7 @@ export interface WidgetSelectItemGroup extends SelectItemGroup {
     items: WidgetSelectItem[];
 }
 
-export function toWidgetOptionGroup(widgets: Iterable<UniChatLocalWidget>): WidgetSelectItemGroup[] {
+export function toWidgetOptionGroup(widgets: Iterable<WidgetMetadata>): WidgetSelectItemGroup[] {
     const systemWidgets: WidgetSelectItem[] = [];
     const userWidgets: WidgetSelectItem[] = [];
     const pluginWidgets: WidgetSelectItem[] = [];

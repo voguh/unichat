@@ -8,11 +8,11 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import type { UniChatLocalWidget } from "unichat/types/addons";
+import type { WidgetMetadata } from "unichat/types/widgets";
 
 import { WidgetSourceType } from "./constants";
 
-export function isSystemWidget(widget: UniChatLocalWidget | null | undefined): boolean {
+export function isSystemWidget(widget: WidgetMetadata | null | undefined): boolean {
     if (widget == null) {
         return false;
     }
@@ -20,7 +20,7 @@ export function isSystemWidget(widget: UniChatLocalWidget | null | undefined): b
     return widget.widgetSource.type === WidgetSourceType.SYSTEM;
 }
 
-export function isUserPluginWidget(widget: UniChatLocalWidget | null | undefined): boolean {
+export function isUserPluginWidget(widget: WidgetMetadata | null | undefined): boolean {
     if (widget == null) {
         return false;
     }
@@ -28,7 +28,7 @@ export function isUserPluginWidget(widget: UniChatLocalWidget | null | undefined
     return widget.widgetSource.type === WidgetSourceType.USER_PLUGIN;
 }
 
-export function isUserWidget(widget: UniChatLocalWidget | null | undefined): boolean {
+export function isUserWidget(widget: WidgetMetadata | null | undefined): boolean {
     if (widget == null) {
         return false;
     }
@@ -38,7 +38,7 @@ export function isUserWidget(widget: UniChatLocalWidget | null | undefined): boo
 
 /* ============================================================================================== */
 
-export function isGeneralSystemWidget(widget: UniChatLocalWidget | null | undefined): boolean {
+export function isGeneralSystemWidget(widget: WidgetMetadata | null | undefined): boolean {
     if (widget == null) {
         return false;
     }
@@ -46,7 +46,7 @@ export function isGeneralSystemWidget(widget: UniChatLocalWidget | null | undefi
     return widget.widgetSource.type === WidgetSourceType.SYSTEM;
 }
 
-export function isGeneralUserWidget(widget: UniChatLocalWidget | null | undefined): boolean {
+export function isGeneralUserWidget(widget: WidgetMetadata | null | undefined): boolean {
     if (widget == null) {
         return false;
     }
@@ -56,7 +56,7 @@ export function isGeneralUserWidget(widget: UniChatLocalWidget | null | undefine
     );
 }
 
-export function isGeneralPluginWidget(widget: UniChatLocalWidget | null | undefined): boolean {
+export function isGeneralPluginWidget(widget: WidgetMetadata | null | undefined): boolean {
     if (widget == null) {
         return false;
     }

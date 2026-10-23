@@ -18,7 +18,7 @@ import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { addonsService } from "unichat/services/addonsService";
 import { modalService } from "unichat/services/modalService";
 import { notificationService } from "unichat/services/notificationService";
-import type { UniChatLocalPlugin } from "unichat/types/addons";
+import type { PluginMetadata } from "unichat/types/plugins";
 
 import { PluginOverviewModal, PluginOverviewModalActions } from "./PluginOverview";
 import styles from "./styles.module.css";
@@ -27,9 +27,9 @@ import { handleBadgeVariant } from "./utils/handleBadgeVariant";
 
 const _logger = LoggerFactory.getLogger("Plugins");
 export function PluginsModal(): PReact.ComponentChildren {
-    const [plugins, setPlugins] = useState<UniChatLocalPlugin[]>([]);
+    const [plugins, setPlugins] = useState<PluginMetadata[]>([]);
 
-    function openPluginDetails(plugin: UniChatLocalPlugin): void {
+    function openPluginDetails(plugin: PluginMetadata): void {
         modalService.openModal({
             fullscreen: true,
             title: "Plugin Overview",

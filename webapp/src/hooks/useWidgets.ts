@@ -11,19 +11,16 @@
 import { useEffect, useState } from "preact/hooks";
 
 import { addonsService } from "unichat/services/addonsService";
-import type { UniChatLocalWidget } from "unichat/types/addons";
+import type { WidgetMetadata } from "unichat/types/widgets";
 
-type Transformer<T = UniChatLocalWidget> = (widgets: UniChatLocalWidget[]) => T;
+type Transformer<T = WidgetMetadata> = (widgets: WidgetMetadata[]) => T;
 
-const cachedWidgets: UniChatLocalWidget[] = [];
-export function useWidgets<T = UniChatLocalWidget>(
-    transformer: Transformer<T>,
-    defaultValue: T
-): [T, () => Promise<void>] {
+const cachedWidgets: WidgetMetadata[] = [];
+export function useWidgets<T = WidgetMetadata>(transformer: Transformer<T>, defaultValue: T): [T, () => Promise<void>] {
     const [transformedData, setTransformedData] = useState<T | null>(null);
 
     async function updateWidgets(forceFetch = false): Promise<void> {
-        let widgets: UniChatLocalWidget[] = [];
+        let widgets: WidgetMetadata[] = [];
         if (forceFetch || cachedWidgets.length === 0) {
             widgets = await addonsService.getLocalWidgets();
             cachedWidgets.splice(0, cachedWidgets.length, ...widgets);
