@@ -63,9 +63,11 @@ pub fn from_lua_value<T: DeserializeOwned>(lua: &mlua::Lua, value: mlua::Value) 
 }
 
 fn table_deep_unwrap(lua: &mlua::Lua, value: mlua::Value, visiting: &mut HashSet<*const c_void>) -> Result<mlua::Value, mlua::Error> {
-    let mlua::Value::Table(table) = value else {
+    if !value.is_table() {
         return Ok(value);
-    };
+    }
+
+    let table: mlua::Table = lua.unpack(value)?;
 
     let source = match table.metatable() {
         Some(mt) => mt.raw_get::<Option<mlua::Table>>(READONLY_DATA_KEY)?.unwrap_or(table),
@@ -80,7 +82,8 @@ fn table_deep_unwrap(lua: &mlua::Lua, value: mlua::Value, visiting: &mut HashSet
     let copy = lua.create_table()?;
     for pair in source.pairs::<mlua::Value, mlua::Value>() {
         let (key, value) = pair?;
-        copy.raw_set(key, table_deep_unwrap(lua, value, visiting)?)?;
+        let result = table_deep_unwrap(lua, value, visiting)?;
+        copy.raw_set(key, result)?;
     }
 
     if let Some(mt) = source.metatable() {

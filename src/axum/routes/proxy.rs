@@ -57,9 +57,9 @@ pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryStr
     match base64::url_safe_decode(encoded_url) {
         Ok(decoded) => url_path = String::from_utf8_lossy(&decoded).to_string(),
         Err(e) => {
-            log::error!("Failed to decode URL path: {:?}", e);
+            log::error!("Failed to decode URL path: {:#?}", e);
             return Response::builder().status(400)
-                .body(format!("Failed to decode URL path: {:?}", e).into())
+                .body(format!("Failed to decode URL path: {:#?}", e).into())
                 .unwrap();
         }
     }
@@ -106,12 +106,12 @@ pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryStr
         }
         Ok(Err(err)) => {
             return Response::builder().status(502)
-                .body(format!("Failed to fetch proxied url: {:?}", err).into())
+                .body(format!("Failed to fetch proxied url: {:#?}", err).into())
                 .unwrap();
         }
         Err(err) => {
             return Response::builder().status(500)
-                .body(format!("Proxy task failed: {:?}", err).into())
+                .body(format!("Proxy task failed: {:#?}", err).into())
                 .unwrap();
         }
     }

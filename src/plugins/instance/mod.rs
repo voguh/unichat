@@ -75,7 +75,8 @@ fn start(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
 
 pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(), Error> {
     let parsed_dependencies = parse_dependencies(&manifest.dependencies)?;
-    let plugin = Arc::new(UniChatPlugin::new(plugin_path, manifest, parsed_dependencies)?);
+    let plugin = UniChatPlugin::new(plugin_path, manifest, parsed_dependencies)?;
+    let plugin = Arc::new(plugin);
     let mut is_valid = true;
 
     if !plugin.get_entrypoint_path().is_file() {
@@ -111,14 +112,14 @@ pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(),
     log::info!("Plugin '{}' loaded", plugin.name);
 
     if let Err(e) = widgets::add_plugin_widgets(&plugin) {
-        plugin.add_message(format!("An error occurred while loading plugin widgets: {:?}", e));
-        log::error!("Failed to load widgets for plugin '{}': {:?}", plugin.name, e);
+        plugin.add_message(format!("An error occurred while loading plugin widgets: {:#?}", e));
+        log::error!("Failed to load widgets for plugin '{}': {:#?}", plugin.name, e);
     }
 
     if let Err(e) = start(&plugin) {
-        plugin.add_message(format!("An error occurred on start plugin: {:?}", e));
+        plugin.add_message(format!("An error occurred on start plugin: {:#?}", e));
         plugin.set_status(PluginStatus::Error);
-        return Err(anyhow!("Failed to create LUA environment for plugin '{}': {:?}", plugin.name, e));
+        return Err(anyhow!("Failed to create LUA environment for plugin '{}': {:#?}", plugin.name, e));
     }
 
     plugin.set_status(PluginStatus::Active);

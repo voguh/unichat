@@ -29,12 +29,12 @@ pub fn compare(a: &str, b: &str) -> Ordering {
     let a_ver = Version::parse(a);
     let b_ver = Version::parse(b);
 
-    match (a_ver, b_ver) {
+    return match (a_ver, b_ver) {
         (Ok(a_parsed), Ok(b_parsed)) => a_parsed.cmp(&b_parsed),
         (Ok(_), Err(_)) => Ordering::Greater,
         (Err(_), Ok(_)) => Ordering::Less,
-        (Err(_), Err(_)) => Ordering::Equal,
-    }
+        (Err(_), Err(_)) => Ordering::Equal
+    };
 }
 
 pub fn rcompare(a: &str, b: &str) -> Ordering {

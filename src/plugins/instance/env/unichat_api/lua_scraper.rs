@@ -223,15 +223,13 @@ impl UniChatScraper for LuaUniChatScraper {
     }
 
     fn on_status(&self, event: &ScraperStatusEvent) -> Result<(), Error> {
-        let Some(callback) = self.status_callback(event.status) else {
-            return Ok(());
-        };
+        if let Some(callback) = self.status_callback(event.status) {
+            let lua = runtime::get()?;
+            let table = lua.to_value(event)?;
 
-        let lua = runtime::get()?;
-        let table = lua.to_value(event)?;
-
-        if let Err(err) = callback.call::<()>(table) {
-            log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper '{:?}' status callback: {:#?}", self.id, event.status, err);
+            if let Err(err) = callback.call::<()>(table) {
+                log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper '{:?}' status callback: {:#?}", self.id, event.status, err);
+            }
         }
 
         return Ok(());

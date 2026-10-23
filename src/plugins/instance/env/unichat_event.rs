@@ -19,9 +19,8 @@ use crate::plugins::instance::env::utils::table_deep_readonly;
 /* ========================================================================== */
 
 fn create_readonly_event(lua: &mlua::Lua, event: &UniChatEvent) -> Result<mlua::Table, mlua::Error> {
-    let mlua::Value::Table(table) = lua.to_value(event)? else {
-        return Err(mlua::Error::runtime("UniChatEvent must serialize to a table"));
-    };
+    let value = lua.to_value(event)?;
+    let table: mlua::Table = lua.unpack(value).map_err(|_| mlua::Error::runtime("UniChatEvent must serialize to a table"))?;
 
     let table_name = lua.create_string("UniChatEvent")?;
     return table_deep_readonly(lua, &mlua::Value::String(table_name), table);

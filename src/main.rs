@@ -117,7 +117,7 @@ fn run_startup() -> Result<(), Error> {
     let start = Instant::now();
     wm::splash_window::notice(0, &format!("Starting {} v{}...", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION));
 
-    /* ========================================================================================== */
+    /* ====================================================================== */
 
     wm::splash_window::stage(1, "Initializing properties...");
     utils::properties::init()?;
@@ -202,7 +202,7 @@ fn run_startup() -> Result<(), Error> {
     let duration = end.duration_since(start);
     wm::splash_window::notice(wm::splash_window::TOTAL_STAGES, &format!("Setup completed successfully in {:.2?}.", duration));
 
-    /* ========================================================================================== */
+    /* ====================================================================== */
 
     wm::main_window::create()?;
 
@@ -277,5 +277,5 @@ fn main() {
             commands::widgets::set_widget_fieldstate,
         ])
         .run(tauri::generate_context!())
-        .unwrap_or_else(|e| panic!("Failed to run {} v{}!\n{:?}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION, e));
+        .unwrap_or_else(|e| panic!("Failed to run {} v{}!\n{:#?}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION, e));
 }

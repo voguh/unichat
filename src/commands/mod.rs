@@ -56,7 +56,7 @@ fn is_virtual_interface(name: &str) -> bool {
         "vmware"
     ];
 
-    blocked.iter().any(|b| name.contains(b))
+    return blocked.iter().any(|b| name.contains(b));
 }
 
 #[tauri::command]

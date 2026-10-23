@@ -95,7 +95,8 @@ fn handle_event(payload: &str) -> Result<(), Error> {
     }
 
     if payload.get("timestamp").is_none() {
-        payload["timestamp"] = serde_json::json!(get_current_timestamp()?);
+        let timestamp = get_current_timestamp()?;
+        payload["timestamp"] = serde_json::json!(timestamp);
     }
 
     let event: ScraperStatusEvent = serde_json::from_value(payload)?;
@@ -150,14 +151,14 @@ pub fn register_scraper(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Resul
         return Err(anyhow!("Scraper ID '{}' is invalid. Scraper IDs must end with the suffix '-chat'.", scraper.id()));
     }
 
-    /* ========================================================================================== */
+    /* ====================================================================== */
 
     let mut scrapers = SCRAPERS.write().map_err(|_| anyhow!("{} lock poisoned", LAZY_LOCK_NAME))?;
     if scrapers.contains_key(scraper.id()) {
         return Err(anyhow!("Scraper with ID '{}' is already registered", scraper.id()));
     }
 
-    /* ========================================================================================== */
+    /* ====================================================================== */
 
     let start_hidden: bool = settings::get_item(settings::SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY)?;
     let window = window::new(scraper.id(), "scraper_idle.html")
@@ -168,7 +169,7 @@ pub fn register_scraper(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Resul
         .on_page_load(on_scraper_page_load)
         .build()?;
 
-    /* ========================================================================================== */
+    /* ====================================================================== */
 
     scrapers.insert(scraper.id().to_string(), scraper);
 
@@ -176,7 +177,7 @@ pub fn register_scraper(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Resul
         let payload = event.payload();
 
         if let Err(err) = handle_event(payload) {
-            log::error!("Failed to handle scraper event: {:?}", err);
+            log::error!("Failed to handle scraper event: {:#?}", err);
             log::error!("Event payload: {}", payload);
         }
     });

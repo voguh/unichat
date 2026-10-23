@@ -56,17 +56,10 @@ pub fn is_remote_url(scraper_id: &str, url: &Url) -> bool {
         return false;
     }
 
-    let stored_url: String = match settings::get_scraper_property(scraper_id, "url") {
-        Ok(stored_url) => stored_url,
-        Err(_) => return false
-    };
+    let stored_url: Option<String> = settings::get_scraper_property(scraper_id, "url").ok();
+    let stored_url = stored_url.and_then(|stored_url| Url::parse(&stored_url).ok());
 
-    let stored_url = match Url::parse(&stored_url) {
-        Ok(stored_url) => stored_url,
-        Err(_) => return false
-    };
-
-    return url == &stored_url;
+    return matches!(stored_url, Some(stored_url) if url == &stored_url);
 }
 
 pub fn is_navigation_allowed(scraper_id: &str, url: &Url) -> bool {

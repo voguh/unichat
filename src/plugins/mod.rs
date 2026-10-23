@@ -244,7 +244,7 @@ fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, UniChat
                         loaded_manifests.push((plugin_path, manifest));
                     },
                     Err(e) => {
-                        log::error!("Failed to load plugin manifest: {:?}", e);
+                        log::error!("Failed to load plugin manifest: {:#?}", e);
                     }
                 }
             }
@@ -266,7 +266,7 @@ pub fn load_plugins() -> Result<(), Error> {
     for (plugin_path, manifest) in loaded_manifests.iter_mut() {
         log::info!("Loading plugin: {} v{}", manifest.name, manifest.version);
         if let Err(e) = instance::create(plugin_path, manifest) {
-            log::error!("Failed to load user plugin: {:?}", e);
+            log::error!("Failed to load user plugin: {:#?}", e);
         }
     }
 

@@ -63,7 +63,7 @@ impl mlua::UserData for UniChatLoggerModule {
 
             log::debug!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
             if let Some(err) = err {
-                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:?}", err);
+                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:#?}", err);
             }
 
             return Ok(());
@@ -74,7 +74,7 @@ impl mlua::UserData for UniChatLoggerModule {
 
             log::info!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
             if let Some(err) = err {
-                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:?}", err);
+                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:#?}", err);
             }
 
             return Ok(());
@@ -85,7 +85,7 @@ impl mlua::UserData for UniChatLoggerModule {
 
             log::warn!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
             if let Some(err) = err {
-                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:?}", err);
+                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:#?}", err);
             }
 
             return Ok(());
@@ -96,7 +96,7 @@ impl mlua::UserData for UniChatLoggerModule {
 
             log::error!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
             if let Some(err) = err {
-                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:?}", err);
+                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:#?}", err);
             }
 
             return Ok(());

@@ -38,10 +38,10 @@ impl PreReleaseType {
 
 impl Display for PreReleaseType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
+        return match self {
             PreReleaseType::Alpha => write!(f, "alpha"),
             PreReleaseType::Beta => write!(f, "beta"),
             PreReleaseType::ReleaseCandidate => write!(f, "rc")
-        }
+        };
     }
 }

@@ -99,7 +99,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.set(&youtube_url_key, raw_value);
             }
 
-            /* ================================================================================== */
+            /* ============================================================== */
 
             let twitch_log_level_key = store_mount_scraper_key("twitch-chat", "log_level");
             if let Some(value) = store.get("settings.log-twitch-events") {
@@ -123,7 +123,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.set(&youtube_log_level_key, raw_value);
             }
 
-            /* ================================================================================== */
+            /* ============================================================== */
 
             let create_webview_hidden_key = "settings:create-webview-hidden";
             if let Some(value) = store.get("settings.create-webview-hidden") {
@@ -136,7 +136,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.set(create_webview_hidden_key, raw_value);
             }
 
-            /* ================================================================================== */
+            /* ============================================================== */
 
             let current_tour_steps_key = "settings:tour-steps";
             if let Some(value) = store.get("settings.tour-steps") {
@@ -160,7 +160,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.set(previous_tour_steps_key, raw_value);
             }
 
-            /* ================================================================================== */
+            /* ============================================================== */
 
             return Ok(());
         }),
@@ -172,7 +172,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.set(default_preview_widget_key, raw_value);
             }
 
-            /* ================================================================================== */
+            /* ============================================================== */
 
             let open_to_lan_key = "settings:open-to-lan";
             if store.get(open_to_lan_key).is_none() {
@@ -181,7 +181,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.set(open_to_lan_key, raw_value);
             }
 
-            /* ================================================================================== */
+            /* ============================================================== */
 
             let log_scraper_events_key = "settings:log-scraper-events";
             if store.get(log_scraper_events_key).is_none() {
@@ -202,7 +202,7 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
                 store.delete(youtube_log_level_key);
             }
 
-            /* ================================================================================== */
+            /* ============================================================== */
 
             let current_tour_steps_key = "settings:current-tour-steps";
             if let Some(value) = store.get("settings:tour-steps") {
