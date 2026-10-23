@@ -12,6 +12,8 @@ import { randBoolean, randFloat } from "@ngneat/falso";
 
 import type { UniChatAuthorType, UniChatBadge, UniChatPlatform } from "@voguh/unichat-api/widgets/events";
 
+import { chooseByPlatform } from "./chooseByPlatform";
+
 const TWITCH_MODERATOR_BADGE: UniChatBadge = {
     code: "moderator/1",
     url: "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/3"
@@ -29,14 +31,17 @@ const YOUTUBE_MODERATOR_BADGE: UniChatBadge = {
 
 const YOUTUBE_SPONSOR_BADGE: UniChatBadge = {
     code: "sponsor",
-    url: "/proxy/aHR0cHM6Ly95dDMuZ2dwaHQuY29tL2dBcTdqRGVrdkc1ZV9Bei1WbktoUy1TeS1yWkRneUhJZEdRQWhrczJpV2xON3JNa2lUbHhuVzV6dE1XOTZ5bnlFSUcxaE1lNjdMTExDUDZxPXMxNi1jLWs=?referer=https://www.youtube.com/" // prettier-ignore
+    url: "/proxy/aHR0cHM6Ly95dDMuZ2dwaHQuY29tL2dBcTdqRGVrdkc1ZV9Bei1WbktoUy1TeS1yWkRneUhJZEdRQWhrczJpV2xON3JNa2lUbHhuVzV6dE1XOTZ5bnlFSUcxaE1lNjdMTExDUDZxPXMxNi1jLWs=?referer=https://www.youtube.com/"
 };
 
 export function badgesForAuthorType(plt: UniChatPlatform, authorType: UniChatAuthorType): UniChatBadge[] {
+    const isTwitch = plt === "twitch";
+    const isYouTube = plt === "youtube";
+
     if (authorType === "MODERATOR") {
-        return plt === "twitch" ? [TWITCH_MODERATOR_BADGE] : plt === "youtube" ? [YOUTUBE_MODERATOR_BADGE] : [];
+        return chooseByPlatform(isTwitch, isYouTube, [TWITCH_MODERATOR_BADGE], [YOUTUBE_MODERATOR_BADGE], []);
     } else if (authorType === "SPONSOR") {
-        return plt === "twitch" ? [TWITCH_SUBSCRIBER_BADGE] : plt === "youtube" ? [YOUTUBE_SPONSOR_BADGE] : [];
+        return chooseByPlatform(isTwitch, isYouTube, [TWITCH_SUBSCRIBER_BADGE], [YOUTUBE_SPONSOR_BADGE], []);
     }
 
     return [];

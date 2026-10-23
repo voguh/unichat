@@ -23,6 +23,7 @@ import {
     UNICHAT_FLAG_EMULATOR_GENERATED,
     UNICHAT_FLAG_YOUTUBE_SUPERCHAT_TIER
 } from "./buildEmulatedEventData";
+import { chooseByPlatform } from "./chooseByPlatform";
 import { badgesForAuthorType } from "./randomizeBadgeAndAuthorType";
 
 const UNICHAT_FLAG_TWITCH_STREAK_DAYS = "unichat:twitch_streak_days";
@@ -133,7 +134,12 @@ export function lockedAuthorType(form: CustomEventForm): UniChatAuthorType | nul
 }
 
 export function giphyGif(url: string): UniChatEmote | null {
-    const id = url.split("?")[0].split("/").filter(Boolean).pop()?.split("-").pop();
+    const slug = url.split("?")[0].split("/").filter(Boolean).pop();
+    if (slug == null) {
+        return null;
+    }
+
+    const id = slug.split("-").pop();
     if (id == null || id === "") {
         return null;
     }
@@ -142,11 +148,19 @@ export function giphyGif(url: string): UniChatEmote | null {
 }
 
 function nullable(text: string): string | null {
-    return text === "" ? null : text;
+    if (text !== "") {
+        return text;
+    }
+
+    return null;
 }
 
 function nullableNumber(text: string): number | null {
-    return text === "" ? null : Number(text);
+    if (text !== "") {
+        return Number(text);
+    }
+
+    return null;
 }
 
 export function buildCustomEvent(form: CustomEventForm, seed: CustomEventSeed): UniChatEvent {
@@ -157,7 +171,13 @@ export function buildCustomEvent(form: CustomEventForm, seed: CustomEventSeed): 
     const flags: Record<string, string | null> = { [UNICHAT_FLAG_EMULATOR_GENERATED]: "true" };
 
     const common: Omit<EmulatedEventData<"unichat:raid">, "messageId" | "viewerCount"> = {
-        channelId: isTwitch ? DUMMY_TWITCH_CHANNEL_ID : isYouTube ? DUMMY_YOUTUBE_CHANNEL_ID : "emulator-channel",
+        channelId: chooseByPlatform(
+            isTwitch,
+            isYouTube,
+            DUMMY_TWITCH_CHANNEL_ID,
+            DUMMY_YOUTUBE_CHANNEL_ID,
+            "emulator-channel"
+        ),
         channelName: isTwitch ? DUMMY_TWITCH_CHANNEL_NAME : null,
 
         platform: platform,
@@ -240,7 +260,7 @@ export function buildCustomEvent(form: CustomEventForm, seed: CustomEventSeed): 
                 type: "unichat:sponsor_gift",
                 data: {
                     ...common,
-                    tier: isTwitch ? form.tier : isYouTube ? null : nullable(form.tier),
+                    tier: chooseByPlatform<string | null>(isTwitch, isYouTube, form.tier, null, nullable(form.tier)),
                     count: Number(form.count),
                     messageId: seed.messageId
                 }

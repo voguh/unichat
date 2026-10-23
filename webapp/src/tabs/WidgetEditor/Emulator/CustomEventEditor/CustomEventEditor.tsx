@@ -24,7 +24,7 @@ import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
 import { Button } from "@voguh/unichat-ui/components/ui/Button";
 import { SegmentedControl } from "@voguh/unichat-ui/components/ui/SegmentedControl";
 import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
-
+import { clsx } from "@voguh/unichat-ui/utils/clsx";
 import {
     buildCustomEvent,
     CUSTOM_EVENT_LABELS,
@@ -34,9 +34,10 @@ import {
     type CustomPlatform,
     giphyGif,
     lockedAuthorType
-} from "../__utils__/buildCustomEvent";
-import { randomizeMessage } from "../__utils__/randomizeMessage";
-import { TWITCH_SPONSOR_TIERS } from "../__utils__/randomizeSponsorData";
+} from "unichat/tabs/WidgetEditor/Emulator/__utils__/buildCustomEvent";
+import { randomizeMessage } from "unichat/tabs/WidgetEditor/Emulator/__utils__/randomizeMessage";
+import { TWITCH_SPONSOR_TIERS } from "unichat/tabs/WidgetEditor/Emulator/__utils__/randomizeSponsorData";
+
 import { PayloadEditor } from "./PayloadEditor";
 import styles from "./styles.module.css";
 
@@ -102,9 +103,19 @@ function createDefaultForm(): CustomEventForm {
 async function createSeed(previous: CustomEventSeed | null): Promise<CustomEventSeed> {
     const [randomMessageText, randomEmotes] = await randomizeMessage();
 
+    let authorId: string;
+    let authorDisplayColor: string;
+    if (previous != null) {
+        authorId = previous.authorId;
+        authorDisplayColor = previous.authorDisplayColor;
+    } else {
+        authorId = crypto.randomUUID();
+        authorDisplayColor = randHex().toUpperCase();
+    }
+
     return {
-        authorId: previous?.authorId ?? crypto.randomUUID(),
-        authorDisplayColor: previous?.authorDisplayColor ?? randHex().toUpperCase(),
+        authorId: authorId,
+        authorDisplayColor: authorDisplayColor,
         messageId: crypto.randomUUID(),
         randomMessageText,
         randomEmotes,
@@ -177,24 +188,13 @@ export function CustomEventEditor(): PReact.ComponentChildren {
         setMoreOpen(false);
     }
 
-    useEffect(() => {
-        createSeed(null).then(setSeed);
-    }, []);
-
-    useEffect(() => {
-        if (seed != null) {
-            setPayload(JSON.stringify(buildCustomEvent(form, seed), null, 2));
-            setEditedByHand(false);
-        }
-    }, [form, seed]);
-
     function messageField(label: string): PReact.ComponentChildren {
         return (
             <div className={styles.wide}>
                 <div className={styles.messageHeader}>
                     <span>{label}</span>
                     <SegmentedControl
-                        className={`${styles.segmented} ${styles.messageMode}`}
+                        className={clsx(styles.segmented, styles.messageMode)}
                         value={form.messageMode}
                         onChange={(event) =>
                             update({ messageMode: event.currentTarget.value === "custom" ? "custom" : "random" })
@@ -255,7 +255,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
     ): PReact.ComponentChildren {
         return (
             <TextInput
-                groupProps={opts.wide ? { className: styles.wide } : undefined}
+                groupProps={{ className: clsx({ [styles.wide]: opts.wide === true }) }}
                 label={
                     <>
                         {label} {opts.optional && <small>(Optional)</small>}
@@ -288,7 +288,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                 const gif = isTwitch ? giphyGif(form.gifUrl) : null;
                 const details =
                     gif != null ? (
-                        <div className={`${styles.wide} ${styles.lockHint}`}>
+                        <div className={clsx(styles.wide, styles.lockHint)}>
                             GIF set: on Twitch a message is either a GIF or text, so the text is ignored.
                         </div>
                     ) : (
@@ -310,7 +310,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                         {numberField("value", "Value")}
                         {textField("currency", "Currency")}
                         {sticker ? (
-                            <div className={`${styles.wide} ${styles.lockHint}`}>
+                            <div className={clsx(styles.wide, styles.lockHint)}>
                                 Super Sticker: YouTube sends the fixed text "sticker" as the message.
                             </div>
                         ) : (
@@ -369,7 +369,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
             case "unichat:raid":
                 return {
                     details: isYouTube ? (
-                        <div className={`${styles.wide} ${styles.hint}`}>YouTube raids carry no viewer count.</div>
+                        <div className={clsx(styles.wide, styles.hint)}>YouTube raids carry no viewer count.</div>
                     ) : (
                         numberField("viewerCount", "Viewers", isOther)
                     ),
@@ -433,6 +433,17 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                 };
         }
     }
+
+    useEffect(() => {
+        createSeed(null).then(setSeed);
+    }, []);
+
+    useEffect(() => {
+        if (seed != null) {
+            setPayload(JSON.stringify(buildCustomEvent(form, seed), null, 2));
+            setEditedByHand(false);
+        }
+    }, [form, seed]);
 
     const { details, more } = buildDetails();
     const authorTypeLabel = AUTHOR_TYPES.find((type) => type.value === (lockedType ?? form.authorType))?.label;
@@ -500,7 +511,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                         <button type="button" className={styles.moreToggle} onClick={() => setMoreOpen((old) => !old)}>
                             {moreOpen ? "Hide options" : "More options"}
                         </button>
-                        {moreOpen && <div className={`${styles.grid} ${styles.more}`}>{more}</div>}
+                        {moreOpen && <div className={clsx(styles.grid, styles.more)}>{more}</div>}
                     </>
                 )}
             </div>

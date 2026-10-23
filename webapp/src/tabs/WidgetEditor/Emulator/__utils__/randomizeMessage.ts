@@ -18,6 +18,38 @@ const conjunctions = ["and", "but", "or", "because", "so", "although", "while", 
 
 const availableEmotes: UniChatEmote[] = [];
 
+function pronoun(): string {
+    return rand(pronouns);
+}
+
+function adverb(): string {
+    return rand(adverbs);
+}
+
+function conjunction(): string {
+    return rand(conjunctions);
+}
+
+function noun(): string {
+    return randNoun().toLowerCase();
+}
+
+function verb(): string {
+    return randVerb().toLowerCase();
+}
+
+function adjective(): string {
+    return randAdjective().toLowerCase();
+}
+
+function emote(): UniChatEmote {
+    return rand(availableEmotes);
+}
+
+function emotesList(): UniChatEmote[] {
+    return Array.from({ length: randNumber({ min: 1, max: 4 }) }, emote);
+}
+
 export async function randomizeMessage(): Promise<[string, UniChatEmote[]]> {
     if (availableEmotes.length === 0) {
         const data = await fetch("https://api.betterttv.net/3/cached/emotes/global");
@@ -31,15 +63,6 @@ export async function randomizeMessage(): Promise<[string, UniChatEmote[]]> {
             });
         }
     }
-
-    const pronoun = (): string => rand(pronouns);
-    const adverb = (): string => rand(adverbs);
-    const conjunction = (): string => rand(conjunctions);
-    const noun = (): string => randNoun().toLowerCase();
-    const verb = (): string => randVerb().toLowerCase();
-    const adjective = (): string => randAdjective().toLowerCase();
-    const emote = (): UniChatEmote => rand(availableEmotes);
-    const emotesList = (): UniChatEmote[] => Array.from({ length: randNumber({ min: 1, max: 4 }) }, emote);
 
     const structures: Array<() => [string, UniChatEmote[]]> = [
         () => [`${pronoun()} ${verb()} ${adjective()} ${noun()}.`, []],

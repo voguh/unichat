@@ -56,6 +56,21 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
         }
     }
 
+    function buildTooltipContent(): PReact.ComponentChildren {
+        return (
+            <ul>
+                <li>
+                    <strong>Global</strong>: The events emitted by this emulator will be dispatched globally and can be
+                    received by other widgets as well.
+                </li>
+                <li>
+                    <strong>Emulator Only</strong>: The events emitted by this emulator will only be dispatched to the
+                    emulator itself.
+                </li>
+            </ul>
+        );
+    }
+
     useEffect(() => {
         commandService.closeCustomEventWindow();
 
@@ -77,21 +92,6 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
             unListenerPromise.then((unlisten) => unlisten());
         };
     }, [emulatorOnly, dispatchEvent]);
-
-    function buildTooltipContent(): PReact.ComponentChildren {
-        return (
-            <ul>
-                <li>
-                    <strong>Global</strong>: The events emitted by this emulator will be dispatched globally and can be
-                    received by other widgets as well.
-                </li>
-                <li>
-                    <strong>Emulator Only</strong>: The events emitted by this emulator will only be dispatched to the
-                    emulator itself.
-                </li>
-            </ul>
-        );
-    }
 
     return (
         <div className={styles.container}>
@@ -125,7 +125,7 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
                         Sponsor
                     </Button>
                     <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:sponsor_gift")}>
-                        <i class="fas fa-gift" />
+                        <i className="fas fa-gift" />
                         Sponsor Gift
                     </Button>
                     <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:raid")}>
