@@ -12,7 +12,7 @@ env:
   TAURI_FRONTEND_PATH: webapp
   NODE_VERSION: 24.16.0
   PNPM_VERSION: 10.33.4
-  RUST_VERSION: 1.95.0
+  RUST_VERSION: 1.99.1
 
 defaults:
   run:

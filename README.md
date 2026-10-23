@@ -42,7 +42,7 @@ Types and schemas: [`@voguh/unichat-api`](./unichat-api/).
 
 ### Requirements
 
-- Rust 1.95.0
+- Rust 1.99.1
 - Node.js 24.16.0
 - PNPM 10.33.4
 - [Tauri v2 prerequisites](https://v2.tauri.app/start/prerequisites/)
