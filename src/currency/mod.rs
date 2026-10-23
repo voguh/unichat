@@ -21,7 +21,6 @@ use crate::utils::settings::SETTINGS_CURRENCY_TARGET_KEY;
 
 mod currencies;
 mod rates;
-mod utils;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct UniChatCurrency {

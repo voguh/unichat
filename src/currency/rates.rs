@@ -9,7 +9,6 @@
  ******************************************************************************/
 
 use std::collections::HashMap;
-use std::fs;
 use std::sync::LazyLock;
 use std::sync::RwLock;
 use std::time::Duration;
@@ -19,9 +18,9 @@ use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::cache;
 use crate::currency::UniChatCurrency;
 use crate::currency::currencies;
-use crate::currency::utils::cache_path;
 use crate::utils::ureq;
 
 #[derive(Default)]
@@ -103,20 +102,18 @@ pub struct FrankfurterRate {
 }
 
 pub fn fetch_rates(target: &str) -> Result<(), Error> {
-    let path = cache_path(&format!("currency_rates_{}.json", target))?;
-    if let Ok(metadata) = fs::metadata(&path) {
-        if metadata.modified()?.elapsed()? < RATES_FILE_TTL {
-            let body = fs::read_to_string(&path)?;
-            let rates: Vec<(String, String, f64)> = serde_json::from_str(&body)?;
+    let key = format!("currency_rates_{}", target);
+    let rates: Vec<(String, String, f64)> = cache::get_or_fetch(&key, RATES_FILE_TTL, || fetch_rate_list(target))?;
 
-            if let Ok(mut state) = RATES.write() {
-                state.clear();
-                state.add_all(rates);
-                return Ok(());
-            }
-        }
+    if let Ok(mut state) = RATES.write() {
+        state.clear();
+        state.add_all(rates);
     }
 
+    return Ok(());
+}
+
+fn fetch_rate_list(target: &str) -> Result<Vec<(String, String, f64)>, Error> {
     let currencies_list: HashMap<String, UniChatCurrency> = currencies::list().iter().map(|c| (c.code.clone(), c.clone())).collect();
     if currencies_list.is_empty() {
         return Err(anyhow!("Currency list is empty. Please update the currency list first."));
@@ -127,18 +124,12 @@ pub fn fetch_rates(target: &str) -> Result<(), Error> {
     let mut response = ureq::get(url).call()?;
     let entries: Vec<FrankfurterRate> = response.body_mut().read_json()?;
 
-    if let Ok(mut state) = RATES.write() {
-        state.clear();
-
-        for entry in entries.iter() {
-            if let Some(currency) = currencies_list.get(&entry.quote) {
-                state.add(currency.code.clone(), currency.symbol.clone(), entry.rate);
-            }
+    let mut rates: Vec<(String, String, f64)> = Vec::new();
+    for entry in entries.iter() {
+        if let Some(currency) = currencies_list.get(&entry.quote) {
+            rates.push((currency.code.clone(), currency.symbol.clone(), entry.rate));
         }
-
-        let raw = serde_json::to_string(&state.items)?;
-        fs::write(&path, raw)?;
     }
 
-    return Ok(());
+    return Ok(rates);
 }

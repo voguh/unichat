@@ -9,7 +9,6 @@
  ******************************************************************************/
 
 use std::collections::HashMap;
-use std::fs;
 use std::sync::LazyLock;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -19,8 +18,8 @@ use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::cache;
 use crate::currency::UniChatCurrency;
-use crate::currency::utils::cache_path;
 use crate::utils::ureq;
 
 // Currency symbols from CLDR `en-US` for the currencies whose symbol differs from their code.
@@ -66,15 +65,12 @@ pub struct FrankfurterCurrency {
 }
 
 pub fn fetch_currencies() -> Result<(), Error> {
-    let path = cache_path("currency_list.json")?;
-    if let Ok(metadata) = fs::metadata(&path) {
-        if metadata.modified()?.elapsed()? < CURRENCIES_FILE_TTL {
-            let body = fs::read_to_string(&path)?;
-            let result: Vec<UniChatCurrency> = serde_json::from_str(&body)?;
-            return CURRENCIES.set(result).map_err(|_| anyhow!("Failed to set currencies list from cached data"));
-        }
-    }
+    let list: Vec<UniChatCurrency> = cache::get_or_fetch("currency_list", CURRENCIES_FILE_TTL, fetch_currency_list)?;
 
+    return CURRENCIES.set(list).map_err(|_| anyhow!("Failed to set currencies list"));
+}
+
+fn fetch_currency_list() -> Result<Vec<UniChatCurrency>, Error> {
     log::info!("Fetching currency list from '{}'...", CURRENCIES_URL);
     let mut response = ureq::get(CURRENCIES_URL).call()?;
     let entries: Vec<serde_json::Value> = response.body_mut().read_json()?;
@@ -119,8 +115,5 @@ pub fn fetch_currencies() -> Result<(), Error> {
         list.push(UniChatCurrency { code: currency.iso_code, name: currency.name, symbol: currency.symbol });
     }
 
-    let raw = serde_json::to_string(&list)?;
-    fs::write(&path, raw)?;
-
-    return CURRENCIES.set(list).map_err(|_| anyhow!("Failed to set currencies list from fetched data"));
+    return Ok(list);
 }
