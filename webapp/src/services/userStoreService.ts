@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { invoke } from "@tauri-apps/api/core";
+import { invoke } from "unichat/utils/invoke";
 
 export class UserStoreService {
     public async getItem<T>(key: string): Promise<T> {

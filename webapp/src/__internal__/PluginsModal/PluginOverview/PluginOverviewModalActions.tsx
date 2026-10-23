@@ -13,15 +13,15 @@ import type * as PReact from "preact";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import type { UniChatPluginMetadata } from "unichat/types";
+import type { UniChatLocalPlugin } from "unichat/types/addons";
 
 interface Props {
-    plugin: UniChatPluginMetadata;
+    plugin: UniChatLocalPlugin;
 }
 
-export function PluginOverviewModalActions({ plugin: { pluginPath } }: Props): PReact.ComponentChildren {
+export function PluginOverviewModalActions({ plugin: { path } }: Props): PReact.ComponentChildren {
     return (
-        <Button onClick={() => revealItemInDir(pluginPath)}>
+        <Button onClick={() => revealItemInDir(path)}>
             <i className="fas fa-folder" />
             &nbsp;Show in Folder
         </Button>

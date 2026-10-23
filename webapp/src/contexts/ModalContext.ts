@@ -11,10 +11,10 @@
 import { createContext } from "preact";
 import type { Dispatch, StateUpdater } from "preact/hooks";
 
-export interface ModalContextType {
+export interface ModalContextType<T extends object = Record<string, any>> {
     onClose: () => void;
-    setSharedStore: Dispatch<StateUpdater<Record<string, any>>>;
-    sharedStore: Record<string, any>;
+    setSharedStore: Dispatch<StateUpdater<Partial<T>>>;
+    sharedStore: Partial<T>;
 }
 
-export const ModalContext = createContext({} as ModalContextType);
+export const ModalContext = createContext({} as ModalContextType<any>);

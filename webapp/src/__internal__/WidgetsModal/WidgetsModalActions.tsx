@@ -10,11 +10,17 @@
 
 import type * as PReact from "preact";
 
-import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { useModalContext } from "unichat/hooks/useModalContext";
+
+import { OtherWidgetsPopover } from "./OtherWidgetsPopover";
+import type { WidgetsModalSharedStore } from "./WidgetsModal";
 
 export function WidgetsModalActions(): PReact.ComponentChildren {
+    const { sharedStore } = useModalContext<WidgetsModalSharedStore>();
+
     return (
         <>
             <Button
@@ -24,10 +30,7 @@ export function WidgetsModalActions(): PReact.ComponentChildren {
                 <i className="fas fa-book" />
                 Read the Docs
             </Button>
-            <Button onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)}>
-                <i className="fas fa-folder" />
-                Show Widgets Folder
-            </Button>
+            <OtherWidgetsPopover communityWidgetNames={sharedStore.communityWidgetNames ?? []} />
         </>
     );
 }

@@ -8,8 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { PluginStatus, WidgetSourceType } from "unichat/utils/constants";
-
 export interface Dimensions {
     width: number;
     height: number;
@@ -67,23 +65,6 @@ export interface GalleryItem {
 
 /* ========================================================================== */
 
-export interface UniChatPluginMetadata {
-    name: string;
-    description?: string;
-    version: string;
-    author?: string;
-    license?: string;
-    homepage?: string;
-    dependencies: string[];
-
-    icon?: string;
-    status: PluginStatus;
-    messages: string[];
-    pluginPath: string;
-}
-
-/* ========================================================================== */
-
 export interface UniChatScraper {
     id: string;
     name: string;
@@ -92,19 +73,6 @@ export interface UniChatScraper {
     placeholderText: string;
     badges: string[];
     icon: string;
-}
-
-/* ========================================================================== */
-
-export interface UniChatWidget {
-    restPath: string;
-    widgetSource: UniChatWidgetSource;
-    warnings: string[];
-}
-
-export interface UniChatWidgetSource {
-    type: WidgetSourceType;
-    value?: string;
 }
 
 /* ========================================================================== */

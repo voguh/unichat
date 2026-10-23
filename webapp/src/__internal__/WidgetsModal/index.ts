@@ -10,3 +10,4 @@
 
 export * from "./WidgetsModal";
 export * from "./WidgetsModalActions";
+export * from "./WidgetsModalTitle";

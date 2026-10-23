@@ -28,10 +28,10 @@ pub struct SerializedPluginMetadata {
     pub homepage: Option<String>,
     pub dependencies: Vec<String>,
 
+    pub path: PathBuf,
     pub icon: Option<String>,
     pub status: PluginStatus,
-    pub messages: Vec<String>,
-    pub plugin_path: Option<PathBuf>
+    pub messages: Vec<String>
 }
 
 #[tauri::command]
@@ -40,8 +40,6 @@ pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Serialize
     let plugins = plugins::get_plugins().map_err(|e| format!("An error occurred on get plugins: {:#?}", e))?;
 
     for plugin in plugins {
-        let plugin_path = Some(plugin.get_plugin_path());
-
         let metadata = SerializedPluginMetadata {
             name: plugin.name.clone(),
             description: plugin.description.clone(),
@@ -51,10 +49,10 @@ pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Serialize
             homepage: plugin.homepage.clone(),
             dependencies: plugin.dependencies.iter().map(|(name, version_range)| format!("{}@{}", name, version_range)).collect(),
 
+            path: plugin.get_plugin_path(),
             icon: plugin.get_icon().map(|bytes| format!("data:image/png;base64,{}", base64::encode(bytes))),
             status: plugin.get_status(),
             messages: plugin.get_messages(),
-            plugin_path: plugin_path,
         };
 
         serialized_plugins.push(metadata);

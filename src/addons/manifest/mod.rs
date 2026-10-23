@@ -19,7 +19,7 @@ use serde::Serialize;
 use crate::utils::semver::version::Version;
 
 #[derive(Serialize, Deserialize, Hash, Clone, Debug)]
-pub struct PluginManifestYAML {
+pub struct UniChatAddonManifest {
     pub name: String,
     pub description: Option<String>,
     pub version: String,
@@ -29,13 +29,13 @@ pub struct PluginManifestYAML {
     pub dependencies: Vec<String>
 }
 
-pub fn load_manifest(plugin_path: &Path) -> Result<PluginManifestYAML, Error> {
-    let manifest_path = plugin_path.join("manifest.yaml");
+pub fn load_manifest(addon_path: &Path) -> Result<UniChatAddonManifest, Error> {
+    let manifest_path = addon_path.join("manifest.yaml");
     let manifest_content = fs::read_to_string(&manifest_path)?;
-    let mut manifest: PluginManifestYAML = serde_saphyr::from_str(&manifest_content)?;
+    let manifest: UniChatAddonManifest = serde_saphyr::from_str(&manifest_content)?;
 
     if let Err(err) = Version::parse(&manifest.version) {
-        return Err(anyhow!("Invalid version '{}' for plugin '{}': {:?}", manifest.version, manifest.name, err));
+        return Err(anyhow!("Invalid version '{}' for addon '{}': {:#?}", manifest.version, manifest.name, err));
     }
 
     return Ok(manifest);

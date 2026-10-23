@@ -20,7 +20,7 @@ import { NotificationProvider } from "unichat/__internal__/NotificationProvider"
 import { PluginsModal, PluginsModalActions } from "unichat/__internal__/PluginsModal";
 import { SettingsModal } from "unichat/__internal__/SettingsModal";
 import { Tour } from "unichat/__internal__/Tour";
-import { WidgetsModal, WidgetsModalActions } from "unichat/__internal__/WidgetsModal";
+import { WidgetsModal, WidgetsModalActions, WidgetsModalTitle } from "unichat/__internal__/WidgetsModal";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
@@ -94,7 +94,7 @@ export function App(): PReact.ComponentChildren {
     function toggleWidgetsModal(): void {
         modalService.openModal({
             size: "xl",
-            title: "Widgets",
+            title: <WidgetsModalTitle />,
             actions: <WidgetsModalActions />,
             children: <WidgetsModal />
         });

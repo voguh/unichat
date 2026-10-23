@@ -17,11 +17,11 @@ use anyhow::Error;
 
 use crate::UNICHAT_DISPLAY_NAME;
 use crate::UNICHAT_VERSION;
+use crate::addons::manifest::UniChatAddonManifest;
 use crate::plugins::LOADED_PLUGINS;
 use crate::plugins::LOADED_PLUGINS_LAZY_LOCK_KEY;
 use crate::plugins::PluginStatus;
 use crate::plugins::UniChatPlugin;
-use crate::plugins::manifest::PluginManifestYAML;
 use crate::plugins::runtime;
 use crate::utils::get_current_timestamp;
 use crate::utils::semver::version::Version;
@@ -71,7 +71,7 @@ fn start(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
 
 /* ========================================================================== */
 
-pub fn create(plugin_path: &Path, manifest: &PluginManifestYAML) -> Result<(), Error> {
+pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(), Error> {
     let parsed_dependencies = parse_dependencies(&manifest.dependencies)?;
     let plugin = Arc::new(UniChatPlugin::new(plugin_path, manifest, parsed_dependencies)?);
     let mut is_valid = true;

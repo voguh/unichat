@@ -34,6 +34,52 @@ class OrphanFilesPlugin {
     }
 }
 
+class NoParentImportsPlugin {
+    static PLUGIN_NAME = "NoParentImportsPlugin";
+    constructor(options = {}) {
+        this.options = {
+            pattern: "../",
+            exclude: /node_modules/,
+            level: "warning", // 'error' | 'warning'
+            ...options
+        };
+    }
+
+    /** @param {import("@rspack/core").Compiler} compiler */
+    apply(compiler) {
+        const pluginName = NoParentImportsPlugin.PLUGIN_NAME;
+        const { pattern, exclude, level } = this.options;
+
+        compiler.hooks.normalModuleFactory.tap(pluginName, (nmf) => {
+            nmf.hooks.beforeResolve.tap(pluginName, (data) => {
+                if (!data) {
+                    return;
+                }
+
+                const request = data.request;
+                const issuer = data.contextInfo && data.contextInfo.issuer;
+
+                if (!request || !request.includes(pattern)) {
+                    return;
+                }
+
+                if (issuer && exclude && exclude.test(issuer)) {
+                    return;
+                }
+
+                const message = `[${NoParentImportsPlugin.PLUGIN_NAME}] Forbidden import detected: "${request}" in ${issuer || "unknown context"}`;
+                if (level === "error") {
+                    throw new Error(message);
+                }
+
+                compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
+                    compilation.warnings.push(new Error(message));
+                });
+            });
+        });
+    }
+}
+
 /* ================================================================================================================== */
 
 /** @type {import("@rspack/core").Configuration} */
@@ -133,9 +179,9 @@ module.exports = {
 
     plugins: [
         process.env.RSDOCTOR === "true" && new OrphanFilesPlugin(),
-        process.env.RSDOCTOR === "true" &&
-            new RsdoctorRspackPlugin({ output: { mode: "brief", options: { type: ["json"] } } }),
+        process.env.RSDOCTOR === "true" && new RsdoctorRspackPlugin(),
         process.env.RSDOCTOR !== "true" && new SourceMapDevToolPlugin({ filename: "[file].map", exclude: /vendor/ }),
+        new NoParentImportsPlugin(),
         new CopyRspackPlugin({
             patterns: [
                 {

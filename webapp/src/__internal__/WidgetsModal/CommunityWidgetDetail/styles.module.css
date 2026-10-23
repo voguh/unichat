@@ -1,0 +1,82 @@
+/*!******************************************************************************
+ * Copyright (c) 2026 Voguh
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ******************************************************************************/
+
+.detail {
+    @apply h-full grid gap-5;
+
+    grid-template-columns: 14rem minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+}
+
+.titleRow {
+    @apply flex items-center gap-2;
+
+    > h2 {
+        @apply text-xl font-semibold;
+        @apply m-0;
+    }
+}
+
+.sidebar {
+    @apply flex flex-col gap-2;
+
+    > img {
+        @apply bg-black rounded;
+        @apply block w-full object-cover object-top mb-1;
+
+        aspect-ratio: 414 / 521;
+    }
+}
+
+.actionRow {
+    @apply flex gap-2;
+
+    > button:last-child {
+        @apply flex-1;
+    }
+}
+
+.main {
+    @apply min-w-0 min-h-0 flex flex-col gap-3;
+}
+
+.tabs {
+    @apply flex-1 min-h-0;
+}
+
+.tabContent {
+    @apply flex-1 min-h-0 overflow-y-auto;
+}
+
+.meta {
+    @apply text-stone-400 text-sm;
+    @apply flex flex-wrap items-center gap-x-3 gap-y-1;
+}
+
+.releases {
+    @apply flex flex-col gap-2;
+}
+
+.release {
+    @apply bg-stone-950 border border-stone-800 rounded;
+    @apply flex items-center gap-3 px-3 py-2;
+}
+
+.releaseInfo {
+    @apply flex-1 min-w-0 flex flex-col;
+
+    > small {
+        @apply text-stone-400 text-xs;
+    }
+}
+
+.releaseName {
+    @apply flex items-center gap-2;
+}

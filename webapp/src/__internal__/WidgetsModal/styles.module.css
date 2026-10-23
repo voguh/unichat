@@ -8,45 +8,16 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-.accordion {
-    @apply gap-2;
+.root {
+    @apply overflow-y-auto;
+
+    height: calc(var(--dialog-height) - 4.75rem - 2px);
 }
 
-.table {
-    @apply w-full border-collapse;
+.title {
+    @apply flex items-center gap-2;
 
-    > tbody > tr {
-        &:nth-child(odd) {
-            @apply bg-stone-600/25;
-        }
-
-        &:nth-child(even) {
-            @apply bg-stone-700/25;
-        }
-
-        > td {
-            @apply h-12 p-2 text-left;
-        }
-    }
-}
-
-.name {
-    @apply w-full max-w-0 align-middle;
-
-    > span {
-        @apply font-semibold;
-        @apply block whitespace-nowrap overflow-hidden text-ellipsis;
-    }
-}
-
-.actions {
-    @apply w-px whitespace-nowrap;
-
-    > div {
-        @apply flex justify-end items-center gap-2;
-
-        > button[data-size] {
-            @apply flex justify-center items-center gap-2 shrink-0 whitespace-nowrap p-0 w-8 h-8;
-        }
+    > button[data-size] {
+        @apply size-7 p-0;
     }
 }

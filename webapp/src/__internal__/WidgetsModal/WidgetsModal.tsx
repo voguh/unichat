@@ -9,154 +9,118 @@
  ******************************************************************************/
 
 import type * as PReact from "preact";
+import { useEffect, useState } from "preact/hooks";
 
-import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
+import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
-import { Accordion } from "@voguh/unichat-ui/components/ui/Accordion";
-import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
-import { useWidgets } from "unichat/hooks/useWidgets";
-import type { Variants } from "unichat/types";
-import { toWidgetOptionGroup } from "unichat/utils/toWidgetOptionGroup";
+import { Loading } from "@voguh/unichat-ui/components/Loading";
+import { useModalContext } from "unichat/hooks/useModalContext";
+import { LoggerFactory } from "unichat/logging/LoggerFactory";
+import { addonsService } from "unichat/services/addonsService";
+import { notificationService } from "unichat/services/notificationService";
+import type { CommunityWidget } from "unichat/types/addons";
 
+import { CommunityShowcase } from "./CommunityShowcase";
+import { CommunityWidgetDetail } from "./CommunityWidgetDetail";
 import styles from "./styles.module.css";
 
-interface WidgetWarning {
-    message: string | PReact.ComponentChildren;
-    details: string;
-    variant: Variants;
+export interface WidgetsModalSharedStore {
+    communityWidgetNames: string[];
+    selectedWidget: CommunityWidget | null;
 }
 
+const _logger = LoggerFactory.getLogger("WidgetsModal");
 export function WidgetsModal(): PReact.ComponentChildren {
-    const [widgets, _reloadWidgets] = useWidgets(toWidgetOptionGroup, []);
+    const [communityWidgets, setCommunityWidgets] = useState<CommunityWidget[] | null>(null);
+    const [installing, setInstalling] = useState<string | null>(null);
 
-    function formatWarning(warning: string): WidgetWarning | undefined {
-        switch (warning) {
-            case "DUPLICATE_HTML_ENTRYPOINT":
-                return {
-                    message: (
-                        <>
-                            <i className="fab fa-html5" /> Duplicated
-                        </>
-                    ),
-                    details: "This widget contains multiple HTML entrypoints. Only 'widget.html' will be used.",
-                    variant: "danger"
-                };
-            case "LEGACY_HTML_ENTRYPOINT":
-                return {
-                    message: (
-                        <>
-                            <i className="fab fa-html5" /> Legacy
-                        </>
-                    ),
-                    details: "This widget uses a deprecated HTML entrypoint. Consider renaming it to 'widget.html'.",
-                    variant: "warning"
-                };
-            case "DUPLICATE_JS_ENTRYPOINT":
-                return {
-                    message: (
-                        <>
-                            <i className="fab fa-js" /> Duplicated
-                        </>
-                    ),
-                    details: "This widget contains multiple JS entrypoints. Only 'widget.js' will be used.",
-                    variant: "danger"
-                };
-            case "LEGACY_JS_ENTRYPOINT":
-                return {
-                    message: (
-                        <>
-                            <i className="fab fa-js" /> Legacy
-                        </>
-                    ),
-                    details: "This widget uses a deprecated JS entrypoint. Consider renaming it to 'widget.js'.",
-                    variant: "warning"
-                };
-            case "DUPLICATE_CSS_ENTRYPOINT":
-                return {
-                    message: (
-                        <>
-                            <i className="fab fa-css3-alt" /> Duplicated
-                        </>
-                    ),
-                    details: "This widget contains multiple CSS entrypoints. Only 'widget.css' will be used.",
-                    variant: "danger"
-                };
-            case "LEGACY_CSS_ENTRYPOINT":
-                return {
-                    message: (
-                        <>
-                            <i className="fab fa-css3-alt" /> Legacy
-                        </>
-                    ),
-                    details: "This widget uses a deprecated CSS entrypoint. Consider renaming it to 'widget.css'.",
-                    variant: "warning"
-                };
+    const { sharedStore, setSharedStore } = useModalContext<WidgetsModalSharedStore>();
+
+    async function fetchCommunityWidgets(): Promise<void> {
+        try {
+            const items = await addonsService.getCommunityWidgets();
+            setCommunityWidgets(items);
+            setSharedStore((old) => ({ ...old, communityWidgetNames: items.map((item) => item.name) }));
+        } catch (error) {
+            _logger.error("An error occurred on fetch community widgets", error);
+
+            notificationService.error({
+                title: "Fetch Error",
+                message: "An error occurred while fetching community widgets."
+            });
         }
     }
 
-    function formatWarnings(warnings: string[]): PReact.ComponentChildren {
-        return warnings.map((warning) => {
-            const formattedWarning = formatWarning(warning);
-            if (formattedWarning == null) {
-                return null;
+    async function installWidget(widget: CommunityWidget, release?: string): Promise<void> {
+        try {
+            setInstalling(widget.id);
+
+            let releaseName = release;
+            if (releaseName == null) {
+                const detail = await addonsService.getCommunityWidget(widget.id);
+                const latestStable = (detail.releases ?? []).find((item) => !item.prerelease);
+
+                releaseName = widget.version;
+                if (latestStable != null) {
+                    releaseName = latestStable.name;
+                }
             }
 
-            const { message, details, variant } = formattedWarning;
+            await addonsService.installCommunityWidget(widget.id, releaseName);
+            notificationService.success({ title: "Success", message: `${widget.name} ${releaseName} installed.` });
+            await fetchCommunityWidgets();
+        } catch (error) {
+            _logger.error("An error occurred on install community widget", error);
 
-            return (
-                <Tooltip key={warning} placement="bottom" content={details}>
-                    <Badge variant={variant}>{message}</Badge>
-                </Tooltip>
-            );
-        });
+            notificationService.error({
+                title: "Install Error",
+                message: `An error occurred while installing ${widget.name}.`
+            });
+        } finally {
+            setInstalling(null);
+        }
     }
 
-    return (
-        <Accordion.Root className={styles.accordion}>
-            {widgets.map((widgetGroup) => (
-                <Accordion.Item key={widgetGroup.label} name="widget-groups" title={widgetGroup.label}>
-                    <table className={styles.table}>
-                        <tbody>
-                            {widgetGroup.items
-                                .sort((a, b) => a.label.localeCompare(b.label))
-                                .map((widget) => (
-                                    <tr key={widget.label}>
-                                        <td className={styles.name}>
-                                            <span>{widget.label}</span>
-                                        </td>
-                                        <td className={styles.actions}>
-                                            <div>
-                                                {formatWarnings(widget.warnings)}
-                                                {widgetGroup.label === "User Widgets" && (
-                                                    <Tooltip placement="bottom" content="Reveal in Folder">
-                                                        <Button
-                                                            variant="default"
-                                                            onClick={() =>
-                                                                revealItemInDir(
-                                                                    `${UNICHAT_WIDGETS_DIR}/${widget.label}`
-                                                                )
-                                                            }
-                                                        >
-                                                            <i className="fas fa-folder" />
-                                                        </Button>
-                                                    </Tooltip>
-                                                )}
+    function openWidgetFolder(widget: CommunityWidget): void {
+        revealItemInDir(`${UNICHAT_WIDGETS_DIR}/${widget.name}`);
+    }
 
-                                                <Tooltip placement="bottom" content="Open in Browser">
-                                                    <Button variant="default" onClick={() => openUrl(widget.label)}>
-                                                        <i className="fas fa-external-link-alt" />
-                                                    </Button>
-                                                </Tooltip>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </Accordion.Item>
-            ))}
-        </Accordion.Root>
-    );
+    function renderContent(): PReact.ComponentChildren {
+        const { selectedWidget } = sharedStore;
+
+        if (communityWidgets == null) {
+            return <Loading show label="Loading widgets" />;
+        }
+
+        if (selectedWidget != null) {
+            const currentWidget = communityWidgets.find((widget) => widget.id === selectedWidget.id);
+            if (currentWidget != null) {
+                return (
+                    <CommunityWidgetDetail
+                        widget={currentWidget}
+                        installing={installing}
+                        onInstall={installWidget}
+                        onOpenFolder={openWidgetFolder}
+                    />
+                );
+            }
+        }
+
+        return (
+            <CommunityShowcase
+                widgets={communityWidgets}
+                installing={installing}
+                onSelect={(widget) => setSharedStore((old) => ({ ...old, selectedWidget: widget }))}
+                onInstall={installWidget}
+                onOpenFolder={openWidgetFolder}
+            />
+        );
+    }
+
+    // biome-ignore lint/correctness/useExhaustiveDependencies: componentDidMount
+    useEffect(() => {
+        fetchCommunityWidgets();
+    }, []);
+
+    return <div className={styles.root}>{renderContent()}</div>;
 }

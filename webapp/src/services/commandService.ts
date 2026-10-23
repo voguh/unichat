@@ -8,31 +8,16 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import { invoke as tauriInvoke } from "@tauri-apps/api/core";
-
 import type { UniChatEvent } from "@voguh/unichat-api/widgets/events";
 import type {
     GalleryItem,
     ThirdPartyLicenseInfo,
     UniChatCurrency,
-    UniChatPluginMetadata,
     UniChatReleaseInfo,
     UniChatScraper,
-    UniChatWidget,
     WidgetFields
 } from "unichat/types";
-
-async function invoke<T>(cmd: string, args?: Record<string, any>): Promise<T> {
-    try {
-        return tauriInvoke<T>(cmd, args);
-    } catch (error) {
-        if (error instanceof Error) {
-            throw error;
-        } else {
-            throw new Error(String(error));
-        }
-    }
-}
+import { invoke } from "unichat/utils/invoke";
 
 let cachedReleases: UniChatReleaseInfo | null = null;
 export class CommandService {
@@ -85,16 +70,6 @@ export class CommandService {
 
     public async uploadGalleryItems(files: string[]): Promise<void> {
         await invoke("upload_gallery_items", { files });
-    }
-
-    /* ========================================================================================== */
-
-    public async getPlugins(): Promise<UniChatPluginMetadata[]> {
-        return invoke("get_plugins");
-    }
-
-    public async togglePluginState(pluginName: string, newState: boolean): Promise<void> {
-        await invoke("toggle_plugin_state", { pluginName, newState });
     }
 
     /* ========================================================================================== */
@@ -158,10 +133,6 @@ export class CommandService {
     public async setWidgetFieldState(widget: string, fieldstate: Record<string, any>): Promise<void> {
         const data = JSON.stringify(fieldstate);
         await invoke("set_widget_fieldstate", { widget, data });
-    }
-
-    public async getWidgets(): Promise<UniChatWidget[]> {
-        return invoke<UniChatWidget[]>("get_widgets");
     }
 }
 

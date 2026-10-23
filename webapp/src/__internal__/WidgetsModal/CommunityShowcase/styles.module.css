@@ -1,0 +1,66 @@
+/*!******************************************************************************
+ * Copyright (c) 2026 Voguh
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ******************************************************************************/
+
+.showcase {
+    @apply h-full flex flex-col gap-4;
+}
+
+.toolbar {
+    @apply flex items-center gap-2;
+}
+
+.search {
+    @apply flex-1;
+}
+
+.content {
+    @apply flex-1 min-h-0 overflow-y-auto;
+}
+
+.grid {
+    @apply grid grid-cols-4 gap-3;
+}
+
+.poster {
+    @apply bg-black border border-stone-800 rounded;
+    @apply relative overflow-hidden;
+
+    aspect-ratio: 414 / 521;
+}
+
+.posterOpen {
+    @apply block size-full cursor-pointer;
+
+    > img {
+        @apply block size-full object-cover object-top;
+    }
+}
+
+.posterBadge {
+    @apply absolute top-2 right-2;
+}
+
+.posterInfo {
+    @apply bg-linear-to-t from-stone-950 via-stone-950/95 to-transparent;
+    @apply absolute inset-x-0 bottom-0 flex items-end gap-2 px-3 pt-12 pb-3;
+}
+
+.posterTitle {
+    @apply flex-1 min-w-0 flex flex-col gap-0.5;
+
+    > strong {
+        @apply truncate;
+    }
+
+    > small {
+        @apply text-stone-400 text-xs;
+        @apply truncate;
+    }
+}

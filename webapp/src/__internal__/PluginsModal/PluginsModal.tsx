@@ -15,10 +15,10 @@ import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
 import { Button } from "@voguh/unichat-ui/components/ui/Button";
 import { EmptyState } from "@voguh/unichat-ui/components/ui/EmptyState";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
-import { commandService } from "unichat/services/commandService";
+import { addonsService } from "unichat/services/addonsService";
 import { modalService } from "unichat/services/modalService";
 import { notificationService } from "unichat/services/notificationService";
-import type { UniChatPluginMetadata } from "unichat/types";
+import type { UniChatLocalPlugin } from "unichat/types/addons";
 
 import { PluginOverviewModal, PluginOverviewModalActions } from "./PluginOverview";
 import styles from "./styles.module.css";
@@ -27,9 +27,9 @@ import { handleBadgeVariant } from "./utils/handleBadgeVariant";
 
 const _logger = LoggerFactory.getLogger("Plugins");
 export function PluginsModal(): PReact.ComponentChildren {
-    const [plugins, setPlugins] = useState<UniChatPluginMetadata[]>([]);
+    const [plugins, setPlugins] = useState<UniChatLocalPlugin[]>([]);
 
-    function openPluginDetails(plugin: UniChatPluginMetadata): void {
+    function openPluginDetails(plugin: UniChatLocalPlugin): void {
         modalService.openModal({
             fullscreen: true,
             title: "Plugin Overview",
@@ -41,7 +41,7 @@ export function PluginsModal(): PReact.ComponentChildren {
     useEffect(() => {
         async function handleFetchPlugins(): Promise<void> {
             try {
-                const items = await commandService.getPlugins();
+                const items = await addonsService.getLocalPlugins();
                 setPlugins(items);
             } catch (error) {
                 _logger.error("An error occurred on fetch plugins", error);

@@ -8,10 +8,10 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import type { UniChatPluginMetadata } from "unichat/types";
+import type { UniChatLocalPlugin } from "unichat/types/addons";
 import { Strings } from "unichat/utils/Strings";
 
-export function getPluginIconDataUrl(plugin: UniChatPluginMetadata): string {
+export function getPluginIconDataUrl(plugin: UniChatLocalPlugin): string {
     if (Strings.isNullOrEmpty(plugin.icon)) {
         return UNICHAT_ICON;
     } else {

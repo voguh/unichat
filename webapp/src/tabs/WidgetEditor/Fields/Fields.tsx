@@ -23,14 +23,15 @@ import { parseColor } from "@voguh/unichat-ui/utils/colorUtils";
 import { GalleryFileInput } from "unichat/components/forms/GalleryFileInput";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
-import type { UniChatWidget, WidgetFields } from "unichat/types";
+import type { WidgetFields } from "unichat/types";
+import type { UniChatLocalWidget } from "unichat/types/addons";
 import { Strings } from "unichat/utils/Strings";
 import { isGeneralUserWidget, isSystemWidget } from "unichat/utils/widgetSourceTypeGuards";
 
 import styles from "./styles.module.css";
 
 interface Props {
-    widgets: Map<string, UniChatWidget>;
+    widgets: Map<string, UniChatLocalWidget>;
     selectedWidget: string;
     handleReset: () => Promise<void>;
     handleApply: (values: Record<string, unknown>) => Promise<void>;

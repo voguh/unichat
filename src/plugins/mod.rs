@@ -19,15 +19,14 @@ use std::sync::RwLock;
 use anyhow::anyhow;
 use anyhow::Error;
 
-use crate::plugins::manifest::PluginManifestYAML;
-use crate::plugins::manifest::load_manifest;
+use crate::addons::manifest::UniChatAddonManifest;
+use crate::addons::manifest::load_manifest;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::semver::version::Version;
 use crate::utils::semver::version_range::VersionRange;
 
 mod instance;
-mod manifest;
 mod runtime;
 
 const LOADED_PLUGINS_LAZY_LOCK_KEY: &str = "Plugins::LOADED_PLUGINS";
@@ -87,7 +86,7 @@ pub struct UniChatPlugin {
 }
 
 impl UniChatPlugin {
-    pub(in crate::plugins) fn new(plugin_path: &Path, manifest: &PluginManifestYAML, dependencies: Vec<(String, VersionRange)>) -> Result<Self, Error> {
+    pub(in crate::plugins) fn new(plugin_path: &Path, manifest: &UniChatAddonManifest, dependencies: Vec<(String, VersionRange)>) -> Result<Self, Error> {
         let version = Version::parse(&manifest.version)?;
 
         let lua = runtime::get()?;
@@ -211,12 +210,12 @@ pub fn init() -> Result<(), Error> {
     return runtime::new();
 }
 
-fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, PluginManifestYAML)>, Error> {
+fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, UniChatAddonManifest)>, Error> {
     if !plugins_path.exists() || !plugins_path.is_dir() {
         return Ok(Vec::new());
     }
 
-    let mut loaded_manifests: Vec<(PathBuf, PluginManifestYAML)> = Vec::new();
+    let mut loaded_manifests: Vec<(PathBuf, UniChatAddonManifest)> = Vec::new();
     for entry in fs::read_dir(plugins_path)? {
         if let Ok(entry) = entry {
             let plugin_path = entry.path();
@@ -256,7 +255,7 @@ fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, PluginM
 }
 
 pub fn load_plugins() -> Result<(), Error> {
-    let mut loaded_manifests: Vec<(PathBuf, PluginManifestYAML)> = Vec::new();
+    let mut loaded_manifests: Vec<(PathBuf, UniChatAddonManifest)> = Vec::new();
 
     let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
     let user_plugins_manifests = load_plugins_from_disk(user_plugins_dir)?;

@@ -30,7 +30,10 @@ use crate::utils::properties::AppPaths;
 
 include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 
+mod addons;
+mod api;
 mod axum;
+mod cache;
 mod commands;
 mod currency;
 mod events;
@@ -239,6 +242,9 @@ fn main() {
             commands::get_releases,
             commands::get_system_hosts,
             commands::get_third_party_licenses,
+            commands::addon::get_community_widget,
+            commands::addon::get_community_widgets,
+            commands::addon::install_community_widget,
             commands::currency::get_currencies,
             commands::emulator::close_custom_event_window,
             commands::emulator::dispatch_emulated_event,

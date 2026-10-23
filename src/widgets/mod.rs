@@ -21,6 +21,8 @@ use anyhow::Error;
 use serde::Serialize;
 use serde_json::Map;
 
+use crate::addons::manifest::UniChatAddonManifest;
+use crate::addons::manifest::load_manifest;
 use crate::plugins::UniChatPlugin;
 use crate::utils::constants::BASE_REST_PORT;
 use crate::utils::properties;
@@ -37,8 +39,15 @@ pub enum WidgetSource {
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct WidgetMetadata {
-    #[serde(skip_serializing)]
-    path: PathBuf,
+    pub name: String,
+    pub description: Option<String>,
+    pub version: String,
+    pub author: Option<String>,
+    pub license: Option<String>,
+    pub homepage: Option<String>,
+    pub dependencies: Vec<String>,
+
+    pub path: PathBuf,
     pub rest_path: String,
     pub widget_source: WidgetSource,
     pub warnings: Vec<String>
@@ -51,12 +60,6 @@ impl WidgetMetadata {
 
     pub fn assets_path(&self) -> PathBuf {
         return self.path.join("assets");
-    }
-
-    /* ====================================================================== */
-
-    pub fn name(&self) -> String {
-        return self.path.file_name().unwrap().to_string_lossy().to_string();
     }
 
     /* ====================================================================== */
@@ -149,8 +152,16 @@ static WIDGETS: LazyLock<RwLock<HashMap<String, WidgetMetadata>>> = LazyLock::ne
 
 /* ============================================================================================== */
 
-fn get_warnings_for_widget(widget_path: &Path) -> Vec<String> {
+fn get_warnings_for_widget(widget_path: &Path, widget_name: &str, source_type: &WidgetSource, manifest: &Option<UniChatAddonManifest>) -> Vec<String> {
     let mut warnings = Vec::new();
+
+    if let Some(manifest) = manifest {
+        if manifest.name != widget_name {
+            warnings.push("MANIFEST_NAME_MISMATCH".to_string());
+        }
+    } else if source_type == &WidgetSource::User && !widget_path.join("manifest.yaml").is_file() {
+        warnings.push("MISSING_MANIFEST".to_string());
+    }
 
     if widget_path.join("main.html").exists() && widget_path.join("widget.html").exists() {
         warnings.push("DUPLICATE_HTML_ENTRYPOINT".to_string());
@@ -196,20 +207,49 @@ fn load_widgets_from_disk(widgets_path: &Path, source_type: WidgetSource, cb: im
                 continue;
             }
 
+            let mut manifest = None;
+            if widget_path.join("manifest.yaml").is_file() {
+                match load_manifest(&widget_path) {
+                    Ok(loaded_manifest) => {
+                        manifest = Some(loaded_manifest);
+                    },
+                    Err(e) => {
+                        log::warn!("Failed to load manifest of widget '{}' from {:?}: {:#?}", widget_name, widgets_path, e);
+                    }
+                }
+            }
+
+            let warnings = get_warnings_for_widget(&widget_path, &widget_name, &source_type, &manifest);
+            let manifest = manifest.unwrap_or(UniChatAddonManifest {
+                name: widget_name.clone(),
+                description: None,
+                version: String::from("0.0.0"),
+                author: None,
+                license: None,
+                homepage: None,
+                dependencies: Vec::new()
+            });
+
             let rest_path;
             if let WidgetSource::UserPlugin(plugin_name) = &source_type {
                 rest_path = format!("{}::{}", plugin_name, widget_name);
             } else {
-                rest_path = widget_name
+                rest_path = widget_name.clone()
             }
 
-            let warnings = get_warnings_for_widget(&widget_path);
-
             let metadata = WidgetMetadata {
+                name: widget_name,
+                description: manifest.description,
+                version: manifest.version,
+                author: manifest.author,
+                license: manifest.license,
+                homepage: manifest.homepage,
+                dependencies: manifest.dependencies,
+
                 path: widget_path,
                 rest_path: rest_path.clone(),
                 widget_source: source_type.clone(),
-                warnings: warnings,
+                warnings: warnings
             };
             cb(&metadata);
             widgets.insert(rest_path.clone(), metadata);
@@ -229,7 +269,7 @@ pub fn get_widgets() -> Result<Vec<WidgetMetadata>, Error> {
 pub fn get_widget_from_name(name: &str) -> Result<WidgetMetadata, Error> {
     let widgets = WIDGETS.read().map_err(|_| anyhow!("{} lock poisoned", WIDGETS_LAZY_LOCK_KEY))?;
     for metadata in widgets.values() {
-        if metadata.name() == name {
+        if metadata.name == name {
             return Ok(metadata.clone());
         }
     }
@@ -259,7 +299,7 @@ pub fn add_plugin_widgets(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
     let widgets_path = plugin.get_widgets_path();
 
     let callback = move |metadata: &WidgetMetadata| {
-        plugin.add_message(format!("Registered widget '{}' provided as 'http://localhost:{}/widget/{}'", metadata.name(), BASE_REST_PORT, metadata.rest_path));
+        plugin.add_message(format!("Registered widget '{}' provided as 'http://localhost:{}/widget/{}'", metadata.name, BASE_REST_PORT, metadata.rest_path));
     };
 
     load_widgets_from_disk(&widgets_path, WidgetSource::UserPlugin(plugin.name.clone()), callback)?;
