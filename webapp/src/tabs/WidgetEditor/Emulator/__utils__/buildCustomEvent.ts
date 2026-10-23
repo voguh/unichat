@@ -11,12 +11,12 @@
 import type { UniChatAuthorType, UniChatEmote, UniChatEvent } from "@voguh/unichat-api/widgets/events";
 
 import {
+    DUMMY_TWITCH_AVATAR_URL,
     DUMMY_TWITCH_CHANNEL_ID,
     DUMMY_TWITCH_CHANNEL_NAME,
-    DUMMY_TWITCH_PROFILE_PICTURE_URL,
     DUMMY_TWITCH_REWARD_ICON_URL,
+    DUMMY_YOUTUBE_AVATAR_URL,
     DUMMY_YOUTUBE_CHANNEL_ID,
-    DUMMY_YOUTUBE_PROFILE_PICTURE_URL,
     type EmulatedEventData,
     type EmulatedEventType,
     fakeSuperChatTier,
@@ -167,7 +167,7 @@ export function buildCustomEvent(form: CustomEventForm, seed: CustomEventSeed): 
         authorUsername: isTwitch ? form.authorDisplayName.toLowerCase() : null,
         authorDisplayName: form.authorDisplayName,
         authorDisplayColor: seed.authorDisplayColor,
-        authorProfilePictureUrl: isYouTube ? DUMMY_YOUTUBE_PROFILE_PICTURE_URL : null,
+        authorProfilePictureUrl: isYouTube ? DUMMY_YOUTUBE_AVATAR_URL : null,
         authorBadges: badgesForAuthorType(platform, authorType),
         authorType: authorType,
 
@@ -250,9 +250,7 @@ export function buildCustomEvent(form: CustomEventForm, seed: CustomEventSeed): 
                 type: "unichat:raid",
                 data: {
                     ...common,
-                    authorProfilePictureUrl: isTwitch
-                        ? DUMMY_TWITCH_PROFILE_PICTURE_URL
-                        : common.authorProfilePictureUrl,
+                    authorProfilePictureUrl: isTwitch ? DUMMY_TWITCH_AVATAR_URL : common.authorProfilePictureUrl,
                     messageId: seed.messageId,
                     viewerCount: isYouTube ? null : nullableNumber(form.viewerCount)
                 }

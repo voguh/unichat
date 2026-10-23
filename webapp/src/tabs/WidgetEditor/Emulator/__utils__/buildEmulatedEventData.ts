@@ -26,8 +26,9 @@ export const DUMMY_YOUTUBE_CHANNEL_ID = "UCBR8-60-B28hp2BmDPdntcQ";
 export const DUMMY_TWITCH_CHANNEL_ID = "12826";
 export const DUMMY_TWITCH_CHANNEL_NAME = "Twitch";
 
-export const DUMMY_YOUTUBE_PROFILE_PICTURE_URL = "/proxy/aHR0cHM6Ly95dDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tLzNzNmV2cHFBaURVOXRRUjRzQzJzaUppcHBiSDJSV1ZQbndIZ3lsNFYwdGgyaXVRejBWRFFaYlVoUUJHbXN4TFlvLW1qRzZUcVpRPXMxNjAtYy1rLWMweDAwZmZmZmZmLW5vLXJq?referer=https://www.youtube.com/"; // prettier-ignore
-export const DUMMY_TWITCH_PROFILE_PICTURE_URL = "https://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_70x70.png";
+// biome-ignore format: long string, break line doesn't change anything
+export const DUMMY_YOUTUBE_AVATAR_URL = "/proxy/aHR0cHM6Ly95dDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tLzNzNmV2cHFBaURVOXRRUjRzQzJzaUppcHBiSDJSV1ZQbndIZ3lsNFYwdGgyaXVRejBWRFFaYlVoUUJHbXN4TFlvLW1qRzZUcVpRPXMxNjAtYy1rLWMweDAwZmZmZmZmLW5vLXJq?referer=https://www.youtube.com/";
+export const DUMMY_TWITCH_AVATAR_URL = "https://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_70x70.png";
 
 export const DUMMY_TWITCH_REWARD_ICON_URL = "https://static-cdn.jtvnw.net/custom-reward-images/tree-4.png";
 const DUMMY_YOUTUBE_GIFT_ASSET_URL = "https://www.gstatic.com/youtube/img/pdg/gift/assets/pastel.webp=w320-h320";
@@ -196,7 +197,7 @@ const EMULATED_EVENT_BUILDERS: {
             ...buildCommonData(ctx),
 
             authorId: isYouTube ? actionId : ctx.authorId,
-            authorProfilePictureUrl: isYouTube ? DUMMY_YOUTUBE_PROFILE_PICTURE_URL : DUMMY_TWITCH_PROFILE_PICTURE_URL,
+            authorProfilePictureUrl: isYouTube ? DUMMY_YOUTUBE_AVATAR_URL : DUMMY_TWITCH_AVATAR_URL,
             authorBadges: isYouTube ? [] : ctx.authorBadges,
             authorType: isYouTube ? "VIEWER" : ctx.authorType,
 
@@ -290,7 +291,7 @@ export async function buildEmulatedEventData<K extends EmulatedEventType>(
         authorUsername: platform === "youtube" ? null : userDisplayName.toLowerCase(),
         authorDisplayName: userDisplayName,
         authorDisplayColor: randHex().toUpperCase(),
-        authorProfilePictureUrl: platform === "twitch" ? null : DUMMY_YOUTUBE_PROFILE_PICTURE_URL,
+        authorProfilePictureUrl: platform === "twitch" ? null : DUMMY_YOUTUBE_AVATAR_URL,
         authorBadges: authorBadges,
         authorType: authorType,
 

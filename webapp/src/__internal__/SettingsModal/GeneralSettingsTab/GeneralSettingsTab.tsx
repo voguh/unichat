@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 
 import { Select } from "@voguh/unichat-ui/components/forms/Select";
 import { Switch } from "@voguh/unichat-ui/components/forms/Switch";
-import { Button, ButtonLink } from "@voguh/unichat-ui/components/ui/Button";
+import { Button } from "@voguh/unichat-ui/components/ui/Button";
 import type { SelectItem } from "@voguh/unichat-ui/components/ui/Select";
 import { useStorage } from "unichat/hooks/useStorage";
 import { useWidgets } from "unichat/hooks/useWidgets";
