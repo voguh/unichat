@@ -49,6 +49,7 @@ fn generate_resources(target_gen_dir: &Path) -> Result<(), Box<dyn std::error::E
     let license_code = env!("CARGO_PKG_LICENSE");
     let (license_name, license_url) = get_license_info(license_code)?;
 
+    #[rustfmt::skip]
     let metadata = format!(r#"
         pub const UNICHAT_DISPLAY_NAME: &str = "{display_name}";
         pub const UNICHAT_NAME: &str = "{name}";
@@ -68,21 +69,36 @@ fn generate_resources(target_gen_dir: &Path) -> Result<(), Box<dyn std::error::E
 
 /* ========================================================================== */
 
+const EQUALS_ENV: [&str; 18] = [
+    "DEBUG",
+    "HOST",
+    "LD_LIBRARY_PATH",
+    "MACOSX_DEPLOYMENT_TARGET",
+    "NUM_JOBS",
+    "OPT_LEVEL",
+    "OUT_DIR",
+    "PROFILE",
+    "RUSTC",
+    "RUSTDOC",
+    "RUST_RECURSION_COUNT",
+    "SSL_CERT_DIR",
+    "SSL_CERT_FILE",
+    "STATIC_VCRUNTIME",
+    "TARGET",
+    "TAURI_APP_PATH",
+    "TAURI_CLI_VERBOSITY",
+    "TAURI_FRONTEND_PATH",
+];
+
+const STARTS_WITH_ENV: [&str; 3] = ["CARGO", "DEP_TAURI", "RUSTUP"];
+
 fn get_clean_env() -> HashMap<String, String> {
     let mut clean_env: HashMap<String, String> = HashMap::new();
 
     for (key, value) in env::vars() {
-        if key.starts_with("CARGO") {
+        if EQUALS_ENV.contains(&key.as_str()) {
             continue;
-        } else if key == "DEBUG" {
-            continue;
-        } else if key.starts_with("DEP_TAURI") {
-            continue;
-        } else if matches!(key.as_str(), "HOST" | "LD_LIBRARY_PATH" | "MACOSX_DEPLOYMENT_TARGET" | "NUM_JOBS" | "OPT_LEVEL" | "OUT_DIR" | "PROFILE" | "RUSTC" | "RUSTDOC") {
-            continue;
-        } else if key.starts_with("RUSTUP") {
-            continue;
-        } else if matches!(key.as_str(), "RUST_RECURSION_COUNT" | "SSL_CERT_DIR" | "SSL_CERT_FILE" | "STATIC_VCRUNTIME" | "TARGET" | "TAURI_APP_PATH" | "TAURI_CLI_VERBOSITY" | "TAURI_FRONTEND_PATH") {
+        } else if STARTS_WITH_ENV.iter().any(|prefix| key.starts_with(prefix)) {
             continue;
         }
 
