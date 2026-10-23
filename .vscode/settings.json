@@ -1,6 +1,7 @@
 {
     "js/ts.tsdk.path": "./webapp/node_modules/typescript/lib",
 
+    "biome.requireConfiguration": true,
     "biome.configurationPath": "./webapp/biome.json",
     "biome.lsp.bin": "./webapp/node_modules/.bin/biome",
 
