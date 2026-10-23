@@ -7,6 +7,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
+// biome-ignore-all format: biome doesn't need to format this file
+// biome-ignore-all lint: biome doesn't need to lint this file
 
 /**
  * @typedef {"trace" | "debug" | "info" | "warn" | "error"} LogLevel
@@ -128,7 +130,7 @@ class UniChatLogger {
 /** @type {UniChatLogger} */
 globalThis.uniChatLogger = globalThis.uniChatLogger || new UniChatLogger();
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 class UniChat {
     get scraperId() {
@@ -157,7 +159,7 @@ class UniChat {
 /** @type {UniChat} */
 globalThis.uniChat = globalThis.uniChat || new UniChat();
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 function registerIntermittentEventDispatcher(type) {
     async function dispatch() {
@@ -167,13 +169,13 @@ function registerIntermittentEventDispatcher(type) {
     setInterval(dispatch, 60000);
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 if (window.WebSocket.__WRAPPED__ !== true) {
     uniChatLogger.info("Wrapping WebSocket to monitor messages.");
     const OriginalWebSocket = window.WebSocket;
 
-    window.WebSocket = function (url, protocols) {
+    window.WebSocket = (url, protocols) => {
         const wsInstance = protocols ? new OriginalWebSocket(url, protocols) : new OriginalWebSocket(url);
 
         wsInstance.addEventListener("message", async (event) => {
@@ -243,11 +245,11 @@ if (window.fetch.__WRAPPED__ !== true) {
     Object.defineProperty(window.fetch, "__WRAPPED__", { value: true, writable: false });
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
-{{SCRAPER_JS}}
+{SCRAPER_JS}
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 async function uniChatPreInit() {
     try {

@@ -7,6 +7,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
+// biome-ignore-all format: biome doesn't need to format this file
+// biome-ignore-all lint: biome doesn't need to lint this file
 
 HTMLIFrameElement.prototype.setAttribute = function (name, value) {
     console.log("Blocked iframe with src:", value);
@@ -29,7 +31,7 @@ async function uniChatHandleNotification(notification) {
     }
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 async function uniChatHandleGraphQLResponse(res) {
     try {
@@ -65,14 +67,14 @@ async function uniChatHandleGraphQLResponse(res) {
     }
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 function uniChatInit() {
     if (!window.location.href.startsWith("https://www.twitch.tv/")) {
         throw new Error("This scraper can only be initialized on Twitch pages.");
     }
 
-    /* ====================================================================================================== */
+    /* ====================================================================== */
 
     uniChat.onWebSocketMessage = async function (event, { wsInstance, url, protocols }) {
         if (url.startsWith("wss://hermes.twitch.tv/v1")) {

@@ -7,6 +7,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
+// biome-ignore-all format: biome doesn't need to format this file
+// biome-ignore-all lint: biome doesn't need to lint this file
 
 function uniChatNormalizeBase64(data) {
     data = decodeURIComponent(data);
