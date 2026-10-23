@@ -17,6 +17,8 @@ use serde::Serialize;
 use crate::events::unichat::UniChatEmote;
 use crate::utils::ureq;
 
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct FrankerFaceZEmote {

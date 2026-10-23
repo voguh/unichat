@@ -18,6 +18,8 @@ use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::utils::get_current_timestamp;
 use crate::utils::irc::IRCMessage;
 
+/* ========================================================================== */
+
 pub fn parse(channel: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let tags = message.tags.clone();
 

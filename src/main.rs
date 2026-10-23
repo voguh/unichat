@@ -46,6 +46,8 @@ mod widgets;
 mod wm;
 mod youtube;
 
+/* ========================================================================== */
+
 pub static UNICHAT_ICON_BYTES: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/icons/icon.png"));
 pub static THIRD_PARTY_LICENSES: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/third_party_licenses.json"));
 static APP_HANDLE: OnceLock<tauri::AppHandle<tauri::Wry>> = OnceLock::new();
@@ -55,7 +57,7 @@ pub fn get_app_handle() -> &'static tauri::AppHandle<tauri::Wry> {
     return APP_HANDLE.get().expect("APP_HANDLE is not initialized");
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 fn start_startup() {
     if STARTUP_STARTED.swap(true, Ordering::SeqCst) {
@@ -83,7 +85,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
     return Ok(());
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 fn has_plugins() -> bool {
     let mut has_plugins = false;

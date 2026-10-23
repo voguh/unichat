@@ -31,12 +31,14 @@ use crate::wm::window;
 pub mod status;
 pub mod utils;
 
+/* ========================================================================== */
+
 pub static COMMON_SCRAPER_JS: &str = include_str!("./static/common_scraper.js");
 
 const LAZY_LOCK_NAME: &str = "Scraper::SCRAPERS";
 static SCRAPERS: LazyLock<RwLock<HashMap<String, Arc<dyn UniChatScraper + Send + Sync>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 pub trait UniChatScraper {
     fn id(&self) -> &str;
@@ -52,7 +54,7 @@ pub trait UniChatScraper {
     fn on_status(&self, _event: &ScraperStatusEvent) -> Result<(), Error>;
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 pub fn serialize_scraper(scraper: &Arc<dyn UniChatScraper + Send + Sync>) -> serde_json::Value {
     let serialized = serde_json::json!({
@@ -107,7 +109,7 @@ fn handle_event(payload: &str) -> Result<(), Error> {
     return Ok(());
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 fn build_scraper_initialization_script(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> String {
     return COMMON_SCRAPER_JS

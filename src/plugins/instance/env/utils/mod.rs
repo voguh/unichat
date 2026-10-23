@@ -14,6 +14,8 @@ use std::ffi::c_void;
 use mlua::LuaSerdeExt as _;
 use serde::de::DeserializeOwned;
 
+/* ========================================================================== */
+
 const READONLY_DATA_KEY: &str = "__unichat_readonly_data";
 
 pub fn table_deep_readonly(lua: &mlua::Lua, table_name: &mlua::Value, table: mlua::Table) -> Result<mlua::Table, mlua::Error> {

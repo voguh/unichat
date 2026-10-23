@@ -34,7 +34,7 @@ pub mod scrapers;
 pub mod userstore;
 pub mod widgets;
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 fn is_virtual_interface(name: &str) -> bool {
     let name = name.to_lowercase();
@@ -85,14 +85,14 @@ pub async fn get_system_hosts<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Stri
     return Ok(lan_ips);
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 #[tauri::command]
 pub async fn get_releases<R: Runtime>(_app: AppHandle<R>) -> Result<UniChatReleaseInfo, String> {
     return release::get_info().map_err(|e| format!("Failed to get releases: {:#?}", e));
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 #[tauri::command]
 pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), String> {
@@ -109,7 +109,7 @@ pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), S
     return Ok(());
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 #[tauri::command]
 pub async fn get_third_party_licenses<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<serde_json::Value>, String> {

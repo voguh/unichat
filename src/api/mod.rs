@@ -16,6 +16,8 @@ use crate::utils::ureq;
 
 pub mod release;
 
+/* ========================================================================== */
+
 const UNICHAT_API_URL: &str = "https://unichat.voguh.me/api";
 
 pub fn url(path: &str) -> String {

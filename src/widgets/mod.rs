@@ -28,6 +28,8 @@ use crate::utils::constants::BASE_REST_PORT;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
+/* ========================================================================== */
+
 #[derive(Serialize, Clone, Debug, Eq, PartialEq)]
 #[serde(tag = "type", content = "value", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum WidgetSource {
@@ -146,7 +148,7 @@ impl WidgetMetadata {
 const WIDGETS_LAZY_LOCK_KEY: &str = "Widgets::WIDGETS";
 static WIDGETS: LazyLock<RwLock<HashMap<String, WidgetMetadata>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 fn get_warnings_for_widget(widget_path: &Path, widget_name: &str, source_type: &WidgetSource, manifest: &Option<UniChatAddonManifest>) -> Vec<String> {
     let mut warnings = Vec::new();
@@ -255,7 +257,7 @@ fn load_widgets_from_disk(widgets_path: &Path, source_type: WidgetSource, cb: im
     return Ok(());
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 pub fn get_widgets() -> Result<Vec<WidgetMetadata>, Error> {
     let widgets = WIDGETS.read().map_err(|_| anyhow!("{} lock poisoned", WIDGETS_LAZY_LOCK_KEY))?;
@@ -289,7 +291,7 @@ pub fn reload_user_widgets() -> Result<(), Error> {
     return Ok(());
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 pub fn add_plugin_widgets(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
     let widgets_path = plugin.get_widgets_path();
@@ -303,7 +305,7 @@ pub fn add_plugin_widgets(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
     return Ok(());
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 pub fn init() -> Result<(), Error> {
     let system_widgets_path = properties::get_app_path(AppPaths::UniChatSystemWidgets);

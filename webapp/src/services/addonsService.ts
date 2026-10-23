@@ -18,7 +18,7 @@ export class AddonsService {
         return invoke("get_plugins");
     }
 
-    /* ========================================================================================== */
+    /* ====================================================================== */
 
     public async getLocalWidgets(): Promise<WidgetMetadata[]> {
         return invoke<WidgetMetadata[]>("get_widgets");

@@ -32,6 +32,8 @@ use crate::UNICHAT_LICENSE_URL;
 use crate::UNICHAT_NAME;
 use crate::UNICHAT_VERSION;
 
+/* ========================================================================== */
+
 pub const MAIN_WINDOW_LABEL: &str = "main";
 
 fn on_page_load(window: WebviewWindow<Wry>, payload: PageLoadPayload<'_>) {

@@ -14,6 +14,8 @@ use tauri::Runtime;
 use crate::addons::community_widget;
 use crate::addons::community_widget::CommunityWidget;
 
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn get_community_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<CommunityWidget>, String> {
     return community_widget::list().map_err(|e| format!("Failed to get community widgets: {:#?}", e));

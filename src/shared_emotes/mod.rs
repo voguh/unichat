@@ -21,6 +21,8 @@ mod betterttv;
 mod frankerfacez;
 mod seventv;
 
+/* ========================================================================== */
+
 pub static EMOTES_HASHSET: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
 type EmotesResult = Result<HashMap<String, UniChatEmote>, Error>;

@@ -17,6 +17,8 @@ use crate::plugins;
 use crate::plugins::PluginStatus;
 use crate::utils::base64;
 
+/* ========================================================================== */
+
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SerializedPluginMetadata {

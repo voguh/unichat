@@ -27,6 +27,8 @@ use crate::utils::get_current_timestamp;
 use crate::utils::irc::IRCCommand;
 use crate::utils::irc::IRCMessage;
 
+/* ========================================================================== */
+
 pub fn parse(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let tags = message.tags.clone();
     let mut channel: Option<String> = None;

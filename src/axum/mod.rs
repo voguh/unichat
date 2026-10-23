@@ -21,6 +21,8 @@ use crate::utils::settings::SETTINGS_OPEN_TO_LAN_KEY;
 mod routes;
 mod utils;
 
+/* ========================================================================== */
+
 pub async fn start() -> Result<(), Error> {
     let mut host = format!("127.0.0.1:{}", BASE_REST_PORT);
     if settings::get_item(SETTINGS_OPEN_TO_LAN_KEY).is_ok_and(|v: bool| v == true) {

@@ -22,6 +22,8 @@ use crate::utils::settings::SETTINGS_CURRENCY_TARGET_KEY;
 mod currencies;
 mod rates;
 
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct UniChatCurrency {
     pub code: String,
@@ -107,7 +109,7 @@ pub fn init() -> Result<(), Error> {
     return Ok(());
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 fn round_cents(value: f64) -> f64 {
     return (value * 100.0).round() / 100.0;

@@ -13,6 +13,8 @@ use std::collections::HashMap;
 use anyhow::anyhow;
 use anyhow::Error;
 
+/* ========================================================================== */
+
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct IRCMessage {
     pub raw: String,

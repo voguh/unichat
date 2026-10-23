@@ -16,6 +16,8 @@ use crate::get_app_handle;
 use crate::utils::is_dev;
 use crate::utils::settings;
 
+/* ========================================================================== */
+
 pub fn decode_url(url: &str) -> Result<Url, Error> {
     let mut url = url.trim();
     if url.is_empty() || !url.starts_with("https://") {
@@ -30,7 +32,7 @@ pub fn decode_url(url: &str) -> Result<Url, Error> {
     return Ok(url);
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 fn get_scraper_url(scraper_id: &str) -> Option<String> {
     let window = get_app_handle().get_webview_window(scraper_id)?;

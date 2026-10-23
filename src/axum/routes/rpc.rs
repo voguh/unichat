@@ -17,6 +17,8 @@ use crate::utils::jsonrpc::JsonRPCRequest;
 use crate::utils::jsonrpc::JsonRPCResponse;
 use crate::utils::userstore;
 
+/* ========================================================================== */
+
 fn process_rpc_request(body: JsonRPCRequest) -> Result<JsonRPCResponse, JsonRPCError> {
     if body.jsonrpc() != "2.0" {
         return Err(JsonRPCError::invalid_request(body.id(), Some("Invalid JSON-RPC version")));

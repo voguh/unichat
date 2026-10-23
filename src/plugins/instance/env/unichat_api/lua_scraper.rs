@@ -28,6 +28,8 @@ use crate::utils::properties::AppPaths;
 use crate::utils::settings;
 use crate::utils::settings::SettingLogEventLevel;
 
+/* ========================================================================== */
+
 fn get_optional_table_property<R: mlua::FromLua>(table: &mlua::Table, key: &str) -> Result<Option<R>, mlua::Error> {
     if let Ok(value) = table.get(key) {
         return Ok(Some(value));

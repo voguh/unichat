@@ -28,11 +28,13 @@ pub mod settings;
 pub mod ureq;
 pub mod userstore;
 
+/* ========================================================================== */
+
 pub fn is_dev() -> bool {
     return cfg!(debug_assertions) || tauri::is_dev();
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 pub fn get_current_timestamp() -> Result<i64, Error> {
     let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?;
@@ -40,13 +42,13 @@ pub fn get_current_timestamp() -> Result<i64, Error> {
     return Ok(timestamp_sec);
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 pub fn path_to_string(path: &PathBuf) -> String {
     return path.to_string_lossy().replace('\\', "\\\\");
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 pub fn normalize_value(value_raw: &str) -> Result<f64, Error> {
     let last_dot = value_raw.rfind('.');
@@ -83,7 +85,7 @@ pub fn normalize_value(value_raw: &str) -> Result<f64, Error> {
     return Ok(value);
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 pub fn parse_u32_to_rgba(color: u32) -> (u8, u8, u8, f32) {
     let a = ((color >> 24) & 0xFF) as u8;
@@ -108,7 +110,7 @@ pub fn random_color_by_seed(seed: &str) -> Result<String, Error> {
     return Ok(format!("#{:02X}{:02X}{:02X}", r, g, b));
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 // Thanks to Glenn Slayden which explained the YouTube channel ID format
 // on https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video/101153#101153
@@ -141,7 +143,7 @@ pub fn is_valid_twitch_channel_name(channel_name: &str) -> bool {
     return TWITCH_CHANNEL_NAME_REGEX.is_match(channel_name);
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 pub fn safe_guard_path(base_path: &path::PathBuf, concat_str: &str) -> Result<path::PathBuf, Error> {
     let concatenated_path = base_path.join(concat_str);

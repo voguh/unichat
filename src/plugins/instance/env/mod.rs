@@ -45,6 +45,8 @@ mod unichat_utils;
 mod unichat_yaml;
 mod utils;
 
+/* ========================================================================== */
+
 const PLUGIN_NAME_KEY: &str = "__PLUGIN_NAME";
 const PLUGIN_VERSION_KEY: &str = "__PLUGIN_VERSION";
 const UNICHAT_API_KEY: &str = "UniChatAPI";

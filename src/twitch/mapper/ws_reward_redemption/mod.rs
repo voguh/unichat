@@ -22,6 +22,8 @@ use crate::twitch::mapper::handle_redemption_event;
 use crate::twitch::mapper::structs::author::parse_author_color;
 use crate::utils::get_current_timestamp;
 
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Debug)]
 struct WsRewardRedemption {
     id: String,

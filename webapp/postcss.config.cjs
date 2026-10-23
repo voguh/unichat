@@ -14,7 +14,7 @@ const tailwindcss = require("@tailwindcss/postcss");
 
 const GLOBAL_STYLESHEET = path.resolve(__dirname, "src/styles/global.css");
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 // Gives every CSS module the Tailwind theme for @apply.
 function tailwindReference() {
@@ -31,7 +31,7 @@ function tailwindReference() {
 
 tailwindReference.postcss = true;
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 module.exports = {
     plugins: [tailwindReference(), tailwindcss()]

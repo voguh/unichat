@@ -27,6 +27,8 @@ use crate::twitch::mapper::structs::message::parse_message_string;
 use crate::utils::get_current_timestamp;
 use crate::utils::irc::IRCMessage;
 
+/* ========================================================================== */
+
 pub fn parse(channel: String, text: String, message: &IRCMessage, tags: HashMap<String, Option<String>>) -> Result<Option<UniChatEvent>, Error> {
     let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing room-id tag"))?;
     let author_id = tags.get("user-id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing user-id tag"))?;

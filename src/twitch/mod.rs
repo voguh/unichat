@@ -38,13 +38,15 @@ use crate::utils::settings::SettingLogEventLevel;
 
 mod mapper;
 
+/* ========================================================================== */
+
 pub const SCRAPER_ID: &str = "twitch-chat";
 static SCRAPER_JS: &str = include_str!("./static/scraper.js");
 
 pub static TWITCH_CHEERMOTES: LazyLock<RwLock<HashSet<String>>> = LazyLock::new(|| RwLock::new(HashSet::new()));
 pub static TWITCH_BADGES: LazyLock<RwLock<HashMap<String, UniChatBadge>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 fn handle_ready_status(event: &ScraperStatusEvent) -> Result<(), Error> {
     let channel_id = event.extra_str("channelId")
@@ -94,7 +96,7 @@ fn handle_cheermotes_event(event_type: &str, payload: &Value) -> Result<(), Erro
     return Ok(());
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     let app_log_dir = properties::get_app_path(AppPaths::AppLog);
@@ -173,7 +175,7 @@ fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error>
     return Ok(());
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 static TWITCH_VALID_URLS: LazyLock<Vec<String>> = LazyLock::new(|| vec![
     String::from("https://www.twitch.tv/{CHANNEL_NAME}/chat"),
@@ -268,7 +270,7 @@ impl UniChatScraper for TwitchUniChatScraper {
     }
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 pub fn init() -> Result<(), Error> {
     let scraper_data = TwitchUniChatScraper::default();

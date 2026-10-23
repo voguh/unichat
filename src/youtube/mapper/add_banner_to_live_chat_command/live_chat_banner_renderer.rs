@@ -28,6 +28,8 @@ use crate::youtube::mapper::structs::author::parse_author_name_str;
 use crate::youtube::mapper::structs::author::parse_author_username_str;
 use crate::youtube::mapper::structs::proxy_youtube_url;
 
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct LiveChatBannerRenderer {

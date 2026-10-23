@@ -13,6 +13,8 @@ use std::collections::HashMap;
 pub mod author;
 pub mod message;
 
+/* ========================================================================== */
+
 const DROPPED_TAGS: [&str; 25] = [
     "badge-info",
     "badges",

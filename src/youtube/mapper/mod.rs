@@ -19,6 +19,8 @@ mod remove_chat_item_action;
 mod remove_chat_item_by_author_action;
 pub mod structs;
 
+/* ========================================================================== */
+
 pub fn parse(payload: &serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     if let Some(value) = payload.get("addBannerToLiveChatCommand") {
         return add_banner_to_live_chat_command::parse(value);

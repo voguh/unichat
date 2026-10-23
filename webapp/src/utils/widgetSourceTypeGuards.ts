@@ -36,7 +36,7 @@ export function isUserWidget(widget: WidgetMetadata | null | undefined): boolean
     return widget.widgetSource.type === WidgetSourceType.USER;
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 export function isGeneralSystemWidget(widget: WidgetMetadata | null | undefined): boolean {
     if (widget == null) {

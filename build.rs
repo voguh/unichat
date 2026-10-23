@@ -19,6 +19,8 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 
+/* ========================================================================== */
+
 // I will not implement any api to get license information.
 // This is a "safe guard" to remember me to change license info if I change the license.
 fn get_license_info(license: &str) -> Result<(String, String), Box<dyn std::error::Error>> {
@@ -64,7 +66,7 @@ fn generate_resources(target_gen_dir: &Path) -> Result<(), Box<dyn std::error::E
     return Ok(());
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 fn get_clean_env() -> HashMap<String, String> {
     let mut clean_env: HashMap<String, String> = HashMap::new();

@@ -20,6 +20,8 @@ use crate::utils::constants::BASE_REST_PORT;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
+/* ========================================================================== */
+
 #[derive(serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GalleryItem {

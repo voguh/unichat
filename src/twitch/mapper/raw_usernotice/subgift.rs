@@ -24,6 +24,8 @@ use crate::twitch::mapper::structs::author::parse_author_username_str;
 use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::utils::get_current_timestamp;
 
+/* ========================================================================== */
+
 pub fn parse(channel: String, tags: &HashMap<String, Option<String>>) -> Result<Option<UniChatEvent>, Error> {
     let room_id = tags.get("room-id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing room-id tag"))?;
     let author_id = tags.get("user-id").and_then(|v| v.as_ref()).ok_or(anyhow!("Missing user-id tag"))?;

@@ -33,6 +33,8 @@ use crate::youtube::mapper::structs::author::parse_author_username;
 use crate::youtube::mapper::structs::message::MessageRun;
 use crate::youtube::mapper::structs::message::MessageRunsWrapper;
 
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct LiveChatSponsorshipsGiftPurchaseAnnouncementRenderer {

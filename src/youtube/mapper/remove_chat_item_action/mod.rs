@@ -21,6 +21,8 @@ use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct RemoveChatItemAction {

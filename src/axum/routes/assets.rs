@@ -24,6 +24,8 @@ use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::safe_guard_path;
 
+/* ========================================================================== */
+
 pub async fn assets(Path(mut asset_path): Path<String>, req: Request<Body>) -> Response {
     let mut asset_path_parts = asset_path.split("/");
     let first_part = asset_path_parts.next().unwrap_or("");

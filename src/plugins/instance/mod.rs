@@ -30,6 +30,8 @@ use crate::widgets;
 
 mod env;
 
+/* ========================================================================== */
+
 fn parse_dependencies(raw_dependencies: &Vec<String>) -> Result<Vec<(String, VersionRange)>, Error> {
     let mut dependencies: Vec<(String, VersionRange)> = Vec::new();
 

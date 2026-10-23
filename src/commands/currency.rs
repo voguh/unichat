@@ -14,6 +14,8 @@ use tauri::Runtime;
 use crate::currency;
 use crate::currency::UniChatCurrency;
 
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn get_currencies<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<UniChatCurrency>, String> {
     return Ok(currency::currencies());

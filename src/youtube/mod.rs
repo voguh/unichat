@@ -33,10 +33,12 @@ use crate::utils::settings::SettingLogEventLevel;
 
 mod mapper;
 
+/* ========================================================================== */
+
 pub const SCRAPER_ID: &str = "youtube-chat";
 static SCRAPER_JS: &str = include_str!("./static/scraper.js");
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 fn handle_ready_status(event: &ScraperStatusEvent) -> Result<(), Error> {
     let channel_id = event.extra_str("channelId")
@@ -52,7 +54,7 @@ fn handle_ready_status(event: &ScraperStatusEvent) -> Result<(), Error> {
     return Ok(());
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     let app_log_dir = properties::get_app_path(AppPaths::AppLog);
@@ -103,7 +105,7 @@ fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> 
     return Ok(());
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 static YOUTUBE_VALID_URLS: LazyLock<Vec<String>> = LazyLock::new(|| vec![
     String::from("https://www.youtube.com/watch?v={VIDEO_ID}"),

@@ -10,6 +10,8 @@
 
 use crate::currency;
 
+/* ========================================================================== */
+
 pub struct UniChatCurrencyModule;
 
 impl UniChatCurrencyModule {

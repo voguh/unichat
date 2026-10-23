@@ -13,6 +13,8 @@ use std::collections::HashMap;
 use serde::Deserialize;
 use serde::Serialize;
 
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(tag = "type", content = "data")]
 pub enum UniChatEvent {

@@ -24,6 +24,8 @@ use crate::utils::safe_guard_path;
 use crate::widgets::WidgetMetadata;
 use crate::widgets::get_widget_from_rest_path;
 
+/* ========================================================================== */
+
 static WIDGET_TEMPLATE: &str = include_str!("./../static/index.html.template");
 
 fn fill_fieldstate(template: &str, widget: &WidgetMetadata) -> String {
@@ -66,7 +68,7 @@ fn fill_fieldstate(template: &str, widget: &WidgetMetadata) -> String {
     return template;
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 pub async fn get_widget_assets(Path((widget_name, asset_path)): Path<(String, String)>, req: Request<Body>) -> Response {
     let widget_metadata: WidgetMetadata;
@@ -103,7 +105,7 @@ pub async fn get_widget_assets(Path((widget_name, asset_path)): Path<(String, St
     return serve_partial_content(&asset_full_path, req.headers(), CACHE_REVALIDATE);
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 pub async fn get_widget_css(Path(widget_name): Path<String>) -> Response {
     if let Ok(widget) = get_widget_from_rest_path(&widget_name) {

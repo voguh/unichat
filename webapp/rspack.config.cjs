@@ -14,21 +14,22 @@ const { RsdoctorRspackPlugin } = require("@rsdoctor/rspack-plugin");
 const { CopyRspackPlugin, HtmlRspackPlugin, SourceMapDevToolPlugin } = require("@rspack/core");
 const { glob } = require("glob");
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 const isDev = process.env.NODE_ENV !== "production";
 
 class OrphanFilesPlugin {
+    static PLUGIN_NAME = "OrphanFilesPlugin";
     /** @param {import("@rspack/core").Compiler} compiler */
     apply(compiler) {
-        compiler.hooks.done.tapPromise("@unichat/build-tools", async (stats) => {
+        compiler.hooks.done.tapPromise(OrphanFilesPlugin.PLUGIN_NAME, async (stats) => {
             const files = await glob("./src/**/*.{ts,tsx}", { cwd: __dirname, absolute: true, ignore: "**/*.d.ts" });
             const orphanFiles = files.filter((file) => !stats.compilation.fileDependencies.has(file)).sort();
             if (orphanFiles.length > 0) {
                 const logLines = orphanFiles.map((file) => `║  ./${path.relative(__dirname, file)}`);
                 logLines.unshift("╔══ Orphan files detected ══════════════════════════════════════════════════════");
                 logLines.push("╚══════════════════════════════════════════════════════════════════════════════");
-                compiler.getInfrastructureLogger("@unichat/build-tools").info(logLines.join("\n"));
+                compiler.getInfrastructureLogger(OrphanFilesPlugin.PLUGIN_NAME).info(logLines.join("\n"));
             }
         });
     }
@@ -80,7 +81,7 @@ class NoParentImportsPlugin {
     }
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 /** @type {import("@rspack/core").Configuration} */
 module.exports = {

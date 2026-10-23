@@ -21,6 +21,8 @@ use crate::twitch::TWITCH_BADGES;
 use crate::utils::irc::IRCPrefix;
 use crate::utils::random_color_by_seed;
 
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TwitchRawBadge {

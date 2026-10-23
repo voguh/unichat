@@ -17,7 +17,7 @@ use crate::utils::ureq::http::response::Response;
 use crate::utils::ureq::RequestBuilder;
 use crate::utils::ureq::ResponseExt as _;
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 struct UreqResponse {
     response: Response<ureq::Body>
@@ -93,7 +93,7 @@ impl mlua::UserData for UreqResponse {
     }
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 fn apply_args<B>(builder: RequestBuilder<B>, args: Option<mlua::Table>) -> Result<RequestBuilder<B>, mlua::Error> {
     let mut builder = builder.config().http_status_as_error(false).build();
@@ -129,7 +129,7 @@ fn apply_args<B>(builder: RequestBuilder<B>, args: Option<mlua::Table>) -> Resul
     return Ok(builder);
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 pub struct UniChatHttpModule;
 

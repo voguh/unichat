@@ -14,6 +14,8 @@ use tauri::Runtime;
 
 use crate::utils::settings;
 
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn settings_get_item(key: &str) -> Result<Value, String> {
     let key = format!("settings:{}", key);

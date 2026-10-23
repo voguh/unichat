@@ -18,6 +18,8 @@ pub mod main_window;
 pub mod splash_window;
 pub mod window;
 
+/* ========================================================================== */
+
 pub fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     let app = window.app_handle();
     let label = window.label();

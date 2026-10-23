@@ -28,6 +28,8 @@ use crate::events::unichat::UniChatEvent;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
+/* ========================================================================== */
+
 static USERSTORE_PATH: LazyLock<path::PathBuf> = LazyLock::new(|| properties::get_app_path(AppPaths::AppData).join("userstore.json"));
 
 const USERSTORE_INSTANCE_NAME: &str = "UserStore::CACHE_INSTANCE";
@@ -91,7 +93,7 @@ static USERSTORE_WRITE_TX: LazyLock<UnboundedSender<()>> = LazyLock::new(|| {
     return tx;
 });
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 pub fn flush_userstore() -> Result<(), Error> {
     if let Ok(store) = USERSTORE_CACHE.read() {
@@ -103,7 +105,7 @@ pub fn flush_userstore() -> Result<(), Error> {
     return Ok(());
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 pub fn init() -> Result<(), Error> {
     let store_path = USERSTORE_PATH.as_path();
@@ -119,7 +121,7 @@ pub fn init() -> Result<(), Error> {
     return Ok(());
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 pub fn get_all_items() -> Result<HashMap<String, String>, Error> {
     let store = USERSTORE_CACHE.read().map_err(|_| anyhow!("{} cache lock poisoned", USERSTORE_INSTANCE_NAME))?;

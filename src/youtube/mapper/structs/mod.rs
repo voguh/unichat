@@ -19,6 +19,8 @@ use crate::utils::normalize_value;
 pub mod author;
 pub mod message;
 
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ThumbnailsWrapper {

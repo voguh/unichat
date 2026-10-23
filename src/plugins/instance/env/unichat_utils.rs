@@ -10,6 +10,8 @@
 
 use crate::utils::random_color_by_seed;
 
+/* ========================================================================== */
+
 pub struct UniChatUtilsModule;
 
 impl UniChatUtilsModule {

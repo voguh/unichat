@@ -16,6 +16,8 @@ use crate::get_app_handle;
 use crate::scraper::status::ScraperStatusEvent;
 use crate::wm::main_window::MAIN_WINDOW_LABEL;
 
+/* ========================================================================== */
+
 pub fn emit_notification(title:&str, message: &str) {
     let app_handle = get_app_handle();
 

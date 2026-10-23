@@ -28,7 +28,7 @@ impl mlua::UserData for UniChatStringsModule {
             return Ok(s.to_lowercase());
         });
 
-        /* ========================================================================================== */
+        /* ================================================================== */
 
         methods.add_method("strip_prefix", |_lua, _this, (s, prefix): (String, String)| {
             let result = s.strip_prefix(&prefix);
@@ -50,7 +50,7 @@ impl mlua::UserData for UniChatStringsModule {
             }
         });
 
-        /* ========================================================================================== */
+        /* ================================================================== */
 
         methods.add_method("starts_with", |_lua, _this, (s, prefix): (String, String)| {
             return Ok(s.starts_with(&prefix));
@@ -60,7 +60,7 @@ impl mlua::UserData for UniChatStringsModule {
             return Ok(s.ends_with(&suffix));
         });
 
-        /* ========================================================================================== */
+        /* ================================================================== */
 
         methods.add_method("find", |_lua, _this, (s, substring): (String, String)| {
             if let Some(index) = s.find(&substring) {
@@ -78,13 +78,13 @@ impl mlua::UserData for UniChatStringsModule {
             }
         });
 
-        /* ========================================================================================== */
+        /* ================================================================== */
 
         methods.add_method("is_empty", |_lua, _this, s: String| {
             return Ok(s.is_empty());
         });
 
-        /* ========================================================================================== */
+        /* ================================================================== */
 
         methods.add_method("trim", |_lua, _this, s: String| {
             return Ok(s.trim().to_string());
@@ -98,7 +98,7 @@ impl mlua::UserData for UniChatStringsModule {
             return Ok(s.trim_end().to_string());
         });
 
-        /* ========================================================================================== */
+        /* ================================================================== */
 
         methods.add_method("to_bytes", |_lua, _this, s: String| {
             return Ok(s.into_bytes());
@@ -108,7 +108,7 @@ impl mlua::UserData for UniChatStringsModule {
             return String::from_utf8(bytes).map_err(mlua::Error::external);
         });
 
-        /* ========================================================================================== */
+        /* ================================================================== */
 
         methods.add_method("chars", |_lua, _this, s: String| {
             let chars: Vec<String> = s.chars().map(|c| c.to_string()).collect();

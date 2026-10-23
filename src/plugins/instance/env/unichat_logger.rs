@@ -10,6 +10,8 @@
 
 use mlua::LuaSerdeExt as _;
 
+/* ========================================================================== */
+
 fn format_str(lua: &mlua::Lua, args: mlua::Variadic<mlua::Value>) -> Result<(String, Option<mlua::Error>), mlua::Error> {
     if args.is_empty() {
         return Err(mlua::Error::external("No log message provided"));

@@ -18,6 +18,8 @@ use serde::Serialize;
 
 use crate::utils::semver::version::Version;
 
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Hash, Clone, Debug)]
 pub struct UniChatAddonManifest {
     pub name: String,

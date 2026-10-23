@@ -23,6 +23,8 @@ use crate::currency::UniChatCurrency;
 use crate::currency::currencies;
 use crate::utils::ureq;
 
+/* ========================================================================== */
+
 #[derive(Default)]
 struct RatesStore {
     items: Vec<(String, String, f64)>,

@@ -21,6 +21,8 @@ use crate::wm::window;
 use crate::UNICHAT_DISPLAY_NAME;
 use crate::UNICHAT_VERSION;
 
+/* ========================================================================== */
+
 pub const SPLASH_WINDOW_LABEL: &str = "splash-screen";
 pub const SPLASH_WINDOW_READY_EVENT: &str = "unichat://splashscreen:ready";
 pub const TOTAL_STAGES: u8 = 15;
@@ -36,7 +38,7 @@ struct SplashProgressEvent {
     message: String
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 pub fn create() -> Result<WebviewWindow, Error> {
     let window = window::new(SPLASH_WINDOW_LABEL, "splash-screen.html")
@@ -57,7 +59,7 @@ pub fn close() {
     }
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 fn report(step: u8, message: &str) {
     match CURRENT_STAGE.write() {

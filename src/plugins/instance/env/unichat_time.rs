@@ -10,6 +10,8 @@
 
 use crate::utils::get_current_timestamp;
 
+/* ========================================================================== */
+
 pub struct UniChatTimeModule;
 
 impl UniChatTimeModule {

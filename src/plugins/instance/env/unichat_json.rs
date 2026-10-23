@@ -12,6 +12,8 @@ use mlua::LuaSerdeExt as _;
 
 use crate::plugins::instance::env::utils::from_lua_value;
 
+/* ========================================================================== */
+
 pub struct UniChatJsonModule;
 
 impl UniChatJsonModule {

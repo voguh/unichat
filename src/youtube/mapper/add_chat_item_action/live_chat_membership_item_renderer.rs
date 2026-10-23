@@ -37,6 +37,8 @@ use crate::youtube::mapper::structs::message::MessageRunsWrapper;
 use crate::youtube::mapper::structs::message::parse_message_emojis;
 use crate::youtube::mapper::structs::message::parse_message_string;
 
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct LiveChatMembershipItemRenderer {

@@ -29,6 +29,8 @@ use crate::utils::semver::version_range::VersionRange;
 mod instance;
 mod runtime;
 
+/* ========================================================================== */
+
 const LOADED_PLUGINS_LAZY_LOCK_KEY: &str = "Plugins::LOADED_PLUGINS";
 static LOADED_PLUGINS: LazyLock<RwLock<HashMap<String, Arc<UniChatPlugin>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
@@ -36,7 +38,7 @@ pub fn runtime_initialized() -> bool {
     return runtime::get().is_ok();
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 pub fn get_plugins() -> Result<Vec<Arc<UniChatPlugin>>, Error> {
     let envs = LOADED_PLUGINS.read().map_err(|_| anyhow!("{} lock poisoned", LOADED_PLUGINS_LAZY_LOCK_KEY))?;
@@ -55,7 +57,7 @@ pub fn get_plugin(plugin_name: &str) -> Result<Arc<UniChatPlugin>, Error> {
     return Ok(manifest.clone());
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "UPPERCASE")]
@@ -66,7 +68,7 @@ pub enum PluginStatus {
     Error,
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 pub struct UniChatPlugin {
     pub name: String,
@@ -204,7 +206,7 @@ impl UniChatPlugin {
     }
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 pub fn init() -> Result<(), Error> {
     return runtime::new();

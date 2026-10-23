@@ -14,6 +14,8 @@ use tauri::Runtime;
 
 use crate::utils::settings;
 
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn get_prev_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
     let prev_tour_steps = settings::get_item(settings::SETTINGS_TOUR_PREVIOUS_STEPS_KEY)

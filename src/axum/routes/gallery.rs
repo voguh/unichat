@@ -22,6 +22,8 @@ use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::safe_guard_path;
 
+/* ========================================================================== */
+
 pub async fn gallery(Path(asset_path): Path<String>, req: Request<Body>) -> Response {
 
     let asset_full_path: PathBuf;

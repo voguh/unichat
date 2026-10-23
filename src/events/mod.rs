@@ -22,6 +22,8 @@ use crate::events::unichat::UNICHAT_FLAG_EMULATOR_GENERATED;
 
 pub mod unichat;
 
+/* ========================================================================== */
+
 const ONCE_LOCK_NAME: &str = "Events::INSTANCE";
 static INSTANCE: OnceLock<broadcast::Sender<UniChatEvent>> = OnceLock::new();
 

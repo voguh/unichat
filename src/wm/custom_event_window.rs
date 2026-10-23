@@ -21,6 +21,8 @@ use crate::wm::main_window;
 use crate::wm::window;
 use crate::UNICHAT_DISPLAY_NAME;
 
+/* ========================================================================== */
+
 pub const CUSTOM_EVENT_WINDOW_LABEL: &str = "custom-event";
 
 fn on_page_load(window: WebviewWindow<Wry>, payload: PageLoadPayload<'_>) {

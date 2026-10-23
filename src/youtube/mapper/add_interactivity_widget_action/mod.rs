@@ -15,6 +15,8 @@ use crate::events::unichat::UniChatEvent;
 
 mod interactivity_widget_renderer;
 
+/* ========================================================================== */
+
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let widget_renderer = value.get("widgetRenderer").ok_or(anyhow!("No item found in value"))?;
 

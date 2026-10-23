@@ -13,6 +13,8 @@ use tauri::Runtime;
 
 use crate::utils::userstore;
 
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn get_userstore<R: Runtime>(_app: AppHandle<R>, key: String) -> Result<serde_json::Value, String> {
     let value: Option<serde_json::Value> = userstore::get_item(&key).map_err(|e| format!("Failed to emit event: {:#?}", e))?;

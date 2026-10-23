@@ -16,6 +16,8 @@ use axum::response::Response;
 use crate::axum::utils::CACHE_IMMUTABLE;
 use crate::get_app_handle;
 
+/* ========================================================================== */
+
 pub async fn fontawesome(Path(asset_path): Path<String>) -> Response {
     let app = get_app_handle();
     let asset_resolver = app.asset_resolver();

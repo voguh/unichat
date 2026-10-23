@@ -28,6 +28,8 @@ use crate::utils::get_current_timestamp;
 use crate::utils::irc::IRCCommand;
 use crate::utils::irc::IRCMessage;
 
+/* ========================================================================== */
+
 pub fn parse(message: &IRCMessage, tags: &HashMap<String, Option<String>>) -> Result<Option<UniChatEvent>, Error> {
     let (channel, message_text) = match &message.command {
         IRCCommand::Raw(_, payload) => Ok((payload[0].clone(), payload.get(1))),

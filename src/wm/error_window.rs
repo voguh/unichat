@@ -22,6 +22,8 @@ use crate::UNICHAT_DISPLAY_NAME;
 use crate::UNICHAT_NAME;
 use crate::UNICHAT_VERSION;
 
+/* ========================================================================== */
+
 pub const ERROR_WINDOW_LABEL: &str = "error";
 
 fn on_page_load(window: WebviewWindow<Wry>, payload: PageLoadPayload<'_>) {

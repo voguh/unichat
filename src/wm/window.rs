@@ -18,6 +18,8 @@ use tauri::WebviewWindow;
 use tauri::WebviewWindowBuilder;
 use url::Url;
 
+/* ========================================================================== */
+
 // All webviews share the same default WebView2 environment (one per user data folder), and its
 // AdditionalBrowserArguments are locked in by whichever webview is created first.
 //

@@ -15,6 +15,8 @@ use crate::events::unichat::UniChatEvent;
 
 mod live_chat_banner_renderer;
 
+/* ========================================================================== */
+
 pub fn parse(value: &serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let banner_renderer = value.get("bannerRenderer").ok_or(anyhow!("No bannerRenderer found"))?;
 

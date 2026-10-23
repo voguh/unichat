@@ -21,6 +21,8 @@ mod subgift;
 mod subscription;
 mod watch_streak;
 
+/* ========================================================================== */
+
 pub fn parse(channel_name: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let tags = message.tags.clone();
 

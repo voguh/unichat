@@ -16,6 +16,8 @@ use crate::utils::irc::IRCMessage;
 mod cheer;
 mod message;
 
+/* ========================================================================== */
+
 pub fn parse(channel: String, text: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let tags = message.tags.clone();
 

@@ -44,6 +44,8 @@ use crate::youtube::mapper::structs::message::parse_message_emojis;
 use crate::youtube::mapper::structs::message::parse_message_string;
 use crate::youtube::mapper::structs::message::parse_super_chat_tier;
 
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct LiveChatPaidMessageRenderer {

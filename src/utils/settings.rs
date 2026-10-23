@@ -25,6 +25,8 @@ use crate::utils::is_dev;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SettingLogEventLevel {
@@ -51,7 +53,7 @@ fn store_mount_scraper_key(scraper_id: &str, key: &str) -> String {
     return SCRAPER_KEY_TEMPLATE.replacen("{}", scraper_id, 1).replacen("{}", key, 1);
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 pub fn init() -> Result<(), Error> {
     let app_handle = get_app_handle();
@@ -272,7 +274,7 @@ fn migrate_store_version() -> Result<(), Error> {
     return Ok(());
 }
 
-/* ====================================================================== */
+/* ========================================================================== */
 
 type SettingsChangeListener = Box<dyn Fn(&str, &serde_json::Value) + Send + Sync>;
 
@@ -299,7 +301,7 @@ fn notify_change_listeners(key: &str, value: &serde_json::Value) {
     }
 }
 
-/* ====================================================================== */
+/* ========================================================================== */
 
 pub fn get_store_version() -> Result<u8, Error> {
     let store = INSTANCE.get().ok_or(anyhow!("{} was not initialized", ONCE_LOCK_NAME))?;
@@ -354,7 +356,7 @@ pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &V) -> Result<(), Er
     return Ok(());
 }
 
-/* ====================================================================== */
+/* ========================================================================== */
 
 pub fn get_scraper_property<R: serde::de::DeserializeOwned>(scraper_id: &str, property: &str) -> Result<R, Error> {
     let scraper_id = scraper_id.trim();

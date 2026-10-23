@@ -15,6 +15,8 @@ use std::sync::RwLock;
 use anyhow::anyhow;
 use anyhow::Error;
 
+/* ========================================================================== */
+
 const SHARED_MODULES_LAZY_LOCK_KEY: &str = "Plugins::SHARED_MODULES";
 static SHARED_MODULES: LazyLock<RwLock<HashMap<String, mlua::Value>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 

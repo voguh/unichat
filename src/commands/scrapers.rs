@@ -18,6 +18,8 @@ use crate::scraper::utils::decode_url;
 use crate::scraper::utils::is_local_url;
 use crate::utils::settings;
 
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn get_scrapers<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<serde_json::Value>, String> {
     let scrapers = scraper::get_scrapers().map_err(|e| format!("An error occurred on get scrapers: {:#?}", e))?;
@@ -46,7 +48,7 @@ pub async fn validate_scraper_url<R: Runtime>(_app: AppHandle<R>, scraper_id: &s
     return Err(format!("Scraper with ID '{}' not found", scraper_id));
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 #[tauri::command]
 pub async fn get_scraper_stored_url<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) -> Result<Option<String>, String> {

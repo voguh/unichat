@@ -22,6 +22,8 @@ use crate::widgets::WidgetSource;
 use crate::widgets::get_widget_from_rest_path;
 use crate::widgets::reload_user_widgets;
 
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn get_widget_fields<R: Runtime>(_app: tauri::AppHandle<R>, widget: String) -> Result<Map<String, Value>, String> {
     let widget = get_widget_from_rest_path(&widget).map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
@@ -61,7 +63,7 @@ pub async fn set_widget_fieldstate<R: Runtime>(_app: tauri::AppHandle<R>, widget
     return Err("Cannot set fieldstate of system or plugin widgets".into());
 }
 
-/* ================================================================================================================== */
+/* ========================================================================== */
 
 #[tauri::command]
 pub async fn get_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<WidgetMetadata>, String> {

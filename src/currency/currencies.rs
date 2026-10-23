@@ -22,6 +22,8 @@ use crate::cache;
 use crate::currency::UniChatCurrency;
 use crate::utils::ureq;
 
+/* ========================================================================== */
+
 // Currency symbols from CLDR `en-US` for the currencies whose symbol differs from their code.
 // Generated from `https://github.com/unicode-org/cldr-json/blob/main/cldr-json/cldr-numbers-full/main/en/currencies.json`
 // reading the `symbol` field, never `symbol-alt-narrow`.

@@ -13,6 +13,8 @@ use axum::http::Request;
 use axum::http::StatusCode;
 use axum::response::Response;
 
+/* ========================================================================== */
+
 pub async fn not_found(req: Request<Body>) -> Response {
     return Response::builder().status(StatusCode::NOT_FOUND)
         .body(Body::from(format!("Request '{}' not found", req.uri())))

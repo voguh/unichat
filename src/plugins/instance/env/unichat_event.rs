@@ -16,6 +16,8 @@ use crate::events::unichat::UniChatPlatform;
 use crate::plugins::instance::env::utils::from_lua_value;
 use crate::plugins::instance::env::utils::table_deep_readonly;
 
+/* ========================================================================== */
+
 fn create_readonly_event(lua: &mlua::Lua, event: &UniChatEvent) -> Result<mlua::Table, mlua::Error> {
     let mlua::Value::Table(table) = lua.to_value(event)? else {
         return Err(mlua::Error::runtime("UniChatEvent must serialize to a table"));
@@ -97,7 +99,7 @@ impl mlua::UserData for LuaUniChatEventFactory {
     }
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 pub struct LuaUniChatEmoteFactory;
 
@@ -117,7 +119,7 @@ impl mlua::UserData for LuaUniChatEmoteFactory {
     }
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 pub struct LuaUniChatBadgeFactory;
 
@@ -136,7 +138,7 @@ impl mlua::UserData for LuaUniChatBadgeFactory {
     }
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 pub struct LuaUniChatPlatformFactory;
 
@@ -165,7 +167,7 @@ impl mlua::UserData for LuaUniChatPlatformFactory {
     }
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 pub struct LuaUniChatAuthorTypeFactory;
 

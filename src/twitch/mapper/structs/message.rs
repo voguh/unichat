@@ -15,6 +15,8 @@ use crate::events::unichat::UniChatEmote;
 use crate::shared_emotes;
 use crate::twitch::TWITCH_CHEERMOTES;
 
+/* ========================================================================== */
+
 fn normalize_message_text(message_raw: &str) -> String {
     let mut message_raw = message_raw.trim().to_string();
     if message_raw.starts_with("\u{1}ACTION") && message_raw.ends_with("\u{1}") {
