@@ -115,7 +115,7 @@ fn has_plugins() -> bool {
 
 fn run_startup() -> Result<(), Error> {
     let start = Instant::now();
-    wm::splash_window::notice(0, &format!("Starting {} v{}...", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION));
+    wm::splash_window::begin(format!("Starting {} v{}...", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION));
 
     /* ====================================================================== */
 
@@ -167,7 +167,7 @@ fn run_startup() -> Result<(), Error> {
         wm::splash_window::stage(9, "Initializing plugins module...");
         plugins::init()?;
     } else {
-        wm::splash_window::notice(9, "No plugins found. Skipping plugins initialization.");
+        wm::splash_window::stage(9, "No plugins found. Skipping plugins initialization.");
     }
 
     wm::splash_window::stage(10, "Initializing userstore module...");
@@ -188,7 +188,7 @@ fn run_startup() -> Result<(), Error> {
         wm::splash_window::stage(14, "Loading plugins...");
         plugins::load_plugins()?;
     } else {
-        wm::splash_window::notice(14, "No plugins found. Skipping plugin loading.");
+        wm::splash_window::stage(14, "No plugins found. Skipping plugin loading.");
     }
 
     /* ====================================================================== */
@@ -200,7 +200,7 @@ fn run_startup() -> Result<(), Error> {
 
     let end = Instant::now();
     let duration = end.duration_since(start);
-    wm::splash_window::notice(wm::splash_window::TOTAL_STAGES, &format!("Setup completed successfully in {:.2?}.", duration));
+    wm::splash_window::end(format!("Setup completed successfully in {:.2?}.", duration));
 
     /* ====================================================================== */
 
