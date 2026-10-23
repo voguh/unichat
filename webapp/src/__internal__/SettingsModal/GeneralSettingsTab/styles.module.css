@@ -17,6 +17,16 @@
 
     > div {
         @apply w-full;
+
+        &[data-tour="currency-target"] {
+            @apply flex flex-col gap-1;
+
+            > small {
+                > a {
+                    @apply text-red-300;
+                }
+            }
+        }
     }
 }
 
