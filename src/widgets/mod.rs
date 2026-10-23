@@ -54,10 +54,6 @@ pub struct WidgetMetadata {
 }
 
 impl WidgetMetadata {
-    pub fn path(&self) -> &Path {
-        return &self.path;
-    }
-
     pub fn assets_path(&self) -> PathBuf {
         return self.path.join("assets");
     }
