@@ -175,7 +175,7 @@ if (window.WebSocket.__WRAPPED__ !== true) {
     uniChatLogger.info("Wrapping WebSocket to monitor messages.");
     const OriginalWebSocket = window.WebSocket;
 
-    window.WebSocket = (url, protocols) => {
+    window.WebSocket = function (url, protocols) {
         const wsInstance = protocols ? new OriginalWebSocket(url, protocols) : new OriginalWebSocket(url);
 
         wsInstance.addEventListener("message", async (event) => {
@@ -247,7 +247,7 @@ if (window.fetch.__WRAPPED__ !== true) {
 
 /* ========================================================================== */
 
-{SCRAPER_JS}
+{{SCRAPER_JS}}
 
 /* ========================================================================== */
 
