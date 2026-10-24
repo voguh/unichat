@@ -11,6 +11,9 @@ inputs:
   rust-version:
     description: Rust version to install
     required: true
+  node-version:
+    description: Node.JS version to install
+    required: true
   pnpm-version:
     description: PNPM version to install
     required: true
@@ -30,29 +33,37 @@ runs:
         toolchain: ${{ inputs.rust-version }}
 
     - name: Rust nightly toolchain setup
+      if: ${{ runner.os == 'Linux' }}
       uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
       with:
         toolchain: nightly
         components: rustfmt,clippy
 
-    - name: Cache cargo registry
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+    - name: Cache cargo
+      uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-        key: cargo-registry-${{ inputs.rust-version }}-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          cargo-registry-${{ inputs.rust-version }}-
+        workspaces: ${{ inputs.tauri-app-path }}
 
-    - name: Cache cargo target
+    - name: Cache tauri bundler tools
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
-          ${{ inputs.tauri-app-path }}/target
-        key: cargo-target-${{ runner.os }}-${{ inputs.rust-version }}-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          cargo-target-${{ runner.os }}-${{ inputs.rust-version }}-
+          ~/.cache/tauri
+          ~/AppData/Local/tauri
+          ~/Library/Caches/tauri
+        key: tauri-tools-${{ runner.os }}-2.12.2
+
+    - name: Install PNPM
+      uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      with:
+        version: ${{ inputs.pnpm-version }}
+
+    - name: Install Node.JS
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: pnpm
+        cache-dependency-path: ${{ inputs.tauri-frontend-path }}/pnpm-lock.yaml
 
     - name: Install linux dependencies
       if: ${{ runner.os == 'Linux' }}
@@ -66,7 +77,6 @@ runs:
       shell: bash
       run: |
         jq '.build.beforeBuildCommand = ""' tauri.conf.json > tmp.json && mv tmp.json tauri.conf.json
-        corepack enable && corepack prepare pnpm@${{ inputs.pnpm-version }} --activate && corepack enable pnpm
         npm install -g @tauri-apps/cli@2.12.2
         tauri --version
 
