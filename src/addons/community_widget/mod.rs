@@ -12,8 +12,8 @@ use std::fs;
 use std::io::Cursor;
 use std::time::Duration;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 use zip::ZipArchive;
@@ -87,17 +87,17 @@ fn find_local_widget(name: &str) -> Option<WidgetMetadata> {
     return local_widget;
 }
 
-fn build(data: CommunityWidgetData, local_widget: Option<WidgetMetadata>, releases: &[AddonRelease]) -> CommunityWidget {
+fn build(data: CommunityWidgetData, installed: Option<WidgetMetadata>, releases: &[AddonRelease]) -> CommunityWidget {
     let compatible = is_compatible(&data.requires_unichat);
     let preview_url = api::url(&format!("{}/{}/preview", COMMUNITY_WIDGETS_PATH, data.id));
     let mut installed_version = None;
     let mut update_available = false;
     let mut warnings = Vec::new();
 
-    if let Some(local_widget) = local_widget {
-        update_available = has_update(&local_widget.version, releases);
-        warnings = local_widget.warnings;
-        installed_version = Some(local_widget.version);
+    if let Some(installed) = installed {
+        update_available = has_update(&installed.version, releases);
+        warnings = installed.warnings;
+        installed_version = Some(installed.version);
     }
 
     return CommunityWidget {
@@ -143,14 +143,17 @@ pub fn get(id: &str) -> Result<CommunityWidget, Error> {
 pub fn install(id: &str, release: &str) -> Result<(), Error> {
     let data = fetch(id)?;
     let releases = data.releases.clone().unwrap_or_default();
-    let selected_release = releases.iter().find(|r| r.name == release).ok_or(anyhow!("Release '{}' not found for widget '{}'", release, data.name))?;
+    let selected = releases.iter().find(|r| r.name == release);
+    let selected = selected.ok_or(anyhow!("Release '{}' not found for widget '{}'", release, data.name))?;
 
     let compatible = is_compatible(&data.requires_unichat);
-    if selected_release.name == data.version && !compatible {
-        return Err(anyhow!("Widget '{}' {} requires UniChat {}", data.name, release, data.requires_unichat.unwrap_or_default()));
+    if selected.name == data.version && !compatible {
+        let requires_unichat = data.requires_unichat.unwrap_or_default();
+        return Err(anyhow!("Widget '{}' {} requires UniChat {}", data.name, release, requires_unichat));
     }
 
-    let asset = selected_release.assets.iter().find(|a| a.name.ends_with(".zip")).ok_or(anyhow!("Release '{}' of widget '{}' has no zip asset", release, data.name))?;
+    let asset = selected.assets.iter().find(|a| a.name.ends_with(".zip"));
+    let asset = asset.ok_or(anyhow!("Release '{}' of widget '{}' has no zip asset", release, data.name))?;
     let bytes = download_release_asset(asset)?;
 
     /* ====================================================================== */
@@ -160,8 +163,9 @@ pub fn install(id: &str, release: &str) -> Result<(), Error> {
         fs::remove_dir_all(&extract_path).map_err(|e| anyhow!("Failed to clean '{:?}': {:#?}", extract_path, e))?;
     }
 
-    let mut archive = ZipArchive::new(Cursor::new(bytes)).map_err(|e| anyhow!("Failed to open asset '{}': {:#?}", asset.name, e))?;
-    archive.extract(&extract_path).map_err(|e| anyhow!("Failed to extract asset '{}': {:#?}", asset.name, e))?;
+    let cursor = Cursor::new(bytes);
+    let mut file = ZipArchive::new(cursor).map_err(|e| anyhow!("Failed to open asset '{}': {:#?}", asset.name, e))?;
+    file.extract(&extract_path).map_err(|e| anyhow!("Failed to extract asset '{}': {:#?}", asset.name, e))?;
 
     let extracted_widget_path = extract_path.join(&data.name);
     if !extracted_widget_path.is_dir() {
@@ -174,14 +178,19 @@ pub fn install(id: &str, release: &str) -> Result<(), Error> {
     if widget_path.exists() {
         let fieldstate_path = widget_path.join("fieldstate.json");
         if fieldstate_path.is_file() {
-            let target_fieldstate_path = extracted_widget_path.join("fieldstate.json");
-            fs::copy(&fieldstate_path, &target_fieldstate_path).map_err(|e| anyhow!("Failed to copy '{:?}' to '{:?}': {:#?}", fieldstate_path, target_fieldstate_path, e))?;
+            let target_path = extracted_widget_path.join("fieldstate.json");
+            if let Err(e) = fs::copy(&fieldstate_path, &target_path) {
+                return Err(anyhow!("Failed to copy '{:?}' to '{:?}': {:#?}", fieldstate_path, target_path, e));
+            }
         }
 
         fs::remove_dir_all(&widget_path).map_err(|e| anyhow!("Failed to remove '{:?}': {:#?}", widget_path, e))?;
     }
 
-    fs::rename(&extracted_widget_path, &widget_path).map_err(|e| anyhow!("Failed to move '{:?}' to '{:?}': {:#?}", extracted_widget_path, widget_path, e))?;
+    if let Err(e) = fs::rename(&extracted_widget_path, &widget_path) {
+        return Err(anyhow!("Failed to move '{:?}' to '{:?}': {:#?}", extracted_widget_path, widget_path, e));
+    }
+
     fs::remove_dir_all(&extract_path).map_err(|e| anyhow!("Failed to clean '{:?}': {:#?}", extract_path, e))?;
     reload_user_widgets()?;
     log::info!("Installed community widget '{}' version '{}'", data.name, release);

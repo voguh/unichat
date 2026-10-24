@@ -49,7 +49,11 @@ pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Serialize
             author: plugin.author.clone(),
             license: plugin.license.clone(),
             homepage: plugin.homepage.clone(),
-            dependencies: plugin.dependencies.iter().map(|(name, version_range)| format!("{}@{}", name, version_range)).collect(),
+            dependencies: plugin
+                .dependencies
+                .iter()
+                .map(|(name, version_range)| format!("{}@{}", name, version_range))
+                .collect(),
 
             path: plugin.get_plugin_path(),
             icon: plugin.get_icon().map(|bytes| format!("data:image/png;base64,{}", base64::encode(bytes))),

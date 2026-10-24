@@ -21,6 +21,12 @@ pub mod structs;
 
 /* ========================================================================== */
 
+// This is a fallback, I've detected that YouTube sometimes uses
+// "updateOrAddInteractivityWidgetAction" instead of "addInteractivityWidgetAction"
+fn get_interactivity_widget_action(payload: &serde_json::Value) -> Option<&serde_json::Value> {
+    return payload.get("addInteractivityWidgetAction").or_else(|| payload.get("updateOrAddInteractivityWidgetAction"));
+}
+
 pub fn parse(payload: &serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     if let Some(value) = payload.get("addBannerToLiveChatCommand") {
         return add_banner_to_live_chat_command::parse(value);
@@ -30,7 +36,7 @@ pub fn parse(payload: &serde_json::Value) -> Result<Option<UniChatEvent>, Error>
         return remove_chat_item_action::parse(value.clone());
     } else if let Some(value) = payload.get("removeChatItemByAuthorAction") {
         return remove_chat_item_by_author_action::parse(value.clone());
-    } else if let Some(value) = payload.get("addInteractivityWidgetAction").or_else(|| payload.get("updateOrAddInteractivityWidgetAction")) {
+    } else if let Some(value) = get_interactivity_widget_action(payload) {
         return add_interactivity_widget_action::parse(value.clone());
     }
 

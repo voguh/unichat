@@ -28,10 +28,28 @@ use crate::utils::ureq;
 // reading the `symbol` field, never `symbol-alt-narrow`.
 static ICU_SYMBOLS: LazyLock<HashMap<&str, &str>> = LazyLock::new(|| {
     return HashMap::from([
-        ("AUD", "A$"), ("BRL", "R$"), ("CAD", "CA$"), ("CNY", "CN¥"), ("EUR", "€"), ("GBP", "£"),
-        ("HKD", "HK$"), ("ILS", "₪"), ("INR", "₹"), ("JPY", "¥"), ("KRW", "₩"), ("MXN", "MX$"),
-        ("NZD", "NZ$"), ("PHP", "₱"), ("TWD", "NT$"), ("USD", "$"), ("VND", "₫"), ("XAF", "FCFA"),
-        ("XCD", "EC$"), ("XCG", "Cg."), ("XOF", "F CFA"), ("XPF", "CFPF")
+        ("AUD", "A$"),
+        ("BRL", "R$"),
+        ("CAD", "CA$"),
+        ("CNY", "CN¥"),
+        ("EUR", "€"),
+        ("GBP", "£"),
+        ("HKD", "HK$"),
+        ("ILS", "₪"),
+        ("INR", "₹"),
+        ("JPY", "¥"),
+        ("KRW", "₩"),
+        ("MXN", "MX$"),
+        ("NZD", "NZ$"),
+        ("PHP", "₱"),
+        ("TWD", "NT$"),
+        ("USD", "$"),
+        ("VND", "₫"),
+        ("XAF", "FCFA"),
+        ("XCD", "EC$"),
+        ("XCG", "Cg."),
+        ("XOF", "F CFA"),
+        ("XPF", "CFPF")
     ]);
 });
 

@@ -10,8 +10,8 @@
 
 use std::fmt::Display;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 
 /* ========================================================================== */
 

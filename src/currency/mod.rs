@@ -68,12 +68,12 @@ fn refresh_rates(value: serde_json::Value) -> Result<(), Error> {
 
     let currencies_list = currencies::get();
     if currencies_list.is_empty() {
-        return Err(anyhow!("Currencies list is empty, cannot refresh rates"));
+        return Err(anyhow!("Empty currencies list"));
     }
 
     let target_currency = currencies_list.iter().find(|c| c.code == code).cloned();
     if target_currency.is_none() {
-        return Err(anyhow!("Currency with code '{}' not found in currencies list", code));
+        return Err(anyhow!("Currency '{}' not found", code));
     }
 
     if let Err(err) = rates::fetch_rates(&code) {

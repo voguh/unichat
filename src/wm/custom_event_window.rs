@@ -8,18 +8,18 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use anyhow::anyhow;
 use anyhow::Error;
-use tauri::webview::PageLoadPayload;
+use anyhow::anyhow;
 use tauri::Manager as _;
 use tauri::WebviewWindow;
 use tauri::Wry;
+use tauri::webview::PageLoadPayload;
 
+use crate::UNICHAT_DISPLAY_NAME;
 use crate::get_app_handle;
 use crate::utils::is_dev;
 use crate::wm::main_window;
 use crate::wm::window;
-use crate::UNICHAT_DISPLAY_NAME;
 
 /* ========================================================================== */
 
@@ -43,13 +43,16 @@ pub fn open() -> Result<(), Error> {
         return Ok(());
     }
 
-    let main_window = app.get_webview_window(main_window::MAIN_WINDOW_LABEL)
-        .ok_or(anyhow!("Main window not found"))?;
+    let main_window = app.get_webview_window(main_window::MAIN_WINDOW_LABEL).ok_or(anyhow!("Main window not found"))?;
 
     window::new(CUSTOM_EVENT_WINDOW_LABEL, "custom-event.html")
         .title(format!("{} - Custom Event", UNICHAT_DISPLAY_NAME))
         .inner_size(960.0, 600.0)
-        .resizable(false).maximizable(false).minimizable(false).center().visible(false)
+        .resizable(false)
+        .maximizable(false)
+        .minimizable(false)
+        .center()
+        .visible(false)
         .parent(&main_window)?
         .initialization_script(format!("globalThis.__IS_DEV__ = {};", is_dev()))
         .on_page_load(on_page_load)

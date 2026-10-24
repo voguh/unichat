@@ -12,8 +12,8 @@ use std::fs;
 use std::path::Path;
 use std::sync::Arc;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 
 use crate::UNICHAT_DISPLAY_NAME;
 use crate::UNICHAT_VERSION;
@@ -37,7 +37,7 @@ fn parse_dependencies(raw_dependencies: &Vec<String>) -> Result<Vec<(String, Ver
     for dep in raw_dependencies {
         let parts: Vec<&str> = dep.splitn(2, '@').collect();
         if parts.len() != 2 {
-            return Err(anyhow!("Invalid dependency format: '{}'. Expected format is 'name@version_req'", dep));
+            return Err(anyhow!("Invalid dependency '{}'", dep));
         }
 
         let name = parts[0].trim().to_string();
@@ -79,15 +79,16 @@ pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(),
     let mut is_valid = true;
 
     if !plugin.get_entrypoint_path().is_file() {
-        plugin.add_message(format!("Plugin folder '{:?}' is missing required 'data/main.lua' entrypoint file", plugin_path));
+        plugin.add_message(format!("Plugin '{:?}' is missing required 'data/main.lua'", plugin_path));
         is_valid = false;
     }
 
     for (key, version_req) in plugin.dependencies.iter() {
         if key == "unichat" {
-            let unichat_version = Version::parse(UNICHAT_VERSION).expect("UNICHAT_VERSION is not a valid version");
-            if !version_req.matches(&unichat_version) {
-                plugin.add_message(format!("Required {} version '{}' does not satisfy the current version '{}'", UNICHAT_DISPLAY_NAME, version_req, unichat_version));
+            let version = Version::parse(UNICHAT_VERSION).expect("UNICHAT_VERSION is not a valid version");
+            if !version_req.matches(&version) {
+                let msg = format!("{} required '{}', found '{}'", UNICHAT_DISPLAY_NAME, version_req, version);
+                plugin.add_message(msg);
                 is_valid = false;
             }
         }
@@ -97,7 +98,7 @@ pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(),
 
     if !is_valid {
         plugin.set_status(PluginStatus::Invalid);
-        return Err(anyhow!("Plugin '{}' initialization failed due to previous errors", plugin.name));
+        return Err(anyhow!("Invalid plugin '{}'", plugin.name));
     }
 
     plugin.set_status(PluginStatus::Loaded);

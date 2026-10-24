@@ -32,14 +32,20 @@ fn process_rpc_request(body: JsonRPCRequest) -> Result<JsonRPCResponse, JsonRPCE
             if let Some(ok) = id {
                 let params = body.params().unwrap_or_default();
                 if params.len() != 1 {
-                    return Err(JsonRPCError::invalid_params(Some(ok.to_string()), Some("Expected exactly 1 parameter for 'userstore:get'")));
+                    return Err(JsonRPCError::invalid_params(
+                        Some(ok.to_string()),
+                        Some("Expected exactly 1 parameter for 'userstore:get'")
+                    ));
                 }
 
                 let key: &str;
                 match params[0].as_str() {
                     Some(k) => key = k,
                     None => {
-                        return Err(JsonRPCError::invalid_params(Some(ok.to_string()), Some("Parameter for 'userstore:get' must be a string")));
+                        return Err(JsonRPCError::invalid_params(
+                            Some(ok.to_string()),
+                            Some("Parameter for 'userstore:get' must be a string")
+                        ));
                     }
                 }
 
@@ -58,7 +64,6 @@ fn process_rpc_request(body: JsonRPCRequest) -> Result<JsonRPCResponse, JsonRPCE
         _ => {
             return Err(JsonRPCError::method_not_found(id, Some(format!("Method '{}' not found", method))));
         }
-
     }
 }
 

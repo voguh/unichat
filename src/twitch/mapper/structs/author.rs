@@ -10,8 +10,8 @@
 
 use std::collections::HashMap;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -84,7 +84,6 @@ pub fn parse_author_color(color: Option<&Option<String>>, author_name: &Option<S
     }
 }
 
-
 pub fn parse_author_badges(badges: Option<&Option<String>>) -> Vec<UniChatBadge> {
     let badges = badges.and_then(|v| v.as_ref());
 
@@ -92,7 +91,8 @@ pub fn parse_author_badges(badges: Option<&Option<String>>) -> Vec<UniChatBadge>
     if let Some(badge_str) = badges {
         let twitch_badges = read_badges();
         for badge in badge_str.split(',') {
-            if let Some(twitch_badge) = twitch_badges.get(badge).or_else(|| twitch_badges.get(&format!("global/{}", badge))) {
+            let global_badge = format!("global/{}", badge);
+            if let Some(twitch_badge) = twitch_badges.get(badge).or_else(|| twitch_badges.get(&global_badge)) {
                 parsed_badges.push(twitch_badge.to_owned());
             }
         }

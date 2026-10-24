@@ -23,14 +23,16 @@ pub async fn fontawesome(Path(asset_path): Path<String>) -> Response {
     let asset_resolver = app.asset_resolver();
 
     if let Some(asset) = asset_resolver.get(format!("fontawesome/{}", asset_path)) {
-        return Response::builder().status(StatusCode::OK)
+        return Response::builder()
+            .status(StatusCode::OK)
             .header("Content-Type", asset.mime_type())
             .header("Cache-Control", CACHE_IMMUTABLE)
             .body(Body::from(asset.bytes().to_vec()))
             .expect("Failed to build HTTP response");
     }
 
-    return Response::builder().status(StatusCode::NOT_FOUND)
+    return Response::builder()
+        .status(StatusCode::NOT_FOUND)
         .body(Body::from(format!("Asset '{}' not found in fontawesome", asset_path)))
         .expect("Failed to build HTTP response");
 }

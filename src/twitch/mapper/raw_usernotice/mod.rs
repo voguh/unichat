@@ -8,10 +8,12 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 
 use crate::events::unichat::UniChatEvent;
+use crate::twitch::mapper::get_tag;
+use crate::twitch::mapper::require_tag;
 use crate::utils::irc::IRCCommand;
 use crate::utils::irc::IRCMessage;
 
@@ -34,8 +36,8 @@ fn parse_command(message: &IRCMessage) -> Result<(String, Option<String>), Error
 pub fn parse(channel_name: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let tags = message.tags.clone();
 
-    let msg_id = tags.get("msg-id").and_then(|v| v.to_owned()).ok_or(anyhow!("Missing msg-id tag"))?;
-    let msg_category = tags.get("msg-param-category").and_then(|v| v.to_owned()).unwrap_or_default();
+    let msg_id = require_tag(&tags, "msg-id")?;
+    let msg_category = get_tag(&tags, "msg-param-category").unwrap_or_default();
 
     if msg_id == "announcement" {
         return announcement::parse(message, &tags);

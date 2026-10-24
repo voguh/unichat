@@ -8,15 +8,15 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 
 use crate::events::unichat::UniChatEmote;
 use crate::shared_emotes;
-use crate::youtube::mapper::structs::proxy_youtube_url;
 use crate::youtube::mapper::structs::ThumbnailsWrapper;
+use crate::youtube::mapper::structs::proxy_youtube_url;
 
 /* ========================================================================== */
 
@@ -30,31 +30,18 @@ pub struct MessageRunsWrapper {
 #[serde(untagged)]
 pub enum MessageRun {
     #[serde(rename_all = "camelCase")]
-    Text {
-        text: String
-    },
+    Text { text: String },
     #[serde(rename_all = "camelCase")]
-    Emoji {
-        emoji: Emoji
-    }
+    Emoji { emoji: Emoji }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(untagged)]
 pub enum Emoji {
     #[serde(rename_all = "camelCase")]
-    Custom {
-        emoji_id: String,
-        is_custom_emoji: bool,
-        shortcuts: Vec<String>,
-        image: CustomEmojiThumbnailsWrapper
-    },
+    Custom { emoji_id: String, is_custom_emoji: bool, shortcuts: Vec<String>, image: CustomEmojiThumbnailsWrapper },
     #[serde(rename_all = "camelCase")]
-    FontBased {
-        emoji_id: String,
-        image: FontBaseEmojiThumbnailsWrapper
-    }
-
+    FontBased { emoji_id: String, image: FontBaseEmojiThumbnailsWrapper }
 }
 
 pub type CustomEmojiThumbnailsWrapper = ThumbnailsWrapper;
@@ -99,27 +86,27 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
                         emotes.push(emote.clone());
                     }
                 }
-            },
-            MessageRun::Emoji { emoji } => {
-                match emoji {
-                    Emoji::Custom { emoji_id, image, shortcuts, .. } => {
-                        let shortcut = shortcuts.first().ok_or(anyhow!("No shortcuts found for custom emoji"))?;
-                        let last_image = image.thumbnails.last().ok_or(anyhow!("No thumbnails found for font-based emoji"))?;
+            }
+            MessageRun::Emoji { emoji } => match emoji {
+                Emoji::Custom { emoji_id, image, shortcuts, .. } => {
+                    let shortcut = shortcuts.first().ok_or(anyhow!("No shortcuts found for custom emoji"))?;
+                    let thumbnail = image.thumbnails.last();
+                    let thumbnail = thumbnail.ok_or(anyhow!("No thumbnails found for font-based emoji"))?;
 
-                        emotes.push(UniChatEmote {
-                            id: emoji_id.clone(),
-                            code: shortcut.clone(),
-                            url: proxy_youtube_url(&last_image.url)
-                        });
-                    },
-                    Emoji::FontBased { emoji_id, image, .. } => {
-                        let last_image = image.thumbnails.last().ok_or(anyhow!("No thumbnails found for font-based emoji"))?;
-                        emotes.push(UniChatEmote {
-                            id: emoji_id.clone(),
-                            code: emoji_id.clone(),
-                            url: proxy_youtube_url(&last_image.url)
-                        });
-                    }
+                    emotes.push(UniChatEmote {
+                        id: emoji_id.clone(),
+                        code: shortcut.clone(),
+                        url: proxy_youtube_url(&thumbnail.url)
+                    });
+                }
+                Emoji::FontBased { emoji_id, image, .. } => {
+                    let thumbnail = image.thumbnails.last();
+                    let thumbnail = thumbnail.ok_or(anyhow!("No thumbnails found for font-based emoji"))?;
+                    emotes.push(UniChatEmote {
+                        id: emoji_id.clone(),
+                        code: emoji_id.clone(),
+                        url: proxy_youtube_url(&thumbnail.url)
+                    });
                 }
             }
         }
@@ -135,16 +122,14 @@ pub fn parse_message_string(message_runs: &MessageRunsWrapper) -> Result<String,
         match run {
             MessageRun::Text { text } => {
                 str_message.push(text.clone());
-            },
-            MessageRun::Emoji { emoji } => {
-                match emoji {
-                    Emoji::Custom { shortcuts, .. } => {
-                        let shortcut = shortcuts.first().ok_or(anyhow!("No shortcuts found for custom emoji"))?;
-                        str_message.push(shortcut.clone());
-                    },
-                    Emoji::FontBased { emoji_id, .. } => {
-                        str_message.push(emoji_id.clone());
-                    }
+            }
+            MessageRun::Emoji { emoji } => match emoji {
+                Emoji::Custom { shortcuts, .. } => {
+                    let shortcut = shortcuts.first().ok_or(anyhow!("No shortcuts found for custom emoji"))?;
+                    str_message.push(shortcut.clone());
+                }
+                Emoji::FontBased { emoji_id, .. } => {
+                    str_message.push(emoji_id.clone());
                 }
             }
         }

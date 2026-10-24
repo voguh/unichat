@@ -8,8 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 
 use crate::events::unichat::UniChatEmote;
 use crate::shared_emotes;
@@ -32,7 +32,10 @@ fn parse_delimiter(start: &str, end: &str) -> Result<(usize, usize), Error> {
     return Ok((start, end));
 }
 
-pub fn parse_message_emotes(raw_emotes: Option<&Option<String>>, message_text: &str) -> Result<Vec<UniChatEmote>, Error> {
+pub fn parse_message_emotes(
+    raw_emotes: Option<&Option<String>>,
+    message_text: &str
+) -> Result<Vec<UniChatEmote>, Error> {
     let raw_emotes = raw_emotes.and_then(|v| v.as_ref());
 
     let message_text = normalize_message_text(message_text);

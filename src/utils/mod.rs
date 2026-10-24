@@ -14,8 +14,9 @@ use std::sync::LazyLock;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
+use regex::Regex;
 
 pub mod base64;
 pub mod constants;
@@ -54,7 +55,7 @@ pub fn normalize_value(value_raw: &str) -> Result<f64, Error> {
     let last_dot = value_raw.rfind('.');
     let last_comma = value_raw.rfind(',');
     let normalized: String;
-    match(last_dot, last_comma) {
+    match (last_dot, last_comma) {
         (Some(dot_index), Some(comma_index)) => {
             if dot_index > comma_index {
                 normalized = value_raw.replace(",", "");
@@ -71,7 +72,7 @@ pub fn normalize_value(value_raw: &str) -> Result<f64, Error> {
             }
         }
         (None, Some(comma_index)) => {
-            let digits_after_comma = value_raw.len() - comma_index -1;
+            let digits_after_comma = value_raw.len() - comma_index - 1;
             if value_raw.matches(",").count() == 1 && digits_after_comma <= 2 {
                 normalized = value_raw.replace(",", ".");
             } else {
@@ -115,35 +116,35 @@ pub fn random_color_by_seed(seed: &str) -> String {
 
 /* ========================================================================== */
 
-// Thanks to Glenn Slayden which explained the YouTube channel ID format
+// Thanks to Glenn Slayden which explained the YouTube channel and video ID format
 // on https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video/101153#101153
-static YOUTUBE_CHANNEL_ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^UC[0-9A-Za-z_-]{21}[AQgw]$").expect("Invalid YouTube channel ID regex"));
+static CHANNEL_ID: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^UC[0-9A-Za-z_-]{21}[AQgw]$").unwrap());
 pub fn is_valid_youtube_channel_id(channel_id: &str) -> bool {
     if channel_id.is_empty() {
         return false;
     }
 
-    return YOUTUBE_CHANNEL_ID_REGEX.is_match(channel_id);
+    return CHANNEL_ID.is_match(channel_id);
 }
 
 // Thanks to Glenn Slayden which explained the YouTube video ID format
 // on https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video/101153#101153
-static YOUTUBE_VIDEO_ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[0-9A-Za-z_-]{10}[048AEIMQUYcgkosw]$").expect("Invalid YouTube video ID regex"));
+static VIDEO_ID_R: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[0-9A-Za-z_-]{10}[048AEIMQUYcgkosw]$").unwrap());
 pub fn is_valid_youtube_video_id(video_id: &str) -> bool {
     if video_id.is_empty() || video_id.len() != 11 {
         return false;
     }
 
-    return YOUTUBE_VIDEO_ID_REGEX.is_match(video_id);
+    return VIDEO_ID_R.is_match(video_id);
 }
 
-static TWITCH_CHANNEL_NAME_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[0-9A-Za-z_]+$").expect("Invalid Twitch channel name regex"));
+static CHANNEL_NAME: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[0-9A-Za-z_]+$").unwrap());
 pub fn is_valid_twitch_channel_name(channel_name: &str) -> bool {
     if channel_name.is_empty() || channel_name.len() < 4 || channel_name.len() > 25 {
         return false;
     }
 
-    return TWITCH_CHANNEL_NAME_REGEX.is_match(channel_name);
+    return CHANNEL_NAME.is_match(channel_name);
 }
 
 /* ========================================================================== */

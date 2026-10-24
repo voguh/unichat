@@ -10,8 +10,8 @@
 
 use std::collections::HashMap;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -76,7 +76,8 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
             let author_username = parse_author_username_str(first_run.text.clone());
             let author_name = parse_author_name_str(first_run.text.clone());
             let author_color = parse_author_color(&author_name);
-            let author_photo = renderer.author_photo.thumbnails.last().ok_or(anyhow!("No thumbnails found in author photo"))?;
+            let thumbnails = &renderer.author_photo.thumbnails;
+            let author_photo = thumbnails.last().ok_or(anyhow!("No thumbnails found in author photo"))?;
             let timestamp_usec = get_current_timestamp();
 
             if first_run.bold.is_some() {

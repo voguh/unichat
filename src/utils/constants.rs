@@ -9,3 +9,6 @@
  ******************************************************************************/
 
 pub const BASE_REST_PORT: u16 = 9527;
+pub const BASE_URL: &str = "http://localhost:9527";
+pub const BASE_GALLERY_URL: &str = "http://localhost:9527/gallery";
+pub const BASE_WIDGET_URL: &str = "http://localhost:9527/widget";

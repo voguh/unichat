@@ -11,9 +11,9 @@
 use std::collections::HashMap;
 
 use anyhow::Error;
-use serde_json::Value;
 use serde::Deserialize;
 use serde::Serialize;
+use serde_json::Value;
 
 use crate::events::unichat::UniChatEmote;
 use crate::utils::ureq;
@@ -35,7 +35,7 @@ fn parse_emote(emote: &BetterTTVEmote) -> UniChatEmote {
         // Image size `3x` are used by default, so it's possible to use `1x`, `2x`, `3x` images.
         // By default `webp` is used for better compatibility.
         url: format!("https://cdn.betterttv.net/emote/{}/3x.webp", emote.id)
-    }
+    };
 }
 
 pub fn fetch_global_emotes() -> Result<HashMap<String, UniChatEmote>, Error> {

@@ -21,8 +21,16 @@ use crate::utils::ureq;
 /* ========================================================================== */
 
 const FORWARDED_HEADERS: [&str; 10] = [
-    "Content-Type", "Content-Range", "Accept-Ranges", "Content-Length",
-    "Cache-Control", "ETag", "Last-Modified", "Expires", "Age", "Vary"
+    "Content-Type",
+    "Content-Range",
+    "Accept-Ranges",
+    "Content-Length",
+    "Cache-Control",
+    "ETag",
+    "Last-Modified",
+    "Expires",
+    "Age",
+    "Vary"
 ];
 
 #[derive(serde::Deserialize)]
@@ -48,7 +56,8 @@ fn normalize_url(url: &str) -> String {
 
 pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryString>, req: Request<Body>) -> Response {
     if encoded_url.trim().is_empty() {
-        return Response::builder().status(400)
+        return Response::builder()
+            .status(400)
             .body("Encoded URL path cannot be empty".into())
             .expect("Failed to build HTTP response");
     }
@@ -58,7 +67,8 @@ pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryStr
         Ok(decoded) => url_path = String::from_utf8_lossy(&decoded).to_string(),
         Err(e) => {
             log::error!("Failed to decode URL path: {:#?}", e);
-            return Response::builder().status(400)
+            return Response::builder()
+                .status(400)
                 .body(format!("Failed to decode URL path: {:#?}", e).into())
                 .expect("Failed to build HTTP response");
         }
@@ -66,7 +76,8 @@ pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryStr
 
     let normalized_url = normalize_url(&url_path);
     if normalized_url.trim() == "https://" {
-        return Response::builder().status(400)
+        return Response::builder()
+            .status(400)
             .body("Decoded URL cannot be empty".into())
             .expect("Failed to build HTTP response");
     }
@@ -89,7 +100,8 @@ pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryStr
         let body = response.body_mut().read_to_vec()?;
 
         return Ok::<(ureq::http::response::Parts, Vec<u8>), ureq::Error>((response.into_parts().0, body));
-    }).await;
+    })
+    .await;
 
     match fetched {
         Ok(Ok((parts, body))) => {
@@ -105,12 +117,14 @@ pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryStr
             return builder.body(Body::from(body)).expect("Failed to build HTTP response");
         }
         Ok(Err(err)) => {
-            return Response::builder().status(502)
+            return Response::builder()
+                .status(502)
                 .body(format!("Failed to fetch proxied url: {:#?}", err).into())
                 .expect("Failed to build HTTP response");
         }
         Err(err) => {
-            return Response::builder().status(500)
+            return Response::builder()
+                .status(500)
                 .body(format!("Proxy task failed: {:#?}", err).into())
                 .expect("Failed to build HTTP response");
         }

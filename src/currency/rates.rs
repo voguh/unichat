@@ -14,8 +14,8 @@ use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
 use std::time::Duration;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -94,9 +94,13 @@ pub struct FrankfurterRate {
 }
 
 fn fetch_rate_list(target: &str) -> Result<Vec<(String, String, f64)>, Error> {
-    let currencies_list: HashMap<String, UniChatCurrency> = currencies::get().iter().map(|c| (c.code.clone(), c.clone())).collect();
+    let mut currencies_list: HashMap<String, UniChatCurrency> = HashMap::new();
+    for currency in currencies::get() {
+        currencies_list.insert(currency.code.clone(), currency);
+    }
+
     if currencies_list.is_empty() {
-        return Err(anyhow!("Currency list is empty. Please update the currency list first."));
+        return Err(anyhow!("Empty currencies list"));
     }
 
     let url = format!("{}?base={}", RATES_URL, target);

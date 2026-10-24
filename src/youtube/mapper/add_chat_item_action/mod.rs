@@ -8,8 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 
 use crate::events::unichat::UniChatEvent;
 

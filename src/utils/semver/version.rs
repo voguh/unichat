@@ -10,8 +10,8 @@
 
 use std::fmt::Display;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 
 use crate::utils::semver::pre_release_type::PreReleaseType;
 
@@ -82,7 +82,13 @@ impl Version {
 
     /* ====================================================================== */
 
-    fn new(major: i16, minor: i16, patch: i16, pre_release: Option<(PreReleaseType, i16)>, build_metadata: Option<&str>) -> Self {
+    fn new(
+        major: i16,
+        minor: i16,
+        patch: i16,
+        pre_release: Option<(PreReleaseType, i16)>,
+        build_metadata: Option<&str>
+    ) -> Self {
         return Self { major, minor, patch, pre_release, build_metadata: build_metadata.map(|s| s.to_string()) };
     }
 
@@ -98,13 +104,18 @@ impl Version {
             }
         }
 
-        let (version_numbers, pre_release_parts) = main_part.split_once('-').map(|(a, b)| (a, Some(b))).unwrap_or((main_part, None));
+        let mut version_numbers = main_part;
+        let mut pre_release_parts = None;
+        if let Some((numbers, pre_release)) = main_part.split_once('-') {
+            version_numbers = numbers;
+            pre_release_parts = Some(pre_release);
+        }
 
         /* ================================================================== */
 
         let numbers: Vec<&str> = version_numbers.split('.').collect();
         if numbers.len() != 3 {
-            return Err(anyhow!("Invalid version string, expected MAJOR.MINOR.PATCH"));
+            return Err(anyhow!("Invalid version '{}'", value));
         }
 
         /* ================================================================== */
@@ -113,7 +124,7 @@ impl Version {
         if let Some(pre_release_parts) = pre_release_parts {
             let parts: Vec<&str> = pre_release_parts.split('.').collect();
             if parts.len() > 2 {
-                return Err(anyhow!("Invalid pre-release, expected TYPE.NUMBER"));
+                return Err(anyhow!("Invalid pre-release '{}'", pre_release_parts));
             }
 
             let pre_release_type = PreReleaseType::new(parts[0])?;

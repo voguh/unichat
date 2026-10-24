@@ -17,8 +17,8 @@ use std::sync::LazyLock;
 use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use serde_json::Value;
 
 use crate::events;
@@ -71,7 +71,8 @@ fn write_badges(badges: HashMap<String, UniChatBadge>) {
 /* ========================================================================== */
 
 fn handle_ready_status(event: &ScraperStatusEvent) -> Result<(), Error> {
-    let channel_id = event.extra_str("channelId")
+    let channel_id = event
+        .extra_str("channelId")
         .ok_or(anyhow!("Missing or invalid 'channelId' field in Twitch 'ready' payload"))?;
 
     shared_emotes::fetch_shared_emotes("twitch", channel_id);
@@ -81,9 +82,14 @@ fn handle_ready_status(event: &ScraperStatusEvent) -> Result<(), Error> {
 }
 
 fn handle_badges_event(event_type: &str, payload: &Value) -> Result<(), Error> {
-    let badges_type = payload.get("badgesType").and_then(|v| v.as_str())
+    let badges_type = payload
+        .get("badgesType")
+        .and_then(|v| v.as_str())
         .ok_or(anyhow!("Missing or invalid 'badgesType' field in Twitch '{}' payload", event_type))?;
-    let badges = payload.get("badges").and_then(|v| v.as_array()).cloned()
+    let badges = payload
+        .get("badges")
+        .and_then(|v| v.as_array())
+        .cloned()
         .ok_or(anyhow!("Missing or invalid 'badges' field in Twitch '{}' payload", event_type))?;
 
     let twitch_badges: Vec<TwitchRawBadge> = serde_json::from_value(serde_json::Value::Array(badges))?;
@@ -105,7 +111,10 @@ fn handle_badges_event(event_type: &str, payload: &Value) -> Result<(), Error> {
 }
 
 fn handle_cheermotes_event(event_type: &str, payload: &Value) -> Result<(), Error> {
-    let cheermotes = payload.get("cheermotes").and_then(|v| v.as_array()).cloned()
+    let cheermotes = payload
+        .get("cheermotes")
+        .and_then(|v| v.as_array())
+        .cloned()
         .ok_or(anyhow!("Missing or invalid 'cheermotes' field in Twitch '{}' payload", event_type))?;
 
     let mut cheermotes_set = HashSet::new();
@@ -130,7 +139,9 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     }
 
     let log_file = twitch_log_dir.join(file_name);
-    let mut file = fs::OpenOptions::new().create(true).append(true).open(log_file).expect("Failed to open Twitch log file");
+    let mut options = fs::OpenOptions::new();
+    options.create(true).append(true);
+    let mut file = options.open(log_file).expect("Failed to open Twitch log file");
     writeln!(file, "{content}").expect("Failed to write Twitch log file");
 }
 
@@ -144,7 +155,8 @@ fn handle_ws_event(_event_type: &str, message: &Value) -> Result<(), Error> {
     match mapper::parse_ws(message) {
         Ok(Some(parsed)) => {
             if log_events == SettingLogEventLevel::AllEvents {
-                log_action("events-parsed.log", &serde_json::to_string(&parsed).expect("Failed to serialize UniChatEvent"));
+                let serialized = serde_json::to_string(&parsed).expect("Failed to serialize UniChatEvent");
+                log_action("events-parsed.log", &serialized);
             }
 
             if let Err(err) = events::emit(parsed) {
@@ -177,7 +189,8 @@ fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error>
     match mapper::parse_irc(&message) {
         Ok(Some(parsed)) => {
             if log_events == SettingLogEventLevel::AllEvents {
-                log_action("events-parsed.log", &serde_json::to_string(&parsed).expect("Failed to serialize UniChatEvent"));
+                let serialized = serde_json::to_string(&parsed).expect("Failed to serialize UniChatEvent");
+                log_action("events-parsed.log", &serialized);
             }
 
             if let Err(err) = events::emit(parsed) {
@@ -201,10 +214,12 @@ fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error>
 
 /* ========================================================================== */
 
-static TWITCH_VALID_URLS: LazyLock<Vec<String>> = LazyLock::new(|| vec![
-    String::from("https://www.twitch.tv/{CHANNEL_NAME}/chat"),
-    String::from("https://www.twitch.tv/popout/{CHANNEL_NAME}/chat")
-]);
+static TWITCH_VALID_URLS: LazyLock<Vec<String>> = LazyLock::new(|| {
+    vec![
+        String::from("https://www.twitch.tv/{CHANNEL_NAME}/chat"),
+        String::from("https://www.twitch.tv/popout/{CHANNEL_NAME}/chat"),
+    ]
+});
 
 #[derive(Default)]
 struct TwitchUniChatScraper;
@@ -274,7 +289,9 @@ impl UniChatScraper for TwitchUniChatScraper {
     }
 
     fn on_event(&self, event: serde_json::Value) -> Result<(), Error> {
-        let event_type = event.get("type").and_then(|v| v.as_str())
+        let event_type = event
+            .get("type")
+            .and_then(|v| v.as_str())
             .ok_or(anyhow!("Missing or invalid 'type' field in Twitch raw event payload"))?;
 
         return match event_type {
@@ -297,11 +314,7 @@ impl UniChatScraper for TwitchUniChatScraper {
 /* ========================================================================== */
 
 pub fn init() -> Result<(), Error> {
-    let scraper_data = TwitchUniChatScraper::default();
-
-    let scraper: Arc<dyn UniChatScraper + Send + Sync> = Arc::new(scraper_data);
-    scraper::register_scraper(scraper)?;
+    scraper::register_scraper(Arc::new(TwitchUniChatScraper::default()))?;
 
     return Ok(());
 }
-

@@ -24,14 +24,14 @@ use std::process::Command;
 // I will not implement any api to get license information.
 // This is a "safe guard" to remember me to change license info if I change the license.
 fn get_license_info(license: &str) -> Result<(String, String), Box<dyn std::error::Error>> {
-    let mut licenses: HashMap<&str, (&str, &str)> = HashMap::new();
-    licenses.insert("EPL-2.0", ("Eclipse Public License, Version 2.0", "https://www.eclipse.org/legal/epl-2.0/"));
-
-    if let Some((name, url)) = licenses.get(license) {
-        return Ok((name.to_string(), url.to_string()));
-    } else {
+    if license != "EPL-2.0" {
         return Err(format!("Unknown license: {}", license).into());
     }
+
+    return Ok((
+        String::from("Eclipse Public License, Version 2.0"),
+        String::from("https://www.eclipse.org/legal/epl-2.0/")
+    ));
 }
 
 fn generate_resources(target_gen_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
@@ -48,7 +48,7 @@ fn generate_resources(target_gen_dir: &Path) -> Result<(), Box<dyn std::error::E
     let homepage = env!("CARGO_PKG_HOMEPAGE");
     let license_code = env!("CARGO_PKG_LICENSE");
     let (license_name, license_url) = get_license_info(license_code)?;
-    let icon_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("icons").join("icon.png");
+    let icon_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("icons/icon.png");
     let licenses_path = target_gen_dir.join("third_party_licenses.json");
 
     #[rustfmt::skip]
@@ -103,10 +103,7 @@ fn get_clean_env() -> HashMap<String, String> {
     for (key, value) in env::vars() {
         if EQUALS_ENV.contains(&key.as_str()) {
             continue;
-        } else if STARTS_WITH_ENV
-            .iter()
-            .any(|prefix| key.starts_with(prefix))
-        {
+        } else if STARTS_WITH_ENV.iter().any(|prefix| key.starts_with(prefix)) {
             continue;
         }
 
@@ -161,12 +158,8 @@ fn generate_crate_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::
 
     let cargo_metadata_json = String::from_utf8(metadata_output.stdout)?;
     let cargo_metadata: serde_json::Value = serde_json::from_str(&cargo_metadata_json)?;
-
     let packages: Vec<CargoPackage> = serde_json::from_value(cargo_metadata["packages"].clone())?;
-    let packages_map: HashMap<String, CargoPackage> = packages
-        .into_iter()
-        .map(|pkg| (pkg.name.clone(), pkg.clone()))
-        .collect();
+    let packages_map: HashMap<String, CargoPackage> = packages.into_iter().map(|pkg| (pkg.name.clone(), pkg)).collect();
 
     // let unichat_direct_deps = unichat_package["dependencies"].as_array().ok_or("missing dependencies")?;
 
@@ -226,12 +219,8 @@ fn generate_npm_licenses_info() -> Result<Vec<FinalLicenseInfo>, Box<dyn std::er
     }
 
     let pnpm_metadata_json = String::from_utf8(metadata_output.stdout)?;
-    let pnpm_metadata: Vec<PNPMPackage> = serde_json::from_str(&pnpm_metadata_json)?;
-
-    let packages_map: HashMap<String, PNPMPackage> = pnpm_metadata
-        .into_iter()
-        .map(|pkg| (pkg.name.clone(), pkg.clone()))
-        .collect();
+    let packages: Vec<PNPMPackage> = serde_json::from_str(&pnpm_metadata_json)?;
+    let packages_map: HashMap<String, PNPMPackage> = packages.into_iter().map(|pkg| (pkg.name.clone(), pkg)).collect();
 
     let unichat_package = packages_map["unichat"].clone();
     for dep in unichat_package.dependencies.values() {

@@ -10,8 +10,8 @@
 
 use std::collections::HashMap;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 
 /* ========================================================================== */
 
@@ -37,7 +37,6 @@ pub enum IRCCommand {
     Raw(String, Vec<String>)
 }
 
-
 impl IRCMessage {
     pub fn parse(value: Option<&serde_json::Value>) -> Result<Self, Error> {
         if let Some(value) = value {
@@ -46,12 +45,7 @@ impl IRCMessage {
             let prefix = Self::parse_prefix(value.get("prefix"))?;
             let command = Self::parse_command(value.get("command"))?;
 
-            return Ok(IRCMessage {
-                raw: raw.to_string(),
-                tags: tags,
-                prefix: prefix,
-                command: command
-            });
+            return Ok(IRCMessage { raw: raw.to_string(), tags: tags, prefix: prefix, command: command });
         } else {
             return Err(anyhow!("Missing IRC message value"));
         }
@@ -91,7 +85,10 @@ impl IRCMessage {
     fn parse_command(command_obj: Option<&serde_json::Value>) -> Result<IRCCommand, Error> {
         if let Some(command_obj) = command_obj.and_then(|cmd| cmd.as_object()) {
             let name = command_obj.get("name").and_then(|n| n.as_str()).ok_or(anyhow!("Invalid command name"))?;
-            let params = command_obj.get("params").and_then(|params| params.as_array()).ok_or(anyhow!("Invalid command params"))?;
+            let params = command_obj
+                .get("params")
+                .and_then(|params| params.as_array())
+                .ok_or(anyhow!("Invalid command params"))?;
             let params_str: Vec<String> = params.iter().filter_map(|p| p.as_str().map(|s| s.to_string())).collect();
 
             if name == "PRIVMSG" && params_str.len() == 2 {

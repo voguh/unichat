@@ -84,54 +84,81 @@ static UREQ_AGENT: LazyLock<ureq::Agent> = LazyLock::new(|| {
 
 #[must_use]
 pub fn get<T>(uri: T) -> RequestBuilder<WithoutBody>
-    where Uri: TryFrom<T>, <Uri as TryFrom<T>>::Error: Into<http::Error> {
+where
+    Uri: TryFrom<T>,
+    <Uri as TryFrom<T>>::Error: Into<http::Error>
+{
     return UREQ_AGENT.get(uri);
 }
 
 #[must_use]
 pub fn post<T>(uri: T) -> RequestBuilder<WithBody>
-    where Uri: TryFrom<T>, <Uri as TryFrom<T>>::Error: Into<http::Error> {
+where
+    Uri: TryFrom<T>,
+    <Uri as TryFrom<T>>::Error: Into<http::Error>
+{
     return UREQ_AGENT.post(uri);
 }
 
 #[must_use]
 pub fn put<T>(uri: T) -> RequestBuilder<WithBody>
-    where Uri: TryFrom<T>, <Uri as TryFrom<T>>::Error: Into<http::Error> {
+where
+    Uri: TryFrom<T>,
+    <Uri as TryFrom<T>>::Error: Into<http::Error>
+{
     return UREQ_AGENT.put(uri);
 }
 
 #[must_use]
 pub fn patch<T>(uri: T) -> RequestBuilder<WithBody>
-    where Uri: TryFrom<T>, <Uri as TryFrom<T>>::Error: Into<http::Error> {
+where
+    Uri: TryFrom<T>,
+    <Uri as TryFrom<T>>::Error: Into<http::Error>
+{
     return UREQ_AGENT.patch(uri);
 }
 
 #[must_use]
 pub fn delete<T>(uri: T) -> RequestBuilder<WithoutBody>
-    where Uri: TryFrom<T>, <Uri as TryFrom<T>>::Error: Into<http::Error> {
+where
+    Uri: TryFrom<T>,
+    <Uri as TryFrom<T>>::Error: Into<http::Error>
+{
     return UREQ_AGENT.delete(uri);
 }
 
 #[must_use]
 pub fn head<T>(uri: T) -> RequestBuilder<WithoutBody>
-    where Uri: TryFrom<T>, <Uri as TryFrom<T>>::Error: Into<http::Error> {
+where
+    Uri: TryFrom<T>,
+    <Uri as TryFrom<T>>::Error: Into<http::Error>
+{
     return UREQ_AGENT.head(uri);
 }
 
 #[must_use]
 pub fn options<T>(uri: T) -> RequestBuilder<WithoutBody>
-    where Uri: TryFrom<T>, <Uri as TryFrom<T>>::Error: Into<http::Error> {
+where
+    Uri: TryFrom<T>,
+    <Uri as TryFrom<T>>::Error: Into<http::Error>
+{
     return UREQ_AGENT.options(uri);
 }
 
 #[must_use]
 pub fn connect<T>(uri: T) -> RequestBuilder<WithoutBody>
-    where Uri: TryFrom<T>, <Uri as TryFrom<T>>::Error: Into<http::Error> {
+where
+    Uri: TryFrom<T>,
+    <Uri as TryFrom<T>>::Error: Into<http::Error>
+{
     return UREQ_AGENT.connect(uri);
 }
 
 #[must_use]
 pub fn trace<T>(uri: T) -> RequestBuilder<WithoutBody>
-    where Uri: TryFrom<T>, <Uri as TryFrom<T>>::Error: Into<http::Error> {
+where
+    Uri: TryFrom<T>,
+    <Uri as TryFrom<T>>::Error: Into<http::Error>
+{
     return UREQ_AGENT.trace(uri);
 }

@@ -20,6 +20,22 @@ pub mod window;
 
 /* ========================================================================== */
 
+fn shutdown(app: &tauri::AppHandle, exit_code: i32) {
+    if let Err(err) = flush_userstore() {
+        log::error!("Failed to flush userstore to disk: {:#?}", err);
+    }
+
+    for (key, window) in app.webview_windows() {
+        if key != main_window::MAIN_WINDOW_LABEL {
+            if let Err(err) = window.destroy() {
+                log::error!("Failed to destroy window '{}': {:#?}", key, err);
+            }
+        }
+    }
+
+    app.exit(exit_code);
+}
+
 pub fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     let app = window.app_handle();
     let label = window.label();
@@ -27,26 +43,15 @@ pub fn on_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     if let tauri::WindowEvent::Destroyed = event {
         log::info!("Window '{}' destroyed.", label);
 
-        let is_startup_window = label == splash_window::SPLASH_WINDOW_LABEL || label == error_window::ERROR_WINDOW_LABEL;
-        let has_other_window = app.get_webview_window(main_window::MAIN_WINDOW_LABEL).is_some()
-            || app.get_webview_window(error_window::ERROR_WINDOW_LABEL).is_some();
-
-        if label == main_window::MAIN_WINDOW_LABEL || (is_startup_window && !has_other_window) {
-            if let Err(err) = flush_userstore() {
-                log::error!("Failed to flush userstore to disk: {:#?}", err);
-            }
-
-            for (key, window) in app.webview_windows() {
-                if key != main_window::MAIN_WINDOW_LABEL {
-                    if let Err(err) = window.destroy() {
-                        log::error!("Failed to destroy window '{}': {:#?}", key, err);
-                    }
-                }
-            }
-
-            if label == error_window::ERROR_WINDOW_LABEL {
-                app.cleanup_before_exit();
-                std::process::exit(1);
+        if label == main_window::MAIN_WINDOW_LABEL {
+            shutdown(app, 0);
+        } else if label == error_window::ERROR_WINDOW_LABEL {
+            shutdown(app, 1);
+        } else if label == splash_window::SPLASH_WINDOW_LABEL {
+            let has_main_window = app.get_webview_window(main_window::MAIN_WINDOW_LABEL).is_some();
+            let has_error_window = app.get_webview_window(error_window::ERROR_WINDOW_LABEL).is_some();
+            if !has_main_window && !has_error_window {
+                shutdown(app, 0);
             }
         }
     } else if let tauri::WindowEvent::CloseRequested { api, .. } = event {

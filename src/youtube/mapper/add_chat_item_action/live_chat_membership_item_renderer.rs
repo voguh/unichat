@@ -11,8 +11,8 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -76,7 +76,9 @@ fn parse_tier(parsed: &LiveChatMembershipItemRenderer) -> Option<String> {
     return None;
 }
 
-static MONTHS_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"\d+").expect("Invalid months regex"));
+static MONTHS_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {
+    return regex::Regex::new(r"\d+").expect("Invalid months regex");
+});
 
 // I was able to detect two types of membership events (examples 7 and 8).
 // The event without a message and with 'runs' in the headerSubtext I am assuming is the first month
@@ -90,17 +92,16 @@ fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> Result<u16, Error> {
     let mut months: u16 = 0;
 
     if let Some(header_primary_text) = &parsed.header_primary_text {
-        let run = header_primary_text.runs.get(1)
-            .or_else(|| header_primary_text.runs.get(0))
-            .ok_or(anyhow!("No valid run found in header primary text"))?;
+        let runs = &header_primary_text.runs;
+        let run = runs.get(1).or_else(|| runs.get(0)).ok_or(anyhow!("No valid run found in header primary text"))?;
 
         match run {
             MessageRun::Text { text } => {
-                let value_raw = MONTHS_REGEX.find(text.trim())
-                    .ok_or(anyhow!("Failed to find months in header primary text"))?;
+                let found = MONTHS_REGEX.find(text.trim());
+                let value_raw = found.ok_or(anyhow!("Failed to find months in header primary text"))?;
 
                 months = value_raw.as_str().parse()?;
-            },
+            }
             MessageRun::Emoji { .. } => return Err(anyhow!("Unexpected emoji in header subtext"))
         }
     } else if let Some(_runs) = &parsed.header_subtext.runs {

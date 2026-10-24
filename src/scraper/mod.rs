@@ -15,12 +15,12 @@ use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
 use std::sync::RwLockWriteGuard;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use tauri::Listener as _;
-use tauri::webview::PageLoadPayload;
 use tauri::WebviewWindow;
 use tauri::Wry;
+use tauri::webview::PageLoadPayload;
 
 use crate::scraper::status::ScraperStatusEvent;
 use crate::scraper::utils::decode_url;
@@ -39,12 +39,14 @@ pub static COMMON_SCRAPER_JS: &str = include_str!("./static/common_scraper.js");
 
 /* ========================================================================== */
 
-static SCRAPERS: LazyLock<RwLock<HashMap<String, Arc<dyn UniChatScraper + Send + Sync>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
-fn read() -> RwLockReadGuard<'static, HashMap<String, Arc<dyn UniChatScraper + Send + Sync>>> {
+pub type ArcScraper = Arc<dyn UniChatScraper + Send + Sync>;
+
+static SCRAPERS: LazyLock<RwLock<HashMap<String, ArcScraper>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+fn read() -> RwLockReadGuard<'static, HashMap<String, ArcScraper>> {
     return SCRAPERS.read().expect("Scraper::SCRAPERS lock poisoned");
 }
 
-fn write() -> RwLockWriteGuard<'static, HashMap<String, Arc<dyn UniChatScraper + Send + Sync>>> {
+fn write() -> RwLockWriteGuard<'static, HashMap<String, ArcScraper>> {
     return SCRAPERS.write().expect("Scraper::SCRAPERS lock poisoned");
 }
 
@@ -80,12 +82,12 @@ pub fn serialize_scraper(scraper: &Arc<dyn UniChatScraper + Send + Sync>) -> ser
     return serialized;
 }
 
-pub fn get_scrapers() -> Vec<Arc<dyn UniChatScraper + Send + Sync>> {
+pub fn get_scrapers() -> Vec<ArcScraper> {
     let scrapers = read();
     return scrapers.values().cloned().collect();
 }
 
-pub fn get_scraper(id: &str) -> Option<Arc<dyn UniChatScraper + Send + Sync>> {
+pub fn get_scraper(id: &str) -> Option<ArcScraper> {
     let scrapers = read();
     return scrapers.get(id).cloned();
 }
@@ -93,10 +95,16 @@ pub fn get_scraper(id: &str) -> Option<Arc<dyn UniChatScraper + Send + Sync>> {
 fn handle_event(payload: &str) -> Result<(), Error> {
     let mut payload: serde_json::Value = serde_json::from_str(payload)?;
 
-    let scraper_id = payload.get("scraperId").and_then(|v| v.as_str())
-        .ok_or(anyhow!("Missing or invalid 'scraperId' field in scraper event payload"))?.to_string();
-    let event_type = payload.get("type").and_then(|v| v.as_str())
-        .ok_or(anyhow!("Missing or invalid 'type' field in scraper event payload"))?.to_string();
+    let scraper_id = payload
+        .get("scraperId")
+        .and_then(|v| v.as_str())
+        .ok_or(anyhow!("Missing or invalid 'scraperId' field in scraper event payload"))?
+        .to_string();
+    let event_type = payload
+        .get("type")
+        .and_then(|v| v.as_str())
+        .ok_or(anyhow!("Missing or invalid 'type' field in scraper event payload"))?
+        .to_string();
 
     let scraper = get_scraper(&scraper_id).ok_or(anyhow!("Scraper with ID '{}' not found", scraper_id))?;
 
@@ -147,17 +155,19 @@ fn on_scraper_page_load(webview: WebviewWindow<Wry>, payload: PageLoadPayload<'_
                 log::error!(target: &format!("scraper:{}", scraper_id), "Failed to send scraper '{}' back to the idle page: {:#?}", scraper_id, err);
             }
         }
-        Err(err) => log::error!(target: &format!("scraper:{}", scraper_id), "Failed to resolve the idle page URL: {:#?}", err)
+        Err(err) => {
+            log::error!(target: &format!("scraper:{}", scraper_id), "Failed to resolve the idle page URL: {:#?}", err)
+        }
     }
 }
 
 pub fn register_scraper(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Result<WebviewWindow, Error> {
     if scraper.id().chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
-        return Err(anyhow!("Scraper ID '{}' contains invalid characters. Only ASCII alphanumeric characters, underscores, and hyphens are allowed.", scraper.id()));
+        return Err(anyhow!("Invalid characters in scraper ID '{}'", scraper.id()));
     }
 
     if !scraper.id().ends_with("-chat") {
-        return Err(anyhow!("Scraper ID '{}' is invalid. Scraper IDs must end with the suffix '-chat'.", scraper.id()));
+        return Err(anyhow!("Missing '-chat' suffix in scraper ID '{}'", scraper.id()));
     }
 
     /* ====================================================================== */

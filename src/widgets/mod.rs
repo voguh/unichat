@@ -18,15 +18,15 @@ use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
 use std::sync::RwLockWriteGuard;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use serde::Serialize;
 use serde_json::Map;
 
 use crate::addons::manifest::UniChatAddonManifest;
 use crate::addons::manifest::load_manifest;
 use crate::plugins::UniChatPlugin;
-use crate::utils::constants::BASE_REST_PORT;
+use crate::utils::constants::BASE_WIDGET_URL;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
@@ -158,7 +158,12 @@ fn write() -> RwLockWriteGuard<'static, HashMap<String, WidgetMetadata>> {
 
 /* ========================================================================== */
 
-fn get_warnings_for_widget(widget_path: &Path, widget_name: &str, source_type: &WidgetSource, manifest: &Option<UniChatAddonManifest>) -> Vec<String> {
+fn get_warnings_for_widget(
+    widget_path: &Path,
+    widget_name: &str,
+    source_type: &WidgetSource,
+    manifest: &Option<UniChatAddonManifest>
+) -> Vec<String> {
     let mut warnings = Vec::new();
 
     if let Some(manifest) = manifest {
@@ -190,7 +195,11 @@ fn get_warnings_for_widget(widget_path: &Path, widget_name: &str, source_type: &
     return warnings;
 }
 
-fn load_widgets_from_disk(widgets_path: &Path, source_type: WidgetSource, cb: impl Fn(&WidgetMetadata)) -> Result<(), Error> {
+fn load_widgets_from_disk(
+    widgets_path: &Path,
+    source_type: WidgetSource,
+    cb: impl Fn(&WidgetMetadata)
+) -> Result<(), Error> {
     if !widgets_path.exists() || !widgets_path.is_dir() {
         return Ok(());
     }
@@ -205,7 +214,8 @@ fn load_widgets_from_disk(widgets_path: &Path, source_type: WidgetSource, cb: im
                 continue;
             }
 
-            let widget_name = widget_path.file_name().ok_or(anyhow!("Invalid widget folder name"))?.to_string_lossy().to_string();
+            let folder_name = widget_path.file_name().ok_or(anyhow!("Invalid widget folder name"))?;
+            let widget_name = folder_name.to_string_lossy().to_string();
             if widget_name.starts_with(".") {
                 continue;
             } else if widget_name.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
@@ -218,9 +228,9 @@ fn load_widgets_from_disk(widgets_path: &Path, source_type: WidgetSource, cb: im
                 match load_manifest(&widget_path) {
                     Ok(loaded_manifest) => {
                         manifest = Some(loaded_manifest);
-                    },
+                    }
                     Err(e) => {
-                        log::warn!("Failed to load manifest of widget '{}' from {:?}: {:#?}", widget_name, widgets_path, e);
+                        log::warn!("Failed to load widget manifest from {:?}: {:#?}", widget_path, e);
                     }
                 }
             }
@@ -304,11 +314,11 @@ pub fn reload_user_widgets() -> Result<(), Error> {
 pub fn add_plugin_widgets(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
     let widgets_path = plugin.get_widgets_path();
 
-    let callback = move |metadata: &WidgetMetadata| {
-        plugin.add_message(format!("Registered widget '{}' provided as 'http://localhost:{}/widget/{}'", metadata.name, BASE_REST_PORT, metadata.rest_path));
-    };
-
-    load_widgets_from_disk(&widgets_path, WidgetSource::UserPlugin(plugin.name.clone()), callback)?;
+    load_widgets_from_disk(&widgets_path, WidgetSource::UserPlugin(plugin.name.clone()), move |metadata| {
+        let name = &metadata.name;
+        let rest_path = &metadata.rest_path;
+        plugin.add_message(format!("Registered widget '{}' provided as '{}/{}'", name, BASE_WIDGET_URL, rest_path));
+    })?;
 
     return Ok(());
 }

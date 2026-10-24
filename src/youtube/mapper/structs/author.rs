@@ -11,8 +11,8 @@
 use std::sync::LazyLock;
 use std::time::Duration;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use moka::sync::Cache;
 use serde::Deserialize;
 use serde::Serialize;
@@ -21,8 +21,8 @@ use crate::events::unichat::UniChatAuthorType;
 use crate::events::unichat::UniChatBadge;
 use crate::utils::random_color_by_seed;
 use crate::youtube::mapper::structs::Thumbnail;
-use crate::youtube::mapper::structs::proxy_youtube_url;
 use crate::youtube::mapper::structs::ThumbnailsWrapper;
+use crate::youtube::mapper::structs::proxy_youtube_url;
 
 /* ========================================================================== */
 
@@ -45,13 +45,9 @@ pub struct AuthorBadgeWrapper {
 #[serde(untagged)]
 pub enum AuthorBadgeRenderer {
     #[serde(rename_all = "camelCase")]
-    Custom {
-        custom_thumbnail: AuthorBadgeThumbnailsWrapper
-    },
+    Custom { custom_thumbnail: AuthorBadgeThumbnailsWrapper },
     #[serde(rename_all = "camelCase")]
-    Internal {
-        icon: AuthorBadgeIconWrapper
-    }
+    Internal { icon: AuthorBadgeIconWrapper }
 }
 
 pub type AuthorBadgeThumbnailsWrapper = ThumbnailsWrapper;
@@ -79,8 +75,12 @@ pub struct ButtonViewModel {
 
 /* <================================================================================================================> */
 
-static USERNAME_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^[\p{L}\p{N}_\.-]{3,30}$").expect("Invalid username regex"));
-static USERNAME_CACHE: LazyLock<Cache<String, Option<String>>> = LazyLock::new(|| Cache::builder().time_to_idle(Duration::from_secs(60 * 10)).build());
+static USERNAME_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {
+    return regex::Regex::new(r"^[\p{L}\p{N}_\.-]{3,30}$").expect("Invalid username regex");
+});
+static USERNAME_CACHE: LazyLock<Cache<String, Option<String>>> = LazyLock::new(|| {
+    return Cache::builder().time_to_idle(Duration::from_secs(60 * 10)).build();
+});
 
 pub fn parse_author_username(name: &AuthorNameWrapper) -> Option<String> {
     return parse_author_username_str(name.simple_text.clone());
@@ -136,19 +136,21 @@ pub fn parse_author_color(author_name: &str) -> String {
     return random_color_by_seed(author_name);
 }
 
-pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_content: &Option<Vec<BeforeContentButton>>) -> Result<Vec<UniChatBadge>, Error> {
+pub fn parse_author_badges(
+    badges: &Option<Vec<AuthorBadgeWrapper>>,
+    before_content: &Option<Vec<BeforeContentButton>>
+) -> Result<Vec<UniChatBadge>, Error> {
     let mut parsed_badges = Vec::new();
 
     if let Some(badges) = badges {
         for badge in badges {
             match &badge.live_chat_author_badge_renderer {
                 AuthorBadgeRenderer::Custom { custom_thumbnail } => {
-                    let thumbnail = custom_thumbnail.thumbnails.last().ok_or(anyhow!("No thumbnails found in custom thumbnail"))?;
-                    parsed_badges.push(UniChatBadge {
-                        code: String::from("sponsor"),
-                        url: proxy_youtube_url(&thumbnail.url)
-                    });
-                },
+                    let thumbnails = &custom_thumbnail.thumbnails;
+                    let thumbnail = thumbnails.last().ok_or(anyhow!("No thumbnails found in custom thumbnail"))?;
+                    let badge = UniChatBadge { code: String::from("sponsor"), url: proxy_youtube_url(&thumbnail.url) };
+                    parsed_badges.push(badge);
+                }
                 AuthorBadgeRenderer::Internal { icon } => {
                     match icon.icon_type.as_str() {
                         "OWNER" => parsed_badges.push(UniChatBadge {
@@ -207,16 +209,17 @@ pub fn parse_author_badges(badges: &Option<Vec<AuthorBadgeWrapper>>, before_cont
 
 fn expect_badge_type(badges: &[AuthorBadgeWrapper], badge_type: &str) -> bool {
     if badge_type == "MEMBER" {
-        return badges.iter().any(|badge| matches!(
-            badge.live_chat_author_badge_renderer,
-            AuthorBadgeRenderer::Custom { .. }
-        ));
+        return badges
+            .iter()
+            .any(|badge| matches!(badge.live_chat_author_badge_renderer, AuthorBadgeRenderer::Custom { .. }));
     }
 
-    return badges.iter().any(|badge| matches!(
-        badge.live_chat_author_badge_renderer,
-        AuthorBadgeRenderer::Internal { ref icon } if icon.icon_type == *badge_type
-    ));
+    return badges.iter().any(|badge| {
+        matches!(
+            badge.live_chat_author_badge_renderer,
+            AuthorBadgeRenderer::Internal { ref icon } if icon.icon_type == *badge_type
+        )
+    });
 }
 
 pub fn parse_author_type(badges: &Option<Vec<AuthorBadgeWrapper>>) -> UniChatAuthorType {

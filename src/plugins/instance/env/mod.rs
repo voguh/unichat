@@ -11,7 +11,12 @@
 use std::fs;
 use std::sync::Arc;
 
-use anyhow::Error;
+use mlua::Error;
+use mlua::Function;
+use mlua::Lua;
+use mlua::Table;
+use mlua::Value;
+use mlua::Variadic;
 
 use crate::plugins::get_plugin;
 use crate::plugins::instance::env::unichat_api::UniChatAPI;
@@ -58,9 +63,9 @@ const UNICHAT_BADGE_KEY: &str = "UniChatBadge";
 
 /* ========================================================================== */
 
-fn create_print_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Function, mlua::Error> {
+fn create_print_fn(lua: &Lua, plugin_name: &str) -> Result<Function, Error> {
     let plugin_name: Arc<String> = Arc::new(plugin_name.to_string());
-    let print_func = lua.create_function(move |lua, args: mlua::Variadic<mlua::Value>| {
+    let print_func = lua.create_function(move |lua, args: Variadic<Value>| {
         let mut output_parts: Vec<String> = Vec::new();
 
         for arg in args.into_iter() {
@@ -82,7 +87,7 @@ fn create_print_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Function,
 
 /* ========================================================================== */
 
-fn scoped_modules_require(lua: &mlua::Lua, plugin_env: &mlua::Table, plugin_name: &str, module: &str) -> mlua::Result<mlua::Value> {
+fn scoped_modules_require(lua: &Lua, plugin_env: &Table, plugin_name: &str, module: &str) -> mlua::Result<Value> {
     if module == "unichat:currency" {
         return UniChatCurrencyModule::new(lua);
     } else if module == "unichat:http" {
@@ -101,31 +106,31 @@ fn scoped_modules_require(lua: &mlua::Lua, plugin_env: &mlua::Table, plugin_name
         return UniChatYamlModule::new(lua);
     }
 
-    let manifest = get_plugin(plugin_name).map_err(mlua::Error::external)?;
+    let manifest = get_plugin(plugin_name).map_err(Error::external)?;
     let plugin_root = manifest.get_data_path();
     let mut module_path = module.replace('.', "/");
     if !module_path.ends_with(".lua") {
         module_path.push_str(".lua");
     }
 
-    let path = safe_guard_path(&plugin_root, &module_path).map_err(mlua::Error::external)?;
-    let code = fs::read_to_string(path).map_err(|e| mlua::Error::external(e))?;
-    let result: mlua::Value = lua.load(&code).set_environment(plugin_env.clone()).eval()?;
+    let path = safe_guard_path(&plugin_root, &module_path).map_err(Error::external)?;
+    let code = fs::read_to_string(path).map_err(|e| Error::external(e))?;
+    let result: Value = lua.load(&code).set_environment(plugin_env.clone()).eval()?;
 
     return Ok(result);
 }
 
-fn create_require_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Function, mlua::Error> {
+fn create_require_fn(lua: &Lua, plugin_name: &str) -> Result<Function, Error> {
     let plugin_name: Arc<String> = Arc::new(plugin_name.to_string());
-    let require_fn = lua.create_function(move |lua, module: String| -> mlua::Result<mlua::Value> {
-        let plugin = get_plugin(&plugin_name).map_err(mlua::Error::external)?;
+    let require_fn = lua.create_function(move |lua, module: String| -> mlua::Result<Value> {
+        let plugin = get_plugin(&plugin_name).map_err(Error::external)?;
         if let Ok(cached_module) = plugin.get_cached_loaded_module(&module) {
             return Ok(cached_module);
         }
 
         let plugin_env = plugin.get_plugin_env();
         if module.contains(':') && !module.starts_with("unichat:") {
-            if let Some(shared_module) = shared_modules::get(&module).map_err(mlua::Error::external)? {
+            if let Some(shared_module) = shared_modules::get(&module).map_err(Error::external)? {
                 return Ok(shared_module);
             }
         } else {
@@ -134,7 +139,7 @@ fn create_require_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Functio
             return Ok(saved_module);
         }
 
-        return Err(mlua::Error::runtime(format!("Module '{}' not found for plugin '{}'", module, plugin_name)));
+        return Err(Error::runtime(format!("Module '{}' not found for plugin '{}'", module, plugin_name)));
     })?;
 
     return Ok(require_fn);
@@ -142,7 +147,7 @@ fn create_require_fn(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Functio
 
 /* ========================================================================== */
 
-pub fn load_env(plugin_name:&str, plugin_version: &Version, plugin_env: mlua::Table) -> Result<(), Error> {
+pub fn load_env(plugin_name: &str, plugin_version: &Version, plugin_env: Table) -> Result<(), anyhow::Error> {
     let lua = runtime::get();
 
     /* <======================[ LUA Standard Library ]======================> */
@@ -166,7 +171,7 @@ pub fn load_env(plugin_name:&str, plugin_version: &Version, plugin_env: mlua::Ta
 
     let mt = lua.create_table()?;
     mt.set("__index", lua.globals())?;
-    mt.set("__metatable", mlua::Value::Boolean(false))?;
+    mt.set("__metatable", Value::Boolean(false))?;
     plugin_env.set_metatable(Some(mt))?;
 
     return Ok(());

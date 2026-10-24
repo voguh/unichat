@@ -8,6 +8,12 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use mlua::Lua;
+use mlua::Result;
+use mlua::UserData;
+use mlua::UserDataMethods;
+use mlua::Value;
+
 use crate::currency;
 
 /* ========================================================================== */
@@ -15,24 +21,27 @@ use crate::currency;
 pub struct UniChatCurrencyModule;
 
 impl UniChatCurrencyModule {
-    pub fn new(lua: &mlua::Lua) -> Result<mlua::Value, mlua::Error> {
+    pub fn new(lua: &Lua) -> Result<Value> {
         let userdata = lua.create_userdata(UniChatCurrencyModule)?;
-        return Ok(mlua::Value::UserData(userdata));
+        return Ok(Value::UserData(userdata));
     }
 }
 
-impl mlua::UserData for UniChatCurrencyModule {
-    fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("target", |_lua, _this, ()| -> mlua::Result<Option<String>> {
+impl UserData for UniChatCurrencyModule {
+    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("target", |_lua, _this, ()| -> Result<Option<String>> {
             return Ok(currency::target_currency().map(|currency| currency.code));
         });
 
-        methods.add_method("convert", |_lua, _this, (value, token): (f64, String)| -> mlua::Result<(Option<f64>, Option<String>)> {
-            if let Some((converted, target)) = currency::convert(value, &token) {
-                return Ok((Some(converted), Some(target)));
-            }
+        methods.add_method(
+            "convert",
+            |_lua, _this, (value, token): (f64, String)| -> Result<(Option<f64>, Option<String>)> {
+                if let Some((converted, target)) = currency::convert(value, &token) {
+                    return Ok((Some(converted), Some(target)));
+                }
 
-            return Ok((None, None));
-        });
+                return Ok((None, None));
+            }
+        );
     }
 }

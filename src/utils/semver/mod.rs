@@ -12,16 +12,16 @@
 use std::cmp::Ordering;
 use std::fmt::Display;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 
 use crate::utils::semver::pre_release_type::PreReleaseType;
 use crate::utils::semver::version::Version;
 
 pub mod bound_type;
 pub mod pre_release_type;
-pub mod version_range;
 pub mod version;
+pub mod version_range;
 
 /* ========================================================================== */
 

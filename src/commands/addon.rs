@@ -27,6 +27,11 @@ pub async fn get_community_widget<R: Runtime>(_app: AppHandle<R>, id: String) ->
 }
 
 #[tauri::command]
-pub async fn install_community_widget<R: Runtime>(_app: AppHandle<R>, id: String, release: String) -> Result<(), String> {
-    return community_widget::install(&id, &release).map_err(|e| format!("Failed to install community widget '{}' version '{}': {:#?}", id, release, e));
+pub async fn install_community_widget<R: Runtime>(
+    _app: AppHandle<R>,
+    id: String,
+    release: String
+) -> Result<(), String> {
+    return community_widget::install(&id, &release)
+        .map_err(|e| format!("Failed to install community widget '{}' version '{}': {:#?}", id, release, e));
 }

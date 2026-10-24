@@ -17,8 +17,10 @@ use std::sync::LazyLock;
 use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
+use mlua::Table;
+use mlua::Value;
 
 use crate::addons::manifest::UniChatAddonManifest;
 use crate::addons::manifest::load_manifest;
@@ -32,18 +34,18 @@ mod runtime;
 
 /* ========================================================================== */
 
-static LOADED_PLUGINS: LazyLock<RwLock<HashMap<String, Arc<UniChatPlugin>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+static LOADED: LazyLock<RwLock<HashMap<String, Arc<UniChatPlugin>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 fn read() -> RwLockReadGuard<'static, HashMap<String, Arc<UniChatPlugin>>> {
-    return LOADED_PLUGINS.read().expect("Plugins::LOADED_PLUGINS lock poisoned");
+    return LOADED.read().expect("Plugins::LOADED lock poisoned");
 }
 
 pub(in crate::plugins) fn write(plugin: Arc<UniChatPlugin>) -> Result<(), Error> {
-    let mut loaded_plugins = LOADED_PLUGINS.write().expect("Plugins::LOADED_PLUGINS lock poisoned");
-    if loaded_plugins.contains_key(&plugin.name) {
+    let mut loaded = LOADED.write().expect("Plugins::LOADED lock poisoned");
+    if loaded.contains_key(&plugin.name) {
         return Err(anyhow!("Plugin with name '{}' is already loaded", plugin.name));
     }
 
-    loaded_plugins.insert(plugin.name.clone(), plugin);
+    loaded.insert(plugin.name.clone(), plugin);
 
     return Ok(());
 }
@@ -98,13 +100,17 @@ pub struct UniChatPlugin {
     status: RwLock<PluginStatus>,
     messages: RwLock<Vec<String>>,
 
-    plugin_path: PathBuf,
-    plugin_env: mlua::Table,
-    loaded_modules_cache: RwLock<HashMap<String, mlua::Value>>
+    path: PathBuf,
+    plugin_env: Table,
+    loaded_modules_cache: RwLock<HashMap<String, Value>>
 }
 
 impl UniChatPlugin {
-    pub(in crate::plugins) fn new(plugin_path: &Path, manifest: &UniChatAddonManifest, dependencies: Vec<(String, VersionRange)>) -> Result<Self, Error> {
+    pub(in crate::plugins) fn new(
+        path: &Path,
+        manifest: &UniChatAddonManifest,
+        dependencies: Vec<(String, VersionRange)>
+    ) -> Result<Self, Error> {
         let version = Version::parse(&manifest.version)?;
 
         let lua = runtime::get();
@@ -122,7 +128,7 @@ impl UniChatPlugin {
             status: RwLock::new(PluginStatus::Loaded),
             messages: RwLock::new(Vec::new()),
 
-            plugin_path: plugin_path.to_path_buf(),
+            path: path.to_path_buf(),
             plugin_env: env,
             loaded_modules_cache: RwLock::new(HashMap::new())
         });
@@ -155,13 +161,13 @@ impl UniChatPlugin {
 
     /* ====================================================================== */
 
-    pub(in crate::plugins) fn get_plugin_env(&self) -> mlua::Table {
+    pub(in crate::plugins) fn get_plugin_env(&self) -> Table {
         return self.plugin_env.clone();
     }
 
     /* ====================================================================== */
 
-    pub(in crate::plugins) fn get_cached_loaded_module(&self, module_name: &str) -> Result<mlua::Value, Error> {
+    pub(in crate::plugins) fn get_cached_loaded_module(&self, module_name: &str) -> Result<Value, Error> {
         let cache = self.loaded_modules_cache.read().expect("Loaded modules cache lock poisoned");
         if let Some(cached_module) = cache.get(module_name) {
             return Ok(cached_module.clone());
@@ -170,7 +176,7 @@ impl UniChatPlugin {
         return Err(anyhow!("Module '{}' is not cached", module_name));
     }
 
-    pub(in crate::plugins) fn set_cached_loaded_module(&self, module_name: &str, module: mlua::Value) -> mlua::Value {
+    pub(in crate::plugins) fn set_cached_loaded_module(&self, module_name: &str, module: Value) -> Value {
         let mut cache = self.loaded_modules_cache.write().expect("Loaded modules cache lock poisoned");
         cache.insert(module_name.to_string(), module.clone());
 
@@ -180,15 +186,15 @@ impl UniChatPlugin {
     /* ====================================================================== */
 
     pub fn get_plugin_path(&self) -> PathBuf {
-        return self.plugin_path.clone();
+        return self.path.clone();
     }
 
     pub fn get_assets_path(&self) -> PathBuf {
-        return self.plugin_path.join("assets");
+        return self.path.join("assets");
     }
 
     pub fn get_data_path(&self) -> PathBuf {
-        return self.plugin_path.join("data");
+        return self.path.join("data");
     }
 
     pub fn get_entrypoint_path(&self) -> PathBuf {
@@ -196,11 +202,11 @@ impl UniChatPlugin {
     }
 
     pub fn get_widgets_path(&self) -> PathBuf {
-        return self.plugin_path.join("widgets");
+        return self.path.join("widgets");
     }
 
     pub fn get_icon_path(&self) -> Option<PathBuf> {
-        let icon_path = self.plugin_path.join("icon.png");
+        let icon_path = self.path.join("icon.png");
         if icon_path.exists() && icon_path.is_file() {
             return Some(icon_path);
         }
@@ -246,7 +252,6 @@ fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, UniChat
                     continue;
                 }
 
-
                 let manifest_path = plugin_path.join("manifest.yaml");
                 if !manifest_path.exists() || !manifest_path.is_file() {
                     log::warn!("Skipping folder '{:?}' as it does not contain a valid 'manifest.yaml'", plugin_path);
@@ -257,7 +262,7 @@ fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, UniChat
                 match load_manifest(&plugin_path) {
                     Ok(manifest) => {
                         loaded_manifests.push((plugin_path, manifest));
-                    },
+                    }
                     Err(e) => {
                         log::error!("Failed to load plugin manifest: {:#?}", e);
                     }
@@ -267,8 +272,6 @@ fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, UniChat
     }
 
     return Ok(loaded_manifests);
-
-
 }
 
 pub fn load_plugins() -> Result<(), Error> {

@@ -94,7 +94,9 @@ struct CompatibilityOptions {
     live_chat_author_external_channel_id: String
 }
 
-static GIFT_ASSET_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"/assets/([^./]+)\.").expect("Invalid gift asset regex"));
+static GIFT_ASSET_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {
+    return regex::Regex::new(r"/assets/([^./]+)\.").expect("Invalid gift asset regex");
+});
 
 const GIFT_A11Y_LABEL_SEPARATOR: &str = " sent a gift, ";
 

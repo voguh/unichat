@@ -30,7 +30,7 @@ pub async fn start() -> Result<(), Error> {
     }
 
     if host != format!("127.0.0.1:{}", BASE_REST_PORT) {
-        log::warn!("UniChat is running in 'Open to LAN' mode. Make sure your firewall allows incoming connections on port {}.", BASE_REST_PORT);
+        log::warn!("UniChat is running in 'Open to LAN' mode.");
     }
 
     let app = Router::new()

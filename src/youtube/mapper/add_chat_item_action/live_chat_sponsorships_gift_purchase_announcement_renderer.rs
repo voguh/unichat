@@ -10,8 +10,8 @@
 
 use std::collections::HashMap;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 

@@ -8,33 +8,39 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use mlua::Error;
+use mlua::Lua;
 use mlua::LuaSerdeExt as _;
+use mlua::UserData;
+use mlua::UserDataMethods;
+use mlua::Value;
+use mlua::Variadic;
 
 /* ========================================================================== */
 
-fn format_str(lua: &mlua::Lua, args: mlua::Variadic<mlua::Value>) -> Result<(String, Option<mlua::Error>), mlua::Error> {
+fn format_str(lua: &Lua, args: Variadic<Value>) -> Result<(String, Option<Error>), Error> {
     if args.is_empty() {
-        return Err(mlua::Error::external("No log message provided"));
+        return Err(Error::external("No log message provided"));
     }
 
     let mut args = args;
 
     let msg = args.remove(0);
-    let mut msg: String  = lua.from_value(msg)?;
+    let mut msg: String = lua.from_value(msg)?;
     if msg.trim().is_empty() {
-        return Err(mlua::Error::external("Empty log message"));
+        return Err(Error::external("Empty log message"));
     }
 
-    let mut error: Option<Box<mlua::Error>> = None;
+    let mut error: Option<Box<Error>> = None;
     if args.last().is_some_and(|v| v.is_error()) {
         let last_arg = args.pop().expect("Last argument is checked above");
-        if let mlua::Value::Error(e) = last_arg {
+        if let Value::Error(e) = last_arg {
             error = Some(e);
         }
     }
 
     for arg in args.into_iter() {
-        if let Some(arg_str) =  lua.coerce_string(arg)? {
+        if let Some(arg_str) = lua.coerce_string(arg)? {
             let str = arg_str.to_string_lossy();
             msg = msg.replacen("{}", &str, 1);
         } else {
@@ -50,15 +56,15 @@ pub struct UniChatLoggerModule {
 }
 
 impl UniChatLoggerModule {
-    pub fn new(lua: &mlua::Lua, plugin_name: &str) -> Result<mlua::Value, mlua::Error> {
+    pub fn new(lua: &Lua, plugin_name: &str) -> Result<Value, Error> {
         let userdata = lua.create_userdata(UniChatLoggerModule { plugin_name: plugin_name.to_string() })?;
-        return Ok(mlua::Value::UserData(userdata));
+        return Ok(Value::UserData(userdata));
     }
 }
 
-impl mlua::UserData for UniChatLoggerModule {
-    fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("debug", move |lua, this, args: mlua::Variadic<mlua::Value>| {
+impl UserData for UniChatLoggerModule {
+    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("debug", move |lua, this, args: Variadic<Value>| {
             let (msg, err) = format_str(lua, args)?;
 
             log::debug!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
@@ -69,7 +75,7 @@ impl mlua::UserData for UniChatLoggerModule {
             return Ok(());
         });
 
-        methods.add_method("info", move |lua, this, args: mlua::Variadic<mlua::Value>| {
+        methods.add_method("info", move |lua, this, args: Variadic<Value>| {
             let (msg, err) = format_str(lua, args)?;
 
             log::info!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
@@ -80,7 +86,7 @@ impl mlua::UserData for UniChatLoggerModule {
             return Ok(());
         });
 
-        methods.add_method("warn", move |lua, this, args: mlua::Variadic<mlua::Value>| {
+        methods.add_method("warn", move |lua, this, args: Variadic<Value>| {
             let (msg, err) = format_str(lua, args)?;
 
             log::warn!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
@@ -91,7 +97,7 @@ impl mlua::UserData for UniChatLoggerModule {
             return Ok(());
         });
 
-        methods.add_method("error", move |lua, this, args: mlua::Variadic<mlua::Value>| {
+        methods.add_method("error", move |lua, this, args: Variadic<Value>| {
             let (msg, err) = format_str(lua, args)?;
 
             log::error!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);

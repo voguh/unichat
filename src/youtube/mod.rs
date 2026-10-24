@@ -13,8 +13,8 @@ use std::io::Write;
 use std::sync::Arc;
 use std::sync::LazyLock;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use serde_json::Value;
 
 use crate::events;
@@ -41,7 +41,8 @@ static SCRAPER_JS: &str = include_str!("./static/scraper.js");
 /* ========================================================================== */
 
 fn handle_ready_status(event: &ScraperStatusEvent) -> Result<(), Error> {
-    let channel_id = event.extra_str("channelId")
+    let channel_id = event
+        .extra_str("channelId")
         .ok_or_else(|| anyhow!("Missing or invalid 'channelId' field in YouTube 'ready' payload"))?;
 
     if !is_valid_youtube_channel_id(channel_id) {
@@ -64,12 +65,16 @@ fn log_action(file_name: &str, content: &impl std::fmt::Display) {
     }
 
     let log_file = youtube_log_dir.join(file_name);
-    let mut file = fs::OpenOptions::new().create(true).append(true).open(log_file).expect("Failed to open YouTube log file");
+    let mut options = fs::OpenOptions::new();
+    options.create(true).append(true);
+    let mut file = options.open(log_file).expect("Failed to open YouTube log file");
     writeln!(file, "{content}").expect("Failed to write YouTube log file");
 }
 
 fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> {
-    let actions = payload.get("actions").and_then(|v| v.as_array())
+    let actions = payload
+        .get("actions")
+        .and_then(|v| v.as_array())
         .ok_or_else(|| anyhow!("Missing or invalid 'actions' field in '{event_type}' event payload"))?;
 
     let log_events = settings::get_scraper_events_log_level();
@@ -82,7 +87,8 @@ fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> 
         match mapper::parse(action) {
             Ok(Some(parsed)) => {
                 if log_events == SettingLogEventLevel::AllEvents {
-                    log_action("events-parsed.log", &serde_json::to_string(&parsed).expect("Failed to serialize UniChatEvent"));
+                    let serialized = serde_json::to_string(&parsed).expect("Failed to serialize UniChatEvent");
+                    log_action("events-parsed.log", &serialized);
                 }
 
                 if let Err(err) = events::emit(parsed) {
@@ -107,13 +113,15 @@ fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> 
 
 /* ========================================================================== */
 
-static YOUTUBE_VALID_URLS: LazyLock<Vec<String>> = LazyLock::new(|| vec![
-    String::from("https://www.youtube.com/watch?v={VIDEO_ID}"),
-    String::from("https://www.youtube.com/live_chat?v={VIDEO_ID}"),
-    String::from("https://youtu.be/{VIDEO_ID}"),
-    String::from("https://www.youtube.com/live/{VIDEO_ID}"),
-    String::from("https://www.youtube.com/shorts/{VIDEO_ID}")
-]);
+static YOUTUBE_VALID_URLS: LazyLock<Vec<String>> = LazyLock::new(|| {
+    vec![
+        String::from("https://www.youtube.com/watch?v={VIDEO_ID}"),
+        String::from("https://www.youtube.com/live_chat?v={VIDEO_ID}"),
+        String::from("https://youtu.be/{VIDEO_ID}"),
+        String::from("https://www.youtube.com/live/{VIDEO_ID}"),
+        String::from("https://www.youtube.com/shorts/{VIDEO_ID}"),
+    ]
+});
 
 #[derive(Default)]
 struct YouTubeUniChatScraper;
@@ -187,7 +195,9 @@ impl UniChatScraper for YouTubeUniChatScraper {
     }
 
     fn on_event(&self, event: serde_json::Value) -> Result<(), Error> {
-        let event_type = event.get("type").and_then(|v| v.as_str())
+        let event_type = event
+            .get("type")
+            .and_then(|v| v.as_str())
             .ok_or_else(|| anyhow!("Missing or invalid 'type' field in YouTube raw event payload"))?;
 
         return match event_type {
@@ -205,9 +215,7 @@ impl UniChatScraper for YouTubeUniChatScraper {
 }
 
 pub fn init() -> Result<(), Error> {
-    let scraper_data = YouTubeUniChatScraper::default();
-    let scraper: Arc<dyn UniChatScraper + Send + Sync> = Arc::new(scraper_data);
-    scraper::register_scraper(scraper)?;
+    scraper::register_scraper(Arc::new(YouTubeUniChatScraper::default()))?;
 
     return Ok(());
 }

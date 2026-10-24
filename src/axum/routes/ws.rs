@@ -38,7 +38,7 @@ pub struct WSParams {
 fn resolve_fieldstate(widget: Option<String>) -> HashMap<String, Value> {
     if let Some(widget_name) = widget {
         if let Ok(metadata) = widgets::get_widget_from_name(&widget_name) {
-            return metadata.fieldstate()
+            return metadata.fieldstate();
         }
     }
 
@@ -60,7 +60,6 @@ async fn handle_socket(socket: WebSocket, widget: Option<String>) {
             "currency": currency_data
         }
     });
-
 
     if let Ok(parsed) = serde_json::to_string(&userstore_event) {
         if let Err(err) = sender.send(Message::Text(parsed.into())).await {

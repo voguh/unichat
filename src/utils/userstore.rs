@@ -11,7 +11,6 @@
 use std::collections::HashMap;
 use std::fs;
 use std::path;
-use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
@@ -19,8 +18,8 @@ use std::sync::RwLockWriteGuard;
 use std::time::Duration;
 use std::time::Instant;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::unbounded_channel;
 use tokio::time::sleep;
@@ -32,11 +31,13 @@ use crate::utils::properties::AppPaths;
 
 /* ========================================================================== */
 
-static USERSTORE_PATH: LazyLock<path::PathBuf> = LazyLock::new(|| properties::get_app_path(AppPaths::AppData).join("userstore.json"));
+static USERSTORE_PATH: LazyLock<path::PathBuf> = LazyLock::new(|| {
+    return properties::get_app_path(AppPaths::AppData).join("userstore.json");
+});
 
 /* ========================================================================== */
 
-static USERSTORE_CACHE: LazyLock<Arc<RwLock<HashMap<String, String>>>> = LazyLock::new(|| Arc::new(RwLock::new(HashMap::new())));
+static USERSTORE_CACHE: LazyLock<RwLock<HashMap<String, String>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 fn read() -> RwLockReadGuard<'static, HashMap<String, String>> {
     return USERSTORE_CACHE.read().expect("UserStore::USERSTORE_CACHE lock poisoned");
 }
@@ -47,7 +48,12 @@ fn write() -> RwLockWriteGuard<'static, HashMap<String, String>> {
 
 /* ========================================================================== */
 
-fn compute_wait(last_event: Option<Instant>, first_event: Option<Instant>, debounce: Duration, max_wait: Duration) -> Duration {
+fn compute_wait(
+    last_event: Option<Instant>,
+    first_event: Option<Instant>,
+    debounce: Duration,
+    max_wait: Duration
+) -> Duration {
     if let (Some(last), Some(first)) = (last_event, first_event) {
         let since_last = last.elapsed();
         let since_first = first.elapsed();
@@ -203,7 +209,6 @@ pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &Option<V>) -> Resul
             log::error!("Failed to schedule UserStore flush: {:#?}", err);
         }
     }
-
 
     return Ok(());
 }

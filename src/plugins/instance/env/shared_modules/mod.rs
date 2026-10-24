@@ -14,34 +14,35 @@ use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
 use std::sync::RwLockWriteGuard;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
+use mlua::Value;
 
 /* ========================================================================== */
 
-static SHARED_MODULES: LazyLock<RwLock<HashMap<String, mlua::Value>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
-fn read() -> RwLockReadGuard<'static, HashMap<String, mlua::Value>> {
+static SHARED_MODULES: LazyLock<RwLock<HashMap<String, Value>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+fn read() -> RwLockReadGuard<'static, HashMap<String, Value>> {
     return SHARED_MODULES.read().expect("Plugins::SHARED_MODULES lock poisoned");
 }
 
-fn write() -> RwLockWriteGuard<'static, HashMap<String, mlua::Value>> {
+fn write() -> RwLockWriteGuard<'static, HashMap<String, Value>> {
     return SHARED_MODULES.write().expect("Plugins::SHARED_MODULES lock poisoned");
 }
 
 /* ========================================================================== */
 
-pub fn get(module_name: &str) -> Result<Option<mlua::Value>, Error> {
+pub fn get(module_name: &str) -> Result<Option<Value>, Error> {
     if module_name.is_empty() || !module_name.contains(":") {
-        return Err(anyhow!("Invalid module name '{}'. Module names must be in the format 'plugin_name:module_name'", module_name));
+        return Err(anyhow!("Invalid module name '{}'", module_name));
     }
 
     let shared_modules = read();
     return Ok(shared_modules.get(module_name).cloned());
 }
 
-pub fn add(module_name: String, module_table: mlua::Value) -> Result<(), Error> {
+pub fn add(module_name: String, module_table: Value) -> Result<(), Error> {
     if module_name.is_empty() || !module_name.contains(":") {
-        return Err(anyhow!("Invalid module name '{}'. Module names must be in the format 'plugin_name:module_name'", module_name));
+        return Err(anyhow!("Invalid module name '{}'", module_name));
     }
 
     let mut shared_modules = write();
@@ -55,7 +56,7 @@ pub fn add(module_name: String, module_table: mlua::Value) -> Result<(), Error> 
 
 pub fn remove(module_name: &str) -> Result<(), Error> {
     if module_name.is_empty() || !module_name.contains(":") {
-        return Err(anyhow!("Invalid module name '{}'. Module names must be in the format 'plugin_name:module_name'", module_name));
+        return Err(anyhow!("Invalid module name '{}'", module_name));
     }
 
     let mut shared_modules = write();

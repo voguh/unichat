@@ -18,7 +18,7 @@ use anyhow::Error;
 use tokio::sync::broadcast;
 use unichat::UniChatEvent;
 
-use crate::events::unichat::UNICHAT_FLAG_EMULATOR_GENERATED;
+use crate::events::unichat::FLAG_EMULATOR_GENERATED;
 
 pub mod unichat;
 
@@ -35,36 +35,58 @@ fn set_emitter(sender: broadcast::Sender<UniChatEvent>) {
 
 /* ========================================================================== */
 
-const MAX_CAPACITY: usize = 50;
-static LATEST_EVENTS_CACHE: LazyLock<RwLock<VecDeque<UniChatEvent>>> = LazyLock::new(|| RwLock::new(VecDeque::with_capacity(MAX_CAPACITY)));
-fn read_latest_events_cache() -> RwLockReadGuard<'static, VecDeque<UniChatEvent>> {
-    return LATEST_EVENTS_CACHE.read().expect("Events::LATEST_EVENTS_CACHE lock poisoned");
+struct Queue<T> {
+    items: VecDeque<T>,
+    capacity: usize
 }
 
-fn write_latest_events_cache(event: UniChatEvent) {
-    let mut cache = LATEST_EVENTS_CACHE.write().expect("Events::LATEST_EVENTS_CACHE lock poisoned");
-    if cache.len() == MAX_CAPACITY {
-        cache.pop_front();
+impl<T> Queue<T> {
+    pub fn new(capacity: usize) -> Self {
+        return Self { items: VecDeque::with_capacity(capacity), capacity };
     }
 
-    cache.push_back(event);
+    /* ====================================================================== */
+
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
+        return self.items.iter();
+    }
+
+    pub fn push(&mut self, item: T) {
+        if self.items.len() == self.capacity {
+            self.items.pop_front();
+        }
+
+        if self.capacity > 0 {
+            self.items.push_back(item);
+        }
+    }
+}
+
+static LATEST_EVENTS: LazyLock<RwLock<Queue<UniChatEvent>>> = LazyLock::new(|| RwLock::new(Queue::new(50)));
+fn read_latest_events() -> RwLockReadGuard<'static, Queue<UniChatEvent>> {
+    return LATEST_EVENTS.read().expect("Events::LATEST_EVENTS lock poisoned");
+}
+
+fn write_latest_events(event: UniChatEvent) {
+    let mut cache = LATEST_EVENTS.write().expect("Events::LATEST_EVENTS lock poisoned");
+    cache.push(event);
 }
 
 /* ========================================================================== */
 
 fn event_is_emulated(event: &UniChatEvent) -> bool {
     return match event {
-        UniChatEvent::RemoveMessage(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
-        UniChatEvent::RemoveAuthor(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
-        UniChatEvent::Message(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
-        UniChatEvent::Donate(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
-        UniChatEvent::Sponsor(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
-        UniChatEvent::SponsorGift(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
-        UniChatEvent::Raid(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
-        UniChatEvent::Redemption(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
-        UniChatEvent::Cheer(payload) => payload.flags.contains_key(UNICHAT_FLAG_EMULATOR_GENERATED),
+        UniChatEvent::RemoveMessage(payload) => payload.flags.contains_key(FLAG_EMULATOR_GENERATED),
+        UniChatEvent::RemoveAuthor(payload) => payload.flags.contains_key(FLAG_EMULATOR_GENERATED),
+        UniChatEvent::Message(payload) => payload.flags.contains_key(FLAG_EMULATOR_GENERATED),
+        UniChatEvent::Donate(payload) => payload.flags.contains_key(FLAG_EMULATOR_GENERATED),
+        UniChatEvent::Sponsor(payload) => payload.flags.contains_key(FLAG_EMULATOR_GENERATED),
+        UniChatEvent::SponsorGift(payload) => payload.flags.contains_key(FLAG_EMULATOR_GENERATED),
+        UniChatEvent::Raid(payload) => payload.flags.contains_key(FLAG_EMULATOR_GENERATED),
+        UniChatEvent::Redemption(payload) => payload.flags.contains_key(FLAG_EMULATOR_GENERATED),
+        UniChatEvent::Cheer(payload) => payload.flags.contains_key(FLAG_EMULATOR_GENERATED),
         _ => false
-    }
+    };
 }
 
 pub fn init() -> Result<(), Error> {
@@ -80,8 +102,7 @@ pub fn init() -> Result<(), Error> {
                         continue; // Skip caching emulated events
                     }
 
-
-                    write_latest_events_cache(event);
+                    write_latest_events(event);
                 }
                 Err(tokio::sync::broadcast::error::RecvError::Lagged(skipped)) => {
                     log::warn!("EventEmitter lagged, skipped {} events", skipped);
@@ -100,7 +121,7 @@ pub fn init() -> Result<(), Error> {
 }
 
 pub fn latest_events() -> Vec<UniChatEvent> {
-    return read_latest_events_cache().iter().cloned().collect();
+    return read_latest_events().iter().cloned().collect();
 }
 
 pub fn subscribe() -> broadcast::Receiver<UniChatEvent> {

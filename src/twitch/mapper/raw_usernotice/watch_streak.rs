@@ -8,13 +8,14 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 
-use crate::events::unichat::UNICHAT_FLAG_TWITCH_STREAK_DAYS;
+use crate::events::unichat::FLAG_TWITCH_STREAK_DAYS;
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatMessageEventPayload;
 use crate::events::unichat::UniChatPlatform;
+use crate::twitch::mapper::require_tag;
 use crate::twitch::mapper::structs::author::parse_author_badges;
 use crate::twitch::mapper::structs::author::parse_author_color;
 use crate::twitch::mapper::structs::author::parse_author_name;
@@ -48,31 +49,31 @@ pub fn parse(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
 
     let text = text.ok_or(anyhow!("Missing message text"))?;
 
-    let room_id = tags.get("room-id").and_then(|v| v.to_owned()).ok_or(anyhow!("Missing room-id tag"))?;
+    let room_id = require_tag(&tags, "room-id")?;
     let channel = channel.ok_or(anyhow!("Missing channel name"))?;
     let mut flags = inject_raw_tags(&tags);
-    let author_id = tags.get("user-id").and_then(|v| v.to_owned()).ok_or(anyhow!("Missing user-id tag"))?;
+    let author_id = require_tag(&tags, "user-id")?;
     let author_username = parse_author_username(&message.prefix);
     let author_name = parse_author_name(tags.get("display-name"))?;
     let author_color = parse_author_color(tags.get("color"), &author_username)?;
     let author_badges = parse_author_badges(tags.get("badges"));
     let author_type = parse_author_type(&tags);
-    let message_id = tags.get("id").and_then(|v| v.to_owned()).ok_or(anyhow!("Missing id tag"))?;
+    let message_id = require_tag(&tags, "id")?;
     let message = parse_message_string(&text);
     let emotes = parse_message_emotes(tags.get("emotes"), &text)?;
     let timestamp_usec = get_current_timestamp();
 
-    let streak_days = tags.get("msg-param-value").and_then(|v| v.to_owned()).ok_or(anyhow!("Missing msg-param-value tag"))?;
-    flags.insert(String::from(UNICHAT_FLAG_TWITCH_STREAK_DAYS), Some(streak_days));
+    let streak_days = require_tag(&tags, "msg-param-value")?;
+    flags.insert(String::from(FLAG_TWITCH_STREAK_DAYS), Some(streak_days));
 
     let event = UniChatEvent::Message(UniChatMessageEventPayload {
-        channel_id: room_id.to_owned(),
+        channel_id: room_id,
         channel_name: Some(channel),
 
         platform: UniChatPlatform::Twitch,
         flags: flags,
 
-        author_id: author_id.to_owned(),
+        author_id: author_id,
         author_username: author_username,
         author_display_name: author_name,
         author_display_color: author_color,
@@ -80,7 +81,7 @@ pub fn parse(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
         author_badges: author_badges,
         author_type: author_type,
 
-        message_id: message_id.to_owned(),
+        message_id: message_id,
         message_text: message,
         emotes: emotes,
 

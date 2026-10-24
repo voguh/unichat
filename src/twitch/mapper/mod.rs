@@ -13,8 +13,8 @@ use std::sync::LazyLock;
 use std::sync::Mutex;
 use std::sync::MutexGuard;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 
 use crate::events::unichat::UniChatEvent;
 use crate::events::unichat::UniChatMessageEventPayload;
@@ -26,26 +26,28 @@ mod privmsg;
 mod raw_clearchat;
 mod raw_clearmsg;
 mod raw_usernotice;
-mod ws_reward_redemption;
 pub mod structs;
+mod ws_reward_redemption;
 
 /* ========================================================================== */
 
-static REDEMPTION_EVENT_CACHE: LazyLock<Mutex<HashMap<String, HashMap<String, UniChatRedemptionEventPayload>>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
-fn lock_redemption_event_cache() -> MutexGuard<'static, HashMap<String, HashMap<String, UniChatRedemptionEventPayload>>> {
-    return REDEMPTION_EVENT_CACHE.lock().expect("TwitchMapper::REDEMPTION_EVENT_CACHE lock poisoned");
+#[derive(Default)]
+struct PendingRedemptions {
+    redemptions: HashMap<(String, String), UniChatRedemptionEventPayload>,
+    messages: HashMap<(String, String), UniChatMessageEventPayload>
+}
+
+static PENDING: LazyLock<Mutex<PendingRedemptions>> = LazyLock::new(Default::default);
+fn lock_pending() -> MutexGuard<'static, PendingRedemptions> {
+    return PENDING.lock().expect("TwitchMapper::PENDING lock poisoned");
 }
 
 /* ========================================================================== */
 
-static REDEMPTION_MESSAGE_EVENT_CACHE: LazyLock<Mutex<HashMap<String, HashMap<String, UniChatMessageEventPayload>>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
-fn lock_redemption_message_event_cache() -> MutexGuard<'static, HashMap<String, HashMap<String, UniChatMessageEventPayload>>> {
-    return REDEMPTION_MESSAGE_EVENT_CACHE.lock().expect("TwitchMapper::REDEMPTION_MESSAGE_EVENT_CACHE lock poisoned");
-}
-
-/* ========================================================================== */
-
-fn merge_redemption_events(redemption_event: UniChatRedemptionEventPayload, message_event: UniChatMessageEventPayload) -> UniChatRedemptionEventPayload {
+fn merge_redemption_events(
+    redemption_event: UniChatRedemptionEventPayload,
+    message_event: UniChatMessageEventPayload
+) -> UniChatRedemptionEventPayload {
     return UniChatRedemptionEventPayload {
         channel_id: message_event.channel_id,
         channel_name: message_event.channel_name,
@@ -75,34 +77,43 @@ fn merge_redemption_events(redemption_event: UniChatRedemptionEventPayload, mess
     };
 }
 
-pub fn handle_redemption_event(redemption_event: UniChatRedemptionEventPayload) -> Option<UniChatRedemptionEventPayload> {
-    let mut message_event_cache = lock_redemption_message_event_cache();
-    if let Some(reward_message_events) = message_event_cache.get_mut(&redemption_event.reward_id) {
-        if let Some(message_event) = reward_message_events.remove(&redemption_event.author_id) {
-            return Some(merge_redemption_events(redemption_event, message_event))
-        }
-    } else {
-        let mut redemption_event_cache = lock_redemption_event_cache();
-        let reward_redemption_events = redemption_event_cache.entry(redemption_event.reward_id.clone()).or_insert_with(HashMap::new);
-        reward_redemption_events.insert(redemption_event.author_id.clone(), redemption_event);
+pub fn handle_redemption_event(
+    redemption_event: UniChatRedemptionEventPayload
+) -> Option<UniChatRedemptionEventPayload> {
+    let key = (redemption_event.reward_id.clone(), redemption_event.author_id.clone());
+    let mut pending = lock_pending();
+    if let Some(message_event) = pending.messages.remove(&key) {
+        return Some(merge_redemption_events(redemption_event, message_event));
     }
+
+    pending.redemptions.insert(key, redemption_event);
 
     return None;
 }
 
-pub fn handle_redemption_message_event(reward_id: &str, message_event: UniChatMessageEventPayload) -> Option<UniChatRedemptionEventPayload> {
-    let mut redemption_event_cache = lock_redemption_event_cache();
-    if let Some(redemption_event) = redemption_event_cache.get_mut(reward_id) {
-        if let Some(redemption_event) = redemption_event.remove(&message_event.author_id) {
-            return Some(merge_redemption_events(redemption_event, message_event))
-        }
-    } else {
-        let mut message_event_cache = lock_redemption_message_event_cache();
-        let reward_message_events = message_event_cache.entry(reward_id.to_string()).or_insert_with(HashMap::new);
-        reward_message_events.insert(message_event.author_id.clone(), message_event);
+pub fn handle_redemption_message_event(
+    reward_id: &str,
+    message_event: UniChatMessageEventPayload
+) -> Option<UniChatRedemptionEventPayload> {
+    let key = (reward_id.to_string(), message_event.author_id.clone());
+    let mut pending = lock_pending();
+    if let Some(redemption_event) = pending.redemptions.remove(&key) {
+        return Some(merge_redemption_events(redemption_event, message_event));
     }
 
+    pending.messages.insert(key, message_event);
+
     return None;
+}
+
+/* ========================================================================== */
+
+pub fn get_tag(tags: &HashMap<String, Option<String>>, key: &str) -> Option<String> {
+    return tags.get(key).cloned().flatten();
+}
+
+pub fn require_tag(tags: &HashMap<String, Option<String>>, key: &str) -> Result<String, Error> {
+    return get_tag(tags, key).ok_or(anyhow!("Missing '{}' tag", key));
 }
 
 /* ========================================================================== */

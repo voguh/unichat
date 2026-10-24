@@ -14,8 +14,8 @@ use std::sync::OnceLock;
 use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 use tauri_plugin_store::Store;
@@ -82,7 +82,8 @@ fn write_listeners(key: String, listener: SettingsChangeListener) {
 
 /* ========================================================================== */
 
-static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<(), Error> + Send + Sync>>> = LazyLock::new(|| {
+type Migration = Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<(), Error> + Send + Sync>;
+static MIGRATIONS: LazyLock<Vec<Migration>> = LazyLock::new(|| {
     return vec![
         Box::new(|store| {
             let twitch_url_key = store_mount_scraper_key("twitch-chat", "url");
@@ -139,15 +140,15 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
 
             /* ============================================================== */
 
-            let create_webview_hidden_key = "settings:create-webview-hidden";
+            let cwh_key = "settings:create-webview-hidden";
             if let Some(value) = store.get("settings.create-webview-hidden") {
-                log::info!("Migrating legacy 'settings.create-webview-hidden' to new key '{}'", create_webview_hidden_key);
-                store.set(create_webview_hidden_key, value);
+                log::info!("Migrating legacy 'settings.create-webview-hidden' to new key '{}'", cwh_key);
+                store.set(cwh_key, value);
                 store.delete("settings.create-webview-hidden");
             } else {
-                log::info!("Setting default value for '{}' setting", create_webview_hidden_key);
+                log::info!("Setting default value for '{}' setting", cwh_key);
                 let raw_value = serde_json::json!(true);
-                store.set(create_webview_hidden_key, raw_value);
+                store.set(cwh_key, raw_value);
             }
 
             /* ============================================================== */
@@ -261,8 +262,8 @@ static MIGRATIONS: LazyLock<Vec<Box<dyn Fn(&Arc<Store<tauri::Wry>>) -> Result<()
             }
 
             return Ok(());
-        })
-    ]
+        }),
+    ];
 });
 
 /* ========================================================================== */
@@ -288,7 +289,6 @@ fn migrate_store_version() -> Result<(), Error> {
         let version = idx + 1;
 
         if current_version < version {
-
             log::info!("Applying store migration for version {}", version);
             migration(store)?;
             log::info!("Store migrated to version {}", version);
@@ -336,9 +336,9 @@ pub fn get_item<R: serde::de::DeserializeOwned>(key: &str) -> Result<R, Error> {
     if key.is_empty() {
         return Err(anyhow!("Store key cannot be empty"));
     } else if key.starts_with("scraper") {
-        return Err(anyhow!("Use get_scraper_property to get scraper properties"));
+        return Err(anyhow!("Reserved scraper key '{}'", key));
     } else if key.starts_with("store") {
-        return Err(anyhow!("Keys starting with 'store' are reserved for internal use"));
+        return Err(anyhow!("Reserved store key '{}'", key));
     }
 
     let store = get_instance();
@@ -357,9 +357,9 @@ pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &V) -> Result<(), Er
     if key.is_empty() {
         return Err(anyhow!("Store key cannot be empty"));
     } else if key.starts_with("scraper") {
-        return Err(anyhow!("Use set_scraper_property to set scraper properties"));
+        return Err(anyhow!("Reserved scraper key '{}'", key));
     } else if key.starts_with("store") {
-        return Err(anyhow!("Keys starting with 'store' are reserved for internal use"));
+        return Err(anyhow!("Reserved store key '{}'", key));
     }
 
     let store = get_instance();
@@ -400,7 +400,7 @@ pub fn get_scraper_property<R: serde::de::DeserializeOwned>(scraper_id: &str, pr
     }
 }
 
-pub fn set_scraper_property<V: serde::ser::Serialize>(scraper_id: &str, property: &str, value: &V) -> Result<(), Error> {
+pub fn set_scraper_property<V: serde::ser::Serialize>(scraper_id: &str, key: &str, value: &V) -> Result<(), Error> {
     let scraper_id = scraper_id.trim();
     if scraper_id.is_empty() {
         return Err(anyhow!("Scraper ID cannot be empty"));
@@ -408,7 +408,7 @@ pub fn set_scraper_property<V: serde::ser::Serialize>(scraper_id: &str, property
         return Err(anyhow!("Invalid scraper ID '{}'", scraper_id));
     }
 
-    let property = property.trim();
+    let property = key.trim();
     if property.is_empty() {
         return Err(anyhow!("Scraper property cannot be empty"));
     }

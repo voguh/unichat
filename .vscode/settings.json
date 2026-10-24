@@ -1,17 +1,20 @@
 {
-    "js/ts.tsdk.path": "./webapp/node_modules/typescript/lib",
+    "js/ts.tsdk.path": "${workspaceFolder}/webapp/node_modules/typescript/lib",
 
     "biome.requireConfiguration": true,
-    "biome.configurationPath": "./webapp/biome.json",
-    "biome.lsp.bin": "./webapp/node_modules/.bin/biome",
+    "biome.configurationPath": "${workspaceFolder}/webapp/biome.json",
+    "biome.lsp.bin": "${workspaceFolder}/webapp/node_modules/.bin/biome",
 
-    "[javascript]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "always" } },
-    "[javascriptreact]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "always" } },
-    "[typescript]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "always" } },
-    "[typescriptreact]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "always" } },
-    "[json]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "always" } },
-    "[jsonc]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "always" } },
-    "[css]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "always" } },
+    "rust-analyzer.rustfmt.overrideCommand": ["rustup", "run", "nightly", "rustfmt", "--config-path", "${workspaceFolder}/rustfmt.toml"],
+
+    "[javascript]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "explicit" } },
+    "[javascriptreact]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "explicit" } },
+    "[typescript]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "explicit" } },
+    "[typescriptreact]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "explicit" } },
+    "[json]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "explicit" } },
+    "[jsonc]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "explicit" } },
+    "[css]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "explicit" } },
+    "[rust]": { "editor.defaultFormatter": "rust-lang.rust-analyzer", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll": "explicit" } },
 
     "terminal.integrated.env.linux": {
         "TAURI_APP_PATH": "${workspaceFolder}",

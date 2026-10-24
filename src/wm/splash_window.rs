@@ -82,11 +82,7 @@ fn report(step: u8, message: &str) {
     write(step, message.to_string());
 
     if let Some(window) = get_app_handle().get_webview_window(SPLASH_WINDOW_LABEL) {
-        let event = SplashProgressEvent {
-            step: step,
-            total: TOTAL_STAGES,
-            message: message.to_string()
-        };
+        let event = SplashProgressEvent { step: step, total: TOTAL_STAGES, message: message.to_string() };
 
         if let Err(err) = window.emit("unichat://splashscreen:update", &event) {
             log::error!("Failed to emit splash screen progress: {:#?}", err);

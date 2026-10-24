@@ -20,12 +20,7 @@ pub struct JsonRPCRequest {
 
 impl JsonRPCRequest {
     pub fn new(method: String, id: Option<String>, params: Option<Vec<serde_json::Value>>) -> Self {
-        return JsonRPCRequest {
-            jsonrpc: String::from("2.0"),
-            id: id,
-            method: method,
-            params: params
-        };
+        return JsonRPCRequest { jsonrpc: String::from("2.0"), id: id, method: method, params: params };
     }
 
     /* ====================================================================== */
@@ -59,11 +54,7 @@ pub struct JsonRPCResponse {
 impl JsonRPCResponse {
     pub fn new<R: Into<serde_json::Value>>(id: String, result: R) -> Self {
         let result = result.into();
-        return JsonRPCResponse {
-            jsonrpc: String::from("2.0"),
-            id: id,
-            result: result
-        };
+        return JsonRPCResponse { jsonrpc: String::from("2.0"), id: id, result: result };
     }
 
     /* ====================================================================== */
@@ -103,11 +94,7 @@ impl JsonRPCError {
         return JsonRPCError {
             jsonrpc: String::from("2.0"),
             id: id,
-            error: JsonRPCErrorDetail {
-                code: -32700,
-                message: String::from("Parse error"),
-                data: data
-            }
+            error: JsonRPCErrorDetail { code: -32700, message: String::from("Parse error"), data: data }
         };
     }
 
@@ -116,11 +103,7 @@ impl JsonRPCError {
         return JsonRPCError {
             jsonrpc: String::from("2.0"),
             id: id,
-            error: JsonRPCErrorDetail {
-                code: -32600,
-                message: String::from("Invalid Request"),
-                data: data
-            }
+            error: JsonRPCErrorDetail { code: -32600, message: String::from("Invalid Request"), data: data }
         };
     }
 
@@ -129,11 +112,7 @@ impl JsonRPCError {
         return JsonRPCError {
             jsonrpc: String::from("2.0"),
             id: id,
-            error: JsonRPCErrorDetail {
-                code: -32601,
-                message: String::from("Method not found"),
-                data: data
-            }
+            error: JsonRPCErrorDetail { code: -32601, message: String::from("Method not found"), data: data }
         };
     }
 
@@ -142,11 +121,7 @@ impl JsonRPCError {
         return JsonRPCError {
             jsonrpc: String::from("2.0"),
             id: id,
-            error: JsonRPCErrorDetail {
-                code: -32602,
-                message: String::from("Invalid params"),
-                data: data
-            }
+            error: JsonRPCErrorDetail { code: -32602, message: String::from("Invalid params"), data: data }
         };
     }
 
@@ -155,28 +130,25 @@ impl JsonRPCError {
         return JsonRPCError {
             jsonrpc: String::from("2.0"),
             id: id,
-            error: JsonRPCErrorDetail {
-                code: -32603,
-                message: String::from("Internal error"),
-                data: data
-            }
+            error: JsonRPCErrorDetail { code: -32603, message: String::from("Internal error"), data: data }
         };
     }
 
-    pub fn server_error<D: Into<serde_json::Value>>(id: Option<String>, code: i32, message: String, data: Option<D>) -> Self {
+    pub fn server_error<D: Into<serde_json::Value>>(
+        id: Option<String>,
+        code: i32,
+        message: String,
+        data: Option<D>
+    ) -> Self {
         if code < -32099 || code > -32000 {
-            panic!("Server error code must be in the range -32000 to -32099");
+            panic!("Server error code {} out of range", code);
         }
 
         let data = data.map(|d| d.into());
         return JsonRPCError {
             jsonrpc: String::from("2.0"),
             id: id,
-            error: JsonRPCErrorDetail {
-                code: code,
-                message: message,
-                data: data
-            }
+            error: JsonRPCErrorDetail { code: code, message: message, data: data }
         };
     }
 

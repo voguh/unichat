@@ -29,7 +29,7 @@ pub async fn get_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec
     let tour_steps = settings::get_item(settings::SETTINGS_TOUR_CURRENT_STEPS_KEY)
         .map_err(|e| format!("Failed to get tour steps: {:#?}", e))?;
 
-    return Ok(tour_steps)
+    return Ok(tour_steps);
 }
 
 #[tauri::command]
@@ -48,11 +48,13 @@ pub async fn set_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>, new_steps: Ve
             new_prev_tour_steps = current_tour_steps;
         }
 
-        settings::set_item(settings::SETTINGS_TOUR_PREVIOUS_STEPS_KEY, &new_prev_tour_steps).map_err(|e| format!("Failed to set previous tour steps: {:#?}", e))?;
-        settings::set_item(settings::SETTINGS_TOUR_CURRENT_STEPS_KEY, &new_steps).map_err(|e| format!("Failed to set current tour steps: {:#?}", e))?;
+        settings::set_item(settings::SETTINGS_TOUR_PREVIOUS_STEPS_KEY, &new_prev_tour_steps)
+            .map_err(|e| format!("Failed to set previous tour steps: {:#?}", e))?;
+        settings::set_item(settings::SETTINGS_TOUR_CURRENT_STEPS_KEY, &new_steps)
+            .map_err(|e| format!("Failed to set current tour steps: {:#?}", e))?;
     }
 
-    return Ok(())
+    return Ok(());
 }
 
 #[tauri::command]

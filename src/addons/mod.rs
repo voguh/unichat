@@ -8,8 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 use sha2::Digest;
@@ -70,9 +70,22 @@ pub fn is_compatible(requires_unichat: &Option<String>) -> bool {
 }
 
 pub fn has_update(installed_version: &str, releases: &[AddonRelease]) -> bool {
-    let installed_is_prerelease = Version::parse(installed_version).map(|v| v.pre_release().is_some()).unwrap_or(false);
+    let mut installed_is_prerelease = false;
+    if let Ok(version) = Version::parse(installed_version) {
+        installed_is_prerelease = version.pre_release().is_some();
+    }
 
-    return releases.iter().any(|r| semver::gt(&r.name, installed_version) && (!r.prerelease || installed_is_prerelease));
+    for release in releases {
+        if release.prerelease && !installed_is_prerelease {
+            continue;
+        }
+
+        if semver::gt(&release.name, installed_version) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 pub fn download_release_asset(asset: &AddonReleaseAsset) -> Result<Vec<u8>, Error> {
@@ -80,10 +93,10 @@ pub fn download_release_asset(asset: &AddonReleaseAsset) -> Result<Vec<u8>, Erro
     let mut response = ureq::get(&asset.url).call()?;
     let bytes = response.body_mut().read_to_vec()?;
 
-    let expected_digest = asset.digest.trim_start_matches("sha256:");
-    let digest = format!("{:x}", Sha256::digest(&bytes));
-    if digest != expected_digest {
-        return Err(anyhow!("Digest mismatch for asset '{}': expected '{}', got '{}'", asset.name, expected_digest, digest));
+    let expected = asset.digest.trim_start_matches("sha256:");
+    let actual = format!("{:x}", Sha256::digest(&bytes));
+    if actual != expected {
+        return Err(anyhow!("Digest mismatch for asset '{}': expected '{}', got '{}'", asset.name, expected, actual));
     }
 
     return Ok(bytes);

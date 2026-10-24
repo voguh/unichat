@@ -15,8 +15,8 @@ use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
 use std::sync::RwLockWriteGuard;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use tauri::Manager;
 use tauri::path::BaseDirectory;
 
@@ -117,7 +117,7 @@ pub fn init() -> Result<(), Error> {
     return Ok(());
 }
 
-fn get_item_raw<S: serde::ser::Serialize> (key: S) -> Result<String, Error> {
+fn get_item_raw<S: serde::ser::Serialize>(key: S) -> Result<String, Error> {
     let props = read();
     let key = serialize_key(key);
 

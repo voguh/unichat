@@ -220,16 +220,21 @@ fn main() {
         log_level = log::LevelFilter::Info;
     }
 
-    tauri::Builder::default().setup(setup).on_window_event(wm::on_window_event)
+    tauri::Builder::default()
+        .setup(setup)
+        .on_window_event(wm::on_window_event)
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_log::Builder::default()
-            .level(log_level)
-            .clear_targets()
-            .rotation_strategy(tauri_plugin_log::RotationStrategy::KeepSome(7))
-            .max_file_size(1e6 as u128) // 1 MB
-            .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout))
-            .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir { file_name: Some(UNICHAT_NAME.to_string()) }))
-            .build()
+        .plugin(
+            tauri_plugin_log::Builder::default()
+                .level(log_level)
+                .clear_targets()
+                .rotation_strategy(tauri_plugin_log::RotationStrategy::KeepSome(7))
+                .max_file_size(1e6 as u128) // 1 MB
+                .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout))
+                .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir {
+                    file_name: Some(UNICHAT_NAME.to_string())
+                }))
+                .build()
         )
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())

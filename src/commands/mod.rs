@@ -10,8 +10,8 @@
 
 use std::net::Ipv4Addr;
 
-use if_addrs::get_if_addrs;
 use if_addrs::IfAddr;
+use if_addrs::get_if_addrs;
 use tauri::AppHandle;
 use tauri::Runtime;
 
@@ -28,9 +28,9 @@ pub mod currency;
 pub mod emulator;
 pub mod gallery;
 pub mod plugins;
+pub mod scrapers;
 pub mod store;
 pub mod tour;
-pub mod scrapers;
 pub mod userstore;
 pub mod widgets;
 
@@ -98,6 +98,7 @@ pub async fn get_releases<R: Runtime>(_app: AppHandle<R>) -> Result<UniChatRelea
 pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), String> {
     let timestamp_usec = get_current_timestamp();
 
+    #[rustfmt::skip]
     let event = UniChatEvent::Clear(UniChatClearEventPayload {
         platform: None,
 
@@ -113,6 +114,8 @@ pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), S
 
 #[tauri::command]
 pub async fn get_third_party_licenses<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<serde_json::Value>, String> {
-    let third_party_licenses = serde_json::from_str(THIRD_PARTY_LICENSES).map_err(|e| format!("Failed to parse third party licenses: {:#?}", e))?;
+    let third_party_licenses = serde_json::from_str(THIRD_PARTY_LICENSES)
+        .map_err(|e| format!("Failed to parse third party licenses: {:#?}", e))?;
+
     return Ok(third_party_licenses);
 }

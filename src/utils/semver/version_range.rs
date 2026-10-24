@@ -10,8 +10,8 @@
 
 use std::fmt::Display;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 
 use crate::utils::semver::bound_type::BoundType;
 use crate::utils::semver::version::Version;
@@ -30,7 +30,6 @@ pub struct VersionRange {
 }
 
 impl VersionRange {
-
     pub fn min(&self) -> Option<&(BoundType, Version)> {
         return self.min.as_ref();
     }
@@ -77,7 +76,11 @@ impl VersionRange {
 
     fn is_exact(&self) -> bool {
         if let (Some((min_bound, min_version)), Some((max_bound, max_version))) = (&self.min, &self.max) {
-            return min_version.eq(max_version) && min_bound == &BoundType::Inclusive && max_bound == &BoundType::Inclusive;
+            if min_version != max_version {
+                return false;
+            }
+
+            return min_bound == &BoundType::Inclusive && max_bound == &BoundType::Inclusive;
         }
 
         return false;
@@ -94,13 +97,13 @@ impl VersionRange {
         let has_comma = value.contains(',');
         if has_comma {
             if !(value.starts_with(INCLUSIVE_START) || value.starts_with(EXCLUSIVE_START)) {
-                return Err(anyhow!("Version range contains a comma, it must start with [ or ("));
+                return Err(anyhow!("Missing start bound in version range '{}'", value));
             } else if !(value.ends_with(INCLUSIVE_END) || value.ends_with(EXCLUSIVE_END)) {
-                return Err(anyhow!("Version range contains a comma, it must end with ] or )"));
+                return Err(anyhow!("Missing end bound in version range '{}'", value));
             }
         } else {
             if value.contains(EXCLUSIVE_START) || value.contains(EXCLUSIVE_END) {
-                return Err(anyhow!("Version range does not contain a comma, it cannot contain ( or )"));
+                return Err(anyhow!("Unexpected exclusive bound in version range '{}'", value));
             }
 
             let starts_with_inclusive = value.starts_with(INCLUSIVE_START);
@@ -118,9 +121,9 @@ impl VersionRange {
             }
 
             if starts_with_inclusive {
-                return Err(anyhow!("Version range starting with [ must end with ]"));
+                return Err(anyhow!("Missing end bound in version range '{}'", value));
             } else if ends_with_inclusive {
-                return Err(anyhow!("Version range ending with ] must start with ["));
+                return Err(anyhow!("Missing start bound in version range '{}'", value));
             }
 
             // Version without explicit bounds, assume inclusive start and exclusive end
@@ -134,7 +137,7 @@ impl VersionRange {
         let mut min_bound: Option<BoundType> = None;
         let mut min_version: Option<Version> = None;
         if min_part == INCLUSIVE_START {
-            return Err(anyhow!("Minimum version part cannot be empty with only ["));
+            return Err(anyhow!("Empty minimum version in version range '{}'", value));
         } else if min_part != EXCLUSIVE_START {
             let bound = BoundType::new(&min_part[0..1])?;
             let version_str = Version::parse(&min_part[1..])?;
@@ -146,7 +149,7 @@ impl VersionRange {
         let mut max_bound: Option<BoundType> = None;
         let mut max_version: Option<Version> = None;
         if max_part == INCLUSIVE_END {
-            return Err(anyhow!("Maximum version part cannot be empty with only ]"));
+            return Err(anyhow!("Empty maximum version in version range '{}'", value));
         } else if max_part != EXCLUSIVE_END {
             let bound = BoundType::new(&max_part[max_part.len() - 1..])?;
             let version_str = Version::parse(&max_part[..max_part.len() - 1])?;
@@ -156,20 +159,21 @@ impl VersionRange {
         }
 
         if min_version.is_none() && max_version.is_none() {
-            return Err(anyhow!("At least one of minimum or maximum version must be specified"));
+            return Err(anyhow!("Unbounded version range '{}'", value));
         }
 
         if let (Some(min_version), Some(max_version)) = (&min_version, &max_version) {
             match min_version.cmp(max_version) {
                 std::cmp::Ordering::Greater => {
-                    return Err(anyhow!("Minimum version is greater than maximum version"));
-                },
+                    return Err(anyhow!("Minimum version greater than maximum in version range '{}'", value));
+                }
                 std::cmp::Ordering::Equal => {
-                    let both_inclusive = min_bound == Some(BoundType::Inclusive) && max_bound == Some(BoundType::Inclusive);
-                    if !both_inclusive {
-                        return Err(anyhow!("Equal bounds require [x] (both inclusive)"));
+                    let min_inclusive = min_bound == Some(BoundType::Inclusive);
+                    let max_inclusive = max_bound == Some(BoundType::Inclusive);
+                    if !(min_inclusive && max_inclusive) {
+                        return Err(anyhow!("Exclusive equal bounds in version range '{}'", value));
                     }
-                },
+                }
                 _ => {}
             }
         }

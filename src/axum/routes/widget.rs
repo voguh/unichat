@@ -57,7 +57,7 @@ fn fill_fieldstate(template: &str, widget: &WidgetMetadata) -> String {
             Ok(value_str) => {
                 template = template.replace(&format!("{{{{{}}}}}", key), &value_str);
                 template = template.replace(&format!("{{{}}}", key), &value_str);
-            },
+            }
             Err(err) => {
                 log::error!("Failed to serialize fieldstate value for key '{}': {:#?}", key, err);
                 continue;
@@ -70,12 +70,16 @@ fn fill_fieldstate(template: &str, widget: &WidgetMetadata) -> String {
 
 /* ========================================================================== */
 
-pub async fn get_widget_assets(Path((widget_name, asset_path)): Path<(String, String)>, req: Request<Body>) -> Response {
+pub async fn get_widget_assets(
+    Path((widget_name, asset_path)): Path<(String, String)>,
+    req: Request<Body>
+) -> Response {
     let widget_metadata: WidgetMetadata;
     match get_widget_from_rest_path(&widget_name) {
         Ok(widget) => widget_metadata = widget,
         Err(_) => {
-            return Response::builder().status(StatusCode::NOT_FOUND)
+            return Response::builder()
+                .status(StatusCode::NOT_FOUND)
                 .body(Body::from(format!("Widget '{}' not found", widget_name)))
                 .expect("Failed to build HTTP response");
         }
@@ -86,18 +90,21 @@ pub async fn get_widget_assets(Path((widget_name, asset_path)): Path<(String, St
         Ok(path) => asset_full_path = path,
         Err(err) => {
             log::error!("Invalid asset path '{}' for widget '{}': {:#?}", asset_path, widget_name, err);
-            return Response::builder().status(StatusCode::BAD_REQUEST)
+            return Response::builder()
+                .status(StatusCode::BAD_REQUEST)
                 .body(Body::from("Invalid asset path"))
                 .expect("Failed to build HTTP response");
         }
     }
 
     if !asset_full_path.exists() {
-        return Response::builder().status(StatusCode::NOT_FOUND)
+        return Response::builder()
+            .status(StatusCode::NOT_FOUND)
             .body(Body::from(format!("Asset '{}' not found in widget '{}'", asset_path, widget_name)))
             .expect("Failed to build HTTP response");
     } else if asset_full_path.is_dir() {
-        return Response::builder().status(StatusCode::BAD_REQUEST)
+        return Response::builder()
+            .status(StatusCode::BAD_REQUEST)
             .body(Body::from(format!("Asset '{}' is a directory, not a file", asset_path)))
             .expect("Failed to build HTTP response");
     }
@@ -110,13 +117,15 @@ pub async fn get_widget_assets(Path((widget_name, asset_path)): Path<(String, St
 pub async fn get_widget_css(Path(widget_name): Path<String>) -> Response {
     if let Ok(widget) = get_widget_from_rest_path(&widget_name) {
         let content = fill_fieldstate(&widget.widget_css(), &widget);
-        return Response::builder().status(StatusCode::OK)
+        return Response::builder()
+            .status(StatusCode::OK)
             .header("Content-Type", "text/css; charset=utf-8")
             .body(Body::from(content))
             .expect("Failed to build HTTP response");
     }
 
-    return Response::builder().status(StatusCode::NOT_FOUND)
+    return Response::builder()
+        .status(StatusCode::NOT_FOUND)
         .header("Content-Type", "text/plain; charset=utf-8")
         .body(Body::from(format!("Widget '{}' file 'widget.css' not found", widget_name)))
         .expect("Failed to build HTTP response");
@@ -125,13 +134,15 @@ pub async fn get_widget_css(Path(widget_name): Path<String>) -> Response {
 pub async fn get_widget_js(Path(widget_name): Path<String>) -> Response {
     if let Ok(widget) = get_widget_from_rest_path(&widget_name) {
         let content = fill_fieldstate(&widget.widget_js(), &widget);
-        return Response::builder().status(StatusCode::OK)
+        return Response::builder()
+            .status(StatusCode::OK)
             .header("Content-Type", "text/javascript; charset=utf-8")
             .body(Body::from(content))
             .expect("Failed to build HTTP response");
     }
 
-    return Response::builder().status(StatusCode::NOT_FOUND)
+    return Response::builder()
+        .status(StatusCode::NOT_FOUND)
         .header("Content-Type", "text/plain; charset=utf-8")
         .body(Body::from(format!("Widget '{}' file 'widget.js' not found", widget_name)))
         .expect("Failed to build HTTP response");
@@ -145,18 +156,21 @@ pub async fn get_widget(Path(widget_name): Path<String>, req: Request<Body>) -> 
         let uri = req.uri();
         let scheme = uri.scheme_str().unwrap_or("http");
         let host = uri.host().unwrap_or("localhost");
-        let base_url = format!("{}://{}:{}/widget/{}/", scheme, host, BASE_REST_PORT, widget_name);
+        let port = uri.port_u16().unwrap_or(BASE_REST_PORT);
+        let base_url = format!("{}://{}:{}/widget/{}/", scheme, host, port, widget_name);
         content = content.replace("{{WIDGET_BASE_URL}}", &base_url);
 
         content = fill_fieldstate(&content, &widget);
 
-        return Response::builder().status(StatusCode::OK)
+        return Response::builder()
+            .status(StatusCode::OK)
             .header("Content-Type", "text/html; charset=utf-8")
             .body(Body::from(content))
             .expect("Failed to build HTTP response");
     }
 
-    return Response::builder().status(StatusCode::NOT_FOUND)
+    return Response::builder()
+        .status(StatusCode::NOT_FOUND)
         .header("Content-Type", "text/plain; charset=utf-8")
         .body(Body::from(format!("Widget '{}' entrypoint not found", widget_name)))
         .expect("Failed to build HTTP response");

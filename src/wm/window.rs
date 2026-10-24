@@ -10,12 +10,12 @@
 
 use std::path::PathBuf;
 
-use tauri::webview::PageLoadEvent;
-use tauri::webview::PageLoadPayload;
 use tauri::AppHandle;
 use tauri::WebviewUrl;
 use tauri::WebviewWindow;
 use tauri::WebviewWindowBuilder;
+use tauri::webview::PageLoadEvent;
+use tauri::webview::PageLoadPayload;
 use url::Url;
 
 /* ========================================================================== */
@@ -29,7 +29,7 @@ use url::Url;
 //
 // Also note `additional_browser_args` fully replaces wry's default value, see warning at:
 // https://docs.rs/tauri/2.11.5/tauri/webview/struct.WebviewWindowBuilder.html#method.additional_browser_args
-const WEBVIEW2_ADDITIONAL_BROWSER_ARGS: &str = "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --lang=en-US";
+const ADDITIONAL_BROWSER_ARGS: &str = "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --lang=en-US";
 
 pub fn new(label: &str, url: &str) -> WebviewWindowBuilder<'static, tauri::Wry, AppHandle> {
     let app_handle = crate::get_app_handle();
@@ -42,10 +42,7 @@ pub fn new(label: &str, url: &str) -> WebviewWindowBuilder<'static, tauri::Wry, 
         webview_url = WebviewUrl::App(PathBuf::from(url));
     }
 
-    let window_builder = WebviewWindowBuilder::new(app_handle, label, webview_url)
-        .additional_browser_args(WEBVIEW2_ADDITIONAL_BROWSER_ARGS);
-
-    return window_builder;
+    return WebviewWindowBuilder::new(app_handle, label, webview_url).additional_browser_args(ADDITIONAL_BROWSER_ARGS);
 }
 
 pub fn show_on_page_finished(window: &WebviewWindow<tauri::Wry>, payload: &PageLoadPayload<'_>) -> bool {

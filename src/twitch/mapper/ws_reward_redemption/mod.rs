@@ -113,7 +113,5 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
         return Ok(Some(event));
     }
 
-
-
     return Ok(None);
 }

@@ -10,13 +10,13 @@
 
 use std::collections::HashMap;
 
-use anyhow::anyhow;
 use anyhow::Error;
+use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 
 use crate::currency;
-use crate::events::unichat::UNICHAT_FLAG_YOUTUBE_SUPER_STICKER;
+use crate::events::unichat::FLAG_YOUTUBE_SUPER_STICKER;
 use crate::events::unichat::UniChatDonateEventPayload;
 use crate::events::unichat::UniChatEmote;
 use crate::events::unichat::UniChatEvent;
@@ -25,7 +25,7 @@ use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::PurchaseAmountText;
-use crate::youtube::mapper::structs::parse_purchase_amount;
+use crate::youtube::mapper::structs::ThumbnailsWrapper;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
 use crate::youtube::mapper::structs::author::AuthorNameWrapper;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
@@ -35,8 +35,8 @@ use crate::youtube::mapper::structs::author::parse_author_name;
 use crate::youtube::mapper::structs::author::parse_author_photo;
 use crate::youtube::mapper::structs::author::parse_author_type;
 use crate::youtube::mapper::structs::author::parse_author_username;
+use crate::youtube::mapper::structs::parse_purchase_amount;
 use crate::youtube::mapper::structs::proxy_youtube_url;
-use crate::youtube::mapper::structs::ThumbnailsWrapper;
 
 /* ========================================================================== */
 
@@ -68,15 +68,14 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let author_photo = parse_author_photo(&parsed.author_photo)?;
     let author_type = parse_author_type(&parsed.author_badges);
     let (purchase_currency, purchase_value) = parse_purchase_amount(&parsed.purchase_amount_text)?;
-    let (donate_value, donate_currency, original_value, original_currency) = currency::apply(purchase_value, &purchase_currency);
+    let converted = currency::apply(purchase_value, &purchase_currency);
+    let (donate_value, donate_currency, original_value, original_currency) = converted;
     let sticker = parsed.sticker.thumbnails.last().ok_or(anyhow!("No thumbnails found in author photo"))?;
-    let emotes = vec![
-        UniChatEmote {
-            id: String::from("sticker"),
-            code: String::from("sticker"),
-            url: proxy_youtube_url(&sticker.url)
-        }
-    ];
+    let emotes = vec![UniChatEmote {
+        id: String::from("sticker"),
+        code: String::from("sticker"),
+        url: proxy_youtube_url(&sticker.url)
+    }];
     let timestamp_usec = get_current_timestamp();
 
     let event = UniChatEvent::Donate(UniChatDonateEventPayload {
@@ -84,7 +83,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
         channel_name: None,
 
         platform: UniChatPlatform::YouTube,
-        flags: HashMap::from([(String::from(UNICHAT_FLAG_YOUTUBE_SUPER_STICKER), Some(String::from("true")))]),
+        flags: HashMap::from([(String::from(FLAG_YOUTUBE_SUPER_STICKER), Some(String::from("true")))]),
 
         author_id: author_id,
         author_username: author_username,

@@ -18,7 +18,7 @@ use crate::wm::main_window::MAIN_WINDOW_LABEL;
 
 /* ========================================================================== */
 
-pub fn emit_notification(title:&str, message: &str) {
+pub fn emit_notification(title: &str, message: &str) {
     let app_handle = get_app_handle();
 
     if let Some(window) = app_handle.get_webview_window(MAIN_WINDOW_LABEL) {

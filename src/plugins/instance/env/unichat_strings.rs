@@ -8,18 +8,25 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use mlua::Error;
+use mlua::Lua;
+use mlua::UserData;
+use mlua::UserDataMethods;
+use mlua::Value;
+
+/* ========================================================================== */
+
 pub struct UniChatStringsModule;
 
 impl UniChatStringsModule {
-    pub fn new(lua: &mlua::Lua) -> Result<mlua::Value, mlua::Error> {
+    pub fn new(lua: &Lua) -> Result<Value, Error> {
         let userdata = lua.create_userdata(UniChatStringsModule)?;
-        return Ok(mlua::Value::UserData(userdata));
+        return Ok(Value::UserData(userdata));
     }
 }
 
-impl mlua::UserData for UniChatStringsModule {
-    fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
-
+impl UserData for UniChatStringsModule {
+    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("to_upper", |_lua, _this, s: String| {
             return Ok(s.to_uppercase());
         });
@@ -105,7 +112,7 @@ impl mlua::UserData for UniChatStringsModule {
         });
 
         methods.add_method("from_bytes", |_lua, _this, bytes: Vec<u8>| {
-            return String::from_utf8(bytes).map_err(mlua::Error::external);
+            return String::from_utf8(bytes).map_err(Error::external);
         });
 
         /* ================================================================== */

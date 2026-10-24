@@ -8,6 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use mlua::Error;
+use mlua::Integer;
+use mlua::Lua;
+use mlua::UserData;
+use mlua::UserDataMethods;
+use mlua::Value;
+
 use crate::utils::get_current_timestamp;
 
 /* ========================================================================== */
@@ -15,15 +22,15 @@ use crate::utils::get_current_timestamp;
 pub struct UniChatTimeModule;
 
 impl UniChatTimeModule {
-    pub fn new(lua: &mlua::Lua) -> Result<mlua::Value, mlua::Error> {
+    pub fn new(lua: &Lua) -> Result<Value, Error> {
         let userdata = lua.create_userdata(UniChatTimeModule)?;
-        return Ok(mlua::Value::UserData(userdata));
+        return Ok(Value::UserData(userdata));
     }
 }
 
-impl mlua::UserData for UniChatTimeModule {
-    fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("now", |_lua, _this, ()| -> mlua::Result<mlua::Integer> {
+impl UserData for UniChatTimeModule {
+    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("now", |_lua, _this, ()| -> mlua::Result<Integer> {
             let timestamp = get_current_timestamp();
 
             return Ok(timestamp);
