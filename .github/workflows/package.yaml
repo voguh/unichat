@@ -7,6 +7,9 @@ on:
   workflow_dispatch:
   workflow_call:
 
+permissions:
+  contents: read
+
 env:
   TAURI_APP_PATH: .
   TAURI_FRONTEND_PATH: webapp
