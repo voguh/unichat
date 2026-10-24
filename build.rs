@@ -8,10 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-#![allow(clippy::implicit_return)]
-#![allow(clippy::needless_return)]
-#![allow(clippy::redundant_field_names)]
-
 use std::collections::HashMap;
 use std::env;
 use std::fs;

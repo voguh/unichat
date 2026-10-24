@@ -45,3 +45,8 @@ tokio = { version = "=1.53.3", features = ["full"] }
 ureq = { version = "=3.4.2", default-features = false, features = ["json", "native-tls"] }
 url = { version = "=2.5.8", features = ["serde"] }
 zip = "=9.0.5"
+
+[lints.clippy]
+implicit_return = "allow"
+needless_return = "allow"
+redundant_field_names = "allow"
