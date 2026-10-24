@@ -12,6 +12,7 @@
 import argparse
 from pathlib import Path
 import shutil
+import subprocess
 from utils import logger
 from utils.exec import exec
 from utils.confirm import confirm
@@ -27,9 +28,15 @@ def main():
     parser = argparse.ArgumentParser(description="Release management tool")
     parser.add_argument("version", type=str, help="Version to release")
     parser.add_argument("--prerelease", "-p", action="store_true", help="Indicates if the release is a pre-release version")
+    parser.add_argument("--dry-run", action="store_true", help="Runs the whole release process without committing, tagging or pushing")
 
     args = parser.parse_args()
     next_version = Version.parse(args.version)
+
+    if args.dry_run:
+        logger.warn("==================================================================")
+        logger.warn("  DRY RUN: nothing will be committed, tagged or pushed.")
+        logger.warn("==================================================================")
 
     if not confirm(f"Are you sure you want to release version '{next_version}'?"):
         logger.error("Release cancelled by user.")
@@ -78,21 +85,60 @@ def main():
 
     # ============================================================================================ #
 
-    logger.info("Updating version in '\033[33mCargo.toml\033[0m'...")
-    exec([TOOLS_PATH / "setversion.py", str(next_version)])
+    logger.info("Running webapp lint...")
+    lint_result = exec(["pnpm", "lint"], cwd=TAURI_FRONTEND_PATH, check=False)
+    if lint_result.returncode != 0:
+        logger.error("Webapp lint reported issues. Fix them and commit the changes.")
+        return
+
+    logger.info("Running webapp typecheck...")
+    typecheck_result = exec(["pnpm", "typecheck"], cwd=TAURI_FRONTEND_PATH, check=False)
+    if typecheck_result.returncode != 0:
+        logger.error("Webapp typecheck reported errors. Fix them and commit the changes.")
+        return
+
+    logger.info("Checking Rust formatting...")
+    fmt_result = exec(["cargo", "+nightly", "fmt", "--all", "--check"], check=False)
+    if fmt_result.returncode != 0:
+        logger.error("Code is not formatted. Run '\033[33mcargo +nightly fmt --all\033[0m' and commit the changes.")
+        return
+
+    logger.info("Running clippy...")
+    clippy_result = exec(["cargo", "+nightly", "clippy", "--", "-D", "warnings"], check=False)
+    if clippy_result.returncode != 0:
+        logger.error("Clippy reported warnings. Fix them and commit the changes.")
+        return
 
     # ============================================================================================ #
 
-    logger.info("Cleaning up previous build artifacts...")
-    shutil.rmtree(TAURI_FRONTEND_PATH / "node_modules", ignore_errors=True)
-    shutil.rmtree(TAURI_FRONTEND_PATH / "dist", ignore_errors=True)
-    shutil.rmtree(TAURI_APP_PATH / "target", ignore_errors=True)
+    cargo_toml_backup = CARGO_TOML_PATH.read_bytes()
+    cargo_lock_backup = CARGO_LOCK_PATH.read_bytes()
 
-    # ============================================================================================ #
+    try:
+        logger.info("Updating version in '\033[33mCargo.toml\033[0m'...")
+        exec([TOOLS_PATH / "setversion.py", str(next_version)])
 
-    logger.info("Running tests and building project...")
-    exec(["pnpm", "install", "--frozen-lockfile"], cwd=TAURI_FRONTEND_PATH)
-    exec(["cargo", "tauri", "build"])
+        # ======================================================================================== #
+
+        logger.info("Cleaning up previous build artifacts...")
+        shutil.rmtree(TAURI_FRONTEND_PATH / "node_modules", ignore_errors=True)
+        shutil.rmtree(TAURI_FRONTEND_PATH / "dist", ignore_errors=True)
+        shutil.rmtree(TAURI_APP_PATH / "target", ignore_errors=True)
+
+        # ======================================================================================== #
+
+        logger.info("Running tests and building project...")
+        exec(["pnpm", "install", "--frozen-lockfile"], cwd=TAURI_FRONTEND_PATH)
+        exec(["tauri", "build"])
+    finally:
+        if args.dry_run:
+            logger.info("Restoring '\033[33mCargo.toml\033[0m' and '\033[33mCargo.lock\033[0m'...")
+            CARGO_TOML_PATH.write_bytes(cargo_toml_backup)
+            CARGO_LOCK_PATH.write_bytes(cargo_lock_backup)
+
+    if args.dry_run:
+        logger.info("Dry run finished, skipping commit, tag and push.")
+        return
 
     # ============================================================================================ #
 
@@ -109,3 +155,9 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logger.info("Interrupted by user.")
         exit(0)
+    except subprocess.CalledProcessError as e:
+        logger.error("Command '\033[33m{}\033[0m' failed with exit code {}.", " ".join(map(str, e.cmd)), e.returncode)
+        exit(1)
+    except Exception as e:
+        logger.error("Release failed: {}", e)
+        exit(1)
