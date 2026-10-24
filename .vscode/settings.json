@@ -6,6 +6,8 @@
     "biome.lsp.bin": "${workspaceFolder}/webapp/node_modules/.bin/biome",
 
     "rust-analyzer.rustfmt.overrideCommand": ["rustup", "run", "nightly", "rustfmt", "--config-path", "${workspaceFolder}/rustfmt.toml"],
+    "rust-analyzer.check.command": "clippy",
+    "rust-analyzer.check.extraEnv": { "RUSTUP_TOOLCHAIN": "nightly" },
 
     "[javascript]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "explicit" } },
     "[javascriptreact]": { "editor.defaultFormatter": "biomejs.biome", "editor.formatOnSave": true, "editor.codeActionsOnSave": { "source.fixAll.biome": "explicit" } },
