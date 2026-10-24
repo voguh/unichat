@@ -27,10 +27,10 @@ use crate::plugins::runtime;
 use crate::scraper::UniChatScraper;
 use crate::scraper::status::ScraperStatus;
 use crate::scraper::status::ScraperStatusEvent;
+use crate::settings;
+use crate::settings::SettingLogEventLevel;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
-use crate::utils::settings;
-use crate::utils::settings::SettingLogEventLevel;
 
 /* ========================================================================== */
 

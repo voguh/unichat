@@ -17,8 +17,8 @@ use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::utils::settings;
-use crate::utils::settings::SETTINGS_CURRENCY_TARGET_KEY;
+use crate::settings;
+use crate::settings::SETTINGS_CURRENCY_TARGET_KEY;
 
 mod currencies;
 mod rates;
@@ -97,9 +97,8 @@ pub fn init() -> Result<(), Error> {
 
     currencies::init()?;
 
-    if let Ok(code) = settings::get_item::<serde_json::Value>(SETTINGS_CURRENCY_TARGET_KEY) {
-        refresh_rates(code)?;
-    }
+    let code = serde_json::json!(settings::get_currency_target());
+    refresh_rates(code)?;
 
     return Ok(());
 }

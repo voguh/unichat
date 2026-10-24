@@ -22,14 +22,14 @@ use crate::scraper;
 use crate::scraper::UniChatScraper;
 use crate::scraper::status::ScraperStatus;
 use crate::scraper::status::ScraperStatusEvent;
+use crate::settings;
+use crate::settings::SettingLogEventLevel;
 use crate::shared_emotes;
 use crate::utils::is_valid_youtube_channel_id;
 use crate::utils::is_valid_youtube_video_id;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::properties::PropertiesKey;
-use crate::utils::settings;
-use crate::utils::settings::SettingLogEventLevel;
 
 mod mapper;
 

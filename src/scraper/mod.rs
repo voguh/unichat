@@ -24,10 +24,10 @@ use tauri::webview::PageLoadPayload;
 
 use crate::scraper::status::ScraperStatusEvent;
 use crate::scraper::utils::decode_url;
+use crate::settings;
 use crate::utils::get_current_timestamp;
 use crate::utils::is_dev;
 use crate::utils::render_emitter;
-use crate::utils::settings;
 use crate::wm::window;
 
 pub mod status;
@@ -179,7 +179,7 @@ pub fn register_scraper(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Resul
 
     /* ====================================================================== */
 
-    let start_hidden: bool = settings::get_item(settings::SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY)?;
+    let start_hidden = settings::get_create_webview_hidden();
     let window = window::new(scraper.id(), "scraper_idle.html")
         .title(format!("UniChat - Scraper ({})", scraper.name()))
         .inner_size(400.0, 576.0)

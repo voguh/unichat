@@ -34,6 +34,7 @@ mod currency;
 mod events;
 mod plugins;
 mod scraper;
+mod settings;
 mod shared_emotes;
 mod twitch;
 mod utils;
@@ -112,7 +113,7 @@ fn run_startup() -> Result<(), Error> {
     utils::properties::init()?;
 
     wm::splash_window::stage(2, "Initializing settings...");
-    utils::settings::init()?;
+    settings::init()?;
 
     /* ====================================================================== */
 

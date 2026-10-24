@@ -27,6 +27,8 @@ use crate::scraper;
 use crate::scraper::UniChatScraper;
 use crate::scraper::status::ScraperStatus;
 use crate::scraper::status::ScraperStatusEvent;
+use crate::settings;
+use crate::settings::SettingLogEventLevel;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
 use crate::utils::irc::IRCMessage;
@@ -34,8 +36,6 @@ use crate::utils::is_valid_twitch_channel_name;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::properties::PropertiesKey;
-use crate::utils::settings;
-use crate::utils::settings::SettingLogEventLevel;
 
 mod mapper;
 

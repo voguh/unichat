@@ -14,9 +14,8 @@ use axum::routing::get;
 use axum::routing::post;
 use tokio::net::TcpListener;
 
+use crate::settings;
 use crate::utils::constants::BASE_REST_PORT;
-use crate::utils::settings;
-use crate::utils::settings::SETTINGS_OPEN_TO_LAN_KEY;
 
 mod routes;
 mod utils;
@@ -25,7 +24,7 @@ mod utils;
 
 pub async fn start() -> Result<(), Error> {
     let mut host = format!("127.0.0.1:{}", BASE_REST_PORT);
-    if settings::get_item(SETTINGS_OPEN_TO_LAN_KEY).is_ok_and(|v: bool| v) {
+    if settings::get_open_to_lan() {
         host = format!("0.0.0.0:{}", BASE_REST_PORT);
     }
 

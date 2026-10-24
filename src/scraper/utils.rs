@@ -13,8 +13,8 @@ use tauri::Manager as _;
 use url::Url;
 
 use crate::get_app_handle;
+use crate::settings;
 use crate::utils::is_dev;
-use crate::utils::settings;
 
 /* ========================================================================== */
 
@@ -56,7 +56,7 @@ pub fn is_remote_url(scraper_id: &str, url: &Url) -> bool {
         return false;
     }
 
-    let stored_url: Option<String> = settings::get_scraper_property(scraper_id, "url").ok();
+    let stored_url = settings::get_scraper_url(scraper_id);
     let stored_url = stored_url.and_then(|stored_url| Url::parse(&stored_url).ok());
 
     return matches!(stored_url, Some(stored_url) if url == &stored_url);

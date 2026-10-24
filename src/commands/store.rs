@@ -12,7 +12,7 @@ use serde_json::Value;
 use tauri::AppHandle;
 use tauri::Runtime;
 
-use crate::utils::settings;
+use crate::settings;
 
 /* ========================================================================== */
 
@@ -23,7 +23,7 @@ pub async fn settings_get_item(key: &str) -> Result<Value, String> {
         return Err("Invalid settings key format".to_string());
     }
 
-    let raw_value = settings::get_item(&key).map_err(|e| format!("Failed to get item: {:#?}", e))?;
+    let raw_value = settings::get_by_key(&key).map_err(|e| format!("Failed to get item: {:#?}", e))?;
     return Ok(raw_value);
 }
 
@@ -37,8 +37,8 @@ pub async fn settings_get_items(keys: Vec<String>) -> Result<Value, String> {
             return Err(format!("Invalid settings key format: {}", key));
         }
 
-        let raw_value = settings::get_item(&full_key).map_err(|e| format!("Failed to get item '{}': {:#?}", key, e))?;
-        result.insert(key, raw_value);
+        let value = settings::get_by_key(&full_key).map_err(|e| format!("Failed to get item '{}': {:#?}", key, e))?;
+        result.insert(key, value);
     }
 
     return Ok(Value::Object(result));
@@ -51,7 +51,7 @@ pub async fn settings_set_item<R: Runtime>(_app: AppHandle<R>, key: &str, value:
         return Err("Invalid settings key format".to_string());
     }
 
-    settings::set_item(&key, &value).map_err(|e| format!("Failed to set item: {:#?}", e))?;
+    settings::set_by_key(&key, &value).map_err(|e| format!("Failed to set item: {:#?}", e))?;
     return Ok(());
 }
 
@@ -65,7 +65,7 @@ pub async fn settings_set_items<R: Runtime>(_app: AppHandle<R>, items: Value) ->
             return Err(format!("Invalid settings key format: {}", key));
         }
 
-        settings::set_item(&full_key, value).map_err(|e| format!("Failed to set item '{}': {:#?}", key, e))?;
+        settings::set_by_key(&full_key, value).map_err(|e| format!("Failed to set item '{}': {:#?}", key, e))?;
     }
 
     return Ok(());

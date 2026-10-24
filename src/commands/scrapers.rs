@@ -17,7 +17,7 @@ use crate::scraper;
 use crate::scraper::serialize_scraper;
 use crate::scraper::utils::decode_url;
 use crate::scraper::utils::is_local_url;
-use crate::utils::settings;
+use crate::settings;
 
 /* ========================================================================== */
 
@@ -64,7 +64,7 @@ pub async fn get_scraper_stored_url<R: Runtime>(
         return Err(format!("Scraper webview '{}' not recognized", scraper_id));
     }
 
-    let url = settings::get_scraper_property(scraper_id, "url").ok();
+    let url = settings::get_scraper_url(scraper_id);
     return Ok(url);
 }
 
@@ -94,8 +94,7 @@ pub async fn set_scraper_webview_url<R: Runtime>(app: AppHandle<R>, scraper_id: 
     if is_local_url(scraper_id, &parsed_url) {
         webview.hide().map_err(|e| format!("An error occurred on hide scraper webview: {:#?}", e))?;
     } else {
-        settings::set_scraper_property(scraper_id, "url", &parsed_url.to_string())
-            .map_err(|e| format!("An error occurred on store scraper URL: {:#?}", e))?;
+        settings::set_scraper_url(scraper_id, parsed_url.as_str());
     }
 
     if let Err(e) = webview.navigate(parsed_url) {
