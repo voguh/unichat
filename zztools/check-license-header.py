@@ -54,6 +54,7 @@ EXCLUDE_PATHS = {
     ROOT_PATH / "Cargo.lock",
     ROOT_PATH / "Cargo.toml",
     ROOT_PATH / "LICENSE",
+    ROOT_PATH / "osv-scanner.toml",
     ROOT_PATH / "README.md",
     ROOT_PATH / "run.sh",
     ROOT_PATH / "rust-toolchain.toml",

@@ -85,6 +85,12 @@ def main():
 
     # ============================================================================================ #
 
+    logger.info("Scanning dependencies for vulnerabilities...")
+    osv_result = exec(["osv-scanner", "--config=osv-scanner.toml", "--lockfile=Cargo.lock", "--lockfile=webapp/pnpm-lock.yaml"], check=False)
+    if osv_result.returncode != 0:
+        logger.error("Vulnerable dependencies found. Update them or add a justified entry to '\033[33mosv-scanner.toml\033[0m'.")
+        return
+
     logger.info("Running webapp lint...")
     lint_result = exec(["pnpm", "lint"], cwd=TAURI_FRONTEND_PATH, check=False)
     if lint_result.returncode != 0:

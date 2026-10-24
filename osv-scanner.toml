@@ -1,0 +1,34 @@
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0429"
+ignoreUntil = 2027-01-24
+reason = "glib 0.18 is pinned by tauri/wry gtk bindings; fixed only in glib 0.20"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0370"
+ignoreUntil = 2027-01-24
+reason = "proc-macro-error is unmaintained, pulled by glib-macros 0.18 (tauri gtk bindings); no fixed version"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2026-0370"
+ignoreUntil = 2027-01-24
+reason = "zvariant is unmaintained, pulled by zbus (tauri-plugin-opener); no fixed version"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2026-0371"
+ignoreUntil = 2027-01-24
+reason = "zbus_names is unmaintained, pulled by zbus (tauri-plugin-opener); no fixed version"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2026-0372"
+ignoreUntil = 2027-01-24
+reason = "zvariant_derive is unmaintained, pulled by zbus (tauri-plugin-opener); no fixed version"
+
+[[IgnoredVulns]]
+id = "GHSA-rj75-hqrm-r3gf"
+ignoreUntil = 2027-01-24
+reason = "postcss-selector-parser 6 is pinned by @tailwindcss/typography; only parses project CSS at build time"
+
+[[IgnoredVulns]]
+id = "GHSA-w5hq-g745-h8pq"
+ignoreUntil = 2027-01-24
+reason = "uuid 8 is pinned by @ngneat/falso; the bug affects only v3/v5/v6 with a caller-provided buffer"
