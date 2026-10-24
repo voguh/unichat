@@ -65,12 +65,29 @@ runs:
         cache: pnpm
         cache-dependency-path: ${{ inputs.tauri-frontend-path }}/pnpm-lock.yaml
 
+    - name: Resolve runner image
+      id: runner-image
+      if: ${{ runner.os == 'Linux' }}
+      shell: bash
+      run: echo "version=$ImageOS-$ImageVersion" >> $GITHUB_OUTPUT
+
+    - name: Cache linux dependencies
+      if: ${{ runner.os == 'Linux' }}
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/apt-archives
+        key: apt-archives-${{ steps.runner-image.outputs.version }}
+        restore-keys: |
+          apt-archives-
+
     - name: Install linux dependencies
       if: ${{ runner.os == 'Linux' }}
       shell: bash
       run: |
+        mkdir -p ~/apt-archives/partial
         sudo apt-get update
-        sudo apt-get install --no-install-recommends --no-install-suggests -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev xdg-utils
+        sudo apt-get install -o Dir::Cache::Archives="$HOME/apt-archives" -o Acquire::Retries=3 --no-install-recommends --no-install-suggests -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev xdg-utils
+        sudo chown -R "$USER" ~/apt-archives
 
     - name: Prepare repository
       working-directory: ${{ inputs.tauri-app-path }}
