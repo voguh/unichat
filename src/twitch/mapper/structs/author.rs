@@ -80,7 +80,7 @@ pub fn parse_author_color(color: Option<&Option<String>>, author_name: &Option<S
         return Ok(color.to_owned());
     } else {
         let username = author_name.as_ref().ok_or(anyhow!("Missing author name"))?;
-        return Ok(random_color_by_seed(&username));
+        return Ok(random_color_by_seed(username));
     }
 }
 

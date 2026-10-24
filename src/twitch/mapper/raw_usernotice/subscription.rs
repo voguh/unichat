@@ -39,7 +39,7 @@ pub fn parse(message: &IRCMessage, tags: &HashMap<String, Option<String>>) -> Re
     let author_name = parse_author_name(tags.get("display-name"))?;
     let author_color = parse_author_color(tags.get("color"), &author_username)?;
     let author_badges = parse_author_badges(tags.get("badges"));
-    let author_type = parse_author_type(&tags);
+    let author_type = parse_author_type(tags);
     let tier = require_tag(tags, "msg-param-sub-plan")?;
     let months_str = require_tag(tags, "msg-param-cumulative-months")?;
     let months: u16 = months_str.parse()?;
@@ -53,7 +53,7 @@ pub fn parse(message: &IRCMessage, tags: &HashMap<String, Option<String>>) -> Re
         channel_name: Some(channel),
 
         platform: UniChatPlatform::Twitch,
-        flags: inject_raw_tags(&tags),
+        flags: inject_raw_tags(tags),
 
         author_id: author_id,
         author_username: author_username,

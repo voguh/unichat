@@ -97,9 +97,7 @@ fn get_clean_env() -> HashMap<String, String> {
     let mut clean_env: HashMap<String, String> = HashMap::new();
 
     for (key, value) in env::vars() {
-        if EQUALS_ENV.contains(&key.as_str()) {
-            continue;
-        } else if STARTS_WITH_ENV.iter().any(|prefix| key.starts_with(prefix)) {
+        if EQUALS_ENV.contains(&key.as_str()) || STARTS_WITH_ENV.iter().any(|prefix| key.starts_with(prefix)) {
             continue;
         }
 

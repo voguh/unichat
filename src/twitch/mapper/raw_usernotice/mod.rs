@@ -45,7 +45,7 @@ pub fn parse(channel_name: String, message: &IRCMessage) -> Result<Option<UniCha
         return community_gift::parse(channel_name, &tags);
     } else if msg_id == "raid" {
         return raid::parse(channel_name, &tags);
-    } else if msg_id == "subgift" && tags.get("msg-param-community-gift-id").is_none() {
+    } else if msg_id == "subgift" && !tags.contains_key("msg-param-community-gift-id") {
         return subgift::parse(channel_name, &tags);
     } else if msg_id == "sub" || msg_id == "resub" {
         return subscription::parse(message, &tags);

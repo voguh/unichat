@@ -93,7 +93,7 @@ fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> Result<u16, Error> {
 
     if let Some(header_primary_text) = &parsed.header_primary_text {
         let runs = &header_primary_text.runs;
-        let run = runs.get(1).or_else(|| runs.get(0)).ok_or(anyhow!("No valid run found in header primary text"))?;
+        let run = runs.get(1).or_else(|| runs.first()).ok_or(anyhow!("No valid run found in header primary text"))?;
 
         match run {
             MessageRun::Text { text } => {

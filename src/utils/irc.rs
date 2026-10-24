@@ -32,7 +32,7 @@ pub enum IRCPrefix {
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub enum IRCCommand {
     /// PRIVMSG chatroom :message
-    PRIVMSG(String, String),
+    Privmsg(String, String),
     /// A raw IRC command unknown to the crate.
     Raw(String, Vec<String>)
 }
@@ -66,7 +66,7 @@ impl IRCMessage {
 
     fn parse_prefix(prefix_arr: Option<&serde_json::Value>) -> Result<Option<IRCPrefix>, Error> {
         if let Some(prefix_arr) = prefix_arr.and_then(|prefix| prefix.as_array()) {
-            if prefix_arr.len() == 0 {
+            if prefix_arr.is_empty() {
                 return Ok(None);
             } else if prefix_arr.len() == 1 {
                 let server_name = prefix_arr[0].as_str().ok_or(anyhow!("Invalid server name in prefix"))?;
@@ -92,7 +92,7 @@ impl IRCMessage {
             let params_str: Vec<String> = params.iter().filter_map(|p| p.as_str().map(|s| s.to_string())).collect();
 
             if name == "PRIVMSG" && params_str.len() == 2 {
-                return Ok(IRCCommand::PRIVMSG(params_str[0].clone(), params_str[1].clone()));
+                return Ok(IRCCommand::Privmsg(params_str[0].clone(), params_str[1].clone()));
             }
 
             return Ok(IRCCommand::Raw(name.to_string(), params_str));

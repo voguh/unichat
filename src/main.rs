@@ -84,17 +84,15 @@ fn has_plugins() -> bool {
 
     if user_plugins_dir.exists() && user_plugins_dir.is_dir() {
         if let Ok(entries) = fs::read_dir(&user_plugins_dir) {
-            for entry in entries {
-                if let Ok(entry) = entry {
-                    let path = entry.path();
-                    if path.is_dir() {
-                        let manifest = path.join("manifest.yaml").exists();
-                        let lua_entrypoint = path.join("data/main.lua").exists();
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    let manifest = path.join("manifest.yaml").exists();
+                    let lua_entrypoint = path.join("data/main.lua").exists();
 
-                        if manifest && lua_entrypoint {
-                            has_plugins = true;
-                            break;
-                        }
+                    if manifest && lua_entrypoint {
+                        has_plugins = true;
+                        break;
                     }
                 }
             }
@@ -121,7 +119,7 @@ fn run_startup() -> Result<(), Error> {
     wm::splash_window::stage(3, "Setting up application plugins directory...");
     let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
     if !&user_plugins_dir.exists() {
-        log::info!("Creating user plugins directory at {:?}", &user_plugins_dir);
+        log::info!("Creating user plugins directory at {:?}", user_plugins_dir);
         fs::create_dir_all(&user_plugins_dir)?;
     }
 
@@ -130,7 +128,7 @@ fn run_startup() -> Result<(), Error> {
     wm::splash_window::stage(4, "Setting up application gallery directory...");
     let gallery_dir = properties::get_app_path(AppPaths::UniChatGallery);
     if !&gallery_dir.exists() {
-        log::info!("Creating gallery directory at {:?}", &gallery_dir);
+        log::info!("Creating gallery directory at {:?}", gallery_dir);
         fs::create_dir_all(&gallery_dir)?;
     }
 
@@ -139,7 +137,7 @@ fn run_startup() -> Result<(), Error> {
     wm::splash_window::stage(5, "Setting up application widgets directory...");
     let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
     if !&user_widgets_dir.exists() {
-        log::info!("Creating user widgets directory at {:?}", &user_widgets_dir);
+        log::info!("Creating user widgets directory at {:?}", user_widgets_dir);
         fs::create_dir_all(&user_widgets_dir)?;
     }
 

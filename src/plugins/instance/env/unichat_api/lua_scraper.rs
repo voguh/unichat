@@ -182,7 +182,7 @@ impl UniChatScraper for LuaUniChatScraper {
 
         match self.on_event.call::<Option<Value>>(table) {
             Ok(Some(parsed_event)) => {
-                let json: serde_json::Value = from_lua_value(&lua, parsed_event)?;
+                let json: serde_json::Value = from_lua_value(lua, parsed_event)?;
 
                 let event_type = json.get("type").and_then(|v| v.as_str()).unwrap_or_default();
                 if event_type == "unichat:userstore_update" {

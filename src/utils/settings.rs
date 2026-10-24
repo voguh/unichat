@@ -8,6 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+#![allow(dead_code)]
+
 use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::OnceLock;

@@ -34,7 +34,7 @@ pub fn parse(channel: String, tags: &HashMap<String, Option<String>>) -> Result<
     let author_color = parse_author_color(tags.get("color"), &author_username)?;
     let author_profile_picture_url = require_tag(tags, "msg-param-profileImageURL")?;
     let author_badges = parse_author_badges(tags.get("badges"));
-    let author_type = parse_author_type(&tags);
+    let author_type = parse_author_type(tags);
     let message_id = require_tag(tags, "id")?;
     let count_str = require_tag(tags, "msg-param-viewerCount")?;
     let count: u16 = count_str.parse()?;
@@ -45,7 +45,7 @@ pub fn parse(channel: String, tags: &HashMap<String, Option<String>>) -> Result<
         channel_name: Some(channel),
 
         platform: UniChatPlatform::Twitch,
-        flags: inject_raw_tags(&tags),
+        flags: inject_raw_tags(tags),
 
         author_id: author_id,
         author_username: author_username,

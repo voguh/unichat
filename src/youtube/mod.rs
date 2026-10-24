@@ -123,7 +123,6 @@ static YOUTUBE_VALID_URLS: LazyLock<Vec<String>> = LazyLock::new(|| {
     ]
 });
 
-#[derive(Default)]
 struct YouTubeUniChatScraper;
 
 impl UniChatScraper for YouTubeUniChatScraper {
@@ -172,7 +171,7 @@ impl UniChatScraper for YouTubeUniChatScraper {
             parts.next();
             video_id = parts.next();
         } else if url.starts_with("youtube.com/watch") || url.starts_with("youtube.com/live_chat") {
-            let query = url.splitn(2, "?").nth(1).ok_or_else(|| anyhow!("Missing query"))?;
+            let query = url.split_once("?").map(|x| x.1).ok_or_else(|| anyhow!("Missing query"))?;
             for param in query.split('&') {
                 let mut kv = param.splitn(2, '=');
                 if kv.next() == Some("v") {
@@ -215,7 +214,7 @@ impl UniChatScraper for YouTubeUniChatScraper {
 }
 
 pub fn init() -> Result<(), Error> {
-    scraper::register_scraper(Arc::new(YouTubeUniChatScraper::default()))?;
+    scraper::register_scraper(Arc::new(YouTubeUniChatScraper))?;
 
     return Ok(());
 }

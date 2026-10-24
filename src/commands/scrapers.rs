@@ -24,7 +24,7 @@ use crate::utils::settings;
 #[tauri::command]
 pub async fn get_scrapers<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Value>, String> {
     let scrapers = scraper::get_scrapers();
-    let serialized_scrapers: Vec<Value> = scrapers.iter().map(|s| serialize_scraper(s)).collect();
+    let serialized_scrapers: Vec<Value> = scrapers.iter().map(serialize_scraper).collect();
     return Ok(serialized_scrapers);
 }
 

@@ -168,7 +168,7 @@ impl UserData for LuaUniChatPlatformFactory {
                 return Err(Error::external("String cannot be empty"));
             }
 
-            let obj: UniChatPlatform = serde_plain::from_str(&str).map_err(Error::external)?;
+            let obj: UniChatPlatform = serde_plain::from_str(str).map_err(Error::external)?;
             let lv = serde_plain::to_string(&obj).expect("Failed to serialize UniChatPlatform");
             return Ok(lv);
         });
@@ -211,7 +211,7 @@ impl UserData for LuaUniChatAuthorTypeFactory {
                 return Err(Error::external("String cannot be empty"));
             }
 
-            let obj: UniChatAuthorType = serde_plain::from_str(&str).map_err(Error::external)?;
+            let obj: UniChatAuthorType = serde_plain::from_str(str).map_err(Error::external)?;
             let lv = serde_plain::to_string(&obj).expect("Failed to serialize UniChatAuthorType");
             return Ok(lv);
         });

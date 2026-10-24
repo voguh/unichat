@@ -123,7 +123,7 @@ pub fn parse_author_name_str(name: String) -> String {
     return username;
 }
 
-pub fn parse_author_photo_vec(photos: &Vec<AuthorPhotoWrapper>) -> Result<String, Error> {
+pub fn parse_author_photo_vec(photos: &[AuthorPhotoWrapper]) -> Result<String, Error> {
     let thumbnail = photos.last().ok_or(anyhow!("No thumbnails found in author photo"))?;
     return Ok(proxy_youtube_url(&thumbnail.url));
 }

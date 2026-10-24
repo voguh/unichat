@@ -140,7 +140,7 @@ impl JsonRPCError {
         message: String,
         data: Option<D>
     ) -> Self {
-        if code < -32099 || code > -32000 {
+        if !(-32099..=-32000).contains(&code) {
             panic!("Server error code {} out of range", code);
         }
 

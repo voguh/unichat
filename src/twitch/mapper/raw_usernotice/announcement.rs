@@ -41,7 +41,7 @@ pub fn parse(message: &IRCMessage, tags: &HashMap<String, Option<String>>) -> Re
     let author_name = parse_author_name(tags.get("display-name"))?;
     let author_color = parse_author_color(tags.get("color"), &author_username)?;
     let author_badges = parse_author_badges(tags.get("badges"));
-    let author_type = parse_author_type(&tags);
+    let author_type = parse_author_type(tags);
     let message_id = require_tag(tags, "id")?;
     let message = parse_message_string(&message_text);
     let emotes = parse_message_emotes(tags.get("emotes"), &message_text)?;
@@ -52,7 +52,7 @@ pub fn parse(message: &IRCMessage, tags: &HashMap<String, Option<String>>) -> Re
         channel_name: Some(channel),
 
         platform: UniChatPlatform::Twitch,
-        flags: inject_raw_tags(&tags),
+        flags: inject_raw_tags(tags),
 
         author_id: author_id,
         author_username: author_username,

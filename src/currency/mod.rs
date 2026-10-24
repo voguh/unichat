@@ -114,24 +114,20 @@ pub fn convert(value: f64, token: &str) -> Option<(f64, String)> {
     let code = token.trim().to_ascii_uppercase();
     let symbol = token.trim().to_string();
 
-    match target_currency() {
-        None => return None,
-        Some(state) => {
-            if state.code == code || state.symbol == symbol {
-                return None;
-            }
+    let state = target_currency()?;
+    if state.code == code || state.symbol == symbol {
+        return None;
+    }
 
-            if let Some(rate) = rates::get_rate_by_code(&code) {
-                return Some((round_cents(value / rate), state.symbol));
-            }
+    if let Some(rate) = rates::get_rate_by_code(&code) {
+        return Some((round_cents(value / rate), state.symbol));
+    }
 
-            if let Some(rate) = rates::get_rate_by_symbol(&symbol) {
-                return Some((round_cents(value / rate), state.symbol));
-            }
+    if let Some(rate) = rates::get_rate_by_symbol(&symbol) {
+        return Some((round_cents(value / rate), state.symbol));
+    }
 
-            return None;
-        }
-    };
+    return None;
 }
 
 pub fn apply(value: f64, currency: &str) -> (f64, String, Option<f64>, Option<String>) {

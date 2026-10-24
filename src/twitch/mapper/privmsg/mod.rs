@@ -21,7 +21,7 @@ mod message;
 pub fn parse(channel: String, text: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
     let tags = message.tags.clone();
 
-    if tags.get("bits").is_some() {
+    if tags.contains_key("bits") {
         return cheer::parse(channel, text, message, tags);
     }
 

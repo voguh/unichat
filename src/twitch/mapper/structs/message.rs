@@ -73,18 +73,18 @@ pub fn parse_message_emotes(
     return Ok(emotes);
 }
 
-pub fn parse_message_string(message_raw: &String) -> String {
+pub fn parse_message_string(message_raw: &str) -> String {
     let message_raw = normalize_message_text(message_raw);
     let mut str_message = Vec::new();
 
     let cheermotes = read_cheermotes();
     for word in message_raw.split_whitespace() {
-        let prefix_end = word.find(|c: char| c.is_digit(10)).unwrap_or(word.len());
+        let prefix_end = word.find(|c: char| c.is_ascii_digit()).unwrap_or(word.len());
         let prefix = &word[..prefix_end];
         let suffix = &word[prefix_end..];
         let amount: u32 = suffix.parse().unwrap_or(0);
 
-        if !cheermotes.contains(prefix) || (amount < 1 || amount > 100000) {
+        if !cheermotes.contains(prefix) || !(1..=100000).contains(&amount) {
             str_message.push(word);
         }
     }

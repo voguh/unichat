@@ -62,7 +62,7 @@ pub fn get_plugins() -> Vec<Arc<UniChatPlugin>> {
     let envs = read();
 
     let mut plugins: Vec<Arc<UniChatPlugin>> = Vec::new();
-    for (_name, manifest) in envs.iter() {
+    for manifest in envs.values() {
         plugins.push(manifest.clone());
     }
 
@@ -239,33 +239,32 @@ fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, UniChat
     }
 
     let mut loaded_manifests: Vec<(PathBuf, UniChatAddonManifest)> = Vec::new();
-    for entry in fs::read_dir(plugins_path)? {
-        if let Ok(entry) = entry {
-            let plugin_path = entry.path();
+    let entries = fs::read_dir(plugins_path)?;
+    for entry in entries.flatten() {
+        let plugin_path = entry.path();
 
-            if plugin_path.is_dir() {
-                let plugin_folder = plugin_path.file_name().unwrap_or_default().to_string_lossy().to_string();
-                if plugin_folder.starts_with(".") {
-                    continue;
-                } else if plugin_folder.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
-                    log::warn!("Skipping plugin with invalid name '{}' from {:?}", plugin_folder, plugin_path);
-                    continue;
+        if plugin_path.is_dir() {
+            let plugin_folder = plugin_path.file_name().unwrap_or_default().to_string_lossy().to_string();
+            if plugin_folder.starts_with(".") {
+                continue;
+            } else if plugin_folder.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
+                log::warn!("Skipping plugin with invalid name '{}' from {:?}", plugin_folder, plugin_path);
+                continue;
+            }
+
+            let manifest_path = plugin_path.join("manifest.yaml");
+            if !manifest_path.exists() || !manifest_path.is_file() {
+                log::warn!("Skipping folder '{:?}' as it does not contain a valid 'manifest.yaml'", plugin_path);
+                continue;
+            }
+
+            log::debug!("Loading plugin manifest from directory: {:?}", plugin_path);
+            match load_manifest(&plugin_path) {
+                Ok(manifest) => {
+                    loaded_manifests.push((plugin_path, manifest));
                 }
-
-                let manifest_path = plugin_path.join("manifest.yaml");
-                if !manifest_path.exists() || !manifest_path.is_file() {
-                    log::warn!("Skipping folder '{:?}' as it does not contain a valid 'manifest.yaml'", plugin_path);
-                    continue;
-                }
-
-                log::debug!("Loading plugin manifest from directory: {:?}", plugin_path);
-                match load_manifest(&plugin_path) {
-                    Ok(manifest) => {
-                        loaded_manifests.push((plugin_path, manifest));
-                    }
-                    Err(e) => {
-                        log::error!("Failed to load plugin manifest: {:#?}", e);
-                    }
+                Err(e) => {
+                    log::error!("Failed to load plugin manifest: {:#?}", e);
                 }
             }
         }

@@ -131,7 +131,7 @@ fn handle_event(payload: &str) -> Result<(), Error> {
 
 fn build_scraper_initialization_script(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> String {
     return COMMON_SCRAPER_JS
-        .replace("{{SCRAPER_JS}}", &scraper.scraper_js())
+        .replace("{{SCRAPER_JS}}", scraper.scraper_js())
         .replace("{{IS_DEV}}", &is_dev().to_string())
         .replace("{{SCRAPER_ID}}", scraper.id());
 }

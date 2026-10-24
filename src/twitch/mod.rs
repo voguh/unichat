@@ -221,7 +221,6 @@ static TWITCH_VALID_URLS: LazyLock<Vec<String>> = LazyLock::new(|| {
     ]
 });
 
-#[derive(Default)]
 struct TwitchUniChatScraper;
 
 impl UniChatScraper for TwitchUniChatScraper {
@@ -314,7 +313,7 @@ impl UniChatScraper for TwitchUniChatScraper {
 /* ========================================================================== */
 
 pub fn init() -> Result<(), Error> {
-    scraper::register_scraper(Arc::new(TwitchUniChatScraper::default()))?;
+    scraper::register_scraper(Arc::new(TwitchUniChatScraper))?;
 
     return Ok(());
 }

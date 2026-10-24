@@ -26,7 +26,7 @@ use serde_json::Map;
 use crate::addons::manifest::UniChatAddonManifest;
 use crate::addons::manifest::load_manifest;
 use crate::plugins::UniChatPlugin;
-use crate::utils::constants::BASE_WIDGET_URL;
+use crate::utils::constants::BASE_URL;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
@@ -207,69 +207,68 @@ fn load_widgets_from_disk(
     let mut widgets = write();
     widgets.retain(|_, v| v.widget_source != source_type);
 
-    for entry in fs::read_dir(widgets_path)? {
-        if let Ok(entry) = entry {
-            let widget_path = entry.path();
-            if !widget_path.is_dir() {
-                continue;
-            }
+    let entries = fs::read_dir(widgets_path)?;
+    for entry in entries.flatten() {
+        let widget_path = entry.path();
+        if !widget_path.is_dir() {
+            continue;
+        }
 
-            let folder_name = widget_path.file_name().ok_or(anyhow!("Invalid widget folder name"))?;
-            let widget_name = folder_name.to_string_lossy().to_string();
-            if widget_name.starts_with(".") {
-                continue;
-            } else if widget_name.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
-                log::warn!("Skipping widget with invalid name '{}' from {:?}", widget_name, widgets_path);
-                continue;
-            }
+        let folder_name = widget_path.file_name().ok_or(anyhow!("Invalid widget folder name"))?;
+        let widget_name = folder_name.to_string_lossy().to_string();
+        if widget_name.starts_with(".") {
+            continue;
+        } else if widget_name.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
+            log::warn!("Skipping widget with invalid name '{}' from {:?}", widget_name, widgets_path);
+            continue;
+        }
 
-            let mut manifest = None;
-            if widget_path.join("manifest.yaml").is_file() {
-                match load_manifest(&widget_path) {
-                    Ok(loaded_manifest) => {
-                        manifest = Some(loaded_manifest);
-                    }
-                    Err(e) => {
-                        log::warn!("Failed to load widget manifest from {:?}: {:#?}", widget_path, e);
-                    }
+        let mut manifest = None;
+        if widget_path.join("manifest.yaml").is_file() {
+            match load_manifest(&widget_path) {
+                Ok(loaded_manifest) => {
+                    manifest = Some(loaded_manifest);
+                }
+                Err(e) => {
+                    log::warn!("Failed to load widget manifest from {:?}: {:#?}", widget_path, e);
                 }
             }
-
-            let warnings = get_warnings_for_widget(&widget_path, &widget_name, &source_type, &manifest);
-            let manifest = manifest.unwrap_or(UniChatAddonManifest {
-                name: widget_name.clone(),
-                description: None,
-                version: String::from("0.0.0"),
-                author: None,
-                license: None,
-                homepage: None,
-                dependencies: Vec::new()
-            });
-
-            let rest_path;
-            if let WidgetSource::UserPlugin(plugin_name) = &source_type {
-                rest_path = format!("{}::{}", plugin_name, widget_name);
-            } else {
-                rest_path = widget_name.clone()
-            }
-
-            let metadata = WidgetMetadata {
-                name: widget_name,
-                description: manifest.description,
-                version: manifest.version,
-                author: manifest.author,
-                license: manifest.license,
-                homepage: manifest.homepage,
-                dependencies: manifest.dependencies,
-
-                path: widget_path,
-                rest_path: rest_path.clone(),
-                widget_source: source_type.clone(),
-                warnings: warnings
-            };
-            cb(&metadata);
-            widgets.insert(rest_path.clone(), metadata);
         }
+
+        let warnings = get_warnings_for_widget(&widget_path, &widget_name, &source_type, &manifest);
+        let manifest = manifest.unwrap_or(UniChatAddonManifest {
+            name: widget_name.clone(),
+            description: None,
+            version: String::from("0.0.0"),
+            author: None,
+            license: None,
+            homepage: None,
+            dependencies: Vec::new()
+        });
+
+        let rest_path;
+        if let WidgetSource::UserPlugin(plugin_name) = &source_type {
+            rest_path = format!("{}::{}", plugin_name, widget_name);
+        } else {
+            rest_path = widget_name.clone()
+        }
+
+        let metadata = WidgetMetadata {
+            name: widget_name,
+            description: manifest.description,
+            version: manifest.version,
+            author: manifest.author,
+            license: manifest.license,
+            homepage: manifest.homepage,
+            dependencies: manifest.dependencies,
+
+            path: widget_path,
+            rest_path: rest_path.clone(),
+            widget_source: source_type.clone(),
+            warnings: warnings
+        };
+        cb(&metadata);
+        widgets.insert(rest_path.clone(), metadata);
     }
 
     return Ok(());
@@ -317,7 +316,7 @@ pub fn add_plugin_widgets(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
     load_widgets_from_disk(&widgets_path, WidgetSource::UserPlugin(plugin.name.clone()), move |metadata| {
         let name = &metadata.name;
         let rest_path = &metadata.rest_path;
-        plugin.add_message(format!("Registered widget '{}' provided as '{}/{}'", name, BASE_WIDGET_URL, rest_path));
+        plugin.add_message(format!("Registered widget '{}' provided as '{}/widget/{}'", name, BASE_URL, rest_path));
     })?;
 
     return Ok(());

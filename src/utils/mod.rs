@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 use std::path;
-use std::path::PathBuf;
+use std::path::Path;
 use std::sync::LazyLock;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
@@ -45,7 +45,7 @@ pub fn get_current_timestamp() -> i64 {
 
 /* ========================================================================== */
 
-pub fn path_to_string(path: &PathBuf) -> String {
+pub fn path_to_string(path: &Path) -> String {
     return path.to_string_lossy().replace('\\', "\\\\");
 }
 

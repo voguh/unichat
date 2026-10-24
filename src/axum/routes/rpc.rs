@@ -8,6 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+#![allow(clippy::result_large_err)]
+
 use axum::body::Body;
 use axum::body::Bytes;
 use axum::response::Response;

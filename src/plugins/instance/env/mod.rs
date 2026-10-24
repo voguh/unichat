@@ -8,6 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+#![allow(clippy::new_ret_no_self)]
+
 use std::fs;
 use std::sync::Arc;
 
@@ -114,7 +116,7 @@ fn scoped_modules_require(lua: &Lua, plugin_env: &Table, plugin_name: &str, modu
     }
 
     let path = safe_guard_path(&plugin_root, &module_path).map_err(Error::external)?;
-    let code = fs::read_to_string(path).map_err(|e| Error::external(e))?;
+    let code = fs::read_to_string(path).map_err(Error::external)?;
     let result: Value = lua.load(&code).set_environment(plugin_env.clone()).eval()?;
 
     return Ok(result);
@@ -151,10 +153,10 @@ pub fn load_env(plugin_name: &str, plugin_version: &Version, plugin_env: Table) 
     let lua = runtime::get();
 
     /* <======================[ LUA Standard Library ]======================> */
-    let print_func = create_print_fn(&lua, plugin_name)?;
+    let print_func = create_print_fn(lua, plugin_name)?;
     plugin_env.set("print", print_func)?;
 
-    let require_fn = create_require_fn(&lua, plugin_name)?;
+    let require_fn = create_require_fn(lua, plugin_name)?;
     plugin_env.set("require", require_fn)?;
     /* <====================[ End LUA Standard Library ]====================> */
 

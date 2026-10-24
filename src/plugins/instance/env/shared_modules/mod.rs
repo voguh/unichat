@@ -53,22 +53,3 @@ pub fn add(module_name: String, module_table: Value) -> Result<(), Error> {
     shared_modules.insert(module_name, module_table);
     return Ok(());
 }
-
-pub fn remove(module_name: &str) -> Result<(), Error> {
-    if module_name.is_empty() || !module_name.contains(":") {
-        return Err(anyhow!("Invalid module name '{}'", module_name));
-    }
-
-    let mut shared_modules = write();
-    if !shared_modules.contains_key(module_name) {
-        return Err(anyhow!("Module '{}' is not exposed", module_name));
-    }
-
-    shared_modules.remove(module_name);
-    return Ok(());
-}
-
-pub fn clear() {
-    let mut shared_modules = write();
-    shared_modules.clear();
-}

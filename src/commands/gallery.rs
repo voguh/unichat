@@ -15,7 +15,7 @@ use tauri::AppHandle;
 use tauri::Runtime;
 use tauri::Url;
 
-use crate::utils::constants::BASE_GALLERY_URL;
+use crate::utils::constants::BASE_URL;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 
@@ -48,9 +48,10 @@ fn choose_file_type_by_path(path: &PathBuf) -> String {
 }
 
 fn get_file_url(file_name: &str) -> Url {
-    let mut url = Url::parse(BASE_GALLERY_URL).expect("Invalid gallery URL");
+    let mut url = Url::parse(BASE_URL).expect("Invalid gallery URL");
     {
         let mut segments = url.path_segments_mut().expect("Gallery URL cannot be a base");
+        segments.push("gallery");
         segments.push(file_name);
     }
 
@@ -64,25 +65,23 @@ pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Gal
     let mut gallery_items: Vec<GalleryItem> = Vec::new();
 
     let entries = fs::read_dir(&gallery_path).map_err(|e| format!("Failed to read gallery directory: {:#?}", e))?;
-    for entry in entries {
-        if let Ok(entry) = entry {
-            let path = entry.path();
-            if path.is_file() {
-                let file_name = path.file_name().and_then(|n| n.to_str());
-                let title = file_name.ok_or("An error occurred on parse gallery item title")?;
-                let item_type = choose_file_type_by_path(&path);
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_file() {
+            let file_name = path.file_name().and_then(|n| n.to_str());
+            let title = file_name.ok_or("An error occurred on parse gallery item title")?;
+            let item_type = choose_file_type_by_path(&path);
 
-                let file_url = get_file_url(title);
-                let preview_url = file_url.clone().into();
-                let url = file_url.path().into();
+            let file_url = get_file_url(title);
+            let preview_url = file_url.clone().into();
+            let url = file_url.path().into();
 
-                gallery_items.push(GalleryItem {
-                    title: String::from(title),
-                    item_type: item_type,
-                    preview_url: preview_url,
-                    url: url
-                });
-            }
+            gallery_items.push(GalleryItem {
+                title: String::from(title),
+                item_type: item_type,
+                preview_url: preview_url,
+                url: url
+            });
         }
     }
 
