@@ -32,3 +32,8 @@ reason = "postcss-selector-parser 6 is pinned by @tailwindcss/typography; only p
 id = "GHSA-w5hq-g745-h8pq"
 ignoreUntil = 2027-01-24
 reason = "uuid 8 is pinned by @ngneat/falso; the bug affects only v3/v5/v6 with a caller-provided buffer"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2026-0383"
+ignoreUntil = 2026-10-27
+reason = "ureq uses RootCerts::PlatformVerifier, so the bundled webpki roots are never used; fixed 1.0.10 is still in quarantine"
