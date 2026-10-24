@@ -12,9 +12,9 @@
 from datetime import datetime, timezone
 from enum import Enum
 import fnmatch
-import os
 from pathlib import Path
 import re
+import subprocess
 import sys
 from utils import logger
 from utils.constants import ROOT_PATH
@@ -71,6 +71,28 @@ def is_text_file(path: Path) -> bool:
     except UnicodeDecodeError:
         return False
 
+def git(*args: str) -> str:
+    command = ["git", "-c", "core.quotePath=false", *args]
+    return subprocess.run(command, cwd=ROOT_PATH, capture_output=True, text=True, check=True).stdout
+
+def load_last_modified_years() -> dict[Path, int]:
+    years: dict[Path, int] = {}
+
+    # Newest commits come first, so the first time a path shows up is its last change.
+    year = None
+    for line in git("log", "--format=@%ad", "--date=format:%Y", "--name-only").splitlines():
+        if line.startswith("@"):
+            year = int(line[1:])
+        elif line.strip() != "" and year is not None:
+            years.setdefault(ROOT_PATH / line, year)
+
+    current_year = datetime.now(timezone.utc).year
+    changed = git("diff", "--name-only", "HEAD").splitlines() + git("ls-files", "--others", "--exclude-standard").splitlines()
+    for line in changed:
+        years[ROOT_PATH / line] = current_year
+
+    return years
+
 # ============================================================================ #
 
 class LicenseHeaderChecker(Enum):
@@ -82,7 +104,7 @@ class LicenseHeaderChecker(Enum):
     MISSING_EPL_TEXT = 5
     MISSING_SPDX = 6
 
-def check_epl_header(path: Path) -> LicenseHeaderChecker:
+def check_epl_header(path: Path, last_modified_years: dict[Path, int]) -> LicenseHeaderChecker:
     try:
         lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
         if lines[0].startswith("#!/usr/bin") or lines[0].startswith("#!/bin"):
@@ -98,8 +120,8 @@ def check_epl_header(path: Path) -> LicenseHeaderChecker:
             match_year = re.search(r"\d{4}(?:-\d{4})?", match_copyright.group(0))
             copy_year = int(match_year.group(0).split("-")[-1])
             current_year = datetime.now(timezone.utc).year
-            mtime_year = datetime.fromtimestamp(os.path.getmtime(path), timezone.utc).year
-            if (copy_year < mtime_year) or (copy_year > current_year):
+            modified_year = last_modified_years.get(path, current_year)
+            if (copy_year < modified_year) or (copy_year > current_year):
                 return LicenseHeaderChecker.WRONG_COPYRIGHT_YEAR
 
         # Check fourth line if matches EPL text
@@ -124,6 +146,7 @@ def check_epl_header(path: Path) -> LicenseHeaderChecker:
 
 def main():
     logger.info("Checking license headers...")
+    last_modified_years = load_last_modified_years()
 
     missing = []
     for file in sorted(ROOT_PATH.rglob("*")):
@@ -135,7 +158,7 @@ def main():
             continue
 
         logger.debug(f"Checking {file}...")
-        header_status = check_epl_header(file)
+        header_status = check_epl_header(file, last_modified_years)
         if header_status == None:
             missing.append(["UNREADABLE", file])
         elif header_status != LicenseHeaderChecker.NO_ISSUES:
