@@ -57,6 +57,7 @@ EXCLUDE_PATHS = {
     ROOT_PATH / "README.md",
     ROOT_PATH / "run.sh",
     ROOT_PATH / "rust-toolchain.toml",
+    ROOT_PATH / "rustfmt.toml",
     ROOT_PATH / "tauri.conf.json"
 }
 
