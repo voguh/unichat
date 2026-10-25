@@ -17,7 +17,7 @@
         "@tauri-apps/plugin-log": "2.10.1",
         "@tauri-apps/plugin-opener": "2.7.2",
         "@tauri-apps/plugin-store": "2.5.0",
-        "@voguh/unichat-ui": "0.4.1",
+        "@voguh/unichat-ui": "0.5.0",
         "mitt": "3.0.1",
         "preact": "10.29.8"
     },
