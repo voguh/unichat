@@ -20,9 +20,9 @@
 }
 
 :root {
-    --ucui-font-size-base: 0.875rem;
-    --ucui-font-size-sm: 0.75rem;
-    --ucui-font-size-xs: 0.625rem;
+    --ucui-font-size-base: var(--text-base);
+    --ucui-font-size-sm: var(--text-sm);
+    --ucui-font-size-xs: var(--text-xs);
 }
 
 html,
