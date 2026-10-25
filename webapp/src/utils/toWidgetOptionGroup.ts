@@ -8,23 +8,23 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import type { SelectItem, SelectItemGroup } from "@voguh/unichat-ui/components/ui/Select";
+import type { SelectOption, SelectOptionGroup } from "@voguh/unichat-ui/components/ui/Select";
 import type { WidgetMetadata } from "unichat/types/widgets";
 
 import { isSystemWidget, isUserWidget } from "./widgetSourceTypeGuards";
 
-export interface WidgetSelectItem extends SelectItem {
+export interface WidgetSelectOption extends SelectOption {
     warnings: string[];
 }
 
-export interface WidgetSelectItemGroup extends SelectItemGroup {
-    items: WidgetSelectItem[];
+export interface WidgetSelectOptionGroup extends SelectOptionGroup {
+    options: WidgetSelectOption[];
 }
 
-export function toWidgetOptionGroup(widgets: Iterable<WidgetMetadata>): WidgetSelectItemGroup[] {
-    const systemWidgets: WidgetSelectItem[] = [];
-    const userWidgets: WidgetSelectItem[] = [];
-    const pluginWidgets: WidgetSelectItem[] = [];
+export function toWidgetOptionGroup(widgets: Iterable<WidgetMetadata>): WidgetSelectOptionGroup[] {
+    const systemWidgets: WidgetSelectOption[] = [];
+    const userWidgets: WidgetSelectOption[] = [];
+    const pluginWidgets: WidgetSelectOption[] = [];
 
     for (const widget of widgets) {
         if (widget.restPath === "example") {
@@ -40,26 +40,26 @@ export function toWidgetOptionGroup(widgets: Iterable<WidgetMetadata>): WidgetSe
         }
     }
 
-    const options: WidgetSelectItemGroup[] = [];
+    const options: WidgetSelectOptionGroup[] = [];
 
     if (systemWidgets.length > 0) {
         options.push({
             label: "System Widgets",
-            items: systemWidgets.sort((a, b) => a.label.localeCompare(b.label))
+            options: systemWidgets.sort((a, b) => a.label.localeCompare(b.label))
         });
     }
 
     if (userWidgets.length > 0) {
         options.push({
             label: "User Widgets",
-            items: userWidgets.sort((a, b) => a.label.localeCompare(b.label))
+            options: userWidgets.sort((a, b) => a.label.localeCompare(b.label))
         });
     }
 
     if (pluginWidgets.length > 0) {
         options.push({
             label: "Plugin Widgets",
-            items: pluginWidgets.sort((a, b) => a.label.localeCompare(b.label))
+            options: pluginWidgets.sort((a, b) => a.label.localeCompare(b.label))
         });
     }
 

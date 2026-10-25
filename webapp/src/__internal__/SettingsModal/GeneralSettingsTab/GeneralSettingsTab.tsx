@@ -14,7 +14,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { Select } from "@voguh/unichat-ui/components/forms/Select";
 import { Switch } from "@voguh/unichat-ui/components/forms/Switch";
 import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import type { SelectItem } from "@voguh/unichat-ui/components/ui/Select";
+import type { SelectOption } from "@voguh/unichat-ui/components/ui/Select";
 import { useStorage } from "unichat/hooks/useStorage";
 import { useWidgets } from "unichat/hooks/useWidgets";
 import { commandService } from "unichat/services/commandService";
@@ -25,7 +25,7 @@ import { toWidgetOptionGroup } from "unichat/utils/toWidgetOptionGroup";
 
 import styles from "./styles.module.css";
 
-const CURRENCY_DISABLED_OPTION: SelectItem = { value: "", label: "Disabled" };
+const CURRENCY_DISABLED_OPTION: SelectOption = { value: "", label: "Disabled" };
 
 interface Props {
     onClose: () => void;
@@ -33,7 +33,7 @@ interface Props {
 
 export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren {
     const [widgets, _reloadWidgets] = useWidgets(toWidgetOptionGroup, []);
-    const [currencies, setCurrencies] = useState<SelectItem[]>([CURRENCY_DISABLED_OPTION]);
+    const [currencies, setCurrencies] = useState<SelectOption[]>([CURRENCY_DISABLED_OPTION]);
 
     const [dirty, setDirty] = useState(false);
     const [initialSettings, setInitialSettings] = useState<Partial<UniChatSettings>>({});
@@ -74,6 +74,14 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
     function dispatchTour(type: EventEmitterEvents["tour:start"]["type"]): void {
         onClose();
         eventEmitter.emit("tour:start", { type });
+    }
+
+    function getFormKey(): string {
+        if (Object.keys(initialSettings).length > 0) {
+            return "loaded";
+        }
+
+        return "loading";
     }
 
     useEffect(() => {
@@ -143,22 +151,22 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
     }, []);
 
     return (
-        <div className={styles.container} key={Object.keys(initialSettings).length === 0 ? "loading" : "loaded"}>
+        <div className={styles.container} key={getFormKey()}>
             <div className={styles.body}>
                 <Select
-                    defaultValue={[initialSettings[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET] ?? ""]}
+                    defaultValue={initialSettings[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET] ?? ""}
                     ref={selectRef}
                     label="Default preview widget"
                     description="Select the default widget to be used in preview panels"
-                    items={widgets}
+                    options={widgets}
                 />
 
                 <div data-tour="currency-target">
                     <Select
-                        defaultValue={[initialSettings[UniChatSettingsKeys.CURRENCY_TARGET] ?? ""]}
+                        defaultValue={initialSettings[UniChatSettingsKeys.CURRENCY_TARGET] ?? ""}
                         ref={currencyRef}
                         label="Donation target currency"
-                        items={currencies}
+                        options={currencies}
                     />
                     <small>
                         Powered by{" "}
@@ -189,7 +197,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
                             </span>
                         </div>
                     )}
-                    {openToLanRef.current?.checked && (
+                    {openToLanRef.current != null && openToLanRef.current.checked && (
                         <div className={styles.alert} data-variant="warning">
                             <div>
                                 <i className="fas fa-info-circle" />

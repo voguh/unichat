@@ -87,9 +87,9 @@ export function WidgetEditor(): PReact.ComponentChildren {
             <div className={styles.header}>
                 <Select
                     className={styles.widgetSelector}
-                    value={[selectedWidget]}
-                    items={toWidgetOptionGroup(widgets.values())}
-                    onValueChange={({ value }) => setSelectedWidget(value[0])}
+                    value={selectedWidget}
+                    options={toWidgetOptionGroup(widgets.values())}
+                    onChange={(event) => setSelectedWidget(event.currentTarget.value)}
                 />
 
                 <Tooltip placement="bottom" content="Reload widget view">

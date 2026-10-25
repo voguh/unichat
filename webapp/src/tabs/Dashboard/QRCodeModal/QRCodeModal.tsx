@@ -14,7 +14,7 @@ import { useEffect, useState } from "preact/hooks";
 import { Select } from "@voguh/unichat-ui/components/forms/Select";
 import { Clipboard } from "@voguh/unichat-ui/components/ui/Clipboard";
 import { QrCode } from "@voguh/unichat-ui/components/ui/QrCode";
-import type { SelectItem } from "@voguh/unichat-ui/components/ui/Select";
+import type { SelectOption } from "@voguh/unichat-ui/components/ui/Select";
 import { commandService } from "unichat/services/commandService";
 
 import styles from "./styles.module.css";
@@ -23,8 +23,16 @@ interface Props {
     baseUrl: string;
 }
 
+function formatHost(host: string): string {
+    if (host.includes(":")) {
+        return `[${host}]`;
+    }
+
+    return host;
+}
+
 export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
-    const [systemHosts, setSystemHosts] = useState<SelectItem[]>([]);
+    const [systemHosts, setSystemHosts] = useState<SelectOption[]>([]);
     const [selectedHost, setSelectedHost] = useState<string>("localhost");
     const [selectedHostQrCodeUrl, setSelectedHostQrCodeUrl] = useState<string>(baseUrl);
 
@@ -37,11 +45,7 @@ export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
     useEffect(() => {
         async function init(): Promise<void> {
             const systemHosts = await commandService.getSystemHosts();
-            setSystemHosts(
-                systemHosts
-                    .map((host) => (host.includes(":") ? `[${host}]` : host))
-                    .map((host) => ({ label: host, value: host }))
-            );
+            setSystemHosts(systemHosts.map(formatHost).map((host) => ({ label: host, value: host })));
 
             if (systemHosts.length > 0) {
                 onSelectHost(systemHosts[0]);
@@ -65,9 +69,9 @@ export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
                 <Select
                     label="Select Network Interface"
                     groupProps={{ className: styles.fullWidth }}
-                    items={systemHosts}
-                    value={[selectedHost]}
-                    onValueChange={({ value }) => onSelectHost(value[0])}
+                    options={systemHosts}
+                    value={selectedHost}
+                    onChange={(event) => onSelectHost(event.currentTarget.value)}
                 />
             )}
             {selectedHostQrCodeUrl && (

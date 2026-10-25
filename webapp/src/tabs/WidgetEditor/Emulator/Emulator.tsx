@@ -16,7 +16,7 @@ import * as eventService from "@tauri-apps/api/event";
 import type { UniChatEvent, UniChatPlatform } from "@voguh/unichat-api/widgets/events";
 import { Select } from "@voguh/unichat-ui/components/forms/Select";
 import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import type { SelectItem } from "@voguh/unichat-ui/components/ui/Select";
+import type { SelectOption } from "@voguh/unichat-ui/components/ui/Select";
 import { Switch } from "@voguh/unichat-ui/components/ui/Switch";
 import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
 import { commandService } from "unichat/services/commandService";
@@ -25,7 +25,7 @@ import { buildEmulatedEventData, type EmulatedEventType } from "./__utils__/buil
 import { CUSTOM_EVENT_EMIT_EVENT } from "./CustomEventEditor";
 import styles from "./styles.module.css";
 
-const opModeOptions: SelectItem[] = [
+const opModeOptions: SelectOption[] = [
     { value: "mixed", label: "Mixed" },
     { value: "twitch", label: "Twitch Only" },
     { value: "youtube", label: "YouTube Only" }
@@ -100,9 +100,9 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
             <div className={styles.operationMode}>
                 <Select
                     label="Emulation Mode"
-                    value={[emulationMode]}
-                    items={opModeOptions}
-                    onValueChange={({ value }) => setEmulationMode(value[0])}
+                    value={emulationMode}
+                    options={opModeOptions}
+                    onChange={(event) => setEmulationMode(event.currentTarget.value as UniChatPlatform | "mixed")}
                 />
                 <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:clear")}>
                     <i className="fas fa-eraser" />

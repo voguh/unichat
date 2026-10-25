@@ -8,12 +8,21 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-@import "@voguh/unichat-ui/styles/global.css";
+/* unichat-ui components ship in their own layer, below Tailwind components and utilities. */
+@layer theme, base, unichat-ui, components, utilities;
+
+@import "tailwindcss";
 
 @theme {
     --text-base: 0.875rem;
     --text-sm: 0.75rem;
     --text-xs: 0.625rem;
+}
+
+:root {
+    --ucui-font-size-base: 0.875rem;
+    --ucui-font-size-sm: 0.75rem;
+    --ucui-font-size-xs: 0.625rem;
 }
 
 html,
@@ -24,8 +33,9 @@ body,
 
 body,
 #root {
-    @apply bg-stone-950 text-stone-50 overflow-hidden;
-    @apply text-base;
+    @apply bg-stone-950;
+    @apply text-stone-50 text-base;
+    @apply overflow-hidden;
 }
 
 #root {
@@ -78,8 +88,10 @@ body,
     width: 1.25em;
 }
 
-hr {
-    @apply border-t border-stone-800 my-2 w-full;
+@layer base {
+    hr {
+        @apply border-t border-stone-800 my-2 w-full;
+    }
 }
 
 ::-webkit-scrollbar {

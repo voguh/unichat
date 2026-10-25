@@ -17,9 +17,8 @@ import { Select } from "@voguh/unichat-ui/components/forms/Select";
 import { Switch } from "@voguh/unichat-ui/components/forms/Switch";
 import { Textarea } from "@voguh/unichat-ui/components/forms/Textarea";
 import { TextInput } from "@voguh/unichat-ui/components/forms/TextInput";
-import { Accordion } from "@voguh/unichat-ui/components/ui/Accordion";
 import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { parseColor } from "@voguh/unichat-ui/utils/colorUtils";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "@voguh/unichat-ui/components/ui/Disclosure";
 import { GalleryFileInput } from "unichat/components/forms/GalleryFileInput";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
@@ -37,17 +36,37 @@ interface Props {
     handleApply: (values: Record<string, unknown>) => Promise<void>;
 }
 
+function getDefaultValue(builder: WidgetFields): unknown {
+    if ("value" in builder) {
+        return builder.value;
+    }
+
+    return null;
+}
+
+function toInputValue(value: unknown): string | undefined {
+    if (value != null) {
+        return String(value);
+    }
+
+    return undefined;
+}
+
 const _logger = LoggerFactory.getLogger("Fields");
 export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Props): PReact.ComponentChildren {
     const [fields, setFields] = useState<Record<string, WidgetFields> | null>(null);
     const [fieldState, setFieldState] = useState<Record<string, unknown> | null>(null);
+
+    function updateField(key: string, fieldValue: unknown): void {
+        setFieldState((old) => ({ ...old, [key]: fieldValue }));
+    }
 
     function buildField(key: string, builder: WidgetFields): PReact.ComponentChildren {
         if (fieldState == null) {
             return null;
         }
 
-        const value = fieldState[key] ?? ("value" in builder ? builder.value : null);
+        const value = fieldState[key] ?? getDefaultValue(builder);
 
         switch (builder.type) {
             case "checkbox":
@@ -58,10 +77,7 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         label={builder.label}
                         description={builder.description}
                         checked={value as boolean}
-                        onChange={(event) => {
-                            const checked = event.currentTarget.checked;
-                            setFieldState((old) => ({ ...old, [key]: checked }));
-                        }}
+                        onChange={(event) => updateField(key, event.currentTarget.checked)}
                     />
                 );
             case "colorpicker":
@@ -70,11 +86,9 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         key={key}
                         label={builder.label}
                         description={builder.description}
-                        value={value ? parseColor(value as string) : undefined}
+                        value={(value as string | null) ?? undefined}
                         swatches={builder.swatches ?? []}
-                        onValueChange={({ valueAsString }) =>
-                            setFieldState((old) => ({ ...old, [key]: valueAsString }))
-                        }
+                        onInput={(event) => updateField(key, event.currentTarget.value)}
                     />
                 );
             case "dropdown": {
@@ -83,9 +97,9 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         key={key}
                         label={builder.label}
                         description={builder.description}
-                        value={[value as string]}
-                        onValueChange={({ value }) => setFieldState((old) => ({ ...old, [key]: value[0] }))}
-                        items={Object.entries(builder.options).map(([value, label]) => ({ value, label }))}
+                        value={value as string}
+                        onChange={(event) => updateField(key, event.currentTarget.value)}
+                        options={Object.entries(builder.options).map(([value, label]) => ({ value, label }))}
                     />
                 );
             }
@@ -98,8 +112,8 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         min={builder.min}
                         max={builder.max}
                         step={builder.step}
-                        value={value != null ? String(value) : undefined}
-                        onValueChange={({ value }) => setFieldState((old) => ({ ...old, [key]: value }))}
+                        value={toInputValue(value)}
+                        onChange={(event) => updateField(key, event.currentTarget.value)}
                     />
                 );
             case "textarea":
@@ -110,7 +124,7 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         description={builder.description}
                         value={value as string | undefined}
                         rows={3}
-                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                        onChange={(event) => updateField(key, event.currentTarget.value)}
                     />
                 );
             case "filepicker":
@@ -119,7 +133,7 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         label={builder.label}
                         description={builder.description}
                         value={value as string | undefined}
-                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                        onChange={(event) => updateField(key, event.currentTarget.value)}
                         showTabs={builder.fileType}
                     />
                 );
@@ -137,7 +151,7 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         label={builder.label}
                         description={builder.description}
                         value={value as string | undefined}
-                        onChange={(evt) => setFieldState((old) => ({ ...old, [key]: evt.currentTarget.value }))}
+                        onChange={(event) => updateField(key, event.currentTarget.value)}
                     />
                 );
         }
@@ -167,21 +181,16 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
         }
 
         return (
-            <Accordion.Root className={styles.accordion}>
+            <div className={styles.accordion}>
                 {Object.entries(groups)
                     .filter(([_, elements]) => elements.length > 0)
                     .map(([groupName, elements]) => (
-                        <Accordion.Item
-                            key={groupName}
-                            name="widget-fields"
-                            title={groupName}
-                            className={styles.accordionItem}
-                            contentProps={{ className: styles.accordionContent }}
-                        >
-                            {elements}
-                        </Accordion.Item>
+                        <Disclosure key={groupName} name="widget-fields" className={styles.accordionItem}>
+                            <DisclosureButton>{groupName}</DisclosureButton>
+                            <DisclosurePanel className={styles.accordionContent}>{elements}</DisclosurePanel>
+                        </Disclosure>
                     ))}
-            </Accordion.Root>
+            </div>
         );
     }
 

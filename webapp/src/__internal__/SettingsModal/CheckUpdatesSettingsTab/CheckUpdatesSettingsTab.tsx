@@ -11,7 +11,7 @@
 import type * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
-import { Tabs } from "@voguh/unichat-ui/components/ui/Tabs";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@voguh/unichat-ui/components/ui/Tabs";
 import { commandService } from "unichat/services/commandService";
 import type { UniChatRelease } from "unichat/types";
 
@@ -41,13 +41,19 @@ export function CheckUpdatesSettingsTab(_props: Props): PReact.ComponentChildren
     }
 
     return (
-        <Tabs
-            className={styles.tabs}
-            contentProps={{ className: styles.tabContent }}
-            items={[
-                { value: "stable", label: "Latest Stable", content: <ReleaseNotes release={latestStable} /> },
-                { value: "unstable", label: "Latest Unstable", content: <ReleaseNotes release={latestUnstable} /> }
-            ]}
-        />
+        <TabGroup className={styles.tabs}>
+            <TabList>
+                <Tab>Latest Stable</Tab>
+                <Tab>Latest Unstable</Tab>
+            </TabList>
+            <TabPanels className={styles.tabContent}>
+                <TabPanel>
+                    <ReleaseNotes release={latestStable} />
+                </TabPanel>
+                <TabPanel>
+                    <ReleaseNotes release={latestUnstable} />
+                </TabPanel>
+            </TabPanels>
+        </TabGroup>
     );
 }

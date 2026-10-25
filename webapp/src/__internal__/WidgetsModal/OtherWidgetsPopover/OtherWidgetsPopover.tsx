@@ -14,7 +14,7 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
 import { Button, IconButton } from "@voguh/unichat-ui/components/ui/Button";
-import { Popover } from "@voguh/unichat-ui/components/ui/Popover";
+import { Popover, PopoverButton, PopoverPanel } from "@voguh/unichat-ui/components/ui/Popover";
 import { formatWarnings } from "unichat/__internal__/WidgetsModal/utils/formatWarnings";
 import { useWidgets } from "unichat/hooks/useWidgets";
 import type { WidgetMetadata } from "unichat/types/widgets";
@@ -79,27 +79,22 @@ export function OtherWidgetsPopover({ communityWidgetNames }: Props): PReact.Com
     }
 
     return (
-        <Popover
-            trigger="click"
-            placement="bottom-end"
-            content={
-                <div className={styles.content}>
-                    {groups.map((group) => (
-                        <div key={group.label} className={styles.group}>
-                            <div className={styles.groupHeader}>
-                                <span className={styles.groupLabel}>{group.label}</span>
-                                {group.rightContent}
-                            </div>
-                            {group.items.map(renderWidget)}
-                        </div>
-                    ))}
-                </div>
-            }
-        >
-            <Button variant="secondary">
+        <Popover>
+            <PopoverButton as={Button} variant="secondary">
                 <i className="fas fa-cubes" />
                 Other widgets ({count})
-            </Button>
+            </PopoverButton>
+            <PopoverPanel anchor="bottom end" className={styles.content}>
+                {groups.map((group) => (
+                    <div key={group.label} className={styles.group}>
+                        <div className={styles.groupHeader}>
+                            <span className={styles.groupLabel}>{group.label}</span>
+                            {group.rightContent}
+                        </div>
+                        {group.items.map(renderWidget)}
+                    </div>
+                ))}
+            </PopoverPanel>
         </Popover>
     );
 }

@@ -14,7 +14,7 @@ import { useEffect, useState } from "preact/hooks";
 import { randHex, randUserName } from "@ngneat/falso";
 import { emitTo } from "@tauri-apps/api/event";
 
-import type { UniChatAuthorType } from "@voguh/unichat-api/widgets/events";
+import type { UniChatAuthorType, UniChatEmote } from "@voguh/unichat-api/widgets/events";
 import { NumberInput } from "@voguh/unichat-ui/components/forms/NumberInput";
 import { Select } from "@voguh/unichat-ui/components/forms/Select";
 import { Switch } from "@voguh/unichat-ui/components/forms/Switch";
@@ -31,6 +31,7 @@ import {
     CUSTOM_EVENT_TYPES,
     type CustomEventForm,
     type CustomEventSeed,
+    type CustomEventType,
     type CustomPlatform,
     giphyGif,
     lockedAuthorType
@@ -133,6 +134,31 @@ function isValidJson(text: string): boolean {
     }
 }
 
+function pickType(types: CustomEventType[], current: CustomEventType): CustomEventType {
+    if (types.includes(current)) {
+        return current;
+    }
+
+    return types[0];
+}
+
+function toMessageMode(value: string): CustomEventForm["messageMode"] {
+    if (value === "custom") {
+        return "custom";
+    }
+
+    return "random";
+}
+
+function getAuthorTypeLabel(authorType: UniChatAuthorType): string | undefined {
+    const option = AUTHOR_TYPES.find((type) => type.value === authorType);
+    if (option != null) {
+        return option.label;
+    }
+
+    return undefined;
+}
+
 export function CustomEventEditor(): PReact.ComponentChildren {
     const [form, setForm] = useState<CustomEventForm>(createDefaultForm);
     const [seed, setSeed] = useState<CustomEventSeed | null>(null);
@@ -156,7 +182,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
     function changePlatform(value: string): void {
         const platform = PLATFORMS.find((item) => item.value === value)!;
         const types = CUSTOM_EVENT_TYPES[platform.value];
-        setForm((old) => ({ ...old, platform: platform.value, type: types.includes(old.type) ? old.type : types[0] }));
+        setForm((old) => ({ ...old, platform: platform.value, type: pickType(types, old.type) }));
         setMoreOpen(false);
     }
 
@@ -196,9 +222,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                     <SegmentedControl
                         className={clsx(styles.segmented, styles.messageMode)}
                         value={form.messageMode}
-                        onChange={(event) =>
-                            update({ messageMode: event.currentTarget.value === "custom" ? "custom" : "random" })
-                        }
+                        onChange={(event) => update({ messageMode: toMessageMode(event.currentTarget.value) })}
                         items={[
                             { value: "random", label: "Random" },
                             { value: "custom", label: "Custom" }
@@ -243,7 +267,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                     </>
                 }
                 value={String(form[key])}
-                onValueChange={({ value }) => update({ [key]: value })}
+                onChange={(event) => update({ [key]: event.currentTarget.value })}
             />
         );
     }
@@ -272,20 +296,28 @@ export function CustomEventEditor(): PReact.ComponentChildren {
             return (
                 <Select
                     label="Tier"
-                    items={TWITCH_TIERS}
-                    value={[form.tier]}
-                    onValueChange={({ value }) => update({ tier: value[0] })}
+                    options={TWITCH_TIERS}
+                    value={form.tier}
+                    onChange={(event) => update({ tier: event.currentTarget.value })}
                 />
             );
         }
 
-        return textField("tier", isYouTube ? "Membership level" : "Tier", { optional: true });
+        if (isYouTube) {
+            return textField("tier", "Membership level", { optional: true });
+        }
+
+        return textField("tier", "Tier", { optional: true });
     }
 
     function buildDetails(): { details: PReact.ComponentChildren; more: PReact.ComponentChildren } {
         switch (form.type) {
             case "unichat:message": {
-                const gif = isTwitch ? giphyGif(form.gifUrl) : null;
+                let gif: UniChatEmote | null = null;
+                if (isTwitch) {
+                    gif = giphyGif(form.gifUrl);
+                }
+
                 const details =
                     gif != null ? (
                         <div className={clsx(styles.wide, styles.lockHint)}>
@@ -434,6 +466,63 @@ export function CustomEventEditor(): PReact.ComponentChildren {
         }
     }
 
+    function getEventGroupProps(): PReact.HTMLAttributes<HTMLDivElement> | undefined {
+        if (!isOther) {
+            return { className: styles.wide };
+        }
+
+        return undefined;
+    }
+
+    function getAuthorCaption(): string | undefined {
+        const label = getAuthorTypeLabel(lockedType ?? form.authorType);
+        if (lockedType != null) {
+            return `${label} · fixed for this event`;
+        }
+
+        return label;
+    }
+
+    function getAuthorTypeDescription(): string | undefined {
+        if (lockedType != null) {
+            return "This platform always sends Viewer here.";
+        }
+
+        return undefined;
+    }
+
+    function getAuthorToggleLabel(): string {
+        if (authorOpen) {
+            return "Done";
+        }
+
+        return "Edit";
+    }
+
+    function getMoreToggleLabel(): string {
+        if (moreOpen) {
+            return "Hide options";
+        }
+
+        return "More options";
+    }
+
+    function renderPayloadStatus(): PReact.ComponentChildren {
+        if (!payloadIsValid) {
+            return <Badge variant="danger">Invalid JSON</Badge>;
+        }
+
+        if (editedByHand) {
+            return (
+                <Tooltip placement="left" content="Emit sends this JSON as is. Changing the form overwrites it.">
+                    <Badge variant="warning">Edited by hand</Badge>
+                </Tooltip>
+            );
+        }
+
+        return <Badge variant="secondary">Generated from the form</Badge>;
+    }
+
     useEffect(() => {
         createSeed(null).then(setSeed);
     }, []);
@@ -446,7 +535,6 @@ export function CustomEventEditor(): PReact.ComponentChildren {
     }, [form, seed]);
 
     const { details, more } = buildDetails();
-    const authorTypeLabel = AUTHOR_TYPES.find((type) => type.value === (lockedType ?? form.authorType))?.label;
 
     return (
         <div className={styles.root}>
@@ -464,14 +552,14 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                 <div className={styles.grid}>
                     {isOther && textField("platformId", "Platform id")}
                     <Select
-                        groupProps={isOther ? undefined : { className: styles.wide }}
+                        groupProps={getEventGroupProps()}
                         label="Event"
-                        items={CUSTOM_EVENT_TYPES[form.platform].map((type) => ({
+                        options={CUSTOM_EVENT_TYPES[form.platform].map((type) => ({
                             value: type,
                             label: CUSTOM_EVENT_LABELS[type]
                         }))}
-                        value={[form.type]}
-                        onValueChange={({ value }) => changeType(value[0])}
+                        value={form.type}
+                        onChange={(event) => changeType(event.currentTarget.value)}
                     />
                 </div>
 
@@ -480,12 +568,10 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                         <span className={styles.avatar}>{form.authorDisplayName.charAt(0).toUpperCase()}</span>
                         <div className={styles.authorMeta}>
                             <strong>{form.authorDisplayName}</strong>
-                            <span>
-                                {lockedType != null ? `${authorTypeLabel} · fixed for this event` : authorTypeLabel}
-                            </span>
+                            <span>{getAuthorCaption()}</span>
                         </div>
                         <Button size="sm" onClick={() => setAuthorOpen((old) => !old)}>
-                            {authorOpen ? "Done" : "Edit"}
+                            {getAuthorToggleLabel()}
                         </Button>
                     </div>
                     {authorOpen && (
@@ -493,11 +579,13 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                             {textField("authorDisplayName", "Name")}
                             <Select
                                 label="Type"
-                                description={lockedType != null ? "This platform always sends Viewer here." : undefined}
+                                description={getAuthorTypeDescription()}
                                 disabled={lockedType != null}
-                                items={AUTHOR_TYPES}
-                                value={[lockedType ?? form.authorType]}
-                                onValueChange={({ value }) => update({ authorType: value[0] })}
+                                options={AUTHOR_TYPES}
+                                value={lockedType ?? form.authorType}
+                                onChange={(event) =>
+                                    update({ authorType: event.currentTarget.value as UniChatAuthorType })
+                                }
                             />
                         </div>
                     )}
@@ -509,7 +597,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                 {more && (
                     <>
                         <button type="button" className={styles.moreToggle} onClick={() => setMoreOpen((old) => !old)}>
-                            {moreOpen ? "Hide options" : "More options"}
+                            {getMoreToggleLabel()}
                         </button>
                         {moreOpen && <div className={clsx(styles.grid, styles.more)}>{more}</div>}
                     </>
@@ -519,18 +607,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
             <div className={styles.payload}>
                 <div className={styles.payloadHeader}>
                     <span className={styles.sectionTitle}>Payload</span>
-                    {!payloadIsValid ? (
-                        <Badge variant="danger">Invalid JSON</Badge>
-                    ) : editedByHand ? (
-                        <Tooltip
-                            placement="left"
-                            content="Emit sends this JSON as is. Changing the form overwrites it."
-                        >
-                            <Badge variant="warning">Edited by hand</Badge>
-                        </Tooltip>
-                    ) : (
-                        <Badge variant="secondary">Generated from the form</Badge>
-                    )}
+                    {renderPayloadStatus()}
                 </div>
                 <PayloadEditor value={payload} invalid={!payloadIsValid} onChange={handlePayloadChange} />
             </div>

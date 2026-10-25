@@ -17,7 +17,7 @@ import { Markdown } from "@voguh/unichat-ui/components/Markdown";
 import { Alert } from "@voguh/unichat-ui/components/ui/Alert";
 import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
 import { Button, IconButton } from "@voguh/unichat-ui/components/ui/Button";
-import { Tabs } from "@voguh/unichat-ui/components/ui/Tabs";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@voguh/unichat-ui/components/ui/Tabs";
 import { CommunityWidgetBadge } from "unichat/__internal__/WidgetsModal/CommunityWidgetBadge";
 import { formatWarnings } from "unichat/__internal__/WidgetsModal/utils/formatWarnings";
 import { getWidgetStatus, WidgetStatus } from "unichat/__internal__/WidgetsModal/utils/getWidgetStatus";
@@ -36,6 +36,31 @@ interface Props {
     onOpenFolder: (widget: CommunityWidget) => void;
 }
 
+function getReleases(detail: CommunityWidget | null): AddonRelease[] {
+    if (detail != null) {
+        return detail.releases ?? [];
+    }
+
+    return [];
+}
+
+function getLatestStable(releases: AddonRelease[], fallback: string): string {
+    const stable = releases.find((release) => !release.prerelease);
+    if (stable != null) {
+        return stable.name;
+    }
+
+    return fallback;
+}
+
+function getDescription(detail: CommunityWidget | null): string | null {
+    if (detail != null) {
+        return detail.description;
+    }
+
+    return null;
+}
+
 const _logger = LoggerFactory.getLogger("CommunityWidgetDetail");
 export function CommunityWidgetDetail({
     widget,
@@ -49,8 +74,8 @@ export function CommunityWidgetDetail({
 
     const [detail, setDetail] = useState<CommunityWidget | null>(null);
 
-    const releases = detail?.releases ?? [];
-    const latestStable = releases.find((release) => !release.prerelease)?.name ?? widget.version;
+    const releases = getReleases(detail);
+    const latestStable = getLatestStable(releases, widget.version);
 
     function renderMainActions(): PReact.ComponentChildren {
         switch (status) {
@@ -171,45 +196,37 @@ export function CommunityWidgetDetail({
                     </Alert>
                 )}
 
-                <Tabs
-                    className={styles.tabs}
-                    contentProps={{ className: styles.tabContent }}
-                    items={[
-                        {
-                            value: "readme",
-                            label: "Readme",
-                            content: (
-                                <Markdown
-                                    content={detail?.description ?? null}
-                                    relativeLinksBaseUrl={`${widget.repositoryUrl}/blob/HEAD/`}
-                                />
-                            )
-                        },
-                        {
-                            value: "versions",
-                            label: `Versions (${releases.length})`,
-                            content: (
-                                <div className={styles.releases}>
-                                    {releases.map((release) => (
-                                        <div key={release.id} className={styles.release}>
-                                            <div className={styles.releaseInfo}>
-                                                <div className={styles.releaseName}>
-                                                    <strong>{release.name}</strong>
-                                                    {release.prerelease && <Badge variant="info">Prerelease</Badge>}
-                                                    {release.name === latestStable && (
-                                                        <Badge variant="secondary">Latest stable</Badge>
-                                                    )}
-                                                </div>
-                                                <small>{new Date(release.publishedAt).toLocaleDateString()}</small>
-                                            </div>
-                                            {renderReleaseAction(release)}
+                <TabGroup className={styles.tabs}>
+                    <TabList>
+                        <Tab>Readme</Tab>
+                        <Tab>Versions ({releases.length})</Tab>
+                    </TabList>
+                    <TabPanels className={styles.tabContent}>
+                        <TabPanel>
+                            <Markdown
+                                content={getDescription(detail)}
+                                relativeLinksBaseUrl={`${widget.repositoryUrl}/blob/HEAD/`}
+                            />
+                        </TabPanel>
+                        <TabPanel className={styles.releases}>
+                            {releases.map((release) => (
+                                <div key={release.id} className={styles.release}>
+                                    <div className={styles.releaseInfo}>
+                                        <div className={styles.releaseName}>
+                                            <strong>{release.name}</strong>
+                                            {release.prerelease && <Badge variant="info">Prerelease</Badge>}
+                                            {release.name === latestStable && (
+                                                <Badge variant="secondary">Latest stable</Badge>
+                                            )}
                                         </div>
-                                    ))}
+                                        <small>{new Date(release.publishedAt).toLocaleDateString()}</small>
+                                    </div>
+                                    {renderReleaseAction(release)}
                                 </div>
-                            )
-                        }
-                    ]}
-                />
+                            ))}
+                        </TabPanel>
+                    </TabPanels>
+                </TabGroup>
             </div>
         </div>
     );

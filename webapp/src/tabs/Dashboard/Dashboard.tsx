@@ -57,12 +57,11 @@ export function Dashboard(): PReact.ComponentChildren {
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
     function mountEditingTooltip(message: string, availableUrls: string[]): PReact.ComponentChildren {
-        // prettier-ignore
         return (
             <>
                 {message}
                 <br />
-                <ul className="list-disc list-inside">
+                <ul className={styles.editingTooltipUrls}>
                     {availableUrls.map((url) => (
                         <li key={url}>{url}</li>
                     ))}
@@ -106,9 +105,17 @@ export function Dashboard(): PReact.ComponentChildren {
     async function reloadIframe(): Promise<void> {
         await reloadWidgets();
 
-        if (iframeRef.current) {
+        if (iframeRef.current != null) {
             iframeRef.current.src = `${WIDGET_URL_PREFIX}/${selectedWidget}`;
         }
+    }
+
+    function getOpenLabel(): string {
+        if (isOpenToLan) {
+            return "Open on device";
+        }
+
+        return "Open in browser";
     }
 
     useEffect(() => {
@@ -141,9 +148,9 @@ export function Dashboard(): PReact.ComponentChildren {
                         <div className={styles.previewHeader}>
                             <div className={styles.widgetSelector} data-tour="widgets-selector">
                                 <Select
-                                    items={widgets}
-                                    value={[selectedWidget]}
-                                    onValueChange={({ value }) => setSelectedWidget(value[0])}
+                                    options={widgets}
+                                    value={selectedWidget}
+                                    onChange={(event) => setSelectedWidget(event.currentTarget.value)}
                                 />
                             </div>
 
@@ -153,7 +160,7 @@ export function Dashboard(): PReact.ComponentChildren {
                                 </Button>
                             </Tooltip>
 
-                            <Tooltip placement="bottom" content={isOpenToLan ? "Open on device" : "Open in browser"}>
+                            <Tooltip placement="bottom" content={getOpenLabel()}>
                                 <Button onClick={handleOpenInBrowser} data-tour="preview-open-in-browser">
                                     <i className="fas fa-globe" />
                                 </Button>

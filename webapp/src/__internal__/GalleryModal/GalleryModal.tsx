@@ -12,7 +12,7 @@ import type * as PReact from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 
 import { Loading } from "@voguh/unichat-ui/components/Loading";
-import { Tabs, type TabsItem } from "@voguh/unichat-ui/components/ui/Tabs";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@voguh/unichat-ui/components/ui/Tabs";
 import { ModalContext } from "unichat/contexts/ModalContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
@@ -25,6 +25,12 @@ import { GalleyTabEmpty } from "./GalleyTabEmpty";
 import styles from "./styles.module.css";
 
 export type GalleryTabs = GalleryItem["type"] | "custom";
+
+interface GalleryTab {
+    value: GalleryTabs;
+    label: string;
+    content: PReact.ComponentChildren;
+}
 
 interface Props {
     showTabs?: Omit<GalleryTabs, "custom">[];
@@ -57,8 +63,8 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
         ));
     }
 
-    function buildTabs(): TabsItem[] {
-        const tabs: TabsItem[] = [];
+    function buildTabs(): GalleryTab[] {
+        const tabs: GalleryTab[] = [];
         if (showTabs.includes("image")) {
             tabs.push({
                 value: "image",
@@ -125,10 +131,25 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
         }
     }, [sharedStore.uploading]);
 
+    const tabs = buildTabs();
+    const selectedIndex = tabs.findIndex((tab) => tab.value === startSelectedTab);
+    const startIndex = Math.max(selectedIndex, 0);
+
     return (
         <>
             <Loading show={!!sharedStore.uploading} label="Uploading" />
-            <Tabs items={buildTabs()} defaultValue={startSelectedTab} />
+            <TabGroup defaultIndex={startIndex}>
+                <TabList>
+                    {tabs.map((tab) => (
+                        <Tab key={tab.value}>{tab.label}</Tab>
+                    ))}
+                </TabList>
+                <TabPanels>
+                    {tabs.map((tab) => (
+                        <TabPanel key={tab.value}>{tab.content}</TabPanel>
+                    ))}
+                </TabPanels>
+            </TabGroup>
         </>
     );
 }

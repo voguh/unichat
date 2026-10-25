@@ -11,16 +11,23 @@
 import type * as PReact from "preact";
 import { useState } from "preact/hooks";
 
-import { Dialog, type DialogSize } from "@voguh/unichat-ui/components/ui/Dialog";
+import {
+    Dialog,
+    DialogBackdrop,
+    DialogBody,
+    DialogCloseButton,
+    DialogHeader,
+    DialogPanel,
+    type DialogPanelSize,
+    DialogTitle
+} from "@voguh/unichat-ui/components/ui/Dialog";
 import { ModalContext } from "unichat/contexts/ModalContext";
 
-export interface ModalProps extends Omit<PReact.HTMLAttributes<HTMLDivElement>, "title" | "size"> {
-    withPortal?: boolean;
-
+export interface ModalProps extends Omit<PReact.HTMLAttributes<HTMLDivElement>, "title" | "size" | "ref"> {
     onHide: () => void;
     show?: boolean;
 
-    size?: Exclude<DialogSize, "fullscreen">;
+    size?: Exclude<DialogPanelSize, "fullscreen">;
     fullscreen?: boolean;
 
     backdrop?: boolean;
@@ -32,8 +39,6 @@ export interface ModalProps extends Omit<PReact.HTMLAttributes<HTMLDivElement>, 
 }
 
 export function Modal({
-    withPortal = true,
-
     onHide,
     show = true,
 
@@ -52,22 +57,25 @@ export function Modal({
 }: ModalProps): PReact.ComponentChildren {
     const [sharedStore, setSharedStore] = useState<Record<string, unknown>>({});
 
+    let panelSize: DialogPanelSize = size;
+    if (fullscreen) {
+        panelSize = "fullscreen";
+    }
+
     return (
         <ModalContext.Provider value={{ onClose: onHide, sharedStore, setSharedStore }}>
-            <Dialog
-                {...rest}
-                open={show}
-                onClose={onHide}
-                closeOnInteractOutside={false}
-                size={fullscreen ? "fullscreen" : size}
-                title={title}
-                actions={actions}
-                withCloseButton={withCloseButton}
-                backdrop={backdrop}
-                portal={withPortal}
-                bodyProps={{ className: bodyClassName }}
-            >
-                {children}
+            <Dialog open={show} onClose={onHide} closeOnInteractOutside={false}>
+                {backdrop && <DialogBackdrop />}
+                <DialogPanel {...rest} size={panelSize}>
+                    {(title != null || actions != null || withCloseButton) && (
+                        <DialogHeader>
+                            {title != null && <DialogTitle>{title}</DialogTitle>}
+                            {actions}
+                            {withCloseButton && <DialogCloseButton />}
+                        </DialogHeader>
+                    )}
+                    {children != null && <DialogBody className={bodyClassName}>{children}</DialogBody>}
+                </DialogPanel>
             </Dialog>
         </ModalContext.Provider>
     );

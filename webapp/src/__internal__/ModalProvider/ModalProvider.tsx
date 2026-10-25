@@ -49,14 +49,7 @@ export function ModalProvider(defaultProps: Props): PReact.ComponentChildren {
     return (
         <div className="modal-container">
             {openedModals.map(({ modalId, ...modalProps }) => (
-                <Modal
-                    {...defaultProps}
-                    {...modalProps}
-                    withPortal={false}
-                    key={modalId}
-                    show
-                    onHide={() => requestClose(modalId)}
-                />
+                <Modal {...defaultProps} {...modalProps} key={modalId} show onHide={() => requestClose(modalId)} />
             ))}
         </div>
     );

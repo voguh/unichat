@@ -16,7 +16,7 @@ import * as eventService from "@tauri-apps/api/event";
 import { TextInput } from "@voguh/unichat-ui/components/forms/TextInput";
 import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
 import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { Popover } from "@voguh/unichat-ui/components/ui/Popover";
+import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
@@ -65,7 +65,7 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
         try {
             setLoading(true);
             if (inputRef.current != null) {
-                const inputValue = await validateUrl(inputRef.current?.value ?? "");
+                const inputValue = await validateUrl(inputRef.current.value);
                 inputRef.current.value = inputValue;
 
                 await commandService.setScraperWebviewUrl(scraper.id, inputValue);
@@ -90,21 +90,33 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
         }
     }
 
-    /* ============================================================================================================== */
+    function handleToggle(): Promise<void> {
+        if (scraperIsRunning) {
+            return handleStop();
+        }
+
+        return handleStart();
+    }
+
+    /* ====================================================================== */
 
     function handleStatusLabel(): string {
         if (loading || scraperIsLoading) {
             return "Starting...";
+        } else if (scraperIsRunning) {
+            return "Stop";
         } else {
-            return scraperIsRunning ? "Stop" : "Start";
+            return "Start";
         }
     }
 
     function handleStatusIcon(): PReact.ComponentChildren {
         if (loading || scraperIsLoading) {
             return <i className="fas fa-spinner fa-spin" />;
+        } else if (scraperIsRunning) {
+            return <i className="fas fa-stop" />;
         } else {
-            return <i className={`fas fa-${scraperIsRunning ? "stop" : "play"}`} />;
+            return <i className="fas fa-play" />;
         }
     }
 
@@ -184,8 +196,8 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
     return (
         <div
             className={styles.card}
-            data-active={scraperIsRunning ? "true" : "false"}
-            data-loading={loading || scraperIsLoading ? "true" : "false"}
+            data-active={String(scraperIsRunning)}
+            data-loading={String(loading || scraperIsLoading)}
         >
             <div className={styles.badges}>
                 {scraper.badges.map((badge) => (
@@ -195,19 +207,15 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                 ))}
             </div>
             <div className={styles.body}>
-                <Popover
-                    trigger="focus"
-                    placement="bottom-start"
-                    content={<div className={styles.popoverBody}>{editingTooltip}</div>}
-                >
+                <Tooltip placement="bottom-start" content={<div className={styles.popoverBody}>{editingTooltip}</div>}>
                     <div data-tour={`${scraper.id}--url-input`}>
                         <TextInput
                             label={
                                 <div className={styles.label}>
                                     <div
                                         className={styles.icon}
-                                        data-active={scraperIsRunning ? "true" : "false"}
-                                        data-loading={loading || scraperIsLoading ? "true" : "false"}
+                                        data-active={String(scraperIsRunning)}
+                                        data-loading={String(loading || scraperIsLoading)}
                                     >
                                         {scraper.icon.startsWith("data:") ? (
                                             <img src={scraper.icon} />
@@ -223,12 +231,8 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                             disabled={loading || scraperIsLoading || scraperIsRunning}
                         />
                     </div>
-                </Popover>
-                <Button
-                    variant="secondary"
-                    onClick={scraperIsRunning ? handleStop : handleStart}
-                    disabled={loading || scraperIsLoading}
-                >
+                </Tooltip>
+                <Button variant="secondary" onClick={handleToggle} disabled={loading || scraperIsLoading}>
                     {handleStatusIcon()}
                     {handleStatusLabel()}
                 </Button>
