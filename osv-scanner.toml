@@ -24,11 +24,6 @@ ignoreUntil = 2027-01-24
 reason = "zvariant_derive is unmaintained, pulled by zbus (tauri-plugin-opener); no fixed version"
 
 [[IgnoredVulns]]
-id = "GHSA-rj75-hqrm-r3gf"
-ignoreUntil = 2027-01-24
-reason = "postcss-selector-parser 6 is pinned by @tailwindcss/typography; only parses project CSS at build time"
-
-[[IgnoredVulns]]
 id = "GHSA-w5hq-g745-h8pq"
 ignoreUntil = 2027-01-24
 reason = "uuid 8 is pinned by @ngneat/falso; the bug affects only v3/v5/v6 with a caller-provided buffer"
