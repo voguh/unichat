@@ -28,6 +28,10 @@ export class CommandService {
         return invoke<UniChatReleaseInfo>("get_releases");
     }
 
+    public async restartApp(): Promise<void> {
+        await invoke("restart_app");
+    }
+
     public async getSystemHosts(): Promise<string[]> {
         return invoke("get_system_hosts");
     }

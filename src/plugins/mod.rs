@@ -34,18 +34,18 @@ mod runtime;
 
 /* ========================================================================== */
 
-static LOADED: LazyLock<RwLock<HashMap<String, Arc<UniChatPlugin>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
-fn read() -> RwLockReadGuard<'static, HashMap<String, Arc<UniChatPlugin>>> {
+static LOADED: LazyLock<RwLock<HashMap<String, Arc<PluginMetadata>>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+fn read() -> RwLockReadGuard<'static, HashMap<String, Arc<PluginMetadata>>> {
     return LOADED.read().expect("Plugins::LOADED lock poisoned");
 }
 
-pub(in crate::plugins) fn write(plugin: Arc<UniChatPlugin>) -> Result<(), Error> {
+pub(in crate::plugins) fn write(plugin: Arc<PluginMetadata>) -> Result<(), Error> {
     let mut loaded = LOADED.write().expect("Plugins::LOADED lock poisoned");
-    if loaded.contains_key(&plugin.name) {
-        return Err(anyhow!("Plugin with name '{}' is already loaded", plugin.name));
+    if loaded.contains_key(&plugin.id) {
+        return Err(anyhow!("Plugin with id '{}' is already loaded", plugin.id));
     }
 
-    loaded.insert(plugin.name.clone(), plugin);
+    loaded.insert(plugin.id.clone(), plugin);
 
     return Ok(());
 }
@@ -58,10 +58,10 @@ pub fn runtime_initialized() -> bool {
 
 /* ========================================================================== */
 
-pub fn get_plugins() -> Vec<Arc<UniChatPlugin>> {
+pub fn get_plugins() -> Vec<Arc<PluginMetadata>> {
     let envs = read();
 
-    let mut plugins: Vec<Arc<UniChatPlugin>> = Vec::new();
+    let mut plugins: Vec<Arc<PluginMetadata>> = Vec::new();
     for manifest in envs.values() {
         plugins.push(manifest.clone());
     }
@@ -69,9 +69,9 @@ pub fn get_plugins() -> Vec<Arc<UniChatPlugin>> {
     return plugins;
 }
 
-pub fn get_plugin(plugin_name: &str) -> Result<Arc<UniChatPlugin>, Error> {
+pub fn get_plugin(plugin_id: &str) -> Result<Arc<PluginMetadata>, Error> {
     let envs = read();
-    let manifest = envs.get(plugin_name).ok_or(anyhow!("Plugin '{}' is not loaded", plugin_name))?;
+    let manifest = envs.get(plugin_id).ok_or(anyhow!("Plugin '{}' is not loaded", plugin_id))?;
     return Ok(manifest.clone());
 }
 
@@ -88,7 +88,8 @@ pub enum PluginStatus {
 
 /* ========================================================================== */
 
-pub struct UniChatPlugin {
+pub struct PluginMetadata {
+    pub id: String,
     pub name: String,
     pub description: Option<String>,
     pub version: Version,
@@ -105,18 +106,20 @@ pub struct UniChatPlugin {
     loaded_modules_cache: RwLock<HashMap<String, Value>>
 }
 
-impl UniChatPlugin {
+impl PluginMetadata {
     pub(in crate::plugins) fn new(
         path: &Path,
         manifest: &UniChatAddonManifest,
         dependencies: Vec<(String, VersionRange)>
     ) -> Result<Self, Error> {
         let version = Version::parse(&manifest.version)?;
+        let folder_name = path.file_name().ok_or(anyhow!("Invalid plugin folder name '{:?}'", path))?;
 
         let lua = runtime::get();
         let env = lua.create_table()?;
 
         return Ok(Self {
+            id: folder_name.to_string_lossy().to_string(),
             name: manifest.name.clone(),
             description: manifest.description.clone(),
             version: version,
@@ -248,7 +251,7 @@ fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, UniChat
             if plugin_folder.starts_with(".") {
                 continue;
             } else if plugin_folder.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
-                log::warn!("Skipping plugin with invalid name '{}' from {:?}", plugin_folder, plugin_path);
+                log::warn!("Skipping plugin with invalid id '{}' from {:?}", plugin_folder, plugin_path);
                 continue;
             }
 

@@ -52,12 +52,12 @@ fn format_str(lua: &Lua, args: Variadic<Value>) -> Result<(String, Option<Error>
 }
 
 pub struct UniChatLoggerModule {
-    plugin_name: String
+    plugin_id: String
 }
 
 impl UniChatLoggerModule {
-    pub fn new(lua: &Lua, plugin_name: &str) -> Result<Value, Error> {
-        let userdata = lua.create_userdata(UniChatLoggerModule { plugin_name: plugin_name.to_string() })?;
+    pub fn new(lua: &Lua, plugin_id: &str) -> Result<Value, Error> {
+        let userdata = lua.create_userdata(UniChatLoggerModule { plugin_id: plugin_id.to_string() })?;
         return Ok(Value::UserData(userdata));
     }
 }
@@ -67,9 +67,9 @@ impl UserData for UniChatLoggerModule {
         methods.add_method("debug", move |lua, this, args: Variadic<Value>| {
             let (msg, err) = format_str(lua, args)?;
 
-            log::debug!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
+            log::debug!(target: &format!("plugin:{}", this.plugin_id), "{}", msg);
             if let Some(err) = err {
-                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:#?}", err);
+                log::error!(target: &format!("plugin:{}", this.plugin_id), "{:#?}", err);
             }
 
             return Ok(());
@@ -78,9 +78,9 @@ impl UserData for UniChatLoggerModule {
         methods.add_method("info", move |lua, this, args: Variadic<Value>| {
             let (msg, err) = format_str(lua, args)?;
 
-            log::info!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
+            log::info!(target: &format!("plugin:{}", this.plugin_id), "{}", msg);
             if let Some(err) = err {
-                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:#?}", err);
+                log::error!(target: &format!("plugin:{}", this.plugin_id), "{:#?}", err);
             }
 
             return Ok(());
@@ -89,9 +89,9 @@ impl UserData for UniChatLoggerModule {
         methods.add_method("warn", move |lua, this, args: Variadic<Value>| {
             let (msg, err) = format_str(lua, args)?;
 
-            log::warn!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
+            log::warn!(target: &format!("plugin:{}", this.plugin_id), "{}", msg);
             if let Some(err) = err {
-                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:#?}", err);
+                log::error!(target: &format!("plugin:{}", this.plugin_id), "{:#?}", err);
             }
 
             return Ok(());
@@ -100,9 +100,9 @@ impl UserData for UniChatLoggerModule {
         methods.add_method("error", move |lua, this, args: Variadic<Value>| {
             let (msg, err) = format_str(lua, args)?;
 
-            log::error!(target: &format!("plugin:{}", this.plugin_name), "{}", msg);
+            log::error!(target: &format!("plugin:{}", this.plugin_id), "{}", msg);
             if let Some(err) = err {
-                log::error!(target: &format!("plugin:{}", this.plugin_name), "{:#?}", err);
+                log::error!(target: &format!("plugin:{}", this.plugin_id), "{:#?}", err);
             }
 
             return Ok(());

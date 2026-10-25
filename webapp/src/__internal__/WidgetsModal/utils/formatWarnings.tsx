@@ -13,6 +13,7 @@ import type * as PReact from "preact";
 import { Badge } from "@voguh/unichat-ui/Badge";
 import { Tooltip } from "@voguh/unichat-ui/Tooltip";
 import type { Variants } from "unichat/types";
+import { requireNonNull } from "unichat/utils/requireNonNull";
 
 interface WidgetWarning {
     message: string | PReact.ComponentChildren;
@@ -30,17 +31,6 @@ function formatWarning(warning: string): WidgetWarning | undefined {
                     </>
                 ),
                 details: "This widget has no 'manifest.yaml'. Its version is unknown.",
-                variant: "warning"
-            };
-        case "MANIFEST_NAME_MISMATCH":
-            return {
-                message: (
-                    <>
-                        <i className="fas fa-file-alt" /> Name
-                    </>
-                ),
-                details:
-                    "The name in 'manifest.yaml' differs from the widget folder name. The folder name will be used.",
                 variant: "warning"
             };
         case "DUPLICATE_HTML_ENTRYPOINT":
@@ -121,4 +111,32 @@ export function formatWarnings(warnings: string[]): PReact.ComponentChildren {
             </Tooltip>
         );
     });
+}
+
+export function formatWarningsSummary(warnings: string[]): PReact.ComponentChildren {
+    const formattedWarnings = warnings.map(formatWarning).filter(requireNonNull);
+    if (formattedWarnings.length === 0) {
+        return null;
+    }
+
+    let variant: Variants = "warning";
+    if (formattedWarnings.some((warning) => warning.variant === "danger")) {
+        variant = "danger";
+    }
+
+    const content = (
+        <ul>
+            {formattedWarnings.map((warning) => (
+                <li key={warning.details}>{warning.details}</li>
+            ))}
+        </ul>
+    );
+
+    return (
+        <Tooltip placement="bottom" content={content}>
+            <Badge variant={variant}>
+                <i className="fas fa-exclamation-triangle" /> {formattedWarnings.length}
+            </Badge>
+        </Tooltip>
+    );
 }

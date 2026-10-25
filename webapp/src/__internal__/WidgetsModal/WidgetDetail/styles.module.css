@@ -31,6 +31,18 @@
                 > button:last-child {
                     @apply flex-1;
                 }
+
+                &:global(.no-preview) {
+                    @apply bg-black rounded;
+                    @apply text-stone-500;
+                    @apply flex-col items-center justify-center mb-1;
+
+                    aspect-ratio: 414 / 521;
+
+                    > i {
+                        @apply text-3xl;
+                    }
+                }
             }
         }
 
@@ -57,31 +69,13 @@
 
                     > div[data-part~="TabPanels"] {
                         @apply flex-1 min-h-0 overflow-y-auto;
-
-                        > div[data-part~="TabPanel"] {
-                            &:global(.releases) {
-                                @apply flex flex-col gap-2;
-
-                                > div {
-                                    @apply bg-stone-950 border border-stone-800 rounded;
-                                    @apply flex items-center gap-3 px-3 py-2;
-
-                                    > div {
-                                        @apply flex-1 min-w-0 flex flex-col;
-
-                                        > div {
-                                            @apply flex items-center gap-2;
-                                        }
-
-                                        > small {
-                                            @apply text-stone-400 text-xs;
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
+            }
+
+            > p {
+                @apply text-stone-300;
+                @apply m-0;
             }
         }
     }

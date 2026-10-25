@@ -38,7 +38,7 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
     const [logEventsRef, setLogEventsRef] = useState(LogLevel.UNKNOWN_EVENTS);
     const openScraperWebviewRef = useRef<HTMLInputElement>(null);
 
-    const [requiresRestart, setRequiresRestart] = useStorage(StorageKeys.REQUIRES_RESTART);
+    const [settingsRequiresRestart, setSettingsRequiresRestart] = useStorage(StorageKeys.SETTINGS_REQUIRES_RESTART);
 
     function changeLogEvents(logLevel: LogLevel): void {
         setLogEventsRef(logLevel);
@@ -65,8 +65,9 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
         setInitialSettings(settingsCopy);
         setDirty(false);
 
-        if (beforeCreateWebviewsHidden !== settingsCopy[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN]) {
-            setRequiresRestart(true);
+        const key = UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN;
+        if (beforeCreateWebviewsHidden !== settingsCopy[key] && !settingsRequiresRestart.includes(key)) {
+            setSettingsRequiresRestart((old) => [...old, key]);
         }
     }
 
@@ -129,7 +130,7 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
                         description="On startup, webviews will be created in background and only shown when requested"
                     />
 
-                    {requiresRestart && (
+                    {settingsRequiresRestart.includes(UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN) && (
                         <div className="alert">
                             <div>
                                 <i className="fas fa-info-circle" />

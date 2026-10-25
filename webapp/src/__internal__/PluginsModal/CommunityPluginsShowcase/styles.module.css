@@ -1,0 +1,72 @@
+/*!******************************************************************************
+ * Copyright (c) 2026 Voguh
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ******************************************************************************/
+
+.root {
+    @apply h-full flex flex-col gap-4;
+
+    > div {
+        &:global(.content) {
+            @apply flex-1 min-h-0 overflow-y-auto;
+
+            > div:global(.cards) {
+                @apply grid grid-cols-3 gap-3;
+
+                > div {
+                    @apply bg-stone-950 border border-stone-800 rounded;
+                    @apply flex flex-col gap-2.5 p-3;
+
+                    > div {
+                        &:global(.header) {
+                            @apply flex items-start gap-3;
+
+                            > button {
+                                @apply rounded;
+                                @apply shrink-0 cursor-pointer;
+
+                                > img {
+                                    @apply rounded;
+                                    @apply block size-14 object-cover;
+                                }
+                            }
+
+                            > div {
+                                @apply flex-1 min-w-0 flex flex-col gap-1;
+
+                                > strong {
+                                    @apply truncate;
+                                }
+
+                                > small {
+                                    @apply text-stone-400 text-sm;
+                                    @apply truncate;
+                                }
+
+                                > div {
+                                    @apply flex flex-wrap gap-1;
+                                }
+                            }
+                        }
+
+                        &:global(.actions) {
+                            @apply flex items-center justify-end gap-2;
+                        }
+                    }
+
+                    > p {
+                        @apply text-stone-300 text-sm;
+                        @apply line-clamp-2 m-0;
+
+                        min-height: 2lh;
+                    }
+                }
+            }
+        }
+    }
+}

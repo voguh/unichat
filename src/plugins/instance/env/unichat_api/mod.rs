@@ -42,18 +42,18 @@ mod lua_scraper;
 /* ========================================================================== */
 
 pub struct UniChatAPI {
-    plugin_name: String,
+    plugin_id: String,
     event_listeners: Arc<RwLock<Vec<(u64, Function)>>>,
     next_listener_id: Arc<AtomicU64>
 }
 
 impl UniChatAPI {
-    pub fn new(plugin_name: &str) -> Self {
-        let name = plugin_name.to_string();
+    pub fn new(plugin_id: &str) -> Self {
+        let id = plugin_id.to_string();
         let listeners: Arc<RwLock<Vec<(u64, Function)>>> = Arc::new(RwLock::new(Vec::new()));
         let next_id = Arc::new(AtomicU64::new(0));
 
-        let logger_name = name.to_string();
+        let logger_name = id.to_string();
         let listeners_clone = listeners.clone();
         tauri::async_runtime::spawn(async move {
             let mut rx = events::subscribe();
@@ -89,7 +89,7 @@ impl UniChatAPI {
             }
         });
 
-        return Self { plugin_name: name, event_listeners: listeners, next_listener_id: next_id };
+        return Self { plugin_id: id, event_listeners: listeners, next_listener_id: next_id };
     }
 
     fn write_event_listeners(&self) -> RwLockWriteGuard<'_, Vec<(u64, Function)>> {
@@ -106,7 +106,7 @@ impl UserData for UniChatAPI {
         methods.add_method(
             "register_scraper",
             |_lua, this, (id, name, scraper_js_path, on_event, opts): (String, String, String, Function, Table)| {
-                let plugin = get_plugin(&this.plugin_name).map_err(Error::external)?;
+                let plugin = get_plugin(&this.plugin_id).map_err(Error::external)?;
 
                 let js_path = safe_guard_path(&plugin.get_data_path(), &scraper_js_path).map_err(Error::external)?;
                 let js_content = fs::read_to_string(js_path).map_err(Error::external)?;
@@ -143,12 +143,12 @@ impl UserData for UniChatAPI {
         });
 
         methods.add_method("expose_module", |_lua, this, (module_name, module_table): (String, Value)| {
-            let plugin = get_plugin(&this.plugin_name).map_err(Error::external)?;
-            let plugin_name = this.plugin_name.clone();
-            let key = format!("{}:{}", plugin_name, module_name);
+            let plugin = get_plugin(&this.plugin_id).map_err(Error::external)?;
+            let plugin_id = this.plugin_id.clone();
+            let key = format!("{}:{}", plugin_id, module_name);
 
             if let Err(err) = shared_modules::add(key, module_table) {
-                log::error!(target: &format!("plugin:{}", plugin_name), "Failed to expose shared module '{}' for plugin '{}': {:#?}", module_name, plugin_name, err);
+                log::error!(target: &format!("plugin:{}", plugin_id), "Failed to expose shared module '{}' for plugin '{}': {:#?}", module_name, plugin_id, err);
                 let msg = format!("Failed to expose shared module '{}': {:#?}", module_name, err);
                 plugin.add_message(msg.clone());
                 return Err(Error::external(msg));
@@ -160,7 +160,7 @@ impl UserData for UniChatAPI {
         });
 
         methods.add_method("add_event_listener", |_lua, this, callback: Function| {
-            let plugin = get_plugin(&this.plugin_name).map_err(Error::external)?;
+            let plugin = get_plugin(&this.plugin_id).map_err(Error::external)?;
 
             let id = this.next_listener_id.fetch_add(1, Ordering::SeqCst);
             let mut listeners = this.write_event_listeners();
@@ -172,7 +172,7 @@ impl UserData for UniChatAPI {
         });
 
         methods.add_method("remove_event_listener", |_lua, this, listener_id: u64| {
-            let plugin = get_plugin(&this.plugin_name).map_err(Error::external)?;
+            let plugin = get_plugin(&this.plugin_id).map_err(Error::external)?;
 
             let mut listeners = this.write_event_listeners();
             listeners.retain(|(id, _)| *id != listener_id);
@@ -183,7 +183,7 @@ impl UserData for UniChatAPI {
         });
 
         methods.add_method("get_userstore_item", |lua, this, key: String| {
-            let key = format!("{}:{}", this.plugin_name, key);
+            let key = format!("{}:{}", this.plugin_id, key);
             let item: Option<String> = userstore::get_item(&key).map_err(Error::external)?;
             if let Some(item) = item {
                 let lua_string = lua.create_string(item)?;
@@ -203,13 +203,13 @@ impl UserData for UniChatAPI {
                 return Err(Error::external("Value must be a string or nil"));
             }
 
-            let key = format!("{}:{}", this.plugin_name, key);
+            let key = format!("{}:{}", this.plugin_id, key);
             userstore::set_item(&key, &str_value).map_err(Error::external)?;
             return Ok(());
         });
 
         methods.add_method("notify", |_lua, this, message: String| {
-            render_emitter::emit_notification(&this.plugin_name, &message);
+            render_emitter::emit_notification(&this.plugin_id, &message);
             return Ok(());
         });
     }

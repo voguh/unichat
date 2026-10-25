@@ -11,81 +11,131 @@
 import type * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
-import { Badge } from "@voguh/unichat-ui/Badge";
-import { Button } from "@voguh/unichat-ui/Button";
-import { EmptyState } from "@voguh/unichat-ui/EmptyState";
+import { revealItemInDir } from "@tauri-apps/plugin-opener";
+
+import { Loading } from "@voguh/unichat-ui/Loading";
+import { resolveInstallRelease } from "unichat/__internal__/CommunityAddons/utils/communityAddonReleases";
+import {
+    isCommunityPluginDisplay,
+    type PluginDisplay,
+    toPluginDisplays
+} from "unichat/__internal__/PluginsModal/utils/toPluginDisplays";
+import { useModalContext } from "unichat/hooks/useModalContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { addonsService } from "unichat/services/addonsService";
-import { modalService } from "unichat/services/modalService";
 import { notificationService } from "unichat/services/notificationService";
-import type { PluginMetadata } from "unichat/types/plugins";
+import { StorageKeys, storageService } from "unichat/services/storageService";
+import type { CommunityPlugin } from "unichat/types/addons";
 
-import { PluginOverviewModal, PluginOverviewModalActions } from "./PluginOverview";
+import { CommunityPluginsShowcase } from "./CommunityPluginsShowcase";
+import { PluginDetail } from "./PluginDetail";
 import styles from "./styles.module.css";
-import { getPluginIconDataUrl } from "./utils/getPluginIconDataUrl";
-import { handleBadgeVariant } from "./utils/handleBadgeVariant";
 
-const _logger = LoggerFactory.getLogger("Plugins");
+export interface SelectedPlugin {
+    id: string;
+    name: string;
+}
+
+export interface PluginsModalSharedStore {
+    plugins: PluginDisplay[];
+    selectedPlugin: SelectedPlugin | null;
+}
+
+const _logger = LoggerFactory.getLogger("PluginsModal");
 export function PluginsModal(): PReact.ComponentChildren {
-    const [plugins, setPlugins] = useState<PluginMetadata[]>([]);
+    const [plugins, setPlugins] = useState<PluginDisplay[] | null>(null);
+    const [installing, setInstalling] = useState<string | null>(null);
 
-    function openPluginDetails(plugin: PluginMetadata): void {
-        modalService.openModal({
-            fullscreen: true,
-            title: "Plugin Overview",
-            actions: <PluginOverviewModalActions plugin={plugin} />,
-            children: <PluginOverviewModal plugin={plugin} />
-        });
+    const { sharedStore, setSharedStore } = useModalContext<PluginsModalSharedStore>();
+
+    async function fetchCommunityPlugins(): Promise<void> {
+        try {
+            const [communityPlugins, localPlugins] = await Promise.all([
+                addonsService.getCommunityPlugins(),
+                addonsService.getLocalPlugins()
+            ]);
+            const displays = toPluginDisplays(communityPlugins, localPlugins);
+            setPlugins(displays);
+            setSharedStore((old) => ({ ...old, plugins: displays }));
+        } catch (error) {
+            _logger.error("An error occurred on fetch plugins", error);
+
+            notificationService.error({
+                title: "Fetch Error",
+                message: "An error occurred while fetching plugins."
+            });
+        }
     }
 
-    useEffect(() => {
-        async function handleFetchPlugins(): Promise<void> {
-            try {
-                const items = await addonsService.getLocalPlugins();
-                setPlugins(items);
-            } catch (error) {
-                _logger.error("An error occurred on fetch plugins", error);
+    async function installPlugin(plugin: CommunityPlugin, release?: string): Promise<void> {
+        try {
+            setInstalling(plugin.id);
 
-                notificationService.error({
-                    title: "Fetch Error",
-                    message: "An error occurred while fetching plugins."
-                });
+            let releaseName = release;
+            if (releaseName == null) {
+                releaseName = await resolveInstallRelease(plugin, (id) => addonsService.getCommunityPlugin(id));
+            }
+
+            await addonsService.installCommunityPlugin(plugin.internalId, releaseName);
+            const pending = storageService.get(StorageKeys.PLUGINS_REQUIRES_RESTART);
+            if (!pending.includes(plugin.id)) {
+                storageService.set(StorageKeys.PLUGINS_REQUIRES_RESTART, [...pending, plugin.id]);
+            }
+
+            notificationService.success({ title: "Success", message: `${plugin.name} ${releaseName} installed.` });
+            await fetchCommunityPlugins();
+        } catch (error) {
+            _logger.error("An error occurred on install community plugin", error);
+
+            notificationService.error({
+                title: "Install Error",
+                message: `An error occurred while installing ${plugin.name}.`
+            });
+        } finally {
+            setInstalling(null);
+        }
+    }
+
+    function openPluginFolder(id: string): void {
+        revealItemInDir(`${UNICHAT_PLUGINS_DIR}/${id}`);
+    }
+
+    function renderContent(): PReact.ComponentChildren {
+        const { selectedPlugin } = sharedStore;
+
+        if (plugins == null) {
+            return <Loading show label="Loading plugins" />;
+        }
+
+        if (selectedPlugin != null) {
+            const plugin = plugins.find((item) => item.id === selectedPlugin.id);
+            if (plugin != null) {
+                return (
+                    <PluginDetail
+                        plugin={plugin}
+                        installing={installing}
+                        onInstall={installPlugin}
+                        onOpenFolder={openPluginFolder}
+                    />
+                );
             }
         }
 
-        handleFetchPlugins();
-    }, []);
-
-    if (plugins.length === 0) {
-        return <EmptyState icon={<i className="fas fa-cubes" />} title="No plugins installed" />;
+        return (
+            <CommunityPluginsShowcase
+                plugins={plugins.filter(isCommunityPluginDisplay)}
+                installing={installing}
+                onSelect={(plugin) => setSharedStore((old) => ({ ...old, selectedPlugin: plugin }))}
+                onInstall={installPlugin}
+                onOpenFolder={openPluginFolder}
+            />
+        );
     }
 
-    return (
-        <div className={styles.root}>
-            <table>
-                <tbody>
-                    {plugins
-                        .sort((a, b) => a.name.localeCompare(b.name))
-                        .map((plugin) => (
-                            <tr key={plugin.name}>
-                                <td className="icon">
-                                    <img src={getPluginIconDataUrl(plugin)} />
-                                </td>
-                                <td>
-                                    <span>{plugin.name}</span>
-                                </td>
-                                <td className="badges">
-                                    <div>
-                                        <Badge variant={handleBadgeVariant(plugin.status)}>{plugin.status}</Badge>
-                                    </div>
-                                </td>
-                                <td className="actions">
-                                    <Button onClick={() => openPluginDetails(plugin)}>Details</Button>
-                                </td>
-                            </tr>
-                        ))}
-                </tbody>
-            </table>
-        </div>
-    );
+    // biome-ignore lint/correctness/useExhaustiveDependencies: componentDidMount
+    useEffect(() => {
+        fetchCommunityPlugins();
+    }, []);
+
+    return <div className={styles.root}>{renderContent()}</div>;
 }

@@ -65,8 +65,8 @@ const UNICHAT_BADGE_KEY: &str = "UniChatBadge";
 
 /* ========================================================================== */
 
-fn create_print_fn(lua: &Lua, plugin_name: &str) -> Result<Function, Error> {
-    let plugin_name: Arc<String> = Arc::new(plugin_name.to_string());
+fn create_print_fn(lua: &Lua, plugin_id: &str) -> Result<Function, Error> {
+    let plugin_id: Arc<String> = Arc::new(plugin_id.to_string());
     let print_func = lua.create_function(move |lua, args: Variadic<Value>| {
         let mut output_parts: Vec<String> = Vec::new();
 
@@ -80,7 +80,7 @@ fn create_print_fn(lua: &Lua, plugin_name: &str) -> Result<Function, Error> {
         }
 
         let output = output_parts.join("\t");
-        log::info!(target: &format!("plugin:{}", plugin_name), "{}", output);
+        log::info!(target: &format!("plugin:{}", plugin_id), "{}", output);
         return Ok(());
     })?;
 
@@ -89,7 +89,7 @@ fn create_print_fn(lua: &Lua, plugin_name: &str) -> Result<Function, Error> {
 
 /* ========================================================================== */
 
-fn scoped_modules_require(lua: &Lua, plugin_env: &Table, plugin_name: &str, module: &str) -> mlua::Result<Value> {
+fn scoped_modules_require(lua: &Lua, plugin_env: &Table, plugin_id: &str, module: &str) -> mlua::Result<Value> {
     if module == "unichat:currency" {
         return UniChatCurrencyModule::new(lua);
     } else if module == "unichat:http" {
@@ -97,7 +97,7 @@ fn scoped_modules_require(lua: &Lua, plugin_env: &Table, plugin_name: &str, modu
     } else if module == "unichat:json" {
         return UniChatJsonModule::new(lua);
     } else if module == "unichat:logger" {
-        return UniChatLoggerModule::new(lua, plugin_name);
+        return UniChatLoggerModule::new(lua, plugin_id);
     } else if module == "unichat:strings" {
         return UniChatStringsModule::new(lua);
     } else if module == "unichat:time" {
@@ -108,7 +108,7 @@ fn scoped_modules_require(lua: &Lua, plugin_env: &Table, plugin_name: &str, modu
         return UniChatYamlModule::new(lua);
     }
 
-    let manifest = get_plugin(plugin_name).map_err(Error::external)?;
+    let manifest = get_plugin(plugin_id).map_err(Error::external)?;
     let plugin_root = manifest.get_data_path();
     let mut module_path = module.replace('.', "/");
     if !module_path.ends_with(".lua") {
@@ -122,10 +122,10 @@ fn scoped_modules_require(lua: &Lua, plugin_env: &Table, plugin_name: &str, modu
     return Ok(result);
 }
 
-fn create_require_fn(lua: &Lua, plugin_name: &str) -> Result<Function, Error> {
-    let plugin_name: Arc<String> = Arc::new(plugin_name.to_string());
+fn create_require_fn(lua: &Lua, plugin_id: &str) -> Result<Function, Error> {
+    let plugin_id: Arc<String> = Arc::new(plugin_id.to_string());
     let require_fn = lua.create_function(move |lua, module: String| -> mlua::Result<Value> {
-        let plugin = get_plugin(&plugin_name).map_err(Error::external)?;
+        let plugin = get_plugin(&plugin_id).map_err(Error::external)?;
         if let Ok(cached_module) = plugin.get_cached_loaded_module(&module) {
             return Ok(cached_module);
         }
@@ -136,12 +136,12 @@ fn create_require_fn(lua: &Lua, plugin_name: &str) -> Result<Function, Error> {
                 return Ok(shared_module);
             }
         } else {
-            let result = scoped_modules_require(lua, &plugin_env, &plugin_name, &module)?;
+            let result = scoped_modules_require(lua, &plugin_env, &plugin_id, &module)?;
             let saved_module = plugin.set_cached_loaded_module(&module, result);
             return Ok(saved_module);
         }
 
-        return Err(Error::runtime(format!("Module '{}' not found for plugin '{}'", module, plugin_name)));
+        return Err(Error::runtime(format!("Module '{}' not found for plugin '{}'", module, plugin_id)));
     })?;
 
     return Ok(require_fn);
@@ -149,21 +149,21 @@ fn create_require_fn(lua: &Lua, plugin_name: &str) -> Result<Function, Error> {
 
 /* ========================================================================== */
 
-pub fn load_env(plugin_name: &str, plugin_version: &Version, plugin_env: Table) -> Result<(), anyhow::Error> {
+pub fn load_env(plugin_id: &str, plugin_version: &Version, plugin_env: Table) -> Result<(), anyhow::Error> {
     let lua = runtime::get();
 
     /* <======================[ LUA Standard Library ]======================> */
-    let print_func = create_print_fn(lua, plugin_name)?;
+    let print_func = create_print_fn(lua, plugin_id)?;
     plugin_env.set("print", print_func)?;
 
-    let require_fn = create_require_fn(lua, plugin_name)?;
+    let require_fn = create_require_fn(lua, plugin_id)?;
     plugin_env.set("require", require_fn)?;
     /* <====================[ End LUA Standard Library ]====================> */
 
     /* <====================[ UniChat Standard Library ]====================> */
-    plugin_env.set(PLUGIN_NAME_KEY, plugin_name.to_string())?;
+    plugin_env.set(PLUGIN_NAME_KEY, plugin_id.to_string())?;
     plugin_env.set(PLUGIN_VERSION_KEY, plugin_version.to_string())?;
-    plugin_env.set(UNICHAT_API_KEY, UniChatAPI::new(plugin_name))?;
+    plugin_env.set(UNICHAT_API_KEY, UniChatAPI::new(plugin_id))?;
     plugin_env.set(UNICHAT_EVENT_KEY, LuaUniChatEventFactory)?;
     plugin_env.set(UNICHAT_PLATFORM_KEY, LuaUniChatPlatformFactory)?;
     plugin_env.set(UNICHAT_AUTHOR_TYPE_KEY, LuaUniChatAuthorTypeFactory)?;

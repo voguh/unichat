@@ -15,49 +15,31 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { Badge } from "@voguh/unichat-ui/Badge";
 import { Button, IconButton } from "@voguh/unichat-ui/Button";
 import { Popover, PopoverButton, PopoverPanel } from "@voguh/unichat-ui/Popover";
-import { formatWarnings } from "unichat/__internal__/WidgetsModal/utils/formatWarnings";
+import { formatWarningsSummary } from "unichat/__internal__/WidgetsModal/utils/formatWarnings";
+import {
+    isLocalWidgetDisplay,
+    type WidgetLocalDisplayInfo
+} from "unichat/__internal__/WidgetsModal/utils/toWidgetDisplays";
+import type { WidgetsModalSharedStore } from "unichat/__internal__/WidgetsModal/WidgetsModal";
+import { useModalContext } from "unichat/hooks/useModalContext";
 import { useWidgets } from "unichat/hooks/useWidgets";
 import type { WidgetMetadata } from "unichat/types/widgets";
-import { isSystemWidget, isUserPluginWidget, isUserWidget } from "unichat/utils/widgetSourceTypeGuards";
+import { isSystemWidget, isUserPluginWidget } from "unichat/utils/widgetSourceTypeGuards";
 
 import styles from "./styles.module.css";
 
-interface Props {
-    communityWidgetNames: string[];
-}
-
-export function OtherWidgetsPopover({ communityWidgetNames }: Props): PReact.ComponentChildren {
+export function OtherWidgetsPopover(): PReact.ComponentChildren {
+    const { sharedStore, setSharedStore } = useModalContext<WidgetsModalSharedStore>();
     const [widgets] = useWidgets((items) => items.sort((a, b) => a.restPath.localeCompare(b.restPath)), []);
 
-    const groups = [
-        { label: "Built-in", items: widgets.filter((w) => isSystemWidget(w) && w.restPath !== "example") },
-        { label: "Plugins", items: widgets.filter((w) => isUserPluginWidget(w)) },
-        {
-            label: "Local",
-            items: widgets.filter((w) => isUserWidget(w) && !communityWidgetNames.includes(w.restPath)),
-            rightContent: (
-                <Button size="sm" onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)}>
-                    <i className="fas fa-folder" />
-                    Show Widgets Folder
-                </Button>
-            )
-        }
-    ].filter((group) => group.items.length > 0);
-    const count = groups.reduce((total, group) => total + group.items.length, 0);
+    const systemWidgets = widgets.filter((w) => isSystemWidget(w) && w.restPath !== "example");
+    const pluginWidgets = widgets.filter((w) => isUserPluginWidget(w));
+    const localWidgets = (sharedStore.widgets ?? [])
+        .filter(isLocalWidgetDisplay)
+        .sort((a, b) => a.restPath.localeCompare(b.restPath));
+    const count = systemWidgets.length + pluginWidgets.length + localWidgets.length;
 
-    function renderSubtitle(widget: WidgetMetadata): string | undefined {
-        if (isSystemWidget(widget)) {
-            return "UniChat";
-        } else if (isUserPluginWidget(widget)) {
-            return widget.widgetSource.value;
-        }
-
-        return `v${widget.version}`;
-    }
-
-    function renderWidget(widget: WidgetMetadata): PReact.ComponentChildren {
-        const local = isUserWidget(widget);
-
+    function renderWidget(widget: WidgetMetadata, subtitle: string | undefined): PReact.ComponentChildren {
         return (
             <div key={widget.restPath} className="widget">
                 <span className="icon">
@@ -65,35 +47,83 @@ export function OtherWidgetsPopover({ communityWidgetNames }: Props): PReact.Com
                 </span>
                 <div>
                     <strong>{widget.restPath}</strong>
-                    <small>{renderSubtitle(widget)}</small>
+                    <small>{subtitle}</small>
                 </div>
-                {formatWarnings(widget.warnings)}
-                {local && <Badge variant="secondary">Local</Badge>}
-                {local && (
-                    <IconButton aria-label="Reveal in Folder" onClick={() => revealItemInDir(widget.path)}>
-                        <i className="fas fa-folder" />
-                    </IconButton>
-                )}
+                {formatWarningsSummary(widget.warnings)}
             </div>
         );
     }
 
+    function renderLocalWidget(widget: WidgetLocalDisplayInfo): PReact.ComponentChildren {
+        return (
+            <div key={widget.restPath} className="widget">
+                <span className="icon">
+                    <i className="fas fa-window-maximize" />
+                </span>
+                <div>
+                    <strong>{widget.restPath}</strong>
+                    <small>v{widget.version}</small>
+                </div>
+                {formatWarningsSummary(widget.warnings)}
+                <Badge variant="secondary">Local</Badge>
+                <IconButton size="sm" aria-label="Reveal in Folder" onClick={() => revealItemInDir(widget.path)}>
+                    <i className="fas fa-folder" />
+                </IconButton>
+                <IconButton
+                    size="sm"
+                    aria-label="Details"
+                    onClick={() => setSharedStore((old) => ({ ...old, selectedWidget: widget }))}
+                >
+                    <i className="fas fa-chevron-right" />
+                </IconButton>
+            </div>
+        );
+    }
+
+    if (count === 0) {
+        return (
+            <Button onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)}>
+                <i className="fas fa-folder" />
+                Show Widgets Folder
+            </Button>
+        );
+    }
+
     return (
-        <Popover>
+        <Popover className={styles.trigger}>
             <PopoverButton as={Button} variant="secondary">
                 <i className="fas fa-cubes" />
                 Other widgets ({count})
             </PopoverButton>
             <PopoverPanel anchor="bottom end" className={styles.root}>
-                {groups.map((group) => (
-                    <div key={group.label}>
+                {systemWidgets.length > 0 && (
+                    <div>
                         <div className="header">
-                            <span>{group.label}</span>
-                            {group.rightContent}
+                            <span>Built-in</span>
                         </div>
-                        {group.items.map(renderWidget)}
+                        {systemWidgets.map((widget) => renderWidget(widget, "UniChat"))}
                     </div>
-                ))}
+                )}
+                {pluginWidgets.length > 0 && (
+                    <div>
+                        <div className="header">
+                            <span>Plugins</span>
+                        </div>
+                        {pluginWidgets.map((widget) => renderWidget(widget, widget.widgetSource.value))}
+                    </div>
+                )}
+                {localWidgets.length > 0 && (
+                    <div>
+                        <div className="header">
+                            <span>Local</span>
+                            <Button size="sm" onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)}>
+                                <i className="fas fa-folder" />
+                                Show Widgets Folder
+                            </Button>
+                        </div>
+                        {localWidgets.map(renderLocalWidget)}
+                    </div>
+                )}
             </PopoverPanel>
         </Popover>
     );

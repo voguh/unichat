@@ -13,14 +13,10 @@ import type * as PReact from "preact";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { Button } from "@voguh/unichat-ui/Button";
-import { useModalContext } from "unichat/hooks/useModalContext";
 
 import { OtherWidgetsPopover } from "./OtherWidgetsPopover";
-import type { WidgetsModalSharedStore } from "./WidgetsModal";
 
 export function WidgetsModalActions(): PReact.ComponentChildren {
-    const { sharedStore } = useModalContext<WidgetsModalSharedStore>();
-
     return (
         <>
             <Button
@@ -30,7 +26,7 @@ export function WidgetsModalActions(): PReact.ComponentChildren {
                 <i className="fas fa-book" />
                 Read the Docs
             </Button>
-            <OtherWidgetsPopover communityWidgetNames={sharedStore.communityWidgetNames ?? []} />
+            <OtherWidgetsPopover />
         </>
     );
 }

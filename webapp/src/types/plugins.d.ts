@@ -11,6 +11,7 @@
 import type { PluginStatus } from "unichat/utils/constants";
 
 export interface PluginMetadata {
+    id: string;
     name: string;
     description: string | null;
     version: string;

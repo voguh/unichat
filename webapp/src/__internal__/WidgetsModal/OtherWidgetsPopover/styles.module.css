@@ -8,6 +8,12 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+.trigger {
+    > button[data-size] {
+        @apply py-0 h-7;
+    }
+}
+
 .root {
     @apply w-80 max-h-96 overflow-y-auto flex flex-col gap-3;
 

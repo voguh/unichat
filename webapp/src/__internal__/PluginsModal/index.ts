@@ -10,3 +10,4 @@
 
 export * from "./PluginsModal";
 export * from "./PluginsModalActions";
+export * from "./PluginsModalTitle";

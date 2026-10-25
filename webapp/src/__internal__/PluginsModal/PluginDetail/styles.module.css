@@ -1,0 +1,75 @@
+/*!******************************************************************************
+ * Copyright (c) 2026 Voguh
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ******************************************************************************/
+
+.root {
+    @apply h-full grid gap-5;
+
+    grid-template-columns: 14rem minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+
+    > div {
+        &:global(.sidebar) {
+            @apply flex flex-col gap-2;
+
+            > img {
+                @apply bg-stone-950 rounded;
+                @apply block w-full aspect-square object-contain mb-1;
+            }
+
+            > div {
+                @apply flex gap-2;
+
+                > button:last-child {
+                    @apply flex-1;
+                }
+            }
+        }
+
+        &:global(.main) {
+            @apply min-w-0 min-h-0 flex flex-col gap-3;
+
+            > div {
+                &:global(.title) {
+                    @apply flex items-center gap-2;
+
+                    > h2 {
+                        @apply text-xl font-semibold;
+                        @apply m-0;
+                    }
+                }
+
+                &:global(.meta) {
+                    @apply text-stone-400 text-sm;
+                    @apply flex flex-wrap items-center gap-x-3 gap-y-1;
+                }
+
+                &[data-part~="TabGroup"] {
+                    @apply flex-1 min-h-0;
+
+                    > div[data-part~="TabPanels"] {
+                        @apply flex-1 min-h-0 overflow-y-auto;
+
+                        > div[data-part~="TabPanel"] {
+                            &:global(.logs) {
+                                @apply h-full;
+
+                                > pre {
+                                    @apply bg-stone-950 border border-stone-800 rounded;
+                                    @apply text-stone-300 text-sm font-mono;
+                                    @apply h-full overflow-auto m-0 p-3;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

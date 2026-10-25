@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import type { CommunityWidget } from "unichat/types/addons";
+import type { CommunityPlugin, CommunityWidget } from "unichat/types/addons";
 import type { PluginMetadata } from "unichat/types/plugins";
 import type { WidgetMetadata } from "unichat/types/widgets";
 import { invoke } from "unichat/utils/invoke";
@@ -16,6 +16,18 @@ import { invoke } from "unichat/utils/invoke";
 export class AddonsService {
     public async getLocalPlugins(): Promise<PluginMetadata[]> {
         return invoke("get_plugins");
+    }
+
+    public async getCommunityPlugins(): Promise<CommunityPlugin[]> {
+        return invoke<CommunityPlugin[]>("get_community_plugins");
+    }
+
+    public async getCommunityPlugin(internalId: string): Promise<CommunityPlugin> {
+        return invoke<CommunityPlugin>("get_community_plugin", { internalId });
+    }
+
+    public async installCommunityPlugin(internalId: string, release: string): Promise<void> {
+        await invoke("install_community_plugin", { internalId, release });
     }
 
     /* ====================================================================== */
@@ -28,12 +40,12 @@ export class AddonsService {
         return invoke<CommunityWidget[]>("get_community_widgets");
     }
 
-    public async getCommunityWidget(id: string): Promise<CommunityWidget> {
-        return invoke<CommunityWidget>("get_community_widget", { id });
+    public async getCommunityWidget(internalId: string): Promise<CommunityWidget> {
+        return invoke<CommunityWidget>("get_community_widget", { internalId });
     }
 
-    public async installCommunityWidget(id: string, release: string): Promise<void> {
-        await invoke("install_community_widget", { id, release });
+    public async installCommunityWidget(internalId: string, release: string): Promise<void> {
+        await invoke("install_community_widget", { internalId, release });
     }
 }
 

@@ -12,10 +12,12 @@ import mitt from "mitt";
 
 import { BooleanSerializer } from "unichat/utils/serializer/BooleanSerializer";
 import type { StorageSerializer } from "unichat/utils/serializer/StorageSerializer";
+import { StringArraySerializer } from "unichat/utils/serializer/StringArraySerializer";
 
 export interface StorageValues {
     "show-widget-preview": boolean;
-    "requires-restart": boolean;
+    "settings-requires-restart": string[];
+    "plugins-requires-restart": string[];
 }
 
 type Value<K extends keyof StorageValues> = StorageValues[K];
@@ -30,7 +32,8 @@ function buildEntry<K extends keyof StorageValues>(
 
 export const StorageKeys = Object.freeze({
     SHOW_WIDGET_PREVIEW: buildEntry("show-widget-preview", new BooleanSerializer(), true),
-    REQUIRES_RESTART: buildEntry("requires-restart", new BooleanSerializer(), false)
+    SETTINGS_REQUIRES_RESTART: buildEntry("settings-requires-restart", new StringArraySerializer(), []),
+    PLUGINS_REQUIRES_RESTART: buildEntry("plugins-requires-restart", new StringArraySerializer(), [])
 });
 
 const StorageEntries = new Set<StorageEntry<keyof StorageValues>>(Object.values(StorageKeys));

@@ -44,7 +44,8 @@ export interface AddonRelease {
 
 /* ========================================================================== */
 
-export interface CommunityWidget {
+export interface CommunityAddon {
+    internalId: string;
     id: string;
     name: string;
     shortDescription: string;
@@ -59,9 +60,15 @@ export interface CommunityWidget {
     updatedAt: string | null;
     releases: AddonRelease[] | null;
 
-    previewUrl: string;
     installedVersion: string | null;
     compatible: boolean;
     hasUpdate: boolean;
-    warnings: string[];
+}
+
+export interface CommunityWidget extends CommunityAddon {
+    previewUrl: string;
+}
+
+export interface CommunityPlugin extends CommunityAddon {
+    iconUrl: string;
 }

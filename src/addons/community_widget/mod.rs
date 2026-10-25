@@ -9,104 +9,63 @@
  ******************************************************************************/
 
 use std::fs;
-use std::io::Cursor;
+use std::path::PathBuf;
 use std::time::Duration;
 
 use anyhow::Error;
 use anyhow::anyhow;
-use serde::Deserialize;
 use serde::Serialize;
-use zip::ZipArchive;
 
-use crate::addons::AddonRelease;
-use crate::addons::download_release_asset;
-use crate::addons::has_update;
-use crate::addons::is_compatible;
+use crate::addons::CommunityAddon;
+use crate::addons::CommunityAddonData;
+use crate::addons::build_community_addon;
+use crate::addons::check_compatibility;
+use crate::addons::community_addon_id;
+use crate::addons::download_release;
+use crate::addons::find_installed_version;
+use crate::addons::find_release;
+use crate::addons::replace_addon;
 use crate::api;
 use crate::cache;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
-use crate::widgets;
-use crate::widgets::WidgetMetadata;
-use crate::widgets::WidgetSource;
 use crate::widgets::reload_user_widgets;
 
 /* ========================================================================== */
 
 const COMMUNITY_WIDGETS_PATH: &str = "/v2/community-widgets";
 const COMMUNITY_WIDGETS_FILE_TTL: Duration = Duration::from_secs(60 * 60);
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
-struct CommunityWidgetData {
-    id: String,
-    name: String,
-    short_description: String,
-    description: String,
-    version: String,
-    author: Option<String>,
-    license: Option<String>,
-    homepage_url: Option<String>,
-    repository_url: String,
-    #[serde(rename = "requiresUniChat")]
-    requires_unichat: Option<String>,
-    stars: Option<u64>,
-    updated_at: Option<String>,
-    releases: Option<Vec<AddonRelease>>
-}
+const COMMUNITY_WIDGET_ID_PREFIX: &str = "unichat-widget-";
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommunityWidget {
     #[serde(flatten)]
-    data: CommunityWidgetData,
-    preview_url: String,
-    installed_version: Option<String>,
-    compatible: bool,
-    has_update: bool,
-    warnings: Vec<String>
+    addon: CommunityAddon,
+    preview_url: String
 }
 
 /* ========================================================================== */
 
-fn fetch_all() -> Result<Vec<CommunityWidgetData>, Error> {
+fn fetch_all() -> Result<Vec<CommunityAddonData>, Error> {
     return cache::get_or_fetch("community_widgets", COMMUNITY_WIDGETS_FILE_TTL, || api::get(COMMUNITY_WIDGETS_PATH));
 }
 
-fn fetch(id: &str) -> Result<CommunityWidgetData, Error> {
-    let path = format!("{}/{}", COMMUNITY_WIDGETS_PATH, id);
-    let key = format!("community_widget_{}", id.replace(':', "_"));
+fn fetch(internal_id: &str) -> Result<CommunityAddonData, Error> {
+    let path = format!("{}/{}", COMMUNITY_WIDGETS_PATH, internal_id);
+    let key = format!("community_widget_{}", internal_id.replace(':', "_"));
 
     return cache::get_or_fetch(&key, COMMUNITY_WIDGETS_FILE_TTL, || api::get(&path));
 }
 
-fn find_local_widget(name: &str) -> Option<WidgetMetadata> {
-    let local_widgets = widgets::get_widgets();
-    let local_widget = local_widgets.into_iter().find(|w| w.widget_source == WidgetSource::User && w.name == name);
-
-    return local_widget;
-}
-
-fn build(data: CommunityWidgetData, installed: Option<WidgetMetadata>, releases: &[AddonRelease]) -> CommunityWidget {
-    let compatible = is_compatible(&data.requires_unichat);
+fn build(data: CommunityAddonData, installed_version: Option<String>) -> CommunityWidget {
+    let id = community_addon_id(&data.id, COMMUNITY_WIDGET_ID_PREFIX);
     let preview_url = api::url(&format!("{}/{}/preview", COMMUNITY_WIDGETS_PATH, data.id));
-    let mut installed_version = None;
-    let mut update_available = false;
-    let mut warnings = Vec::new();
-
-    if let Some(installed) = installed {
-        update_available = has_update(&installed.version, releases);
-        warnings = installed.warnings;
-        installed_version = Some(installed.version);
-    }
+    let releases = data.releases.clone().unwrap_or_default();
 
     return CommunityWidget {
-        data: data,
-        preview_url: preview_url,
-        installed_version: installed_version,
-        compatible: compatible,
-        has_update: update_available,
-        warnings: warnings
+        addon: build_community_addon(data, id, installed_version, &releases),
+        preview_url: preview_url
     };
 }
 
@@ -114,86 +73,46 @@ fn build(data: CommunityWidgetData, installed: Option<WidgetMetadata>, releases:
 
 pub fn list() -> Result<Vec<CommunityWidget>, Error> {
     let items = fetch_all()?;
+    let widgets_path = properties::get_app_path(AppPaths::UniChatUserWidgets);
 
     let mut community_widgets = Vec::new();
     for item in items {
-        let local_widget = find_local_widget(&item.name);
+        let id = community_addon_id(&item.id, COMMUNITY_WIDGET_ID_PREFIX);
+        let installed_version = find_installed_version(&widgets_path, &id);
 
-        let mut releases = Vec::new();
-        if local_widget.is_some() {
-            let detail = fetch(&item.id)?;
-            releases = detail.releases.unwrap_or_default();
+        let mut data = item;
+        if installed_version.is_some() {
+            data = fetch(&data.id)?;
         }
 
-        let community_widget = build(item, local_widget, &releases);
-        community_widgets.push(community_widget);
+        community_widgets.push(build(data, installed_version));
     }
 
     return Ok(community_widgets);
 }
 
-pub fn get(id: &str) -> Result<CommunityWidget, Error> {
-    let data = fetch(id)?;
-    let releases = data.releases.clone().unwrap_or_default();
-    let local_widget = find_local_widget(&data.name);
+pub fn get(internal_id: &str) -> Result<CommunityWidget, Error> {
+    let data = fetch(internal_id)?;
+    let id = community_addon_id(&data.id, COMMUNITY_WIDGET_ID_PREFIX);
+    let widgets_path = properties::get_app_path(AppPaths::UniChatUserWidgets);
+    let installed_version = find_installed_version(&widgets_path, &id);
 
-    return Ok(build(data, local_widget, &releases));
+    return Ok(build(data, installed_version));
 }
 
-pub fn install(id: &str, release: &str) -> Result<(), Error> {
-    let data = fetch(id)?;
-    let releases = data.releases.clone().unwrap_or_default();
-    let selected = releases.iter().find(|r| r.name == release);
-    let selected = selected.ok_or(anyhow!("Release '{}' not found for widget '{}'", release, data.name))?;
+pub fn install(internal_id: &str, release: &str) -> Result<(), Error> {
+    let data = fetch(internal_id)?;
+    let id = community_addon_id(&data.id, COMMUNITY_WIDGET_ID_PREFIX);
+    let selected = find_release(&data, release)?;
+    check_compatibility(&data, selected)?;
 
-    let compatible = is_compatible(&data.requires_unichat);
-    if selected.name == data.version && !compatible {
-        let requires_unichat = data.requires_unichat.unwrap_or_default();
-        return Err(anyhow!("Widget '{}' {} requires UniChat {}", data.name, release, requires_unichat));
-    }
-
-    let asset = selected.assets.iter().find(|a| a.name.ends_with(".zip"));
-    let asset = asset.ok_or(anyhow!("Release '{}' of widget '{}' has no zip asset", release, data.name))?;
-    let bytes = download_release_asset(asset)?;
-
-    /* ====================================================================== */
-
-    let extract_path = properties::get_app_path(AppPaths::AppCache).join(format!("install_{}", data.name));
-    if extract_path.exists() {
-        fs::remove_dir_all(&extract_path).map_err(|e| anyhow!("Failed to clean '{:?}': {:#?}", extract_path, e))?;
-    }
-
-    let cursor = Cursor::new(bytes);
-    let mut file = ZipArchive::new(cursor).map_err(|e| anyhow!("Failed to open asset '{}': {:#?}", asset.name, e))?;
-    file.extract(&extract_path).map_err(|e| anyhow!("Failed to extract asset '{}': {:#?}", asset.name, e))?;
-
-    let extracted_widget_path = extract_path.join(&data.name);
-    if !extracted_widget_path.is_dir() {
-        return Err(anyhow!("Asset '{}' does not contain a '{}' folder", asset.name, data.name));
-    }
-
-    /* ====================================================================== */
-
-    let widget_path = properties::get_app_path(AppPaths::UniChatUserWidgets).join(&data.name);
-    if widget_path.exists() {
-        let fieldstate_path = widget_path.join("fieldstate.json");
-        if fieldstate_path.is_file() {
-            let target_path = extracted_widget_path.join("fieldstate.json");
-            if let Err(e) = fs::copy(&fieldstate_path, &target_path) {
-                return Err(anyhow!("Failed to copy '{:?}' to '{:?}': {:#?}", fieldstate_path, target_path, e));
-            }
-        }
-
-        fs::remove_dir_all(&widget_path).map_err(|e| anyhow!("Failed to remove '{:?}': {:#?}", widget_path, e))?;
-    }
-
-    if let Err(e) = fs::rename(&extracted_widget_path, &widget_path) {
-        return Err(anyhow!("Failed to move '{:?}' to '{:?}': {:#?}", extracted_widget_path, widget_path, e));
-    }
+    let (extract_path, extracted_widget_path) = download_release(&id, selected)?;
+    let widget_path = properties::get_app_path(AppPaths::UniChatUserWidgets).join(&id);
+    replace_addon(&extracted_widget_path, &widget_path, &[PathBuf::from("fieldstate.json")])?;
 
     fs::remove_dir_all(&extract_path).map_err(|e| anyhow!("Failed to clean '{:?}': {:#?}", extract_path, e))?;
     reload_user_widgets()?;
-    log::info!("Installed community widget '{}' version '{}'", data.name, release);
+    log::info!("Installed community widget '{}' version '{}'", id, release);
 
     return Ok(());
 }

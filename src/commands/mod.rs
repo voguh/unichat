@@ -22,6 +22,7 @@ use crate::events;
 use crate::events::unichat::UniChatClearEventPayload;
 use crate::events::unichat::UniChatEvent;
 use crate::utils::get_current_timestamp;
+use crate::utils::userstore::flush_userstore;
 
 pub mod addon;
 pub mod currency;
@@ -90,6 +91,14 @@ pub async fn get_system_hosts<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Stri
 #[tauri::command]
 pub async fn get_releases<R: Runtime>(_app: AppHandle<R>) -> Result<UniChatReleaseInfo, String> {
     return release::get_info().map_err(|e| format!("Failed to get releases: {:#?}", e));
+}
+
+#[tauri::command]
+pub async fn restart_app<R: Runtime>(app: AppHandle<R>) -> Result<(), String> {
+    flush_userstore().map_err(|e| format!("Failed to flush userstore to disk: {:#?}", e))?;
+    app.request_restart();
+
+    return Ok(());
 }
 
 /* ========================================================================== */

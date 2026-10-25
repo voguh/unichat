@@ -8,23 +8,23 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import type { CommunityWidget } from "unichat/types/addons";
+import type { CommunityAddon } from "unichat/types/addons";
 
-export enum WidgetStatus {
+export enum CommunityAddonStatus {
     INCOMPATIBLE = "INCOMPATIBLE",
     UPDATE_AVAILABLE = "UPDATE_AVAILABLE",
     INSTALLED = "INSTALLED",
     AVAILABLE = "AVAILABLE"
 }
 
-export function getWidgetStatus(widget: CommunityWidget): WidgetStatus {
-    if (!widget.compatible) {
-        return WidgetStatus.INCOMPATIBLE;
-    } else if (widget.hasUpdate) {
-        return WidgetStatus.UPDATE_AVAILABLE;
-    } else if (widget.installedVersion != null) {
-        return WidgetStatus.INSTALLED;
+export function getCommunityAddonStatus(addon: CommunityAddon): CommunityAddonStatus {
+    if (!addon.compatible) {
+        return CommunityAddonStatus.INCOMPATIBLE;
+    } else if (addon.hasUpdate) {
+        return CommunityAddonStatus.UPDATE_AVAILABLE;
+    } else if (addon.installedVersion != null) {
+        return CommunityAddonStatus.INSTALLED;
     }
 
-    return WidgetStatus.AVAILABLE;
+    return CommunityAddonStatus.AVAILABLE;
 }

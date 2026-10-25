@@ -19,8 +19,8 @@ use crate::UNICHAT_DISPLAY_NAME;
 use crate::UNICHAT_VERSION;
 use crate::addons::manifest::UniChatAddonManifest;
 use crate::plugins;
+use crate::plugins::PluginMetadata;
 use crate::plugins::PluginStatus;
-use crate::plugins::UniChatPlugin;
 use crate::plugins::runtime;
 use crate::utils::get_current_timestamp;
 use crate::utils::semver::version::Version;
@@ -52,19 +52,19 @@ fn parse_dependencies(raw_dependencies: &Vec<String>) -> Result<Vec<(String, Ver
 
 /* ========================================================================== */
 
-fn start(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
+fn start(plugin: &Arc<PluginMetadata>) -> Result<(), Error> {
     let lua = runtime::get();
     let plugin_env = plugin.get_plugin_env();
-    env::load_env(&plugin.name, &plugin.version, plugin_env.clone())?;
+    env::load_env(&plugin.id, &plugin.version, plugin_env.clone())?;
 
     /* ====================================================================== */
 
     let start_ms = get_current_timestamp();
-    log::info!("Executing plugin entrypoint for plugin: {} v{}", plugin.name, plugin.version);
+    log::info!("Executing plugin entrypoint for plugin: {} v{}", plugin.id, plugin.version);
     let entrypoint_code = fs::read_to_string(plugin.get_entrypoint_path())?;
     lua.load(&entrypoint_code).set_environment(plugin_env.clone()).exec()?;
     let end_ms = get_current_timestamp();
-    log::info!("Plugin '{}' initialized in {} ms", plugin.name, end_ms - start_ms);
+    log::info!("Plugin '{}' initialized in {} ms", plugin.id, end_ms - start_ms);
     plugin.add_message(format!("Initialization finished in {}ms", end_ms - start_ms));
 
     return Ok(());
@@ -74,7 +74,7 @@ fn start(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
 
 pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(), Error> {
     let parsed_dependencies = parse_dependencies(&manifest.dependencies)?;
-    let plugin = UniChatPlugin::new(plugin_path, manifest, parsed_dependencies)?;
+    let plugin = PluginMetadata::new(plugin_path, manifest, parsed_dependencies)?;
     let plugin = Arc::new(plugin);
     let mut is_valid = true;
 
@@ -98,25 +98,25 @@ pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(),
 
     if !is_valid {
         plugin.set_status(PluginStatus::Invalid);
-        return Err(anyhow!("Invalid plugin '{}'", plugin.name));
+        return Err(anyhow!("Invalid plugin '{}'", plugin.id));
     }
 
     plugin.set_status(PluginStatus::Loaded);
-    log::info!("Plugin '{}' loaded", plugin.name);
+    log::info!("Plugin '{}' loaded", plugin.id);
 
     if let Err(e) = widgets::add_plugin_widgets(&plugin) {
         plugin.add_message(format!("An error occurred while loading plugin widgets: {:#?}", e));
-        log::error!("Failed to load widgets for plugin '{}': {:#?}", plugin.name, e);
+        log::error!("Failed to load widgets for plugin '{}': {:#?}", plugin.id, e);
     }
 
     if let Err(e) = start(&plugin) {
         plugin.add_message(format!("An error occurred on start plugin: {:#?}", e));
         plugin.set_status(PluginStatus::Error);
-        return Err(anyhow!("Failed to create LUA environment for plugin '{}': {:#?}", plugin.name, e));
+        return Err(anyhow!("Failed to create LUA environment for plugin '{}': {:#?}", plugin.id, e));
     }
 
     plugin.set_status(PluginStatus::Active);
-    log::info!("Plugin '{}' loaded successfully", plugin.name);
+    log::info!("Plugin '{}' loaded successfully", plugin.id);
 
     return Ok(());
 }

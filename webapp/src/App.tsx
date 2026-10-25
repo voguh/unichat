@@ -17,10 +17,11 @@ import { Button } from "@voguh/unichat-ui/Button";
 import { Tooltip } from "@voguh/unichat-ui/Tooltip";
 import { ModalProvider } from "unichat/__internal__/ModalProvider";
 import { NotificationProvider } from "unichat/__internal__/NotificationProvider";
-import { PluginsModal, PluginsModalActions } from "unichat/__internal__/PluginsModal";
+import { PluginsModal, PluginsModalActions, PluginsModalTitle } from "unichat/__internal__/PluginsModal";
 import { SettingsModal } from "unichat/__internal__/SettingsModal";
 import { Tour } from "unichat/__internal__/Tour";
 import { WidgetsModal, WidgetsModalActions, WidgetsModalTitle } from "unichat/__internal__/WidgetsModal";
+import { useStorage } from "unichat/hooks/useStorage";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";
@@ -81,11 +82,13 @@ const _logger = LoggerFactory.getLogger("App");
 export function App(): PReact.ComponentChildren {
     const [openedSettingsModal, setOpenedSettingsModal] = useState<string | boolean>(false);
     const [selectedTab, setSelectedTab] = useState<keyof typeof tabs>("dashboard");
+    const [settingsRequiresRestart] = useStorage(StorageKeys.SETTINGS_REQUIRES_RESTART);
+    const [pluginsRequiresRestart] = useStorage(StorageKeys.PLUGINS_REQUIRES_RESTART);
 
     function togglePluginsModal(): void {
         modalService.openModal({
             size: "xl",
-            title: "Plugins",
+            title: <PluginsModalTitle />,
             actions: <PluginsModalActions />,
             children: <PluginsModal />
         });
@@ -104,7 +107,8 @@ export function App(): PReact.ComponentChildren {
 
     useEffect(() => {
         async function init(): Promise<void> {
-            storageService.set(StorageKeys.REQUIRES_RESTART, false);
+            storageService.set(StorageKeys.SETTINGS_REQUIRES_RESTART, []);
+            storageService.set(StorageKeys.PLUGINS_REQUIRES_RESTART, []);
 
             const isOpenToLan = await settingsService.getItem(UniChatSettingsKeys.OPEN_TO_LAN);
             if (isOpenToLan) {
@@ -140,6 +144,41 @@ export function App(): PReact.ComponentChildren {
             }
         };
     }, []);
+
+    useEffect(() => {
+        async function restartApp(): Promise<void> {
+            try {
+                await commandService.restartApp();
+            } catch (error) {
+                _logger.error("An error occurred on restart app", error);
+
+                notificationService.error({
+                    title: "Restart Error",
+                    message: `An error occurred while restarting ${UNICHAT_DISPLAY_NAME}.`
+                });
+            }
+        }
+
+        if (pluginsRequiresRestart.length > 0) {
+            notificationService.info({
+                id: "plugins-requires-restart",
+                persistent: true,
+                title: "Restart required",
+                message: `${pluginsRequiresRestart.join(", ")} will load after restarting ${UNICHAT_DISPLAY_NAME}.`,
+                action: { label: "Restart", onClick: restartApp }
+            });
+        }
+
+        if (settingsRequiresRestart.length > 0) {
+            notificationService.info({
+                id: "settings-requires-restart",
+                persistent: true,
+                title: "Restart required",
+                message: `Changes to settings will take effect after restarting ${UNICHAT_DISPLAY_NAME}.`,
+                action: { label: "Restart", onClick: restartApp }
+            });
+        }
+    }, [settingsRequiresRestart, pluginsRequiresRestart]);
 
     return (
         <>

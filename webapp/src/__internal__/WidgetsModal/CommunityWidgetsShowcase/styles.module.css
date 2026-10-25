@@ -12,14 +12,6 @@
     @apply h-full flex flex-col gap-4;
 
     > div {
-        &:global(.toolbar) {
-            @apply flex items-center gap-2;
-
-            > div[data-part~="Input"] {
-                @apply flex-1;
-            }
-        }
-
         &:global(.content) {
             @apply flex-1 min-h-0 overflow-y-auto;
 

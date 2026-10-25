@@ -14,33 +14,48 @@ import { useEffect, useState } from "preact/hooks";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import { Loading } from "@voguh/unichat-ui/Loading";
+import { resolveInstallRelease } from "unichat/__internal__/CommunityAddons/utils/communityAddonReleases";
+import {
+    isCommunityWidgetDisplay,
+    toWidgetDisplays,
+    type WidgetDisplay
+} from "unichat/__internal__/WidgetsModal/utils/toWidgetDisplays";
 import { useModalContext } from "unichat/hooks/useModalContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { addonsService } from "unichat/services/addonsService";
 import { notificationService } from "unichat/services/notificationService";
 import type { CommunityWidget } from "unichat/types/addons";
 
-import { CommunityShowcase } from "./CommunityShowcase";
-import { CommunityWidgetDetail } from "./CommunityWidgetDetail";
+import { CommunityWidgetsShowcase } from "./CommunityWidgetsShowcase";
 import styles from "./styles.module.css";
+import { WidgetDetail } from "./WidgetDetail";
+
+export interface SelectedWidget {
+    id: string;
+    name: string;
+}
 
 export interface WidgetsModalSharedStore {
-    communityWidgetNames: string[];
-    selectedWidget: CommunityWidget | null;
+    widgets: WidgetDisplay[];
+    selectedWidget: SelectedWidget | null;
 }
 
 const _logger = LoggerFactory.getLogger("WidgetsModal");
 export function WidgetsModal(): PReact.ComponentChildren {
-    const [communityWidgets, setCommunityWidgets] = useState<CommunityWidget[] | null>(null);
+    const [widgets, setWidgets] = useState<WidgetDisplay[] | null>(null);
     const [installing, setInstalling] = useState<string | null>(null);
 
     const { sharedStore, setSharedStore } = useModalContext<WidgetsModalSharedStore>();
 
     async function fetchCommunityWidgets(): Promise<void> {
         try {
-            const items = await addonsService.getCommunityWidgets();
-            setCommunityWidgets(items);
-            setSharedStore((old) => ({ ...old, communityWidgetNames: items.map((item) => item.name) }));
+            const [communityWidgets, localWidgets] = await Promise.all([
+                addonsService.getCommunityWidgets(),
+                addonsService.getLocalWidgets()
+            ]);
+            const displays = toWidgetDisplays(communityWidgets, localWidgets);
+            setWidgets(displays);
+            setSharedStore((old) => ({ ...old, widgets: displays }));
         } catch (error) {
             _logger.error("An error occurred on fetch community widgets", error);
 
@@ -57,16 +72,10 @@ export function WidgetsModal(): PReact.ComponentChildren {
 
             let releaseName = release;
             if (releaseName == null) {
-                const detail = await addonsService.getCommunityWidget(widget.id);
-                const latestStable = (detail.releases ?? []).find((item) => !item.prerelease);
-
-                releaseName = widget.version;
-                if (latestStable != null) {
-                    releaseName = latestStable.name;
-                }
+                releaseName = await resolveInstallRelease(widget, (id) => addonsService.getCommunityWidget(id));
             }
 
-            await addonsService.installCommunityWidget(widget.id, releaseName);
+            await addonsService.installCommunityWidget(widget.internalId, releaseName);
             notificationService.success({ title: "Success", message: `${widget.name} ${releaseName} installed.` });
             await fetchCommunityWidgets();
         } catch (error) {
@@ -81,23 +90,23 @@ export function WidgetsModal(): PReact.ComponentChildren {
         }
     }
 
-    function openWidgetFolder(widget: CommunityWidget): void {
-        revealItemInDir(`${UNICHAT_WIDGETS_DIR}/${widget.name}`);
+    function openWidgetFolder(id: string): void {
+        revealItemInDir(`${UNICHAT_WIDGETS_DIR}/${id}`);
     }
 
     function renderContent(): PReact.ComponentChildren {
         const { selectedWidget } = sharedStore;
 
-        if (communityWidgets == null) {
+        if (widgets == null) {
             return <Loading show label="Loading widgets" />;
         }
 
         if (selectedWidget != null) {
-            const currentWidget = communityWidgets.find((widget) => widget.id === selectedWidget.id);
-            if (currentWidget != null) {
+            const widget = widgets.find((item) => item.id === selectedWidget.id);
+            if (widget != null) {
                 return (
-                    <CommunityWidgetDetail
-                        widget={currentWidget}
+                    <WidgetDetail
+                        widget={widget}
                         installing={installing}
                         onInstall={installWidget}
                         onOpenFolder={openWidgetFolder}
@@ -107,8 +116,8 @@ export function WidgetsModal(): PReact.ComponentChildren {
         }
 
         return (
-            <CommunityShowcase
-                widgets={communityWidgets}
+            <CommunityWidgetsShowcase
+                widgets={widgets.filter(isCommunityWidgetDisplay)}
                 installing={installing}
                 onSelect={(widget) => setSharedStore((old) => ({ ...old, selectedWidget: widget }))}
                 onInstall={installWidget}

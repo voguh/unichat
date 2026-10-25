@@ -41,7 +41,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
     const openToLanRef = useRef<HTMLInputElement>(null);
     const currencyRef = useRef<HTMLSelectElement>(null);
 
-    const [requiresRestart, setRequiresRestart] = useStorage(StorageKeys.REQUIRES_RESTART);
+    const [settingsRequiresRestart, setSettingsRequiresRestart] = useStorage(StorageKeys.SETTINGS_REQUIRES_RESTART);
 
     async function applySettings(): Promise<void> {
         const beforeOpenToLan = initialSettings[UniChatSettingsKeys.OPEN_TO_LAN];
@@ -66,8 +66,9 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
         setInitialSettings(settingsCopy);
         setDirty(false);
 
-        if (beforeOpenToLan !== settingsCopy[UniChatSettingsKeys.OPEN_TO_LAN]) {
-            setRequiresRestart(true);
+        const key = UniChatSettingsKeys.OPEN_TO_LAN;
+        if (beforeOpenToLan !== settingsCopy[key] && !settingsRequiresRestart.includes(key)) {
+            setSettingsRequiresRestart((old) => [...old, key]);
         }
     }
 
@@ -186,7 +187,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
                         description="Allow other devices on your local network view widgets"
                     />
 
-                    {requiresRestart && (
+                    {settingsRequiresRestart.includes(UniChatSettingsKeys.OPEN_TO_LAN) && (
                         <div className="alert" data-variant="primary">
                             <div>
                                 <i className="fas fa-info-circle" />

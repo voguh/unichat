@@ -36,8 +36,8 @@ pub struct WSParams {
 /* ========================================================================== */
 
 fn resolve_fieldstate(widget: Option<String>) -> HashMap<String, Value> {
-    if let Some(widget_name) = widget {
-        if let Ok(metadata) = widgets::get_widget_from_name(&widget_name) {
+    if let Some(widget_id) = widget {
+        if let Ok(metadata) = widgets::get_widget_from_id(&widget_id) {
             return metadata.fieldstate();
         }
     }

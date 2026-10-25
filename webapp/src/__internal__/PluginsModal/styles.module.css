@@ -9,46 +9,15 @@
  ******************************************************************************/
 
 .root {
-    @apply relative;
+    @apply overflow-y-auto;
 
-    > table {
-        @apply w-full border-collapse;
+    height: calc(var(--dialog-height) - 4.75rem - 2px);
+}
 
-        > tbody {
-            > tr {
-                &:nth-child(odd) {
-                    @apply bg-stone-950/25;
-                }
+.title {
+    @apply flex items-center gap-2;
 
-                &:nth-child(even) {
-                    @apply bg-stone-950/50;
-                }
-
-                > td {
-                    @apply p-2;
-
-                    &:global(.icon) {
-                        @apply w-px;
-
-                        > img {
-                            @apply rounded;
-                            @apply object-cover size-10;
-                        }
-                    }
-
-                    &:global(.badges) {
-                        @apply w-px whitespace-nowrap;
-
-                        > div {
-                            @apply flex flex-nowrap gap-1 justify-end items-center h-10;
-                        }
-                    }
-
-                    &:global(.actions) {
-                        @apply w-px whitespace-nowrap;
-                    }
-                }
-            }
-        }
+    > button[data-size] {
+        @apply size-7 p-0;
     }
 }

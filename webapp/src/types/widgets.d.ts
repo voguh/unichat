@@ -11,6 +11,7 @@
 import type { WidgetSourceType } from "unichat/utils/constants";
 
 export interface WidgetMetadata {
+    id: string;
     name: string;
     description: string | null;
     version: string;

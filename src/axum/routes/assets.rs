@@ -33,7 +33,7 @@ pub async fn assets(Path(mut asset_path): Path<String>, req: Request<Body>) -> R
     let asset_base_path: PathBuf;
     let cache_control: &str;
     let plugins = plugins::get_plugins();
-    if let Some(plugin) = plugins.iter().find(|p| p.name == first_part) {
+    if let Some(plugin) = plugins.iter().find(|p| p.id == first_part) {
         asset_base_path = plugin.get_assets_path();
         let remaining_parts: Vec<&str> = asset_path_parts.collect();
         asset_path = remaining_parts.join("/");

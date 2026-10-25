@@ -10,9 +10,11 @@
 
 import type * as PReact from "preact";
 
-import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { Button } from "@voguh/unichat-ui/Button";
+
+import { OtherPluginsPopover } from "./OtherPluginsPopover";
 
 export function PluginsModalActions(): PReact.ComponentChildren {
     return (
@@ -24,10 +26,7 @@ export function PluginsModalActions(): PReact.ComponentChildren {
                 <i className="fas fa-book" />
                 Read the Docs
             </Button>
-            <Button onClick={() => revealItemInDir(UNICHAT_PLUGINS_DIR)}>
-                <i className="fas fa-folder" />
-                Show Plugins Folder
-            </Button>
+            <OtherPluginsPopover />
         </>
     );
 }

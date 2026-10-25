@@ -22,6 +22,7 @@ use crate::utils::base64;
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SerializedPluginMetadata {
+    pub id: String,
     pub name: String,
     pub description: Option<String>,
     pub version: String,
@@ -43,6 +44,7 @@ pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Serialize
 
     for plugin in plugins {
         let metadata = SerializedPluginMetadata {
+            id: plugin.id.clone(),
             name: plugin.name.clone(),
             description: plugin.description.clone(),
             version: plugin.version.to_string(),

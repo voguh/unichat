@@ -14,11 +14,19 @@ import { eventEmitter } from "./eventEmitter";
 
 export type ToastType = "success" | "info" | "error" | "warn" | "default";
 
+export interface NotificationAction {
+    label: string;
+    onClick: () => void;
+}
+
 export interface NotificationOptions {
     type: ToastType;
     title: string;
     message: string;
     icon?: ComponentChildren;
+    id?: string;
+    persistent?: boolean;
+    action?: NotificationAction;
 }
 
 export class NotificationService {

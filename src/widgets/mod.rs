@@ -25,7 +25,7 @@ use serde_json::Map;
 
 use crate::addons::manifest::UniChatAddonManifest;
 use crate::addons::manifest::load_manifest;
-use crate::plugins::UniChatPlugin;
+use crate::plugins::PluginMetadata;
 use crate::utils::constants::BASE_URL;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
@@ -43,6 +43,7 @@ pub enum WidgetSource {
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct WidgetMetadata {
+    pub id: String,
     pub name: String,
     pub description: Option<String>,
     pub version: String,
@@ -158,19 +159,10 @@ fn write() -> RwLockWriteGuard<'static, HashMap<String, WidgetMetadata>> {
 
 /* ========================================================================== */
 
-fn get_warnings_for_widget(
-    widget_path: &Path,
-    widget_name: &str,
-    source_type: &WidgetSource,
-    manifest: &Option<UniChatAddonManifest>
-) -> Vec<String> {
+fn get_warnings_for_widget(widget_path: &Path, source_type: &WidgetSource) -> Vec<String> {
     let mut warnings = Vec::new();
 
-    if let Some(manifest) = manifest {
-        if manifest.name != widget_name {
-            warnings.push("MANIFEST_NAME_MISMATCH".to_string());
-        }
-    } else if source_type == &WidgetSource::User && !widget_path.join("manifest.yaml").is_file() {
+    if source_type == &WidgetSource::User && !widget_path.join("manifest.yaml").is_file() {
         warnings.push("MISSING_MANIFEST".to_string());
     }
 
@@ -215,11 +207,11 @@ fn load_widgets_from_disk(
         }
 
         let folder_name = widget_path.file_name().ok_or(anyhow!("Invalid widget folder name"))?;
-        let widget_name = folder_name.to_string_lossy().to_string();
-        if widget_name.starts_with(".") {
+        let widget_id = folder_name.to_string_lossy().to_string();
+        if widget_id.starts_with(".") {
             continue;
-        } else if widget_name.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
-            log::warn!("Skipping widget with invalid name '{}' from {:?}", widget_name, widgets_path);
+        } else if widget_id.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
+            log::warn!("Skipping widget with invalid id '{}' from {:?}", widget_id, widgets_path);
             continue;
         }
 
@@ -235,9 +227,9 @@ fn load_widgets_from_disk(
             }
         }
 
-        let warnings = get_warnings_for_widget(&widget_path, &widget_name, &source_type, &manifest);
+        let warnings = get_warnings_for_widget(&widget_path, &source_type);
         let manifest = manifest.unwrap_or(UniChatAddonManifest {
-            name: widget_name.clone(),
+            name: widget_id.clone(),
             description: None,
             version: String::from("0.0.0"),
             author: None,
@@ -247,14 +239,15 @@ fn load_widgets_from_disk(
         });
 
         let rest_path;
-        if let WidgetSource::UserPlugin(plugin_name) = &source_type {
-            rest_path = format!("{}::{}", plugin_name, widget_name);
+        if let WidgetSource::UserPlugin(plugin_id) = &source_type {
+            rest_path = format!("{}::{}", plugin_id, widget_id);
         } else {
-            rest_path = widget_name.clone()
+            rest_path = widget_id.clone()
         }
 
         let metadata = WidgetMetadata {
-            name: widget_name,
+            id: widget_id,
+            name: manifest.name,
             description: manifest.description,
             version: manifest.version,
             author: manifest.author,
@@ -281,10 +274,10 @@ pub fn get_widgets() -> Vec<WidgetMetadata> {
     return widgets.values().cloned().collect();
 }
 
-pub fn get_widget_from_name(name: &str) -> Result<WidgetMetadata, Error> {
+pub fn get_widget_from_id(id: &str) -> Result<WidgetMetadata, Error> {
     let widgets = read();
     for metadata in widgets.values() {
-        if metadata.name == name {
+        if metadata.id == id {
             return Ok(metadata.clone());
         }
     }
@@ -310,13 +303,13 @@ pub fn reload_user_widgets() -> Result<(), Error> {
 
 /* ========================================================================== */
 
-pub fn add_plugin_widgets(plugin: &Arc<UniChatPlugin>) -> Result<(), Error> {
+pub fn add_plugin_widgets(plugin: &Arc<PluginMetadata>) -> Result<(), Error> {
     let widgets_path = plugin.get_widgets_path();
 
-    load_widgets_from_disk(&widgets_path, WidgetSource::UserPlugin(plugin.name.clone()), move |metadata| {
-        let name = &metadata.name;
+    load_widgets_from_disk(&widgets_path, WidgetSource::UserPlugin(plugin.id.clone()), move |metadata| {
+        let id = &metadata.id;
         let rest_path = &metadata.rest_path;
-        plugin.add_message(format!("Registered widget '{}' provided as '{}/widget/{}'", name, BASE_URL, rest_path));
+        plugin.add_message(format!("Registered widget '{}' provided as '{}/widget/{}'", id, BASE_URL, rest_path));
     })?;
 
     return Ok(());
