@@ -13,7 +13,7 @@ import { useEffect, useState } from "preact/hooks";
 
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
-import { Loading } from "@voguh/unichat-ui/components/Loading";
+import { Loading } from "@voguh/unichat-ui/Loading";
 import { useModalContext } from "unichat/hooks/useModalContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { addonsService } from "unichat/services/addonsService";

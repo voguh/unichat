@@ -11,9 +11,9 @@
 import type * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
-import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { EmptyState } from "@voguh/unichat-ui/components/ui/EmptyState";
+import { Badge } from "@voguh/unichat-ui/Badge";
+import { Button } from "@voguh/unichat-ui/Button";
+import { EmptyState } from "@voguh/unichat-ui/EmptyState";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { addonsService } from "unichat/services/addonsService";
 import { modalService } from "unichat/services/modalService";

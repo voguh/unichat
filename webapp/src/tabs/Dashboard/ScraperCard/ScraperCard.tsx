@@ -13,10 +13,10 @@ import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 
 import * as eventService from "@tauri-apps/api/event";
 
-import { TextInput } from "@voguh/unichat-ui/components/forms/TextInput";
-import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
+import { Badge } from "@voguh/unichat-ui/Badge";
+import { Button } from "@voguh/unichat-ui/Button";
+import { TextInput } from "@voguh/unichat-ui/forms/TextInput";
+import { Tooltip } from "@voguh/unichat-ui/Tooltip";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { modalService } from "unichat/services/modalService";

@@ -15,15 +15,15 @@ import { randHex, randUserName } from "@ngneat/falso";
 import { emitTo } from "@tauri-apps/api/event";
 
 import type { UniChatAuthorType, UniChatEmote } from "@voguh/unichat-api/widgets/events";
-import { NumberInput } from "@voguh/unichat-ui/components/forms/NumberInput";
-import { Select } from "@voguh/unichat-ui/components/forms/Select";
-import { Switch } from "@voguh/unichat-ui/components/forms/Switch";
-import { Textarea } from "@voguh/unichat-ui/components/forms/Textarea";
-import { TextInput } from "@voguh/unichat-ui/components/forms/TextInput";
-import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { SegmentedControl } from "@voguh/unichat-ui/components/ui/SegmentedControl";
-import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
+import { Badge } from "@voguh/unichat-ui/Badge";
+import { Button } from "@voguh/unichat-ui/Button";
+import { NumberInput } from "@voguh/unichat-ui/forms/NumberInput";
+import { Select } from "@voguh/unichat-ui/forms/Select";
+import { Switch } from "@voguh/unichat-ui/forms/Switch";
+import { Textarea } from "@voguh/unichat-ui/forms/Textarea";
+import { TextInput } from "@voguh/unichat-ui/forms/TextInput";
+import { SegmentedControl } from "@voguh/unichat-ui/SegmentedControl";
+import { Tooltip } from "@voguh/unichat-ui/Tooltip";
 import { clsx } from "@voguh/unichat-ui/utils/clsx";
 import {
     buildCustomEvent,

@@ -10,8 +10,8 @@
 
 import type * as PReact from "preact";
 
-import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
-import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
+import { Badge } from "@voguh/unichat-ui/Badge";
+import { Tooltip } from "@voguh/unichat-ui/Tooltip";
 import type { Variants } from "unichat/types";
 
 interface WidgetWarning {

@@ -12,7 +12,7 @@ import type * as PReact from "preact";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { Button } from "@voguh/unichat-ui/Button";
 import { useModalContext } from "unichat/hooks/useModalContext";
 
 import { OtherWidgetsPopover } from "./OtherWidgetsPopover";

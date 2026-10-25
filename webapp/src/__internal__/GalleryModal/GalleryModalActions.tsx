@@ -14,8 +14,8 @@ import { useContext } from "preact/hooks";
 import * as dialog from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
+import { Button } from "@voguh/unichat-ui/Button";
+import { Tooltip } from "@voguh/unichat-ui/Tooltip";
 import { ModalContext } from "unichat/contexts/ModalContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";

@@ -13,11 +13,11 @@ import { useEffect, useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { Markdown } from "@voguh/unichat-ui/components/Markdown";
-import { Alert } from "@voguh/unichat-ui/components/ui/Alert";
-import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
-import { Button, IconButton } from "@voguh/unichat-ui/components/ui/Button";
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@voguh/unichat-ui/components/ui/Tabs";
+import { Alert } from "@voguh/unichat-ui/Alert";
+import { Badge } from "@voguh/unichat-ui/Badge";
+import { Button, IconButton } from "@voguh/unichat-ui/Button";
+import { Markdown } from "@voguh/unichat-ui/Markdown";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@voguh/unichat-ui/Tabs";
 import { CommunityWidgetBadge } from "unichat/__internal__/WidgetsModal/CommunityWidgetBadge";
 import { formatWarnings } from "unichat/__internal__/WidgetsModal/utils/formatWarnings";
 import { getWidgetStatus, WidgetStatus } from "unichat/__internal__/WidgetsModal/utils/getWidgetStatus";

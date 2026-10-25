@@ -10,7 +10,7 @@
 
 import type * as PReact from "preact";
 
-import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
+import { Badge } from "@voguh/unichat-ui/Badge";
 import { getWidgetStatus, WidgetStatus } from "unichat/__internal__/WidgetsModal/utils/getWidgetStatus";
 import type { CommunityWidget } from "unichat/types/addons";
 

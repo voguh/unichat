@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import type { SelectOption, SelectOptionGroup } from "@voguh/unichat-ui/components/ui/Select";
+import type { SelectOption, SelectOptionGroup } from "@voguh/unichat-ui/Select";
 import type { WidgetMetadata } from "unichat/types/widgets";
 
 import { isSystemWidget, isUserWidget } from "./widgetSourceTypeGuards";

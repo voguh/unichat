@@ -12,9 +12,9 @@ import type * as PReact from "preact";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { Markdown } from "@voguh/unichat-ui/components/Markdown";
-import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { Badge } from "@voguh/unichat-ui/Badge";
+import { Button } from "@voguh/unichat-ui/Button";
+import { Markdown } from "@voguh/unichat-ui/Markdown";
 import type { UniChatRelease } from "unichat/types";
 
 import styles from "./styles.module.css";

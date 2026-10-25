@@ -11,7 +11,7 @@
 import type * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@voguh/unichat-ui/components/ui/Tabs";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@voguh/unichat-ui/Tabs";
 import { commandService } from "unichat/services/commandService";
 import type { UniChatRelease } from "unichat/types";
 

@@ -11,8 +11,8 @@
 import type * as PReact from "preact";
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
 
-import { TextInput } from "@voguh/unichat-ui/components/forms/TextInput";
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { Button } from "@voguh/unichat-ui/Button";
+import { TextInput } from "@voguh/unichat-ui/forms/TextInput";
 import { ModalContext } from "unichat/contexts/ModalContext";
 import type { GalleryItem } from "unichat/types";
 

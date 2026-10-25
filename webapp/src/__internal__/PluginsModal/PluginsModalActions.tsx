@@ -12,7 +12,7 @@ import type * as PReact from "preact";
 
 import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { Button } from "@voguh/unichat-ui/Button";
 
 export function PluginsModalActions(): PReact.ComponentChildren {
     return (

@@ -112,7 +112,7 @@ module.exports = {
 
     module: {
         parser: { "css/auto": { namedExports: false, dashedIdents: false } },
-        generator: { "css/auto": { localIdentName: "[hash:base64:8]" } },
+        generator: { "css/auto": { localIdentName: "uc-[hash]-[local]" } },
         rules: [
             {
                 test: /\.tsx?$/,

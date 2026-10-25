@@ -13,8 +13,8 @@ import { useEffect, useState } from "preact/hooks";
 
 import * as eventService from "@tauri-apps/api/event";
 
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
+import { Button } from "@voguh/unichat-ui/Button";
+import { Tooltip } from "@voguh/unichat-ui/Tooltip";
 import { ModalProvider } from "unichat/__internal__/ModalProvider";
 import { NotificationProvider } from "unichat/__internal__/NotificationProvider";
 import { PluginsModal, PluginsModalActions } from "unichat/__internal__/PluginsModal";

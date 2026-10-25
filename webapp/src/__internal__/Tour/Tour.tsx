@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { Button } from "@voguh/unichat-ui/Button";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
 import { type EventEmitterEvents, eventEmitter } from "unichat/services/eventEmitter";

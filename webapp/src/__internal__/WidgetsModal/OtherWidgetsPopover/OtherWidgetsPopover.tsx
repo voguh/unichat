@@ -12,9 +12,9 @@ import type * as PReact from "preact";
 
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
-import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
-import { Button, IconButton } from "@voguh/unichat-ui/components/ui/Button";
-import { Popover, PopoverButton, PopoverPanel } from "@voguh/unichat-ui/components/ui/Popover";
+import { Badge } from "@voguh/unichat-ui/Badge";
+import { Button, IconButton } from "@voguh/unichat-ui/Button";
+import { Popover, PopoverButton, PopoverPanel } from "@voguh/unichat-ui/Popover";
 import { formatWarnings } from "unichat/__internal__/WidgetsModal/utils/formatWarnings";
 import { useWidgets } from "unichat/hooks/useWidgets";
 import type { WidgetMetadata } from "unichat/types/widgets";

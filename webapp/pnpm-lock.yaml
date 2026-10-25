@@ -37,8 +37,8 @@ importers:
         specifier: 2.5.0
         version: 2.5.0
       '@voguh/unichat-ui':
-        specifier: 0.3.1
-        version: 0.3.1(preact@10.29.8)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: 0.4.0
+        version: 0.4.0(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))(preact@10.29.8)
       mitt:
         specifier: 3.0.1
         version: 3.0.1
@@ -82,6 +82,12 @@ importers:
       postcss-loader:
         specifier: 8.2.1
         version: 8.2.1(@rspack/core@2.2.9(@swc/helpers@0.5.23))(postcss@8.5.30)(typescript@7.0.2)
+      react:
+        specifier: npm:@preact/compat@18.3.2
+        version: '@preact/compat@18.3.2(preact@10.29.8)'
+      react-dom:
+        specifier: npm:@preact/compat@18.3.2
+        version: '@preact/compat@18.3.2(preact@10.29.8)'
       rimraf:
         specifier: 6.1.3
         version: 6.1.3
@@ -251,6 +257,11 @@ packages:
 
   '@ngneat/falso@8.0.2':
     resolution: {integrity: sha512-vhPtuoHoxE5JGWPSPBqEyTXcjI4MAn8GllR+Vs8FfpAQu2sQRd4PJc3e8kc9vdbdhYHx1C9HmbECgtGLK30z4w==}
+
+  '@preact/compat@18.3.2':
+    resolution: {integrity: sha512-5vSl55K5yLMvocT7PBKxDOHGgYPjMrKQqqr6roSNjIXcJOtSgDDMjpiCAF3s7klRdmGrN75b/Przmjw8gmlg/w==}
+    peerDependencies:
+      preact: '*'
 
   '@react-aria/focus@3.22.1':
     resolution: {integrity: sha512-CPxtkyrBi/HYY5P3lE/57sQ6qfa0lN8E55TOm89H0kNGv0lKt+/0zP7lWERzBjRr5IxBVrQX4gFEowBN52LPaA==}
@@ -764,8 +775,8 @@ packages:
   '@voguh/unichat-api@file:../unichat-api':
     resolution: {directory: ../unichat-api, type: directory}
 
-  '@voguh/unichat-ui@0.3.1':
-    resolution: {integrity: sha512-st+HIIi7Y5pP99MgGp77j4V8sFBu1n3YQEcfRENCvcPAGAjK4H7/+NBur18SFuMUAQKYOCQWpwBUIMhda3NUWA==}
+  '@voguh/unichat-ui@0.4.0':
+    resolution: {integrity: sha512-eyp2xrGzxuJI3XaXndSQPS1S0D7fruiCaO4R5gXOnWJ02IG55D90x88UJSHf3dPWMeDNqTkNSfG2qM2KGXfP4A==}
     peerDependencies:
       preact: '>=10 <11'
 
@@ -1195,19 +1206,10 @@ packages:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
       react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
-  react-dom@19.3.1:
-    resolution: {integrity: sha512-Y0bARz53lhEC1NMCASs0/j+faB/zqt3R8hpvg1e8+61ZVJ4UL0UdC4cBbXfZMcIuhrfgeILTLe+ZeBCavQPtKQ==}
-    peerDependencies:
-      react: ^19.3.1
-
   react-stately@3.51.0:
     resolution: {integrity: sha512-YJcmkAXu2XOQP97hO/qz/cC3qv9kni3oVhwBlxWr358BHePJUpY15XwL3YSRMKxYt4EkslPqAz11JRirMfANGw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
-
-  react@19.3.1:
-    resolution: {integrity: sha512-QNhWdt7nrgVWWQG58QuGsAR3jv3Hbe4mb4vz7w2csnHavciZJgda1CPNaldF6eVxv90ud3jUXpKlHL69gO38yw==}
-    engines: {node: '>=0.10.0'}
 
   resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
@@ -1224,9 +1226,6 @@ packages:
 
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
-
-  scheduler@0.28.0:
-    resolution: {integrity: sha512-juorfCmIkIw8tT+p5BXSm6PJjQF/ycEYmKyzURCIt/RaZIhL+PulbQ9Yu2z1HdOJDdqDTlxA1+xKBmHXJsczAw==}
 
   seedrandom@3.0.5:
     resolution: {integrity: sha512-8OwmbklUNzwezjGInmZ+2clQmExQPvomqjL7LFqOYqtmuxRgQYqOD3mHaU+MvZn5FLUeVxVfQjwLZW/n/JFuqg==}
@@ -1422,31 +1421,31 @@ snapshots:
       '@floating-ui/core': 1.8.0
       '@floating-ui/utils': 0.2.12
 
-  '@floating-ui/react-dom@2.1.9(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@floating-ui/react-dom@2.1.9(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))':
     dependencies:
       '@floating-ui/dom': 1.8.0
-      react: 19.3.1
-      react-dom: 19.3.1(react@19.3.1)
+      react: '@preact/compat@18.3.2(preact@10.29.8)'
+      react-dom: '@preact/compat@18.3.2(preact@10.29.8)'
 
-  '@floating-ui/react@0.26.28(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@floating-ui/react@0.26.28(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))':
     dependencies:
-      '@floating-ui/react-dom': 2.1.9(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@floating-ui/react-dom': 2.1.9(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))
       '@floating-ui/utils': 0.2.12
-      react: 19.3.1
-      react-dom: 19.3.1(react@19.3.1)
+      react: '@preact/compat@18.3.2(preact@10.29.8)'
+      react-dom: '@preact/compat@18.3.2(preact@10.29.8)'
       tabbable: 6.5.0
 
   '@floating-ui/utils@0.2.12': {}
 
-  '@headlessui/react@2.2.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@headlessui/react@2.2.10(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))':
     dependencies:
-      '@floating-ui/react': 0.26.28(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@react-aria/focus': 3.22.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@react-aria/interactions': 3.28.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@tanstack/react-virtual': 3.14.21(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      react: 19.3.1
-      react-dom: 19.3.1(react@19.3.1)
-      use-sync-external-store: 1.7.0(react@19.3.1)
+      '@floating-ui/react': 0.26.28(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))
+      '@react-aria/focus': 3.22.1(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))
+      '@react-aria/interactions': 3.28.1(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))
+      '@tanstack/react-virtual': 3.14.21(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))
+      react: '@preact/compat@18.3.2(preact@10.29.8)'
+      react-dom: '@preact/compat@18.3.2(preact@10.29.8)'
+      use-sync-external-store: 1.7.0(@preact/compat@18.3.2(preact@10.29.8))
 
   '@internationalized/date@3.12.4':
     dependencies:
@@ -1498,24 +1497,28 @@ snapshots:
       seedrandom: 3.0.5
       uuid: 8.3.2
 
-  '@react-aria/focus@3.22.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@preact/compat@18.3.2(preact@10.29.8)':
+    dependencies:
+      preact: 10.29.8
+
+  '@react-aria/focus@3.22.1(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))':
     dependencies:
       '@swc/helpers': 0.5.23
-      react: 19.3.1
-      react-aria: 3.53.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      react-dom: 19.3.1(react@19.3.1)
+      react: '@preact/compat@18.3.2(preact@10.29.8)'
+      react-aria: 3.53.1(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))
+      react-dom: '@preact/compat@18.3.2(preact@10.29.8)'
 
-  '@react-aria/interactions@3.28.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@react-aria/interactions@3.28.1(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))':
     dependencies:
-      '@react-types/shared': 3.37.0(react@19.3.1)
+      '@react-types/shared': 3.37.0(@preact/compat@18.3.2(preact@10.29.8))
       '@swc/helpers': 0.5.23
-      react: 19.3.1
-      react-aria: 3.53.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      react-dom: 19.3.1(react@19.3.1)
+      react: '@preact/compat@18.3.2(preact@10.29.8)'
+      react-aria: 3.53.1(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))
+      react-dom: '@preact/compat@18.3.2(preact@10.29.8)'
 
-  '@react-types/shared@3.37.0(react@19.3.1)':
+  '@react-types/shared@3.37.0(@preact/compat@18.3.2(preact@10.29.8))':
     dependencies:
-      react: 19.3.1
+      react: '@preact/compat@18.3.2(preact@10.29.8)'
 
   '@rsbuild/plugin-check-syntax@1.6.1':
     dependencies:
@@ -1838,11 +1841,11 @@ snapshots:
       postcss: 8.5.30
       tailwindcss: 4.3.3
 
-  '@tanstack/react-virtual@3.14.21(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@tanstack/react-virtual@3.14.21(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))':
     dependencies:
       '@tanstack/virtual-core': 3.19.6
-      react: 19.3.1
-      react-dom: 19.3.1(react@19.3.1)
+      react: '@preact/compat@18.3.2(preact@10.29.8)'
+      react-dom: '@preact/compat@18.3.2(preact@10.29.8)'
 
   '@tanstack/virtual-core@3.19.6': {}
 
@@ -1964,11 +1967,11 @@ snapshots:
     dependencies:
       '@types/jquery': 3.5.32
 
-  '@voguh/unichat-ui@0.3.1(preact@10.29.8)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@voguh/unichat-ui@0.4.0(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))(preact@10.29.8)':
     dependencies:
       '@ctrl/tinycolor': 4.2.1
       '@floating-ui/dom': 1.8.0
-      '@headlessui/react': 2.2.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@headlessui/react': 2.2.10(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))
       dompurify: 3.4.17
       lean-qr: 2.7.4
       marked: 18.1.1
@@ -2322,36 +2325,29 @@ snapshots:
 
   preact@10.29.8: {}
 
-  react-aria@3.53.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
+  react-aria@3.53.1(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8)):
     dependencies:
       '@internationalized/date': 3.12.4
       '@internationalized/number': 3.6.9
       '@internationalized/string': 3.2.10
-      '@react-types/shared': 3.37.0(react@19.3.1)
+      '@react-types/shared': 3.37.0(@preact/compat@18.3.2(preact@10.29.8))
       '@swc/helpers': 0.5.23
       aria-hidden: 1.2.6
       clsx: 2.1.1
-      react: 19.3.1
-      react-dom: 19.3.1(react@19.3.1)
-      react-stately: 3.51.0(react@19.3.1)
-      use-sync-external-store: 1.7.0(react@19.3.1)
+      react: '@preact/compat@18.3.2(preact@10.29.8)'
+      react-dom: '@preact/compat@18.3.2(preact@10.29.8)'
+      react-stately: 3.51.0(@preact/compat@18.3.2(preact@10.29.8))
+      use-sync-external-store: 1.7.0(@preact/compat@18.3.2(preact@10.29.8))
 
-  react-dom@19.3.1(react@19.3.1):
-    dependencies:
-      react: 19.3.1
-      scheduler: 0.28.0
-
-  react-stately@3.51.0(react@19.3.1):
+  react-stately@3.51.0(@preact/compat@18.3.2(preact@10.29.8)):
     dependencies:
       '@internationalized/date': 3.12.4
       '@internationalized/number': 3.6.9
       '@internationalized/string': 3.2.10
-      '@react-types/shared': 3.37.0(react@19.3.1)
+      '@react-types/shared': 3.37.0(@preact/compat@18.3.2(preact@10.29.8))
       '@swc/helpers': 0.5.23
-      react: 19.3.1
-      use-sync-external-store: 1.7.0(react@19.3.1)
-
-  react@19.3.1: {}
+      react: '@preact/compat@18.3.2(preact@10.29.8)'
+      use-sync-external-store: 1.7.0(@preact/compat@18.3.2(preact@10.29.8))
 
   resolve-from@4.0.0: {}
 
@@ -2363,8 +2359,6 @@ snapshots:
   rslog@2.3.0: {}
 
   safer-buffer@2.1.2: {}
-
-  scheduler@0.28.0: {}
 
   seedrandom@3.0.5: {}
 
@@ -2459,9 +2453,9 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
-  use-sync-external-store@1.7.0(react@19.3.1):
+  use-sync-external-store@1.7.0(@preact/compat@18.3.2(preact@10.29.8)):
     dependencies:
-      react: 19.3.1
+      react: '@preact/compat@18.3.2(preact@10.29.8)'
 
   uuid@8.3.2: {}
 

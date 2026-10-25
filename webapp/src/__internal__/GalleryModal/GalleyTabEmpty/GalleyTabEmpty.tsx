@@ -10,8 +10,8 @@
 
 import type * as PReact from "preact";
 
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { EmptyState } from "@voguh/unichat-ui/components/ui/EmptyState";
+import { Button } from "@voguh/unichat-ui/Button";
+import { EmptyState } from "@voguh/unichat-ui/EmptyState";
 import { clsx } from "@voguh/unichat-ui/utils/clsx";
 
 import itemStyles from "../GalleryItemDisplay/styles.module.css";

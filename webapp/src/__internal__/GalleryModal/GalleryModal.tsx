@@ -11,8 +11,8 @@
 import type * as PReact from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 
-import { Loading } from "@voguh/unichat-ui/components/Loading";
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@voguh/unichat-ui/components/ui/Tabs";
+import { Loading } from "@voguh/unichat-ui/Loading";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@voguh/unichat-ui/Tabs";
 import { ModalContext } from "unichat/contexts/ModalContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";

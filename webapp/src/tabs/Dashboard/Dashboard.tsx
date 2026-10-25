@@ -13,10 +13,10 @@ import { useEffect, useRef, useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { Select } from "@voguh/unichat-ui/components/ui/Select";
-import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
+import { Badge } from "@voguh/unichat-ui/Badge";
+import { Button } from "@voguh/unichat-ui/Button";
+import { Select } from "@voguh/unichat-ui/Select";
+import { Tooltip } from "@voguh/unichat-ui/Tooltip";
 import { useScrapers } from "unichat/hooks/useScrapers";
 import { useStorage } from "unichat/hooks/useStorage";
 import { useWidgets } from "unichat/hooks/useWidgets";

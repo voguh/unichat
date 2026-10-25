@@ -10,7 +10,7 @@
 
 import type * as PReact from "preact";
 
-import { IconButton } from "@voguh/unichat-ui/components/ui/Button";
+import { IconButton } from "@voguh/unichat-ui/Button";
 import { useModalContext } from "unichat/hooks/useModalContext";
 
 import styles from "./styles.module.css";

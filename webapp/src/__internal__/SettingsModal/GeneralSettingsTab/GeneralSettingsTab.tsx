@@ -11,10 +11,10 @@
 import type * as PReact from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 
-import { Select } from "@voguh/unichat-ui/components/forms/Select";
-import { Switch } from "@voguh/unichat-ui/components/forms/Switch";
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import type { SelectOption } from "@voguh/unichat-ui/components/ui/Select";
+import { Button } from "@voguh/unichat-ui/Button";
+import { Select } from "@voguh/unichat-ui/forms/Select";
+import { Switch } from "@voguh/unichat-ui/forms/Switch";
+import type { SelectOption } from "@voguh/unichat-ui/Select";
 import { useStorage } from "unichat/hooks/useStorage";
 import { useWidgets } from "unichat/hooks/useWidgets";
 import { commandService } from "unichat/services/commandService";

@@ -20,7 +20,7 @@ import {
     DialogPanel,
     type DialogPanelSize,
     DialogTitle
-} from "@voguh/unichat-ui/components/ui/Dialog";
+} from "@voguh/unichat-ui/Dialog";
 import { ModalContext } from "unichat/contexts/ModalContext";
 
 export interface ModalProps extends Omit<PReact.HTMLAttributes<HTMLDivElement>, "title" | "size" | "ref"> {

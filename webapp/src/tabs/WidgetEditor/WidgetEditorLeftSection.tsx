@@ -12,8 +12,8 @@ import type * as PReact from "preact";
 
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
+import { Button } from "@voguh/unichat-ui/Button";
+import { Tooltip } from "@voguh/unichat-ui/Tooltip";
 import { GalleryModal, GalleryModalActions } from "unichat/__internal__/GalleryModal";
 import { modalService } from "unichat/services/modalService";
 

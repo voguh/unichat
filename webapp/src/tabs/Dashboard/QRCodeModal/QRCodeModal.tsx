@@ -11,10 +11,10 @@
 import type * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
-import { Select } from "@voguh/unichat-ui/components/forms/Select";
-import { Clipboard } from "@voguh/unichat-ui/components/ui/Clipboard";
-import { QrCode } from "@voguh/unichat-ui/components/ui/QrCode";
-import type { SelectOption } from "@voguh/unichat-ui/components/ui/Select";
+import { Clipboard } from "@voguh/unichat-ui/Clipboard";
+import { Select } from "@voguh/unichat-ui/forms/Select";
+import { QrCode } from "@voguh/unichat-ui/QrCode";
+import type { SelectOption } from "@voguh/unichat-ui/Select";
 import { commandService } from "unichat/services/commandService";
 
 import styles from "./styles.module.css";

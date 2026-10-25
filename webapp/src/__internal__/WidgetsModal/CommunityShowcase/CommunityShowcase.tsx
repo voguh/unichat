@@ -11,10 +11,10 @@
 import type * as PReact from "preact";
 import { useState } from "preact/hooks";
 
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { EmptyState } from "@voguh/unichat-ui/components/ui/EmptyState";
-import { Input } from "@voguh/unichat-ui/components/ui/Input";
-import { SegmentedControl } from "@voguh/unichat-ui/components/ui/SegmentedControl";
+import { Button } from "@voguh/unichat-ui/Button";
+import { EmptyState } from "@voguh/unichat-ui/EmptyState";
+import { Input } from "@voguh/unichat-ui/Input";
+import { SegmentedControl } from "@voguh/unichat-ui/SegmentedControl";
 import { CommunityWidgetBadge } from "unichat/__internal__/WidgetsModal/CommunityWidgetBadge";
 import { getWidgetStatus, WidgetStatus } from "unichat/__internal__/WidgetsModal/utils/getWidgetStatus";
 import type { CommunityWidget } from "unichat/types/addons";

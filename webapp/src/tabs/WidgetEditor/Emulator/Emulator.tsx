@@ -14,11 +14,11 @@ import { useEffect, useState } from "preact/hooks";
 import * as eventService from "@tauri-apps/api/event";
 
 import type { UniChatEvent, UniChatPlatform } from "@voguh/unichat-api/widgets/events";
-import { Select } from "@voguh/unichat-ui/components/forms/Select";
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import type { SelectOption } from "@voguh/unichat-ui/components/ui/Select";
-import { Switch } from "@voguh/unichat-ui/components/ui/Switch";
-import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
+import { Button } from "@voguh/unichat-ui/Button";
+import { Select } from "@voguh/unichat-ui/forms/Select";
+import type { SelectOption } from "@voguh/unichat-ui/Select";
+import { Switch } from "@voguh/unichat-ui/Switch";
+import { Tooltip } from "@voguh/unichat-ui/Tooltip";
 import { commandService } from "unichat/services/commandService";
 
 import { buildEmulatedEventData, type EmulatedEventType } from "./__utils__/buildEmulatedEventData";

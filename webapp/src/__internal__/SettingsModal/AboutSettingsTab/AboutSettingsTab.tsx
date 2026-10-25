@@ -13,7 +13,7 @@ import { useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
+import { Button } from "@voguh/unichat-ui/Button";
 import { modalService } from "unichat/services/modalService";
 
 import styles from "./styles.module.css";

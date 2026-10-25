@@ -11,7 +11,7 @@
 import type * as PReact from "preact";
 import { useEffect } from "preact/hooks";
 
-import { Toaster, toaster, type ToastType as UIToastType } from "@voguh/unichat-ui/components/ui/Toast";
+import { Toaster, toaster, type ToastType as UIToastType } from "@voguh/unichat-ui/Toast";
 import { eventEmitter } from "unichat/services/eventEmitter";
 import type { NotificationOptions, ToastType } from "unichat/services/notificationService";
 

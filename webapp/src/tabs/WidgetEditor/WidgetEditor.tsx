@@ -12,9 +12,9 @@ import type * as PReact from "preact";
 import { useRef, useState } from "preact/hooks";
 
 import type { UniChatEvent } from "@voguh/unichat-api/widgets/events";
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { Select } from "@voguh/unichat-ui/components/ui/Select";
-import { Tooltip } from "@voguh/unichat-ui/components/ui/Tooltip";
+import { Button } from "@voguh/unichat-ui/Button";
+import { Select } from "@voguh/unichat-ui/Select";
+import { Tooltip } from "@voguh/unichat-ui/Tooltip";
 import { useWidgets } from "unichat/hooks/useWidgets";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";

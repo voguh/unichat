@@ -11,7 +11,7 @@
 import type * as PReact from "preact";
 import { useRef, useState } from "preact/hooks";
 
-import { TextInput, type TextInputProps } from "@voguh/unichat-ui/components/forms/TextInput";
+import { TextInput, type TextInputProps } from "@voguh/unichat-ui/forms/TextInput";
 import { GalleryModal, GalleryModalActions, type GalleryTabs } from "unichat/__internal__/GalleryModal";
 import { modalService } from "unichat/services/modalService";
 import { mergeRefs } from "unichat/utils/mergeRefs";

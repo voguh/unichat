@@ -13,7 +13,7 @@ import { useEffect, useState } from "preact/hooks";
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-import { Badge } from "@voguh/unichat-ui/components/ui/Badge";
+import { Badge } from "@voguh/unichat-ui/Badge";
 import { commandService } from "unichat/services/commandService";
 import type { ThirdPartyLicenseInfo } from "unichat/types";
 

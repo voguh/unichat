@@ -11,14 +11,14 @@
 import type * as PReact from "preact";
 import { useEffect, useState } from "preact/hooks";
 
-import { ColorPicker } from "@voguh/unichat-ui/components/forms/ColorPicker";
-import { NumberInput } from "@voguh/unichat-ui/components/forms/NumberInput";
-import { Select } from "@voguh/unichat-ui/components/forms/Select";
-import { Switch } from "@voguh/unichat-ui/components/forms/Switch";
-import { Textarea } from "@voguh/unichat-ui/components/forms/Textarea";
-import { TextInput } from "@voguh/unichat-ui/components/forms/TextInput";
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { Disclosure, DisclosureButton, DisclosurePanel } from "@voguh/unichat-ui/components/ui/Disclosure";
+import { Button } from "@voguh/unichat-ui/Button";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "@voguh/unichat-ui/Disclosure";
+import { ColorPicker } from "@voguh/unichat-ui/forms/ColorPicker";
+import { NumberInput } from "@voguh/unichat-ui/forms/NumberInput";
+import { Select } from "@voguh/unichat-ui/forms/Select";
+import { Switch } from "@voguh/unichat-ui/forms/Switch";
+import { Textarea } from "@voguh/unichat-ui/forms/Textarea";
+import { TextInput } from "@voguh/unichat-ui/forms/TextInput";
 import { GalleryFileInput } from "unichat/components/forms/GalleryFileInput";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";

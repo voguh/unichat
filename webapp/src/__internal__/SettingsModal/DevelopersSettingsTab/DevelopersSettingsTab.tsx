@@ -11,10 +11,10 @@
 import type * as PReact from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 
-import { FormGroup } from "@voguh/unichat-ui/components/forms/FormGroup";
-import { Switch } from "@voguh/unichat-ui/components/forms/Switch";
-import { Button } from "@voguh/unichat-ui/components/ui/Button";
-import { SegmentedControl } from "@voguh/unichat-ui/components/ui/SegmentedControl";
+import { Button } from "@voguh/unichat-ui/Button";
+import { FormGroup } from "@voguh/unichat-ui/forms/FormGroup";
+import { Switch } from "@voguh/unichat-ui/forms/Switch";
+import { SegmentedControl } from "@voguh/unichat-ui/SegmentedControl";
 import { useStorage } from "unichat/hooks/useStorage";
 import {
     ScraperEventsLogLevel as LogLevel,

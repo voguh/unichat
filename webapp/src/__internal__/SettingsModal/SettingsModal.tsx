@@ -11,7 +11,7 @@
 import type * as PReact from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 
-import { Button, type ButtonVariant } from "@voguh/unichat-ui/components/ui/Button";
+import { Button, type ButtonVariant } from "@voguh/unichat-ui/Button";
 import { Modal } from "unichat/components/Modal";
 import { ModalContext } from "unichat/contexts/ModalContext";
 
