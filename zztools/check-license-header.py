@@ -22,21 +22,13 @@ from utils.constants import ROOT_PATH
 # ============================================================================ #
 
 EXCLUDE_PATHS = {
-    ROOT_PATH / ".git",
     ROOT_PATH / ".github",
     ROOT_PATH / ".vscode",
     ROOT_PATH / "(un)released-notes",
     ROOT_PATH / "capabilities",
-    ROOT_PATH / "dist",
-    ROOT_PATH / "gen",
-    ROOT_PATH / "plugins",
-    ROOT_PATH / "target",
     ROOT_PATH / "unichat-api" / "widgets" / "fields-schema.json",
     ROOT_PATH / "unichat-api" / "package.json",
     ROOT_PATH / "unichat-api" / "tsconfig.json",
-    ROOT_PATH / "webapp" / "coverage",
-    ROOT_PATH / "webapp" / "dist",
-    ROOT_PATH / "webapp" / "node_modules",
     ROOT_PATH / "webapp" / "public" / "fontawesome",
     ROOT_PATH / "webapp" / ".npmrc",
     ROOT_PATH / "webapp" / ".nvmrc",
@@ -46,7 +38,6 @@ EXCLUDE_PATHS = {
     ROOT_PATH / "webapp" / "pnpm-workspace.yaml",
     ROOT_PATH / "webapp" / "tsconfig.json",
     ROOT_PATH / "widgets",
-    ROOT_PATH / "zztools" / "utils" / "__pycache__",
     ROOT_PATH / ".editorconfig",
     ROOT_PATH / ".gitattributes",
     ROOT_PATH / ".gitignore",
@@ -74,6 +65,10 @@ def is_text_file(path: Path) -> bool:
 def git(*args: str) -> str:
     command = ["git", "-c", "core.quotePath=false", *args]
     return subprocess.run(command, cwd=ROOT_PATH, capture_output=True, text=True, check=True).stdout
+
+def list_project_files() -> list[Path]:
+    output = git("ls-files", "--cached", "--others", "--exclude-standard")
+    return sorted(ROOT_PATH / line for line in output.splitlines() if line.strip() != "")
 
 def load_last_modified_years() -> dict[Path, int]:
     years: dict[Path, int] = {}
@@ -149,7 +144,7 @@ def main():
     last_modified_years = load_last_modified_years()
 
     missing = []
-    for file in sorted(ROOT_PATH.rglob("*")):
+    for file in list_project_files():
         if not file.is_file():
             continue
         if any(file.is_relative_to(d) for d in EXCLUDE_PATHS):
