@@ -83,20 +83,28 @@ jobs:
             fi
           done
 
-      - name: Create and upload Release
+      - name: Create draft Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           export VERSION="${{ github.ref_name }}"
+          if [[ "$(gh release view "$VERSION" --json isDraft --jq .isDraft 2> /dev/null)" == "true" ]]; then
+            gh release delete "$VERSION" --yes
+          fi
           if [[ "$VERSION" == *"-"* || "$VERSION" == *"+"* ]]; then
-            gh release create "$VERSION" dist/* --prerelease
+            gh release create "$VERSION" dist/* --draft --prerelease
           else
-            gh release create "$VERSION" dist/*
+            gh release create "$VERSION" dist/* --draft
           fi
 
       - name: Publish unichat-api to zBell
         run: |
           export VERSION="${{ github.ref_name }}"
+          PACKAGE_NAME="$(jq -r '.name' unichat-api/package.json)"
+          if npm view "$PACKAGE_NAME@$VERSION" version --registry "$ZBELL_REGISTRY" > /dev/null 2>&1; then
+            echo "$PACKAGE_NAME@$VERSION is already published to zBell."
+            exit 0
+          fi
           NPM_TAG="latest"
           if [[ "$VERSION" == *"-"* || "$VERSION" == *"+"* ]]; then
             NPM_TAG="experimental"
@@ -119,3 +127,8 @@ jobs:
         run: |
           export VERSION="${{ github.ref_name }}"
           aws s3 cp dist/ "s3://$AWS_S3_BUCKET_NAME/$AWS_S3_PATH/$VERSION/" --recursive --endpoint-url "$AWS_S3_ENDPOINT"
+
+      - name: Publish Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "${{ github.ref_name }}" --draft=false
