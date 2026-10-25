@@ -161,9 +161,9 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
         const widget = widgets.get(selectedWidget);
 
         if (isSystemWidget(widget)) {
-            return <div className={styles.empty}>No editable fields for system widgets.</div>;
+            return <div className="empty">No editable fields for system widgets.</div>;
         } else if (fields == null || Object.keys(fields).length === 0) {
-            return <div className={styles.empty}>No fields defined for this widget.</div>;
+            return <div className="empty">No fields defined for this widget.</div>;
         }
 
         const groups: Record<string, PReact.ComponentChild[]> = {
@@ -181,13 +181,13 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
         }
 
         return (
-            <div className={styles.accordion}>
+            <div className="accordion">
                 {Object.entries(groups)
                     .filter(([_, elements]) => elements.length > 0)
                     .map(([groupName, elements]) => (
-                        <Disclosure key={groupName} name="widget-fields" className={styles.accordionItem}>
+                        <Disclosure key={groupName} name="widget-fields">
                             <DisclosureButton>{groupName}</DisclosureButton>
-                            <DisclosurePanel className={styles.accordionContent}>{elements}</DisclosurePanel>
+                            <DisclosurePanel>{elements}</DisclosurePanel>
                         </Disclosure>
                     ))}
             </div>
@@ -218,11 +218,11 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
     }, [selectedWidget]);
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
+        <div className={styles.root}>
+            <div className="header">
                 <span>Fields Editor</span>
                 {fields != null && Object.keys(fields).length > 0 && (
-                    <div className={styles.actions}>
+                    <div>
                         <Button variant="default" size="sm" onClick={() => wrappedReset()}>
                             <i className="fas fa-undo" />
                         </Button>
@@ -232,7 +232,7 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                     </div>
                 )}
             </div>
-            <div className={styles.content}>{buildFieldsEditor()}</div>
+            <div className="content">{buildFieldsEditor()}</div>
         </div>
     );
 }

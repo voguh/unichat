@@ -10,7 +10,8 @@
 
 import type { Side } from "@floating-ui/dom";
 
-import type { TourBuilder } from "../Tour";
+import type { TourBuilder } from "unichat/__internal__/Tour";
+
 import { stageBuilder } from "./stageBuilder";
 
 export function settingsModalStageBuilder(
@@ -24,17 +25,28 @@ export function settingsModalStageBuilder(
 
     return async (container) => {
         if (document.querySelector("[data-tour='settings-modal']") == null) {
-            document.querySelector<HTMLButtonElement>("[data-tour='settings-modal-toggle']")?.click();
+            const toggle = document.querySelector<HTMLButtonElement>("[data-tour='settings-modal-toggle']");
+            if (toggle != null) {
+                toggle.click();
+            }
+
             await new Promise((resolve) => setTimeout(resolve, 50));
         }
 
-        document.querySelector<HTMLButtonElement>(`[data-tour='settings-${tab}-tab']`)?.click();
+        const tabButton = document.querySelector<HTMLButtonElement>(`[data-tour='settings-${tab}-tab']`);
+        if (tabButton != null) {
+            tabButton.click();
+        }
 
         await new Promise((resolve) => setTimeout(resolve, 50));
         await builder(container);
 
         return () => {
-            document.querySelector<HTMLButtonElement>("[data-tour='settings-modal'] [aria-label='Close']")?.click();
+            const closeSelector = "[data-tour='settings-modal'] [aria-label='Close']";
+            const close = document.querySelector<HTMLButtonElement>(closeSelector);
+            if (close != null) {
+                close.click();
+            }
         };
     };
 }

@@ -43,15 +43,15 @@ export function GalleryItemDisplay(props: Props): PReact.ComponentChildren {
     }
 
     return (
-        <div className={styles.container}>
-            <div className={styles.name}>
+        <div className={styles.root}>
+            <div className="name">
                 <Tooltip content={title}>
                     <span>{title}</span>
                 </Tooltip>
             </div>
-            <div className={styles.preview}>{renderPreview()}</div>
+            <div className="preview">{renderPreview()}</div>
             {!!onSelectItem && (
-                <div className={styles.footer}>
+                <div className="footer">
                     <Button
                         variant={selected ? "success" : "secondary"}
                         disabled={selected}

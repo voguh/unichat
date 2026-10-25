@@ -8,21 +8,23 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-.container {
+.root {
     @apply col-span-full w-75 flex flex-col gap-4 justify-center items-center mx-auto;
-}
 
-.mediaWrapper {
-    @apply bg-gray-200 rounded;
-    @apply w-full aspect-video flex justify-center items-center overflow-hidden;
+    > div {
+        &:global(.media) {
+            @apply bg-gray-200 rounded;
+            @apply w-full aspect-video flex justify-center items-center overflow-hidden;
 
-    > img,
-    > video,
-    > audio {
-        @apply w-full h-full object-contain;
+            > img,
+            > video,
+            > audio {
+                @apply w-full h-full object-contain;
+            }
+        }
+
+        &:global(.input) {
+            @apply w-full flex justify-center items-end gap-2;
+        }
     }
-}
-
-.inputWrapper {
-    @apply w-full flex justify-center items-end gap-2;
 }

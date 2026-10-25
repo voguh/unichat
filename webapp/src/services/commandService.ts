@@ -19,21 +19,13 @@ import type {
 } from "unichat/types";
 import { invoke } from "unichat/utils/invoke";
 
-let cachedReleases: UniChatReleaseInfo | null = null;
 export class CommandService {
     public async dispatchClearChat(): Promise<void> {
         await invoke("dispatch_clear_chat");
     }
 
     public async getReleases(): Promise<UniChatReleaseInfo> {
-        if (cachedReleases) {
-            return cachedReleases;
-        }
-
-        const releases = await invoke<UniChatReleaseInfo>("get_releases");
-        cachedReleases = releases;
-
-        return releases;
+        return invoke<UniChatReleaseInfo>("get_releases");
     }
 
     public async getSystemHosts(): Promise<string[]> {
@@ -48,7 +40,7 @@ export class CommandService {
         return invoke("get_third_party_licenses");
     }
 
-    /* ========================================================================================== */
+    /* ====================================================================== */
 
     public async dispatchEmulatedEvent(event: UniChatEvent): Promise<void> {
         await invoke("dispatch_emulated_event", { event });
@@ -62,7 +54,7 @@ export class CommandService {
         await invoke("close_custom_event_window");
     }
 
-    /* ========================================================================================== */
+    /* ====================================================================== */
 
     public async getGalleryItems(): Promise<GalleryItem[]> {
         return invoke("get_gallery_items");
@@ -72,7 +64,7 @@ export class CommandService {
         await invoke("upload_gallery_items", { files });
     }
 
-    /* ========================================================================================== */
+    /* ====================================================================== */
 
     public async getPrevTourSteps(): Promise<string[]> {
         return invoke("get_prev_tour_steps");
@@ -90,7 +82,7 @@ export class CommandService {
         return invoke("tour_steps_has_new");
     }
 
-    /* ========================================================================================== */
+    /* ====================================================================== */
 
     public async getScrapers(): Promise<UniChatScraper[]> {
         return invoke("get_scrapers");
@@ -120,7 +112,7 @@ export class CommandService {
         return invoke("toggle_scraper_webview", { scraperId });
     }
 
-    /* ========================================================================================== */
+    /* ====================================================================== */
 
     public async getWidgetFields(widget: string): Promise<Record<string, WidgetFields>> {
         return invoke<Record<string, WidgetFields>>("get_widget_fields", { widget });

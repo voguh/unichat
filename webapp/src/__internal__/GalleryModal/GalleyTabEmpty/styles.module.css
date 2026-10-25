@@ -8,14 +8,16 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-.container {
+.root {
     @apply col-span-full grid grid-cols-4 gap-1;
-}
 
-.sizer {
-    @apply invisible col-start-1 row-start-1;
-}
+    > div {
+        &:global(.sizer) {
+            @apply invisible col-start-1 row-start-1;
+        }
 
-.emptyState {
-    @apply col-span-full row-start-1 self-center py-0!;
+        &[data-part~="EmptyState"] {
+            @apply col-span-full row-start-1 self-center py-0!;
+        }
+    }
 }

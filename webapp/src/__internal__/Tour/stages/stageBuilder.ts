@@ -10,7 +10,7 @@
 
 import { computePosition, flip, offset, type Placement, type Side, shift } from "@floating-ui/dom";
 
-import type { TourBuilder } from "../Tour";
+import type { TourBuilder } from "unichat/__internal__/Tour";
 
 export const ELEMENT_PADDING = 4;
 
@@ -52,7 +52,7 @@ export function stageBuilder(
         highlight.style.height = `${y2 - y1}px`;
         container.appendChild(highlight);
 
-        /* ========================================================================================================== */
+        /* ================================================================== */
 
         const dialogElem = document.createElement("div");
         dialogElem.classList.add("tour-dialog");
@@ -85,16 +85,25 @@ export function stageBuilder(
         dialogElem.style.top = `${y}px`;
 
         dialogCaretElem.setAttribute("data-placement", placement);
-        const isTop = placement.startsWith("top");
-        const isRight = placement.startsWith("right");
-        const isBottom = placement.startsWith("bottom");
-        const isLeft = placement.startsWith("left");
-        if (isTop || isBottom) {
-            dialogCaretElem.style.left = `${bounds.x + bounds.width / 2}px`;
-            dialogCaretElem.style.top = isTop ? `${bounds.y}px` : `${bounds.y + bounds.height}px`;
-        } else if (isLeft || isRight) {
-            dialogCaretElem.style.left = isLeft ? `${bounds.x}px` : `${bounds.x + bounds.width}px`;
-            dialogCaretElem.style.top = `${bounds.y + bounds.height / 2}px`;
+        const centerX = `${bounds.x + bounds.width / 2}px`;
+        const centerY = `${bounds.y + bounds.height / 2}px`;
+        switch (placement) {
+            case "top":
+                dialogCaretElem.style.left = centerX;
+                dialogCaretElem.style.top = `${bounds.y}px`;
+                break;
+            case "bottom":
+                dialogCaretElem.style.left = centerX;
+                dialogCaretElem.style.top = `${bounds.y + bounds.height}px`;
+                break;
+            case "left":
+                dialogCaretElem.style.left = `${bounds.x}px`;
+                dialogCaretElem.style.top = centerY;
+                break;
+            case "right":
+                dialogCaretElem.style.left = `${bounds.x + bounds.width}px`;
+                dialogCaretElem.style.top = centerY;
+                break;
         }
     };
 }

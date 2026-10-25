@@ -31,7 +31,6 @@ export interface ModalProps extends Omit<PReact.HTMLAttributes<HTMLDivElement>, 
     fullscreen?: boolean;
 
     backdrop?: boolean;
-    bodyClassName?: string;
 
     title?: PReact.ComponentChildren;
     actions?: PReact.ComponentChildren;
@@ -46,7 +45,6 @@ export function Modal({
     fullscreen = false,
 
     backdrop = true,
-    bodyClassName,
 
     title,
     actions,
@@ -74,7 +72,7 @@ export function Modal({
                             {withCloseButton && <DialogCloseButton />}
                         </DialogHeader>
                     )}
-                    {children != null && <DialogBody className={bodyClassName}>{children}</DialogBody>}
+                    {children != null && <DialogBody>{children}</DialogBody>}
                 </DialogPanel>
             </Dialog>
         </ModalContext.Provider>

@@ -131,8 +131,8 @@ export function Dashboard(): PReact.ComponentChildren {
     }, []);
 
     return (
-        <div className={styles.container}>
-            <div className={styles.scrapers}>
+        <div className={styles.root}>
+            <div className="scrapers">
                 {scrapers.map((s) => (
                     <ScraperCard
                         key={s.id}
@@ -142,11 +142,11 @@ export function Dashboard(): PReact.ComponentChildren {
                     />
                 ))}
             </div>
-            <div className={styles.preview}>
+            <div className="preview">
                 {showWidgetPreview ? (
                     <>
-                        <div className={styles.previewHeader}>
-                            <div className={styles.widgetSelector} data-tour="widgets-selector">
+                        <div className="header">
+                            <div data-tour="widgets-selector">
                                 <Select
                                     options={widgets}
                                     value={selectedWidget}
@@ -167,7 +167,7 @@ export function Dashboard(): PReact.ComponentChildren {
                             </Tooltip>
                         </div>
 
-                        <div className={styles.iframeWrapper}>
+                        <div className="frame">
                             <iframe
                                 ref={iframeRef}
                                 src={`${WIDGET_URL_PREFIX}/${selectedWidget}`}
@@ -177,13 +177,13 @@ export function Dashboard(): PReact.ComponentChildren {
                         </div>
                     </>
                 ) : (
-                    <div className={styles.previewDisabled}>
+                    <div className="disabled">
                         <div>
-                            <div className={styles.previewDisabledIcons}>
+                            <div className="icons">
                                 <i className="fas fa-desktop fa-3x" />
                                 <i className="fas fa-times fa-2x" />
                             </div>
-                            <div className={styles.previewDisabledText}>Widget preview is disabled.</div>
+                            <div className="message">Widget preview is disabled.</div>
                         </div>
                     </div>
                 )}

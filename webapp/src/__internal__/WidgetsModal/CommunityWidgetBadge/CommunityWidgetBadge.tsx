@@ -16,29 +16,20 @@ import type { CommunityWidget } from "unichat/types/addons";
 
 interface Props {
     widget: CommunityWidget;
-    className?: string;
 }
 
-export function CommunityWidgetBadge({ widget, className }: Props): PReact.ComponentChildren {
+export function CommunityWidgetBadge({ widget }: Props): PReact.ComponentChildren {
     switch (getWidgetStatus(widget)) {
         case WidgetStatus.INCOMPATIBLE:
-            return (
-                <Badge className={className} variant="danger">
-                    Requires UniChat {widget.requiresUniChat}
-                </Badge>
-            );
+            return <Badge variant="danger">Requires UniChat {widget.requiresUniChat}</Badge>;
         case WidgetStatus.UPDATE_AVAILABLE:
             return (
-                <Badge className={className} variant="warning">
+                <Badge variant="warning">
                     Update {widget.installedVersion} <i className="fas fa-arrow-right" /> {widget.version}
                 </Badge>
             );
         case WidgetStatus.INSTALLED:
-            return (
-                <Badge className={className} variant="success">
-                    Installed {widget.installedVersion}
-                </Badge>
-            );
+            return <Badge variant="success">Installed {widget.installedVersion}</Badge>;
         default:
             return null;
     }

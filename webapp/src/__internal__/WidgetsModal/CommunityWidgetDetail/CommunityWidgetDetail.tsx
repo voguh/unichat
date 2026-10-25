@@ -83,7 +83,7 @@ export function CommunityWidgetDetail({
                 return <Button disabled>Install {widget.version}</Button>;
             case WidgetStatus.UPDATE_AVAILABLE:
                 return (
-                    <div className={styles.actionRow}>
+                    <div>
                         <IconButton aria-label="Open folder" onClick={() => onOpenFolder(widget)}>
                             <i className="fas fa-folder" />
                         </IconButton>
@@ -95,7 +95,7 @@ export function CommunityWidgetDetail({
             case WidgetStatus.INSTALLED:
                 return (
                     requireNonNull(installedVersion) && (
-                        <div className={styles.actionRow}>
+                        <div>
                             <IconButton aria-label="Open folder" onClick={() => onOpenFolder(widget)}>
                                 <i className="fas fa-folder" />
                             </IconButton>
@@ -151,8 +151,8 @@ export function CommunityWidgetDetail({
     }, [widget]);
 
     return (
-        <div className={styles.detail}>
-            <div className={styles.sidebar}>
+        <div className={styles.root}>
+            <div className="sidebar">
                 <img src={widget.previewUrl} />
                 {renderMainActions()}
                 {requireNonNull(homepageUrl) && (
@@ -167,14 +167,14 @@ export function CommunityWidgetDetail({
                 </Button>
             </div>
 
-            <div className={styles.main}>
-                <div className={styles.titleRow}>
+            <div className="main">
+                <div className="title">
                     <h2>{widget.name}</h2>
                     <CommunityWidgetBadge widget={widget} />
                     {formatWarnings(widget.warnings)}
                 </div>
 
-                <div className={styles.meta}>
+                <div className="meta">
                     <span>v{widget.version}</span>
                     <span>{widget.author}</span>
                     <span>{widget.license}</span>
@@ -196,23 +196,23 @@ export function CommunityWidgetDetail({
                     </Alert>
                 )}
 
-                <TabGroup className={styles.tabs}>
+                <TabGroup>
                     <TabList>
                         <Tab>Readme</Tab>
                         <Tab>Versions ({releases.length})</Tab>
                     </TabList>
-                    <TabPanels className={styles.tabContent}>
+                    <TabPanels>
                         <TabPanel>
                             <Markdown
                                 content={getDescription(detail)}
                                 relativeLinksBaseUrl={`${widget.repositoryUrl}/blob/HEAD/`}
                             />
                         </TabPanel>
-                        <TabPanel className={styles.releases}>
+                        <TabPanel className="releases">
                             {releases.map((release) => (
-                                <div key={release.id} className={styles.release}>
-                                    <div className={styles.releaseInfo}>
-                                        <div className={styles.releaseName}>
+                                <div key={release.id}>
+                                    <div>
+                                        <div>
                                             <strong>{release.name}</strong>
                                             {release.prerelease && <Badge variant="info">Prerelease</Badge>}
                                             {release.name === latestStable && (

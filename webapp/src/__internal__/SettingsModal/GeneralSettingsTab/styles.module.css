@@ -8,49 +8,54 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-.container {
+.root {
     @apply h-full flex flex-col;
-}
-
-.body {
-    @apply flex-1 min-h-0 overflow-y-auto p-4 flex flex-col items-center gap-2;
 
     > div {
-        @apply w-full;
+        &:global(.body) {
+            @apply flex-1 min-h-0 overflow-y-auto p-4 flex flex-col items-center gap-2;
 
-        &[data-tour="currency-target"] {
-            @apply flex flex-col gap-1;
+            > div {
+                @apply w-full;
 
-            > small {
-                > a {
-                    @apply text-red-300;
+                > div {
+                    &:global(.alert) {
+                        @apply border rounded;
+                        @apply text-stone-50;
+                        @apply mt-4 p-2 flex flex-nowrap gap-2;
+
+                        &[data-variant="primary"] {
+                            @apply bg-red-800/25 border-red-800;
+                        }
+
+                        &[data-variant="warning"] {
+                            @apply bg-yellow-500/25 border-yellow-500;
+                        }
+                    }
+
+                    &:global(.tour-buttons) {
+                        @apply mt-4 flex flex-wrap gap-2;
+
+                        > button {
+                            @apply flex-1;
+                        }
+                    }
+                }
+
+                &[data-tour="currency-target"] {
+                    @apply flex flex-col gap-1;
+
+                    > small {
+                        > a {
+                            @apply text-red-300;
+                        }
+                    }
                 }
             }
         }
+
+        &:global(.footer) {
+            @apply shrink-0 p-4 flex justify-end gap-2;
+        }
     }
-}
-
-.alert {
-    @apply border rounded text-stone-50;
-    @apply mt-4 p-2 flex flex-nowrap gap-2;
-
-    &[data-variant="primary"] {
-        @apply bg-red-800/25 border-red-800;
-    }
-
-    &[data-variant="warning"] {
-        @apply bg-yellow-500/25 border-yellow-500;
-    }
-}
-
-.tourButtons {
-    @apply mt-4 flex flex-wrap gap-2;
-
-    > button {
-        @apply flex-1;
-    }
-}
-
-.footer {
-    @apply shrink-0 p-4 flex justify-end gap-2;
 }

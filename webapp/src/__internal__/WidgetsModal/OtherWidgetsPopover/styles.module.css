@@ -8,42 +8,44 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-.content {
+.root {
     @apply w-80 max-h-96 overflow-y-auto flex flex-col gap-3;
-}
 
-.group {
-    @apply flex flex-col gap-1;
-}
+    > div {
+        @apply flex flex-col gap-1;
 
-.groupHeader {
-    @apply flex items-center justify-between gap-2;
-}
+        > div {
+            &:global(.header) {
+                @apply flex items-center justify-between gap-2;
 
-.groupLabel {
-    @apply text-stone-400 text-xs font-semibold uppercase tracking-wider;
-    @apply px-2;
-}
+                > span {
+                    @apply text-stone-400 text-xs font-semibold uppercase tracking-wider;
+                    @apply px-2;
+                }
+            }
 
-.widget {
-    @apply flex items-center gap-3 px-2 py-1.5;
-}
+            &:global(.widget) {
+                @apply flex items-center gap-3 px-2 py-1.5;
 
-.widgetIcon {
-    @apply bg-stone-700 rounded;
-    @apply text-stone-300;
-    @apply size-8 shrink-0 flex items-center justify-center;
-}
+                > span:global(.icon) {
+                    @apply bg-stone-700 rounded;
+                    @apply text-stone-300;
+                    @apply size-8 shrink-0 flex items-center justify-center;
+                }
 
-.widgetInfo {
-    @apply flex-1 min-w-0 flex flex-col;
+                > div {
+                    @apply flex-1 min-w-0 flex flex-col;
 
-    > strong {
-        @apply text-sm;
-        @apply truncate;
-    }
+                    > strong {
+                        @apply text-sm;
+                        @apply truncate;
+                    }
 
-    > small {
-        @apply text-stone-400 text-xs;
+                    > small {
+                        @apply text-stone-400 text-xs;
+                    }
+                }
+            }
+        }
     }
 }

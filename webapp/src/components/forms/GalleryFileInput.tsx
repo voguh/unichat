@@ -37,20 +37,24 @@ export function GalleryFileInput({
     const innerRef = useRef<HTMLInputElement>(null);
 
     function handleShowTabs(): GalleryTabs[] {
-        let _showTabs = Array.isArray(showTabs) ? showTabs : [];
-        if (_showTabs.length === 0) {
-            _showTabs = ["image", "video", "audio", "file"];
+        if (Array.isArray(showTabs) && showTabs.length > 0) {
+            return showTabs;
         }
 
-        return _showTabs;
+        return ["image", "video", "audio", "file"];
     }
 
     function handleClick(event: PReact.TargetedMouseEvent<HTMLInputElement>): void {
         try {
             const _showTabs = handleShowTabs();
-            let wrappedSelectedTab: GalleryTabs | null = innerRef.current?.value.startsWith("http") ? "custom" : null;
-            if (wrappedSelectedTab == null) {
-                wrappedSelectedTab = (_showTabs ?? [])[0] ?? "image";
+
+            let selectedItem: string | undefined;
+            let wrappedSelectedTab = _showTabs[0];
+            if (innerRef.current != null) {
+                selectedItem = innerRef.current.value;
+                if (selectedItem.startsWith("http")) {
+                    wrappedSelectedTab = "custom";
+                }
             }
 
             modalService.openModal({
@@ -61,7 +65,7 @@ export function GalleryFileInput({
                     <GalleryModal
                         showTabs={_showTabs}
                         startSelectedTab={wrappedSelectedTab}
-                        selectedItem={innerRef.current?.value}
+                        selectedItem={selectedItem}
                         onSelectItem={(url, context) => {
                             try {
                                 if (!isControlled) {

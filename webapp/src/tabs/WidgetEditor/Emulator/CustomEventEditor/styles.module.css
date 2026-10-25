@@ -13,15 +13,118 @@
     @apply h-screen grid grid-cols-2;
 
     grid-template-rows: minmax(0, 1fr) auto;
+
+    > div {
+        &:global(.form) {
+            @apply min-w-0 min-h-0 p-4 flex flex-col gap-3;
+            @apply overflow-y-auto;
+
+            > div {
+                &:global(.field) {
+                    @apply flex flex-col gap-1;
+
+                    > span {
+                        @apply text-stone-300 text-sm font-medium;
+                    }
+                }
+
+                &:global(.author) {
+                    @apply flex flex-col gap-3;
+
+                    > div:global(.chip) {
+                        @apply bg-stone-800 rounded;
+                        @apply flex items-center gap-2 p-2;
+
+                        > span {
+                            @apply bg-pink-600 rounded;
+                            @apply text-stone-50 text-xs font-bold;
+                            @apply size-7 shrink-0 flex items-center justify-center;
+                        }
+
+                        > div {
+                            @apply text-stone-400 text-xs;
+                            @apply flex-1 min-w-0 flex flex-col;
+
+                            > strong {
+                                @apply text-stone-50 text-sm;
+                                @apply truncate;
+                            }
+                        }
+                    }
+                }
+
+                &:global(.section-title) {
+                    @apply text-stone-400 text-xs font-semibold uppercase tracking-wider;
+                }
+
+                &:global(.more) {
+                    @apply border-t border-dashed border-stone-700;
+                    @apply pt-3;
+                }
+            }
+
+            > button {
+                @apply text-stone-400 text-sm;
+                @apply self-start cursor-pointer;
+
+                &:hover {
+                    @apply text-stone-50;
+                }
+            }
+        }
+
+        &:global(.payload) {
+            @apply min-w-0 min-h-0 p-4 flex flex-col gap-3;
+
+            > div:global(.header) {
+                @apply flex items-center justify-between gap-2;
+
+                > span {
+                    @apply text-stone-400 text-xs font-semibold uppercase tracking-wider;
+                }
+            }
+        }
+
+        &:global(.footer) {
+            @apply border-t border-stone-800;
+            @apply col-span-2 p-4 flex justify-between gap-2;
+        }
+    }
 }
 
-.form,
-.payload {
-    @apply min-w-0 min-h-0 p-4 flex flex-col gap-3;
-}
+.grid {
+    @apply grid grid-cols-2 gap-3;
 
-.form {
-    @apply overflow-y-auto;
+    > div {
+        &:global(.wide) {
+            @apply col-span-2;
+        }
+
+        &:global(.hint) {
+            @apply text-stone-400 text-xs;
+        }
+
+        &:global(.lock-hint) {
+            @apply text-amber-400 text-xs;
+        }
+
+        &:global(.message) {
+            > div {
+                &:global(.header) {
+                    @apply text-stone-300 text-sm font-medium;
+                    @apply mb-1 flex items-center justify-between gap-2;
+
+                    > div[data-part~="SegmentedControl"] {
+                        @apply w-48;
+                    }
+                }
+
+                &:global(.hint) {
+                    @apply text-stone-400 text-xs;
+                }
+            }
+        }
+    }
 }
 
 .segmented {
@@ -30,89 +133,4 @@
     > label {
         @apply flex-1 justify-center;
     }
-}
-
-.payloadHeader {
-    @apply flex items-center justify-between gap-2;
-}
-
-.field {
-    @apply flex flex-col gap-1;
-}
-
-.label {
-    @apply text-stone-300 text-sm font-medium;
-}
-
-.grid {
-    @apply grid grid-cols-2 gap-3;
-}
-
-.wide {
-    @apply col-span-2;
-}
-
-.author {
-    @apply flex flex-col gap-3;
-}
-
-.authorChip {
-    @apply bg-stone-800 rounded;
-    @apply flex items-center gap-2 p-2;
-}
-
-.avatar {
-    @apply bg-pink-600 rounded;
-    @apply text-stone-50 text-xs font-bold;
-    @apply size-7 shrink-0 flex items-center justify-center;
-}
-
-.authorMeta {
-    @apply text-stone-400 text-xs;
-    @apply flex-1 min-w-0 flex flex-col;
-
-    > strong {
-        @apply text-stone-50 text-sm;
-        @apply truncate;
-    }
-}
-
-.sectionTitle {
-    @apply text-stone-400 text-xs font-semibold uppercase tracking-wider;
-}
-
-.moreToggle {
-    @apply text-stone-400 text-sm;
-    @apply self-start cursor-pointer;
-
-    &:hover {
-        @apply text-stone-50;
-    }
-}
-
-.more {
-    @apply border-t border-dashed border-stone-700;
-    @apply pt-3;
-}
-
-.messageHeader {
-    @apply text-stone-300 text-sm font-medium;
-    @apply mb-1 flex items-center justify-between gap-2;
-}
-
-.messageMode {
-    @apply w-48;
-}
-
-.hint {
-    @apply text-stone-400 text-xs;
-}
-
-.lockHint {
-    @apply text-amber-400 text-xs;
-}
-
-.footer {
-    @apply border-t border-stone-800;
-    @apply col-span-2 p-4 flex justify-between gap-2;
 }

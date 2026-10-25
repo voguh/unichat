@@ -80,7 +80,7 @@ function parseLines(stack: string | undefined): StackLine[] {
     const lines: StackLine[] = [];
 
     if (__PLATFORM__ === "windows") {
-        // Assuming v8's stack trace format
+        // V8 stack trace format.
 
         for (const line of (stack || "").split("\n")) {
             const match = line.match(/^\s*at\s+(?:(.+?)\s+\()?(.+?):(\d+):(\d+)\)?$/);
@@ -96,7 +96,7 @@ function parseLines(stack: string | undefined): StackLine[] {
             });
         }
     } else {
-        // Assuming JavaScriptCore's stack trace format
+        // JavaScriptCore stack trace format.
 
         for (const line of (stack || "").split("\n")) {
             const match = line.match(/^\s*(?:(.*?)@)?(.+?):(\d+):(\d+)\s*$/);
@@ -118,10 +118,8 @@ function parseLines(stack: string | undefined): StackLine[] {
 
 export class StackElements {
     public static async getStackTraceElement(callerIndex: number): Promise<StackLine> {
-        const adjustedIndex = callerIndex + 1; // Skip the current function's stack frame
-
         const lines = parseLines(new Error().stack);
-        const element = lines[adjustedIndex];
+        const element = lines[callerIndex + 1];
 
         if (!__IS_DEV__) {
             const mapped = await mapCallSite(element);
@@ -136,5 +134,11 @@ export class StackElements {
         }
 
         return element;
+    }
+
+    /* ====================================================================== */
+
+    private constructor() {
+        throw new Error();
     }
 }

@@ -9,10 +9,6 @@
  ******************************************************************************/
 
 export class Strings {
-    constructor() {
-        throw new Error("Strings is a static class and cannot be instantiated.");
-    }
-
     /**
      * Validates if the value is null, undefined, or an empty string.
      *
@@ -33,7 +29,7 @@ export class Strings {
      * @param {string | null | undefined} str String to validate.
      * @param {string} [message] Optional error message.
      * @returns {string} The validated string.
-     * @throws {TypeError} If the string is null or undefined.
+     * @throws {TypeError} If the string is null, undefined, empty or whitespace-only.
      */
     public static requireNonNull(str: string | null | undefined, message?: string): string {
         if (Strings.isNullOrEmpty(str)) {
@@ -70,5 +66,11 @@ export class Strings {
         }
 
         return normalizedPath;
+    }
+
+    /* ====================================================================== */
+
+    private constructor() {
+        throw new Error();
     }
 }

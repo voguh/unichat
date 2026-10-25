@@ -39,8 +39,8 @@ export function ThirdPartyLicenses(): PReact.ComponentChildren {
     }, []);
 
     return (
-        <div>
-            <table className={styles.table}>
+        <div className={styles.root}>
+            <table>
                 <thead>
                     <tr>
                         <th>Package</th>

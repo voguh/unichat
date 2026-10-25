@@ -129,10 +129,10 @@ export function GalleyCustomDisplay(props: Props): PReact.ComponentChildren {
     }, []);
 
     return (
-        <div className={styles.container}>
-            <div className={styles.mediaWrapper}>{renderPreview()}</div>
+        <div className={styles.root}>
+            <div className="media">{renderPreview()}</div>
 
-            <div className={styles.inputWrapper}>
+            <div className="input">
                 <TextInput ref={inputRef} label="Media URL" placeholder="Enter media URL" defaultValue={tempURL} />
                 <Button onClick={handleApply}>
                     <i className="fas fa-check" />

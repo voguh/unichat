@@ -8,52 +8,56 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-.container {
+.root {
     @apply relative h-full flex flex-col;
-}
 
-.header {
-    @apply w-full p-2 flex justify-between items-center shrink-0;
+    > div {
+        &:global(.header) {
+            @apply w-full p-2 flex justify-between items-center shrink-0;
 
-    > span {
-        @apply text-lg font-bold;
+            > span {
+                @apply text-lg font-bold;
+            }
+
+            > div {
+                @apply flex gap-2;
+
+                > button[data-size] {
+                    @apply px-2 min-w-8 flex justify-center items-center;
+                }
+            }
+        }
+
+        &:global(.content) {
+            @apply w-full flex-1 min-h-0 p-2 flex flex-col overflow-y-auto;
+
+            > div {
+                &:global(.empty) {
+                    @apply text-stone-50/50;
+                    @apply w-full h-full flex flex-col justify-center items-center gap-2;
+                }
+
+                &:global(.accordion) {
+                    @apply gap-0;
+
+                    > div[data-part~="Disclosure"] {
+                        @apply rounded-none shrink-0;
+
+                        &:first-child {
+                            @apply rounded-t;
+                        }
+
+                        &:last-child {
+                            @apply rounded-b;
+                        }
+
+                        > div[data-part~="DisclosurePanel"] {
+                            @apply bg-stone-700/25;
+                            @apply p-2 flex flex-col gap-4;
+                        }
+                    }
+                }
+            }
+        }
     }
-}
-
-.actions {
-    @apply flex gap-2;
-
-    > button[data-size] {
-        @apply px-2 min-w-8 flex justify-center items-center;
-    }
-}
-
-.content {
-    @apply w-full flex-1 min-h-0 p-2 flex flex-col overflow-y-auto;
-}
-
-.empty {
-    @apply text-stone-50/50;
-    @apply w-full h-full flex flex-col justify-center items-center gap-2;
-}
-
-.accordion {
-    @apply gap-0;
-}
-
-.accordionItem {
-    @apply rounded-none shrink-0;
-
-    &:first-child {
-        @apply rounded-t;
-    }
-
-    &:last-child {
-        @apply rounded-b;
-    }
-}
-
-.accordionContent {
-    @apply bg-stone-700/25;
-    @apply p-2 flex flex-col gap-4;
 }

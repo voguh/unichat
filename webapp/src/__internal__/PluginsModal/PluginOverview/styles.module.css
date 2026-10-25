@@ -8,85 +8,92 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-.container {
+.root {
     @apply relative h-full grid gap-2;
 
     grid-template-rows: --spacing(52) minmax(0, 1fr);
-}
 
-.details {
-    @apply grid gap-2;
+    > div {
+        @apply grid gap-2;
 
-    grid-row: 1;
-    grid-template-columns: --spacing(52) minmax(0, 1fr);
-}
+        grid-row: 1;
+        grid-template-columns: --spacing(52) minmax(0, 1fr);
 
-.icon {
-    @apply size-52 flex justify-center items-center;
+        > div {
+            &:global(.icon) {
+                @apply size-52 flex justify-center items-center;
 
-    > img {
-        @apply rounded;
-        @apply w-full h-full object-contain;
+                > img {
+                    @apply rounded;
+                    @apply w-full h-full object-contain;
+                }
+            }
+
+            &:global(.meta) {
+                @apply grid grid-cols-12 gap-2;
+
+                grid-template-rows: --spacing(8) --spacing(8) minmax(0, 1fr);
+                grid-template-areas:
+                    "PN PN PN PN PN PN PN PV PV PV PS PS"
+                    "PA PA PA PL PL PH PH PH PH PH PH PH"
+                    "PD PD PD PD PD PD PD PD PD PD PD PD";
+
+                > div {
+                    > div {
+                        &:global(.label) {
+                            @apply text-xs opacity-75;
+                        }
+
+                        &:global(.value) {
+                            @apply overflow-hidden text-ellipsis whitespace-nowrap line-clamp-1;
+                        }
+                    }
+
+                    &:global(.name) {
+                        grid-area: PN;
+                    }
+
+                    &:global(.version) {
+                        grid-area: PV;
+                    }
+
+                    &:global(.status) {
+                        grid-area: PS;
+                    }
+
+                    &:global(.authors) {
+                        grid-area: PA;
+                    }
+
+                    &:global(.license) {
+                        grid-area: PL;
+                    }
+
+                    &:global(.homepage) {
+                        grid-area: PH;
+
+                        > div:global(.value) {
+                            @apply text-blue-600 cursor-pointer;
+                        }
+                    }
+
+                    &:global(.description) {
+                        @apply flex flex-col min-h-0;
+
+                        grid-area: PD;
+
+                        > div:global(.value) {
+                            @apply whitespace-normal line-clamp-none;
+                            @apply flex-1 min-h-0 overflow-y-auto;
+                        }
+                    }
+                }
+            }
+        }
     }
-}
 
-.meta {
-    @apply grid grid-cols-12 gap-2;
-
-    grid-template-rows: --spacing(8) --spacing(8) minmax(0, 1fr);
-    grid-template-areas:
-        "PN PN PN PN PN PN PN PV PV PV PS PS"
-        "PA PA PA PL PL PH PH PH PH PH PH PH"
-        "PD PD PD PD PD PD PD PD PD PD PD PD";
-}
-
-.label {
-    @apply text-xs opacity-75;
-}
-
-.value {
-    @apply overflow-hidden text-ellipsis whitespace-nowrap line-clamp-1;
-}
-
-.name {
-    grid-area: PN;
-}
-
-.version {
-    grid-area: PV;
-}
-
-.status {
-    grid-area: PS;
-}
-
-.authors {
-    grid-area: PA;
-}
-
-.license {
-    grid-area: PL;
-}
-
-.homepage {
-    grid-area: PH;
-
-    > .value {
-        @apply text-blue-600 cursor-pointer;
+    > pre {
+        @apply bg-stone-950 rounded;
+        @apply p-2 mb-0;
     }
-}
-
-.description {
-    @apply flex flex-col min-h-0;
-
-    grid-area: PD;
-
-    > .value {
-        @apply flex-1 min-h-0 overflow-y-auto whitespace-normal line-clamp-none;
-    }
-}
-
-.messages {
-    @apply bg-stone-950 rounded;
-    @apply p-2 mb-0;
 }

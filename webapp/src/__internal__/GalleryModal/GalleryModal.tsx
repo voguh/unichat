@@ -69,7 +69,7 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
             tabs.push({
                 value: "image",
                 label: "Images",
-                content: <div className={styles.tabContainer}>{printGalleryItems("image")}</div>
+                content: <div>{printGalleryItems("image")}</div>
             });
         }
 
@@ -77,7 +77,7 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
             tabs.push({
                 value: "video",
                 label: "Videos",
-                content: <div className={styles.tabContainer}>{printGalleryItems("video")}</div>
+                content: <div>{printGalleryItems("video")}</div>
             });
         }
 
@@ -85,14 +85,14 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
             tabs.push({
                 value: "audio",
                 label: "Audios",
-                content: <div className={styles.tabContainer}>{printGalleryItems("audio")}</div>
+                content: <div>{printGalleryItems("audio")}</div>
             });
         }
         if (showTabs.includes("file")) {
             tabs.push({
                 value: "file",
                 label: "Others",
-                content: <div className={styles.tabContainer}>{printGalleryItems("file")}</div>
+                content: <div>{printGalleryItems("file")}</div>
             });
         }
 
@@ -101,7 +101,7 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
                 value: "custom",
                 label: "Custom",
                 content: (
-                    <div className={styles.tabContainer}>
+                    <div>
                         <GalleyCustomDisplay selectedItem={selectedItem} onSelectItem={onSelectItem} />
                     </div>
                 )
@@ -138,7 +138,7 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
     return (
         <>
             <Loading show={!!sharedStore.uploading} label="Uploading" />
-            <TabGroup defaultIndex={startIndex}>
+            <TabGroup className={styles.root} defaultIndex={startIndex}>
                 <TabList>
                     {tabs.map((tab) => (
                         <Tab key={tab.value}>{tab.label}</Tab>

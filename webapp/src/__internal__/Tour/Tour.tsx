@@ -34,10 +34,7 @@ export type TourBuilder = (container: HTMLDivElement) => Promise<(() => void) | 
 
 interface TourStep {
     id: string;
-    /**
-     * If set, this step will only run if the step with the step id informed was
-     * previously ran in another tour session.
-     */
+    /** Runs only if this step id ran in a previous tour session. */
     replaces?: string;
     builder: TourBuilder;
 }
@@ -304,9 +301,9 @@ export function Tour(_props: Props): PReact.ComponentChildren {
     }, []);
 
     return (
-        <div style={{ visibility: currentStep === -1 ? "hidden" : "visible" }}>
-            <div className={styles.stage} ref={svgRef}></div>
-            <div className={styles.actions}>
+        <div className={styles.root} data-hidden={currentStep === -1}>
+            <div className="stage" ref={svgRef}></div>
+            <div className="actions">
                 <Button disabled={currentStep === 0} onClick={previousStage}>
                     <i className="fas fa-chevron-left" />
                     Previous
@@ -319,12 +316,12 @@ export function Tour(_props: Props): PReact.ComponentChildren {
             </div>
 
             {stepsToRun.length === 1 || currentStep === stepsToRun.length - 1 ? (
-                <Button variant="success" onClick={endTour} className={styles.skip}>
+                <Button variant="success" onClick={endTour}>
                     <i className="fas fa-check" />
                     End Tour
                 </Button>
             ) : (
-                <Button onClick={endTour} className={styles.skip}>
+                <Button onClick={endTour}>
                     <i className="fas fa-times" />
                     Skip Tour
                 </Button>

@@ -10,7 +10,8 @@
 
 import type { Side } from "@floating-ui/dom";
 
-import type { TourBuilder } from "../Tour";
+import type { TourBuilder } from "unichat/__internal__/Tour";
+
 import { stageBuilder } from "./stageBuilder";
 
 export function dashboardStageBuilder(

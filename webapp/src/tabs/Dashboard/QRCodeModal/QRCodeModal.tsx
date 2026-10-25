@@ -57,18 +57,17 @@ export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
 
     if (!systemHosts || systemHosts.length === 0) {
         return (
-            <div className={styles.container}>
-                <div className={styles.label}>No available network interfaces found to generate QR code.</div>
+            <div className={styles.root}>
+                <div className="label">No available network interfaces found to generate QR code.</div>
             </div>
         );
     }
 
     return (
-        <div className={styles.container}>
+        <div className={styles.root}>
             {systemHosts.length > 1 && (
                 <Select
                     label="Select Network Interface"
-                    groupProps={{ className: styles.fullWidth }}
                     options={systemHosts}
                     value={selectedHost}
                     onChange={(event) => onSelectHost(event.currentTarget.value)}
@@ -76,9 +75,9 @@ export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
             )}
             {selectedHostQrCodeUrl && (
                 <>
-                    <div className={styles.label}>Scan this QR code with your device to open</div>
-                    <QrCode value={selectedHostQrCodeUrl} alt="QR Code" className={styles.qrcode} />
-                    <Clipboard value={selectedHostQrCodeUrl} className={styles.fullWidth} />
+                    <div className="label">Scan this QR code with your device to open</div>
+                    <QrCode value={selectedHostQrCodeUrl} alt="QR Code" />
+                    <Clipboard value={selectedHostQrCodeUrl} />
                 </>
             )}
         </div>

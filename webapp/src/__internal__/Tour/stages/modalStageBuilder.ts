@@ -10,9 +10,8 @@
 
 import type { ComponentChildren } from "preact";
 
+import type { TourBuilder } from "unichat/__internal__/Tour";
 import { modalService } from "unichat/services/modalService";
-
-import type { TourBuilder } from "../Tour";
 
 export function modalStageBuilder(title: string, subTitle: ComponentChildren): TourBuilder {
     return async (container) => {

@@ -25,13 +25,17 @@ interface Props {
 
 export function ReleaseNotes({ release }: Props): PReact.ComponentChildren {
     if (release == null) {
-        return <div className={styles.empty}>No stable release available.</div>;
+        return (
+            <div className={styles.root} data-empty="true">
+                No stable release available.
+            </div>
+        );
     }
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <div className={styles.name}>
+        <div className={styles.root}>
+            <div className="header">
+                <div className="name">
                     {release.name}
                     <Badge variant={release.prerelease ? "warning" : "success"}>
                         {release.prerelease ? "Unstable" : "Stable"}

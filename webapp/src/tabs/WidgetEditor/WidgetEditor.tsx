@@ -83,10 +83,9 @@ export function WidgetEditor(): PReact.ComponentChildren {
     }
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
+        <div className={styles.root}>
+            <div className="header">
                 <Select
-                    className={styles.widgetSelector}
                     value={selectedWidget}
                     options={toWidgetOptionGroup(widgets.values())}
                     onChange={(event) => setSelectedWidget(event.currentTarget.value)}
@@ -99,8 +98,8 @@ export function WidgetEditor(): PReact.ComponentChildren {
                 </Tooltip>
             </div>
 
-            <div className={styles.content}>
-                <div className={styles.fields}>
+            <div className="content">
+                <div className="fields">
                     <Fields
                         handleApply={handleApply}
                         handleReset={handleReset}
@@ -108,7 +107,7 @@ export function WidgetEditor(): PReact.ComponentChildren {
                         widgets={widgets}
                     />
                 </div>
-                <div className={styles.preview}>
+                <div className="preview">
                     <iframe
                         ref={iframeRef}
                         src={`${WIDGET_URL_PREFIX}/${selectedWidget}`}

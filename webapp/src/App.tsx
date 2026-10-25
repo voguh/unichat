@@ -55,26 +55,26 @@ const tabs: Record<string, TabOptions> = {
 };
 
 function TabLeftSection({ selectedTab }: { selectedTab: keyof typeof tabs }): PReact.ComponentChildren {
-    const leftSection = tabs[selectedTab]?.leftSection;
-    if (leftSection == null) {
+    const tab = tabs[selectedTab];
+    if (tab == null || tab.leftSection == null) {
         return null;
     }
 
     return (
         <div className="sidebar__left-section">
             <div className="sidebar__divider" />
-            {leftSection}
+            {tab.leftSection}
         </div>
     );
 }
 
 function TabContent({ selectedTab }: { selectedTab: keyof typeof tabs }): PReact.ComponentChildren {
-    const content = tabs[selectedTab]?.component;
-    if (content == null) {
+    const tab = tabs[selectedTab];
+    if (tab == null) {
         return null;
     }
 
-    return content;
+    return tab.component;
 }
 
 const _logger = LoggerFactory.getLogger("App");
@@ -114,7 +114,7 @@ export function App(): PReact.ComponentChildren {
                 });
             }
 
-            /* ====================================================================================== */
+            /* ============================================================== */
 
             const releaseInfo = await commandService.getReleases();
             if (releaseInfo.hasUpdate) {
@@ -124,7 +124,7 @@ export function App(): PReact.ComponentChildren {
 
         init();
 
-        /* ====================================================================================== */
+        /* ================================================================== */
 
         const unListenerPromise = eventService.listen<IPCNotificationEvent>("unichat://notification", ({ payload }) => {
             const title = payload.title || "Notification";

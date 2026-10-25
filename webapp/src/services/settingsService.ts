@@ -17,37 +17,36 @@ export enum ScraperEventsLogLevel {
 }
 
 export enum UniChatSettingsKeys {
-    /* General settings */
+    /* ==== General settings ================================================ */
     DEFAULT_PREVIEW_WIDGET = "default-preview-widget",
     OPEN_TO_LAN = "open-to-lan",
     CURRENCY_TARGET = "currency-target",
 
-    /* Developers settings */
+    /* ==== Developers settings ============================================= */
     CREATE_WEBVIEW_HIDDEN = "create-webview-hidden",
     LOG_SCRAPER_EVENTS = "log-scraper-events",
     OPEN_SCRAPER_WEBVIEW = "open-scraper-webview",
 
-    /* Tour steps */
+    /* ==== Tour steps ====================================================== */
     PREVIOUS_TOUR_STEPS = "previous-tour-steps",
     CURRENT_TOUR_STEPS = "current-tour-steps"
 }
 
 export interface UniChatSettings {
-    /* General settings */
+    /* ==== General settings ================================================ */
     [UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET]: string;
     [UniChatSettingsKeys.OPEN_TO_LAN]: boolean;
     [UniChatSettingsKeys.CURRENCY_TARGET]: string;
 
-    /* Developers settings */
+    /* ==== Developers settings ============================================= */
     [UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN]: boolean;
     [UniChatSettingsKeys.LOG_SCRAPER_EVENTS]: ScraperEventsLogLevel;
     [UniChatSettingsKeys.OPEN_SCRAPER_WEBVIEW]: boolean;
 
-    /* Tour steps */
+    /* ==== Tour steps ====================================================== */
     [UniChatSettingsKeys.CURRENT_TOUR_STEPS]: string[];
     [UniChatSettingsKeys.PREVIOUS_TOUR_STEPS]: string[];
 
-    /* Allow for future settings without breaking the type */
     [key: string]: any;
 }
 

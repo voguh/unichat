@@ -8,32 +8,34 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-.container {
+.root {
     @apply bg-stone-950 rounded;
     @apply w-full p-2 flex flex-col gap-2;
-}
 
-.name {
-    @apply text-sm font-medium text-center text-ellipsis;
-    @apply overflow-hidden whitespace-nowrap;
-}
+    > div {
+        &:global(.name) {
+            @apply text-sm font-medium text-center text-ellipsis whitespace-nowrap;
+            @apply overflow-hidden;
+        }
 
-.preview {
-    @apply bg-gray-200 rounded;
-    @apply w-full aspect-video flex justify-center items-center overflow-hidden;
+        &:global(.preview) {
+            @apply bg-gray-200 rounded;
+            @apply w-full aspect-video flex justify-center items-center overflow-hidden;
 
-    > img,
-    > video {
-        @apply w-full h-full object-contain;
-    }
+            > img,
+            > video {
+                @apply w-full h-full object-contain;
+            }
 
-    > audio {
-        @apply w-full;
-    }
-}
+            > audio {
+                @apply w-full;
+            }
+        }
 
-.footer {
-    > button {
-        @apply w-full;
+        &:global(.footer) {
+            > button {
+                @apply w-full;
+            }
+        }
     }
 }

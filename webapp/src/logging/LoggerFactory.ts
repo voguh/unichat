@@ -11,11 +11,13 @@
 import { Logger } from "./Logger";
 
 export class LoggerFactory {
-    constructor() {
-        throw new Error("LoggerFactory is a static class and cannot be instantiated.");
-    }
-
     public static getLogger(name: string): Logger {
         return new Logger(name);
+    }
+
+    /* ====================================================================== */
+
+    private constructor() {
+        throw new Error();
     }
 }

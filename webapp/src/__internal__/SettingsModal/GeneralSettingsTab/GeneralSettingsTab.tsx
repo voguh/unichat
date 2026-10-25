@@ -151,8 +151,8 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
     }, []);
 
     return (
-        <div className={styles.container} key={getFormKey()}>
-            <div className={styles.body}>
+        <div className={styles.root} key={getFormKey()}>
+            <div className="body">
                 <Select
                     defaultValue={initialSettings[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET] ?? ""}
                     ref={selectRef}
@@ -187,7 +187,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
                     />
 
                     {requiresRestart && (
-                        <div className={styles.alert} data-variant="primary">
+                        <div className="alert" data-variant="primary">
                             <div>
                                 <i className="fas fa-info-circle" />
                             </div>
@@ -198,7 +198,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
                         </div>
                     )}
                     {openToLanRef.current != null && openToLanRef.current.checked && (
-                        <div className={styles.alert} data-variant="warning">
+                        <div className="alert" data-variant="warning">
                             <div>
                                 <i className="fas fa-info-circle" />
                             </div>
@@ -213,7 +213,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
 
                 <div>
                     Tour
-                    <div className={styles.tourButtons}>
+                    <div className="tour-buttons">
                         <Button variant="default" onClick={() => dispatchTour("full")}>
                             <i className="fas fa-compass" />
                             View Tour
@@ -226,7 +226,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
                 </div>
             </div>
 
-            <div className={styles.footer}>
+            <div className="footer">
                 <Button variant="success" disabled={!dirty} onClick={applySettings}>
                     Apply
                 </Button>

@@ -41,12 +41,12 @@ export function CheckUpdatesSettingsTab(_props: Props): PReact.ComponentChildren
     }
 
     return (
-        <TabGroup className={styles.tabs}>
+        <TabGroup className={styles.root}>
             <TabList>
                 <Tab>Latest Stable</Tab>
                 <Tab>Latest Unstable</Tab>
             </TabList>
-            <TabPanels className={styles.tabContent}>
+            <TabPanels>
                 <TabPanel>
                     <ReleaseNotes release={latestStable} />
                 </TabPanel>

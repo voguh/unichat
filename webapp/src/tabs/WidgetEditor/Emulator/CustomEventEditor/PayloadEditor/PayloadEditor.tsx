@@ -22,12 +22,12 @@ function highlight(source: string): PReact.ComponentChildren[] {
     for (const match of source.matchAll(TOKEN_REGEX)) {
         nodes.push(source.slice(last, match.index));
         if (match[1] != null) {
-            nodes.push(<span className={match[2] != null ? styles.key : styles.string}>{match[1]}</span>);
+            nodes.push(<span className={match[2] != null ? "key" : "string"}>{match[1]}</span>);
             nodes.push(match[2] ?? "");
         } else if (match[3] != null) {
-            nodes.push(<span className={styles.number}>{match[3]}</span>);
+            nodes.push(<span className="number">{match[3]}</span>);
         } else {
-            nodes.push(<span className={styles.literal}>{match[4]}</span>);
+            nodes.push(<span className="literal">{match[4]}</span>);
         }
 
         last = match.index + match[0].length;
@@ -63,8 +63,8 @@ export function PayloadEditor({ value, invalid, onChange }: Props): PReact.Compo
     }
 
     return (
-        <div className={styles.root} data-invalid={invalid ? "true" : "false"}>
-            <pre ref={highlightRef} aria-hidden="true" className={styles.highlight}>
+        <div className={styles.root} data-invalid={invalid}>
+            <pre ref={highlightRef} aria-hidden="true">
                 {highlight(value)}
             </pre>
             <textarea
@@ -74,7 +74,6 @@ export function PayloadEditor({ value, invalid, onChange }: Props): PReact.Compo
                 onInput={(event) => onChange(event.currentTarget.value)}
                 onScroll={syncScroll}
                 onKeyDown={handleKeyDown}
-                className={styles.input}
             />
         </div>
     );

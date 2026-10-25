@@ -119,8 +119,8 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
     }, []);
 
     return (
-        <div className={styles.container} key={Object.keys(initialSettings).length === 0 ? "loading" : "loaded"}>
-            <div className={styles.body}>
+        <div className={styles.root} key={Object.keys(initialSettings).length === 0 ? "loading" : "loaded"}>
+            <div className="body">
                 <div>
                     <Switch
                         defaultChecked={initialSettings[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN] ?? false}
@@ -130,7 +130,7 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
                     />
 
                     {requiresRestart && (
-                        <div className={styles.alert}>
+                        <div className="alert">
                             <div>
                                 <i className="fas fa-info-circle" />
                             </div>
@@ -169,7 +169,6 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
                     }
                 >
                     <SegmentedControl
-                        className={styles.logLevels}
                         value={logEventsRef}
                         disabled={__IS_DEV__}
                         onChange={(event) => changeLogEvents(event.currentTarget.value as LogLevel)}
@@ -182,7 +181,7 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
                 </FormGroup>
             </div>
 
-            <div className={styles.footer}>
+            <div className="footer">
                 <Button variant="success" disabled={!dirty} onClick={applySettings}>
                     Apply
                 </Button>

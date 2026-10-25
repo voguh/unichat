@@ -37,8 +37,8 @@ importers:
         specifier: 2.5.0
         version: 2.5.0
       '@voguh/unichat-ui':
-        specifier: 0.4.0
-        version: 0.4.0(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))(preact@10.29.8)
+        specifier: 0.4.1
+        version: 0.4.1(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))(preact@10.29.8)
       mitt:
         specifier: 3.0.1
         version: 3.0.1
@@ -775,8 +775,8 @@ packages:
   '@voguh/unichat-api@file:../unichat-api':
     resolution: {directory: ../unichat-api, type: directory}
 
-  '@voguh/unichat-ui@0.4.0':
-    resolution: {integrity: sha512-eyp2xrGzxuJI3XaXndSQPS1S0D7fruiCaO4R5gXOnWJ02IG55D90x88UJSHf3dPWMeDNqTkNSfG2qM2KGXfP4A==}
+  '@voguh/unichat-ui@0.4.1':
+    resolution: {integrity: sha512-ySdmD8V3SHdf8+BJqg5C/l1BZNl1e9glA7QP9ja9xyXZceDpmjz6w2ZJQL18puXSMj4spLWSe4asuOcc3Zji3w==}
     peerDependencies:
       preact: '>=10 <11'
 
@@ -1967,7 +1967,7 @@ snapshots:
     dependencies:
       '@types/jquery': 3.5.32
 
-  '@voguh/unichat-ui@0.4.0(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))(preact@10.29.8)':
+  '@voguh/unichat-ui@0.4.1(@preact/compat@18.3.2(preact@10.29.8))(@preact/compat@18.3.2(preact@10.29.8))(preact@10.29.8)':
     dependencies:
       '@ctrl/tinycolor': 4.2.1
       '@floating-ui/dom': 1.8.0

@@ -8,31 +8,36 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-.container {
+.root {
     @apply h-full flex flex-col;
-}
-
-.body {
-    @apply flex-1 min-h-0 overflow-y-auto p-4 flex flex-col items-center gap-2;
 
     > div {
-        @apply w-full;
+        &:global(.body) {
+            @apply flex-1 min-h-0 overflow-y-auto p-4 flex flex-col items-center gap-2;
+
+            > div {
+                @apply w-full;
+
+                > div {
+                    &:global(.alert) {
+                        @apply bg-red-800/25 border border-red-800 rounded;
+                        @apply text-stone-50;
+                        @apply mt-4 p-2 flex flex-nowrap gap-2;
+                    }
+
+                    &[data-part~="SegmentedControl"] {
+                        @apply w-full mt-4;
+
+                        > label {
+                            @apply flex-1 justify-center;
+                        }
+                    }
+                }
+            }
+        }
+
+        &:global(.footer) {
+            @apply shrink-0 p-4 flex justify-end gap-2;
+        }
     }
-}
-
-.alert {
-    @apply bg-red-800/25 border border-red-800 rounded text-stone-50;
-    @apply mt-4 p-2 flex flex-nowrap gap-2;
-}
-
-.logLevels {
-    @apply w-full mt-4;
-
-    > label {
-        @apply flex-1 justify-center;
-    }
-}
-
-.footer {
-    @apply shrink-0 p-4 flex justify-end gap-2;
 }

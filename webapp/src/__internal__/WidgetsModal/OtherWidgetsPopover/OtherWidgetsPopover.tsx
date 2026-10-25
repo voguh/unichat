@@ -59,11 +59,11 @@ export function OtherWidgetsPopover({ communityWidgetNames }: Props): PReact.Com
         const local = isUserWidget(widget);
 
         return (
-            <div key={widget.restPath} className={styles.widget}>
-                <span className={styles.widgetIcon}>
+            <div key={widget.restPath} className="widget">
+                <span className="icon">
                     <i className="fas fa-window-maximize" />
                 </span>
-                <div className={styles.widgetInfo}>
+                <div>
                     <strong>{widget.restPath}</strong>
                     <small>{renderSubtitle(widget)}</small>
                 </div>
@@ -84,11 +84,11 @@ export function OtherWidgetsPopover({ communityWidgetNames }: Props): PReact.Com
                 <i className="fas fa-cubes" />
                 Other widgets ({count})
             </PopoverButton>
-            <PopoverPanel anchor="bottom end" className={styles.content}>
+            <PopoverPanel anchor="bottom end" className={styles.root}>
                 {groups.map((group) => (
-                    <div key={group.label} className={styles.group}>
-                        <div className={styles.groupHeader}>
-                            <span className={styles.groupLabel}>{group.label}</span>
+                    <div key={group.label}>
+                        <div className="header">
+                            <span>{group.label}</span>
                             {group.rightContent}
                         </div>
                         {group.items.map(renderWidget)}

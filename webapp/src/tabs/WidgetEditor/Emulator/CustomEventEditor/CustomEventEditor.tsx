@@ -216,11 +216,11 @@ export function CustomEventEditor(): PReact.ComponentChildren {
 
     function messageField(label: string): PReact.ComponentChildren {
         return (
-            <div className={styles.wide}>
-                <div className={styles.messageHeader}>
+            <div className="wide message">
+                <div className="header">
                     <span>{label}</span>
                     <SegmentedControl
-                        className={clsx(styles.segmented, styles.messageMode)}
+                        className={styles.segmented}
                         value={form.messageMode}
                         onChange={(event) => update({ messageMode: toMessageMode(event.currentTarget.value) })}
                         items={[
@@ -238,7 +238,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                         onChange={(event) => update({ messageText: event.currentTarget.value })}
                     />
                 ) : (
-                    <div className={styles.hint}>A random message is generated on each emit.</div>
+                    <div className="hint">A random message is generated on each emit.</div>
                 )}
             </div>
         );
@@ -248,7 +248,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
         return (
             <>
                 <Switch
-                    groupProps={{ className: styles.wide }}
+                    groupProps={{ className: "wide" }}
                     label={toggleLabel}
                     checked={form.withMessage}
                     onChange={(event) => update({ withMessage: event.currentTarget.checked })}
@@ -279,7 +279,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
     ): PReact.ComponentChildren {
         return (
             <TextInput
-                groupProps={{ className: clsx({ [styles.wide]: opts.wide === true }) }}
+                groupProps={{ className: clsx({ wide: opts.wide === true }) }}
                 label={
                     <>
                         {label} {opts.optional && <small>(Optional)</small>}
@@ -320,7 +320,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
 
                 const details =
                     gif != null ? (
-                        <div className={clsx(styles.wide, styles.lockHint)}>
+                        <div className="wide lock-hint">
                             GIF set: on Twitch a message is either a GIF or text, so the text is ignored.
                         </div>
                     ) : (
@@ -342,7 +342,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                         {numberField("value", "Value")}
                         {textField("currency", "Currency")}
                         {sticker ? (
-                            <div className={clsx(styles.wide, styles.lockHint)}>
+                            <div className="wide lock-hint">
                                 Super Sticker: YouTube sends the fixed text "sticker" as the message.
                             </div>
                         ) : (
@@ -353,7 +353,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                 const more = (
                     <>
                         <Switch
-                            groupProps={{ className: styles.wide }}
+                            groupProps={{ className: "wide" }}
                             label="Converted currency"
                             checked={form.converted}
                             onChange={(event) => update({ converted: event.currentTarget.checked })}
@@ -366,7 +366,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                         )}
                         {isYouTube && (
                             <Switch
-                                groupProps={{ className: styles.wide }}
+                                groupProps={{ className: "wide" }}
                                 label="Super Sticker"
                                 checked={form.superSticker}
                                 onChange={(event) => update({ superSticker: event.currentTarget.checked })}
@@ -401,7 +401,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
             case "unichat:raid":
                 return {
                     details: isYouTube ? (
-                        <div className={clsx(styles.wide, styles.hint)}>YouTube raids carry no viewer count.</div>
+                        <div className="wide hint">YouTube raids carry no viewer count.</div>
                     ) : (
                         numberField("viewerCount", "Viewers", isOther)
                     ),
@@ -468,7 +468,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
 
     function getEventGroupProps(): PReact.HTMLAttributes<HTMLDivElement> | undefined {
         if (!isOther) {
-            return { className: styles.wide };
+            return { className: "wide" };
         }
 
         return undefined;
@@ -538,9 +538,9 @@ export function CustomEventEditor(): PReact.ComponentChildren {
 
     return (
         <div className={styles.root}>
-            <div className={styles.form}>
-                <div className={styles.field}>
-                    <span className={styles.label}>Platform</span>
+            <div className="form">
+                <div className="field">
+                    <span>Platform</span>
                     <SegmentedControl
                         className={styles.segmented}
                         value={form.platform}
@@ -563,10 +563,10 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                     />
                 </div>
 
-                <div className={styles.author}>
-                    <div className={styles.authorChip}>
-                        <span className={styles.avatar}>{form.authorDisplayName.charAt(0).toUpperCase()}</span>
-                        <div className={styles.authorMeta}>
+                <div className="author">
+                    <div className="chip">
+                        <span>{form.authorDisplayName.charAt(0).toUpperCase()}</span>
+                        <div>
                             <strong>{form.authorDisplayName}</strong>
                             <span>{getAuthorCaption()}</span>
                         </div>
@@ -591,28 +591,28 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                     )}
                 </div>
 
-                <div className={styles.sectionTitle}>Details</div>
+                <div className="section-title">Details</div>
                 <div className={styles.grid}>{details}</div>
 
                 {more && (
                     <>
-                        <button type="button" className={styles.moreToggle} onClick={() => setMoreOpen((old) => !old)}>
+                        <button type="button" onClick={() => setMoreOpen((old) => !old)}>
                             {getMoreToggleLabel()}
                         </button>
-                        {moreOpen && <div className={clsx(styles.grid, styles.more)}>{more}</div>}
+                        {moreOpen && <div className={clsx(styles.grid, "more")}>{more}</div>}
                     </>
                 )}
             </div>
 
-            <div className={styles.payload}>
-                <div className={styles.payloadHeader}>
-                    <span className={styles.sectionTitle}>Payload</span>
+            <div className="payload">
+                <div className="header">
+                    <span>Payload</span>
                     {renderPayloadStatus()}
                 </div>
                 <PayloadEditor value={payload} invalid={!payloadIsValid} onChange={handlePayloadChange} />
             </div>
 
-            <div className={styles.footer}>
+            <div className="footer">
                 <Button onClick={handleReset}>Reset</Button>
                 <Button variant="primary" disabled={!canEmit} onClick={handleEmit}>
                     Emit

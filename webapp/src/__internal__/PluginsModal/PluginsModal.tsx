@@ -61,25 +61,25 @@ export function PluginsModal(): PReact.ComponentChildren {
     }
 
     return (
-        <div className={styles.container}>
-            <table className={styles.table}>
+        <div className={styles.root}>
+            <table>
                 <tbody>
                     {plugins
                         .sort((a, b) => a.name.localeCompare(b.name))
                         .map((plugin) => (
                             <tr key={plugin.name}>
-                                <td className={styles.icon}>
+                                <td className="icon">
                                     <img src={getPluginIconDataUrl(plugin)} />
                                 </td>
                                 <td>
                                     <span>{plugin.name}</span>
                                 </td>
-                                <td className={styles.badges}>
+                                <td className="badges">
                                     <div>
                                         <Badge variant={handleBadgeVariant(plugin.status)}>{plugin.status}</Badge>
                                     </div>
                                 </td>
-                                <td className={styles.actions}>
+                                <td className="actions">
                                     <Button onClick={() => openPluginDetails(plugin)}>Details</Button>
                                 </td>
                             </tr>

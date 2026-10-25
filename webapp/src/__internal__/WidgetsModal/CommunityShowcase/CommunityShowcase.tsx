@@ -90,10 +90,9 @@ export function CommunityShowcase({
     }
 
     return (
-        <div className={styles.showcase}>
-            <div className={styles.toolbar}>
+        <div className={styles.root}>
+            <div className="toolbar">
                 <Input
-                    rootProps={{ className: styles.search }}
                     type="search"
                     placeholder="Search widgets"
                     aria-label="Search widgets"
@@ -112,24 +111,23 @@ export function CommunityShowcase({
                 />
             </div>
 
-            <div className={styles.content}>
+            <div className="content">
                 {filteredWidgets.length === 0 ? (
                     <EmptyState icon={<i className="fas fa-puzzle-piece" />} title="No widgets found" />
                 ) : (
-                    <div className={styles.grid}>
+                    <div className="posters">
                         {filteredWidgets.map((widget) => (
-                            <div key={widget.id} className={styles.poster}>
+                            <div key={widget.id}>
                                 <button
                                     type="button"
-                                    className={styles.posterOpen}
                                     aria-label={`Open ${widget.name}`}
                                     onClick={() => onSelect(widget)}
                                 >
                                     <img src={widget.previewUrl} loading="lazy" />
                                 </button>
-                                <CommunityWidgetBadge className={styles.posterBadge} widget={widget} />
-                                <div className={styles.posterInfo}>
-                                    <div className={styles.posterTitle}>
+                                <CommunityWidgetBadge widget={widget} />
+                                <div>
+                                    <div>
                                         <strong>{widget.name}</strong>
                                         <small>v{widget.version}</small>
                                     </div>

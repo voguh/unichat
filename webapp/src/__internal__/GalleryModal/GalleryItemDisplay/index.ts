@@ -8,4 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+import styles from "./styles.module.css";
+
 export * from "./GalleryItemDisplay";
+export const galleryItemStyle = styles.root;

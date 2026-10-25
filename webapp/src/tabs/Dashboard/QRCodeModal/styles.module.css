@@ -8,18 +8,21 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-.container {
+.root {
     @apply w-full h-full flex flex-col justify-center items-center gap-4;
-}
 
-.label {
-    @apply text-stone-100 text-center;
-}
+    > div {
+        &:global(.label) {
+            @apply text-stone-100 text-center;
+        }
 
-.qrcode {
-    @apply size-64;
-}
+        &[data-part~="FormGroup"],
+        &[data-part~="Clipboard"] {
+            @apply w-full;
+        }
+    }
 
-.fullWidth {
-    @apply w-full;
+    > img {
+        @apply size-64;
+    }
 }

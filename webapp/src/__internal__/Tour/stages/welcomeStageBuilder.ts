@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-import type { TourBuilder } from "../Tour";
+import type { TourBuilder } from "unichat/__internal__/Tour";
 
 export function welcomeStageBuilder(title: string, subTitle: string | string[]): TourBuilder {
     return async (container) => {
@@ -19,21 +19,12 @@ export function welcomeStageBuilder(title: string, subTitle: string | string[]):
 
         const root = document.createElement("div");
         root.classList.add("tour-dialog");
-        Object.assign(root.style, {
-            left: "50%",
-            top: "50%",
-            transform: "translate(-50%, -50%)",
-            textAlign: "center",
-            visibility: "visible",
-            opacity: "1",
-            maxWidth: "min(80vw, 520px)"
-        });
+        root.setAttribute("data-welcome", "");
         container.appendChild(root);
 
         const titleElem = document.createElement("div");
         titleElem.classList.add("tour-dialog-title");
         titleElem.innerHTML = title;
-        titleElem.style.fontSize = "1.5rem";
         root.appendChild(titleElem);
 
         const subTitleElem = document.createElement("div");
@@ -43,15 +34,6 @@ export function welcomeStageBuilder(title: string, subTitle: string | string[]):
         } else {
             subTitleElem.innerHTML = subTitle;
         }
-
-        Object.assign(subTitleElem.style, {
-            fontSize: "1rem",
-            marginTop: "0.5rem",
-            paddingTop: "0.5rem",
-            display: "flex",
-            flexDirection: "column",
-            gap: "0.5rem"
-        });
 
         root.appendChild(subTitleElem);
     };

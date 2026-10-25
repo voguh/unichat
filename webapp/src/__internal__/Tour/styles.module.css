@@ -8,62 +8,93 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-.stage {
-    > :global(.tour-backdrop) {
-        @apply bg-black/50 backdrop-blur-xs;
-        @apply fixed inset-0 z-50;
+.root {
+    &[data-hidden="true"] {
+        @apply invisible;
     }
 
-    > :global(.tour-highlight) {
-        @apply bg-transparent border-2 border-red-800 rounded;
-        @apply fixed z-50;
+    > div {
+        &:global(.stage) {
+            > div {
+                &:global(.tour-backdrop) {
+                    @apply bg-black/50 backdrop-blur-xs;
+                    @apply fixed inset-0 z-50;
+                }
 
-        box-shadow: 0 0 --spacing(2) color-mix(in srgb, var(--color-red-800), transparent 75%);
-    }
+                &:global(.tour-highlight) {
+                    @apply bg-transparent border-2 border-red-800 rounded;
+                    @apply fixed z-50;
 
-    > :global(.tour-dialog) {
-        @apply bg-stone-950 border border-stone-700 rounded shadow-lg;
-        @apply fixed z-50 p-2 text-center invisible opacity-0;
+                    box-shadow: 0 0 --spacing(2) color-mix(in srgb, var(--color-red-800), transparent 75%);
+                }
 
-        max-width: min(80vw, --spacing(80));
+                &:global(.tour-dialog) {
+                    @apply bg-stone-950 border border-stone-700 rounded shadow-lg;
+                    @apply text-center;
+                    @apply fixed z-50 p-2 invisible opacity-0;
 
-        > :global(.tour-dialog-caret) {
-            @apply bg-stone-950 border-l border-b border-stone-700;
-            @apply fixed size-2;
+                    max-width: min(80vw, --spacing(80));
 
-            &[data-placement^="top"] {
-                transform: translate(-50%, calc((100% + --spacing(1)) * -1)) rotate(-45deg);
-            }
+                    > div {
+                        &:global(.tour-dialog-caret) {
+                            @apply bg-stone-950 border-l border-b border-stone-700;
+                            @apply fixed size-2;
 
-            &[data-placement^="bottom"] {
-                transform: translate(-50%, --spacing(1)) rotate(135deg);
-            }
+                            &[data-placement^="top"] {
+                                transform: translate(-50%, calc((100% + --spacing(1)) * -1)) rotate(-45deg);
+                            }
 
-            &[data-placement^="left"] {
-                transform: translate(calc((100% + --spacing(1)) * -1), -50%) rotate(-135deg);
-            }
+                            &[data-placement^="bottom"] {
+                                transform: translate(-50%, --spacing(1)) rotate(135deg);
+                            }
 
-            &[data-placement^="right"] {
-                transform: translate(--spacing(1), -50%) rotate(45deg);
+                            &[data-placement^="left"] {
+                                transform: translate(calc((100% + --spacing(1)) * -1), -50%) rotate(-135deg);
+                            }
+
+                            &[data-placement^="right"] {
+                                transform: translate(--spacing(1), -50%) rotate(45deg);
+                            }
+                        }
+
+                        &:global(.tour-dialog-title) {
+                            @apply font-semibold;
+                            @apply mb-1;
+                        }
+
+                        &:global(.tour-dialog-subtitle) {
+                            @apply border-t border-stone-700;
+                            @apply text-stone-300 text-sm;
+                            @apply mx-1 pt-1 mt-1;
+                        }
+                    }
+
+                    &[data-welcome] {
+                        @apply top-1/2 left-1/2 -translate-1/2 visible opacity-100;
+
+                        max-width: min(80vw, --spacing(130));
+
+                        > div {
+                            &:global(.tour-dialog-title) {
+                                @apply text-2xl;
+                            }
+
+                            &:global(.tour-dialog-subtitle) {
+                                @apply text-base;
+                                @apply flex flex-col gap-2 mt-2 pt-2;
+                            }
+                        }
+                    }
+                }
             }
         }
 
-        > :global(.tour-dialog-title) {
-            @apply font-semibold;
-            @apply mb-1;
-        }
-
-        > :global(.tour-dialog-subtitle) {
-            @apply text-stone-300 text-sm border-t border-stone-700;
-            @apply mx-1 pt-1 mt-1;
+        &:global(.actions) {
+            @apply fixed z-50 bottom-4 left-1/2 -translate-x-1/2 flex gap-2;
         }
     }
-}
 
-.actions {
-    @apply fixed z-50 bottom-4 left-1/2 -translate-x-1/2 flex gap-2;
-}
-
-.skip {
-    @apply fixed z-50 bottom-16 left-1/2 -translate-x-1/2 flex gap-2;
+    > button {
+        @apply fixed z-50 bottom-16 left-1/2 -translate-x-1/2 flex gap-2;
+    }
 }

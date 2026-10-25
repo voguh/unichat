@@ -8,10 +8,10 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-.tabs {
+.root {
     @apply h-full;
-}
 
-.tabContent {
-    @apply flex-1 min-h-0 overflow-y-auto;
+    > div[data-part~="TabPanels"] {
+        @apply flex-1 min-h-0 overflow-y-auto;
+    }
 }

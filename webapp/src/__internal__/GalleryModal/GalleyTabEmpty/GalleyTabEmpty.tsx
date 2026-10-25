@@ -13,8 +13,8 @@ import type * as PReact from "preact";
 import { Button } from "@voguh/unichat-ui/Button";
 import { EmptyState } from "@voguh/unichat-ui/EmptyState";
 import { clsx } from "@voguh/unichat-ui/utils/clsx";
+import { galleryItemStyle } from "unichat/__internal__/GalleryModal/GalleryItemDisplay";
 
-import itemStyles from "../GalleryItemDisplay/styles.module.css";
 import styles from "./styles.module.css";
 
 interface Props {
@@ -23,21 +23,17 @@ interface Props {
 
 export function GalleyTabEmpty({ withSelect }: Props): PReact.ComponentChildren {
     return (
-        <div className={styles.container}>
-            <div className={clsx(itemStyles.container, styles.sizer)} aria-hidden="true">
-                <div className={itemStyles.name}>&nbsp;</div>
-                <div className={itemStyles.preview} />
+        <div className={styles.root}>
+            <div className={clsx(galleryItemStyle, "sizer")} aria-hidden="true">
+                <div className="name">&nbsp;</div>
+                <div className="preview" />
                 {withSelect && (
-                    <div className={itemStyles.footer}>
+                    <div className="footer">
                         <Button>&nbsp;</Button>
                     </div>
                 )}
             </div>
-            <EmptyState
-                className={styles.emptyState}
-                icon={<i className="fas fa-images" />}
-                title="No items to display"
-            />
+            <EmptyState icon={<i className="fas fa-images" />} title="No items to display" />
         </div>
     );
 }

@@ -195,25 +195,24 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
 
     return (
         <div
-            className={styles.card}
+            className={styles.root}
             data-active={String(scraperIsRunning)}
             data-loading={String(loading || scraperIsLoading)}
         >
-            <div className={styles.badges}>
+            <div className="badges">
                 {scraper.badges.map((badge) => (
                     <Badge key={badge} variant="secondary">
                         {badge.toUpperCase()}
                     </Badge>
                 ))}
             </div>
-            <div className={styles.body}>
-                <Tooltip placement="bottom-start" content={<div className={styles.popoverBody}>{editingTooltip}</div>}>
+            <div className="body">
+                <Tooltip placement="bottom-start" content={<div className={styles.tooltip}>{editingTooltip}</div>}>
                     <div data-tour={`${scraper.id}--url-input`}>
                         <TextInput
                             label={
-                                <div className={styles.label}>
+                                <div>
                                     <div
-                                        className={styles.icon}
                                         data-active={String(scraperIsRunning)}
                                         data-loading={String(loading || scraperIsLoading)}
                                     >
@@ -241,7 +240,7 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                         variant="default"
                         onClick={() => commandService.toggleScraperWebview(scraper.id)}
                         disabled={loading || scraperIsLoading}
-                        className={styles.iconButton}
+                        className="icon-button"
                     >
                         <i className="fas fa-window-restore" />
                     </Button>

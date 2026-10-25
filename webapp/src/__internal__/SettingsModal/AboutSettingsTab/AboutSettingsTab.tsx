@@ -35,22 +35,22 @@ export function AboutSettingsTab(_props: Props): PReact.ComponentChildren {
     }
 
     return (
-        <div className={styles.container}>
-            <div className={styles.image}>
+        <div className={styles.root}>
+            <div className="image">
                 <img src={UNICHAT_ICON} />
             </div>
-            <div className={styles.name}>{UNICHAT_DISPLAY_NAME}</div>
-            <div className={styles.version}>{UNICHAT_VERSION}</div>
-            <div className={styles.homepage}>
+            <div className="name">{UNICHAT_DISPLAY_NAME}</div>
+            <div className="version">{UNICHAT_VERSION}</div>
+            <div className="homepage">
                 <span onClick={() => openUrl(UNICHAT_HOMEPAGE)}>Website</span>
             </div>
-            <div className={styles.description}>
+            <div className="description">
                 This program comes with absolutely no warranty.
                 <br />
                 See the <span onClick={() => openUrl(UNICHAT_LICENSE_URL)}>{UNICHAT_LICENSE_NAME}</span> license for
                 details.
             </div>
-            <div className={styles.footer}>
+            <div className="footer">
                 <Button variant="default" onClick={() => setIsCreditsOpen(true)}>
                     Credits
                 </Button>
@@ -58,11 +58,11 @@ export function AboutSettingsTab(_props: Props): PReact.ComponentChildren {
                     Third Party Licenses
                 </Button>
             </div>
-            <div className={styles.credits} data-open={isCreditsOpen}>
-                <div className={styles.creditsData}>
+            <div className="credits" data-open={isCreditsOpen}>
+                <div className="data">
                     <div>
-                        <div className={styles.creditsLabel}>Developed by</div>
-                        <div className={styles.creditsValues}>
+                        <div className="label">Developed by</div>
+                        <div className="values">
                             {UNICHAT_AUTHORS.split(";").map((author) => {
                                 const [name, _email] = author.split("<");
 
@@ -71,7 +71,7 @@ export function AboutSettingsTab(_props: Props): PReact.ComponentChildren {
                         </div>
                     </div>
                 </div>
-                <div className={styles.creditsFooter}>
+                <div className="footer">
                     <Button variant="default" onClick={() => setIsCreditsOpen(false)}>
                         Close
                     </Button>

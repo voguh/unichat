@@ -61,7 +61,7 @@ const storageListener = mitt<StorageEvents>();
 /* ========================================================================== */
 
 const PREFIX = "unichat";
-class StorageService {
+export class StorageService {
     public get<K extends keyof StorageValues>(entry: StorageEntry<K>): StorageValues[K] {
         checkStorageEntry(entry);
 

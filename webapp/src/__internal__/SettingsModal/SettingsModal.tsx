@@ -104,12 +104,11 @@ export function SettingsModal({ externalActiveTab, onHide, show }: Props): PReac
             onHide={onHide}
             size="xl"
             title="Settings"
-            className={styles.dialog}
-            bodyClassName={styles.container}
+            className={styles.root}
             data-tour="settings-modal"
         >
-            <div className={styles.sidebar}>
-                <div className={styles.sidebarItems}>
+            <div className="sidebar">
+                <div className="items">
                     {Object.entries(settingsItems).map(([key, item]) => (
                         <Button
                             key={key}
@@ -122,13 +121,13 @@ export function SettingsModal({ externalActiveTab, onHide, show }: Props): PReac
                         </Button>
                     ))}
                 </div>
-                <div className={styles.sidebarFooter}>
+                <div className="footer">
                     <span>
                         <strong>{UNICHAT_DISPLAY_NAME}</strong> {UNICHAT_VERSION}
                     </span>
                 </div>
             </div>
-            <div className={styles.content}>
+            <div className="content">
                 <TabContent selectedItem={activeTab} />
             </div>
         </Modal>

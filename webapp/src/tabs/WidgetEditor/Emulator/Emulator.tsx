@@ -94,10 +94,10 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
     }, [emulatorOnly, dispatchEvent]);
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>Emulator</div>
+        <div className={styles.root}>
+            <div className="header">Emulator</div>
 
-            <div className={styles.operationMode}>
+            <div className="mode">
                 <Select
                     label="Emulation Mode"
                     value={emulationMode}
@@ -109,9 +109,9 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
                 </Button>
             </div>
 
-            <div className={styles.events} data-tour="widget-editor-emulator-events-dispatcher">
-                <div className={styles.eventsTitle}>Emit Events</div>
-                <div className={styles.buttonGroup}>
+            <div className="events" data-tour="widget-editor-emulator-events-dispatcher">
+                <div className="title">Emit Events</div>
+                <div className="buttons">
                     <Button variant="default" onClick={() => dispatchEmulatedEvent("unichat:message")}>
                         <i className="fas fa-comment" />
                         Message
@@ -147,15 +147,15 @@ export function Emulator({ dispatchEvent }: Props): PReact.ComponentChildren {
                 </div>
             </div>
 
-            <div className={styles.target} data-tour="widget-editor-emulator-target-selector">
+            <div className="target" data-tour="widget-editor-emulator-target-selector">
                 <Tooltip content={buildTooltipContent()}>
-                    <div className={styles.targetTitle}>
+                    <div className="title">
                         Emulation Target
                         <i className="fas fa-info-circle" />
                     </div>
                 </Tooltip>
 
-                <div className={styles.targetSelect}>
+                <div className="switch-row">
                     <div>Global</div>
                     <div>
                         <Switch

@@ -26,51 +26,51 @@ interface Props {
 
 export function PluginOverviewModal({ plugin }: Props): PReact.ComponentChildren {
     return (
-        <div className={styles.container}>
-            <div className={styles.details}>
-                <div className={styles.icon}>
+        <div className={styles.root}>
+            <div>
+                <div className="icon">
                     <img src={getPluginIconDataUrl(plugin)} />
                 </div>
-                <div className={styles.meta}>
-                    <div className={styles.name}>
-                        <div className={styles.label}>Name</div>
-                        <div className={styles.value}>{plugin.name}</div>
+                <div className="meta">
+                    <div className="name">
+                        <div className="label">Name</div>
+                        <div className="value">{plugin.name}</div>
                     </div>
-                    <div className={styles.version}>
-                        <div className={styles.label}>Version</div>
-                        <div className={styles.value}>{plugin.version}</div>
+                    <div className="version">
+                        <div className="label">Version</div>
+                        <div className="value">{plugin.version}</div>
                     </div>
-                    <div className={styles.status}>
-                        <div className={styles.label}>Status</div>
-                        <div className={styles.value}>
+                    <div className="status">
+                        <div className="label">Status</div>
+                        <div className="value">
                             <Badge variant={handleBadgeVariant(plugin.status)}>{plugin.status}</Badge>
                         </div>
                     </div>
-                    <div className={styles.authors}>
-                        <div className={styles.label}>Authors</div>
+                    <div className="authors">
+                        <div className="label">Authors</div>
                         <Tooltip placement="bottom" content={plugin.author}>
-                            <div className={styles.value}>{plugin.author}</div>
+                            <div className="value">{plugin.author}</div>
                         </Tooltip>
                     </div>
-                    <div className={styles.license}>
-                        <div className={styles.label}>License</div>
+                    <div className="license">
+                        <div className="label">License</div>
                         <Tooltip placement="bottom" content={plugin.license}>
-                            <div className={styles.value}>{plugin.license}</div>
+                            <div className="value">{plugin.license}</div>
                         </Tooltip>
                     </div>
-                    <div className={styles.homepage}>
-                        <div className={styles.label}>Homepage</div>
-                        <div className={styles.value} onClick={() => plugin.homepage && openUrl(plugin.homepage)}>
+                    <div className="homepage">
+                        <div className="label">Homepage</div>
+                        <div className="value" onClick={() => plugin.homepage && openUrl(plugin.homepage)}>
                             {plugin.homepage}
                         </div>
                     </div>
-                    <div className={styles.description}>
-                        <div className={styles.label}>Description</div>
-                        <div className={styles.value}>{plugin.description}</div>
+                    <div className="description">
+                        <div className="label">Description</div>
+                        <div className="value">{plugin.description}</div>
                     </div>
                 </div>
             </div>
-            <pre className={styles.messages}>{plugin.messages.join("\n")}</pre>
+            <pre>{plugin.messages.join("\n")}</pre>
         </div>
     );
 }
