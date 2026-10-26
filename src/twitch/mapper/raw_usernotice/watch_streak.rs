@@ -47,10 +47,10 @@ pub fn parse(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
         text = Some(args[1].clone());
     }
 
-    let text = text.ok_or(anyhow!("Missing message text"))?;
+    let text = text.ok_or_else(|| anyhow!("Missing message text"))?;
 
     let room_id = require_tag(&tags, "room-id")?;
-    let channel = channel.ok_or(anyhow!("Missing channel name"))?;
+    let channel = channel.ok_or_else(|| anyhow!("Missing channel name"))?;
     let mut flags = inject_raw_tags(&tags);
     let author_id = require_tag(&tags, "user-id")?;
     let author_username = parse_author_username(&message.prefix);

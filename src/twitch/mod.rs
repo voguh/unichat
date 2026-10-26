@@ -74,7 +74,7 @@ fn write_badges(badges: HashMap<String, UniChatBadge>) {
 fn handle_ready_status(event: &ScraperStatusEvent) -> Result<(), Error> {
     let channel_id = event
         .extra_str("channelId")
-        .ok_or(anyhow!("Missing or invalid 'channelId' field in Twitch 'ready' payload"))?;
+        .ok_or_else(|| anyhow!("Missing or invalid 'channelId' field in Twitch 'ready' payload"))?;
 
     shared_emotes::fetch_shared_emotes("twitch", channel_id);
     properties::set_item(PropertiesKey::TwitchChannelId, String::from(channel_id));
@@ -86,12 +86,12 @@ fn handle_badges_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let badges_type = payload
         .get("badgesType")
         .and_then(|v| v.as_str())
-        .ok_or(anyhow!("Missing or invalid 'badgesType' field in Twitch '{}' payload", event_type))?;
+        .ok_or_else(|| anyhow!("Missing or invalid 'badgesType' field in Twitch '{}' payload", event_type))?;
     let badges = payload
         .get("badges")
         .and_then(|v| v.as_array())
         .cloned()
-        .ok_or(anyhow!("Missing or invalid 'badges' field in Twitch '{}' payload", event_type))?;
+        .ok_or_else(|| anyhow!("Missing or invalid 'badges' field in Twitch '{}' payload", event_type))?;
 
     let twitch_badges: Vec<TwitchRawBadge> = serde_json::from_value(serde_json::Value::Array(badges))?;
 
@@ -116,7 +116,7 @@ fn handle_cheermotes_event(event_type: &str, payload: &Value) -> Result<(), Erro
         .get("cheermotes")
         .and_then(|v| v.as_array())
         .cloned()
-        .ok_or(anyhow!("Missing or invalid 'cheermotes' field in Twitch '{}' payload", event_type))?;
+        .ok_or_else(|| anyhow!("Missing or invalid 'cheermotes' field in Twitch '{}' payload", event_type))?;
 
     let mut cheermotes_set = HashSet::new();
     for cheer in cheermotes {
@@ -297,7 +297,7 @@ impl UniChatScraper for TwitchUniChatScraper {
         let event_type = event
             .get("type")
             .and_then(|v| v.as_str())
-            .ok_or(anyhow!("Missing or invalid 'type' field in Twitch raw event payload"))?;
+            .ok_or_else(|| anyhow!("Missing or invalid 'type' field in Twitch raw event payload"))?;
 
         return match event_type {
             "badges" => handle_badges_event(event_type, &event),

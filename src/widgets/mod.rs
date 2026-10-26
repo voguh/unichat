@@ -206,7 +206,7 @@ fn load_widgets_from_disk(
             continue;
         }
 
-        let folder_name = widget_path.file_name().ok_or(anyhow!("Invalid widget folder name"))?;
+        let folder_name = widget_path.file_name().ok_or_else(|| anyhow!("Invalid widget folder name"))?;
         let widget_id = folder_name.to_string_lossy().to_string();
         if widget_id.starts_with(".") {
             continue;

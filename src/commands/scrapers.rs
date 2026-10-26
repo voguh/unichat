@@ -42,7 +42,7 @@ pub async fn get_scraper_webview_url<R: Runtime>(app: AppHandle<R>, scraper_id: 
         return Err(format!("Webview window '{}' not recognized", scraper_id));
     }
 
-    let webview = app.get_webview_window(scraper_id).ok_or(format!("Scraper window '{}' not found", scraper_id))?;
+    let webview = app.get_webview_window(scraper_id).ok_or_else(|| format!("Scraper window '{}' not found", scraper_id))?;
     let url = webview.url().map_err(|e| format!("An error occurred on get scraper webview URL: {:#?}", e))?;
 
     return Ok(url.to_string());
@@ -79,7 +79,7 @@ pub async fn set_scraper_webview_url<R: Runtime>(app: AppHandle<R>, scraper_id: 
     }
 
     log::info!("Setting scraper webview '{}' to URL '{}'", scraper_id, url);
-    let webview = app.get_webview_window(scraper_id).ok_or(format!("Scraper webview '{}' not found", scraper_id))?;
+    let webview = app.get_webview_window(scraper_id).ok_or_else(|| format!("Scraper webview '{}' not found", scraper_id))?;
 
     let parsed_url = decode_url(url).map_err(|e| format!("An error occurred on decode scraper URL: {:#?}", e))?;
 
@@ -104,7 +104,7 @@ pub async fn toggle_scraper_webview<R: Runtime>(app: AppHandle<R>, scraper_id: &
         return Err(format!("Scraper webview '{}' not recognized", scraper_id));
     }
 
-    let webview = app.get_webview_window(scraper_id).ok_or(format!("Scraper webview '{}' not found", scraper_id))?;
+    let webview = app.get_webview_window(scraper_id).ok_or_else(|| format!("Scraper webview '{}' not found", scraper_id))?;
     let visible = webview.is_visible();
     let visible = visible.map_err(|e| format!("An error occurred on get scraper webview visibility: {:#?}", e))?;
     if visible {

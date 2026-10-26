@@ -103,15 +103,15 @@ fn handle_event(payload: &str) -> Result<(), Error> {
     let scraper_id = payload
         .get("scraperId")
         .and_then(|v| v.as_str())
-        .ok_or(anyhow!("Missing or invalid 'scraperId' field in scraper event payload"))?
+        .ok_or_else(|| anyhow!("Missing or invalid 'scraperId' field in scraper event payload"))?
         .to_string();
     let event_type = payload
         .get("type")
         .and_then(|v| v.as_str())
-        .ok_or(anyhow!("Missing or invalid 'type' field in scraper event payload"))?
+        .ok_or_else(|| anyhow!("Missing or invalid 'type' field in scraper event payload"))?
         .to_string();
 
-    let scraper = get_scraper(&scraper_id).ok_or(anyhow!("Scraper with ID '{}' not found", scraper_id))?;
+    let scraper = get_scraper(&scraper_id).ok_or_else(|| anyhow!("Scraper with ID '{}' not found", scraper_id))?;
 
     if status::parse_status(&event_type).is_none() {
         return scraper.on_event(payload);

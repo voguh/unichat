@@ -113,7 +113,7 @@ pub fn get_tag(tags: &HashMap<String, Option<String>>, key: &str) -> Option<Stri
 }
 
 pub fn require_tag(tags: &HashMap<String, Option<String>>, key: &str) -> Result<String, Error> {
-    return get_tag(tags, key).ok_or(anyhow!("Missing '{}' tag", key));
+    return get_tag(tags, key).ok_or_else(|| anyhow!("Missing '{}' tag", key));
 }
 
 /* ========================================================================== */
@@ -127,7 +127,7 @@ pub fn parse_irc(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
         let channel_name = parse_channel_name(channel);
         return privmsg::parse(channel_name, text.to_owned(), message);
     } else if let IRCCommand::Raw(cmd, payload) = &message.command {
-        let channel = payload.first().ok_or(anyhow!("Missing channel name"))?;
+        let channel = payload.first().ok_or_else(|| anyhow!("Missing channel name"))?;
         let channel_name = parse_channel_name(channel);
 
         if cmd == "CLEARCHAT" {

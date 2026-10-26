@@ -209,7 +209,7 @@ fn find_release<'a>(data: &'a CommunityAddonData, release: &str) -> Result<&'a A
     let releases = data.releases.as_deref().unwrap_or_default();
     let selected = releases.iter().find(|r| r.name == release);
 
-    return selected.ok_or(anyhow!("Release '{}' not found for '{}'", release, data.name));
+    return selected.ok_or_else(|| anyhow!("Release '{}' not found for '{}'", release, data.name));
 }
 
 fn check_compatibility(data: &CommunityAddonData, release: &AddonRelease) -> Result<(), Error> {
@@ -238,7 +238,7 @@ fn download_release_asset(asset: &AddonReleaseAsset) -> Result<Vec<u8>, Error> {
 fn download_release(id: &str, release: &AddonRelease) -> Result<(PathBuf, PathBuf), Error> {
     let asset_name = format!("{}-{}.zip", id, release.name);
     let asset = release.assets.iter().find(|a| a.name == asset_name);
-    let asset = asset.ok_or(anyhow!("Release '{}' of '{}' has no asset '{}'", release.name, id, asset_name))?;
+    let asset = asset.ok_or_else(|| anyhow!("Release '{}' of '{}' has no asset '{}'", release.name, id, asset_name))?;
     let bytes = download_release_asset(asset)?;
 
     let extract_path = paths::get(AppPaths::AppCache).join(format!("install_{}", id));

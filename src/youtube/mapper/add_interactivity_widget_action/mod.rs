@@ -18,7 +18,7 @@ mod interactivity_widget_renderer;
 /* ========================================================================== */
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
-    let widget_renderer = value.get("widgetRenderer").ok_or(anyhow!("No item found in value"))?;
+    let widget_renderer = value.get("widgetRenderer").ok_or_else(|| anyhow!("No item found in value"))?;
 
     if let Some(value) = widget_renderer.get("interactivityWidgetRenderer") {
         return interactivity_widget_renderer::parse(value.clone());

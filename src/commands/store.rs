@@ -63,7 +63,7 @@ pub async fn settings_set_item<R: Runtime>(_app: AppHandle<R>, key: &str, value:
 
 #[tauri::command]
 pub async fn settings_set_items<R: Runtime>(_app: AppHandle<R>, items: Value) -> Result<(), String> {
-    let items_map = items.as_object().ok_or("Items must be a JSON object".to_string())?;
+    let items_map = items.as_object().ok_or_else(|| String::from("Items must be a JSON object"))?;
 
     for (key, value) in items_map {
         let full_key = format!("settings:{}", key);

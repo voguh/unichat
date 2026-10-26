@@ -42,7 +42,7 @@ pub fn open() -> Result<(), Error> {
         return Ok(());
     }
 
-    let main_window = app.get_webview_window(main_window::MAIN_WINDOW_LABEL).ok_or(anyhow!("Main window not found"))?;
+    let main_window = app.get_webview_window(main_window::MAIN_WINDOW_LABEL).ok_or_else(|| anyhow!("Main window not found"))?;
 
     window::new(CUSTOM_EVENT_WINDOW_LABEL, "custom-event.html")
         .title(format!("{} - Custom Event", UNICHAT_DISPLAY_NAME))

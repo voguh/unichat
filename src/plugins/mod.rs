@@ -71,7 +71,7 @@ pub fn get_plugins() -> Vec<Arc<PluginMetadata>> {
 
 fn get_plugin(plugin_id: &str) -> Result<Arc<PluginMetadata>, Error> {
     let envs = read();
-    let manifest = envs.get(plugin_id).ok_or(anyhow!("Plugin '{}' is not loaded", plugin_id))?;
+    let manifest = envs.get(plugin_id).ok_or_else(|| anyhow!("Plugin '{}' is not loaded", plugin_id))?;
     return Ok(manifest.clone());
 }
 
@@ -113,7 +113,7 @@ impl PluginMetadata {
         dependencies: Vec<(String, VersionRange)>
     ) -> Result<Self, Error> {
         let version = Version::parse(&manifest.version)?;
-        let folder_name = path.file_name().ok_or(anyhow!("Invalid plugin folder name '{:?}'", path))?;
+        let folder_name = path.file_name().ok_or_else(|| anyhow!("Invalid plugin folder name '{:?}'", path))?;
 
         let lua = runtime::get();
         let env = lua.create_table()?;

@@ -55,9 +55,9 @@ pub fn parse(
     let event_payload: UniChatMessageEventPayload;
     if let Some(Some(gif_str)) = tags.get("gifs") {
         let mut it = gif_str.splitn(3, "|");
-        let _gif_pos = it.next().ok_or(anyhow!("Missing gif position"))?;
-        let gif_id = it.next().ok_or(anyhow!("Missing gif id"))?;
-        let gif_url = it.next().ok_or(anyhow!("Missing gif url"))?;
+        let _gif_pos = it.next().ok_or_else(|| anyhow!("Missing gif position"))?;
+        let gif_id = it.next().ok_or_else(|| anyhow!("Missing gif id"))?;
+        let gif_url = it.next().ok_or_else(|| anyhow!("Missing gif url"))?;
 
         let mut flags = inject_raw_tags(&tags);
         flags.insert(String::from(FLAG_TWITCH_GIF), Some(String::from("true")));

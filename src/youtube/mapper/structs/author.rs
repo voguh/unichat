@@ -124,7 +124,7 @@ pub fn parse_author_name_str(name: String) -> String {
 }
 
 pub fn parse_author_photo_vec(photos: &[AuthorPhotoWrapper]) -> Result<String, Error> {
-    let thumbnail = photos.last().ok_or(anyhow!("No thumbnails found in author photo"))?;
+    let thumbnail = photos.last().ok_or_else(|| anyhow!("No thumbnails found in author photo"))?;
     return Ok(proxy_youtube_url(&thumbnail.url));
 }
 
@@ -147,7 +147,7 @@ pub fn parse_author_badges(
             match &badge.live_chat_author_badge_renderer {
                 AuthorBadgeRenderer::Custom { custom_thumbnail } => {
                     let thumbnails = &custom_thumbnail.thumbnails;
-                    let thumbnail = thumbnails.last().ok_or(anyhow!("No thumbnails found in custom thumbnail"))?;
+                    let thumbnail = thumbnails.last().ok_or_else(|| anyhow!("No thumbnails found in custom thumbnail"))?;
                     let badge = UniChatBadge { code: String::from("sponsor"), url: proxy_youtube_url(&thumbnail.url) };
                     parsed_badges.push(badge);
                 }

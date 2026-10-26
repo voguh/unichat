@@ -62,7 +62,7 @@ struct LiveChatSponsorshipsHeaderRenderer {
 }
 
 fn parse_count(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<u16, Error> {
-    let run = render.primary_text.runs.get(1).ok_or(anyhow!("No count run found"))?;
+    let run = render.primary_text.runs.get(1).ok_or_else(|| anyhow!("No count run found"))?;
     match run {
         MessageRun::Text { text } => {
             let count: u16 = text.parse()?;

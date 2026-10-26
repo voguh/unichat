@@ -70,7 +70,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let (purchase_currency, purchase_value) = parse_purchase_amount(&parsed.purchase_amount_text)?;
     let converted = currency::apply(purchase_value, &purchase_currency);
     let (donate_value, donate_currency, original_value, original_currency) = converted;
-    let sticker = parsed.sticker.thumbnails.last().ok_or(anyhow!("No thumbnails found in author photo"))?;
+    let sticker = parsed.sticker.thumbnails.last().ok_or_else(|| anyhow!("No thumbnails found in author photo"))?;
     let emotes = vec![UniChatEmote {
         id: String::from("sticker"),
         code: String::from("sticker"),

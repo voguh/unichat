@@ -33,7 +33,7 @@ use crate::utils::irc::IRCMessage;
 
 pub fn parse(message: &IRCMessage, tags: &HashMap<String, Option<String>>) -> Result<Option<UniChatEvent>, Error> {
     let (channel, message_text) = parse_command(message)?;
-    let message_text = message_text.ok_or(anyhow!("Missing message text"))?;
+    let message_text = message_text.ok_or_else(|| anyhow!("Missing message text"))?;
 
     let room_id = require_tag(tags, "room-id")?;
     let author_id = require_tag(tags, "user-id")?;

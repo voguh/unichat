@@ -54,9 +54,9 @@ pub fn parse_message_emotes(
                 continue;
             }
 
-            let (emote_id, positions_raw) = raw_emote.split_once(":").ok_or(anyhow!("Invalid emote format"))?;
-            let first_range = positions_raw.split(",").next().ok_or(anyhow!("Invalid emote positions format"))?;
-            let (start_str, end_str) = first_range.split_once("-").ok_or(anyhow!("Invalid emote positions format"))?;
+            let (emote_id, positions_raw) = raw_emote.split_once(":").ok_or_else(|| anyhow!("Invalid emote format"))?;
+            let first_range = positions_raw.split(",").next().ok_or_else(|| anyhow!("Invalid emote positions format"))?;
+            let (start_str, end_str) = first_range.split_once("-").ok_or_else(|| anyhow!("Invalid emote positions format"))?;
             let (start, end) = parse_delimiter(start_str, end_str)?;
 
             let emote_code: String = message_text.chars().skip(start).take((end - start) + 1).collect();
