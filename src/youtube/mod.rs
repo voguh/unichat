@@ -19,9 +19,9 @@ use serde_json::Value;
 
 use crate::events;
 use crate::scraper;
+use crate::scraper::ScraperStatus;
+use crate::scraper::ScraperStatusEvent;
 use crate::scraper::UniChatScraper;
-use crate::scraper::status::ScraperStatus;
-use crate::scraper::status::ScraperStatusEvent;
 use crate::settings;
 use crate::settings::SettingLogEventLevel;
 use crate::shared_emotes;
@@ -35,7 +35,7 @@ mod mapper;
 
 /* ========================================================================== */
 
-pub const SCRAPER_ID: &str = "youtube-chat";
+const SCRAPER_ID: &str = "youtube-chat";
 static SCRAPER_JS: &str = include_str!("./static/scraper.js");
 
 /* ========================================================================== */

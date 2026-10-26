@@ -27,6 +27,8 @@ pub async fn settings_get_item(key: &str) -> Result<Value, String> {
     return Ok(raw_value);
 }
 
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn settings_get_items(keys: Vec<String>) -> Result<Value, String> {
     let mut result = serde_json::Map::new();
@@ -44,6 +46,8 @@ pub async fn settings_get_items(keys: Vec<String>) -> Result<Value, String> {
     return Ok(Value::Object(result));
 }
 
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn settings_set_item<R: Runtime>(_app: AppHandle<R>, key: &str, value: Value) -> Result<(), String> {
     let key = format!("settings:{}", key);
@@ -54,6 +58,8 @@ pub async fn settings_set_item<R: Runtime>(_app: AppHandle<R>, key: &str, value:
     settings::set_by_key(&key, &value).map_err(|e| format!("Failed to set item: {:#?}", e))?;
     return Ok(());
 }
+
+/* ========================================================================== */
 
 #[tauri::command]
 pub async fn settings_set_items<R: Runtime>(_app: AppHandle<R>, items: Value) -> Result<(), String> {

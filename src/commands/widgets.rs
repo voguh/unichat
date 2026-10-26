@@ -37,6 +37,8 @@ pub async fn get_widget_fields<R: Runtime>(_app: AppHandle<R>, widget: String) -
     return Err("Cannot get fields of system or plugin widgets".into());
 }
 
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn get_widget_fieldstate<R: Runtime>(
     _app: AppHandle<R>,
@@ -51,6 +53,17 @@ pub async fn get_widget_fieldstate<R: Runtime>(
 
     return Err("Cannot get fieldstate of system or plugin widgets".into());
 }
+
+/* ========================================================================== */
+
+#[tauri::command]
+pub async fn get_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<WidgetMetadata>, String> {
+    reload_user_widgets().map_err(|e| format!("Failed to reload user widgets: {:#?}", e))?;
+    let widgets = widgets::get_widgets();
+    return Ok(widgets);
+}
+
+/* ========================================================================== */
 
 #[tauri::command]
 pub async fn set_widget_fieldstate<R: Runtime>(_app: AppHandle<R>, widget: String, data: String) -> Result<(), String> {
@@ -67,13 +80,4 @@ pub async fn set_widget_fieldstate<R: Runtime>(_app: AppHandle<R>, widget: Strin
     }
 
     return Err("Cannot set fieldstate of system or plugin widgets".into());
-}
-
-/* ========================================================================== */
-
-#[tauri::command]
-pub async fn get_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<WidgetMetadata>, String> {
-    reload_user_widgets().map_err(|e| format!("Failed to reload user widgets: {:#?}", e))?;
-    let widgets = widgets::get_widgets();
-    return Ok(widgets);
 }

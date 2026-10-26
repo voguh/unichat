@@ -16,11 +16,11 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::currency;
-use crate::events::unichat::FLAG_YOUTUBE_SUPER_STICKER;
-use crate::events::unichat::UniChatDonateEventPayload;
-use crate::events::unichat::UniChatEmote;
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatPlatform;
+use crate::events::FLAG_YOUTUBE_SUPER_STICKER;
+use crate::events::UniChatDonateEventPayload;
+use crate::events::UniChatEmote;
+use crate::events::UniChatEvent;
+use crate::events::UniChatPlatform;
 use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;

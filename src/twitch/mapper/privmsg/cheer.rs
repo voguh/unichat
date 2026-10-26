@@ -12,9 +12,9 @@ use std::collections::HashMap;
 
 use anyhow::Error;
 
-use crate::events::unichat::UniChatCheerEventPayload;
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatPlatform;
+use crate::events::UniChatCheerEventPayload;
+use crate::events::UniChatEvent;
+use crate::events::UniChatPlatform;
 use crate::twitch::mapper::require_tag;
 use crate::twitch::mapper::structs::author::parse_author_badges;
 use crate::twitch::mapper::structs::author::parse_author_color;

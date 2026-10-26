@@ -23,8 +23,8 @@ use anyhow::anyhow;
 use serde::Serialize;
 use serde_json::Map;
 
-use crate::addons::manifest::UniChatAddonManifest;
-use crate::addons::manifest::load_manifest;
+use crate::addons::UniChatAddonManifest;
+use crate::addons::load_manifest;
 use crate::plugins::PluginMetadata;
 use crate::utils::constants::BASE_URL;
 use crate::utils::properties;
@@ -65,7 +65,7 @@ impl WidgetMetadata {
 
     /* ====================================================================== */
 
-    pub fn fields_path(&self) -> PathBuf {
+    fn fields_path(&self) -> PathBuf {
         return self.path.join("fields.json");
     }
 
@@ -101,7 +101,7 @@ impl WidgetMetadata {
 
     /* ====================================================================== */
 
-    pub fn widget_css_path(&self) -> PathBuf {
+    fn widget_css_path(&self) -> PathBuf {
         let path = self.path.join("widget.css");
         if path.exists() {
             return path;
@@ -117,7 +117,7 @@ impl WidgetMetadata {
 
     /* ====================================================================== */
 
-    pub fn widget_html_path(&self) -> PathBuf {
+    fn widget_html_path(&self) -> PathBuf {
         let path = self.path.join("widget.html");
         if path.exists() {
             return path;
@@ -133,7 +133,7 @@ impl WidgetMetadata {
 
     /* ====================================================================== */
 
-    pub fn widget_js_path(&self) -> PathBuf {
+    fn widget_js_path(&self) -> PathBuf {
         let path = self.path.join("widget.js");
         if path.exists() {
             return path;

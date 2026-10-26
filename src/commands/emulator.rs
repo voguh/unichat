@@ -12,8 +12,16 @@ use tauri::AppHandle;
 use tauri::Runtime;
 
 use crate::events;
-use crate::events::unichat::UniChatEvent;
+use crate::events::UniChatEvent;
 use crate::wm::custom_event_window;
+
+/* ========================================================================== */
+
+#[tauri::command]
+pub async fn close_custom_event_window<R: Runtime>(_app: AppHandle<R>) -> Result<(), String> {
+    custom_event_window::close().map_err(|e| format!("Failed to close custom event window: {:#?}", e))?;
+    return Ok(());
+}
 
 /* ========================================================================== */
 
@@ -23,14 +31,10 @@ pub async fn dispatch_emulated_event<R: Runtime>(_app: AppHandle<R>, event: UniC
     return Ok(());
 }
 
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn open_custom_event_window<R: Runtime>(_app: AppHandle<R>) -> Result<(), String> {
     custom_event_window::open().map_err(|e| format!("Failed to open custom event window: {:#?}", e))?;
-    return Ok(());
-}
-
-#[tauri::command]
-pub async fn close_custom_event_window<R: Runtime>(_app: AppHandle<R>) -> Result<(), String> {
-    custom_event_window::close().map_err(|e| format!("Failed to close custom event window: {:#?}", e))?;
     return Ok(());
 }

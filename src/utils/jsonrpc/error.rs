@@ -8,84 +8,32 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-#![allow(unused)]
-
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
-pub struct JsonRPCRequest {
-    jsonrpc: String,
-    id: Option<String>,
-    method: String,
-    params: Option<Vec<serde_json::Value>>
+pub struct JsonRPCErrorDetail {
+    code: i32,
+    message: String,
+    data: Option<serde_json::Value>
 }
 
-impl JsonRPCRequest {
-    pub fn new(method: String, id: Option<String>, params: Option<Vec<serde_json::Value>>) -> Self {
-        return JsonRPCRequest { jsonrpc: String::from("2.0"), id: id, method: method, params: params };
+impl JsonRPCErrorDetail {
+    pub fn code(&self) -> i32 {
+        return self.code;
     }
 
-    /* ====================================================================== */
-
-    pub fn jsonrpc(&self) -> String {
-        return self.jsonrpc.clone();
+    pub fn message(&self) -> String {
+        return self.message.clone();
     }
 
-    pub fn id(&self) -> Option<String> {
-        return self.id.clone();
-    }
-
-    pub fn method(&self) -> String {
-        return self.method.clone();
-    }
-
-    pub fn params(&self) -> Option<Vec<serde_json::Value>> {
-        return self.params.clone();
+    pub fn data(&self) -> Option<serde_json::Value> {
+        return self.data.clone();
     }
 }
-
-/* ========================================================================== */
-
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
-pub struct JsonRPCResponse {
-    jsonrpc: String,
-    id: String,
-    result: serde_json::Value
-}
-
-impl JsonRPCResponse {
-    pub fn new<R: Into<serde_json::Value>>(id: String, result: R) -> Self {
-        let result = result.into();
-        return JsonRPCResponse { jsonrpc: String::from("2.0"), id: id, result: result };
-    }
-
-    /* ====================================================================== */
-
-    pub fn jsonrpc(&self) -> String {
-        return self.jsonrpc.clone();
-    }
-
-    pub fn id(&self) -> String {
-        return self.id.clone();
-    }
-
-    pub fn result(&self) -> serde_json::Value {
-        return self.result.clone();
-    }
-}
-
-/* ========================================================================== */
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct JsonRPCError {
     jsonrpc: String,
     id: Option<String>,
     error: JsonRPCErrorDetail
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
-pub struct JsonRPCErrorDetail {
-    code: i32,
-    message: String,
-    data: Option<serde_json::Value>
 }
 
 impl JsonRPCError {
@@ -164,19 +112,5 @@ impl JsonRPCError {
 
     pub fn error(&self) -> JsonRPCErrorDetail {
         return self.error.clone();
-    }
-}
-
-impl JsonRPCErrorDetail {
-    pub fn code(&self) -> i32 {
-        return self.code;
-    }
-
-    pub fn message(&self) -> String {
-        return self.message.clone();
-    }
-
-    pub fn data(&self) -> Option<serde_json::Value> {
-        return self.data.clone();
     }
 }

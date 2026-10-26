@@ -10,10 +10,10 @@
 
 use anyhow::Error;
 
-use crate::events::unichat::UniChatClearEventPayload;
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatPlatform;
-use crate::events::unichat::UniChatRemoveAuthorEventPayload;
+use crate::events::UniChatClearEventPayload;
+use crate::events::UniChatEvent;
+use crate::events::UniChatPlatform;
+use crate::events::UniChatRemoveAuthorEventPayload;
 use crate::twitch::mapper::get_tag;
 use crate::twitch::mapper::require_tag;
 use crate::twitch::mapper::structs::inject_raw_tags;

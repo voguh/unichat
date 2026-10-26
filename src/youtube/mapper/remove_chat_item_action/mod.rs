@@ -14,9 +14,9 @@ use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatPlatform;
-use crate::events::unichat::UniChatRemoveMessageEventPayload;
+use crate::events::UniChatEvent;
+use crate::events::UniChatPlatform;
+use crate::events::UniChatRemoveMessageEventPayload;
 use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;

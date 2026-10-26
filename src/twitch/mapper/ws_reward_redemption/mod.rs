@@ -14,10 +14,10 @@ use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::events::unichat::UniChatAuthorType;
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatPlatform;
-use crate::events::unichat::UniChatRedemptionEventPayload;
+use crate::events::UniChatAuthorType;
+use crate::events::UniChatEvent;
+use crate::events::UniChatPlatform;
+use crate::events::UniChatRedemptionEventPayload;
 use crate::twitch::mapper::handle_redemption_event;
 use crate::twitch::mapper::structs::author::parse_author_color;
 use crate::utils::get_current_timestamp;

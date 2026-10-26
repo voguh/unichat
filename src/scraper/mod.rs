@@ -22,24 +22,29 @@ use tauri::WebviewWindow;
 use tauri::Wry;
 use tauri::webview::PageLoadPayload;
 
-use crate::scraper::status::ScraperStatusEvent;
-use crate::scraper::utils::decode_url;
 use crate::settings;
 use crate::utils::get_current_timestamp;
 use crate::utils::is_dev;
-use crate::utils::render_emitter;
+use crate::wm::main_window;
 use crate::wm::window;
 
-pub mod status;
-pub mod utils;
+mod status;
+mod utils;
 
 /* ========================================================================== */
 
-pub static COMMON_SCRAPER_JS: &str = include_str!("./static/common_scraper.js");
+pub use status::ScraperStatus;
+pub use status::ScraperStatusEvent;
+pub use utils::decode_url;
+pub use utils::is_local_url;
 
 /* ========================================================================== */
 
-pub type ArcScraper = Arc<dyn UniChatScraper + Send + Sync>;
+static COMMON_SCRAPER_JS: &str = include_str!("./static/common_scraper.js");
+
+/* ========================================================================== */
+
+type ArcScraper = Arc<dyn UniChatScraper + Send + Sync>;
 
 static SCRAPERS: LazyLock<RwLock<HashMap<String, ArcScraper>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 fn read() -> RwLockReadGuard<'static, HashMap<String, ArcScraper>> {
@@ -122,7 +127,7 @@ fn handle_event(payload: &str) -> Result<(), Error> {
         log::error!(target: &format!("scraper:{}", scraper_id), "An error occurred on '{}' scraper status hook: {:#?}", scraper_id, err);
     }
 
-    render_emitter::emit_status(&event);
+    main_window::emit_status(&event);
 
     return Ok(());
 }

@@ -16,11 +16,11 @@ use tauri::AppHandle;
 use tauri::Runtime;
 
 use crate::THIRD_PARTY_LICENSES;
-use crate::api::release;
-use crate::api::release::UniChatReleaseInfo;
+use crate::api;
+use crate::api::UniChatReleaseInfo;
 use crate::events;
-use crate::events::unichat::UniChatClearEventPayload;
-use crate::events::unichat::UniChatEvent;
+use crate::events::UniChatClearEventPayload;
+use crate::events::UniChatEvent;
 use crate::utils::get_current_timestamp;
 use crate::utils::userstore::flush_userstore;
 
@@ -34,6 +34,31 @@ pub mod store;
 pub mod tour;
 pub mod userstore;
 pub mod widgets;
+
+/* ========================================================================== */
+
+#[tauri::command]
+pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), String> {
+    let timestamp_usec = get_current_timestamp();
+
+    #[rustfmt::skip]
+    let event = UniChatEvent::Clear(UniChatClearEventPayload {
+        platform: None,
+
+        timestamp: timestamp_usec
+    });
+
+    events::emit(event).map_err(|e| format!("An error occurred on emit ClearChat event: {:#?}", e))?;
+
+    return Ok(());
+}
+
+/* ========================================================================== */
+
+#[tauri::command]
+pub async fn get_releases<R: Runtime>(_app: AppHandle<R>) -> Result<UniChatReleaseInfo, String> {
+    return api::get_release_info().map_err(|e| format!("Failed to get releases: {:#?}", e));
+}
 
 /* ========================================================================== */
 
@@ -89,9 +114,14 @@ pub async fn get_system_hosts<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Stri
 /* ========================================================================== */
 
 #[tauri::command]
-pub async fn get_releases<R: Runtime>(_app: AppHandle<R>) -> Result<UniChatReleaseInfo, String> {
-    return release::get_info().map_err(|e| format!("Failed to get releases: {:#?}", e));
+pub async fn get_third_party_licenses<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<serde_json::Value>, String> {
+    let third_party_licenses = serde_json::from_str(THIRD_PARTY_LICENSES)
+        .map_err(|e| format!("Failed to parse third party licenses: {:#?}", e))?;
+
+    return Ok(third_party_licenses);
 }
+
+/* ========================================================================== */
 
 #[tauri::command]
 pub async fn restart_app<R: Runtime>(app: AppHandle<R>) -> Result<(), String> {
@@ -99,32 +129,4 @@ pub async fn restart_app<R: Runtime>(app: AppHandle<R>) -> Result<(), String> {
     app.request_restart();
 
     return Ok(());
-}
-
-/* ========================================================================== */
-
-#[tauri::command]
-pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), String> {
-    let timestamp_usec = get_current_timestamp();
-
-    #[rustfmt::skip]
-    let event = UniChatEvent::Clear(UniChatClearEventPayload {
-        platform: None,
-
-        timestamp: timestamp_usec
-    });
-
-    events::emit(event).map_err(|e| format!("An error occurred on emit ClearChat event: {:#?}", e))?;
-
-    return Ok(());
-}
-
-/* ========================================================================== */
-
-#[tauri::command]
-pub async fn get_third_party_licenses<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<serde_json::Value>, String> {
-    let third_party_licenses = serde_json::from_str(THIRD_PARTY_LICENSES)
-        .map_err(|e| format!("Failed to parse third party licenses: {:#?}", e))?;
-
-    return Ok(third_party_licenses);
 }

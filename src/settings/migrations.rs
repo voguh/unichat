@@ -221,7 +221,7 @@ fn get_store_version() -> Result<u8, Error> {
     }
 }
 
-pub(super) fn migrate() -> Result<(), Error> {
+pub fn migrate() -> Result<(), Error> {
     let store = get_instance();
 
     if store.get(STORE_VERSION_KEY).is_none() {

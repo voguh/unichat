@@ -14,7 +14,12 @@ use serde::de::DeserializeOwned;
 use crate::UNICHAT_VERSION;
 use crate::utils::ureq;
 
-pub mod release;
+mod release;
+
+/* ========================================================================== */
+
+pub use release::UniChatReleaseInfo;
+pub use release::get_release_info;
 
 /* ========================================================================== */
 

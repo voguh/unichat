@@ -10,7 +10,7 @@
 
 use anyhow::Error;
 
-use crate::events::unichat::UniChatEvent;
+use crate::events::UniChatEvent;
 use crate::utils::irc::IRCMessage;
 
 mod cheer;

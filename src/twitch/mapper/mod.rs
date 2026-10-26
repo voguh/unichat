@@ -16,9 +16,9 @@ use std::sync::MutexGuard;
 use anyhow::Error;
 use anyhow::anyhow;
 
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatMessageEventPayload;
-use crate::events::unichat::UniChatRedemptionEventPayload;
+use crate::events::UniChatEvent;
+use crate::events::UniChatMessageEventPayload;
+use crate::events::UniChatRedemptionEventPayload;
 use crate::utils::irc::IRCCommand;
 use crate::utils::irc::IRCMessage;
 

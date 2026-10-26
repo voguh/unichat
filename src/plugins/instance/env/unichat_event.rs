@@ -16,9 +16,9 @@ use mlua::UserData;
 use mlua::UserDataMethods;
 use mlua::Value;
 
-use crate::events::unichat::UniChatAuthorType;
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatPlatform;
+use crate::events::UniChatAuthorType;
+use crate::events::UniChatEvent;
+use crate::events::UniChatPlatform;
 use crate::plugins::instance::env::utils::from_lua_value;
 use crate::plugins::instance::env::utils::table_deep_readonly;
 

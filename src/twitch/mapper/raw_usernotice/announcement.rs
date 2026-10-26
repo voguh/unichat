@@ -13,9 +13,9 @@ use std::collections::HashMap;
 use anyhow::Error;
 use anyhow::anyhow;
 
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatMessageEventPayload;
-use crate::events::unichat::UniChatPlatform;
+use crate::events::UniChatEvent;
+use crate::events::UniChatMessageEventPayload;
+use crate::events::UniChatPlatform;
 use crate::twitch::mapper::raw_usernotice::parse_command;
 use crate::twitch::mapper::require_tag;
 use crate::twitch::mapper::structs::author::parse_author_badges;

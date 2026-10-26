@@ -401,9 +401,3 @@ pub struct UniChatUserstoreUpdateEventPayload {
     pub key: String,
     pub value: Option<String>
 }
-
-impl UniChatEvent {
-    pub fn userstore_update(key: String, value: Option<String>) -> Self {
-        return UniChatEvent::UserstoreUpdate(UniChatUserstoreUpdateEventPayload { key, value });
-    }
-}

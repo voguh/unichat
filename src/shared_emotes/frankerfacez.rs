@@ -14,7 +14,7 @@ use anyhow::Error;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::events::unichat::UniChatEmote;
+use crate::events::UniChatEmote;
 use crate::utils::ureq;
 
 /* ========================================================================== */

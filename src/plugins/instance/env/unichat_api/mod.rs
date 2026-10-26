@@ -33,9 +33,9 @@ use crate::plugins::runtime;
 use crate::scraper;
 use crate::scraper::UniChatScraper;
 use crate::shared_emotes;
-use crate::utils::render_emitter;
 use crate::utils::safe_guard_path;
 use crate::utils::userstore;
+use crate::wm::main_window;
 
 mod lua_scraper;
 
@@ -209,7 +209,7 @@ impl UserData for UniChatAPI {
         });
 
         methods.add_method("notify", |_lua, this, message: String| {
-            render_emitter::emit_notification(&this.plugin_id, &message);
+            main_window::emit_notification(&this.plugin_id, &message);
             return Ok(());
         });
     }
