@@ -86,7 +86,7 @@ fn refresh_rates(value: serde_json::Value) -> Result<(), Error> {
 }
 
 pub fn init() -> Result<(), Error> {
-    settings::add_change_listener(SETTINGS_CURRENCY_TARGET_KEY, |_, value| {
+    settings::add_change_listener(SETTINGS_CURRENCY_TARGET_KEY, |value| {
         let move_value = value.clone();
         tauri::async_runtime::spawn_blocking(move || {
             if let Err(err) = refresh_rates(move_value) {

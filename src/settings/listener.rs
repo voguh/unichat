@@ -16,7 +16,7 @@ use serde_json::Value;
 
 /* ========================================================================== */
 
-type SettingsChangeListener = Box<dyn Fn(&str, &Value) + Send + Sync>;
+type SettingsChangeListener = Box<dyn Fn(&Value) + Send + Sync>;
 
 static LISTENERS: LazyLock<RwLock<Vec<(String, SettingsChangeListener)>>> = LazyLock::new(|| RwLock::new(Vec::new()));
 fn read() -> RwLockReadGuard<'static, Vec<(String, SettingsChangeListener)>> {
@@ -30,14 +30,14 @@ fn write(key: String, listener: SettingsChangeListener) {
 
 /* ========================================================================== */
 
-pub fn add_change_listener<F: Fn(&str, &Value) + Send + Sync + 'static>(key: &str, listener: F) {
+pub fn add_change_listener<F: Fn(&Value) + Send + Sync + 'static>(key: &str, listener: F) {
     write(key.to_string(), Box::new(listener));
 }
 
 pub fn notify_change_listeners(key: &str, value: &Value) {
     for (listener_key, listener) in read().iter() {
         if listener_key == key {
-            listener(key, value);
+            listener(value);
         }
     }
 }

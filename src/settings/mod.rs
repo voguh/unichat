@@ -51,13 +51,12 @@ const SETTINGS_TOUR_CURRENT_STEPS_KEY: &str = "settings:current-tour-steps";
 const SETTINGS_TOUR_PREVIOUS_STEPS_KEY: &str = "settings:previous-tour-steps";
 const SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY: &str = "settings:default-preview-widget";
 const SETTINGS_OPEN_TO_LAN_KEY: &str = "settings:open-to-lan";
-const SETTINGS_LOG_SCRAPER_EVENTS: &str = "settings:log-scraper-events";
+const SETTINGS_LOG_SCRAPER_EVENTS_KEY: &str = "settings:log-scraper-events";
 const SETTINGS_OPEN_SCRAPER_WEBVIEW_KEY: &str = "settings:open-scraper-webview";
 pub const SETTINGS_CURRENCY_TARGET_KEY: &str = "settings:currency-target";
 
-const SCRAPER_KEY_TEMPLATE: &str = "scraper:{}:{}";
 fn store_mount_scraper_key(scraper_id: &str, key: &str) -> String {
-    return SCRAPER_KEY_TEMPLATE.replacen("{}", scraper_id, 1).replacen("{}", key, 1);
+    return format!("scraper:{}:{}", scraper_id, key);
 }
 
 /* ========================================================================== */
@@ -147,11 +146,11 @@ pub fn set_open_to_lan(value: bool) {
 }
 
 pub fn get_log_scraper_events() -> SettingLogEventLevel {
-    return get_value(SETTINGS_LOG_SCRAPER_EVENTS).unwrap_or(SettingLogEventLevel::OnlyErrors);
+    return get_value(SETTINGS_LOG_SCRAPER_EVENTS_KEY).unwrap_or(SettingLogEventLevel::OnlyErrors);
 }
 
 pub fn set_log_scraper_events(value: SettingLogEventLevel) {
-    set_value(SETTINGS_LOG_SCRAPER_EVENTS, value);
+    set_value(SETTINGS_LOG_SCRAPER_EVENTS_KEY, value);
 }
 
 pub fn get_open_scraper_webview() -> bool {
@@ -199,7 +198,7 @@ pub fn get_by_key(key: &str) -> Result<Value, Error> {
         SETTINGS_TOUR_PREVIOUS_STEPS_KEY => Ok(json!(get_previous_tour_steps())),
         SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY => Ok(json!(get_default_preview_widget())),
         SETTINGS_OPEN_TO_LAN_KEY => Ok(json!(get_open_to_lan())),
-        SETTINGS_LOG_SCRAPER_EVENTS => Ok(json!(get_log_scraper_events())),
+        SETTINGS_LOG_SCRAPER_EVENTS_KEY => Ok(json!(get_log_scraper_events())),
         SETTINGS_OPEN_SCRAPER_WEBVIEW_KEY => Ok(json!(get_open_scraper_webview())),
         SETTINGS_CURRENCY_TARGET_KEY => Ok(json!(get_currency_target())),
         _ => Err(anyhow!("Unknown setting '{}'", key))
@@ -228,7 +227,7 @@ pub fn set_by_key(key: &str, value: &Value) -> Result<(), Error> {
             let value: bool = Deserialize::deserialize(value)?;
             set_open_to_lan(value);
         }
-        SETTINGS_LOG_SCRAPER_EVENTS => {
+        SETTINGS_LOG_SCRAPER_EVENTS_KEY => {
             let value: SettingLogEventLevel = Deserialize::deserialize(value)?;
             set_log_scraper_events(value);
         }
