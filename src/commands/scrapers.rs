@@ -14,9 +14,9 @@ use tauri::Manager as _;
 use tauri::Runtime;
 
 use crate::scraper;
+use crate::scraper::decode_url;
+use crate::scraper::is_local_url;
 use crate::scraper::serialize_scraper;
-use crate::scraper::utils::decode_url;
-use crate::scraper::utils::is_local_url;
 use crate::settings;
 
 /* ========================================================================== */

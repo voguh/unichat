@@ -13,7 +13,7 @@ use tauri::Emitter as _;
 use tauri::Manager as _;
 
 use crate::get_app_handle;
-use crate::scraper::status::ScraperStatusEvent;
+use crate::scraper::ScraperStatusEvent;
 use crate::wm::main_window::MAIN_WINDOW_LABEL;
 
 /* ========================================================================== */
