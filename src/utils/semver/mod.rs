@@ -15,13 +15,17 @@ use std::fmt::Display;
 use anyhow::Error;
 use anyhow::anyhow;
 
-use crate::utils::semver::pre_release_type::PreReleaseType;
-use crate::utils::semver::version::Version;
+mod bound_type;
+mod pre_release_type;
+mod version;
+mod version_range;
 
-pub mod bound_type;
-pub mod pre_release_type;
-pub mod version;
-pub mod version_range;
+/* ========================================================================== */
+
+pub use bound_type::BoundType;
+pub use pre_release_type::PreReleaseType;
+pub use version::Version;
+pub use version_range::VersionRange;
 
 /* ========================================================================== */
 

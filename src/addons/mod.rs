@@ -25,8 +25,8 @@ use crate::UNICHAT_VERSION;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::semver;
-use crate::utils::semver::version::Version;
-use crate::utils::semver::version_range::VersionRange;
+use crate::utils::semver::Version;
+use crate::utils::semver::VersionRange;
 use crate::utils::ureq;
 
 mod manifest;

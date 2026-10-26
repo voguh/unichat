@@ -26,8 +26,8 @@ use crate::addons::UniChatAddonManifest;
 use crate::addons::load_manifest;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
-use crate::utils::semver::version::Version;
-use crate::utils::semver::version_range::VersionRange;
+use crate::utils::semver::Version;
+use crate::utils::semver::VersionRange;
 
 mod instance;
 mod runtime;

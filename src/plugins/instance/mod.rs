@@ -23,8 +23,8 @@ use crate::plugins::PluginMetadata;
 use crate::plugins::PluginStatus;
 use crate::plugins::runtime;
 use crate::utils::get_current_timestamp;
-use crate::utils::semver::version::Version;
-use crate::utils::semver::version_range::VersionRange;
+use crate::utils::semver::Version;
+use crate::utils::semver::VersionRange;
 use crate::widgets;
 
 mod env;

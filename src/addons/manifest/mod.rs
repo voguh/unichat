@@ -16,7 +16,7 @@ use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::utils::semver::version::Version;
+use crate::utils::semver::Version;
 
 /* ========================================================================== */
 
