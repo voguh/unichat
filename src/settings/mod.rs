@@ -29,6 +29,8 @@ use crate::utils::properties::AppPaths;
 mod listener;
 mod migrations;
 
+/* ========================================================================== */
+
 pub use listener::add_change_listener;
 
 /* ========================================================================== */

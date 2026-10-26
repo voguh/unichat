@@ -34,7 +34,7 @@ pub fn add_change_listener<F: Fn(&str, &Value) + Send + Sync + 'static>(key: &st
     write(key.to_string(), Box::new(listener));
 }
 
-pub(super) fn notify_change_listeners(key: &str, value: &Value) {
+pub fn notify_change_listeners(key: &str, value: &Value) {
     for (listener_key, listener) in read().iter() {
         if listener_key == key {
             listener(key, value);
