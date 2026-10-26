@@ -41,13 +41,13 @@ mod mapper;
 
 /* ========================================================================== */
 
-pub const SCRAPER_ID: &str = "twitch-chat";
+const SCRAPER_ID: &str = "twitch-chat";
 static SCRAPER_JS: &str = include_str!("./static/scraper.js");
 
 /* ========================================================================== */
 
 static TWITCH_CHEERMOTES: LazyLock<RwLock<HashSet<String>>> = LazyLock::new(|| RwLock::new(HashSet::new()));
-pub(in crate::twitch) fn read_cheermotes() -> RwLockReadGuard<'static, HashSet<String>> {
+fn read_cheermotes() -> RwLockReadGuard<'static, HashSet<String>> {
     return TWITCH_CHEERMOTES.read().expect("Twitch::TWITCH_CHEERMOTES lock poisoned");
 }
 
@@ -59,7 +59,7 @@ fn write_cheermotes(cheermotes: HashSet<String>) {
 /* ========================================================================== */
 
 static TWITCH_BADGES: LazyLock<RwLock<HashMap<String, UniChatBadge>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
-pub(in crate::twitch) fn read_badges() -> RwLockReadGuard<'static, HashMap<String, UniChatBadge>> {
+fn read_badges() -> RwLockReadGuard<'static, HashMap<String, UniChatBadge>> {
     return TWITCH_BADGES.read().expect("Twitch::TWITCH_BADGES lock poisoned");
 }
 
