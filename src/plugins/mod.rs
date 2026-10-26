@@ -39,7 +39,7 @@ fn read() -> RwLockReadGuard<'static, HashMap<String, Arc<PluginMetadata>>> {
     return LOADED.read().expect("Plugins::LOADED lock poisoned");
 }
 
-pub(in crate::plugins) fn write(plugin: Arc<PluginMetadata>) -> Result<(), Error> {
+fn write(plugin: Arc<PluginMetadata>) -> Result<(), Error> {
     let mut loaded = LOADED.write().expect("Plugins::LOADED lock poisoned");
     if loaded.contains_key(&plugin.id) {
         return Err(anyhow!("Plugin with id '{}' is already loaded", plugin.id));
@@ -69,7 +69,7 @@ pub fn get_plugins() -> Vec<Arc<PluginMetadata>> {
     return plugins;
 }
 
-pub fn get_plugin(plugin_id: &str) -> Result<Arc<PluginMetadata>, Error> {
+fn get_plugin(plugin_id: &str) -> Result<Arc<PluginMetadata>, Error> {
     let envs = read();
     let manifest = envs.get(plugin_id).ok_or(anyhow!("Plugin '{}' is not loaded", plugin_id))?;
     return Ok(manifest.clone());
@@ -107,7 +107,7 @@ pub struct PluginMetadata {
 }
 
 impl PluginMetadata {
-    pub(in crate::plugins) fn new(
+    fn new(
         path: &Path,
         manifest: &UniChatAddonManifest,
         dependencies: Vec<(String, VersionRange)>
@@ -144,7 +144,7 @@ impl PluginMetadata {
         return status.clone();
     }
 
-    pub(in crate::plugins) fn set_status(&self, status: PluginStatus) {
+    fn set_status(&self, status: PluginStatus) {
         let mut current_status = self.status.write().expect("Plugin status lock poisoned");
         *current_status = status;
     }
@@ -164,13 +164,13 @@ impl PluginMetadata {
 
     /* ====================================================================== */
 
-    pub(in crate::plugins) fn get_plugin_env(&self) -> Table {
+    fn get_plugin_env(&self) -> Table {
         return self.plugin_env.clone();
     }
 
     /* ====================================================================== */
 
-    pub(in crate::plugins) fn get_cached_loaded_module(&self, module_name: &str) -> Result<Value, Error> {
+    fn get_cached_loaded_module(&self, module_name: &str) -> Result<Value, Error> {
         let cache = self.loaded_modules_cache.read().expect("Loaded modules cache lock poisoned");
         if let Some(cached_module) = cache.get(module_name) {
             return Ok(cached_module.clone());
@@ -179,7 +179,7 @@ impl PluginMetadata {
         return Err(anyhow!("Module '{}' is not cached", module_name));
     }
 
-    pub(in crate::plugins) fn set_cached_loaded_module(&self, module_name: &str, module: Value) -> Value {
+    fn set_cached_loaded_module(&self, module_name: &str, module: Value) -> Value {
         let mut cache = self.loaded_modules_cache.write().expect("Loaded modules cache lock poisoned");
         cache.insert(module_name.to_string(), module.clone());
 
@@ -196,11 +196,11 @@ impl PluginMetadata {
         return self.path.join("assets");
     }
 
-    pub fn get_data_path(&self) -> PathBuf {
+    fn get_data_path(&self) -> PathBuf {
         return self.path.join("data");
     }
 
-    pub fn get_entrypoint_path(&self) -> PathBuf {
+    fn get_entrypoint_path(&self) -> PathBuf {
         return self.get_data_path().join("main.lua");
     }
 
@@ -208,7 +208,7 @@ impl PluginMetadata {
         return self.path.join("widgets");
     }
 
-    pub fn get_icon_path(&self) -> Option<PathBuf> {
+    fn get_icon_path(&self) -> Option<PathBuf> {
         let icon_path = self.path.join("icon.png");
         if icon_path.exists() && icon_path.is_file() {
             return Some(icon_path);

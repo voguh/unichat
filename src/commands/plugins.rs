@@ -22,19 +22,19 @@ use crate::utils::base64;
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SerializedPluginMetadata {
-    pub id: String,
-    pub name: String,
-    pub description: Option<String>,
-    pub version: String,
-    pub author: Option<String>,
-    pub license: Option<String>,
-    pub homepage: Option<String>,
-    pub dependencies: Vec<String>,
+    id: String,
+    name: String,
+    description: Option<String>,
+    version: String,
+    author: Option<String>,
+    license: Option<String>,
+    homepage: Option<String>,
+    dependencies: Vec<String>,
 
-    pub path: PathBuf,
-    pub icon: Option<String>,
-    pub status: PluginStatus,
-    pub messages: Vec<String>
+    path: PathBuf,
+    icon: Option<String>,
+    status: PluginStatus,
+    messages: Vec<String>
 }
 
 #[tauri::command]
