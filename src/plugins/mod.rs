@@ -22,8 +22,8 @@ use anyhow::anyhow;
 use mlua::Table;
 use mlua::Value;
 
-use crate::addons::manifest::UniChatAddonManifest;
-use crate::addons::manifest::load_manifest;
+use crate::addons::UniChatAddonManifest;
+use crate::addons::load_manifest;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::semver::version::Version;

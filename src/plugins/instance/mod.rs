@@ -17,7 +17,7 @@ use anyhow::anyhow;
 
 use crate::UNICHAT_DISPLAY_NAME;
 use crate::UNICHAT_VERSION;
-use crate::addons::manifest::UniChatAddonManifest;
+use crate::addons::UniChatAddonManifest;
 use crate::plugins;
 use crate::plugins::PluginMetadata;
 use crate::plugins::PluginStatus;

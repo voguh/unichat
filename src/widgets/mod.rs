@@ -23,8 +23,8 @@ use anyhow::anyhow;
 use serde::Serialize;
 use serde_json::Map;
 
-use crate::addons::manifest::UniChatAddonManifest;
-use crate::addons::manifest::load_manifest;
+use crate::addons::UniChatAddonManifest;
+use crate::addons::load_manifest;
 use crate::plugins::PluginMetadata;
 use crate::utils::constants::BASE_URL;
 use crate::utils::properties;

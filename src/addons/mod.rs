@@ -22,7 +22,6 @@ use sha2::Sha256;
 use zip::ZipArchive;
 
 use crate::UNICHAT_VERSION;
-use crate::addons::manifest::load_manifest;
 use crate::utils::properties;
 use crate::utils::properties::AppPaths;
 use crate::utils::semver;
@@ -30,15 +29,20 @@ use crate::utils::semver::version::Version;
 use crate::utils::semver::version_range::VersionRange;
 use crate::utils::ureq;
 
-pub mod community_plugin;
-pub mod community_widget;
-pub mod manifest;
+mod manifest;
+pub mod plugin;
+pub mod widget;
+
+/* ========================================================================== */
+
+pub use manifest::UniChatAddonManifest;
+pub use manifest::load_manifest;
 
 /* ========================================================================== */
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct AddonReleaseAsset {
+struct AddonReleaseAsset {
     pub id: u64,
     pub name: String,
     pub size: u64,
@@ -50,7 +54,7 @@ pub struct AddonReleaseAsset {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct AddonRelease {
+struct AddonRelease {
     pub id: u64,
     pub name: String,
     pub description: String,
@@ -64,7 +68,7 @@ pub struct AddonRelease {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct CommunityAddonData {
+struct CommunityAddonData {
     pub id: String,
     pub name: String,
     pub short_description: String,
@@ -83,7 +87,7 @@ pub struct CommunityAddonData {
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CommunityAddon {
+struct CommunityAddon {
     internal_id: String,
     id: String,
     name: String,
@@ -107,7 +111,7 @@ pub struct CommunityAddon {
 
 /* ========================================================================== */
 
-pub fn is_compatible(requires_unichat: &Option<String>) -> bool {
+fn is_compatible(requires_unichat: &Option<String>) -> bool {
     if let Some(requires_unichat) = requires_unichat {
         let unichat_version = Version::parse(UNICHAT_VERSION).expect("UNICHAT_VERSION is not a valid version");
         match VersionRange::parse(requires_unichat) {
@@ -122,7 +126,7 @@ pub fn is_compatible(requires_unichat: &Option<String>) -> bool {
     return true;
 }
 
-pub fn has_update(installed_version: &str, releases: &[AddonRelease]) -> bool {
+fn has_update(installed_version: &str, releases: &[AddonRelease]) -> bool {
     let mut installed_is_prerelease = false;
     if let Ok(version) = Version::parse(installed_version) {
         installed_is_prerelease = version.pre_release().is_some();
@@ -143,13 +147,13 @@ pub fn has_update(installed_version: &str, releases: &[AddonRelease]) -> bool {
 
 /* ========================================================================== */
 
-pub fn community_addon_id(internal_id: &str, prefix: &str) -> String {
+fn community_addon_id(internal_id: &str, prefix: &str) -> String {
     let repository = internal_id.rsplit(':').next().unwrap_or(internal_id);
 
     return repository.strip_prefix(prefix).unwrap_or(repository).to_string();
 }
 
-pub fn find_installed_version(addons_path: &Path, id: &str) -> Option<String> {
+fn find_installed_version(addons_path: &Path, id: &str) -> Option<String> {
     let addon_path = addons_path.join(id);
     if !addon_path.join("manifest.yaml").is_file() {
         return None;
@@ -164,7 +168,7 @@ pub fn find_installed_version(addons_path: &Path, id: &str) -> Option<String> {
     }
 }
 
-pub fn build_community_addon(
+fn build_community_addon(
     data: CommunityAddonData,
     id: String,
     installed_version: Option<String>,
@@ -201,14 +205,14 @@ pub fn build_community_addon(
 
 /* ========================================================================== */
 
-pub fn find_release<'a>(data: &'a CommunityAddonData, release: &str) -> Result<&'a AddonRelease, Error> {
+fn find_release<'a>(data: &'a CommunityAddonData, release: &str) -> Result<&'a AddonRelease, Error> {
     let releases = data.releases.as_deref().unwrap_or_default();
     let selected = releases.iter().find(|r| r.name == release);
 
     return selected.ok_or(anyhow!("Release '{}' not found for '{}'", release, data.name));
 }
 
-pub fn check_compatibility(data: &CommunityAddonData, release: &AddonRelease) -> Result<(), Error> {
+fn check_compatibility(data: &CommunityAddonData, release: &AddonRelease) -> Result<(), Error> {
     if release.name == data.version && !is_compatible(&data.requires_unichat) {
         let requires_unichat = data.requires_unichat.clone().unwrap_or_default();
         return Err(anyhow!("'{}' {} requires UniChat {}", data.name, release.name, requires_unichat));
@@ -231,7 +235,7 @@ fn download_release_asset(asset: &AddonReleaseAsset) -> Result<Vec<u8>, Error> {
     return Ok(bytes);
 }
 
-pub fn download_release(id: &str, release: &AddonRelease) -> Result<(PathBuf, PathBuf), Error> {
+fn download_release(id: &str, release: &AddonRelease) -> Result<(PathBuf, PathBuf), Error> {
     let asset_name = format!("{}-{}.zip", id, release.name);
     let asset = release.assets.iter().find(|a| a.name == asset_name);
     let asset = asset.ok_or(anyhow!("Release '{}' of '{}' has no asset '{}'", release.name, id, asset_name))?;
@@ -271,7 +275,7 @@ fn copy_recursively(from: &Path, to: &Path) -> Result<(), Error> {
     return Ok(());
 }
 
-pub fn replace_addon(src: &Path, dest: &Path, keep_list: &[PathBuf]) -> Result<(), Error> {
+fn replace_addon(src: &Path, dest: &Path, keep_list: &[PathBuf]) -> Result<(), Error> {
     if dest.exists() {
         for relative_path in keep_list {
             let from = dest.join(relative_path);
