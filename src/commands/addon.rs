@@ -19,11 +19,6 @@ use crate::addons::widget::CommunityWidget;
 /* ========================================================================== */
 
 #[tauri::command]
-pub async fn get_community_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<CommunityPlugin>, String> {
-    return plugin::list().map_err(|e| format!("Failed to get community plugins: {:#?}", e));
-}
-
-#[tauri::command]
 pub async fn get_community_plugin<R: Runtime>(
     _app: AppHandle<R>,
     internal_id: String
@@ -31,6 +26,33 @@ pub async fn get_community_plugin<R: Runtime>(
     return plugin::get(&internal_id)
         .map_err(|e| format!("Failed to get community plugin '{}': {:#?}", internal_id, e));
 }
+
+/* ========================================================================== */
+
+#[tauri::command]
+pub async fn get_community_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<CommunityPlugin>, String> {
+    return plugin::list().map_err(|e| format!("Failed to get community plugins: {:#?}", e));
+}
+
+/* ========================================================================== */
+
+#[tauri::command]
+pub async fn get_community_widget<R: Runtime>(
+    _app: AppHandle<R>,
+    internal_id: String
+) -> Result<CommunityWidget, String> {
+    return widget::get(&internal_id)
+        .map_err(|e| format!("Failed to get community widget '{}': {:#?}", internal_id, e));
+}
+
+/* ========================================================================== */
+
+#[tauri::command]
+pub async fn get_community_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<CommunityWidget>, String> {
+    return widget::list().map_err(|e| format!("Failed to get community widgets: {:#?}", e));
+}
+
+/* ========================================================================== */
 
 #[tauri::command]
 pub async fn install_community_plugin<R: Runtime>(
@@ -43,20 +65,6 @@ pub async fn install_community_plugin<R: Runtime>(
 }
 
 /* ========================================================================== */
-
-#[tauri::command]
-pub async fn get_community_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<CommunityWidget>, String> {
-    return widget::list().map_err(|e| format!("Failed to get community widgets: {:#?}", e));
-}
-
-#[tauri::command]
-pub async fn get_community_widget<R: Runtime>(
-    _app: AppHandle<R>,
-    internal_id: String
-) -> Result<CommunityWidget, String> {
-    return widget::get(&internal_id)
-        .map_err(|e| format!("Failed to get community widget '{}': {:#?}", internal_id, e));
-}
 
 #[tauri::command]
 pub async fn install_community_widget<R: Runtime>(

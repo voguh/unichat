@@ -27,6 +27,8 @@ pub async fn get_userstore<R: Runtime>(_app: AppHandle<R>, key: String) -> Resul
     }
 }
 
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn set_userstore<R: Runtime>(_app: AppHandle<R>, key: String, value: Option<Value>) -> Result<(), String> {
     return userstore::set_item(&key, &value).map_err(|e| format!("Failed to set userstore item: {:#?}", e));

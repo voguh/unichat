@@ -88,6 +88,8 @@ pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Gal
     return Ok(gallery_items);
 }
 
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn upload_gallery_items<R: Runtime>(_app: AppHandle<R>, files: Vec<String>) -> Result<(), String> {
     let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);

@@ -22,11 +22,15 @@ pub async fn get_prev_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Resul
     return Ok(prev_tour_steps);
 }
 
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn get_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
     let tour_steps = settings::get_current_tour_steps();
     return Ok(tour_steps);
 }
+
+/* ========================================================================== */
 
 #[tauri::command]
 pub async fn set_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>, new_steps: Vec<String>) -> Result<(), String> {
@@ -49,6 +53,8 @@ pub async fn set_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>, new_steps: Ve
 
     return Ok(());
 }
+
+/* ========================================================================== */
 
 #[tauri::command]
 pub async fn tour_steps_has_new<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, String> {
