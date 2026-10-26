@@ -25,7 +25,7 @@ use tauri::webview::PageLoadPayload;
 use crate::settings;
 use crate::utils::get_current_timestamp;
 use crate::utils::is_dev;
-use crate::utils::render_emitter;
+use crate::wm::main_window;
 use crate::wm::window;
 
 mod status;
@@ -127,7 +127,7 @@ fn handle_event(payload: &str) -> Result<(), Error> {
         log::error!(target: &format!("scraper:{}", scraper_id), "An error occurred on '{}' scraper status hook: {:#?}", scraper_id, err);
     }
 
-    render_emitter::emit_status(&event);
+    main_window::emit_status(&event);
 
     return Ok(());
 }

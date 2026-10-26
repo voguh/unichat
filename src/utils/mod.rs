@@ -23,7 +23,6 @@ pub mod constants;
 pub mod irc;
 pub mod jsonrpc;
 pub mod properties;
-pub mod render_emitter;
 pub mod semver;
 pub mod ureq;
 pub mod userstore;
