@@ -60,10 +60,8 @@ export function OtherPluginsPopover(): PReact.ComponentChildren {
                             <small>v{plugin.version}</small>
                         </div>
                         <Badge variant={handleBadgeVariant(plugin.status)}>{plugin.status}</Badge>
-                        <IconButton aria-label="Reveal in Folder" onClick={() => revealItemInDir(plugin.path)}>
-                            <i className="fas fa-folder" />
-                        </IconButton>
                         <IconButton
+                            size="sm"
                             aria-label="Details"
                             onClick={() => setSharedStore((old) => ({ ...old, selectedPlugin: plugin }))}
                         >

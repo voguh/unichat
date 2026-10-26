@@ -66,9 +66,6 @@ export function OtherWidgetsPopover(): PReact.ComponentChildren {
                 </div>
                 {formatWarningsSummary(widget.warnings)}
                 <Badge variant="secondary">Local</Badge>
-                <IconButton size="sm" aria-label="Reveal in Folder" onClick={() => revealItemInDir(widget.path)}>
-                    <i className="fas fa-folder" />
-                </IconButton>
                 <IconButton
                     size="sm"
                     aria-label="Details"
