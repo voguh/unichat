@@ -59,12 +59,12 @@ pub fn init() -> Result<(), Error> {
     paths.insert(AppPaths::UniChatLogoIcon, path.resolve("icons/icon.png", BaseDirectory::Resource)?);
     paths.insert(AppPaths::UniChatLicense, path.resolve("LICENSE", BaseDirectory::Resource)?);
 
-    INSTANCE.set(paths).expect("Paths::INSTANCE already initialized");
+    INSTANCE.set(paths).expect("Paths::INSTANCE was already initialized");
 
     return Ok(());
 }
 
 pub fn get(key: AppPaths) -> PathBuf {
-    let paths = INSTANCE.get().expect("Paths::INSTANCE not initialized");
+    let paths = INSTANCE.get().expect("Paths::INSTANCE was not initialized");
     return paths.get(&key).expect("Paths::INSTANCE missing key").clone();
 }
