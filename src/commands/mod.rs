@@ -16,8 +16,8 @@ use tauri::AppHandle;
 use tauri::Runtime;
 
 use crate::THIRD_PARTY_LICENSES;
-use crate::api::release;
-use crate::api::release::UniChatReleaseInfo;
+use crate::api;
+use crate::api::UniChatReleaseInfo;
 use crate::events;
 use crate::events::UniChatClearEventPayload;
 use crate::events::UniChatEvent;
@@ -90,7 +90,7 @@ pub async fn get_system_hosts<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Stri
 
 #[tauri::command]
 pub async fn get_releases<R: Runtime>(_app: AppHandle<R>) -> Result<UniChatReleaseInfo, String> {
-    return release::get_info().map_err(|e| format!("Failed to get releases: {:#?}", e));
+    return api::get_release_info().map_err(|e| format!("Failed to get releases: {:#?}", e));
 }
 
 #[tauri::command]
