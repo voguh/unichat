@@ -12,6 +12,7 @@ import "unichat/styles/global.css";
 import { render } from "preact";
 
 import { App } from "unichat/App";
+import { CustomEventEditor } from "unichat/tabs/WidgetEditor/Emulator/CustomEventEditor";
 
 if (!__IS_DEV__) {
     window.addEventListener("contextmenu", async (event) => {
@@ -19,9 +20,12 @@ if (!__IS_DEV__) {
     });
 }
 
-const documentRoot = document.querySelector("#root");
-if (documentRoot == null) {
+const appRoot = document.querySelector("#root");
+const customEventRoot = document.querySelector("#custom-event-root");
+if (appRoot != null) {
+    render(<App />, appRoot);
+} else if (customEventRoot != null) {
+    render(<CustomEventEditor />, customEventRoot);
+} else {
     throw new Error("Root element not found");
 }
-
-render(<App />, documentRoot);

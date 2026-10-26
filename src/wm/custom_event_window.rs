@@ -17,7 +17,6 @@ use tauri::webview::PageLoadPayload;
 
 use crate::UNICHAT_DISPLAY_NAME;
 use crate::get_app_handle;
-use crate::utils::is_dev;
 use crate::wm::main_window;
 use crate::wm::window;
 
@@ -54,7 +53,7 @@ pub fn open() -> Result<(), Error> {
         .center()
         .visible(false)
         .parent(&main_window)?
-        .initialization_script(format!("globalThis.__IS_DEV__ = {};", is_dev()))
+        .initialization_script(window::webapp_globals_script())
         .on_page_load(on_page_load)
         .build()?;
 

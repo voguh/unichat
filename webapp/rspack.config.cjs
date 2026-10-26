@@ -17,6 +17,8 @@ const { glob } = require("glob");
 /* ========================================================================== */
 
 const isDev = process.env.NODE_ENV !== "production";
+const bundleAnalyzer = process.env.RSDOCTOR === "true";
+const fileHash = isDev ? "" : "-[contenthash]";
 
 class OrphanFilesPlugin {
     static PLUGIN_NAME = "OrphanFilesPlugin";
@@ -86,21 +88,22 @@ class NoParentImportsPlugin {
 /** @type {import("@rspack/core").Configuration} */
 module.exports = {
     mode: isDev ? "development" : "production",
-    devtool: process.env.RSDOCTOR ? "source-map" : false,
+    devtool: bundleAnalyzer ? "source-map" : false,
     context: __dirname,
 
-    entry: {
-        index: path.resolve(__dirname, "src/main.tsx"),
-        customEvent: path.resolve(__dirname, "src/customEvent.tsx")
-    },
+    entry: path.resolve(__dirname, "src/main.tsx"),
     output: {
         path: path.resolve(__dirname, "dist"),
         publicPath: "/",
-        filename: "js/[name]-[contenthash].js",
-        chunkFilename: "js/[name]-[contenthash].js",
-        cssFilename: "css/[name]-[contenthash].css",
-        cssChunkFilename: "css/[name]-[contenthash].css",
-        assetModuleFilename: "assets/[name]-[contenthash][ext]"
+        filename: `js/[name]${fileHash}.js`,
+        chunkFilename: `js/[name]${fileHash}.js`,
+        cssFilename: `css/[name]${fileHash}.css`,
+        cssChunkFilename: `css/[name]${fileHash}.css`,
+        assetModuleFilename: `assets/[name]${fileHash}[ext]`
+    },
+
+    watchOptions: {
+        aggregateTimeout: 200
     },
 
     devServer: {
@@ -160,7 +163,7 @@ module.exports = {
                 vendor: {
                     test: /[\\/]node_modules[\\/]/,
                     name: "vendor",
-                    chunks: (chunk) => chunk.name === "index",
+                    chunks: "all",
                     enforce: true
                 }
             }
@@ -179,9 +182,9 @@ module.exports = {
     },
 
     plugins: [
-        process.env.RSDOCTOR === "true" && new OrphanFilesPlugin(),
-        process.env.RSDOCTOR === "true" && new RsdoctorRspackPlugin(),
-        process.env.RSDOCTOR !== "true" && new SourceMapDevToolPlugin({ filename: "[file].map", exclude: /vendor/ }),
+        bundleAnalyzer && new OrphanFilesPlugin(),
+        bundleAnalyzer && new RsdoctorRspackPlugin(),
+        !bundleAnalyzer && new SourceMapDevToolPlugin({ filename: "[file].map", test: /\.js$/, exclude: /vendor/ }),
         new NoParentImportsPlugin(),
         new CopyRspackPlugin({
             patterns: [
@@ -193,13 +196,11 @@ module.exports = {
         }),
         new HtmlRspackPlugin({
             template: path.resolve(__dirname, "public/index.html"),
-            chunks: ["index"],
             minify: !isDev
         }),
         new HtmlRspackPlugin({
             template: path.resolve(__dirname, "public/custom-event.html"),
             filename: "custom-event.html",
-            chunks: ["customEvent"],
             minify: !isDev
         })
     ].filter(Boolean)
