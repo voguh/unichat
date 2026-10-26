@@ -148,19 +148,11 @@ export function giphyGif(url: string): UniChatEmote | null {
 }
 
 function nullable(text: string): string | null {
-    if (text !== "") {
-        return text;
-    }
-
-    return null;
+    return text === "" ? null : text;
 }
 
 function nullableNumber(text: string): number | null {
-    if (text !== "") {
-        return Number(text);
-    }
-
-    return null;
+    return text === "" ? null : Number(text);
 }
 
 export function buildCustomEvent(form: CustomEventForm, seed: CustomEventSeed): UniChatEvent {

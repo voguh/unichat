@@ -36,22 +36,6 @@ interface Props {
     handleApply: (values: Record<string, unknown>) => Promise<void>;
 }
 
-function getDefaultValue(builder: WidgetFields): unknown {
-    if ("value" in builder) {
-        return builder.value;
-    }
-
-    return null;
-}
-
-function toInputValue(value: unknown): string | undefined {
-    if (value != null) {
-        return String(value);
-    }
-
-    return undefined;
-}
-
 const _logger = LoggerFactory.getLogger("Fields");
 export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Props): PReact.ComponentChildren {
     const [fields, setFields] = useState<Record<string, WidgetFields> | null>(null);
@@ -66,7 +50,7 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
             return null;
         }
 
-        const value = fieldState[key] ?? getDefaultValue(builder);
+        const value = fieldState[key] ?? ("value" in builder ? builder.value : null);
 
         switch (builder.type) {
             case "checkbox":
@@ -112,7 +96,7 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                         min={builder.min}
                         max={builder.max}
                         step={builder.step}
-                        value={toInputValue(value)}
+                        value={value != null ? String(value) : undefined}
                         onChange={(event) => updateField(key, event.currentTarget.value)}
                     />
                 );

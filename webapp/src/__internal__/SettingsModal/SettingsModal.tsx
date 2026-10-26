@@ -11,7 +11,7 @@
 import type * as PReact from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 
-import { Button, type ButtonVariant } from "@voguh/unichat-ui/Button";
+import { Button } from "@voguh/unichat-ui/Button";
 import { Modal } from "unichat/components/Modal";
 import { ModalContext } from "unichat/contexts/ModalContext";
 
@@ -84,14 +84,6 @@ interface Props {
 export function SettingsModal({ externalActiveTab, onHide, show }: Props): PReact.ComponentChildren {
     const [activeTab, setActiveTab] = useState<keyof typeof settingsItems>("general");
 
-    function getTabVariant(key: string): ButtonVariant {
-        if (key === activeTab) {
-            return "secondary";
-        }
-
-        return "default";
-    }
-
     useEffect(() => {
         if (externalActiveTab != null && externalActiveTab in settingsItems) {
             setActiveTab(externalActiveTab);
@@ -113,7 +105,7 @@ export function SettingsModal({ externalActiveTab, onHide, show }: Props): PReac
                         <Button
                             key={key}
                             data-tour={`settings-${key}-tab`}
-                            variant={getTabVariant(key)}
+                            variant={key === activeTab ? "secondary" : "default"}
                             onClick={() => setActiveTab(key)}
                         >
                             <i className={item.icon} />

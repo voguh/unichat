@@ -90,14 +90,6 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
         }
     }
 
-    function handleToggle(): Promise<void> {
-        if (scraperIsRunning) {
-            return handleStop();
-        }
-
-        return handleStart();
-    }
-
     /* ====================================================================== */
 
     function handleStatusLabel(): string {
@@ -231,7 +223,11 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                         />
                     </div>
                 </Tooltip>
-                <Button variant="secondary" onClick={handleToggle} disabled={loading || scraperIsLoading}>
+                <Button
+                    variant="secondary"
+                    onClick={scraperIsRunning ? handleStop : handleStart}
+                    disabled={loading || scraperIsLoading}
+                >
                     {handleStatusIcon()}
                     {handleStatusLabel()}
                 </Button>

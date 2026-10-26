@@ -55,16 +55,11 @@ export function Modal({
 }: ModalProps): PReact.ComponentChildren {
     const [sharedStore, setSharedStore] = useState<Record<string, unknown>>({});
 
-    let panelSize: DialogPanelSize = size;
-    if (fullscreen) {
-        panelSize = "fullscreen";
-    }
-
     return (
         <ModalContext.Provider value={{ onClose: onHide, sharedStore, setSharedStore }}>
             <Dialog open={show} onClose={onHide} closeOnInteractOutside={false}>
                 {backdrop && <DialogBackdrop />}
-                <DialogPanel {...rest} size={panelSize}>
+                <DialogPanel {...rest} size={fullscreen ? "fullscreen" : size}>
                     {(title != null || actions != null || withCloseButton) && (
                         <DialogHeader>
                             {title != null && <DialogTitle>{title}</DialogTitle>}

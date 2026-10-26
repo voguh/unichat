@@ -23,14 +23,6 @@ interface Props {
     baseUrl: string;
 }
 
-function formatHost(host: string): string {
-    if (host.includes(":")) {
-        return `[${host}]`;
-    }
-
-    return host;
-}
-
 export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
     const [systemHosts, setSystemHosts] = useState<SelectOption[]>([]);
     const [selectedHost, setSelectedHost] = useState<string>("localhost");
@@ -45,7 +37,11 @@ export function QRCodeModal({ baseUrl }: Props): PReact.ComponentChildren {
     useEffect(() => {
         async function init(): Promise<void> {
             const systemHosts = await commandService.getSystemHosts();
-            setSystemHosts(systemHosts.map(formatHost).map((host) => ({ label: host, value: host })));
+            setSystemHosts(
+                systemHosts
+                    .map((host) => (host.includes(":") ? `[${host}]` : host))
+                    .map((host) => ({ label: host, value: host }))
+            );
 
             if (systemHosts.length > 0) {
                 onSelectHost(systemHosts[0]);

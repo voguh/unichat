@@ -119,10 +119,7 @@ export function formatWarningsSummary(warnings: string[]): PReact.ComponentChild
         return null;
     }
 
-    let variant: Variants = "warning";
-    if (formattedWarnings.some((warning) => warning.variant === "danger")) {
-        variant = "danger";
-    }
+    const variant = formattedWarnings.some((warning) => warning.variant === "danger") ? "danger" : "warning";
 
     const content = (
         <ul>

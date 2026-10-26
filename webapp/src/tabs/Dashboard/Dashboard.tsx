@@ -110,14 +110,6 @@ export function Dashboard(): PReact.ComponentChildren {
         }
     }
 
-    function getOpenLabel(): string {
-        if (isOpenToLan) {
-            return "Open on device";
-        }
-
-        return "Open in browser";
-    }
-
     useEffect(() => {
         async function init(): Promise<void> {
             const defaultPreviewWidget = await settingsService.getItem(UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET);
@@ -160,7 +152,7 @@ export function Dashboard(): PReact.ComponentChildren {
                                 </Button>
                             </Tooltip>
 
-                            <Tooltip placement="bottom" content={getOpenLabel()}>
+                            <Tooltip placement="bottom" content={isOpenToLan ? "Open on device" : "Open in browser"}>
                                 <Button onClick={handleOpenInBrowser} data-tour="preview-open-in-browser">
                                     <i className="fas fa-globe" />
                                 </Button>

@@ -14,7 +14,7 @@ import { useEffect, useState } from "preact/hooks";
 import { randHex, randUserName } from "@ngneat/falso";
 import { emitTo } from "@tauri-apps/api/event";
 
-import type { UniChatAuthorType, UniChatEmote } from "@voguh/unichat-api/widgets/events";
+import type { UniChatAuthorType } from "@voguh/unichat-api/widgets/events";
 import { Badge } from "@voguh/unichat-ui/Badge";
 import { Button } from "@voguh/unichat-ui/Button";
 import { NumberInput } from "@voguh/unichat-ui/forms/NumberInput";
@@ -31,7 +31,6 @@ import {
     CUSTOM_EVENT_TYPES,
     type CustomEventForm,
     type CustomEventSeed,
-    type CustomEventType,
     type CustomPlatform,
     giphyGif,
     lockedAuthorType
@@ -134,22 +133,6 @@ function isValidJson(text: string): boolean {
     }
 }
 
-function pickType(types: CustomEventType[], current: CustomEventType): CustomEventType {
-    if (types.includes(current)) {
-        return current;
-    }
-
-    return types[0];
-}
-
-function toMessageMode(value: string): CustomEventForm["messageMode"] {
-    if (value === "custom") {
-        return "custom";
-    }
-
-    return "random";
-}
-
 function getAuthorTypeLabel(authorType: UniChatAuthorType): string | undefined {
     const option = AUTHOR_TYPES.find((type) => type.value === authorType);
     if (option != null) {
@@ -171,6 +154,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
     const isYouTube = form.platform === "youtube";
     const isOther = form.platform === "other";
     const lockedType = lockedAuthorType(form);
+    const authorTypeLabel = getAuthorTypeLabel(lockedType ?? form.authorType);
     const payloadIsValid = isValidJson(payload);
     const canEmit =
         seed != null && payloadIsValid && form.authorDisplayName !== "" && (!isOther || form.platformId !== "");
@@ -182,7 +166,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
     function changePlatform(value: string): void {
         const platform = PLATFORMS.find((item) => item.value === value)!;
         const types = CUSTOM_EVENT_TYPES[platform.value];
-        setForm((old) => ({ ...old, platform: platform.value, type: pickType(types, old.type) }));
+        setForm((old) => ({ ...old, platform: platform.value, type: types.includes(old.type) ? old.type : types[0] }));
         setMoreOpen(false);
     }
 
@@ -222,7 +206,9 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                     <SegmentedControl
                         className={styles.segmented}
                         value={form.messageMode}
-                        onChange={(event) => update({ messageMode: toMessageMode(event.currentTarget.value) })}
+                        onChange={(event) =>
+                            update({ messageMode: event.currentTarget.value === "custom" ? "custom" : "random" })
+                        }
                         items={[
                             { value: "random", label: "Random" },
                             { value: "custom", label: "Custom" }
@@ -279,7 +265,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
     ): PReact.ComponentChildren {
         return (
             <TextInput
-                groupProps={{ className: clsx({ wide: opts.wide === true }) }}
+                groupProps={opts.wide ? { className: "wide" } : undefined}
                 label={
                     <>
                         {label} {opts.optional && <small>(Optional)</small>}
@@ -303,21 +289,13 @@ export function CustomEventEditor(): PReact.ComponentChildren {
             );
         }
 
-        if (isYouTube) {
-            return textField("tier", "Membership level", { optional: true });
-        }
-
-        return textField("tier", "Tier", { optional: true });
+        return textField("tier", isYouTube ? "Membership level" : "Tier", { optional: true });
     }
 
     function buildDetails(): { details: PReact.ComponentChildren; more: PReact.ComponentChildren } {
         switch (form.type) {
             case "unichat:message": {
-                let gif: UniChatEmote | null = null;
-                if (isTwitch) {
-                    gif = giphyGif(form.gifUrl);
-                }
-
+                const gif = isTwitch ? giphyGif(form.gifUrl) : null;
                 const details =
                     gif != null ? (
                         <div className="wide lock-hint">
@@ -466,47 +444,6 @@ export function CustomEventEditor(): PReact.ComponentChildren {
         }
     }
 
-    function getEventGroupProps(): PReact.HTMLAttributes<HTMLDivElement> | undefined {
-        if (!isOther) {
-            return { className: "wide" };
-        }
-
-        return undefined;
-    }
-
-    function getAuthorCaption(): string | undefined {
-        const label = getAuthorTypeLabel(lockedType ?? form.authorType);
-        if (lockedType != null) {
-            return `${label} · fixed for this event`;
-        }
-
-        return label;
-    }
-
-    function getAuthorTypeDescription(): string | undefined {
-        if (lockedType != null) {
-            return "This platform always sends Viewer here.";
-        }
-
-        return undefined;
-    }
-
-    function getAuthorToggleLabel(): string {
-        if (authorOpen) {
-            return "Done";
-        }
-
-        return "Edit";
-    }
-
-    function getMoreToggleLabel(): string {
-        if (moreOpen) {
-            return "Hide options";
-        }
-
-        return "More options";
-    }
-
     function renderPayloadStatus(): PReact.ComponentChildren {
         if (!payloadIsValid) {
             return <Badge variant="danger">Invalid JSON</Badge>;
@@ -552,7 +489,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                 <div className={styles.grid}>
                     {isOther && textField("platformId", "Platform id")}
                     <Select
-                        groupProps={getEventGroupProps()}
+                        groupProps={isOther ? undefined : { className: "wide" }}
                         label="Event"
                         options={CUSTOM_EVENT_TYPES[form.platform].map((type) => ({
                             value: type,
@@ -568,10 +505,12 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                         <span>{form.authorDisplayName.charAt(0).toUpperCase()}</span>
                         <div>
                             <strong>{form.authorDisplayName}</strong>
-                            <span>{getAuthorCaption()}</span>
+                            <span>
+                                {lockedType != null ? `${authorTypeLabel} · fixed for this event` : authorTypeLabel}
+                            </span>
                         </div>
                         <Button size="sm" onClick={() => setAuthorOpen((old) => !old)}>
-                            {getAuthorToggleLabel()}
+                            {authorOpen ? "Done" : "Edit"}
                         </Button>
                     </div>
                     {authorOpen && (
@@ -579,7 +518,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                             {textField("authorDisplayName", "Name")}
                             <Select
                                 label="Type"
-                                description={getAuthorTypeDescription()}
+                                description={lockedType != null ? "This platform always sends Viewer here." : undefined}
                                 disabled={lockedType != null}
                                 options={AUTHOR_TYPES}
                                 value={lockedType ?? form.authorType}
@@ -597,7 +536,7 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                 {more && (
                     <>
                         <button type="button" onClick={() => setMoreOpen((old) => !old)}>
-                            {getMoreToggleLabel()}
+                            {moreOpen ? "Hide options" : "More options"}
                         </button>
                         {moreOpen && <div className={clsx(styles.grid, "more")}>{more}</div>}
                     </>

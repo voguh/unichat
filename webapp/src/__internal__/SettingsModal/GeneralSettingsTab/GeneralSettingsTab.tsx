@@ -77,14 +77,6 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
         eventEmitter.emit("tour:start", { type });
     }
 
-    function getFormKey(): string {
-        if (Object.keys(initialSettings).length > 0) {
-            return "loaded";
-        }
-
-        return "loading";
-    }
-
     useEffect(() => {
         if (Object.keys(initialSettings).length === 0) {
             return;
@@ -152,7 +144,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
     }, []);
 
     return (
-        <div className={styles.root} key={getFormKey()}>
+        <div className={styles.root} key={Object.keys(initialSettings).length === 0 ? "loading" : "loaded"}>
             <div className="body">
                 <Select
                     defaultValue={initialSettings[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET] ?? ""}
