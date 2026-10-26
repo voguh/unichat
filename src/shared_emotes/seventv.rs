@@ -11,10 +11,8 @@
 use std::collections::HashMap;
 
 use anyhow::Error;
-use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
-use serde_json::Value;
 
 use crate::events::UniChatEmote;
 use crate::utils::ureq;
@@ -29,43 +27,46 @@ pub struct SevenTVEmote {
     pub flags: u32
 }
 
-fn parse_emote(emote: &SevenTVEmote) -> UniChatEmote {
-    return UniChatEmote {
-        id: emote.id.clone(),
-        code: emote.name.clone(),
-        // Image size `4x` are used by default, so it's possible to use `1x`, `2x`, `3x`, `4x` images.
-        // By default `webp` is used for better compatibility.
-        url: format!("https://cdn.7tv.app/emote/{}/4x.webp", emote.id)
-    };
+#[derive(Deserialize)]
+pub struct SevenTVEmoteSet {
+    pub emotes: Option<Vec<SevenTVEmote>>
+}
+
+#[derive(Deserialize)]
+pub struct SevenTVUser {
+    pub emote_set: Option<SevenTVEmoteSet>
+}
+
+fn parse_emotes(emotes: Vec<SevenTVEmote>) -> HashMap<String, UniChatEmote> {
+    let mut parsed = HashMap::new();
+    for emote in emotes.iter() {
+        let unichat_emote = UniChatEmote {
+            id: emote.id.clone(),
+            code: emote.name.clone(),
+            // Image size `4x` are used by default, so it's possible to use `1x`, `2x`, `3x`, `4x` images.
+            // By default `webp` is used for better compatibility.
+            url: format!("https://cdn.7tv.app/emote/{}/4x.webp", emote.id)
+        };
+
+        parsed.insert(emote.name.clone(), unichat_emote);
+    }
+
+    return parsed;
 }
 
 pub fn fetch_global_emotes() -> Result<HashMap<String, UniChatEmote>, Error> {
     let url = "https://7tv.io/v3/emote-sets/global";
     let mut response = ureq::get(url).call()?;
-    let response_body: Value = response.body_mut().read_json()?;
-    let emotes = response_body.get("emotes").and_then(|v| v.as_array()).cloned().unwrap_or_default();
-    let emotes: Vec<SevenTVEmote> = serde_json::from_value(Value::Array(emotes))?;
+    let emote_set: SevenTVEmoteSet = response.body_mut().read_json()?;
 
-    let mut parsed = HashMap::new();
-    for emote in emotes.iter() {
-        parsed.insert(emote.name.clone(), parse_emote(emote));
-    }
-
-    return Ok(parsed);
+    return Ok(parse_emotes(emote_set.emotes.unwrap_or_default()));
 }
 
-pub fn fetch_channel_emotes(platform: String, channel_id: String) -> Result<HashMap<String, UniChatEmote>, Error> {
+pub fn fetch_channel_emotes(platform: &str, channel_id: &str) -> Result<HashMap<String, UniChatEmote>, Error> {
     let url = format!("https://7tv.io/v3/users/{}/{}", platform, channel_id);
     let mut response = ureq::get(url).call()?;
-    let response_body: Value = response.body_mut().read_json()?;
-    let emote_set = response_body.get("emote_set").ok_or(anyhow!("Emote set not found"))?;
-    let emotes = emote_set.get("emotes").and_then(|v| v.as_array()).cloned().unwrap_or_default();
-    let emotes: Vec<SevenTVEmote> = serde_json::from_value(Value::Array(emotes))?;
+    let user: SevenTVUser = response.body_mut().read_json()?;
+    let emotes = user.emote_set.and_then(|emote_set| emote_set.emotes).unwrap_or_default();
 
-    let mut parsed = HashMap::new();
-    for emote in emotes.iter() {
-        parsed.insert(emote.name.clone(), parse_emote(emote));
-    }
-
-    return Ok(parsed);
+    return Ok(parse_emotes(emotes));
 }
