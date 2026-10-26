@@ -45,7 +45,7 @@ pub struct UniChatReleaseInfo {
 }
 
 pub fn get_info() -> Result<UniChatReleaseInfo, Error> {
-    let mut releases: Vec<UniChatRelease> = cache::get_or_fetch("releases", TTL, || api::get("/v1/unichat-releases"))?;
+    let mut releases: Vec<UniChatRelease> = cache::get_or_fetch("releases", TTL, || api::get("/unichat-releases"))?;
 
     releases.sort_by(|a, b| semver::rcompare(&a.name, &b.name));
     let latest_stable = releases.iter().find(|r| !r.prerelease);

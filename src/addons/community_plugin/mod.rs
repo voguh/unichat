@@ -33,7 +33,7 @@ use crate::utils::properties::AppPaths;
 
 /* ========================================================================== */
 
-const COMMUNITY_PLUGINS_PATH: &str = "/v1/community-plugins";
+const COMMUNITY_PLUGINS_PATH: &str = "/community-plugins";
 const COMMUNITY_PLUGINS_FILE_TTL: Duration = Duration::from_secs(60 * 60);
 const COMMUNITY_PLUGIN_ID_PREFIX: &str = "unichat-";
 

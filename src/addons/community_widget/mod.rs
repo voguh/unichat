@@ -33,7 +33,7 @@ use crate::widgets::reload_user_widgets;
 
 /* ========================================================================== */
 
-const COMMUNITY_WIDGETS_PATH: &str = "/v2/community-widgets";
+const COMMUNITY_WIDGETS_PATH: &str = "/community-widgets";
 const COMMUNITY_WIDGETS_FILE_TTL: Duration = Duration::from_secs(60 * 60);
 const COMMUNITY_WIDGET_ID_PREFIX: &str = "unichat-widget-";
 

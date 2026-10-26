@@ -18,7 +18,7 @@ pub mod release;
 
 /* ========================================================================== */
 
-const UNICHAT_API_URL: &str = "https://unichat.voguh.me/api";
+const UNICHAT_API_URL: &str = "https://unichat.voguh.me/api/v1";
 
 pub fn url(path: &str) -> String {
     return format!("{}{}", UNICHAT_API_URL, path);
