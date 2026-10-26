@@ -28,8 +28,8 @@ use crate::addons::find_release;
 use crate::addons::replace_addon;
 use crate::api;
 use crate::cache;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 
 /* ========================================================================== */
 
@@ -84,7 +84,7 @@ fn widget_fieldstates(plugin_path: &Path) -> Vec<PathBuf> {
 
 pub fn list() -> Result<Vec<CommunityPlugin>, Error> {
     let items = fetch_all()?;
-    let plugins_path = properties::get_app_path(AppPaths::UniChatUserPlugins);
+    let plugins_path = paths::get(AppPaths::UniChatUserPlugins);
 
     let mut community_plugins = Vec::new();
     for item in items {
@@ -105,7 +105,7 @@ pub fn list() -> Result<Vec<CommunityPlugin>, Error> {
 pub fn get(internal_id: &str) -> Result<CommunityPlugin, Error> {
     let data = fetch(internal_id)?;
     let id = community_addon_id(&data.id, COMMUNITY_PLUGIN_ID_PREFIX);
-    let plugins_path = properties::get_app_path(AppPaths::UniChatUserPlugins);
+    let plugins_path = paths::get(AppPaths::UniChatUserPlugins);
     let installed_version = find_installed_version(&plugins_path, &id);
 
     return Ok(build(data, installed_version));
@@ -118,7 +118,7 @@ pub fn install(internal_id: &str, release: &str) -> Result<(), Error> {
     check_compatibility(&data, selected)?;
 
     let (extract_path, extracted_plugin_path) = download_release(&id, selected)?;
-    let plugin_path = properties::get_app_path(AppPaths::UniChatUserPlugins).join(&id);
+    let plugin_path = paths::get(AppPaths::UniChatUserPlugins).join(&id);
     replace_addon(&extracted_plugin_path, &plugin_path, &widget_fieldstates(&plugin_path))?;
 
     fs::remove_dir_all(&extract_path).map_err(|e| anyhow!("Failed to clean '{:?}': {:#?}", extract_path, e))?;

@@ -19,6 +19,7 @@ use std::sync::RwLockReadGuard;
 
 use anyhow::Error;
 use anyhow::anyhow;
+use regex::Regex;
 use serde_json::Value;
 
 use crate::events;
@@ -32,9 +33,9 @@ use crate::settings::SettingLogEventLevel;
 use crate::shared_emotes;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
 use crate::utils::irc::IRCMessage;
-use crate::utils::is_valid_twitch_channel_name;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 use crate::utils::properties;
-use crate::utils::properties::AppPaths;
 use crate::utils::properties::PropertiesKey;
 
 mod mapper;
@@ -132,7 +133,7 @@ fn handle_cheermotes_event(event_type: &str, payload: &Value) -> Result<(), Erro
 /* ========================================================================== */
 
 fn log_action(file_name: &str, content: &impl std::fmt::Display) {
-    let app_log_dir = properties::get_app_path(AppPaths::AppLog);
+    let app_log_dir = paths::get(AppPaths::AppLog);
     let twitch_log_dir = app_log_dir.join(SCRAPER_ID);
     if !twitch_log_dir.exists() {
         fs::create_dir_all(&twitch_log_dir).expect("Failed to create Twitch log directory");
@@ -159,9 +160,7 @@ fn handle_ws_event(_event_type: &str, message: &Value) -> Result<(), Error> {
                 log_action("events-parsed.log", &serialized);
             }
 
-            if let Err(err) = events::emit(parsed) {
-                log::error!("An error occurred on send unichat event: {:#?}", err);
-            }
+            events::emit(parsed);
         }
 
         Ok(None) => {
@@ -193,9 +192,7 @@ fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error>
                 log_action("events-parsed.log", &serialized);
             }
 
-            if let Err(err) = events::emit(parsed) {
-                log::error!("An error occurred on send unichat event: {:#?}", err);
-            }
+            events::emit(parsed);
         }
 
         Ok(None) => {
@@ -210,6 +207,15 @@ fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error>
     }
 
     return Ok(());
+}
+
+/* ========================================================================== */
+
+static CHANNEL_NAME: LazyLock<Regex> = LazyLock::new(|| {
+    return Regex::new(r"^[0-9A-Za-z_]{4,25}$").expect("Twitch::CHANNEL_NAME regex is invalid");
+});
+fn is_valid_channel_name(channel_name: &str) -> bool {
+    return CHANNEL_NAME.is_match(channel_name);
 }
 
 /* ========================================================================== */
@@ -275,7 +281,7 @@ impl UniChatScraper for TwitchUniChatScraper {
             }
         }
 
-        if let Some(channel_name) = channel_name.filter(|channel_name| is_valid_twitch_channel_name(channel_name)) {
+        if let Some(channel_name) = channel_name.filter(|channel_name| is_valid_channel_name(channel_name)) {
             let formatted_url = format!("https://www.twitch.tv/popout/{}/chat", channel_name);
             return Ok(formatted_url);
         }

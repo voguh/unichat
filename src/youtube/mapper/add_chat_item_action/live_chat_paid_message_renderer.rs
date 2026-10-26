@@ -24,7 +24,6 @@ use crate::events::UniChatDonateEventPayload;
 use crate::events::UniChatEmote;
 use crate::events::UniChatEvent;
 use crate::events::UniChatPlatform;
-use crate::utils;
 use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;
@@ -86,13 +85,22 @@ fn build_option_emotes(message: &Option<MessageRunsWrapper>) -> Result<Vec<UniCh
     return Ok(Vec::new());
 }
 
+fn parse_u32_to_rgba(color: u32) -> (u8, u8, u8, f32) {
+    let a = ((color >> 24) & 0xFF) as u8;
+    let r = ((color >> 16) & 0xFF) as u8;
+    let g = ((color >> 8) & 0xFF) as u8;
+    let b = (color & 0xFF) as u8;
+
+    return (r, g, b, a as f32 / 255.0);
+}
+
 fn create_flags_map(parsed: &LiveChatPaidMessageRenderer) -> HashMap<String, Option<String>> {
     let mut flags = HashMap::new();
 
     /* ====================================================================== */
 
     if let Some(body_background_color) = parsed.body_background_color {
-        let (r, g, b, a) = utils::parse_u32_to_rgba(body_background_color);
+        let (r, g, b, a) = parse_u32_to_rgba(body_background_color);
         let rgba = format!("rgba({}, {}, {}, {:.3})", r, g, b, a);
         flags.insert(FLAG_YOUTUBE_SUPERCHAT_PRIMARY_BG_COLOR.to_string(), Some(rgba.clone()));
 
@@ -101,7 +109,7 @@ fn create_flags_map(parsed: &LiveChatPaidMessageRenderer) -> HashMap<String, Opt
     }
 
     if let Some(body_text_color) = parsed.body_text_color {
-        let (r, g, b, a) = utils::parse_u32_to_rgba(body_text_color);
+        let (r, g, b, a) = parse_u32_to_rgba(body_text_color);
         let rgba = format!("rgba({}, {}, {}, {:.3})", r, g, b, a);
         flags.insert(FLAG_YOUTUBE_SUPERCHAT_PRIMARY_TEXT_COLOR.to_string(), Some(rgba));
     }
@@ -109,13 +117,13 @@ fn create_flags_map(parsed: &LiveChatPaidMessageRenderer) -> HashMap<String, Opt
     /* ====================================================================== */
 
     if let Some(header_background_color) = parsed.header_background_color {
-        let (r, g, b, a) = utils::parse_u32_to_rgba(header_background_color);
+        let (r, g, b, a) = parse_u32_to_rgba(header_background_color);
         let rgba = format!("rgba({}, {}, {}, {:.3})", r, g, b, a);
         flags.insert(FLAG_YOUTUBE_SUPERCHAT_SECONDARY_BG_COLOR.to_string(), Some(rgba));
     }
 
     if let Some(header_text_color) = parsed.header_text_color {
-        let (r, g, b, a) = utils::parse_u32_to_rgba(header_text_color);
+        let (r, g, b, a) = parse_u32_to_rgba(header_text_color);
         let rgba = format!("rgba({}, {}, {}, {:.3})", r, g, b, a);
         flags.insert(FLAG_YOUTUBE_SUPERCHAT_SECONDARY_TEXT_COLOR.to_string(), Some(rgba));
     }

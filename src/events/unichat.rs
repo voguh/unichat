@@ -44,7 +44,7 @@ pub enum UniChatEvent {
     Custom(serde_json::Value)
 }
 
-/* <============================================================================================> */
+/* ============================================================================================== */
 
 pub const FLAG_TWITCH_STREAK_DAYS: &str = "unichat:twitch_streak_days";
 pub const FLAG_TWITCH_GIF: &str = "unichat:twitch_gif";
@@ -60,7 +60,7 @@ pub const FLAG_YOUTUBE_SUPERCHAT_SECONDARY_TEXT_COLOR: &str = "unichat:youtube_s
 
 pub const FLAG_EMULATOR_GENERATED: &str = "unichat:emulator_generated";
 
-/* <============================================================================================> */
+/* ============================================================================================== */
 
 #[derive(Clone, Debug)]
 pub enum UniChatPlatform {
@@ -93,6 +93,8 @@ impl<'de> Deserialize<'de> for UniChatPlatform {
         });
     }
 }
+
+/* ========================================================================== */
 
 #[derive(Clone, Debug)]
 pub enum UniChatAuthorType {
@@ -132,6 +134,8 @@ impl<'de> Deserialize<'de> for UniChatAuthorType {
     }
 }
 
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Hash)]
 #[serde(rename_all = "camelCase")]
 pub struct UniChatEmote {
@@ -147,7 +151,7 @@ pub struct UniChatBadge {
     pub url: String
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -157,7 +161,7 @@ pub struct UniChatClearEventPayload {
     pub timestamp: i64
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -173,7 +177,7 @@ pub struct UniChatRemoveMessageEventPayload {
     pub timestamp: i64
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -189,7 +193,7 @@ pub struct UniChatRemoveAuthorEventPayload {
     pub timestamp: i64
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -215,7 +219,7 @@ pub struct UniChatMessageEventPayload {
     pub timestamp: i64
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -247,7 +251,7 @@ pub struct UniChatDonateEventPayload {
     pub timestamp: i64
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -276,7 +280,7 @@ pub struct UniChatSponsorEventPayload {
     pub timestamp: i64
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -302,7 +306,7 @@ pub struct UniChatSponsorGiftEventPayload {
     pub timestamp: i64
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -327,7 +331,7 @@ pub struct UniChatRaidEventPayload {
     pub timestamp: i64
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -359,7 +363,7 @@ pub struct UniChatRedemptionEventPayload {
     pub timestamp: i64
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -393,7 +397,7 @@ pub struct UniChatCheerEventPayload {
     pub timestamp: i64
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]

@@ -18,15 +18,15 @@ use axum::response::Response;
 
 use crate::axum::utils::CACHE_REVALIDATE;
 use crate::axum::utils::serve_partial_content;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 use crate::utils::safe_guard_path;
 
 /* ========================================================================== */
 
 pub async fn gallery(Path(asset_path): Path<String>, req: Request<Body>) -> Response {
     let asset_full_path: PathBuf;
-    let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
+    let gallery_path = paths::get(AppPaths::UniChatGallery);
     match safe_guard_path(&gallery_path, &asset_path) {
         Ok(path) => asset_full_path = path,
         Err(err) => {

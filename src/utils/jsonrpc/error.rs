@@ -20,12 +20,12 @@ impl JsonRPCErrorDetail {
         return self.code;
     }
 
-    pub fn message(&self) -> String {
-        return self.message.clone();
+    pub fn message(&self) -> &str {
+        return &self.message;
     }
 
-    pub fn data(&self) -> Option<serde_json::Value> {
-        return self.data.clone();
+    pub fn data(&self) -> Option<&serde_json::Value> {
+        return self.data.as_ref();
     }
 }
 
@@ -102,15 +102,15 @@ impl JsonRPCError {
 
     /* ====================================================================== */
 
-    pub fn jsonrpc(&self) -> String {
-        return self.jsonrpc.clone();
+    pub fn jsonrpc(&self) -> &str {
+        return &self.jsonrpc;
     }
 
-    pub fn id(&self) -> Option<String> {
-        return self.id.clone();
+    pub fn id(&self) -> Option<&str> {
+        return self.id.as_deref();
     }
 
-    pub fn error(&self) -> JsonRPCErrorDetail {
-        return self.error.clone();
+    pub fn error(&self) -> &JsonRPCErrorDetail {
+        return &self.error;
     }
 }

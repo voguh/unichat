@@ -27,7 +27,7 @@ pub async fn close_custom_event_window<R: Runtime>(_app: AppHandle<R>) -> Result
 
 #[tauri::command]
 pub async fn dispatch_emulated_event<R: Runtime>(_app: AppHandle<R>, event: UniChatEvent) -> Result<(), String> {
-    events::emit(event).map_err(|e| format!("Failed to emit event: {:#?}", e))?;
+    events::emit(event);
     return Ok(());
 }
 

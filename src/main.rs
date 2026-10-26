@@ -20,8 +20,8 @@ use std::time::Instant;
 use anyhow::Error;
 use tauri::Listener;
 
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 
 include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 
@@ -81,7 +81,7 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
 fn has_plugins() -> bool {
     let mut has_plugins = false;
-    let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
+    let user_plugins_dir = paths::get(AppPaths::UniChatUserPlugins);
 
     if user_plugins_dir.exists() && user_plugins_dir.is_dir() {
         if let Ok(entries) = fs::read_dir(&user_plugins_dir) {
@@ -109,8 +109,8 @@ fn run_startup() -> Result<(), Error> {
 
     /* ====================================================================== */
 
-    wm::splash_window::stage(1, "Initializing properties...");
-    utils::properties::init()?;
+    wm::splash_window::stage(1, "Initializing paths...");
+    paths::init()?;
 
     wm::splash_window::stage(2, "Initializing settings...");
     settings::init()?;
@@ -118,7 +118,7 @@ fn run_startup() -> Result<(), Error> {
     /* ====================================================================== */
 
     wm::splash_window::stage(3, "Setting up application plugins directory...");
-    let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
+    let user_plugins_dir = paths::get(AppPaths::UniChatUserPlugins);
     if !&user_plugins_dir.exists() {
         log::info!("Creating user plugins directory at {:?}", user_plugins_dir);
         fs::create_dir_all(&user_plugins_dir)?;
@@ -127,7 +127,7 @@ fn run_startup() -> Result<(), Error> {
     /* ====================================================================== */
 
     wm::splash_window::stage(4, "Setting up application gallery directory...");
-    let gallery_dir = properties::get_app_path(AppPaths::UniChatGallery);
+    let gallery_dir = paths::get(AppPaths::UniChatGallery);
     if !&gallery_dir.exists() {
         log::info!("Creating gallery directory at {:?}", gallery_dir);
         fs::create_dir_all(&gallery_dir)?;
@@ -136,7 +136,7 @@ fn run_startup() -> Result<(), Error> {
     /* ====================================================================== */
 
     wm::splash_window::stage(5, "Setting up application widgets directory...");
-    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
+    let user_widgets_dir = paths::get(AppPaths::UniChatUserWidgets);
     if !&user_widgets_dir.exists() {
         log::info!("Creating user widgets directory at {:?}", user_widgets_dir);
         fs::create_dir_all(&user_widgets_dir)?;
@@ -145,7 +145,7 @@ fn run_startup() -> Result<(), Error> {
     /* ====================================================================== */
 
     wm::splash_window::stage(6, "Initializing events emitter module...");
-    events::init()?;
+    events::init();
 
     wm::splash_window::stage(7, "Initializing currency module...");
     currency::init()?;

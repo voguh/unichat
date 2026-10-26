@@ -22,8 +22,8 @@ use sha2::Sha256;
 use zip::ZipArchive;
 
 use crate::UNICHAT_VERSION;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 use crate::utils::semver;
 use crate::utils::semver::Version;
 use crate::utils::semver::VersionRange;
@@ -241,7 +241,7 @@ fn download_release(id: &str, release: &AddonRelease) -> Result<(PathBuf, PathBu
     let asset = asset.ok_or(anyhow!("Release '{}' of '{}' has no asset '{}'", release.name, id, asset_name))?;
     let bytes = download_release_asset(asset)?;
 
-    let extract_path = properties::get_app_path(AppPaths::AppCache).join(format!("install_{}", id));
+    let extract_path = paths::get(AppPaths::AppCache).join(format!("install_{}", id));
     if extract_path.exists() {
         fs::remove_dir_all(&extract_path).map_err(|e| anyhow!("Failed to clean '{:?}': {:#?}", extract_path, e))?;
     }

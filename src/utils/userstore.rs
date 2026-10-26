@@ -27,13 +27,13 @@ use tokio::time::sleep;
 use crate::events;
 use crate::events::UniChatEvent;
 use crate::events::UniChatUserstoreUpdateEventPayload;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 
 /* ========================================================================== */
 
 static USERSTORE_PATH: LazyLock<path::PathBuf> = LazyLock::new(|| {
-    return properties::get_app_path(AppPaths::AppData).join("userstore.json");
+    return paths::get(AppPaths::AppData).join("userstore.json");
 });
 
 /* ========================================================================== */
@@ -128,7 +128,7 @@ pub fn flush_userstore() -> Result<(), Error> {
 pub fn init() -> Result<(), Error> {
     let store_path = USERSTORE_PATH.as_path();
     if !store_path.exists() {
-        fs::write(store_path, "{}")?;
+        return Ok(());
     }
 
     let raw_data = fs::read_to_string(store_path)?;
@@ -176,47 +176,31 @@ pub fn set_item<V: serde::ser::Serialize>(key: &str, value: &Option<V>) -> Resul
         return Err(anyhow!("Store key cannot be empty"));
     }
 
-    let mut store = write();
-
+    let mut raw_value = None;
     if let Some(value) = value {
-        let raw_value: String;
         if let Ok(plain) = serde_plain::to_string(value) {
-            raw_value = plain;
+            raw_value = Some(plain);
         } else if let Ok(json) = serde_json::to_string(value) {
-            raw_value = json;
+            raw_value = Some(json);
         } else {
             return Err(anyhow!("Failed to serialize UserStore item for key '{}'", key));
         }
+    }
 
+    let mut store = write();
+    if let Some(raw_value) = &raw_value {
         store.insert(key.to_string(), raw_value.clone());
-
-        let event = UniChatEvent::UserstoreUpdate(UniChatUserstoreUpdateEventPayload {
-            key: key.to_string(),
-            value: Some(raw_value.clone())
-        });
-        if let Err(err) = events::emit(event) {
-            log::error!("Failed to emit UserStoreUpdate event: {:#?}", err);
-        }
-
-        if let Err(err) = USERSTORE_WRITE_TX.send(()) {
-            log::error!("Failed to schedule UserStore flush: {:#?}", err);
-        }
     } else {
         store.remove(key);
-
-        #[rustfmt::skip]
-        let event = UniChatEvent::UserstoreUpdate(UniChatUserstoreUpdateEventPayload {
-            key: key.to_string(),
-            value: None
-        });
-        if let Err(err) = events::emit(event) {
-            log::error!("Failed to emit UserStoreUpdate event: {:#?}", err);
-        }
-
-        if let Err(err) = USERSTORE_WRITE_TX.send(()) {
-            log::error!("Failed to schedule UserStore flush: {:#?}", err);
-        }
     }
+
+    #[rustfmt::skip]
+    let event = UniChatEvent::UserstoreUpdate(UniChatUserstoreUpdateEventPayload {
+        key: key.to_string(),
+        value: raw_value
+    });
+    events::emit(event);
+    USERSTORE_WRITE_TX.send(()).expect("UserStore::USERSTORE_WRITE_TX has no receiver");
 
     return Ok(());
 }

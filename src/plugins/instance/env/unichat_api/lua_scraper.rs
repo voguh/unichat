@@ -29,8 +29,8 @@ use crate::scraper::ScraperStatusEvent;
 use crate::scraper::UniChatScraper;
 use crate::settings;
 use crate::settings::SettingLogEventLevel;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 
 /* ========================================================================== */
 
@@ -112,7 +112,7 @@ impl LuaUniChatScraper {
     }
 
     fn log_action(&self, file_name: &str, content: &impl std::fmt::Display) {
-        let app_log_dir = properties::get_app_path(AppPaths::AppLog);
+        let app_log_dir = paths::get(AppPaths::AppLog);
         let scraper_log_dir = app_log_dir.join(&self.id);
         if !scraper_log_dir.exists() {
             fs::create_dir_all(&scraper_log_dir).expect("Failed to create scraper log directory")
@@ -211,9 +211,7 @@ impl UniChatScraper for LuaUniChatScraper {
                     self.log_action("events-parsed.log", &str);
                 }
 
-                if let Err(err) = events::emit(parsed) {
-                    log::error!(target: &format!("scraper:{}", self.name), "An error occurred on send unichat event: {:#?}", err);
-                }
+                events::emit(parsed);
             }
             Ok(None) => {
                 if [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {

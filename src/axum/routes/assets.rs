@@ -20,8 +20,8 @@ use crate::axum::utils::CACHE_IMMUTABLE;
 use crate::axum::utils::CACHE_REVALIDATE;
 use crate::axum::utils::serve_partial_content;
 use crate::plugins;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 use crate::utils::safe_guard_path;
 
 /* ========================================================================== */
@@ -39,7 +39,7 @@ pub async fn assets(Path(mut asset_path): Path<String>, req: Request<Body>) -> R
         asset_path = remaining_parts.join("/");
         cache_control = CACHE_REVALIDATE;
     } else {
-        asset_base_path = properties::get_app_path(AppPaths::UniChatAssets);
+        asset_base_path = paths::get(AppPaths::UniChatAssets);
         cache_control = CACHE_IMMUTABLE;
     }
 

@@ -10,10 +10,6 @@
 
 #![allow(unused)]
 use std::cmp::Ordering;
-use std::fmt::Display;
-
-use anyhow::Error;
-use anyhow::anyhow;
 
 mod bound_type;
 mod pre_release_type;

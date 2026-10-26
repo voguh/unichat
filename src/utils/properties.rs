@@ -9,7 +9,6 @@
  ******************************************************************************/
 
 use std::collections::HashMap;
-use std::path::PathBuf;
 use std::sync::LazyLock;
 use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
@@ -17,10 +16,6 @@ use std::sync::RwLockWriteGuard;
 
 use anyhow::Error;
 use anyhow::anyhow;
-use tauri::Manager;
-use tauri::path::BaseDirectory;
-
-use crate::get_app_handle;
 
 /* ========================================================================== */
 
@@ -29,24 +24,6 @@ use crate::get_app_handle;
 pub enum PropertiesKey {
     YouTubeChannelId,
     TwitchChannelId
-}
-
-#[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "snake_case")]
-pub enum AppPaths {
-    AppCache,
-    AppConfig,
-    AppData,
-    AppLocalData,
-    AppLog,
-
-    UniChatAssets,
-    UniChatGallery,
-    UniChatSystemWidgets,
-    UniChatUserWidgets,
-    UniChatUserPlugins,
-    UniChatLogoIcon,
-    UniChatLicense
 }
 
 /* ========================================================================== */
@@ -70,54 +47,7 @@ fn serialize_key<S: serde::ser::Serialize>(key: S) -> String {
     }
 }
 
-pub fn init() -> Result<(), Error> {
-    let app_handle = get_app_handle();
-    let path = app_handle.path();
-
-    let app_cache_dir = path.app_cache_dir()?;
-    let app_config_dir = path.app_config_dir()?;
-    let app_data_dir = path.app_data_dir()?;
-    let app_local_data_dir = path.app_local_data_dir()?;
-    let app_log_dir = path.app_log_dir()?;
-    let assets_dir = path.resolve("assets", BaseDirectory::Resource)?;
-    let gallery_dir = path.resolve("gallery", BaseDirectory::AppData)?;
-    let system_widgets_dir = path.resolve("widgets", BaseDirectory::Resource)?;
-    let user_widgets_dir = path.resolve("widgets", BaseDirectory::AppData)?;
-    let user_plugins_dir = path.resolve("plugins", BaseDirectory::AppData)?;
-    let logo_icon_file = path.resolve("icons/icon.png", BaseDirectory::Resource)?;
-    let license_file = path.resolve("LICENSE", BaseDirectory::Resource)?;
-
-    let app_cache_path = app_cache_dir.to_string_lossy().to_string();
-    let app_config_path = app_config_dir.to_string_lossy().to_string();
-    let app_data_path = app_data_dir.to_string_lossy().to_string();
-    let app_local_data_path = app_local_data_dir.to_string_lossy().to_string();
-    let app_log_path = app_log_dir.to_string_lossy().to_string();
-    let assets_path = assets_dir.to_string_lossy().to_string();
-    let gallery_path = gallery_dir.to_string_lossy().to_string();
-    let system_widgets_path = system_widgets_dir.to_string_lossy().to_string();
-    let user_widgets_path = user_widgets_dir.to_string_lossy().to_string();
-    let user_plugins_path = user_plugins_dir.to_string_lossy().to_string();
-    let logo_icon_path = logo_icon_file.to_string_lossy().to_string();
-    let license_path = license_file.to_string_lossy().to_string();
-
-    let mut properties = write();
-    properties.insert(serialize_key(AppPaths::AppCache), app_cache_path);
-    properties.insert(serialize_key(AppPaths::AppConfig), app_config_path);
-    properties.insert(serialize_key(AppPaths::AppData), app_data_path);
-    properties.insert(serialize_key(AppPaths::AppLocalData), app_local_data_path);
-    properties.insert(serialize_key(AppPaths::AppLog), app_log_path);
-    properties.insert(serialize_key(AppPaths::UniChatAssets), assets_path);
-    properties.insert(serialize_key(AppPaths::UniChatGallery), gallery_path);
-    properties.insert(serialize_key(AppPaths::UniChatSystemWidgets), system_widgets_path);
-    properties.insert(serialize_key(AppPaths::UniChatUserWidgets), user_widgets_path);
-    properties.insert(serialize_key(AppPaths::UniChatUserPlugins), user_plugins_path);
-    properties.insert(serialize_key(AppPaths::UniChatLogoIcon), logo_icon_path);
-    properties.insert(serialize_key(AppPaths::UniChatLicense), license_path);
-
-    return Ok(());
-}
-
-fn get_item_raw<S: serde::ser::Serialize>(key: S) -> Result<String, Error> {
+pub fn get_item(key: PropertiesKey) -> Result<String, Error> {
     let props = read();
     let key = serialize_key(key);
 
@@ -128,16 +58,7 @@ fn get_item_raw<S: serde::ser::Serialize>(key: S) -> Result<String, Error> {
     }
 }
 
-pub fn get_item(key: PropertiesKey) -> Result<String, Error> {
-    return get_item_raw(key);
-}
-
 pub fn set_item(key: PropertiesKey, value: String) {
     let mut properties = write();
     properties.insert(serialize_key(key), value);
-}
-
-pub fn get_app_path(key: AppPaths) -> PathBuf {
-    let path_str = get_item_raw(key).expect("Failed to get app path");
-    return PathBuf::from(path_str);
 }

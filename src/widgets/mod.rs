@@ -27,8 +27,8 @@ use crate::addons::UniChatAddonManifest;
 use crate::addons::load_manifest;
 use crate::plugins::PluginMetadata;
 use crate::utils::constants::BASE_URL;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 
 /* ========================================================================== */
 
@@ -295,7 +295,7 @@ pub fn get_widget_from_rest_path(rest_path: &str) -> Result<WidgetMetadata, Erro
 }
 
 pub fn reload_user_widgets() -> Result<(), Error> {
-    let user_widgets_path = properties::get_app_path(AppPaths::UniChatUserWidgets);
+    let user_widgets_path = paths::get(AppPaths::UniChatUserWidgets);
     load_widgets_from_disk(&user_widgets_path, WidgetSource::User, |_| {})?;
 
     return Ok(());
@@ -318,10 +318,10 @@ pub fn add_plugin_widgets(plugin: &Arc<PluginMetadata>) -> Result<(), Error> {
 /* ========================================================================== */
 
 pub fn init() -> Result<(), Error> {
-    let system_widgets_path = properties::get_app_path(AppPaths::UniChatSystemWidgets);
+    let system_widgets_path = paths::get(AppPaths::UniChatSystemWidgets);
     load_widgets_from_disk(&system_widgets_path, WidgetSource::System, |_| {})?;
 
-    let user_widgets_path = properties::get_app_path(AppPaths::UniChatUserWidgets);
+    let user_widgets_path = paths::get(AppPaths::UniChatUserWidgets);
     load_widgets_from_disk(&user_widgets_path, WidgetSource::User, |_| {})?;
 
     return Ok(());

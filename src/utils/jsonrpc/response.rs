@@ -23,15 +23,15 @@ impl JsonRPCResponse {
 
     /* ====================================================================== */
 
-    pub fn jsonrpc(&self) -> String {
-        return self.jsonrpc.clone();
+    pub fn jsonrpc(&self) -> &str {
+        return &self.jsonrpc;
     }
 
-    pub fn id(&self) -> String {
-        return self.id.clone();
+    pub fn id(&self) -> &str {
+        return &self.id;
     }
 
-    pub fn result(&self) -> serde_json::Value {
-        return self.result.clone();
+    pub fn result(&self) -> &serde_json::Value {
+        return &self.result;
     }
 }

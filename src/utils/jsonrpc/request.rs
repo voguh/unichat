@@ -23,19 +23,19 @@ impl JsonRPCRequest {
 
     /* ====================================================================== */
 
-    pub fn jsonrpc(&self) -> String {
-        return self.jsonrpc.clone();
+    pub fn jsonrpc(&self) -> &str {
+        return &self.jsonrpc;
     }
 
-    pub fn id(&self) -> Option<String> {
-        return self.id.clone();
+    pub fn id(&self) -> Option<&str> {
+        return self.id.as_deref();
     }
 
-    pub fn method(&self) -> String {
-        return self.method.clone();
+    pub fn method(&self) -> &str {
+        return &self.method;
     }
 
-    pub fn params(&self) -> Option<Vec<serde_json::Value>> {
-        return self.params.clone();
+    pub fn params(&self) -> Option<&[serde_json::Value]> {
+        return self.params.as_deref();
     }
 }

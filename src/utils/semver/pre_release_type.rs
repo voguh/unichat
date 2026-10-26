@@ -15,7 +15,7 @@ use anyhow::anyhow;
 
 /* ========================================================================== */
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PreReleaseType {
     Alpha,
     Beta,

@@ -16,8 +16,8 @@ use anyhow::Error;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 
 /* ========================================================================== */
 
@@ -26,7 +26,7 @@ pub fn get_or_fetch<T: Serialize + DeserializeOwned>(
     max_age: Duration,
     fetch: impl FnOnce() -> Result<T, Error>
 ) -> Result<T, Error> {
-    let app_cache_dir = properties::get_app_path(AppPaths::AppCache);
+    let app_cache_dir = paths::get(AppPaths::AppCache);
     if !app_cache_dir.exists() {
         fs::create_dir_all(&app_cache_dir)?;
     }

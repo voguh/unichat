@@ -24,8 +24,8 @@ use mlua::Value;
 
 use crate::addons::UniChatAddonManifest;
 use crate::addons::load_manifest;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 use crate::utils::semver::Version;
 use crate::utils::semver::VersionRange;
 
@@ -279,7 +279,7 @@ fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, UniChat
 pub fn load_plugins() -> Result<(), Error> {
     let mut loaded_manifests: Vec<(PathBuf, UniChatAddonManifest)> = Vec::new();
 
-    let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
+    let user_plugins_dir = paths::get(AppPaths::UniChatUserPlugins);
     let user_plugins_manifests = load_plugins_from_disk(user_plugins_dir)?;
     loaded_manifests.extend(user_plugins_manifests);
 

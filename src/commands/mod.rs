@@ -48,7 +48,7 @@ pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), S
         timestamp: timestamp_usec
     });
 
-    events::emit(event).map_err(|e| format!("An error occurred on emit ClearChat event: {:#?}", e))?;
+    events::emit(event);
 
     return Ok(());
 }

@@ -8,6 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use std::path::Path;
 use std::path::PathBuf;
 
 use tauri::AppHandle;
@@ -31,9 +32,8 @@ use crate::UNICHAT_VERSION;
 use crate::plugins;
 use crate::utils::base64;
 use crate::utils::is_dev;
-use crate::utils::path_to_string;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 
 /* ========================================================================== */
 
@@ -62,6 +62,10 @@ pub fn new(label: &str, url: &str) -> WebviewWindowBuilder<'static, tauri::Wry, 
     return WebviewWindowBuilder::new(app_handle, label, webview_url).additional_browser_args(ADDITIONAL_BROWSER_ARGS);
 }
 
+fn path_to_string(path: &Path) -> String {
+    return path.to_string_lossy().replace('\\', "\\\\");
+}
+
 pub fn webapp_globals_script() -> String {
     let is_dev = is_dev();
     let platform = std::env::consts::OS;
@@ -69,10 +73,10 @@ pub fn webapp_globals_script() -> String {
 
     let unichat_icon = format!("data:image/png;base64,{}", base64::encode(UNICHAT_ICON_BYTES));
 
-    let gallery_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatGallery));
-    let license_file = path_to_string(&properties::get_app_path(AppPaths::UniChatLicense));
-    let plugins_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatUserPlugins));
-    let widgets_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatUserWidgets));
+    let gallery_dir = path_to_string(&paths::get(AppPaths::UniChatGallery));
+    let license_file = path_to_string(&paths::get(AppPaths::UniChatLicense));
+    let plugins_dir = path_to_string(&paths::get(AppPaths::UniChatUserPlugins));
+    let widgets_dir = path_to_string(&paths::get(AppPaths::UniChatUserWidgets));
 
     return format!(
         r#"

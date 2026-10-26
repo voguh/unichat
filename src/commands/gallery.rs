@@ -16,8 +16,8 @@ use tauri::Runtime;
 use tauri::Url;
 
 use crate::utils::constants::BASE_URL;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 
 /* ========================================================================== */
 
@@ -60,7 +60,7 @@ fn get_file_url(file_name: &str) -> Url {
 
 #[tauri::command]
 pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<GalleryItem>, String> {
-    let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
+    let gallery_path = paths::get(AppPaths::UniChatGallery);
 
     let mut gallery_items: Vec<GalleryItem> = Vec::new();
 
@@ -92,7 +92,7 @@ pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Gal
 
 #[tauri::command]
 pub async fn upload_gallery_items<R: Runtime>(_app: AppHandle<R>, files: Vec<String>) -> Result<(), String> {
-    let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
+    let gallery_path = paths::get(AppPaths::UniChatGallery);
     if !gallery_path.exists() {
         fs::create_dir_all(&gallery_path)
             .map_err(|e| format!("An error occurred on create gallery directory: {:#?}", e))?;

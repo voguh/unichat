@@ -23,13 +23,13 @@ use crate::utils::userstore;
 
 fn process_rpc_request(body: JsonRPCRequest) -> Result<JsonRPCResponse, JsonRPCError> {
     if body.jsonrpc() != "2.0" {
-        return Err(JsonRPCError::invalid_request(body.id(), Some("Invalid JSON-RPC version")));
+        return Err(JsonRPCError::invalid_request(body.id().map(String::from), Some("Invalid JSON-RPC version")));
     }
 
-    let id = body.id();
+    let id = body.id().map(String::from);
     let method = body.method();
 
-    match method.as_str() {
+    match method {
         "userstore:get" => {
             if let Some(ok) = id {
                 let params = body.params().unwrap_or_default();

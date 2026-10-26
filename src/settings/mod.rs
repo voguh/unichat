@@ -23,8 +23,8 @@ use tauri_plugin_store::StoreExt;
 
 use crate::get_app_handle;
 use crate::utils::is_dev;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 
 mod listener;
 mod migrations;
@@ -78,7 +78,7 @@ fn set_instance(store: Arc<Store<tauri::Wry>>) {
 pub fn init() -> Result<(), Error> {
     let app_handle = get_app_handle();
 
-    let store_path = properties::get_app_path(AppPaths::AppConfig).join("settings.json");
+    let store_path = paths::get(AppPaths::AppConfig).join("settings.json");
 
     let store = app_handle.store(store_path)?;
     set_instance(store);
