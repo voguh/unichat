@@ -10,7 +10,7 @@
 
 use anyhow::Error;
 
-use crate::events::unichat::UniChatEvent;
+use crate::events::UniChatEvent;
 
 mod add_banner_to_live_chat_command;
 mod add_chat_item_action;

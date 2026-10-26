@@ -11,7 +11,7 @@
 use anyhow::Error;
 use anyhow::anyhow;
 
-use crate::events::unichat::UniChatEvent;
+use crate::events::UniChatEvent;
 
 mod live_chat_membership_item_renderer;
 mod live_chat_paid_message_renderer;

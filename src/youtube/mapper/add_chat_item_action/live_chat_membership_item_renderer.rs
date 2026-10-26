@@ -16,10 +16,10 @@ use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::events::unichat::UniChatEmote;
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatPlatform;
-use crate::events::unichat::UniChatSponsorEventPayload;
+use crate::events::UniChatEmote;
+use crate::events::UniChatEvent;
+use crate::events::UniChatPlatform;
+use crate::events::UniChatSponsorEventPayload;
 use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;

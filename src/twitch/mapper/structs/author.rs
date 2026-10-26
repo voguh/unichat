@@ -15,8 +15,8 @@ use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::events::unichat::UniChatAuthorType;
-use crate::events::unichat::UniChatBadge;
+use crate::events::UniChatAuthorType;
+use crate::events::UniChatBadge;
 use crate::twitch::read_badges;
 use crate::utils::irc::IRCPrefix;
 use crate::utils::random_color_by_seed;

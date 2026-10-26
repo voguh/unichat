@@ -13,11 +13,11 @@ use std::collections::HashMap;
 use anyhow::Error;
 use anyhow::anyhow;
 
-use crate::events::unichat::FLAG_TWITCH_GIF;
-use crate::events::unichat::UniChatEmote;
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatMessageEventPayload;
-use crate::events::unichat::UniChatPlatform;
+use crate::events::FLAG_TWITCH_GIF;
+use crate::events::UniChatEmote;
+use crate::events::UniChatEvent;
+use crate::events::UniChatMessageEventPayload;
+use crate::events::UniChatPlatform;
 use crate::twitch::mapper::get_tag;
 use crate::twitch::mapper::handle_redemption_message_event;
 use crate::twitch::mapper::require_tag;

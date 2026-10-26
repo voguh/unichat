@@ -19,8 +19,8 @@ use crate::THIRD_PARTY_LICENSES;
 use crate::api::release;
 use crate::api::release::UniChatReleaseInfo;
 use crate::events;
-use crate::events::unichat::UniChatClearEventPayload;
-use crate::events::unichat::UniChatEvent;
+use crate::events::UniChatClearEventPayload;
+use crate::events::UniChatEvent;
 use crate::utils::get_current_timestamp;
 use crate::utils::userstore::flush_userstore;
 

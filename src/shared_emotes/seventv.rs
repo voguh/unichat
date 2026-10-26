@@ -16,7 +16,7 @@ use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value;
 
-use crate::events::unichat::UniChatEmote;
+use crate::events::UniChatEmote;
 use crate::utils::ureq;
 
 /* ========================================================================== */

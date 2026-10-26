@@ -20,8 +20,8 @@ use mlua::Value;
 use serde::Deserialize;
 
 use crate::events;
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatPlatform;
+use crate::events::UniChatEvent;
+use crate::events::UniChatPlatform;
 use crate::plugins::instance::env::utils::from_lua_value;
 use crate::plugins::runtime;
 use crate::scraper::UniChatScraper;

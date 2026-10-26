@@ -16,7 +16,7 @@ use std::thread;
 
 use anyhow::Error;
 
-use crate::events::unichat::UniChatEmote;
+use crate::events::UniChatEmote;
 
 mod betterttv;
 mod frankerfacez;

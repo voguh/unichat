@@ -12,7 +12,7 @@ use tauri::AppHandle;
 use tauri::Runtime;
 
 use crate::events;
-use crate::events::unichat::UniChatEvent;
+use crate::events::UniChatEvent;
 use crate::wm::custom_event_window;
 
 /* ========================================================================== */

@@ -11,7 +11,7 @@
 use anyhow::Error;
 use anyhow::anyhow;
 
-use crate::events::unichat::UniChatEvent;
+use crate::events::UniChatEvent;
 use crate::twitch::mapper::get_tag;
 use crate::twitch::mapper::require_tag;
 use crate::utils::irc::IRCCommand;

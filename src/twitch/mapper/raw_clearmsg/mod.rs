@@ -10,9 +10,9 @@
 
 use anyhow::Error;
 
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatPlatform;
-use crate::events::unichat::UniChatRemoveMessageEventPayload;
+use crate::events::UniChatEvent;
+use crate::events::UniChatPlatform;
+use crate::events::UniChatRemoveMessageEventPayload;
 use crate::twitch::mapper::require_tag;
 use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::utils::get_current_timestamp;

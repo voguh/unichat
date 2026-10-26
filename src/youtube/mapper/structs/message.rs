@@ -13,7 +13,7 @@ use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::events::unichat::UniChatEmote;
+use crate::events::UniChatEmote;
 use crate::shared_emotes;
 use crate::youtube::mapper::structs::ThumbnailsWrapper;
 use crate::youtube::mapper::structs::proxy_youtube_url;

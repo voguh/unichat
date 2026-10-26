@@ -15,10 +15,10 @@ use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::events::unichat::UniChatAuthorType;
-use crate::events::unichat::UniChatEvent;
-use crate::events::unichat::UniChatPlatform;
-use crate::events::unichat::UniChatRaidEventPayload;
+use crate::events::UniChatAuthorType;
+use crate::events::UniChatEvent;
+use crate::events::UniChatPlatform;
+use crate::events::UniChatRaidEventPayload;
 use crate::utils::get_current_timestamp;
 use crate::utils::properties;
 use crate::utils::properties::PropertiesKey;

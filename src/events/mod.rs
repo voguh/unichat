@@ -16,11 +16,37 @@ use std::sync::RwLockReadGuard;
 
 use anyhow::Error;
 use tokio::sync::broadcast;
-use unichat::UniChatEvent;
 
 use crate::events::unichat::FLAG_EMULATOR_GENERATED;
 
-pub mod unichat;
+mod unichat;
+
+/* ========================================================================== */
+
+pub use unichat::FLAG_TWITCH_GIF;
+pub use unichat::FLAG_TWITCH_STREAK_DAYS;
+pub use unichat::FLAG_YOUTUBE_SUPER_STICKER;
+pub use unichat::FLAG_YOUTUBE_SUPERCHAT_PRIMARY_BG_COLOR;
+pub use unichat::FLAG_YOUTUBE_SUPERCHAT_PRIMARY_TEXT_COLOR;
+pub use unichat::FLAG_YOUTUBE_SUPERCHAT_SECONDARY_BG_COLOR;
+pub use unichat::FLAG_YOUTUBE_SUPERCHAT_SECONDARY_TEXT_COLOR;
+pub use unichat::FLAG_YOUTUBE_SUPERCHAT_TIER;
+pub use unichat::UniChatAuthorType;
+pub use unichat::UniChatBadge;
+pub use unichat::UniChatCheerEventPayload;
+pub use unichat::UniChatClearEventPayload;
+pub use unichat::UniChatDonateEventPayload;
+pub use unichat::UniChatEmote;
+pub use unichat::UniChatEvent;
+pub use unichat::UniChatMessageEventPayload;
+pub use unichat::UniChatPlatform;
+pub use unichat::UniChatRaidEventPayload;
+pub use unichat::UniChatRedemptionEventPayload;
+pub use unichat::UniChatRemoveAuthorEventPayload;
+pub use unichat::UniChatRemoveMessageEventPayload;
+pub use unichat::UniChatSponsorEventPayload;
+pub use unichat::UniChatSponsorGiftEventPayload;
+pub use unichat::UniChatUserstoreUpdateEventPayload;
 
 /* ========================================================================== */
 
@@ -41,17 +67,17 @@ struct Queue<T> {
 }
 
 impl<T> Queue<T> {
-    pub fn new(capacity: usize) -> Self {
+    fn new(capacity: usize) -> Self {
         return Self { items: VecDeque::with_capacity(capacity), capacity };
     }
 
     /* ====================================================================== */
 
-    pub fn iter(&self) -> impl Iterator<Item = &T> {
+    fn iter(&self) -> impl Iterator<Item = &T> {
         return self.items.iter();
     }
 
-    pub fn push(&mut self, item: T) {
+    fn push(&mut self, item: T) {
         if self.items.len() == self.capacity {
             self.items.pop_front();
         }

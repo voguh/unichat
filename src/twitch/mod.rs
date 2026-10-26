@@ -22,7 +22,7 @@ use anyhow::anyhow;
 use serde_json::Value;
 
 use crate::events;
-use crate::events::unichat::UniChatBadge;
+use crate::events::UniChatBadge;
 use crate::scraper;
 use crate::scraper::UniChatScraper;
 use crate::scraper::status::ScraperStatus;

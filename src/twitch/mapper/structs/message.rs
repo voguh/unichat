@@ -11,7 +11,7 @@
 use anyhow::Error;
 use anyhow::anyhow;
 
-use crate::events::unichat::UniChatEmote;
+use crate::events::UniChatEmote;
 use crate::shared_emotes;
 use crate::twitch::read_cheermotes;
 
