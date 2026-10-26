@@ -17,6 +17,7 @@ import { Alert } from "@voguh/unichat-ui/Alert";
 import { Badge } from "@voguh/unichat-ui/Badge";
 import { Button, IconButton } from "@voguh/unichat-ui/Button";
 import { Markdown } from "@voguh/unichat-ui/Markdown";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@voguh/unichat-ui/Tabs";
 import { CommunityAddonBadge } from "unichat/__internal__/CommunityAddons/CommunityAddonBadge";
 import { CommunityAddonReleases } from "unichat/__internal__/CommunityAddons/CommunityAddonReleases";
@@ -125,23 +126,25 @@ export function WidgetDetail({ widget, installing, onInstall, onOpenFolder }: Pr
                     <Tab>Readme</Tab>
                     <Tab>Versions ({releases.length})</Tab>
                 </TabList>
-                <TabPanels>
-                    <TabPanel>
-                        <Markdown
-                            content={getDescription(detail)}
-                            relativeLinksBaseUrl={`${widget.repositoryUrl}/blob/HEAD/`}
-                        />
-                    </TabPanel>
-                    <TabPanel>
-                        <CommunityAddonReleases
-                            addon={widget}
-                            releases={releases}
-                            latestStable={latestStable}
-                            loading={loading}
-                            onInstall={(release) => onInstall(widget, release)}
-                        />
-                    </TabPanel>
-                </TabPanels>
+                <ScrollableView>
+                    <TabPanels>
+                        <TabPanel>
+                            <Markdown
+                                content={getDescription(detail)}
+                                relativeLinksBaseUrl={`${widget.repositoryUrl}/blob/HEAD/`}
+                            />
+                        </TabPanel>
+                        <TabPanel>
+                            <CommunityAddonReleases
+                                addon={widget}
+                                releases={releases}
+                                latestStable={latestStable}
+                                loading={loading}
+                                onInstall={(release) => onInstall(widget, release)}
+                            />
+                        </TabPanel>
+                    </TabPanels>
+                </ScrollableView>
             </TabGroup>
         );
     }

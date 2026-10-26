@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { Button } from "@voguh/unichat-ui/Button";
 import { FormGroup } from "@voguh/unichat-ui/forms/FormGroup";
 import { Switch } from "@voguh/unichat-ui/forms/Switch";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import { SegmentedControl } from "@voguh/unichat-ui/SegmentedControl";
 import { useStorage } from "unichat/hooks/useStorage";
 import {
@@ -121,7 +122,7 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
 
     return (
         <div className={styles.root} key={Object.keys(initialSettings).length === 0 ? "loading" : "loaded"}>
-            <div className="body">
+            <ScrollableView rootProps={{ className: "body" }}>
                 <div>
                     <Switch
                         defaultChecked={initialSettings[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN] ?? false}
@@ -180,7 +181,7 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
                         ]}
                     />
                 </FormGroup>
-            </div>
+            </ScrollableView>
 
             <div className="footer">
                 <Button variant="success" disabled={!dirty} onClick={applySettings}>

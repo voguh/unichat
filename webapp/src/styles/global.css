@@ -94,18 +94,24 @@ body,
     }
 }
 
+/* Native scrollbars mirror the ScrollableView thumb against a transparent track. */
 ::-webkit-scrollbar {
-    @apply w-2;
+    @apply w-2 h-2;
 }
 
-::-webkit-scrollbar-track {
-    @apply bg-stone-700;
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+    @apply bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    @apply bg-stone-950/50 rounded-xs;
+    @apply rounded-full;
+
+    background-color: var(--ucui-color-primary);
+    background-clip: padding-box;
+    border: 2px solid transparent;
 
     &:hover {
-        @apply bg-stone-950/75;
+        background-color: color-mix(in oklab, var(--ucui-color-primary) 85%, white);
     }
 }

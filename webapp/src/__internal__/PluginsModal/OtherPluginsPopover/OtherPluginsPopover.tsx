@@ -15,6 +15,7 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { Badge } from "@voguh/unichat-ui/Badge";
 import { Button, IconButton } from "@voguh/unichat-ui/Button";
 import { Popover, PopoverButton, PopoverPanel } from "@voguh/unichat-ui/Popover";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import type { PluginsModalSharedStore } from "unichat/__internal__/PluginsModal/PluginsModal";
 import { handleBadgeVariant } from "unichat/__internal__/PluginsModal/utils/handleBadgeVariant";
 import { isLocalPluginDisplay } from "unichat/__internal__/PluginsModal/utils/toPluginDisplays";
@@ -45,30 +46,32 @@ export function OtherPluginsPopover(): PReact.ComponentChildren {
                 Other plugins ({plugins.length})
             </PopoverButton>
             <PopoverPanel anchor="bottom end" className={styles.root}>
-                <div className="header">
-                    <span>Local</span>
-                    <Button size="sm" onClick={() => revealItemInDir(UNICHAT_PLUGINS_DIR)}>
-                        <i className="fas fa-folder" />
-                        Show Plugins Folder
-                    </Button>
-                </div>
-                {plugins.map((plugin) => (
-                    <div key={plugin.id} className="plugin">
-                        <img src={plugin.iconUrl} />
-                        <div>
-                            <strong>{plugin.name}</strong>
-                            <small>v{plugin.version}</small>
-                        </div>
-                        <Badge variant={handleBadgeVariant(plugin.status)}>{plugin.status}</Badge>
-                        <IconButton
-                            size="sm"
-                            aria-label="Details"
-                            onClick={() => setSharedStore((old) => ({ ...old, selectedPlugin: plugin }))}
-                        >
-                            <i className="fas fa-chevron-right" />
-                        </IconButton>
+                <ScrollableView>
+                    <div className="header">
+                        <span>Local</span>
+                        <Button size="sm" onClick={() => revealItemInDir(UNICHAT_PLUGINS_DIR)}>
+                            <i className="fas fa-folder" />
+                            Show Plugins Folder
+                        </Button>
                     </div>
-                ))}
+                    {plugins.map((plugin) => (
+                        <div key={plugin.id} className="plugin">
+                            <img src={plugin.iconUrl} />
+                            <div>
+                                <strong>{plugin.name}</strong>
+                                <small>v{plugin.version}</small>
+                            </div>
+                            <Badge variant={handleBadgeVariant(plugin.status)}>{plugin.status}</Badge>
+                            <IconButton
+                                size="sm"
+                                aria-label="Details"
+                                onClick={() => setSharedStore((old) => ({ ...old, selectedPlugin: plugin }))}
+                            >
+                                <i className="fas fa-chevron-right" />
+                            </IconButton>
+                        </div>
+                    ))}
+                </ScrollableView>
             </PopoverPanel>
         </Popover>
     );

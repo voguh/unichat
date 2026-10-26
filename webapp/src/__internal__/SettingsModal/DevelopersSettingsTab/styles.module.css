@@ -13,23 +13,27 @@
 
     > div {
         &:global(.body) {
-            @apply flex-1 min-h-0 overflow-y-auto p-4 flex flex-col items-center gap-2;
+            @apply flex-1 min-h-0;
 
-            > div {
-                @apply w-full;
+            > div[data-slot="viewport"] {
+                @apply p-4 flex flex-col items-center gap-2;
 
                 > div {
-                    &:global(.alert) {
-                        @apply bg-red-800/25 border border-red-800 rounded;
-                        @apply text-stone-50;
-                        @apply mt-4 p-2 flex flex-nowrap gap-2;
-                    }
+                    @apply w-full;
 
-                    &[data-part~="SegmentedControl"] {
-                        @apply w-full mt-4;
+                    > div {
+                        &:global(.alert) {
+                            @apply bg-red-800/25 border border-red-800 rounded;
+                            @apply text-stone-50;
+                            @apply mt-4 p-2 flex flex-nowrap gap-2;
+                        }
 
-                        > label {
-                            @apply flex-1 justify-center;
+                        &[data-part~="SegmentedControl"] {
+                            @apply w-full mt-4;
+
+                            > label {
+                                @apply flex-1 justify-center;
+                            }
                         }
                     }
                 }

@@ -53,17 +53,23 @@
                 &[data-part~="TabGroup"] {
                     @apply flex-1 min-h-0;
 
-                    > div[data-part~="TabPanels"] {
-                        @apply flex-1 min-h-0 overflow-y-auto;
+                    > div[data-part~="ScrollableView"] {
+                        @apply flex-1 min-h-0;
 
-                        > div[data-part~="TabPanel"] {
-                            &:global(.logs) {
-                                @apply h-full;
+                        > div[data-slot="viewport"] {
+                            > div[data-part~="TabPanels"] {
+                                @apply min-h-full flex flex-col;
 
-                                > pre {
-                                    @apply bg-stone-950 border border-stone-800 rounded;
-                                    @apply text-stone-300 text-sm font-mono;
-                                    @apply h-full overflow-auto m-0 p-3;
+                                > div[data-part~="TabPanel"] {
+                                    &:global(.logs) {
+                                        @apply flex-1 flex flex-col;
+
+                                        > pre {
+                                            @apply bg-stone-950 border border-stone-800 rounded;
+                                            @apply text-stone-300 text-sm font-mono;
+                                            @apply flex-1 w-max min-w-full m-0 p-3;
+                                        }
+                                    }
                                 }
                             }
                         }

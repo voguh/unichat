@@ -13,57 +13,59 @@
 
     > div {
         &:global(.content) {
-            @apply flex-1 min-h-0 overflow-y-auto;
+            @apply flex-1 min-h-0;
 
-            > div:global(.cards) {
-                @apply grid grid-cols-3 gap-3;
-
-                > div {
-                    @apply bg-stone-950 border border-stone-800 rounded;
-                    @apply flex flex-col gap-2.5 p-3;
+            > div[data-slot="viewport"] {
+                > div:global(.cards) {
+                    @apply grid grid-cols-3 gap-3;
 
                     > div {
-                        &:global(.header) {
-                            @apply flex items-start gap-3;
+                        @apply bg-stone-950 border border-stone-800 rounded;
+                        @apply flex flex-col gap-2.5 p-3;
 
-                            > button {
-                                @apply rounded;
-                                @apply shrink-0 cursor-pointer;
+                        > div {
+                            &:global(.header) {
+                                @apply flex items-start gap-3;
 
-                                > img {
+                                > button {
                                     @apply rounded;
-                                    @apply block size-14 object-cover;
-                                }
-                            }
+                                    @apply shrink-0 cursor-pointer;
 
-                            > div {
-                                @apply flex-1 min-w-0 flex flex-col gap-1;
-
-                                > strong {
-                                    @apply truncate;
-                                }
-
-                                > small {
-                                    @apply text-stone-400 text-sm;
-                                    @apply truncate;
+                                    > img {
+                                        @apply rounded;
+                                        @apply block size-14 object-cover;
+                                    }
                                 }
 
                                 > div {
-                                    @apply flex flex-wrap gap-1;
+                                    @apply flex-1 min-w-0 flex flex-col gap-1;
+
+                                    > strong {
+                                        @apply truncate;
+                                    }
+
+                                    > small {
+                                        @apply text-stone-400 text-sm;
+                                        @apply truncate;
+                                    }
+
+                                    > div {
+                                        @apply flex flex-wrap gap-1;
+                                    }
                                 }
+                            }
+
+                            &:global(.actions) {
+                                @apply flex items-center justify-end gap-2;
                             }
                         }
 
-                        &:global(.actions) {
-                            @apply flex items-center justify-end gap-2;
+                        > p {
+                            @apply text-stone-300 text-sm;
+                            @apply line-clamp-2 m-0;
+
+                            min-height: 2lh;
                         }
-                    }
-
-                    > p {
-                        @apply text-stone-300 text-sm;
-                        @apply line-clamp-2 m-0;
-
-                        min-height: 2lh;
                     }
                 }
             }

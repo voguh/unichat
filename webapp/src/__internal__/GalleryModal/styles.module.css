@@ -9,10 +9,18 @@
  ******************************************************************************/
 
 .root {
-    > div[data-part~="TabPanels"] {
-        > div[data-part~="TabPanel"] {
-            > div {
-                @apply grid grid-cols-4 gap-1;
+    @apply min-h-0;
+
+    > div[data-part~="ScrollableView"] {
+        @apply min-h-0;
+
+        > div[data-slot="viewport"] {
+            > div[data-part~="TabPanels"] {
+                > div[data-part~="TabPanel"] {
+                    > div {
+                        @apply grid grid-cols-4 gap-1;
+                    }
+                }
             }
         }
     }

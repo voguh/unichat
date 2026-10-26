@@ -10,51 +10,56 @@
 
 .root {
     @apply bg-stone-950 border border-stone-800 rounded;
-    @apply relative flex-1 min-h-0 overflow-hidden;
+    @apply flex-1 min-h-0;
 
-    &[data-invalid="true"] {
+    &:has(> div[data-slot="viewport"][data-invalid="true"]) {
         @apply border-red-500;
     }
 
-    > pre {
-        @apply text-stone-300;
-        @apply overflow-hidden pointer-events-none;
+    > div[data-slot="viewport"] {
+        > div {
+            @apply relative min-h-full;
 
-        > span {
-            &:global(.key) {
-                @apply text-red-300;
+            > pre {
+                @apply text-stone-300;
+                @apply pointer-events-none;
+
+                > span {
+                    &:global(.key) {
+                        @apply text-red-300;
+                    }
+
+                    &:global(.string) {
+                        @apply text-green-300;
+                    }
+
+                    &:global(.number) {
+                        @apply text-blue-300;
+                    }
+
+                    &:global(.literal) {
+                        @apply text-amber-300;
+                    }
+                }
             }
 
-            &:global(.string) {
-                @apply text-green-300;
+            > textarea {
+                @apply bg-transparent outline-none;
+                @apply text-transparent caret-stone-50;
+                @apply absolute inset-0 overflow-hidden resize-none;
             }
 
-            &:global(.number) {
-                @apply text-blue-300;
-            }
+            > pre,
+            > textarea {
+                @apply border-0;
+                @apply font-mono text-xs;
+                @apply m-0 p-3;
 
-            &:global(.literal) {
-                @apply text-amber-300;
+                line-height: 1.55;
+                tab-size: 2;
+                white-space: pre-wrap;
+                overflow-wrap: anywhere;
             }
         }
-    }
-
-    > textarea {
-        @apply bg-transparent outline-none;
-        @apply text-transparent caret-stone-50;
-        @apply overflow-y-auto resize-none;
-    }
-
-    > pre,
-    > textarea {
-        @apply border-0;
-        @apply font-mono text-xs;
-        @apply absolute inset-0 m-0 p-3;
-
-        line-height: 1.55;
-        tab-size: 2;
-        white-space: pre-wrap;
-        overflow-wrap: anywhere;
-        scrollbar-gutter: stable;
     }
 }

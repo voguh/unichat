@@ -19,6 +19,7 @@ import { Select } from "@voguh/unichat-ui/forms/Select";
 import { Switch } from "@voguh/unichat-ui/forms/Switch";
 import { Textarea } from "@voguh/unichat-ui/forms/Textarea";
 import { TextInput } from "@voguh/unichat-ui/forms/TextInput";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import { GalleryFileInput } from "unichat/components/forms/GalleryFileInput";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
@@ -216,7 +217,7 @@ export function Fields({ handleApply, handleReset, selectedWidget, widgets }: Pr
                     </div>
                 )}
             </div>
-            <div className="content">{buildFieldsEditor()}</div>
+            <ScrollableView rootProps={{ className: "content" }}>{buildFieldsEditor()}</ScrollableView>
         </div>
     );
 }

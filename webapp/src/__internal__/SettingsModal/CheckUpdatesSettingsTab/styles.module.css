@@ -12,6 +12,10 @@
     @apply h-full;
 
     > div[data-part~="TabPanels"] {
-        @apply flex-1 min-h-0 overflow-y-auto;
+        @apply flex-1 min-h-0 flex flex-col;
+
+        > div[data-part~="TabPanel"] {
+            @apply flex-1 min-h-0;
+        }
     }
 }

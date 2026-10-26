@@ -9,43 +9,47 @@
  ******************************************************************************/
 
 .root {
-    > table {
-        @apply w-full border-collapse;
+    @apply min-h-0;
 
-        > thead {
-            @apply bg-stone-950;
+    > div[data-slot="viewport"] {
+        > table {
+            @apply w-full border-collapse;
 
-            > tr {
-                > th {
-                    @apply border-b border-stone-700;
-                    @apply text-left;
-                    @apply px-4 py-2;
+            > thead {
+                @apply bg-stone-950;
+
+                > tr {
+                    > th {
+                        @apply border-b border-stone-700;
+                        @apply text-left;
+                        @apply px-4 py-2;
+                    }
                 }
             }
-        }
 
-        > tbody {
-            > tr {
-                @apply bg-stone-900;
+            > tbody {
+                > tr {
+                    @apply bg-stone-900;
 
-                &:nth-child(even) {
-                    @apply bg-stone-800;
-                }
-
-                &[data-with-link="true"] {
-                    cursor: pointer;
-                }
-
-                > td {
-                    @apply border-b border-stone-700;
-                    @apply px-4 py-2;
-
-                    > span {
-                        @apply flex items-center gap-2;
+                    &:nth-child(even) {
+                        @apply bg-stone-800;
                     }
 
-                    &:last-child {
-                        @apply w-px whitespace-nowrap;
+                    &[data-with-link="true"] {
+                        cursor: pointer;
+                    }
+
+                    > td {
+                        @apply border-b border-stone-700;
+                        @apply px-4 py-2;
+
+                        > span {
+                            @apply flex items-center gap-2;
+                        }
+
+                        &:last-child {
+                            @apply w-px whitespace-nowrap;
+                        }
                     }
                 }
             }

@@ -9,7 +9,8 @@
  ******************************************************************************/
 
 import type * as PReact from "preact";
-import { useRef } from "preact/hooks";
+
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 
 import styles from "./styles.module.css";
 
@@ -45,13 +46,6 @@ interface Props {
 }
 
 export function PayloadEditor({ value, invalid, onChange }: Props): PReact.ComponentChildren {
-    const highlightRef = useRef<HTMLPreElement>(null);
-
-    function syncScroll(event: PReact.TargetedUIEvent<HTMLTextAreaElement>): void {
-        highlightRef.current!.scrollTop = event.currentTarget.scrollTop;
-        highlightRef.current!.scrollLeft = event.currentTarget.scrollLeft;
-    }
-
     function handleKeyDown(event: PReact.TargetedKeyboardEvent<HTMLTextAreaElement>): void {
         if (event.key === "Tab") {
             event.preventDefault();
@@ -63,18 +57,17 @@ export function PayloadEditor({ value, invalid, onChange }: Props): PReact.Compo
     }
 
     return (
-        <div className={styles.root} data-invalid={invalid}>
-            <pre ref={highlightRef} aria-hidden="true">
-                {highlight(value)}
-            </pre>
-            <textarea
-                value={value}
-                spellcheck={false}
-                aria-label="Event payload"
-                onInput={(event) => onChange(event.currentTarget.value)}
-                onScroll={syncScroll}
-                onKeyDown={handleKeyDown}
-            />
-        </div>
+        <ScrollableView rootProps={{ className: styles.root }} data-invalid={invalid}>
+            <div>
+                <pre aria-hidden="true">{highlight(value)}</pre>
+                <textarea
+                    value={value}
+                    spellcheck={false}
+                    aria-label="Event payload"
+                    onInput={(event) => onChange(event.currentTarget.value)}
+                    onKeyDown={handleKeyDown}
+                />
+            </div>
+        </ScrollableView>
     );
 }

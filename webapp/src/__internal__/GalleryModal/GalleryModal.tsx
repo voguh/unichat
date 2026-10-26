@@ -12,6 +12,7 @@ import type * as PReact from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 
 import { Loading } from "@voguh/unichat-ui/Loading";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@voguh/unichat-ui/Tabs";
 import { ModalContext } from "unichat/contexts/ModalContext";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
@@ -144,11 +145,13 @@ export function GalleryModal(props: Props): PReact.ComponentChildren {
                         <Tab key={tab.value}>{tab.label}</Tab>
                     ))}
                 </TabList>
-                <TabPanels>
-                    {tabs.map((tab) => (
-                        <TabPanel key={tab.value}>{tab.content}</TabPanel>
-                    ))}
-                </TabPanels>
+                <ScrollableView>
+                    <TabPanels>
+                        {tabs.map((tab) => (
+                            <TabPanel key={tab.value}>{tab.content}</TabPanel>
+                        ))}
+                    </TabPanels>
+                </ScrollableView>
             </TabGroup>
         </>
     );

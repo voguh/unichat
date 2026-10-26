@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { Button } from "@voguh/unichat-ui/Button";
 import { Select } from "@voguh/unichat-ui/forms/Select";
 import { Switch } from "@voguh/unichat-ui/forms/Switch";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import type { SelectOption } from "@voguh/unichat-ui/Select";
 import { useStorage } from "unichat/hooks/useStorage";
 import { useWidgets } from "unichat/hooks/useWidgets";
@@ -145,7 +146,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
 
     return (
         <div className={styles.root} key={Object.keys(initialSettings).length === 0 ? "loading" : "loaded"}>
-            <div className="body">
+            <ScrollableView rootProps={{ className: "body" }}>
                 <Select
                     defaultValue={initialSettings[UniChatSettingsKeys.DEFAULT_PREVIEW_WIDGET] ?? ""}
                     ref={selectRef}
@@ -217,7 +218,7 @@ export function GeneralSettingsTab({ onClose }: Props): PReact.ComponentChildren
                         </Button>
                     </div>
                 </div>
-            </div>
+            </ScrollableView>
 
             <div className="footer">
                 <Button variant="success" disabled={!dirty} onClick={applySettings}>

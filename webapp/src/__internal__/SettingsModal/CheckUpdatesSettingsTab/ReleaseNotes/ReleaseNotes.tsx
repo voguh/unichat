@@ -15,6 +15,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { Badge } from "@voguh/unichat-ui/Badge";
 import { Button } from "@voguh/unichat-ui/Button";
 import { Markdown } from "@voguh/unichat-ui/Markdown";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import type { UniChatRelease } from "unichat/types";
 
 import styles from "./styles.module.css";
@@ -46,7 +47,9 @@ export function ReleaseNotes({ release }: Props): PReact.ComponentChildren {
                 </div>
             </div>
 
-            <Markdown content={release.description} />
+            <ScrollableView>
+                <Markdown content={release.description} />
+            </ScrollableView>
         </div>
     );
 }

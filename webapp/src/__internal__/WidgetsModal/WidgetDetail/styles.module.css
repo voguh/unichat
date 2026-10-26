@@ -67,8 +67,8 @@
                 &[data-part~="TabGroup"] {
                     @apply flex-1 min-h-0;
 
-                    > div[data-part~="TabPanels"] {
-                        @apply flex-1 min-h-0 overflow-y-auto;
+                    > div[data-part~="ScrollableView"] {
+                        @apply flex-1 min-h-0;
                     }
                 }
             }

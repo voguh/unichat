@@ -21,9 +21,14 @@ import {
     type DialogPanelSize,
     DialogTitle
 } from "@voguh/unichat-ui/Dialog";
+import { clsx } from "@voguh/unichat-ui/utils/clsx";
 import { ModalContext } from "unichat/contexts/ModalContext";
 
-export interface ModalProps extends Omit<PReact.HTMLAttributes<HTMLDivElement>, "title" | "size" | "ref"> {
+import styles from "./styles.module.css";
+
+export interface ModalProps
+    extends Omit<PReact.HTMLAttributes<HTMLDivElement>, "title" | "size" | "ref" | "className"> {
+    className?: string;
     onHide: () => void;
     show?: boolean;
 
@@ -51,6 +56,7 @@ export function Modal({
     withCloseButton = true,
 
     children,
+    className,
     ...rest
 }: ModalProps): PReact.ComponentChildren {
     const [sharedStore, setSharedStore] = useState<Record<string, unknown>>({});
@@ -59,7 +65,7 @@ export function Modal({
         <ModalContext.Provider value={{ onClose: onHide, sharedStore, setSharedStore }}>
             <Dialog open={show} onClose={onHide} closeOnInteractOutside={false}>
                 {backdrop && <DialogBackdrop />}
-                <DialogPanel {...rest} size={fullscreen ? "fullscreen" : size}>
+                <DialogPanel {...rest} size={fullscreen ? "fullscreen" : size} className={clsx(styles.root, className)}>
                     {(title != null || actions != null || withCloseButton) && (
                         <DialogHeader>
                             {title != null && <DialogTitle>{title}</DialogTitle>}

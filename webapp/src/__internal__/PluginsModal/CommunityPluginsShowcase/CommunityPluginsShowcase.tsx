@@ -12,6 +12,7 @@ import type * as PReact from "preact";
 
 import { Button } from "@voguh/unichat-ui/Button";
 import { EmptyState } from "@voguh/unichat-ui/EmptyState";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import { CommunityAddonsToolbar } from "unichat/__internal__/CommunityAddons/CommunityAddonsToolbar";
 import { useCommunityAddonsFilter } from "unichat/__internal__/CommunityAddons/hooks/useCommunityAddonsFilter";
 import {
@@ -77,7 +78,7 @@ export function CommunityPluginsShowcase({
         <div className={styles.root}>
             <CommunityAddonsToolbar placeholder="Search plugins" state={filterState} />
 
-            <div className="content">
+            <ScrollableView rootProps={{ className: "content" }}>
                 {filterState.filteredAddons.length === 0 ? (
                     <EmptyState icon={<i className="fas fa-cubes" />} title="No plugins found" />
                 ) : (
@@ -113,7 +114,7 @@ export function CommunityPluginsShowcase({
                         ))}
                     </div>
                 )}
-            </div>
+            </ScrollableView>
         </div>
     );
 }

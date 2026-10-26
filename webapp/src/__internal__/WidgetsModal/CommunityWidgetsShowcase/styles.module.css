@@ -13,44 +13,46 @@
 
     > div {
         &:global(.content) {
-            @apply flex-1 min-h-0 overflow-y-auto;
+            @apply flex-1 min-h-0;
 
-            > div {
-                &:global(.posters) {
-                    @apply grid grid-cols-4 gap-3;
-
-                    > div {
-                        @apply bg-black border border-stone-800 rounded;
-                        @apply relative overflow-hidden;
-
-                        aspect-ratio: 414 / 521;
-
-                        > button {
-                            @apply block size-full cursor-pointer;
-
-                            > img {
-                                @apply block size-full object-cover object-top;
-                            }
-                        }
-
-                        > span[data-part~="Badge"] {
-                            @apply absolute top-2 right-2;
-                        }
+            > div[data-slot="viewport"] {
+                > div {
+                    &:global(.posters) {
+                        @apply grid grid-cols-4 gap-3;
 
                         > div {
-                            @apply bg-linear-to-t from-stone-950 via-stone-950/95 to-transparent;
-                            @apply absolute inset-x-0 bottom-0 flex items-end gap-2 px-3 pt-12 pb-3;
+                            @apply bg-black border border-stone-800 rounded;
+                            @apply relative overflow-hidden;
+
+                            aspect-ratio: 414 / 521;
+
+                            > button {
+                                @apply block size-full cursor-pointer;
+
+                                > img {
+                                    @apply block size-full object-cover object-top;
+                                }
+                            }
+
+                            > span[data-part~="Badge"] {
+                                @apply absolute top-2 right-2;
+                            }
 
                             > div {
-                                @apply flex-1 min-w-0 flex flex-col gap-0.5;
+                                @apply bg-linear-to-t from-stone-950 via-stone-950/95 to-transparent;
+                                @apply absolute inset-x-0 bottom-0 flex items-end gap-2 px-3 pt-12 pb-3;
 
-                                > strong {
-                                    @apply truncate;
-                                }
+                                > div {
+                                    @apply flex-1 min-w-0 flex flex-col gap-0.5;
 
-                                > small {
-                                    @apply text-stone-400 text-xs;
-                                    @apply truncate;
+                                    > strong {
+                                        @apply truncate;
+                                    }
+
+                                    > small {
+                                        @apply text-stone-400 text-xs;
+                                        @apply truncate;
+                                    }
                                 }
                             }
                         }

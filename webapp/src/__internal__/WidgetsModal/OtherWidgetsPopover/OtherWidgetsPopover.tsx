@@ -15,6 +15,7 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { Badge } from "@voguh/unichat-ui/Badge";
 import { Button, IconButton } from "@voguh/unichat-ui/Button";
 import { Popover, PopoverButton, PopoverPanel } from "@voguh/unichat-ui/Popover";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import { formatWarningsSummary } from "unichat/__internal__/WidgetsModal/utils/formatWarnings";
 import {
     isLocalWidgetDisplay,
@@ -93,34 +94,36 @@ export function OtherWidgetsPopover(): PReact.ComponentChildren {
                 Other widgets ({count})
             </PopoverButton>
             <PopoverPanel anchor="bottom end" className={styles.root}>
-                {systemWidgets.length > 0 && (
-                    <div>
-                        <div className="header">
-                            <span>Built-in</span>
+                <ScrollableView>
+                    {systemWidgets.length > 0 && (
+                        <div>
+                            <div className="header">
+                                <span>Built-in</span>
+                            </div>
+                            {systemWidgets.map((widget) => renderWidget(widget, "UniChat"))}
                         </div>
-                        {systemWidgets.map((widget) => renderWidget(widget, "UniChat"))}
-                    </div>
-                )}
-                {pluginWidgets.length > 0 && (
-                    <div>
-                        <div className="header">
-                            <span>Plugins</span>
+                    )}
+                    {pluginWidgets.length > 0 && (
+                        <div>
+                            <div className="header">
+                                <span>Plugins</span>
+                            </div>
+                            {pluginWidgets.map((widget) => renderWidget(widget, widget.widgetSource.value))}
                         </div>
-                        {pluginWidgets.map((widget) => renderWidget(widget, widget.widgetSource.value))}
-                    </div>
-                )}
-                {localWidgets.length > 0 && (
-                    <div>
-                        <div className="header">
-                            <span>Local</span>
-                            <Button size="sm" onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)}>
-                                <i className="fas fa-folder" />
-                                Show Widgets Folder
-                            </Button>
+                    )}
+                    {localWidgets.length > 0 && (
+                        <div>
+                            <div className="header">
+                                <span>Local</span>
+                                <Button size="sm" onClick={() => revealItemInDir(UNICHAT_WIDGETS_DIR)}>
+                                    <i className="fas fa-folder" />
+                                    Show Widgets Folder
+                                </Button>
+                            </div>
+                            {localWidgets.map(renderLocalWidget)}
                         </div>
-                        {localWidgets.map(renderLocalWidget)}
-                    </div>
-                )}
+                    )}
+                </ScrollableView>
             </PopoverPanel>
         </Popover>
     );

@@ -16,6 +16,7 @@ import * as eventService from "@tauri-apps/api/event";
 import { Badge } from "@voguh/unichat-ui/Badge";
 import { Button } from "@voguh/unichat-ui/Button";
 import { TextInput } from "@voguh/unichat-ui/forms/TextInput";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import { Tooltip } from "@voguh/unichat-ui/Tooltip";
 import { LoggerFactory } from "unichat/logging/LoggerFactory";
 import { commandService } from "unichat/services/commandService";
@@ -168,13 +169,13 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                     size: "lg",
                     title: `An error occurred in the ${scraper.name} scraper initialization!`,
                     children: (
-                        <div>
+                        <ScrollableView rootProps={{ className: styles.errorDetails }}>
                             <pre>
                                 {payload.message}
                                 <br />
                                 {payload.stack ?? "No stack trace available."}
                             </pre>
-                        </div>
+                        </ScrollableView>
                     )
                 });
             }

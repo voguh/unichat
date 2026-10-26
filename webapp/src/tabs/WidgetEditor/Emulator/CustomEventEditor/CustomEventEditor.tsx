@@ -22,6 +22,7 @@ import { Select } from "@voguh/unichat-ui/forms/Select";
 import { Switch } from "@voguh/unichat-ui/forms/Switch";
 import { Textarea } from "@voguh/unichat-ui/forms/Textarea";
 import { TextInput } from "@voguh/unichat-ui/forms/TextInput";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import { SegmentedControl } from "@voguh/unichat-ui/SegmentedControl";
 import { Tooltip } from "@voguh/unichat-ui/Tooltip";
 import { clsx } from "@voguh/unichat-ui/utils/clsx";
@@ -531,16 +532,18 @@ export function CustomEventEditor(): PReact.ComponentChildren {
                 </div>
 
                 <div className="section-title">Details</div>
-                <div className={styles.grid}>{details}</div>
+                <ScrollableView>
+                    <div className={styles.grid}>{details}</div>
 
-                {more && (
-                    <>
-                        <button type="button" onClick={() => setMoreOpen((old) => !old)}>
-                            {moreOpen ? "Hide options" : "More options"}
-                        </button>
-                        {moreOpen && <div className={clsx(styles.grid, "more")}>{more}</div>}
-                    </>
-                )}
+                    {more && (
+                        <>
+                            <button type="button" onClick={() => setMoreOpen((old) => !old)}>
+                                {moreOpen ? "Hide options" : "More options"}
+                            </button>
+                            {moreOpen && <div className={clsx(styles.grid, "more")}>{more}</div>}
+                        </>
+                    )}
+                </ScrollableView>
             </div>
 
             <div className="payload">

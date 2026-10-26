@@ -17,9 +17,11 @@
 
     > div {
         &:global(.scrapers) {
-            @apply p-2 flex flex-col gap-2;
-
             grid-column: 1;
+
+            > div[data-slot="viewport"] {
+                @apply p-2 flex flex-col gap-2;
+            }
         }
 
         &:global(.preview) {

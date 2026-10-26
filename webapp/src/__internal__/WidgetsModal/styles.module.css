@@ -9,8 +9,6 @@
  ******************************************************************************/
 
 .root {
-    @apply overflow-y-auto;
-
     height: calc(var(--dialog-height) - 4.75rem - 2px);
 }
 

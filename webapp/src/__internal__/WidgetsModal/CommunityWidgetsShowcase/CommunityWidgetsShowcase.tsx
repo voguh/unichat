@@ -12,6 +12,7 @@ import type * as PReact from "preact";
 
 import { Button } from "@voguh/unichat-ui/Button";
 import { EmptyState } from "@voguh/unichat-ui/EmptyState";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import { CommunityAddonBadge } from "unichat/__internal__/CommunityAddons/CommunityAddonBadge";
 import { CommunityAddonsToolbar } from "unichat/__internal__/CommunityAddons/CommunityAddonsToolbar";
 import { useCommunityAddonsFilter } from "unichat/__internal__/CommunityAddons/hooks/useCommunityAddonsFilter";
@@ -77,7 +78,7 @@ export function CommunityWidgetsShowcase({
         <div className={styles.root}>
             <CommunityAddonsToolbar placeholder="Search widgets" state={filterState} />
 
-            <div className="content">
+            <ScrollableView rootProps={{ className: "content" }}>
                 {filterState.filteredAddons.length === 0 ? (
                     <EmptyState icon={<i className="fas fa-puzzle-piece" />} title="No widgets found" />
                 ) : (
@@ -103,7 +104,7 @@ export function CommunityWidgetsShowcase({
                         ))}
                     </div>
                 )}
-            </div>
+            </ScrollableView>
         </div>
     );
 }

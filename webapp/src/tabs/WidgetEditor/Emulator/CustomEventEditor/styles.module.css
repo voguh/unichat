@@ -17,7 +17,6 @@
     > div {
         &:global(.form) {
             @apply min-w-0 min-h-0 p-4 flex flex-col gap-3;
-            @apply overflow-y-auto;
 
             > div {
                 &:global(.field) {
@@ -57,18 +56,28 @@
                     @apply text-stone-400 text-xs font-semibold uppercase tracking-wider;
                 }
 
-                &:global(.more) {
-                    @apply border-t border-dashed border-stone-700;
-                    @apply pt-3;
-                }
-            }
+                &[data-part~="ScrollableView"] {
+                    @apply flex-1 min-h-0;
 
-            > button {
-                @apply text-stone-400 text-sm;
-                @apply self-start cursor-pointer;
+                    > div[data-slot="viewport"] {
+                        @apply flex flex-col gap-3;
 
-                &:hover {
-                    @apply text-stone-50;
+                        > div {
+                            &:global(.more) {
+                                @apply border-t border-dashed border-stone-700;
+                                @apply pt-3;
+                            }
+                        }
+
+                        > button {
+                            @apply text-stone-400 text-sm;
+                            @apply self-start cursor-pointer;
+
+                            &:hover {
+                                @apply text-stone-50;
+                            }
+                        }
+                    }
                 }
             }
         }

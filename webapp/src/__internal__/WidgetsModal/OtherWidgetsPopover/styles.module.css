@@ -15,40 +15,50 @@
 }
 
 .root {
-    @apply w-80 max-h-96 overflow-y-auto flex flex-col gap-3;
+    @apply w-80;
 
-    > div {
-        @apply flex flex-col gap-1;
+    --anchor-max-height: --spacing(96);
 
-        > div {
-            &:global(.header) {
-                @apply flex items-center justify-between gap-2;
+    > div[data-part~="ScrollableView"] {
+        @apply min-h-0;
 
-                > span {
-                    @apply text-stone-400 text-xs font-semibold uppercase tracking-wider;
-                    @apply px-2;
-                }
-            }
+        > div[data-slot="viewport"] {
+            @apply flex flex-col gap-3;
 
-            &:global(.widget) {
-                @apply flex items-center gap-3 px-2 py-1.5;
-
-                > span:global(.icon) {
-                    @apply bg-stone-700 rounded;
-                    @apply text-stone-300;
-                    @apply size-8 shrink-0 flex items-center justify-center;
-                }
+            > div {
+                @apply flex flex-col gap-1;
 
                 > div {
-                    @apply flex-1 min-w-0 flex flex-col;
+                    &:global(.header) {
+                        @apply flex items-center justify-between gap-2;
 
-                    > strong {
-                        @apply text-sm;
-                        @apply truncate;
+                        > span {
+                            @apply text-stone-400 text-xs font-semibold uppercase tracking-wider;
+                            @apply px-2;
+                        }
                     }
 
-                    > small {
-                        @apply text-stone-400 text-xs;
+                    &:global(.widget) {
+                        @apply flex items-center gap-3 px-2 py-1.5;
+
+                        > span:global(.icon) {
+                            @apply bg-stone-700 rounded;
+                            @apply text-stone-300;
+                            @apply size-8 shrink-0 flex items-center justify-center;
+                        }
+
+                        > div {
+                            @apply flex-1 min-w-0 flex flex-col;
+
+                            > strong {
+                                @apply text-sm;
+                                @apply truncate;
+                            }
+
+                            > small {
+                                @apply text-stone-400 text-xs;
+                            }
+                        }
                     }
                 }
             }

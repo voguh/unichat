@@ -15,6 +15,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { Badge } from "@voguh/unichat-ui/Badge";
 import { Button } from "@voguh/unichat-ui/Button";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import { Select } from "@voguh/unichat-ui/Select";
 import { Tooltip } from "@voguh/unichat-ui/Tooltip";
 import { useScrapers } from "unichat/hooks/useScrapers";
@@ -124,7 +125,7 @@ export function Dashboard(): PReact.ComponentChildren {
 
     return (
         <div className={styles.root}>
-            <div className="scrapers">
+            <ScrollableView rootProps={{ className: "scrapers" }}>
                 {scrapers.map((s) => (
                     <ScraperCard
                         key={s.id}
@@ -133,7 +134,7 @@ export function Dashboard(): PReact.ComponentChildren {
                         scraper={s}
                     />
                 ))}
-            </div>
+            </ScrollableView>
             <div className="preview">
                 {showWidgetPreview ? (
                     <>

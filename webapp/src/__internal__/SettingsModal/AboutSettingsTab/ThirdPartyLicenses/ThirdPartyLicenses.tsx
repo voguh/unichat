@@ -14,6 +14,7 @@ import { useEffect, useState } from "preact/hooks";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { Badge } from "@voguh/unichat-ui/Badge";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import { commandService } from "unichat/services/commandService";
 import type { ThirdPartyLicenseInfo } from "unichat/types";
 
@@ -39,7 +40,7 @@ export function ThirdPartyLicenses(): PReact.ComponentChildren {
     }, []);
 
     return (
-        <div className={styles.root}>
+        <ScrollableView rootProps={{ className: styles.root }}>
             <table>
                 <thead>
                     <tr>
@@ -75,6 +76,6 @@ export function ThirdPartyLicenses(): PReact.ComponentChildren {
                         ))}
                 </tbody>
             </table>
-        </div>
+        </ScrollableView>
     );
 }

@@ -16,6 +16,7 @@ import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 import { Alert } from "@voguh/unichat-ui/Alert";
 import { Button, IconButton } from "@voguh/unichat-ui/Button";
 import { Markdown } from "@voguh/unichat-ui/Markdown";
+import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@voguh/unichat-ui/Tabs";
 import { CommunityAddonReleases } from "unichat/__internal__/CommunityAddons/CommunityAddonReleases";
 import {
@@ -128,9 +129,11 @@ export function PluginDetail({ plugin, installing, onInstall, onOpenFolder }: Pr
                     <TabList>
                         <Tab>Logs</Tab>
                     </TabList>
-                    <TabPanels>
-                        <TabPanel className="logs">{renderLogs(plugin.messages)}</TabPanel>
-                    </TabPanels>
+                    <ScrollableView>
+                        <TabPanels>
+                            <TabPanel className="logs">{renderLogs(plugin.messages)}</TabPanel>
+                        </TabPanels>
+                    </ScrollableView>
                 </TabGroup>
             );
         }
@@ -142,26 +145,28 @@ export function PluginDetail({ plugin, installing, onInstall, onOpenFolder }: Pr
                     <Tab>Versions ({releases.length})</Tab>
                     <Tab disabled={plugin.variant === "community" || plugin.status == null}>Logs</Tab>
                 </TabList>
-                <TabPanels>
-                    <TabPanel>
-                        <Markdown
-                            content={getDescription(detail)}
-                            relativeLinksBaseUrl={`${plugin.repositoryUrl}/blob/HEAD/`}
-                        />
-                    </TabPanel>
-                    <TabPanel>
-                        <CommunityAddonReleases
-                            addon={plugin}
-                            releases={releases}
-                            latestStable={latestStable}
-                            loading={loading}
-                            onInstall={(release) => onInstall(plugin, release)}
-                        />
-                    </TabPanel>
-                    <TabPanel className="logs">
-                        {plugin.variant === "installed" && renderLogs(plugin.messages)}
-                    </TabPanel>
-                </TabPanels>
+                <ScrollableView>
+                    <TabPanels>
+                        <TabPanel>
+                            <Markdown
+                                content={getDescription(detail)}
+                                relativeLinksBaseUrl={`${plugin.repositoryUrl}/blob/HEAD/`}
+                            />
+                        </TabPanel>
+                        <TabPanel>
+                            <CommunityAddonReleases
+                                addon={plugin}
+                                releases={releases}
+                                latestStable={latestStable}
+                                loading={loading}
+                                onInstall={(release) => onInstall(plugin, release)}
+                            />
+                        </TabPanel>
+                        <TabPanel className="logs">
+                            {plugin.variant === "installed" && renderLogs(plugin.messages)}
+                        </TabPanel>
+                    </TabPanels>
+                </ScrollableView>
             </TabGroup>
         );
     }
