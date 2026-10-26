@@ -35,7 +35,7 @@ mod mapper;
 
 /* ========================================================================== */
 
-pub const SCRAPER_ID: &str = "youtube-chat";
+const SCRAPER_ID: &str = "youtube-chat";
 static SCRAPER_JS: &str = include_str!("./static/scraper.js");
 
 /* ========================================================================== */
