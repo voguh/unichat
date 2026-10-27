@@ -13,7 +13,6 @@ use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
-use std::sync::RwLockWriteGuard;
 
 use anyhow::Error;
 use anyhow::anyhow;
@@ -23,7 +22,6 @@ use tauri::Wry;
 use tauri::webview::PageLoadPayload;
 
 use crate::settings;
-use crate::utils::get_current_timestamp;
 use crate::utils::is_dev;
 use crate::wm::main_window;
 use crate::wm::window;
@@ -51,8 +49,9 @@ fn read() -> RwLockReadGuard<'static, HashMap<String, ArcScraper>> {
     return SCRAPERS.read().expect("Scraper::SCRAPERS lock poisoned");
 }
 
-fn write() -> RwLockWriteGuard<'static, HashMap<String, ArcScraper>> {
-    return SCRAPERS.write().expect("Scraper::SCRAPERS lock poisoned");
+fn write(scraper: ArcScraper) {
+    let mut scrapers = SCRAPERS.write().expect("Scraper::SCRAPERS lock poisoned");
+    scrapers.insert(scraper.id().to_string(), scraper);
 }
 
 /* ========================================================================== */
@@ -68,13 +67,13 @@ pub trait UniChatScraper {
     fn validate_url(&self, url: String) -> Result<String, Error>;
     fn scraper_js(&self) -> &str;
     fn on_event(&self, event: serde_json::Value) -> Result<(), Error>;
-    fn on_status(&self, _event: &ScraperStatusEvent) -> Result<(), Error>;
+    fn on_status(&self, event: &ScraperStatusEvent) -> Result<(), Error>;
 }
 
 /* ========================================================================== */
 
-pub fn serialize_scraper(scraper: &Arc<dyn UniChatScraper + Send + Sync>) -> serde_json::Value {
-    let serialized = serde_json::json!({
+pub fn serialize_scraper(scraper: &ArcScraper) -> serde_json::Value {
+    return serde_json::json!({
         "id": scraper.id(),
         "name": scraper.name(),
         "editingTooltipMessage": scraper.editing_tooltip_message(),
@@ -83,8 +82,6 @@ pub fn serialize_scraper(scraper: &Arc<dyn UniChatScraper + Send + Sync>) -> ser
         "badges": scraper.badges(),
         "icon": scraper.icon()
     });
-
-    return serialized;
 }
 
 pub fn get_scrapers() -> Vec<ArcScraper> {
@@ -98,33 +95,26 @@ pub fn get_scraper(id: &str) -> Option<ArcScraper> {
 }
 
 fn handle_event(payload: &str) -> Result<(), Error> {
-    let mut payload: serde_json::Value = serde_json::from_str(payload)?;
+    let payload: serde_json::Value = serde_json::from_str(payload)?;
 
     let scraper_id = payload
         .get("scraperId")
         .and_then(|v| v.as_str())
-        .ok_or_else(|| anyhow!("Missing or invalid 'scraperId' field in scraper event payload"))?
-        .to_string();
+        .ok_or_else(|| anyhow!("Missing or invalid 'scraperId' field in scraper event payload"))?;
+    let scraper = get_scraper(scraper_id).ok_or_else(|| anyhow!("Scraper with ID '{}' not found", scraper_id))?;
+
     let event_type = payload
         .get("type")
         .and_then(|v| v.as_str())
-        .ok_or_else(|| anyhow!("Missing or invalid 'type' field in scraper event payload"))?
-        .to_string();
-
-    let scraper = get_scraper(&scraper_id).ok_or_else(|| anyhow!("Scraper with ID '{}' not found", scraper_id))?;
-
-    if status::parse_status(&event_type).is_none() {
+        .ok_or_else(|| anyhow!("Missing or invalid 'type' field in scraper event payload"))?;
+    if status::parse_status(event_type).is_none() {
         return scraper.on_event(payload);
-    }
-
-    if payload.get("timestamp").is_none() {
-        payload["timestamp"] = serde_json::json!(get_current_timestamp());
     }
 
     let event: ScraperStatusEvent = serde_json::from_value(payload)?;
 
     if let Err(err) = scraper.on_status(&event) {
-        log::error!(target: &format!("scraper:{}", scraper_id), "An error occurred on '{}' scraper status hook: {:#?}", scraper_id, err);
+        log::error!(target: &format!("scraper:{}", event.scraper_id), "An error occurred on status hook: {:#?}", err);
     }
 
     main_window::emit_status(&event);
@@ -134,7 +124,7 @@ fn handle_event(payload: &str) -> Result<(), Error> {
 
 /* ========================================================================== */
 
-fn build_scraper_initialization_script(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> String {
+fn build_scraper_initialization_script(scraper: &ArcScraper) -> String {
     return COMMON_SCRAPER_JS
         .replace("{{SCRAPER_JS}}", scraper.scraper_js())
         .replace("{{IS_DEV}}", &is_dev().to_string())
@@ -148,25 +138,18 @@ fn on_scraper_page_load(webview: WebviewWindow<Wry>, payload: PageLoadPayload<'_
         return;
     }
 
-    log::warn!(target: &format!("scraper:{}", scraper_id), "Blocked navigation attempt in scraper '{}': {}", scraper_id, payload.url());
+    log::warn!(target: &format!("scraper:{}", scraper_id), "Blocked navigation attempt: {}", payload.url());
 
     if let Err(err) = webview.eval("window.stop();") {
-        log::error!(target: &format!("scraper:{}", scraper_id), "Failed to stop blocked page in scraper '{}': {:#?}", scraper_id, err);
+        log::error!(target: &format!("scraper:{}", scraper_id), "Failed to stop blocked page: {:#?}", err);
     }
 
-    match decode_url("") {
-        Ok(idle_url) => {
-            if let Err(err) = webview.navigate(idle_url) {
-                log::error!(target: &format!("scraper:{}", scraper_id), "Failed to send scraper '{}' back to the idle page: {:#?}", scraper_id, err);
-            }
-        }
-        Err(err) => {
-            log::error!(target: &format!("scraper:{}", scraper_id), "Failed to resolve the idle page URL: {:#?}", err)
-        }
+    if let Err(err) = webview.navigate(utils::idle_url()) {
+        log::error!(target: &format!("scraper:{}", scraper_id), "Failed to send scraper back to the idle page: {:#?}", err);
     }
 }
 
-pub fn register_scraper(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Result<WebviewWindow, Error> {
+pub fn register_scraper(scraper: ArcScraper) -> Result<WebviewWindow, Error> {
     if scraper.id().chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
         return Err(anyhow!("Invalid characters in scraper ID '{}'", scraper.id()));
     }
@@ -177,8 +160,7 @@ pub fn register_scraper(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Resul
 
     /* ====================================================================== */
 
-    let mut scrapers = write();
-    if scrapers.contains_key(scraper.id()) {
+    if get_scraper(scraper.id()).is_some() {
         return Err(anyhow!("Scraper with ID '{}' is already registered", scraper.id()));
     }
 
@@ -189,13 +171,13 @@ pub fn register_scraper(scraper: Arc<dyn UniChatScraper + Send + Sync>) -> Resul
         .title(format!("UniChat - Scraper ({})", scraper.name()))
         .inner_size(400.0, 576.0)
         .visible(!start_hidden)
-        .initialization_script(build_scraper_initialization_script(scraper.clone()))
+        .initialization_script(build_scraper_initialization_script(&scraper))
         .on_page_load(on_scraper_page_load)
         .build()?;
 
     /* ====================================================================== */
 
-    scrapers.insert(scraper.id().to_string(), scraper);
+    write(scraper);
 
     window.listen("unichat://scraper_event", |event| {
         let payload = event.payload();

@@ -9,12 +9,8 @@
  ******************************************************************************/
 // biome-ignore-all format: biome doesn't need to format this file
 // biome-ignore-all lint: biome doesn't need to lint this file
+/// <reference path="../../../unichat-api/scrapers/globals.d.ts" />
 
-/**
- * @typedef {"trace" | "debug" | "info" | "warn" | "error"} LogLevel
- */
-
-/** @type {Record<LogLevel, number>} */
 const logLevelsMap = {
     trace: 1,
     debug: 2,
@@ -23,51 +19,29 @@ const logLevelsMap = {
     error: 5
 };
 
-/** @type {(level: LogLevel) => number} */
-function logLevelToNumber(level) {
-    return logLevelsMap[level] || logLevelsMap.info;
-}
-
-/** @type {(level: string) => level is LogLevel} */
-function logLevelGuard(level) {
-    return ["trace", "debug", "info", "warn", "error"].includes(level);
-}
-
 class UniChatLogger {
-    trace(message, ...args) {
-        const { formatted, throwable } = this.#format(message, args);
-        this.#dispatchLog("trace", formatted);
+    constructor() {
+        this.trace = this.trace.bind(this);
+        this.debug = this.debug.bind(this);
+        this.info = this.info.bind(this);
+        this.warn = this.warn.bind(this);
+        this.error = this.error.bind(this);
+    }
 
-        if (throwable) {
-            this.#dispatchThrowable(throwable);
-        }
+    trace(message, ...args) {
+        this.#log("trace", message, args);
     }
 
     debug(message, ...args) {
-        const { formatted, throwable } = this.#format(message, args);
-        this.#dispatchLog("debug", formatted);
-
-        if (throwable) {
-            this.#dispatchThrowable(throwable);
-        }
+        this.#log("debug", message, args);
     }
 
     info(message, ...args) {
-        const { formatted, throwable } = this.#format(message, args);
-        this.#dispatchLog("", formatted);
-
-        if (throwable) {
-            this.#dispatchThrowable(throwable);
-        }
+        this.#log("info", message, args);
     }
 
     warn(message, ...args) {
-        const { formatted, throwable } = this.#format(message, args);
-        this.#dispatchLog("warn", formatted);
-
-        if (throwable) {
-            this.#dispatchThrowable(throwable);
-        }
+        this.#log("warn", message, args);
     }
 
     error(message, ...args) {
@@ -76,31 +50,24 @@ class UniChatLogger {
             message = message.message;
         }
 
+        this.#log("error", message, args);
+    }
+
+    #log(level, message, args) {
         const { formatted, throwable } = this.#format(message, args);
-        this.#dispatchLog("error", formatted);
+        this.#emit(level, formatted);
+        // console.trace prints a stack trace instead of a trace-level message
+        console[level === "trace" ? "debug" : level](formatted);
 
         if (throwable) {
-            this.#dispatchThrowable(throwable);
+            this.#emit("error", throwable.stack);
+            console.error(throwable);
         }
-    }
-
-    #dispatchLog(level, message) {
-        if (!logLevelGuard(level)) {
-            level = "info";
-        }
-
-        this.#emit(level, message);
-        console[level](message);
-    }
-
-    #dispatchThrowable(throwable) {
-        this.#emit("error", throwable.stack);
-        console.error(throwable);
     }
 
     #emit(level, data) {
         __TAURI__.core.invoke("plugin:log|log", {
-            level: logLevelToNumber(level),
+            level: logLevelsMap[level],
             message: data,
             location: "{{SCRAPER_ID}}",
             file: null,
@@ -127,7 +94,6 @@ class UniChatLogger {
     }
 }
 
-/** @type {UniChatLogger} */
 globalThis.uniChatLogger = globalThis.uniChatLogger || new UniChatLogger();
 
 /* ========================================================================== */
@@ -137,12 +103,16 @@ class UniChat {
         return "{{SCRAPER_ID}}";
     }
 
+    constructor() {
+        this.dispatchEvent = this.dispatchEvent.bind(this);
+    }
+
     async dispatchEvent(payload) {
         if (payload == null || typeof payload !== "object") {
             throw new Error("Payload must be a non-null object.");
         }
 
-        if (payload.type == null || typeof payload.type !== "string" || payload.type.trim() === "") {
+        if (typeof payload.type !== "string" || payload.type.trim() === "") {
             throw new Error("Payload must have a non-empty string 'type' property.");
         }
 
@@ -150,23 +120,21 @@ class UniChat {
         payload.timestamp = Date.now();
 
         uniChatLogger.debug("Dispatching event of type '{}'", payload.type);
-        await __TAURI__.event.emitTo(this.scraperId, "unichat://scraper_event", payload)
-            .then(() => uniChatLogger.debug("Event of type '{}' dispatched successfully", payload.type))
-            .catch((err) => uniChatLogger.error(err.message, err));
+        try {
+            await __TAURI__.event.emitTo(this.scraperId, "unichat://scraper_event", payload);
+            uniChatLogger.debug("Event of type '{}' dispatched successfully", payload.type);
+        } catch (err) {
+            uniChatLogger.error(err.message, err);
+        }
     }
 }
 
-/** @type {UniChat} */
 globalThis.uniChat = globalThis.uniChat || new UniChat();
 
 /* ========================================================================== */
 
 function registerIntermittentEventDispatcher(type) {
-    async function dispatch() {
-        await uniChat.dispatchEvent({ type });
-    }
-
-    setInterval(dispatch, 60000);
+    setInterval(() => uniChat.dispatchEvent({ type }), 60000);
 }
 
 /* ========================================================================== */
@@ -194,15 +162,11 @@ if (window.WebSocket.__WRAPPED__ !== true) {
                 data = uniChat.preWebSocketSend(data, { wsInstance, url, protocols }) || data;
             }
 
-            try {
-                if (typeof uniChat.onWebSocketSend === "function") {
-                    uniChat.onWebSocketSend(data, { wsInstance, url, protocols });
-                }
-            } catch (err) {
-                uniChatLogger.error(err.message, err);
+            if (typeof uniChat.onWebSocketSend === "function") {
+                Promise.try(() => uniChat.onWebSocketSend(data, { wsInstance, url, protocols })).catch(uniChatLogger.error);
             }
 
-            return originalSend.apply(this, arguments);
+            return originalSend.call(this, data);
         };
 
         return wsInstance;
@@ -225,18 +189,14 @@ if (window.fetch.__WRAPPED__ !== true) {
             args = (await uniChat.preFetch(args)) || args;
         }
 
-        try {
-            if (typeof uniChat.onFetchRequest === "function") {
-                uniChat.onFetchRequest(args);
-            }
-        } catch (err) {
-            uniChatLogger.error(err.message, err);
+        if (typeof uniChat.onFetchRequest === "function") {
+            Promise.try(() => uniChat.onFetchRequest(args)).catch(uniChatLogger.error);
         }
 
         const res = await originalFetch.apply(this, args);
 
         if (typeof uniChat.onFetchResponse === "function") {
-            uniChat.onFetchResponse(res.clone(), args);
+            Promise.try(() => uniChat.onFetchResponse(res.clone(), args)).catch(uniChatLogger.error);
         }
 
         return res;
@@ -283,7 +243,7 @@ async function uniChatPreInit() {
         document.head.appendChild(style);
 
         if ("{{IS_DEV}}" !== "true") {
-            window.addEventListener("contextmenu", async (event) => {
+            window.addEventListener("contextmenu", (event) => {
                 event.preventDefault();
             });
         }

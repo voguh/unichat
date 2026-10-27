@@ -53,12 +53,7 @@ pub async fn get_scraper_webview_url<R: Runtime>(app: AppHandle<R>, scraper_id: 
 #[tauri::command]
 pub async fn get_scraper<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) -> Result<Option<Value>, String> {
     let scraper = scraper::get_scraper(scraper_id);
-    if let Some(scraper) = scraper {
-        let serialized_scraper = serialize_scraper(&scraper);
-        return Ok(Some(serialized_scraper));
-    }
-
-    return Ok(None);
+    return Ok(scraper.map(|scraper| serialize_scraper(&scraper)));
 }
 
 /* ========================================================================== */
@@ -83,7 +78,7 @@ pub async fn set_scraper_webview_url<R: Runtime>(app: AppHandle<R>, scraper_id: 
 
     let parsed_url = decode_url(url).map_err(|e| format!("An error occurred on decode scraper URL: {:#?}", e))?;
 
-    if is_local_url(scraper_id, &parsed_url) {
+    if is_local_url(&parsed_url) {
         webview.hide().map_err(|e| format!("An error occurred on hide scraper webview: {:#?}", e))?;
     } else {
         settings::set_scraper_url(scraper_id, parsed_url.as_str());

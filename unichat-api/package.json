@@ -6,11 +6,14 @@
     "author": "{{UNICHAT_AUTHOR}}",
     "homepage": "{{UNICHAT_HOMEPAGE}}",
     "repository": { "type": "git", "url": "{{UNICHAT_HOMEPAGE}}" },
-    "files": ["widgets", "plugins"],
+    "files": ["widgets", "plugins", "scrapers"],
     "exports": {
         "./plugins/*.lua": "./plugins/*.lua",
         "./plugins/*": {
             "types": "./plugins/*.d.ts"
+        },
+        "./scrapers/*": {
+            "types": "./scrapers/*.d.ts"
         },
         "./widgets/*.json": "./widgets/*.json",
         "./widgets/*": {

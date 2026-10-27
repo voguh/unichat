@@ -9,23 +9,25 @@
  ******************************************************************************/
 
 use anyhow::Error;
-use tauri::Manager as _;
 use url::Url;
 
-use crate::get_app_handle;
 use crate::settings;
 use crate::utils::is_dev;
 
 /* ========================================================================== */
 
+pub fn idle_url() -> Url {
+    if is_dev() {
+        return Url::parse("http://localhost:1421/scraper_idle.html").expect("Invalid scraper idle URL");
+    }
+
+    return Url::parse("tauri://localhost/scraper_idle.html").expect("Invalid scraper idle URL");
+}
+
 pub fn decode_url(url: &str) -> Result<Url, Error> {
-    let mut url = url.trim();
-    if url.is_empty() || !url.starts_with("https://") {
-        if is_dev() {
-            url = "http://localhost:1421/scraper_idle.html";
-        } else {
-            url = "tauri://localhost/scraper_idle.html";
-        }
+    let url = url.trim();
+    if !url.starts_with("https://") {
+        return Ok(idle_url());
     }
 
     let url = Url::parse(url)?;
@@ -34,34 +36,17 @@ pub fn decode_url(url: &str) -> Result<Url, Error> {
 
 /* ========================================================================== */
 
-fn get_scraper_url(scraper_id: &str) -> Option<String> {
-    let window = get_app_handle().get_webview_window(scraper_id)?;
-    let url = window.url().ok()?;
-
-    return Some(url.to_string());
-}
-
-pub fn is_local_url(scraper_id: &str, url: &Url) -> bool {
-    if get_scraper_url(scraper_id).is_none() {
-        return false;
-    }
-
+pub fn is_local_url(url: &Url) -> bool {
     return matches!(url.scheme(), "http" | "tauri")
         && matches!(url.host_str(), Some("localhost") | Some("tauri.localhost"))
         && url.path() == "/scraper_idle.html";
 }
 
 pub fn is_remote_url(scraper_id: &str, url: &Url) -> bool {
-    if get_scraper_url(scraper_id).is_none() {
-        return false;
-    }
-
     let stored_url = settings::get_scraper_url(scraper_id);
-    let stored_url = stored_url.and_then(|stored_url| Url::parse(&stored_url).ok());
-
-    return matches!(stored_url, Some(stored_url) if url == &stored_url);
+    return stored_url.and_then(|value| Url::parse(&value).ok()).is_some_and(|stored| &stored == url);
 }
 
 pub fn is_navigation_allowed(scraper_id: &str, url: &Url) -> bool {
-    return is_local_url(scraper_id, url) || is_remote_url(scraper_id, url);
+    return is_local_url(url) || is_remote_url(scraper_id, url);
 }
