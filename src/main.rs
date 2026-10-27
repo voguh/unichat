@@ -148,7 +148,7 @@ fn run_startup() -> Result<(), Error> {
     events::init();
 
     wm::splash_window::stage(7, "Initializing currency module...");
-    currency::init()?;
+    currency::init();
 
     wm::splash_window::stage(8, "Fetching global shared emotes...");
     shared_emotes::fetch_global_shared_emotes();

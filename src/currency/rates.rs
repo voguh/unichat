@@ -15,7 +15,6 @@ use std::sync::RwLockReadGuard;
 use std::time::Duration;
 
 use anyhow::Error;
-use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -28,32 +27,8 @@ use crate::utils::ureq;
 
 #[derive(Default)]
 struct RatesStore {
-    items: Vec<(String, String, f64)>,
-    by_code: HashMap<String, usize>,
-    by_symbol: HashMap<String, usize>
-}
-
-impl RatesStore {
-    pub fn add(&mut self, code: String, symbol: String, rate: f64) {
-        let index = self.items.len();
-        self.by_code.insert(code.clone(), index);
-        self.by_symbol.insert(symbol.clone(), index);
-        self.items.push((code, symbol, rate));
-    }
-
-    pub fn add_all(&mut self, rates: Vec<(String, String, f64)>) {
-        for (code, symbol, rate) in rates {
-            self.add(code, symbol, rate);
-        }
-    }
-
-    fn get_by_code(&self, code: &str) -> Option<&(String, String, f64)> {
-        return self.by_code.get(code).map(|&index| &self.items[index]);
-    }
-
-    fn get_by_symbol(&self, symbol: &str) -> Option<&(String, String, f64)> {
-        return self.by_symbol.get(symbol).map(|&index| &self.items[index]);
-    }
+    by_code: HashMap<String, f64>,
+    by_symbol: HashMap<String, f64>
 }
 
 static RATES: LazyLock<RwLock<RatesStore>> = LazyLock::new(|| RwLock::new(RatesStore::default()));
@@ -69,11 +44,13 @@ fn write(new_value: RatesStore) {
 /* ========================================================================== */
 
 pub fn get_rate_by_code(code: &str) -> Option<f64> {
-    return read().get_by_code(code).map(|(_, _, rate)| *rate);
+    let guard = read();
+    return guard.by_code.get(code).copied();
 }
 
 pub fn get_rate_by_symbol(symbol: &str) -> Option<f64> {
-    return read().get_by_symbol(symbol).map(|(_, _, rate)| *rate);
+    let guard = read();
+    return guard.by_symbol.get(symbol).copied();
 }
 
 pub fn clear_rates() {
@@ -99,10 +76,6 @@ fn fetch_rate_list(target: &str) -> Result<Vec<(String, String, f64)>, Error> {
         currencies_list.insert(currency.code.clone(), currency);
     }
 
-    if currencies_list.is_empty() {
-        return Err(anyhow!("Empty currencies list"));
-    }
-
     let url = format!("{}?base={}", RATES_URL, target);
     log::info!("Fetching currency rates from '{}'...", url);
     let mut response = ureq::get(url).call()?;
@@ -123,7 +96,11 @@ pub fn fetch_rates(target: &str) -> Result<(), Error> {
     let rates: Vec<(String, String, f64)> = cache::get_or_fetch(&key, RATES_FILE_TTL, || fetch_rate_list(target))?;
 
     let mut new_state = RatesStore::default();
-    new_state.add_all(rates);
+    for (code, symbol, rate) in rates {
+        new_state.by_code.insert(code, rate);
+        new_state.by_symbol.insert(symbol, rate);
+    }
+
     write(new_state);
 
     return Ok(());

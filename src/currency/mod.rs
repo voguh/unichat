@@ -25,6 +25,10 @@ mod rates;
 
 /* ========================================================================== */
 
+pub use currencies::get as currencies;
+
+/* ========================================================================== */
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct UniChatCurrency {
     pub code: String,
@@ -44,18 +48,15 @@ fn write(new_value: Option<UniChatCurrency>) {
 
 /* ========================================================================== */
 
-pub fn currencies() -> Vec<UniChatCurrency> {
-    return currencies::get();
-}
-
 pub fn target_currency() -> Option<UniChatCurrency> {
-    return read().clone();
+    let guard = read();
+    return guard.clone();
 }
 
 fn refresh_rates(value: serde_json::Value) -> Result<(), Error> {
     let code: String = serde_json::from_value(value)?;
     let code = code.to_ascii_uppercase();
-    if code.is_empty() || code.len() != 3 {
+    if code.len() != 3 {
         rates::clear_rates();
         write(None);
 
@@ -67,10 +68,6 @@ fn refresh_rates(value: serde_json::Value) -> Result<(), Error> {
     }
 
     let currencies_list = currencies::get();
-    if currencies_list.is_empty() {
-        return Err(anyhow!("Empty currencies list"));
-    }
-
     let target_currency = currencies_list.iter().find(|c| c.code == code).cloned();
     if target_currency.is_none() {
         return Err(anyhow!("Currency '{}' not found", code));
@@ -85,7 +82,7 @@ fn refresh_rates(value: serde_json::Value) -> Result<(), Error> {
     return Ok(());
 }
 
-pub fn init() -> Result<(), Error> {
+pub fn init() {
     settings::add_change_listener(SETTINGS_CURRENCY_TARGET_KEY, |value| {
         let move_value = value.clone();
         tauri::async_runtime::spawn_blocking(move || {
@@ -95,12 +92,15 @@ pub fn init() -> Result<(), Error> {
         });
     });
 
-    currencies::init()?;
+    if let Err(err) = currencies::init() {
+        log::error!("Failed to load currency list: {:#?}", err);
+        return;
+    }
 
     let code = serde_json::json!(settings::get_currency_target());
-    refresh_rates(code)?;
-
-    return Ok(());
+    if let Err(err) = refresh_rates(code) {
+        log::error!("Failed to refresh rates: {:#?}", err);
+    }
 }
 
 /* ========================================================================== */
