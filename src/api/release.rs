@@ -50,13 +50,7 @@ pub fn get_release_info() -> Result<UniChatReleaseInfo, Error> {
     releases.sort_by(|a, b| semver::rcompare(&a.name, &b.name));
     let latest_stable = releases.iter().find(|r| !r.prerelease);
     let latest_unstable = releases.iter().find(|r| r.prerelease);
-
-    let mut has_update = false;
-    if let Some(latest_stable) = latest_stable {
-        if semver::gt(&latest_stable.name, UNICHAT_VERSION) {
-            has_update = true;
-        }
-    }
+    let has_update = latest_stable.is_some_and(|r| semver::gt(&r.name, UNICHAT_VERSION));
 
     return Ok(UniChatReleaseInfo {
         has_update: has_update,
