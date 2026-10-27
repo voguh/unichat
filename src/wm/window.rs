@@ -17,7 +17,6 @@ use tauri::WebviewWindow;
 use tauri::WebviewWindowBuilder;
 use tauri::webview::PageLoadEvent;
 use tauri::webview::PageLoadPayload;
-use url::Url;
 
 use crate::UNICHAT_AUTHORS;
 use crate::UNICHAT_DESCRIPTION;
@@ -50,14 +49,7 @@ const ADDITIONAL_BROWSER_ARGS: &str = "--disable-features=msWebOOUI,msPdfOOUI,ms
 
 pub fn new(label: &str, url: &str) -> WebviewWindowBuilder<'static, tauri::Wry, AppHandle> {
     let app_handle = crate::get_app_handle();
-
-    let webview_url;
-    if url.starts_with("https://") {
-        let external_url = Url::parse(url).expect("Failed to parse external URL");
-        webview_url = WebviewUrl::External(external_url);
-    } else {
-        webview_url = WebviewUrl::App(PathBuf::from(url));
-    }
+    let webview_url = WebviewUrl::App(PathBuf::from(url));
 
     return WebviewWindowBuilder::new(app_handle, label, webview_url).additional_browser_args(ADDITIONAL_BROWSER_ARGS);
 }
