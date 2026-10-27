@@ -16,10 +16,8 @@ use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
-use std::sync::RwLockWriteGuard;
 
 use anyhow::Error;
-use anyhow::anyhow;
 use serde::Serialize;
 use serde_json::Map;
 
@@ -70,7 +68,7 @@ impl WidgetMetadata {
     }
 
     pub fn fields(&self) -> Map<String, serde_json::Value> {
-        let raw = fs::read_to_string(self.fields_path()).unwrap_or(String::from("{}"));
+        let raw = fs::read_to_string(self.fields_path()).unwrap_or_else(|_| String::from("{}"));
 
         return match serde_json::from_str(&raw) {
             Ok(map) => map,
@@ -88,7 +86,7 @@ impl WidgetMetadata {
     }
 
     pub fn fieldstate(&self) -> HashMap<String, serde_json::Value> {
-        let raw = fs::read_to_string(self.fieldstate_path()).unwrap_or(String::from("{}"));
+        let raw = fs::read_to_string(self.fieldstate_path()).unwrap_or_else(|_| String::from("{}"));
 
         return match serde_json::from_str(&raw) {
             Ok(map) => map,
@@ -101,50 +99,26 @@ impl WidgetMetadata {
 
     /* ====================================================================== */
 
-    fn widget_css_path(&self) -> PathBuf {
-        let path = self.path.join("widget.css");
+    fn entrypoint_path(&self, current: &str, legacy: &str) -> PathBuf {
+        let path = self.path.join(current);
         if path.exists() {
             return path;
         }
 
-        log::warn!("Falling back to 'style.css' for widget '{:?}'", self.path);
-        return self.path.join("style.css");
+        log::warn!("Falling back to '{}' for widget '{:?}'", legacy, self.path);
+        return self.path.join(legacy);
     }
 
     pub fn widget_css(&self) -> String {
-        return fs::read_to_string(self.widget_css_path()).unwrap_or_default();
-    }
-
-    /* ====================================================================== */
-
-    fn widget_html_path(&self) -> PathBuf {
-        let path = self.path.join("widget.html");
-        if path.exists() {
-            return path;
-        }
-
-        log::warn!("Falling back to 'main.html' for widget '{:?}'", self.path);
-        return self.path.join("main.html");
+        return fs::read_to_string(self.entrypoint_path("widget.css", "style.css")).unwrap_or_default();
     }
 
     pub fn widget_html(&self) -> String {
-        return fs::read_to_string(self.widget_html_path()).unwrap_or_default();
-    }
-
-    /* ====================================================================== */
-
-    fn widget_js_path(&self) -> PathBuf {
-        let path = self.path.join("widget.js");
-        if path.exists() {
-            return path;
-        }
-
-        log::warn!("Falling back to 'script.js' for widget '{:?}'", self.path);
-        return self.path.join("script.js");
+        return fs::read_to_string(self.entrypoint_path("widget.html", "main.html")).unwrap_or_default();
     }
 
     pub fn widget_js(&self) -> String {
-        return fs::read_to_string(self.widget_js_path()).unwrap_or_default();
+        return fs::read_to_string(self.entrypoint_path("widget.js", "script.js")).unwrap_or_default();
     }
 }
 
@@ -153,11 +127,29 @@ fn read() -> RwLockReadGuard<'static, HashMap<String, WidgetMetadata>> {
     return WIDGETS.read().expect("Widgets::WIDGETS lock poisoned");
 }
 
-fn write() -> RwLockWriteGuard<'static, HashMap<String, WidgetMetadata>> {
-    return WIDGETS.write().expect("Widgets::WIDGETS lock poisoned");
+fn write(source_type: &WidgetSource, loaded: Vec<WidgetMetadata>) {
+    let mut widgets = WIDGETS.write().expect("Widgets::WIDGETS lock poisoned");
+    widgets.retain(|_, v| &v.widget_source != source_type);
+
+    for metadata in loaded {
+        widgets.insert(metadata.rest_path.clone(), metadata);
+    }
 }
 
 /* ========================================================================== */
+
+fn get_entrypoint_warning(widget_path: &Path, current: &str, legacy: &str, kind: &str) -> Option<String> {
+    let has_current = widget_path.join(current).exists();
+    let has_legacy = widget_path.join(legacy).exists();
+
+    if has_legacy && has_current {
+        return Some(format!("DUPLICATE_{}_ENTRYPOINT", kind));
+    } else if has_legacy {
+        return Some(format!("LEGACY_{}_ENTRYPOINT", kind));
+    }
+
+    return None;
+}
 
 fn get_warnings_for_widget(widget_path: &Path, source_type: &WidgetSource) -> Vec<String> {
     let mut warnings = Vec::new();
@@ -166,23 +158,9 @@ fn get_warnings_for_widget(widget_path: &Path, source_type: &WidgetSource) -> Ve
         warnings.push("MISSING_MANIFEST".to_string());
     }
 
-    if widget_path.join("main.html").exists() && widget_path.join("widget.html").exists() {
-        warnings.push("DUPLICATE_HTML_ENTRYPOINT".to_string());
-    } else if widget_path.join("main.html").exists() && !widget_path.join("widget.html").exists() {
-        warnings.push("LEGACY_HTML_ENTRYPOINT".to_string());
-    }
-
-    if widget_path.join("script.js").exists() && widget_path.join("widget.js").exists() {
-        warnings.push("DUPLICATE_JS_ENTRYPOINT".to_string());
-    } else if widget_path.join("script.js").exists() && !widget_path.join("widget.js").exists() {
-        warnings.push("LEGACY_JS_ENTRYPOINT".to_string());
-    }
-
-    if widget_path.join("style.css").exists() && widget_path.join("widget.css").exists() {
-        warnings.push("DUPLICATE_CSS_ENTRYPOINT".to_string());
-    } else if widget_path.join("style.css").exists() && !widget_path.join("widget.css").exists() {
-        warnings.push("LEGACY_CSS_ENTRYPOINT".to_string());
-    }
+    warnings.extend(get_entrypoint_warning(widget_path, "widget.html", "main.html", "HTML"));
+    warnings.extend(get_entrypoint_warning(widget_path, "widget.js", "script.js", "JS"));
+    warnings.extend(get_entrypoint_warning(widget_path, "widget.css", "style.css", "CSS"));
 
     return warnings;
 }
@@ -192,13 +170,11 @@ fn load_widgets_from_disk(
     source_type: WidgetSource,
     cb: impl Fn(&WidgetMetadata)
 ) -> Result<(), Error> {
-    if !widgets_path.exists() || !widgets_path.is_dir() {
+    if !widgets_path.is_dir() {
         return Ok(());
     }
 
-    let mut widgets = write();
-    widgets.retain(|_, v| v.widget_source != source_type);
-
+    let mut loaded = Vec::new();
     let entries = fs::read_dir(widgets_path)?;
     for entry in entries.flatten() {
         let widget_path = entry.path();
@@ -206,8 +182,7 @@ fn load_widgets_from_disk(
             continue;
         }
 
-        let folder_name = widget_path.file_name().ok_or_else(|| anyhow!("Invalid widget folder name"))?;
-        let widget_id = folder_name.to_string_lossy().to_string();
+        let widget_id = entry.file_name().to_string_lossy().to_string();
         if widget_id.starts_with(".") {
             continue;
         } else if widget_id.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
@@ -228,7 +203,7 @@ fn load_widgets_from_disk(
         }
 
         let warnings = get_warnings_for_widget(&widget_path, &source_type);
-        let manifest = manifest.unwrap_or(UniChatAddonManifest {
+        let manifest = manifest.unwrap_or_else(|| UniChatAddonManifest {
             name: widget_id.clone(),
             description: None,
             version: String::from("0.0.0"),
@@ -242,7 +217,7 @@ fn load_widgets_from_disk(
         if let WidgetSource::UserPlugin(plugin_id) = &source_type {
             rest_path = format!("{}::{}", plugin_id, widget_id);
         } else {
-            rest_path = widget_id.clone()
+            rest_path = widget_id.clone();
         }
 
         let metadata = WidgetMetadata {
@@ -256,13 +231,15 @@ fn load_widgets_from_disk(
             dependencies: manifest.dependencies,
 
             path: widget_path,
-            rest_path: rest_path.clone(),
+            rest_path: rest_path,
             widget_source: source_type.clone(),
             warnings: warnings
         };
         cb(&metadata);
-        widgets.insert(rest_path.clone(), metadata);
+        loaded.push(metadata);
     }
+
+    write(&source_type, loaded);
 
     return Ok(());
 }
@@ -274,24 +251,9 @@ pub fn get_widgets() -> Vec<WidgetMetadata> {
     return widgets.values().cloned().collect();
 }
 
-pub fn get_widget_from_id(id: &str) -> Result<WidgetMetadata, Error> {
+pub fn get_widget_from_rest_path(rest_path: &str) -> Option<WidgetMetadata> {
     let widgets = read();
-    for metadata in widgets.values() {
-        if metadata.id == id {
-            return Ok(metadata.clone());
-        }
-    }
-
-    return Err(anyhow!("Widget not found"));
-}
-
-pub fn get_widget_from_rest_path(rest_path: &str) -> Result<WidgetMetadata, Error> {
-    let widgets = read();
-    if let Some(metadata) = widgets.get(rest_path) {
-        return Ok(metadata.clone());
-    }
-
-    return Err(anyhow!("Widget not found"));
+    return widgets.get(rest_path).cloned();
 }
 
 pub fn reload_user_widgets() -> Result<(), Error> {

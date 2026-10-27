@@ -76,8 +76,8 @@ pub async fn get_widget_assets(
 ) -> Response {
     let widget_metadata: WidgetMetadata;
     match get_widget_from_rest_path(&widget_name) {
-        Ok(widget) => widget_metadata = widget,
-        Err(_) => {
+        Some(widget) => widget_metadata = widget,
+        None => {
             return Response::builder()
                 .status(StatusCode::NOT_FOUND)
                 .body(Body::from(format!("Widget '{}' not found", widget_name)))
@@ -115,7 +115,7 @@ pub async fn get_widget_assets(
 /* ========================================================================== */
 
 pub async fn get_widget_css(Path(widget_name): Path<String>) -> Response {
-    if let Ok(widget) = get_widget_from_rest_path(&widget_name) {
+    if let Some(widget) = get_widget_from_rest_path(&widget_name) {
         let content = fill_fieldstate(&widget.widget_css(), &widget);
         return Response::builder()
             .status(StatusCode::OK)
@@ -132,7 +132,7 @@ pub async fn get_widget_css(Path(widget_name): Path<String>) -> Response {
 }
 
 pub async fn get_widget_js(Path(widget_name): Path<String>) -> Response {
-    if let Ok(widget) = get_widget_from_rest_path(&widget_name) {
+    if let Some(widget) = get_widget_from_rest_path(&widget_name) {
         let content = fill_fieldstate(&widget.widget_js(), &widget);
         return Response::builder()
             .status(StatusCode::OK)
@@ -149,7 +149,7 @@ pub async fn get_widget_js(Path(widget_name): Path<String>) -> Response {
 }
 
 pub async fn get_widget(Path(widget_name): Path<String>, req: Request<Body>) -> Response {
-    if let Ok(widget) = get_widget_from_rest_path(&widget_name) {
+    if let Some(widget) = get_widget_from_rest_path(&widget_name) {
         let mut content = String::from(WIDGET_TEMPLATE);
         content = content.replace("{{WIDGET_HTML}}", &widget.widget_html());
 

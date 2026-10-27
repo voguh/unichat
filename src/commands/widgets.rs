@@ -27,14 +27,13 @@ use crate::widgets::reload_user_widgets;
 #[tauri::command]
 pub async fn get_widget_fields<R: Runtime>(_app: AppHandle<R>, widget: String) -> Result<Map<String, Value>, String> {
     let found = get_widget_from_rest_path(&widget);
-    let widget = found.map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
-    if matches!(widget.widget_source, WidgetSource::User | WidgetSource::UserPlugin(_)) {
-        let fields = widget.fields();
-
-        return Ok(fields);
+    let widget = found.ok_or_else(|| format!("Widget '{}' not found", widget))?;
+    if widget.widget_source == WidgetSource::System {
+        return Err("Cannot get fields of system widgets".into());
     }
 
-    return Err("Cannot get fields of system or plugin widgets".into());
+    let fields = widget.fields();
+    return Ok(fields);
 }
 
 /* ========================================================================== */
@@ -45,13 +44,13 @@ pub async fn get_widget_fieldstate<R: Runtime>(
     widget: String
 ) -> Result<HashMap<String, Value>, String> {
     let found = get_widget_from_rest_path(&widget);
-    let widget = found.map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
-    if matches!(widget.widget_source, WidgetSource::User | WidgetSource::UserPlugin(_)) {
-        let fieldstate = widget.fieldstate();
-        return Ok(fieldstate);
+    let widget = found.ok_or_else(|| format!("Widget '{}' not found", widget))?;
+    if widget.widget_source == WidgetSource::System {
+        return Err("Cannot get fieldstate of system widgets".into());
     }
 
-    return Err("Cannot get fieldstate of system or plugin widgets".into());
+    let fieldstate = widget.fieldstate();
+    return Ok(fieldstate);
 }
 
 /* ========================================================================== */
@@ -68,16 +67,13 @@ pub async fn get_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<WidgetMet
 #[tauri::command]
 pub async fn set_widget_fieldstate<R: Runtime>(_app: AppHandle<R>, widget: String, data: String) -> Result<(), String> {
     let found = get_widget_from_rest_path(&widget);
-    let widget = found.map_err(|e| format!("Failed to locate widget '{}': {:#?}", widget, e))?;
-    if matches!(widget.widget_source, WidgetSource::User | WidgetSource::UserPlugin(_)) {
-        let path = widget.fieldstate_path();
-        if path.exists() && !path.is_file() {
-            return Err(format!("Widget '{:?}' exists but is not a file", path));
-        }
-
-        fs::write(&path, data).map_err(|e| format!("Failed to write widget '{:?}' fieldstate file: {:#?}", path, e))?;
-        return Ok(());
+    let widget = found.ok_or_else(|| format!("Widget '{}' not found", widget))?;
+    if widget.widget_source == WidgetSource::System {
+        return Err("Cannot set fieldstate of system widgets".into());
     }
 
-    return Err("Cannot set fieldstate of system or plugin widgets".into());
+    let path = widget.fieldstate_path();
+    fs::write(&path, data).map_err(|e| format!("Failed to write widget '{:?}' fieldstate file: {:#?}", path, e))?;
+
+    return Ok(());
 }
