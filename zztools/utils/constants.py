@@ -11,7 +11,7 @@
 from pathlib import Path
 
 EXPECTED_RUSTC_VERSION = "1.99.1"
-EXPECTED_NODE_VERSION = "24.16.0"
+EXPECTED_NODE_VERSION = "26.13.0"
 EXPECTED_PNPM_VERSION = "10.33.4"
 
 TOOLS_PATH = Path(__file__).resolve().parent.parent

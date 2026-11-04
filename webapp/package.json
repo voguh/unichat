@@ -28,7 +28,7 @@
         "@rspack/core": "2.2.9",
         "@rspack/dev-server": "2.2.1",
         "@tailwindcss/postcss": "4.3.3",
-        "@types/node": "24.19.2",
+        "@types/node": "26.6.6",
         "@voguh/unichat-api": "file:../unichat-api",
         "cross-env": "10.1.0",
         "glob": "13.0.6",
