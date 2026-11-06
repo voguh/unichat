@@ -22,12 +22,6 @@
                     @apply w-full;
 
                     > div {
-                        &:global(.alert) {
-                            @apply bg-red-800/25 border border-red-800 rounded;
-                            @apply text-stone-50;
-                            @apply mt-4 p-2 flex flex-nowrap gap-2;
-                        }
-
                         &[data-part~="SegmentedControl"] {
                             @apply w-full mt-4;
 

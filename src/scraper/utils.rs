@@ -9,44 +9,25 @@
  ******************************************************************************/
 
 use anyhow::Error;
+use anyhow::anyhow;
 use url::Url;
 
 use crate::settings;
-use crate::utils::is_dev;
 
 /* ========================================================================== */
 
-pub fn idle_url() -> Url {
-    if is_dev() {
-        return Url::parse("http://localhost:1421/scraper_idle.html").expect("Invalid scraper idle URL");
-    }
-
-    return Url::parse("tauri://localhost/scraper_idle.html").expect("Invalid scraper idle URL");
-}
-
 pub fn decode_url(url: &str) -> Result<Url, Error> {
-    let url = url.trim();
-    if !url.starts_with("https://") {
-        return Ok(idle_url());
+    let url = Url::parse(url.trim())?;
+    if url.scheme() != "https" {
+        return Err(anyhow!("Scraper URL '{}' is not https", url));
     }
 
-    let url = Url::parse(url)?;
     return Ok(url);
 }
 
 /* ========================================================================== */
 
-pub fn is_local_url(url: &Url) -> bool {
-    return matches!(url.scheme(), "http" | "tauri")
-        && matches!(url.host_str(), Some("localhost") | Some("tauri.localhost"))
-        && url.path() == "/scraper_idle.html";
-}
-
-pub fn is_remote_url(scraper_id: &str, url: &Url) -> bool {
+pub fn is_navigation_allowed(scraper_id: &str, url: &Url) -> bool {
     let stored_url = settings::get_scraper_url(scraper_id);
     return stored_url.and_then(|value| Url::parse(&value).ok()).is_some_and(|stored| &stored == url);
-}
-
-pub fn is_navigation_allowed(scraper_id: &str, url: &Url) -> bool {
-    return is_local_url(url) || is_remote_url(scraper_id, url);
 }

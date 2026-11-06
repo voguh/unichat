@@ -13,6 +13,7 @@ use serde::Serialize;
 use serde_json::json;
 use tauri::Emitter as _;
 use tauri::Manager as _;
+use tauri::WebviewUrl;
 
 use crate::UNICHAT_DISPLAY_NAME;
 use crate::UNICHAT_VERSION;
@@ -26,7 +27,7 @@ use crate::wm::window;
 pub const MAIN_WINDOW_LABEL: &str = "main";
 
 pub fn create() -> Result<(), Error> {
-    window::new(MAIN_WINDOW_LABEL, "index.html")
+    window::new(MAIN_WINDOW_LABEL, WebviewUrl::App("index.html".into()))
         .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION))
         .inner_size(1180.0, 640.0)
         .maximizable(false)

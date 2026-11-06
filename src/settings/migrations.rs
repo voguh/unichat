@@ -204,6 +204,11 @@ static MIGRATIONS: LazyLock<Vec<Migration>> = LazyLock::new(|| {
 
             return Ok(());
         }),
+        Box::new(|store| {
+            store.delete("settings:create-webview-hidden");
+
+            return Ok(());
+        }),
     ];
 });
 

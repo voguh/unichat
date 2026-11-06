@@ -59,9 +59,7 @@ pub struct LuaUniChatScraper {
     validate_url: Function,
     scraper_js: String,
     on_event: Function,
-    on_idle: Option<Function>,
     on_ready: Option<Function>,
-    on_ping: Option<Function>,
     on_error: Option<Function>,
     on_fatal: Option<Function>
 }
@@ -75,9 +73,7 @@ impl LuaUniChatScraper {
         let badges = get_table_property(&opts, "badges", Some(Vec::new()))?;
         let icon = get_table_property(&opts, "icon", Some(String::from("fas fa-video")))?;
         let validate_url = get_table_property(&opts, "validate_url", None)?;
-        let on_idle = get_optional_table_property(&opts, "on_idle");
         let on_ready = get_optional_table_property(&opts, "on_ready");
-        let on_ping = get_optional_table_property(&opts, "on_ping");
         let on_error = get_optional_table_property(&opts, "on_error");
         let on_fatal = get_optional_table_property(&opts, "on_fatal");
 
@@ -103,9 +99,7 @@ impl LuaUniChatScraper {
             validate_url: validate_url,
             scraper_js: scraper_js,
             on_event: on_event,
-            on_idle: on_idle,
             on_ready: on_ready,
-            on_ping: on_ping,
             on_error: on_error,
             on_fatal: on_fatal
         });
@@ -127,9 +121,7 @@ impl LuaUniChatScraper {
 
     fn status_callback(&self, status: ScraperStatus) -> Option<&Function> {
         return match status {
-            ScraperStatus::Idle => self.on_idle.as_ref(),
             ScraperStatus::Ready => self.on_ready.as_ref(),
-            ScraperStatus::Ping => self.on_ping.as_ref(),
             ScraperStatus::Error => self.on_error.as_ref(),
             ScraperStatus::Fatal => self.on_fatal.as_ref()
         };

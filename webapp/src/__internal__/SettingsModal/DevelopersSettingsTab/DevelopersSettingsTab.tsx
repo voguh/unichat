@@ -16,14 +16,12 @@ import { FormGroup } from "@voguh/unichat-ui/forms/FormGroup";
 import { Switch } from "@voguh/unichat-ui/forms/Switch";
 import { ScrollableView } from "@voguh/unichat-ui/ScrollableView";
 import { SegmentedControl } from "@voguh/unichat-ui/SegmentedControl";
-import { useStorage } from "unichat/hooks/useStorage";
 import {
     ScraperEventsLogLevel as LogLevel,
     settingsService,
     type UniChatSettings,
     UniChatSettingsKeys
 } from "unichat/services/settingsService";
-import { StorageKeys } from "unichat/services/storageService";
 
 import styles from "./styles.module.css";
 
@@ -35,11 +33,8 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
     const [dirty, setDirty] = useState(false);
     const [initialSettings, setInitialSettings] = useState<Partial<UniChatSettings>>({});
 
-    const createWebviewsHiddenRef = useRef<HTMLInputElement>(null);
     const [logEventsRef, setLogEventsRef] = useState(LogLevel.UNKNOWN_EVENTS);
     const openScraperWebviewRef = useRef<HTMLInputElement>(null);
-
-    const [settingsRequiresRestart, setSettingsRequiresRestart] = useStorage(StorageKeys.SETTINGS_REQUIRES_RESTART);
 
     function changeLogEvents(logLevel: LogLevel): void {
         setLogEventsRef(logLevel);
@@ -47,12 +42,7 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
     }
 
     async function applySettings(): Promise<void> {
-        const beforeCreateWebviewsHidden = initialSettings[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN];
         const settingsCopy = { ...initialSettings };
-
-        if (createWebviewsHiddenRef.current) {
-            settingsCopy[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN] = createWebviewsHiddenRef.current.checked;
-        }
 
         if (logEventsRef) {
             settingsCopy[UniChatSettingsKeys.LOG_SCRAPER_EVENTS] = logEventsRef;
@@ -65,11 +55,6 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
         await settingsService.setItems(settingsCopy);
         setInitialSettings(settingsCopy);
         setDirty(false);
-
-        const key = UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN;
-        if (beforeCreateWebviewsHidden !== settingsCopy[key] && !settingsRequiresRestart.includes(key)) {
-            setSettingsRequiresRestart((old) => [...old, key]);
-        }
     }
 
     useEffect(() => {
@@ -82,19 +67,11 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
             this.removeEventListener("change", changeDirty);
         }
 
-        if (createWebviewsHiddenRef.current) {
-            createWebviewsHiddenRef.current.addEventListener("change", changeDirty);
-        }
-
         if (openScraperWebviewRef.current) {
             openScraperWebviewRef.current.addEventListener("change", changeDirty);
         }
 
         return () => {
-            if (createWebviewsHiddenRef.current) {
-                createWebviewsHiddenRef.current.removeEventListener("change", changeDirty);
-            }
-
             if (openScraperWebviewRef.current) {
                 openScraperWebviewRef.current.removeEventListener("change", changeDirty);
             }
@@ -105,7 +82,6 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
     useEffect(() => {
         async function init(): Promise<void> {
             const settings = await settingsService.getItems([
-                UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN,
                 UniChatSettingsKeys.LOG_SCRAPER_EVENTS,
                 UniChatSettingsKeys.OPEN_SCRAPER_WEBVIEW
             ]);
@@ -123,27 +99,6 @@ export function DevelopersSettingsTab(_props: Props): PReact.ComponentChildren {
     return (
         <div className={styles.root} key={Object.keys(initialSettings).length === 0 ? "loading" : "loaded"}>
             <ScrollableView rootProps={{ className: "body" }}>
-                <div>
-                    <Switch
-                        defaultChecked={initialSettings[UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN] ?? false}
-                        ref={createWebviewsHiddenRef}
-                        label="Create webviews silent"
-                        description="On startup, webviews will be created in background and only shown when requested"
-                    />
-
-                    {settingsRequiresRestart.includes(UniChatSettingsKeys.CREATE_WEBVIEW_HIDDEN) && (
-                        <div className="alert">
-                            <div>
-                                <i className="fas fa-info-circle" />
-                            </div>
-                            <span>
-                                <strong>{UNICHAT_DISPLAY_NAME}</strong> must be restarted for this setting to take
-                                effect.
-                            </span>
-                        </div>
-                    )}
-                </div>
-
                 <div>
                     <Switch
                         defaultChecked={initialSettings[UniChatSettingsKeys.OPEN_SCRAPER_WEBVIEW] ?? false}

@@ -168,22 +168,25 @@ fn run_startup() -> Result<(), Error> {
 
     /* ====================================================================== */
 
-    wm::splash_window::stage(12, "Registering Twitch integration...");
+    wm::splash_window::stage(12, "Initializing scraper module...");
+    scraper::init();
+
+    wm::splash_window::stage(13, "Registering Twitch integration...");
     twitch::init()?;
 
-    wm::splash_window::stage(13, "Registering YouTube integration...");
+    wm::splash_window::stage(14, "Registering YouTube integration...");
     youtube::init()?;
 
     if has_plugins() {
-        wm::splash_window::stage(14, "Loading plugins...");
+        wm::splash_window::stage(15, "Loading plugins...");
         plugins::load_plugins()?;
     } else {
-        wm::splash_window::stage(14, "No plugins found. Skipping plugin loading.");
+        wm::splash_window::stage(15, "No plugins found. Skipping plugin loading.");
     }
 
     /* ====================================================================== */
 
-    wm::splash_window::stage(15, "Initializing HTTP server...");
+    wm::splash_window::stage(16, "Initializing HTTP server...");
     tauri::async_runtime::spawn(axum::start());
 
     /* ====================================================================== */
@@ -257,7 +260,8 @@ fn main() {
             commands::scrapers::get_scraper_webview_url,
             commands::scrapers::get_scraper,
             commands::scrapers::get_scrapers,
-            commands::scrapers::set_scraper_webview_url,
+            commands::scrapers::start_scraper,
+            commands::scrapers::stop_scraper,
             commands::scrapers::toggle_scraper_webview,
             commands::scrapers::validate_scraper_url,
             commands::store::settings_get_item,

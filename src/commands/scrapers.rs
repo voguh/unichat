@@ -15,7 +15,6 @@ use tauri::Runtime;
 
 use crate::scraper;
 use crate::scraper::decode_url;
-use crate::scraper::is_local_url;
 use crate::scraper::serialize_scraper;
 use crate::settings;
 
@@ -37,15 +36,20 @@ pub async fn get_scraper_stored_url<R: Runtime>(
 /* ========================================================================== */
 
 #[tauri::command]
-pub async fn get_scraper_webview_url<R: Runtime>(app: AppHandle<R>, scraper_id: &str) -> Result<String, String> {
+pub async fn get_scraper_webview_url<R: Runtime>(
+    app: AppHandle<R>,
+    scraper_id: &str
+) -> Result<Option<String>, String> {
     if !scraper_id.ends_with("-chat") {
         return Err(format!("Webview window '{}' not recognized", scraper_id));
     }
 
-    let webview = app.get_webview_window(scraper_id).ok_or_else(|| format!("Scraper window '{}' not found", scraper_id))?;
-    let url = webview.url().map_err(|e| format!("An error occurred on get scraper webview URL: {:#?}", e))?;
+    if let Some(webview) = app.get_webview_window(scraper_id) {
+        let url = webview.url().map_err(|e| format!("An error occurred on get scraper webview URL: {:#?}", e))?;
+        return Ok(Some(url.to_string()));
+    }
 
-    return Ok(url.to_string());
+    return Ok(None);
 }
 
 /* ========================================================================== */
@@ -68,27 +72,28 @@ pub async fn get_scrapers<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Value>, 
 /* ========================================================================== */
 
 #[tauri::command]
-pub async fn set_scraper_webview_url<R: Runtime>(app: AppHandle<R>, scraper_id: &str, url: &str) -> Result<(), String> {
+pub async fn start_scraper<R: Runtime>(_app: AppHandle<R>, scraper_id: &str, url: &str) -> Result<(), String> {
     if !scraper_id.ends_with("-chat") {
         return Err(format!("Scraper webview '{}' not recognized", scraper_id));
     }
 
-    log::info!("Setting scraper webview '{}' to URL '{}'", scraper_id, url);
-    let webview = app.get_webview_window(scraper_id).ok_or_else(|| format!("Scraper webview '{}' not found", scraper_id))?;
-
+    log::info!("Starting scraper '{}' with URL '{}'", scraper_id, url);
     let parsed_url = decode_url(url).map_err(|e| format!("An error occurred on decode scraper URL: {:#?}", e))?;
 
-    if is_local_url(&parsed_url) {
-        webview.hide().map_err(|e| format!("An error occurred on hide scraper webview: {:#?}", e))?;
-    } else {
-        settings::set_scraper_url(scraper_id, parsed_url.as_str());
+    return scraper::start_scraper(scraper_id, parsed_url).map_err(|e| format!("Failed to start scraper: {:#?}", e));
+}
+
+/* ========================================================================== */
+
+#[tauri::command]
+pub async fn stop_scraper<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) -> Result<(), String> {
+    if !scraper_id.ends_with("-chat") {
+        return Err(format!("Scraper webview '{}' not recognized", scraper_id));
     }
 
-    if let Err(e) = webview.navigate(parsed_url) {
-        return Err(format!("An error occurred on navigate scraper webview to URL: {:#?}", e));
-    }
+    log::info!("Stopping scraper '{}'", scraper_id);
 
-    return Ok(());
+    return scraper::stop_scraper(scraper_id).map_err(|e| format!("Failed to stop scraper: {:#?}", e));
 }
 
 /* ========================================================================== */

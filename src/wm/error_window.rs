@@ -11,6 +11,7 @@
 use anyhow::Error;
 use serde_json::json;
 use tauri::Manager as _;
+use tauri::WebviewUrl;
 
 use crate::UNICHAT_DISPLAY_NAME;
 use crate::UNICHAT_NAME;
@@ -44,7 +45,7 @@ pub fn open(err: &Error) {
         "logFile": resolve_log_file()
     });
 
-    let result = window::new(ERROR_WINDOW_LABEL, "error.html")
+    let result = window::new(ERROR_WINDOW_LABEL, WebviewUrl::App("error.html".into()))
         .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION))
         .inner_size(640.0, 460.0)
         .center()

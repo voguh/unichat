@@ -9,7 +9,6 @@
  ******************************************************************************/
 
 use std::path::Path;
-use std::path::PathBuf;
 
 use tauri::AppHandle;
 use tauri::WebviewUrl;
@@ -47,9 +46,8 @@ use crate::utils::paths::AppPaths;
 // https://docs.rs/tauri/2.11.5/tauri/webview/struct.WebviewWindowBuilder.html#method.additional_browser_args
 const ADDITIONAL_BROWSER_ARGS: &str = "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --lang=en-US";
 
-pub fn new(label: &str, url: &str) -> WebviewWindowBuilder<'static, tauri::Wry, AppHandle> {
+pub fn new(label: &str, webview_url: WebviewUrl) -> WebviewWindowBuilder<'static, tauri::Wry, AppHandle> {
     let app_handle = crate::get_app_handle();
-    let webview_url = WebviewUrl::App(PathBuf::from(url));
 
     return WebviewWindowBuilder::new(app_handle, label, webview_url).additional_browser_args(ADDITIONAL_BROWSER_ARGS);
 }

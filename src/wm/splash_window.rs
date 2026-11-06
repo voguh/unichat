@@ -15,6 +15,7 @@ use std::sync::RwLockReadGuard;
 use anyhow::Error;
 use tauri::Emitter as _;
 use tauri::Manager as _;
+use tauri::WebviewUrl;
 use tauri::WebviewWindow;
 use tauri::Wry;
 use tauri::webview::PageLoadPayload;
@@ -28,7 +29,7 @@ use crate::wm::window;
 
 pub const SPLASH_WINDOW_LABEL: &str = "splash-screen";
 pub const SPLASH_WINDOW_READY_EVENT: &str = "unichat://splashscreen:ready";
-pub const TOTAL_STAGES: u8 = 15;
+pub const TOTAL_STAGES: u8 = 16;
 
 /* ========================================================================== */
 
@@ -55,7 +56,7 @@ struct SplashProgressEvent {
 /* ========================================================================== */
 
 pub fn create() -> Result<WebviewWindow, Error> {
-    let window = window::new(SPLASH_WINDOW_LABEL, "splash-screen.html")
+    let window = window::new(SPLASH_WINDOW_LABEL, WebviewUrl::App("splash-screen.html".into()))
         .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION))
         .inner_size(500.0, 300.0)
         .center()

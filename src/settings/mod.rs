@@ -46,7 +46,6 @@ pub enum SettingLogEventLevel {
 /* ========================================================================== */
 
 const STORE_VERSION_KEY: &str = "store:version";
-const SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY: &str = "settings:create-webview-hidden";
 const SETTINGS_TOUR_CURRENT_STEPS_KEY: &str = "settings:current-tour-steps";
 const SETTINGS_TOUR_PREVIOUS_STEPS_KEY: &str = "settings:previous-tour-steps";
 const SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY: &str = "settings:default-preview-widget";
@@ -104,14 +103,6 @@ fn set_value<V: Serialize>(key: &str, value: V) {
 }
 
 /* ========================================================================== */
-
-pub fn get_create_webview_hidden() -> bool {
-    return get_value(SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY).unwrap_or(true);
-}
-
-pub fn set_create_webview_hidden(value: bool) {
-    set_value(SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY, value);
-}
 
 pub fn get_current_tour_steps() -> Vec<String> {
     return get_value(SETTINGS_TOUR_CURRENT_STEPS_KEY).unwrap_or_default();
@@ -193,7 +184,6 @@ pub fn set_scraper_url(scraper_id: &str, url: &str) {
 
 pub fn get_by_key(key: &str) -> Result<Value, Error> {
     return match key {
-        SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY => Ok(json!(get_create_webview_hidden())),
         SETTINGS_TOUR_CURRENT_STEPS_KEY => Ok(json!(get_current_tour_steps())),
         SETTINGS_TOUR_PREVIOUS_STEPS_KEY => Ok(json!(get_previous_tour_steps())),
         SETTINGS_DEFAULT_PREVIEW_WIDGET_KEY => Ok(json!(get_default_preview_widget())),
@@ -207,10 +197,6 @@ pub fn get_by_key(key: &str) -> Result<Value, Error> {
 
 pub fn set_by_key(key: &str, value: &Value) -> Result<(), Error> {
     match key {
-        SETTINGS_CREATE_WEBVIEW_HIDDEN_KEY => {
-            let value: bool = Deserialize::deserialize(value)?;
-            set_create_webview_hidden(value);
-        }
         SETTINGS_TOUR_CURRENT_STEPS_KEY => {
             let value: Vec<String> = Deserialize::deserialize(value)?;
             set_current_tour_steps(&value);

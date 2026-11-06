@@ -133,12 +133,6 @@ globalThis.uniChat = globalThis.uniChat || new UniChat();
 
 /* ========================================================================== */
 
-function registerIntermittentEventDispatcher(type) {
-    setInterval(() => uniChat.dispatchEvent({ type }), 60000);
-}
-
-/* ========================================================================== */
-
 if (window.WebSocket.__WRAPPED__ !== true) {
     uniChatLogger.info("Wrapping WebSocket to monitor messages.");
     const OriginalWebSocket = window.WebSocket;
@@ -213,15 +207,6 @@ if (window.fetch.__WRAPPED__ !== true) {
 
 async function uniChatPreInit() {
     try {
-        const scheme = window.location.protocol.split(":")[0];
-        const host = window.location.hostname;
-        const path = window.location.pathname;
-        if (["http", "tauri"].includes(scheme) && ["localhost", "tauri.localhost"].includes(host) && path === "/scraper_idle.html") {
-            uniChatLogger.info("Scraper is not running, setting up idle dispatch.");
-            registerIntermittentEventDispatcher("idle");
-            return;
-        }
-
         uniChatLogger.info("UniChat scraper initializing...");
         const style = document.createElement("style");
         style.textContent = `
@@ -260,8 +245,6 @@ async function uniChatPreInit() {
 
         uniChat.dispatchEvent({ type: "ready", url: window.location.href, ...payload });
         uniChatLogger.info("UniChat scraper initialized.");
-
-        registerIntermittentEventDispatcher("ping");
     } catch (err) {
         uniChatLogger.error(err.message, err);
         uniChat.dispatchEvent({ type: "fatal", message: err.message, stack: err.stack });
