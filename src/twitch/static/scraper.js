@@ -10,9 +10,18 @@
 // biome-ignore-all format: biome doesn't need to format this file
 // biome-ignore-all lint: biome doesn't need to lint this file
 
-HTMLIFrameElement.prototype.setAttribute = function (name, value) {
-    console.log("Blocked iframe with src:", value);
-};
+new MutationObserver((_, observer) => {
+    if (document.head == null) {
+        return;
+    }
+
+    observer.disconnect();
+
+    const csp = document.createElement("meta");
+    csp.httpEquiv = "Content-Security-Policy";
+    csp.content = "frame-src 'none'";
+    document.head.appendChild(csp);
+}).observe(document, { childList: true, subtree: true });
 
 async function uniChatHandleRewardRedemption(payload) {
     const redemption = payload.redemption;
