@@ -1,3 +1,6 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
 root = true
 
 [*]
@@ -9,11 +12,9 @@ trim_trailing_whitespace = true
 insert_final_newline = true
 rulers = 80, 100, 120
 
-[.github/**/*]
-indent_size = 2
-
-[docs/**/*]
-indent_size = 2
-
 [**/*.yaml, **/*.yml]
 indent_size = 2
+
+[*.sh]
+indent_style = tab
+indent_size = 4
