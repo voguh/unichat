@@ -8,6 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 use tauri::AppHandle;
@@ -16,6 +17,8 @@ use tauri::Runtime;
 use crate::plugins;
 use crate::plugins::PluginStatus;
 use crate::utils::base64;
+use crate::utils::semver::Version;
+use crate::utils::semver::VersionRange;
 
 /* ========================================================================== */
 
@@ -25,11 +28,11 @@ pub struct SerializedPluginMetadata {
     id: String,
     name: String,
     description: Option<String>,
-    version: String,
+    version: Version,
     author: Option<String>,
     license: Option<String>,
     homepage: Option<String>,
-    dependencies: Vec<String>,
+    dependencies: HashMap<String, VersionRange>,
 
     path: PathBuf,
     icon: Option<String>,
@@ -47,15 +50,11 @@ pub async fn get_plugins<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Serialize
             id: plugin.id.clone(),
             name: plugin.name.clone(),
             description: plugin.description.clone(),
-            version: plugin.version.to_string(),
+            version: plugin.version.clone(),
             author: plugin.author.clone(),
             license: plugin.license.clone(),
             homepage: plugin.homepage.clone(),
-            dependencies: plugin
-                .dependencies
-                .iter()
-                .map(|(name, version_range)| format!("{}@{}", name, version_range))
-                .collect(),
+            dependencies: plugin.dependencies.clone(),
 
             path: plugin.get_plugin_path(),
             icon: plugin.get_icon().map(|bytes| format!("data:image/png;base64,{}", base64::encode(bytes))),

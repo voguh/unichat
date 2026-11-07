@@ -51,7 +51,9 @@ fn generate_resources(target_gen_dir: &Path) -> Result<(), Box<dyn std::error::E
     let metadata = format!(r#"
         pub const UNICHAT_DISPLAY_NAME: &str = "{display_name}";
         pub const UNICHAT_NAME: &str = "{name}";
-        pub const UNICHAT_VERSION: &str = "{version}";
+        pub static UNICHAT_VERSION: std::sync::LazyLock<crate::utils::semver::Version> = std::sync::LazyLock::new(|| {{
+            return crate::utils::semver::Version::parse("{version}").expect("UNICHAT_VERSION is not a valid version");
+        }});
         pub const UNICHAT_DESCRIPTION: &str = "{description}";
         pub const UNICHAT_AUTHORS: &str = "{authors}";
         pub const UNICHAT_HOMEPAGE: &str = "{homepage}";

@@ -26,13 +26,20 @@ pub struct FrankerFaceZEmote {
     pub code: String
 }
 
-fn parse_emote(emote: &FrankerFaceZEmote) -> UniChatEmote {
-    return UniChatEmote {
-        id: emote.id.to_string(),
-        code: emote.code.clone(),
-        // Image size `4` are used by default, so it's possible to use `1`, `2`, `4` images.
-        url: format!("https://cdn.betterttv.net/frankerfacez_emote/{}/4", emote.id)
-    };
+fn parse_emotes(emotes: Vec<FrankerFaceZEmote>) -> HashMap<String, UniChatEmote> {
+    let mut parsed = HashMap::new();
+    for emote in emotes.iter() {
+        let unichat_emote = UniChatEmote {
+            id: emote.id.to_string(),
+            code: emote.code.clone(),
+            // Image size `4` are used by default, so it's possible to use `1`, `2`, `4` images.
+            url: format!("https://cdn.betterttv.net/frankerfacez_emote/{}/4", emote.id)
+        };
+
+        parsed.insert(emote.code.clone(), unichat_emote);
+    }
+
+    return parsed;
 }
 
 pub fn fetch_global_emotes() -> Result<HashMap<String, UniChatEmote>, Error> {
@@ -40,23 +47,13 @@ pub fn fetch_global_emotes() -> Result<HashMap<String, UniChatEmote>, Error> {
     let mut response = ureq::get(url).call()?;
     let emotes: Vec<FrankerFaceZEmote> = response.body_mut().read_json()?;
 
-    let mut parsed = HashMap::new();
-    for emote in emotes.iter() {
-        parsed.insert(emote.code.clone(), parse_emote(emote));
-    }
-
-    return Ok(parsed);
+    return Ok(parse_emotes(emotes));
 }
 
-pub fn fetch_channel_emotes(platform: String, channel_id: String) -> Result<HashMap<String, UniChatEmote>, Error> {
+pub fn fetch_channel_emotes(platform: &str, channel_id: &str) -> Result<HashMap<String, UniChatEmote>, Error> {
     let url = format!("https://api.betterttv.net/3/cached/frankerfacez/users/{}/{}", platform, channel_id);
     let mut response = ureq::get(url).call()?;
     let emotes: Vec<FrankerFaceZEmote> = response.body_mut().read_json()?;
 
-    let mut parsed = HashMap::new();
-    for emote in emotes.iter() {
-        parsed.insert(emote.code.clone(), parse_emote(emote));
-    }
-
-    return Ok(parsed);
+    return Ok(parse_emotes(emotes));
 }

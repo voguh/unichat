@@ -18,19 +18,18 @@ use crate::events::UniChatEmote;
 use crate::events::UniChatEvent;
 use crate::events::UniChatMessageEventPayload;
 use crate::events::UniChatPlatform;
+use crate::twitch::irc::IRCMessage;
 use crate::twitch::mapper::get_tag;
 use crate::twitch::mapper::handle_redemption_message_event;
 use crate::twitch::mapper::require_tag;
 use crate::twitch::mapper::structs::author::parse_author_badges;
 use crate::twitch::mapper::structs::author::parse_author_color;
-use crate::twitch::mapper::structs::author::parse_author_name;
 use crate::twitch::mapper::structs::author::parse_author_type;
 use crate::twitch::mapper::structs::author::parse_author_username;
 use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::twitch::mapper::structs::message::parse_message_emotes;
 use crate::twitch::mapper::structs::message::parse_message_string;
 use crate::utils::get_current_timestamp;
-use crate::utils::irc::IRCMessage;
 
 /* ========================================================================== */
 
@@ -38,80 +37,58 @@ pub fn parse(
     channel: String,
     text: String,
     message: &IRCMessage,
-    tags: HashMap<String, Option<String>>
+    tags: &HashMap<String, Option<String>>
 ) -> Result<Option<UniChatEvent>, Error> {
-    let room_id = require_tag(&tags, "room-id")?;
-    let author_id = require_tag(&tags, "user-id")?;
+    let room_id = require_tag(tags, "room-id")?;
+    let author_id = require_tag(tags, "user-id")?;
     let author_username = parse_author_username(&message.prefix);
-    let author_name = parse_author_name(tags.get("display-name"))?;
-    let author_color = parse_author_color(tags.get("color"), &author_username)?;
-    let author_badges = parse_author_badges(tags.get("badges"));
-    let author_type = parse_author_type(&tags);
-    let message_id = require_tag(&tags, "id")?;
-    let message = parse_message_string(&text);
-    let emotes = parse_message_emotes(tags.get("emotes"), &text)?;
+    let author_name = require_tag(tags, "display-name")?;
+    let author_color = parse_author_color(get_tag(tags, "color"), &author_username)?;
+    let author_badges = parse_author_badges(get_tag(tags, "badges"));
+    let author_type = parse_author_type(tags);
+    let message_id = require_tag(tags, "id")?;
     let timestamp_usec = get_current_timestamp();
 
-    let event_payload: UniChatMessageEventPayload;
-    if let Some(Some(gif_str)) = tags.get("gifs") {
+    let mut flags = inject_raw_tags(tags);
+    let message_text;
+    let emotes;
+    if let Some(gif_str) = get_tag(tags, "gifs") {
         let mut it = gif_str.splitn(3, "|");
-        let _gif_pos = it.next().ok_or(anyhow!("Missing gif position"))?;
-        let gif_id = it.next().ok_or(anyhow!("Missing gif id"))?;
-        let gif_url = it.next().ok_or(anyhow!("Missing gif url"))?;
+        let _gif_pos = it.next().ok_or_else(|| anyhow!("Missing gif position"))?;
+        let gif_id = it.next().ok_or_else(|| anyhow!("Missing gif id"))?;
+        let gif_url = it.next().ok_or_else(|| anyhow!("Missing gif url"))?;
 
-        let mut flags = inject_raw_tags(&tags);
         flags.insert(String::from(FLAG_TWITCH_GIF), Some(String::from("true")));
-
-        event_payload = UniChatMessageEventPayload {
-            channel_id: room_id,
-            channel_name: Some(channel),
-
-            platform: UniChatPlatform::Twitch,
-            flags: flags,
-
-            author_id: author_id,
-            author_username: author_username,
-            author_display_name: author_name,
-            author_display_color: author_color,
-            author_profile_picture_url: None,
-            author_badges: author_badges,
-            author_type: author_type,
-
-            message_id: message_id,
-            message_text: String::from(gif_id),
-            emotes: Vec::from([UniChatEmote {
-                id: gif_id.to_owned(),
-                code: gif_id.to_owned(),
-                url: gif_url.to_owned()
-            }]),
-
-            timestamp: timestamp_usec
-        };
+        message_text = String::from(gif_id);
+        emotes = Vec::from([UniChatEmote { id: gif_id.to_owned(), code: gif_id.to_owned(), url: gif_url.to_owned() }]);
     } else {
-        event_payload = UniChatMessageEventPayload {
-            channel_id: room_id,
-            channel_name: Some(channel),
-
-            platform: UniChatPlatform::Twitch,
-            flags: inject_raw_tags(&tags),
-
-            author_id: author_id,
-            author_username: author_username,
-            author_display_name: author_name,
-            author_display_color: author_color,
-            author_profile_picture_url: None,
-            author_badges: author_badges,
-            author_type: author_type,
-
-            message_id: message_id,
-            message_text: message,
-            emotes: emotes,
-
-            timestamp: timestamp_usec
-        };
+        message_text = parse_message_string(&text);
+        emotes = parse_message_emotes(get_tag(tags, "emotes"), &text)?;
     }
 
-    if let Some(reward_id) = get_tag(&tags, "custom-reward-id") {
+    let event_payload = UniChatMessageEventPayload {
+        channel_id: room_id,
+        channel_name: Some(channel),
+
+        platform: UniChatPlatform::Twitch,
+        flags: flags,
+
+        author_id: author_id,
+        author_username: author_username,
+        author_display_name: author_name,
+        author_display_color: author_color,
+        author_profile_picture_url: None,
+        author_badges: author_badges,
+        author_type: author_type,
+
+        message_id: message_id,
+        message_text: message_text,
+        emotes: emotes,
+
+        timestamp: timestamp_usec
+    };
+
+    if let Some(reward_id) = get_tag(tags, "custom-reward-id") {
         if let Some(redemption_payload) = handle_redemption_message_event(&reward_id, event_payload) {
             let event = UniChatEvent::Redemption(redemption_payload);
 

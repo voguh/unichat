@@ -15,7 +15,7 @@ pub mod message;
 
 /* ========================================================================== */
 
-const DROPPED_TAGS: [&str; 25] = [
+const DROPPED_TAGS: [&str; 24] = [
     "badge-info",
     "badges",
     "bits",
@@ -39,15 +39,14 @@ const DROPPED_TAGS: [&str; 25] = [
     "tmi-sent-ts",
     "turbo",
     "user-id",
-    "user-type",
-    "gifs"
+    "user-type"
 ];
 
 const DROPPED_TAG_PREFIXES: [&str; 3] = ["msg-param-", "reply-", "source-"];
 
 const KEPT_REPLY_TAG: &str = "reply-parent-msg-id";
 
-/* <================================================================================================================> */
+/* ========================================================================== */
 
 fn is_dropped(tag: &str) -> bool {
     if tag == KEPT_REPLY_TAG {
@@ -70,12 +69,7 @@ pub fn inject_raw_tags(tags: &HashMap<String, Option<String>>) -> HashMap<String
         }
 
         let key = format!("unichat:raw:twitch:{}", key);
-
-        if let Some(value) = value {
-            flags.insert(key, Some(value.to_owned()));
-        } else {
-            flags.insert(key, None);
-        }
+        flags.insert(key, value.clone());
     }
 
     return flags;

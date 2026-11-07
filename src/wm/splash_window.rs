@@ -13,9 +13,12 @@ use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
 
 use anyhow::Error;
-use tauri::Emitter as _;
-use tauri::Manager as _;
+use tauri::Emitter;
+use tauri::Manager;
+use tauri::WebviewUrl;
 use tauri::WebviewWindow;
+use tauri::Wry;
+use tauri::webview::PageLoadPayload;
 
 use crate::UNICHAT_DISPLAY_NAME;
 use crate::UNICHAT_VERSION;
@@ -26,7 +29,7 @@ use crate::wm::window;
 
 pub const SPLASH_WINDOW_LABEL: &str = "splash-screen";
 pub const SPLASH_WINDOW_READY_EVENT: &str = "unichat://splashscreen:ready";
-pub const TOTAL_STAGES: u8 = 15;
+pub const TOTAL_STAGES: u8 = 16;
 
 /* ========================================================================== */
 
@@ -53,8 +56,8 @@ struct SplashProgressEvent {
 /* ========================================================================== */
 
 pub fn create() -> Result<WebviewWindow, Error> {
-    let window = window::new(SPLASH_WINDOW_LABEL, "splash-screen.html")
-        .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION))
+    let window = window::new(SPLASH_WINDOW_LABEL, WebviewUrl::App("splash-screen.html".into()))
+        .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, *UNICHAT_VERSION))
         .inner_size(500.0, 300.0)
         .center()
         .focused(true)
@@ -76,13 +79,19 @@ pub fn close() {
     }
 }
 
+pub fn on_page_load_close_splash(window: WebviewWindow<Wry>, payload: PageLoadPayload<'_>) {
+    if window::show_on_page_finished(&window, &payload) {
+        close();
+    }
+}
+
 /* ========================================================================== */
 
-fn report(step: u8, message: &str) {
-    write(step, message.to_string());
+fn report(step: u8, message: String) {
+    write(step, message.clone());
 
     if let Some(window) = get_app_handle().get_webview_window(SPLASH_WINDOW_LABEL) {
-        let event = SplashProgressEvent { step: step, total: TOTAL_STAGES, message: message.to_string() };
+        let event = SplashProgressEvent { step: step, total: TOTAL_STAGES, message: message };
 
         if let Err(err) = window.emit("unichat://splashscreen:update", &event) {
             log::error!("Failed to emit splash screen progress: {:#?}", err);
@@ -93,21 +102,22 @@ fn report(step: u8, message: &str) {
 pub fn begin(message: impl Into<String>) {
     let message = message.into();
     log::info!("{}", message);
-    report(0, &message);
+    report(0, message);
 }
 
 pub fn stage(step: u8, message: impl Into<String>) {
     let message = message.into();
     log::info!("[{:02}/{}] {}", step, TOTAL_STAGES, message);
-    report(step, &message);
+    report(step, message);
 }
 
 pub fn end(message: impl Into<String>) {
     let message = message.into();
     log::info!("{}", message);
-    report(TOTAL_STAGES, &message);
+    report(TOTAL_STAGES, message);
 }
 
 pub fn current_stage() -> (u8, String) {
-    return read().clone();
+    let guard = read();
+    return guard.clone();
 }

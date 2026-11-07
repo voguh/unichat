@@ -10,8 +10,6 @@
 
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::fs;
-use std::io::Write;
 use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::RwLock;
@@ -19,24 +17,22 @@ use std::sync::RwLockReadGuard;
 
 use anyhow::Error;
 use anyhow::anyhow;
+use regex::Regex;
+use serde::Deserialize;
 use serde_json::Value;
 
 use crate::events;
 use crate::events::UniChatBadge;
 use crate::scraper;
+use crate::scraper::ScraperLogKind;
 use crate::scraper::ScraperStatus;
 use crate::scraper::ScraperStatusEvent;
 use crate::scraper::UniChatScraper;
-use crate::settings;
-use crate::settings::SettingLogEventLevel;
 use crate::shared_emotes;
+use crate::twitch::irc::IRCMessage;
 use crate::twitch::mapper::structs::author::TwitchRawBadge;
-use crate::utils::irc::IRCMessage;
-use crate::utils::is_valid_twitch_channel_name;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
-use crate::utils::properties::PropertiesKey;
 
+mod irc;
 mod mapper;
 
 /* ========================================================================== */
@@ -70,39 +66,45 @@ fn write_badges(badges: HashMap<String, UniChatBadge>) {
 
 /* ========================================================================== */
 
+static CHANNEL_ID: LazyLock<RwLock<Option<String>>> = LazyLock::new(|| RwLock::new(None));
+fn write_channel_id(channel_id: String) {
+    let mut current_channel_id = CHANNEL_ID.write().expect("Twitch::CHANNEL_ID lock poisoned");
+    *current_channel_id = Some(channel_id);
+}
+
+/* ========================================================================== */
+
 fn handle_ready_status(event: &ScraperStatusEvent) -> Result<(), Error> {
     let channel_id = event
         .extra_str("channelId")
-        .ok_or(anyhow!("Missing or invalid 'channelId' field in Twitch 'ready' payload"))?;
+        .ok_or_else(|| anyhow!("Missing or invalid 'channelId' field in Twitch 'ready' payload"))?;
 
     shared_emotes::fetch_shared_emotes("twitch", channel_id);
-    properties::set_item(PropertiesKey::TwitchChannelId, String::from(channel_id));
+    write_channel_id(String::from(channel_id));
 
     return Ok(());
 }
 
-fn handle_badges_event(event_type: &str, payload: &Value) -> Result<(), Error> {
-    let badges_type = payload
-        .get("badgesType")
-        .and_then(|v| v.as_str())
-        .ok_or(anyhow!("Missing or invalid 'badgesType' field in Twitch '{}' payload", event_type))?;
-    let badges = payload
-        .get("badges")
-        .and_then(|v| v.as_array())
-        .cloned()
-        .ok_or(anyhow!("Missing or invalid 'badges' field in Twitch '{}' payload", event_type))?;
+/* ========================================================================== */
 
-    let twitch_badges: Vec<TwitchRawBadge> = serde_json::from_value(serde_json::Value::Array(badges))?;
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct BadgesEvent {
+    badges_type: String,
+    badges: Vec<TwitchRawBadge>
+}
+
+fn handle_badges_event(payload: &Value) -> Result<(), Error> {
+    let event = BadgesEvent::deserialize(payload)?;
 
     let mut badges = HashMap::new();
-    for twitch_badge in twitch_badges {
+    for twitch_badge in event.badges {
         let mut code = format!("{}/{}", twitch_badge.set_id, twitch_badge.version);
-        if badges_type == "global" && ["bits", "subscriber"].contains(&twitch_badge.set_id.as_str()) {
+        if event.badges_type == "global" && ["bits", "subscriber"].contains(&twitch_badge.set_id.as_str()) {
             code = format!("global/{}", code);
         }
 
-        let url = twitch_badge.image_4x;
-        badges.insert(code.clone(), UniChatBadge { code: code.clone(), url: url.clone() });
+        badges.insert(code.clone(), UniChatBadge { code: code, url: twitch_badge.image_4x });
     }
 
     write_badges(badges);
@@ -110,106 +112,87 @@ fn handle_badges_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     return Ok(());
 }
 
-fn handle_cheermotes_event(event_type: &str, payload: &Value) -> Result<(), Error> {
-    let cheermotes = payload
-        .get("cheermotes")
-        .and_then(|v| v.as_array())
-        .cloned()
-        .ok_or(anyhow!("Missing or invalid 'cheermotes' field in Twitch '{}' payload", event_type))?;
+/* ========================================================================== */
 
-    let mut cheermotes_set = HashSet::new();
-    for cheer in cheermotes {
-        if let Ok(cheer_str) = serde_json::from_value::<String>(cheer) {
-            cheermotes_set.insert(cheer_str);
-        }
-    }
+#[derive(Deserialize)]
+struct CheermotesEvent {
+    cheermotes: HashSet<String>
+}
 
-    write_cheermotes(cheermotes_set);
+fn handle_cheermotes_event(payload: &Value) -> Result<(), Error> {
+    let event = CheermotesEvent::deserialize(payload)?;
+    write_cheermotes(event.cheermotes);
 
     return Ok(());
 }
 
 /* ========================================================================== */
 
-fn log_action(file_name: &str, content: &impl std::fmt::Display) {
-    let app_log_dir = properties::get_app_path(AppPaths::AppLog);
-    let twitch_log_dir = app_log_dir.join(SCRAPER_ID);
-    if !twitch_log_dir.exists() {
-        fs::create_dir_all(&twitch_log_dir).expect("Failed to create Twitch log directory");
-    }
-
-    let log_file = twitch_log_dir.join(file_name);
-    let mut options = fs::OpenOptions::new();
-    options.create(true).append(true);
-    let mut file = options.open(log_file).expect("Failed to open Twitch log file");
-    writeln!(file, "{content}").expect("Failed to write Twitch log file");
-}
-
-fn handle_ws_event(_event_type: &str, message: &Value) -> Result<(), Error> {
-    let log_events = settings::get_scraper_events_log_level();
-
-    if log_events == SettingLogEventLevel::AllEvents {
-        log_action("events-raw.log", &format!("{:?}", message));
-    }
+fn handle_ws_event(message: &Value) -> Result<(), Error> {
+    scraper::log_action(SCRAPER_ID, ScraperLogKind::Raw, || format!("{:?}", message));
 
     match mapper::parse_ws(message) {
         Ok(Some(parsed)) => {
-            if log_events == SettingLogEventLevel::AllEvents {
-                let serialized = serde_json::to_string(&parsed).expect("Failed to serialize UniChatEvent");
-                log_action("events-parsed.log", &serialized);
-            }
+            scraper::log_action(SCRAPER_ID, ScraperLogKind::Parsed, || {
+                return serde_json::to_string(&parsed).expect("Failed to serialize UniChatEvent");
+            });
 
-            if let Err(err) = events::emit(parsed) {
-                log::error!("An error occurred on send unichat event: {:#?}", err);
-            }
+            events::emit(parsed);
         }
 
         Ok(None) => {
-            if [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
-                log_action("events-unknown.log", &format!("{:?}", message));
-            }
+            scraper::log_action(SCRAPER_ID, ScraperLogKind::Unknown, || format!("{:?}", message));
         }
 
         Err(err) => {
-            log_action("events-error.log", &format!("{:#?} -- {:?}", err, message));
+            scraper::log_action(SCRAPER_ID, ScraperLogKind::Error, || format!("{:#?} -- {:?}", err, message));
         }
     }
 
     return Ok(());
 }
 
-fn handle_message_event(_event_type: &str, payload: &Value) -> Result<(), Error> {
-    let message = IRCMessage::parse(payload.get("message"))?;
-    let log_events = settings::get_scraper_events_log_level();
+/* ========================================================================== */
 
-    if log_events == SettingLogEventLevel::AllEvents {
-        log_action("events-raw.log", &format!("{:?}", message));
-    }
+#[derive(Deserialize)]
+struct MessageEvent {
+    message: IRCMessage
+}
+
+fn handle_message_event(payload: &Value) -> Result<(), Error> {
+    let event = MessageEvent::deserialize(payload)?;
+    let message = event.message;
+
+    scraper::log_action(SCRAPER_ID, ScraperLogKind::Raw, || message.raw.clone());
 
     match mapper::parse_irc(&message) {
         Ok(Some(parsed)) => {
-            if log_events == SettingLogEventLevel::AllEvents {
-                let serialized = serde_json::to_string(&parsed).expect("Failed to serialize UniChatEvent");
-                log_action("events-parsed.log", &serialized);
-            }
+            scraper::log_action(SCRAPER_ID, ScraperLogKind::Parsed, || {
+                return serde_json::to_string(&parsed).expect("Failed to serialize UniChatEvent");
+            });
 
-            if let Err(err) = events::emit(parsed) {
-                log::error!("An error occurred on send unichat event: {:#?}", err);
-            }
+            events::emit(parsed);
         }
 
         Ok(None) => {
-            if [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
-                log_action("events-unknown.log", &format!("{:?}", message));
-            }
+            scraper::log_action(SCRAPER_ID, ScraperLogKind::Unknown, || format!("{:?}", message));
         }
 
         Err(err) => {
-            log_action("events-error.log", &format!("{:#?} -- {:?}", err, message));
+            scraper::log_action(SCRAPER_ID, ScraperLogKind::Error, || format!("{:#?} -- {:?}", err, message));
         }
     }
 
     return Ok(());
+}
+
+/* ========================================================================== */
+
+static CHANNEL_NAME: LazyLock<Regex> = LazyLock::new(|| {
+    return Regex::new(r"^[0-9A-Za-z_]{4,25}$").expect("Twitch::CHANNEL_NAME regex is invalid");
+});
+fn is_valid_channel_name(channel_name: &str) -> bool {
+    return CHANNEL_NAME.is_match(channel_name);
 }
 
 /* ========================================================================== */
@@ -258,7 +241,7 @@ impl UniChatScraper for TwitchUniChatScraper {
         url = url.strip_prefix("https://").unwrap_or(url);
         url = url.strip_prefix("www.").unwrap_or(url);
 
-        let mut channel_name: Option<&str> = None;
+        let channel_name: Option<&str>;
         if url.starts_with("twitch.tv") {
             let mut parts = url.split('/');
             parts.next();
@@ -273,9 +256,11 @@ impl UniChatScraper for TwitchUniChatScraper {
             } else {
                 return Err(anyhow!("Could not extract channel name from Twitch URL"));
             }
+        } else {
+            channel_name = Some(url);
         }
 
-        if let Some(channel_name) = channel_name.filter(|channel_name| is_valid_twitch_channel_name(channel_name)) {
+        if let Some(channel_name) = channel_name.filter(|channel_name| is_valid_channel_name(channel_name)) {
             let formatted_url = format!("https://www.twitch.tv/popout/{}/chat", channel_name);
             return Ok(formatted_url);
         }
@@ -291,13 +276,13 @@ impl UniChatScraper for TwitchUniChatScraper {
         let event_type = event
             .get("type")
             .and_then(|v| v.as_str())
-            .ok_or(anyhow!("Missing or invalid 'type' field in Twitch raw event payload"))?;
+            .ok_or_else(|| anyhow!("Missing or invalid 'type' field in Twitch raw event payload"))?;
 
         return match event_type {
-            "badges" => handle_badges_event(event_type, &event),
-            "cheermotes" => handle_cheermotes_event(event_type, &event),
-            "redemption" => handle_ws_event(event_type, &event),
-            "message" => handle_message_event(event_type, &event),
+            "badges" => handle_badges_event(&event),
+            "cheermotes" => handle_cheermotes_event(&event),
+            "redemption" => handle_ws_event(&event),
+            "message" => handle_message_event(&event),
             _ => Ok(())
         };
     }

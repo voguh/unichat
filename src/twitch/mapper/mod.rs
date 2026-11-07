@@ -19,8 +19,8 @@ use anyhow::anyhow;
 use crate::events::UniChatEvent;
 use crate::events::UniChatMessageEventPayload;
 use crate::events::UniChatRedemptionEventPayload;
-use crate::utils::irc::IRCCommand;
-use crate::utils::irc::IRCMessage;
+use crate::twitch::irc::IRCCommand;
+use crate::twitch::irc::IRCMessage;
 
 mod privmsg;
 mod raw_clearchat;
@@ -113,13 +113,13 @@ pub fn get_tag(tags: &HashMap<String, Option<String>>, key: &str) -> Option<Stri
 }
 
 pub fn require_tag(tags: &HashMap<String, Option<String>>, key: &str) -> Result<String, Error> {
-    return get_tag(tags, key).ok_or(anyhow!("Missing '{}' tag", key));
+    return get_tag(tags, key).ok_or_else(|| anyhow!("Missing '{}' tag", key));
 }
 
 /* ========================================================================== */
 
 fn parse_channel_name(channel: &str) -> String {
-    return channel.replace("#", "");
+    return channel.strip_prefix('#').unwrap_or(channel).to_string();
 }
 
 pub fn parse_irc(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
@@ -127,7 +127,7 @@ pub fn parse_irc(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
         let channel_name = parse_channel_name(channel);
         return privmsg::parse(channel_name, text.to_owned(), message);
     } else if let IRCCommand::Raw(cmd, payload) = &message.command {
-        let channel = payload.first().ok_or(anyhow!("Missing channel name"))?;
+        let channel = payload.first().ok_or_else(|| anyhow!("Missing channel name"))?;
         let channel_name = parse_channel_name(channel);
 
         if cmd == "CLEARCHAT" {
@@ -135,7 +135,8 @@ pub fn parse_irc(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
         } else if cmd == "CLEARMSG" {
             return raw_clearmsg::parse(channel_name, message);
         } else if cmd == "USERNOTICE" {
-            return raw_usernotice::parse(channel_name, message);
+            let text = payload.get(1).map(String::as_str);
+            return raw_usernotice::parse(channel_name, text, &message.tags);
         }
     }
 

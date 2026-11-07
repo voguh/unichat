@@ -9,18 +9,18 @@
  ******************************************************************************/
 
 use std::collections::HashMap;
-use std::path::PathBuf;
 
 use axum::body::Body;
 use axum::extract::Path;
 use axum::extract::Request;
 use axum::http::StatusCode;
+use axum::http::header;
+use axum::response::IntoResponse;
 use axum::response::Response;
 
 use crate::axum::utils::CACHE_REVALIDATE;
-use crate::axum::utils::serve_partial_content;
+use crate::axum::utils::serve_file;
 use crate::utils::constants::BASE_REST_PORT;
-use crate::utils::safe_guard_path;
 use crate::widgets::WidgetMetadata;
 use crate::widgets::get_widget_from_rest_path;
 
@@ -37,14 +37,10 @@ fn fill_fieldstate(template: &str, widget: &WidgetMetadata) -> String {
 
     let fieldstate_map = widget.fieldstate();
     for (key, value) in widget.fields().iter() {
-        if !value.is_object() {
-            continue;
-        }
-
-        if let Some(state_value) = fieldstate_map.get(key) {
-            fieldstate.insert(key.clone(), state_value.clone());
-        } else if let Some(obj) = value.as_object() {
-            if let Some(default_value) = obj.get("value") {
+        if let Some(field) = value.as_object() {
+            if let Some(state_value) = fieldstate_map.get(key) {
+                fieldstate.insert(key.clone(), state_value.clone());
+            } else if let Some(default_value) = field.get("value") {
                 fieldstate.insert(key.clone(), default_value.clone());
             }
         }
@@ -60,12 +56,25 @@ fn fill_fieldstate(template: &str, widget: &WidgetMetadata) -> String {
             }
             Err(err) => {
                 log::error!("Failed to serialize fieldstate value for key '{}': {:#?}", key, err);
-                continue;
             }
         }
     }
 
     return template;
+}
+
+fn serve_widget_source(
+    widget_name: &str,
+    file_name: &str,
+    content_type: &str,
+    read_source: fn(&WidgetMetadata) -> String
+) -> Response {
+    if let Some(widget) = get_widget_from_rest_path(widget_name) {
+        let content = fill_fieldstate(&read_source(&widget), &widget);
+        return ([(header::CONTENT_TYPE, content_type)], content).into_response();
+    }
+
+    return (StatusCode::NOT_FOUND, format!("Widget '{}' file '{}' not found", widget_name, file_name)).into_response();
 }
 
 /* ========================================================================== */
@@ -74,82 +83,25 @@ pub async fn get_widget_assets(
     Path((widget_name, asset_path)): Path<(String, String)>,
     req: Request<Body>
 ) -> Response {
-    let widget_metadata: WidgetMetadata;
-    match get_widget_from_rest_path(&widget_name) {
-        Ok(widget) => widget_metadata = widget,
-        Err(_) => {
-            return Response::builder()
-                .status(StatusCode::NOT_FOUND)
-                .body(Body::from(format!("Widget '{}' not found", widget_name)))
-                .expect("Failed to build HTTP response");
-        }
+    if let Some(widget) = get_widget_from_rest_path(&widget_name) {
+        return serve_file(&widget.assets_path(), &asset_path, req.headers(), CACHE_REVALIDATE);
     }
 
-    let asset_full_path: PathBuf;
-    match safe_guard_path(&widget_metadata.assets_path(), &asset_path) {
-        Ok(path) => asset_full_path = path,
-        Err(err) => {
-            log::error!("Invalid asset path '{}' for widget '{}': {:#?}", asset_path, widget_name, err);
-            return Response::builder()
-                .status(StatusCode::BAD_REQUEST)
-                .body(Body::from("Invalid asset path"))
-                .expect("Failed to build HTTP response");
-        }
-    }
-
-    if !asset_full_path.exists() {
-        return Response::builder()
-            .status(StatusCode::NOT_FOUND)
-            .body(Body::from(format!("Asset '{}' not found in widget '{}'", asset_path, widget_name)))
-            .expect("Failed to build HTTP response");
-    } else if asset_full_path.is_dir() {
-        return Response::builder()
-            .status(StatusCode::BAD_REQUEST)
-            .body(Body::from(format!("Asset '{}' is a directory, not a file", asset_path)))
-            .expect("Failed to build HTTP response");
-    }
-
-    return serve_partial_content(&asset_full_path, req.headers(), CACHE_REVALIDATE);
+    return (StatusCode::NOT_FOUND, format!("Widget '{}' not found", widget_name)).into_response();
 }
 
 /* ========================================================================== */
 
 pub async fn get_widget_css(Path(widget_name): Path<String>) -> Response {
-    if let Ok(widget) = get_widget_from_rest_path(&widget_name) {
-        let content = fill_fieldstate(&widget.widget_css(), &widget);
-        return Response::builder()
-            .status(StatusCode::OK)
-            .header("Content-Type", "text/css; charset=utf-8")
-            .body(Body::from(content))
-            .expect("Failed to build HTTP response");
-    }
-
-    return Response::builder()
-        .status(StatusCode::NOT_FOUND)
-        .header("Content-Type", "text/plain; charset=utf-8")
-        .body(Body::from(format!("Widget '{}' file 'widget.css' not found", widget_name)))
-        .expect("Failed to build HTTP response");
+    return serve_widget_source(&widget_name, "widget.css", "text/css; charset=utf-8", WidgetMetadata::widget_css);
 }
 
 pub async fn get_widget_js(Path(widget_name): Path<String>) -> Response {
-    if let Ok(widget) = get_widget_from_rest_path(&widget_name) {
-        let content = fill_fieldstate(&widget.widget_js(), &widget);
-        return Response::builder()
-            .status(StatusCode::OK)
-            .header("Content-Type", "text/javascript; charset=utf-8")
-            .body(Body::from(content))
-            .expect("Failed to build HTTP response");
-    }
-
-    return Response::builder()
-        .status(StatusCode::NOT_FOUND)
-        .header("Content-Type", "text/plain; charset=utf-8")
-        .body(Body::from(format!("Widget '{}' file 'widget.js' not found", widget_name)))
-        .expect("Failed to build HTTP response");
+    return serve_widget_source(&widget_name, "widget.js", "text/javascript; charset=utf-8", WidgetMetadata::widget_js);
 }
 
 pub async fn get_widget(Path(widget_name): Path<String>, req: Request<Body>) -> Response {
-    if let Ok(widget) = get_widget_from_rest_path(&widget_name) {
+    if let Some(widget) = get_widget_from_rest_path(&widget_name) {
         let mut content = String::from(WIDGET_TEMPLATE);
         content = content.replace("{{WIDGET_HTML}}", &widget.widget_html());
 
@@ -162,16 +114,8 @@ pub async fn get_widget(Path(widget_name): Path<String>, req: Request<Body>) -> 
 
         content = fill_fieldstate(&content, &widget);
 
-        return Response::builder()
-            .status(StatusCode::OK)
-            .header("Content-Type", "text/html; charset=utf-8")
-            .body(Body::from(content))
-            .expect("Failed to build HTTP response");
+        return ([(header::CONTENT_TYPE, "text/html; charset=utf-8")], content).into_response();
     }
 
-    return Response::builder()
-        .status(StatusCode::NOT_FOUND)
-        .header("Content-Type", "text/plain; charset=utf-8")
-        .body(Body::from(format!("Widget '{}' entrypoint not found", widget_name)))
-        .expect("Failed to build HTTP response");
+    return (StatusCode::NOT_FOUND, format!("Widget '{}' entrypoint not found", widget_name)).into_response();
 }

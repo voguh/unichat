@@ -32,12 +32,22 @@ fn parse_delimiter(start: &str, end: &str) -> Result<(usize, usize), Error> {
     return Ok((start, end));
 }
 
-pub fn parse_message_emotes(
-    raw_emotes: Option<&Option<String>>,
-    message_text: &str
-) -> Result<Vec<UniChatEmote>, Error> {
-    let raw_emotes = raw_emotes.and_then(|v| v.as_ref());
+fn parse_raw_emote(raw_emote: &str, message_text: &str) -> Result<UniChatEmote, Error> {
+    if let Some((emote_id, positions)) = raw_emote.split_once(':') {
+        let first_range = positions.split_once(',').map_or(positions, |(first_range, _)| first_range);
+        if let Some((start, end)) = first_range.split_once('-') {
+            let (start, end) = parse_delimiter(start, end)?;
+            let code: String = message_text.chars().skip(start).take((end - start) + 1).collect();
+            let url = format!("https://static-cdn.jtvnw.net/emoticons/v2/{}/default/dark/3.0", emote_id);
 
+            return Ok(UniChatEmote { id: emote_id.to_string(), code: code, url: url });
+        }
+    }
+
+    return Err(anyhow!("Invalid emote '{}'", raw_emote));
+}
+
+pub fn parse_message_emotes(raw_emotes: Option<String>, message_text: &str) -> Result<Vec<UniChatEmote>, Error> {
     let message_text = normalize_message_text(message_text);
     let mut emotes = Vec::new();
 
@@ -54,18 +64,7 @@ pub fn parse_message_emotes(
                 continue;
             }
 
-            let (emote_id, positions_raw) = raw_emote.split_once(":").ok_or(anyhow!("Invalid emote format"))?;
-            let first_range = positions_raw.split(",").next().ok_or(anyhow!("Invalid emote positions format"))?;
-            let (start_str, end_str) = first_range.split_once("-").ok_or(anyhow!("Invalid emote positions format"))?;
-            let (start, end) = parse_delimiter(start_str, end_str)?;
-
-            let emote_code: String = message_text.chars().skip(start).take((end - start) + 1).collect();
-            let emote = UniChatEmote {
-                id: emote_id.to_string(),
-                code: emote_code.clone(),
-                url: format!("https://static-cdn.jtvnw.net/emoticons/v2/{}/default/dark/3.0", emote_id)
-            };
-
+            let emote = parse_raw_emote(raw_emote, &message_text)?;
             emotes.push(emote);
         }
     }

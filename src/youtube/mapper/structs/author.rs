@@ -9,11 +9,9 @@
  ******************************************************************************/
 
 use std::sync::LazyLock;
-use std::time::Duration;
 
 use anyhow::Error;
 use anyhow::anyhow;
-use moka::sync::Cache;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -58,7 +56,7 @@ pub struct AuthorBadgeIconWrapper {
     pub icon_type: String
 }
 
-/* <================================================================================================================> */
+/* ========================================================================== */
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -73,58 +71,36 @@ pub struct ButtonViewModel {
     pub icon_name: String
 }
 
-/* <================================================================================================================> */
+/* ========================================================================== */
 
 static USERNAME_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {
     return regex::Regex::new(r"^[\p{L}\p{N}_\.-]{3,30}$").expect("Invalid username regex");
 });
-static USERNAME_CACHE: LazyLock<Cache<String, Option<String>>> = LazyLock::new(|| {
-    return Cache::builder().time_to_idle(Duration::from_secs(60 * 10)).build();
-});
 
 pub fn parse_author_username(name: &AuthorNameWrapper) -> Option<String> {
-    return parse_author_username_str(name.simple_text.clone());
+    return parse_author_username_str(&name.simple_text);
 }
 
-pub fn parse_author_username_str(name: String) -> Option<String> {
-    let name = name.trim().to_owned();
-
-    if let Some(cached_username) = USERNAME_CACHE.get(&name) {
-        return cached_username.clone();
+pub fn parse_author_username_str(name: &str) -> Option<String> {
+    let username = name.trim().strip_prefix('@')?;
+    if USERNAME_REGEX.is_match(username) {
+        return Some(username.to_string());
     }
 
-    if name.starts_with("@") {
-        let username = name.replacen("@", "", 1);
-
-        if USERNAME_REGEX.is_match(&username) {
-            USERNAME_CACHE.insert(name, Some(username.clone()));
-            return Some(username);
-        }
-    }
-
-    USERNAME_CACHE.insert(name, None);
     return None;
 }
 
 pub fn parse_author_name(name: &AuthorNameWrapper) -> String {
-    return parse_author_name_str(name.simple_text.clone());
+    return parse_author_name_str(&name.simple_text);
 }
 
-pub fn parse_author_name_str(name: String) -> String {
+pub fn parse_author_name_str(name: &str) -> String {
     let name = name.trim();
-
-    let username: String;
-    if name.starts_with("@") {
-        username = name.replacen("@", "", 1);
-    } else {
-        username = name.to_owned();
-    }
-
-    return username;
+    return name.strip_prefix('@').unwrap_or(name).to_string();
 }
 
 pub fn parse_author_photo_vec(photos: &[AuthorPhotoWrapper]) -> Result<String, Error> {
-    let thumbnail = photos.last().ok_or(anyhow!("No thumbnails found in author photo"))?;
+    let thumbnail = photos.last().ok_or_else(|| anyhow!("No thumbnails found in author photo"))?;
     return Ok(proxy_youtube_url(&thumbnail.url));
 }
 
@@ -146,8 +122,8 @@ pub fn parse_author_badges(
         for badge in badges {
             match &badge.live_chat_author_badge_renderer {
                 AuthorBadgeRenderer::Custom { custom_thumbnail } => {
-                    let thumbnails = &custom_thumbnail.thumbnails;
-                    let thumbnail = thumbnails.last().ok_or(anyhow!("No thumbnails found in custom thumbnail"))?;
+                    let thumbnail = custom_thumbnail.thumbnails.last();
+                    let thumbnail = thumbnail.ok_or_else(|| anyhow!("No thumbnails found in custom thumbnail"))?;
                     let badge = UniChatBadge { code: String::from("sponsor"), url: proxy_youtube_url(&thumbnail.url) };
                     parsed_badges.push(badge);
                 }
@@ -182,7 +158,7 @@ pub fn parse_author_badges(
 
     if let Some(before_content_buttons) = before_content {
         for button in before_content_buttons {
-            let model = button.button_view_model.clone();
+            let model = &button.button_view_model;
             if model.icon_name == "CROWN" {
                 if model.title == "#1" {
                     parsed_badges.push(UniChatBadge {

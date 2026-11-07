@@ -8,60 +8,75 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use std::fs;
+use std::io::Write;
+
 use anyhow::Error;
-use tauri::Manager as _;
+use anyhow::anyhow;
 use url::Url;
 
-use crate::get_app_handle;
 use crate::settings;
-use crate::utils::is_dev;
+use crate::settings::SettingLogEventLevel;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
+
+/* ========================================================================== */
+
+pub enum ScraperLogKind {
+    Raw,
+    Parsed,
+    Unknown,
+    Error
+}
+
+impl ScraperLogKind {
+    fn file_name(&self) -> &'static str {
+        return match self {
+            ScraperLogKind::Raw => "events-raw.log",
+            ScraperLogKind::Parsed => "events-parsed.log",
+            ScraperLogKind::Unknown => "events-unknown.log",
+            ScraperLogKind::Error => "events-error.log"
+        };
+    }
+
+    fn is_enabled(&self, level: &SettingLogEventLevel) -> bool {
+        return match self {
+            ScraperLogKind::Raw | ScraperLogKind::Parsed => *level == SettingLogEventLevel::AllEvents,
+            ScraperLogKind::Unknown => *level != SettingLogEventLevel::OnlyErrors,
+            ScraperLogKind::Error => true
+        };
+    }
+}
+
+pub fn log_action(scraper_id: &str, kind: ScraperLogKind, content: impl FnOnce() -> String) {
+    let level = settings::get_scraper_events_log_level();
+    if !kind.is_enabled(&level) {
+        return;
+    }
+
+    let scraper_log_dir = paths::get(AppPaths::AppLog).join(scraper_id);
+    fs::create_dir_all(&scraper_log_dir).expect("Failed to create scraper log directory");
+
+    let mut options = fs::OpenOptions::new();
+    options.create(true).append(true);
+    let mut file = options.open(scraper_log_dir.join(kind.file_name())).expect("Failed to open scraper log file");
+    writeln!(file, "{}", content()).expect("Failed to write scraper log file");
+}
 
 /* ========================================================================== */
 
 pub fn decode_url(url: &str) -> Result<Url, Error> {
-    let mut url = url.trim();
-    if url.is_empty() || !url.starts_with("https://") {
-        if is_dev() {
-            url = "http://localhost:1421/scraper_idle.html";
-        } else {
-            url = "tauri://localhost/scraper_idle.html";
-        }
+    let url = Url::parse(url.trim())?;
+    if url.scheme() != "https" {
+        return Err(anyhow!("Scraper URL '{}' is not https", url));
     }
 
-    let url = Url::parse(url)?;
     return Ok(url);
 }
 
 /* ========================================================================== */
 
-fn get_scraper_url(scraper_id: &str) -> Option<String> {
-    let window = get_app_handle().get_webview_window(scraper_id)?;
-    let url = window.url().ok()?;
-
-    return Some(url.to_string());
-}
-
-pub fn is_local_url(scraper_id: &str, url: &Url) -> bool {
-    if get_scraper_url(scraper_id).is_none() {
-        return false;
-    }
-
-    return matches!(url.scheme(), "http" | "tauri")
-        && matches!(url.host_str(), Some("localhost") | Some("tauri.localhost"))
-        && url.path() == "/scraper_idle.html";
-}
-
-pub fn is_remote_url(scraper_id: &str, url: &Url) -> bool {
-    if get_scraper_url(scraper_id).is_none() {
-        return false;
-    }
-
-    let stored_url = settings::get_scraper_url(scraper_id);
-    let stored_url = stored_url.and_then(|stored_url| Url::parse(&stored_url).ok());
-
-    return matches!(stored_url, Some(stored_url) if url == &stored_url);
-}
-
 pub fn is_navigation_allowed(scraper_id: &str, url: &Url) -> bool {
-    return is_local_url(scraper_id, url) || is_remote_url(scraper_id, url);
+    let stored_url = settings::get_scraper_url(scraper_id);
+    return stored_url.and_then(|value| Url::parse(&value).ok()).is_some_and(|stored| &stored == url);
 }

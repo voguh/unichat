@@ -21,13 +21,9 @@ use crate::events::FLAG_YOUTUBE_SUPERCHAT_SECONDARY_BG_COLOR;
 use crate::events::FLAG_YOUTUBE_SUPERCHAT_SECONDARY_TEXT_COLOR;
 use crate::events::FLAG_YOUTUBE_SUPERCHAT_TIER;
 use crate::events::UniChatDonateEventPayload;
-use crate::events::UniChatEmote;
 use crate::events::UniChatEvent;
 use crate::events::UniChatPlatform;
-use crate::utils;
 use crate::utils::get_current_timestamp;
-use crate::utils::properties;
-use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::PurchaseAmountText;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
 use crate::youtube::mapper::structs::author::AuthorNameWrapper;
@@ -43,6 +39,7 @@ use crate::youtube::mapper::structs::message::parse_message_emojis;
 use crate::youtube::mapper::structs::message::parse_message_string;
 use crate::youtube::mapper::structs::message::parse_super_chat_tier;
 use crate::youtube::mapper::structs::parse_purchase_amount;
+use crate::youtube::read_channel_id;
 
 /* ========================================================================== */
 
@@ -66,24 +63,15 @@ struct LiveChatPaidMessageRenderer {
     body_text_color: Option<u32>
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
-fn build_option_message(message: &Option<MessageRunsWrapper>) -> Result<Option<String>, Error> {
-    if let Some(message) = message {
-        let message_text = parse_message_string(message)?;
-        return Ok(Some(message_text));
-    }
+fn parse_u32_to_rgba(color: u32) -> (u8, u8, u8, f32) {
+    let a = ((color >> 24) & 0xFF) as u8;
+    let r = ((color >> 16) & 0xFF) as u8;
+    let g = ((color >> 8) & 0xFF) as u8;
+    let b = (color & 0xFF) as u8;
 
-    return Ok(None);
-}
-
-fn build_option_emotes(message: &Option<MessageRunsWrapper>) -> Result<Vec<UniChatEmote>, Error> {
-    if let Some(message) = message {
-        let emotes = parse_message_emojis(message)?;
-        return Ok(emotes);
-    }
-
-    return Ok(Vec::new());
+    return (r, g, b, a as f32 / 255.0);
 }
 
 fn create_flags_map(parsed: &LiveChatPaidMessageRenderer) -> HashMap<String, Option<String>> {
@@ -92,7 +80,7 @@ fn create_flags_map(parsed: &LiveChatPaidMessageRenderer) -> HashMap<String, Opt
     /* ====================================================================== */
 
     if let Some(body_background_color) = parsed.body_background_color {
-        let (r, g, b, a) = utils::parse_u32_to_rgba(body_background_color);
+        let (r, g, b, a) = parse_u32_to_rgba(body_background_color);
         let rgba = format!("rgba({}, {}, {}, {:.3})", r, g, b, a);
         flags.insert(FLAG_YOUTUBE_SUPERCHAT_PRIMARY_BG_COLOR.to_string(), Some(rgba.clone()));
 
@@ -101,7 +89,7 @@ fn create_flags_map(parsed: &LiveChatPaidMessageRenderer) -> HashMap<String, Opt
     }
 
     if let Some(body_text_color) = parsed.body_text_color {
-        let (r, g, b, a) = utils::parse_u32_to_rgba(body_text_color);
+        let (r, g, b, a) = parse_u32_to_rgba(body_text_color);
         let rgba = format!("rgba({}, {}, {}, {:.3})", r, g, b, a);
         flags.insert(FLAG_YOUTUBE_SUPERCHAT_PRIMARY_TEXT_COLOR.to_string(), Some(rgba));
     }
@@ -109,13 +97,13 @@ fn create_flags_map(parsed: &LiveChatPaidMessageRenderer) -> HashMap<String, Opt
     /* ====================================================================== */
 
     if let Some(header_background_color) = parsed.header_background_color {
-        let (r, g, b, a) = utils::parse_u32_to_rgba(header_background_color);
+        let (r, g, b, a) = parse_u32_to_rgba(header_background_color);
         let rgba = format!("rgba({}, {}, {}, {:.3})", r, g, b, a);
         flags.insert(FLAG_YOUTUBE_SUPERCHAT_SECONDARY_BG_COLOR.to_string(), Some(rgba));
     }
 
     if let Some(header_text_color) = parsed.header_text_color {
-        let (r, g, b, a) = utils::parse_u32_to_rgba(header_text_color);
+        let (r, g, b, a) = parse_u32_to_rgba(header_text_color);
         let rgba = format!("rgba({}, {}, {}, {:.3})", r, g, b, a);
         flags.insert(FLAG_YOUTUBE_SUPERCHAT_SECONDARY_TEXT_COLOR.to_string(), Some(rgba));
     }
@@ -125,10 +113,10 @@ fn create_flags_map(parsed: &LiveChatPaidMessageRenderer) -> HashMap<String, Opt
     return flags;
 }
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
-    let parsed: LiveChatPaidMessageRenderer = serde_json::from_value(value)?;
+pub fn parse(value: &serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
+    let parsed = LiveChatPaidMessageRenderer::deserialize(value)?;
 
-    let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
+    let channel_id = read_channel_id()?;
     let flags = create_flags_map(&parsed);
     let author_id = parsed.author_external_channel_id;
     let author_username = parse_author_username(&parsed.author_name);
@@ -140,8 +128,8 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let (purchase_currency, purchase_value) = parse_purchase_amount(&parsed.purchase_amount_text)?;
     let converted = currency::apply(purchase_value, &purchase_currency);
     let (donate_value, donate_currency, original_value, original_currency) = converted;
-    let message = build_option_message(&parsed.message)?;
-    let emotes = build_option_emotes(&parsed.message)?;
+    let message = parsed.message.as_ref().map(parse_message_string).transpose()?;
+    let emotes = parsed.message.as_ref().map(parse_message_emojis).transpose()?.unwrap_or_default();
     let timestamp_usec = get_current_timestamp();
 
     let event = UniChatEvent::Donate(UniChatDonateEventPayload {

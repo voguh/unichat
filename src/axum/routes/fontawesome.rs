@@ -8,9 +8,10 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use axum::body::Body;
 use axum::extract::Path;
 use axum::http::StatusCode;
+use axum::http::header;
+use axum::response::IntoResponse;
 use axum::response::Response;
 
 use crate::axum::utils::CACHE_IMMUTABLE;
@@ -23,16 +24,9 @@ pub async fn fontawesome(Path(asset_path): Path<String>) -> Response {
     let asset_resolver = app.asset_resolver();
 
     if let Some(asset) = asset_resolver.get(format!("fontawesome/{}", asset_path)) {
-        return Response::builder()
-            .status(StatusCode::OK)
-            .header("Content-Type", asset.mime_type())
-            .header("Cache-Control", CACHE_IMMUTABLE)
-            .body(Body::from(asset.bytes().to_vec()))
-            .expect("Failed to build HTTP response");
+        let headers = [(header::CONTENT_TYPE, asset.mime_type()), (header::CACHE_CONTROL, CACHE_IMMUTABLE)];
+        return (headers, asset.bytes().to_vec()).into_response();
     }
 
-    return Response::builder()
-        .status(StatusCode::NOT_FOUND)
-        .body(Body::from(format!("Asset '{}' not found in fontawesome", asset_path)))
-        .expect("Failed to build HTTP response");
+    return (StatusCode::NOT_FOUND, format!("Asset '{}' not found in fontawesome", asset_path)).into_response();
 }

@@ -17,14 +17,8 @@ use crate::utils::userstore;
 /* ========================================================================== */
 
 #[tauri::command]
-pub async fn get_userstore<R: Runtime>(_app: AppHandle<R>, key: String) -> Result<Value, String> {
-    let value: Option<Value> = userstore::get_item(&key).map_err(|e| format!("Failed to emit event: {:#?}", e))?;
-
-    if let Some(v) = value {
-        return Ok(v);
-    } else {
-        return Ok(Value::Null);
-    }
+pub async fn get_userstore<R: Runtime>(_app: AppHandle<R>, key: String) -> Result<Option<Value>, String> {
+    return userstore::get_item(&key).map_err(|e| format!("Failed to get userstore: {:#?}", e));
 }
 
 /* ========================================================================== */

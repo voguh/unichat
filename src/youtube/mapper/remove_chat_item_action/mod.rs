@@ -18,8 +18,7 @@ use crate::events::UniChatEvent;
 use crate::events::UniChatPlatform;
 use crate::events::UniChatRemoveMessageEventPayload;
 use crate::utils::get_current_timestamp;
-use crate::utils::properties;
-use crate::utils::properties::PropertiesKey;
+use crate::youtube::read_channel_id;
 
 /* ========================================================================== */
 
@@ -29,10 +28,10 @@ struct RemoveChatItemAction {
     target_item_id: String
 }
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
-    let parsed: RemoveChatItemAction = serde_json::from_value(value)?;
+pub fn parse(value: &serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
+    let parsed = RemoveChatItemAction::deserialize(value)?;
 
-    let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
+    let channel_id = read_channel_id()?;
     let timestamp_usec = get_current_timestamp();
 
     let event = UniChatEvent::RemoveMessage(UniChatRemoveMessageEventPayload {
@@ -42,7 +41,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
         platform: UniChatPlatform::YouTube,
         flags: HashMap::new(),
 
-        message_id: parsed.target_item_id.clone(),
+        message_id: parsed.target_item_id,
 
         timestamp: timestamp_usec
     });

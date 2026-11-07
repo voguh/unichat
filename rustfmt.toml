@@ -4,4 +4,5 @@ use_small_heuristics = "Max"
 chain_width = 120
 
 unstable_features = true
+imports_granularity = "Item"
 trailing_comma = "Never"

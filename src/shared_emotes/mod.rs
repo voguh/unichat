@@ -24,13 +24,13 @@ mod seventv;
 
 /* ========================================================================== */
 
-static EMOTES_HASHSET: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
+static EMOTES: LazyLock<RwLock<HashMap<String, UniChatEmote>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 pub fn read() -> RwLockReadGuard<'static, HashMap<String, UniChatEmote>> {
-    return EMOTES_HASHSET.read().expect("SharedEmotes::EMOTES_HASHSET lock poisoned");
+    return EMOTES.read().expect("SharedEmotes::EMOTES lock poisoned");
 }
 
 fn write(emotes: HashMap<String, UniChatEmote>) {
-    let mut guard = EMOTES_HASHSET.write().expect("SharedEmotes::EMOTES_HASHSET lock poisoned");
+    let mut guard = EMOTES.write().expect("SharedEmotes::EMOTES lock poisoned");
     guard.extend(emotes);
 }
 
@@ -43,9 +43,7 @@ fn join_emotes(results: Vec<EmotesResult>, context: &str) {
     for result in results.into_iter() {
         match result {
             Err(err) => log::error!("Failed to fetch {} shared emotes: {:#?}", context, err),
-            Ok(batch) => {
-                emotes.extend(batch);
-            }
+            Ok(batch) => emotes.extend(batch)
         }
     }
 
@@ -71,12 +69,12 @@ pub fn fetch_shared_emotes(platform: &str, channel_id: &str) {
     let channel_id = channel_id.to_string();
 
     tauri::async_runtime::spawn_blocking(move || {
-        log::info!("Fetching channel shared emotes ({}:{})...", platform, channel_id);
+        log::info!("Fetching channel shared emotes ({}:{})", platform, channel_id);
 
         let results = thread::scope(|scope| {
-            let bttv = scope.spawn(|| betterttv::fetch_channel_emotes(platform.clone(), channel_id.clone()));
-            let ffz = scope.spawn(|| frankerfacez::fetch_channel_emotes(platform.clone(), channel_id.clone()));
-            let stv = scope.spawn(|| seventv::fetch_channel_emotes(platform.clone(), channel_id.clone()));
+            let bttv = scope.spawn(|| betterttv::fetch_channel_emotes(&platform, &channel_id));
+            let ffz = scope.spawn(|| frankerfacez::fetch_channel_emotes(&platform, &channel_id));
+            let stv = scope.spawn(|| seventv::fetch_channel_emotes(&platform, &channel_id));
 
             return vec![bttv.join(), ffz.join(), stv.join()];
         });

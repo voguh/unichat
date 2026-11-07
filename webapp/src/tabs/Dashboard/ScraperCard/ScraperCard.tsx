@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 import type * as PReact from "preact";
-import { useEffect, useMemo, useRef, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 
 import * as eventService from "@tauri-apps/api/event";
 
@@ -24,13 +24,7 @@ import { modalService } from "unichat/services/modalService";
 import { notificationService } from "unichat/services/notificationService";
 import { settingsService, UniChatSettingsKeys } from "unichat/services/settingsService";
 import type { UniChatScraper } from "unichat/types";
-import {
-    IPCEvents,
-    type IPCStatusEvent,
-    SCRAPER_LIFECYCLE_STATUSES,
-    SCRAPER_RUNNING_STATUSES,
-    ScraperStatus
-} from "unichat/utils/IPCStatusEvent";
+import { IPCEvents, type IPCStatusEvent, ScraperStatus } from "unichat/utils/IPCStatusEvent";
 import { Strings } from "unichat/utils/Strings";
 
 import styles from "./styles.module.css";
@@ -41,24 +35,14 @@ interface Props {
     validateUrl: (url: string) => Promise<string>;
 }
 
-const DEFAULT_EVENT: IPCStatusEvent = {
-    type: ScraperStatus.IDLE,
-    scraperId: "youtube-chat",
-    timestamp: Date.now(),
-    message: null,
-    stack: null
-};
-
 const _logger = LoggerFactory.getLogger("ScraperCard");
 export function ScraperCard(props: Props): PReact.ComponentChildren {
     const { editingTooltip, scraper, validateUrl } = props;
 
     const [loading, setLoading] = useState(false);
     const [showOpenWebviewButton, setShowOpenWebviewButton] = useState(false);
-    const [event, setEvent] = useState<IPCStatusEvent | null>({ ...DEFAULT_EVENT, scraperId: scraper.id });
-
-    const scraperIsRunning = useMemo(() => event != null && SCRAPER_RUNNING_STATUSES.includes(event.type), [event]);
-    const scraperIsLoading = useMemo(() => event == null, [event]);
+    const [scraperIsRunning, setScraperIsRunning] = useState(false);
+    const [scraperIsLoading, setScraperIsLoading] = useState(false);
 
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -69,8 +53,8 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                 const inputValue = await validateUrl(inputRef.current.value);
                 inputRef.current.value = inputValue;
 
-                await commandService.setScraperWebviewUrl(scraper.id, inputValue);
-                setEvent(null);
+                await commandService.startScraper(scraper.id, inputValue);
+                setScraperIsLoading(true);
             }
         } catch (err) {
             _logger.error("An error occurred while starting the '{}' chat scraper: {}", scraper.name, err);
@@ -82,8 +66,8 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
     async function handleStop(): Promise<void> {
         try {
             setLoading(true);
-            await commandService.setScraperWebviewUrl(scraper.id, "about:blank");
-            setEvent({ ...DEFAULT_EVENT, scraperId: scraper.id });
+            await commandService.stopScraper(scraper.id);
+            setScraperIsRunning(false);
         } catch (err) {
             _logger.error("An error occurred while stopping the '{}' chat scraper: {}", scraper.name, err);
         } finally {
@@ -126,7 +110,7 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                 const scraperWebviewUrl = await commandService.getScraperWebviewUrl(scraper.id);
 
                 if (scraperWebviewUrl === scraperStoredUrl) {
-                    setEvent({ ...DEFAULT_EVENT, type: ScraperStatus.READY, scraperId: scraper.id });
+                    setScraperIsRunning(true);
                 }
 
                 if (inputRef.current != null && !Strings.isNullOrEmpty(scraperStoredUrl)) {
@@ -149,22 +133,22 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                 return;
             }
 
-            if (SCRAPER_LIFECYCLE_STATUSES.includes(payload.type)) {
-                if (payload.type === ScraperStatus.READY) {
-                    notificationService.success({
-                        title: `${scraper.name} scraper is ready`,
-                        message: "The scraper has started successfully."
-                    });
-                }
+            if (payload.type === ScraperStatus.READY) {
+                notificationService.success({
+                    title: `${scraper.name} scraper is ready`,
+                    message: "The scraper has started successfully."
+                });
 
-                setEvent(payload);
+                setScraperIsLoading(false);
+                setScraperIsRunning(true);
             } else if (payload.type === ScraperStatus.ERROR) {
                 notificationService.error({
                     title: `Error on ${scraper.name} scraper execution`,
                     message: payload.message ?? "An unknown error occurred in the scraper."
                 });
             } else if (payload.type === ScraperStatus.FATAL) {
-                setEvent({ ...DEFAULT_EVENT, scraperId: scraper.id });
+                setScraperIsLoading(false);
+                setScraperIsRunning(false);
                 modalService.openModal({
                     size: "lg",
                     title: `An error occurred in the ${scraper.name} scraper initialization!`,
@@ -236,7 +220,7 @@ export function ScraperCard(props: Props): PReact.ComponentChildren {
                     <Button
                         variant="default"
                         onClick={() => commandService.toggleScraperWebview(scraper.id)}
-                        disabled={loading || scraperIsLoading}
+                        disabled={loading || scraperIsLoading || !scraperIsRunning}
                         className="icon-button"
                     >
                         <i className="fas fa-window-restore" />

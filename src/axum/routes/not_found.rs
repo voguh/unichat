@@ -11,13 +11,11 @@
 use axum::body::Body;
 use axum::http::Request;
 use axum::http::StatusCode;
+use axum::response::IntoResponse;
 use axum::response::Response;
 
 /* ========================================================================== */
 
 pub async fn not_found(req: Request<Body>) -> Response {
-    return Response::builder()
-        .status(StatusCode::NOT_FOUND)
-        .body(Body::from(format!("Request '{}' not found", req.uri())))
-        .expect("Failed to build HTTP response");
+    return (StatusCode::NOT_FOUND, format!("Request '{}' not found", req.uri())).into_response();
 }

@@ -8,6 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use serde_json::Map;
 use serde_json::Value;
 use tauri::AppHandle;
 use tauri::Runtime;
@@ -16,62 +17,52 @@ use crate::settings;
 
 /* ========================================================================== */
 
-#[tauri::command]
-pub async fn settings_get_item(key: &str) -> Result<Value, String> {
-    let key = format!("settings:{}", key);
-    if key.split(':').count() != 2 {
-        return Err("Invalid settings key format".to_string());
+fn settings_key(key: &str) -> Result<String, String> {
+    if key.contains(':') {
+        return Err(format!("Invalid settings key '{}'", key));
     }
 
-    let raw_value = settings::get_by_key(&key).map_err(|e| format!("Failed to get item: {:#?}", e))?;
-    return Ok(raw_value);
+    return Ok(format!("settings:{}", key));
 }
 
 /* ========================================================================== */
 
 #[tauri::command]
-pub async fn settings_get_items(keys: Vec<String>) -> Result<Value, String> {
-    let mut result = serde_json::Map::new();
+pub async fn settings_get_item(key: &str) -> Result<Value, String> {
+    let full_key = settings_key(key)?;
+    return settings::get_by_key(&full_key).map_err(|e| format!("Failed to get item '{}': {:#?}", key, e));
+}
+
+/* ========================================================================== */
+
+#[tauri::command]
+pub async fn settings_get_items(keys: Vec<String>) -> Result<Map<String, Value>, String> {
+    let mut result = Map::new();
 
     for key in keys {
-        let full_key = format!("settings:{}", key);
-        if full_key.split(':').count() != 2 {
-            return Err(format!("Invalid settings key format: {}", key));
-        }
-
+        let full_key = settings_key(&key)?;
         let value = settings::get_by_key(&full_key).map_err(|e| format!("Failed to get item '{}': {:#?}", key, e))?;
         result.insert(key, value);
     }
 
-    return Ok(Value::Object(result));
+    return Ok(result);
 }
 
 /* ========================================================================== */
 
 #[tauri::command]
 pub async fn settings_set_item<R: Runtime>(_app: AppHandle<R>, key: &str, value: Value) -> Result<(), String> {
-    let key = format!("settings:{}", key);
-    if key.split(':').count() != 2 {
-        return Err("Invalid settings key format".to_string());
-    }
-
-    settings::set_by_key(&key, &value).map_err(|e| format!("Failed to set item: {:#?}", e))?;
-    return Ok(());
+    let full_key = settings_key(key)?;
+    return settings::set_by_key(&full_key, &value).map_err(|e| format!("Failed to set item '{}': {:#?}", key, e));
 }
 
 /* ========================================================================== */
 
 #[tauri::command]
-pub async fn settings_set_items<R: Runtime>(_app: AppHandle<R>, items: Value) -> Result<(), String> {
-    let items_map = items.as_object().ok_or("Items must be a JSON object".to_string())?;
-
-    for (key, value) in items_map {
-        let full_key = format!("settings:{}", key);
-        if full_key.split(':').count() != 2 {
-            return Err(format!("Invalid settings key format: {}", key));
-        }
-
-        settings::set_by_key(&full_key, value).map_err(|e| format!("Failed to set item '{}': {:#?}", key, e))?;
+pub async fn settings_set_items<R: Runtime>(_app: AppHandle<R>, items: Map<String, Value>) -> Result<(), String> {
+    for (key, value) in items {
+        let full_key = settings_key(&key)?;
+        settings::set_by_key(&full_key, &value).map_err(|e| format!("Failed to set item '{}': {:#?}", key, e))?;
     }
 
     return Ok(());

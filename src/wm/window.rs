@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use std::path::PathBuf;
+use std::path::Path;
 
 use tauri::AppHandle;
 use tauri::WebviewUrl;
@@ -16,7 +16,6 @@ use tauri::WebviewWindow;
 use tauri::WebviewWindowBuilder;
 use tauri::webview::PageLoadEvent;
 use tauri::webview::PageLoadPayload;
-use url::Url;
 
 use crate::UNICHAT_AUTHORS;
 use crate::UNICHAT_DESCRIPTION;
@@ -31,9 +30,8 @@ use crate::UNICHAT_VERSION;
 use crate::plugins;
 use crate::utils::base64;
 use crate::utils::is_dev;
-use crate::utils::path_to_string;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 
 /* ========================================================================== */
 
@@ -48,18 +46,14 @@ use crate::utils::properties::AppPaths;
 // https://docs.rs/tauri/2.11.5/tauri/webview/struct.WebviewWindowBuilder.html#method.additional_browser_args
 const ADDITIONAL_BROWSER_ARGS: &str = "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --lang=en-US";
 
-pub fn new(label: &str, url: &str) -> WebviewWindowBuilder<'static, tauri::Wry, AppHandle> {
+pub fn new(label: &str, webview_url: WebviewUrl) -> WebviewWindowBuilder<'static, tauri::Wry, AppHandle> {
     let app_handle = crate::get_app_handle();
 
-    let webview_url;
-    if url.starts_with("https://") {
-        let external_url = Url::parse(url).expect("Failed to parse external URL");
-        webview_url = WebviewUrl::External(external_url);
-    } else {
-        webview_url = WebviewUrl::App(PathBuf::from(url));
-    }
-
     return WebviewWindowBuilder::new(app_handle, label, webview_url).additional_browser_args(ADDITIONAL_BROWSER_ARGS);
+}
+
+fn path_to_string(path: &Path) -> String {
+    return path.to_string_lossy().replace('\\', "\\\\");
 }
 
 pub fn webapp_globals_script() -> String {
@@ -67,12 +61,13 @@ pub fn webapp_globals_script() -> String {
     let platform = std::env::consts::OS;
     let plugins_enabled = plugins::runtime_initialized();
 
+    let unichat_version = &*UNICHAT_VERSION;
     let unichat_icon = format!("data:image/png;base64,{}", base64::encode(UNICHAT_ICON_BYTES));
 
-    let gallery_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatGallery));
-    let license_file = path_to_string(&properties::get_app_path(AppPaths::UniChatLicense));
-    let plugins_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatUserPlugins));
-    let widgets_dir = path_to_string(&properties::get_app_path(AppPaths::UniChatUserWidgets));
+    let gallery_dir = path_to_string(&paths::get(AppPaths::UniChatGallery));
+    let license_file = path_to_string(&paths::get(AppPaths::UniChatLicense));
+    let plugins_dir = path_to_string(&paths::get(AppPaths::UniChatUserPlugins));
+    let widgets_dir = path_to_string(&paths::get(AppPaths::UniChatUserWidgets));
 
     return format!(
         r#"
@@ -82,7 +77,7 @@ pub fn webapp_globals_script() -> String {
 
             globalThis.UNICHAT_DISPLAY_NAME = "{UNICHAT_DISPLAY_NAME}";
             globalThis.UNICHAT_NAME = "{UNICHAT_NAME}";
-            globalThis.UNICHAT_VERSION = "{UNICHAT_VERSION}";
+            globalThis.UNICHAT_VERSION = "{unichat_version}";
             globalThis.UNICHAT_DESCRIPTION = "{UNICHAT_DESCRIPTION}";
             globalThis.UNICHAT_AUTHORS = "{UNICHAT_AUTHORS}";
             globalThis.UNICHAT_HOMEPAGE = "{UNICHAT_HOMEPAGE}";

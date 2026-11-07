@@ -14,8 +14,8 @@ use std::sync::OnceLock;
 use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
 
-use anyhow::Error;
 use tokio::sync::broadcast;
+use tokio::sync::broadcast::error::RecvError;
 
 use crate::events::unichat::FLAG_EMULATOR_GENERATED;
 
@@ -82,9 +82,7 @@ impl<T> Queue<T> {
             self.items.pop_front();
         }
 
-        if self.capacity > 0 {
-            self.items.push_back(item);
-        }
+        self.items.push_back(item);
     }
 }
 
@@ -115,7 +113,7 @@ fn event_is_emulated(event: &UniChatEvent) -> bool {
     };
 }
 
-pub fn init() -> Result<(), Error> {
+pub fn init() {
     let (tx, mut rx) = broadcast::channel(1000);
 
     tauri::async_runtime::spawn(async move {
@@ -125,15 +123,15 @@ pub fn init() -> Result<(), Error> {
             match received {
                 Ok(event) => {
                     if event_is_emulated(&event) {
-                        continue; // Skip caching emulated events
+                        continue;
                     }
 
                     write_latest_events(event);
                 }
-                Err(tokio::sync::broadcast::error::RecvError::Lagged(skipped)) => {
+                Err(RecvError::Lagged(skipped)) => {
                     log::warn!("EventEmitter lagged, skipped {} events", skipped);
                 }
-                Err(tokio::sync::broadcast::error::RecvError::Closed) => {
+                Err(RecvError::Closed) => {
                     log::warn!("EventEmitter channel closed, exiting event loop");
                     break;
                 }
@@ -142,8 +140,6 @@ pub fn init() -> Result<(), Error> {
     });
 
     set_emitter(tx);
-
-    return Ok(());
 }
 
 pub fn latest_events() -> Vec<UniChatEvent> {
@@ -154,9 +150,7 @@ pub fn subscribe() -> broadcast::Receiver<UniChatEvent> {
     return get_emitter().subscribe();
 }
 
-pub fn emit(event: UniChatEvent) -> Result<(), Error> {
-    let s = get_emitter().send(event)?;
-    log::debug!("Event emitted to {} subscribers", s);
-
-    return Ok(());
+pub fn emit(event: UniChatEvent) {
+    let subscribers = get_emitter().send(event).expect("Events::EMITTER has no subscribers");
+    log::debug!("Event emitted to {} subscribers", subscribers);
 }

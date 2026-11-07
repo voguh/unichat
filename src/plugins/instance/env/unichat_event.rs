@@ -10,7 +10,7 @@
 
 use mlua::Error;
 use mlua::Lua;
-use mlua::LuaSerdeExt as _;
+use mlua::LuaSerdeExt;
 use mlua::Table;
 use mlua::UserData;
 use mlua::UserDataMethods;
@@ -29,8 +29,7 @@ fn create_readonly_event(lua: &Lua, event: &UniChatEvent) -> Result<Table, Error
     let table = lua.unpack(value);
     let table: Table = table.map_err(|_| Error::runtime("UniChatEvent must serialize to a table"))?;
 
-    let table_name = lua.create_string("UniChatEvent")?;
-    return table_deep_readonly(lua, &Value::String(table_name), table);
+    return table_deep_readonly(lua, "UniChatEvent", table);
 }
 
 pub struct LuaUniChatEventFactory;
@@ -117,8 +116,7 @@ impl UserData for LuaUniChatEmoteFactory {
             table.set("code", code)?;
             table.set("url", url)?;
 
-            let table_name = lua.create_string("UniChatEmote")?;
-            let locked_table = table_deep_readonly(lua, &Value::String(table_name), table)?;
+            let locked_table = table_deep_readonly(lua, "UniChatEmote", table)?;
 
             return Ok(locked_table);
         });
@@ -136,8 +134,7 @@ impl UserData for LuaUniChatBadgeFactory {
             table.set("code", code)?;
             table.set("url", url)?;
 
-            let table_name = lua.create_string("UniChatBadge")?;
-            let locked_table = table_deep_readonly(lua, &Value::String(table_name), table)?;
+            let locked_table = table_deep_readonly(lua, "UniChatBadge", table)?;
 
             return Ok(locked_table);
         });
@@ -162,13 +159,13 @@ impl UserData for LuaUniChatPlatformFactory {
             return Ok(lv);
         });
 
-        methods.add_method("Other", |_lua, _this, str: String| {
-            let str = str.trim();
-            if str.is_empty() {
+        methods.add_method("Other", |_lua, _this, value: String| {
+            let value = value.trim();
+            if value.is_empty() {
                 return Err(Error::external("String cannot be empty"));
             }
 
-            let obj: UniChatPlatform = serde_plain::from_str(str).map_err(Error::external)?;
+            let obj: UniChatPlatform = serde_plain::from_str(value).map_err(Error::external)?;
             let lv = serde_plain::to_string(&obj).expect("Failed to serialize UniChatPlatform");
             return Ok(lv);
         });
@@ -205,13 +202,13 @@ impl UserData for LuaUniChatAuthorTypeFactory {
             return Ok(lv);
         });
 
-        methods.add_method("Other", |_lua, _this, str: String| {
-            let str = str.trim();
-            if str.is_empty() {
+        methods.add_method("Other", |_lua, _this, value: String| {
+            let value = value.trim();
+            if value.is_empty() {
                 return Err(Error::external("String cannot be empty"));
             }
 
-            let obj: UniChatAuthorType = serde_plain::from_str(str).map_err(Error::external)?;
+            let obj: UniChatAuthorType = serde_plain::from_str(value).map_err(Error::external)?;
             let lv = serde_plain::to_string(&obj).expect("Failed to serialize UniChatAuthorType");
             return Ok(lv);
         });

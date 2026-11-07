@@ -10,8 +10,9 @@
 
 #![allow(clippy::result_large_err)]
 
-use axum::body::Body;
+use axum::Json;
 use axum::body::Bytes;
+use axum::response::IntoResponse;
 use axum::response::Response;
 
 use crate::utils::jsonrpc::JsonRPCError;
@@ -21,78 +22,60 @@ use crate::utils::userstore;
 
 /* ========================================================================== */
 
+fn userstore_get(id: Option<String>, body: &JsonRPCRequest) -> Result<JsonRPCResponse, JsonRPCError> {
+    let id = id.ok_or_else(|| JsonRPCError::invalid_request(None, Some("Missing id in JSON-RPC request")))?;
+
+    let params = body.params().unwrap_or_default();
+    if params.len() != 1 {
+        let message = "Expected exactly 1 parameter for 'userstore:get'";
+        return Err(JsonRPCError::invalid_params(Some(id), Some(message)));
+    }
+
+    let key: &str;
+    match params[0].as_str() {
+        Some(param) => key = param,
+        None => {
+            let message = "Parameter for 'userstore:get' must be a string";
+            return Err(JsonRPCError::invalid_params(Some(id), Some(message)));
+        }
+    }
+
+    return match userstore::get_item::<String>(key) {
+        Ok(value) => Ok(JsonRPCResponse::new(id, value)),
+        Err(err) => {
+            let message = format!("{:#?}", err);
+            return Err(JsonRPCError::internal_error(Some(id), Some(message)));
+        }
+    };
+}
+
 fn process_rpc_request(body: JsonRPCRequest) -> Result<JsonRPCResponse, JsonRPCError> {
+    let id = body.id().map(String::from);
     if body.jsonrpc() != "2.0" {
-        return Err(JsonRPCError::invalid_request(body.id(), Some("Invalid JSON-RPC version")));
+        return Err(JsonRPCError::invalid_request(id, Some("Invalid JSON-RPC version")));
     }
 
-    let id = body.id();
     let method = body.method();
-
-    match method.as_str() {
-        "userstore:get" => {
-            if let Some(ok) = id {
-                let params = body.params().unwrap_or_default();
-                if params.len() != 1 {
-                    return Err(JsonRPCError::invalid_params(
-                        Some(ok.to_string()),
-                        Some("Expected exactly 1 parameter for 'userstore:get'")
-                    ));
-                }
-
-                let key: &str;
-                match params[0].as_str() {
-                    Some(k) => key = k,
-                    None => {
-                        return Err(JsonRPCError::invalid_params(
-                            Some(ok.to_string()),
-                            Some("Parameter for 'userstore:get' must be a string")
-                        ));
-                    }
-                }
-
-                match userstore::get_item::<Option<String>>(key) {
-                    Ok(value) => {
-                        return Ok(JsonRPCResponse::new(ok.to_string(), value));
-                    }
-                    Err(e) => {
-                        return Err(JsonRPCError::internal_error(Some(ok.to_string()), Some(format!("{:#?}", e))));
-                    }
-                }
-            } else {
-                return Err(JsonRPCError::invalid_request(None, Some("Missing id in JSON-RPC request")));
-            }
-        }
-        _ => {
-            return Err(JsonRPCError::method_not_found(id, Some(format!("Method '{}' not found", method))));
-        }
+    if method == "userstore:get" {
+        return userstore_get(id, &body);
     }
+
+    let message = format!("Method '{}' not found", method);
+    return Err(JsonRPCError::method_not_found(id, Some(message)));
 }
 
 pub async fn rpc(body: Bytes) -> Response {
     let rpc_request: JsonRPCRequest;
     match serde_json::from_slice(&body) {
-        Ok(req) => rpc_request = req,
-        Err(e) => {
-            let error_response = JsonRPCError::parse_error(None, Some(format!("{:#?}", e)));
-            let body_str = serde_json::to_string(&error_response).expect("Failed to serialize JSON-RPC error");
-            return Response::builder()
-                .status(200)
-                .header("Content-Type", "application/json")
-                .body(Body::from(body_str))
-                .expect("Failed to build HTTP response");
+        Ok(request) => rpc_request = request,
+        Err(err) => {
+            let error_response = JsonRPCError::parse_error(None, Some(format!("{:#?}", err)));
+            return Json(error_response).into_response();
         }
     }
 
-    let body_str: String;
-    match process_rpc_request(rpc_request) {
-        Ok(response) => body_str = serde_json::to_string(&response).expect("Failed to serialize JSON-RPC response"),
-        Err(err) => body_str = serde_json::to_string(&err).expect("Failed to serialize JSON-RPC error")
-    }
-
-    return Response::builder()
-        .status(200)
-        .header("Content-Type", "application/json")
-        .body(Body::from(body_str))
-        .expect("Failed to build HTTP response");
+    return match process_rpc_request(rpc_request) {
+        Ok(response) => Json(response).into_response(),
+        Err(err) => Json(err).into_response()
+    };
 }

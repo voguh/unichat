@@ -15,6 +15,7 @@ use crate::addons::plugin;
 use crate::addons::plugin::CommunityPlugin;
 use crate::addons::widget;
 use crate::addons::widget::CommunityWidget;
+use crate::utils::semver::Version;
 
 /* ========================================================================== */
 
@@ -23,8 +24,10 @@ pub async fn get_community_plugin<R: Runtime>(
     _app: AppHandle<R>,
     internal_id: String
 ) -> Result<CommunityPlugin, String> {
-    return plugin::get(&internal_id)
-        .map_err(|e| format!("Failed to get community plugin '{}': {:#?}", internal_id, e));
+    return match plugin::get(&internal_id) {
+        Ok(community_plugin) => Ok(community_plugin),
+        Err(e) => Err(format!("Failed to get community plugin '{}': {:#?}", internal_id, e))
+    };
 }
 
 /* ========================================================================== */
@@ -41,8 +44,10 @@ pub async fn get_community_widget<R: Runtime>(
     _app: AppHandle<R>,
     internal_id: String
 ) -> Result<CommunityWidget, String> {
-    return widget::get(&internal_id)
-        .map_err(|e| format!("Failed to get community widget '{}': {:#?}", internal_id, e));
+    return match widget::get(&internal_id) {
+        Ok(community_widget) => Ok(community_widget),
+        Err(e) => Err(format!("Failed to get community widget '{}': {:#?}", internal_id, e))
+    };
 }
 
 /* ========================================================================== */
@@ -58,10 +63,13 @@ pub async fn get_community_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Vec
 pub async fn install_community_plugin<R: Runtime>(
     _app: AppHandle<R>,
     internal_id: String,
-    release: String
+    release: Version
 ) -> Result<(), String> {
-    return plugin::install(&internal_id, &release)
-        .map_err(|e| format!("Failed to install community plugin '{}' version '{}': {:#?}", internal_id, release, e));
+    if let Err(e) = plugin::install(&internal_id, &release) {
+        return Err(format!("Failed to install community plugin '{}' version '{}': {:#?}", internal_id, release, e));
+    }
+
+    return Ok(());
 }
 
 /* ========================================================================== */
@@ -70,8 +78,11 @@ pub async fn install_community_plugin<R: Runtime>(
 pub async fn install_community_widget<R: Runtime>(
     _app: AppHandle<R>,
     internal_id: String,
-    release: String
+    release: Version
 ) -> Result<(), String> {
-    return widget::install(&internal_id, &release)
-        .map_err(|e| format!("Failed to install community widget '{}' version '{}': {:#?}", internal_id, release, e));
+    if let Err(e) = widget::install(&internal_id, &release) {
+        return Err(format!("Failed to install community widget '{}' version '{}': {:#?}", internal_id, release, e));
+    }
+
+    return Ok(());
 }

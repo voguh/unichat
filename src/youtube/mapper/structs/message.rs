@@ -48,7 +48,7 @@ pub type CustomEmojiThumbnailsWrapper = ThumbnailsWrapper;
 
 pub type FontBaseEmojiThumbnailsWrapper = ThumbnailsWrapper;
 
-/* <================================================================================================================> */
+/* ========================================================================== */
 
 pub fn parse_super_chat_tier(primary_superchat_background_color: &str) -> Option<u8> {
     if primary_superchat_background_color.contains("230, 33, 23") {
@@ -89,9 +89,9 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
             }
             MessageRun::Emoji { emoji } => match emoji {
                 Emoji::Custom { emoji_id, image, shortcuts, .. } => {
-                    let shortcut = shortcuts.first().ok_or(anyhow!("No shortcuts found for custom emoji"))?;
+                    let shortcut = shortcuts.first().ok_or_else(|| anyhow!("No shortcuts found for custom emoji"))?;
                     let thumbnail = image.thumbnails.last();
-                    let thumbnail = thumbnail.ok_or(anyhow!("No thumbnails found for font-based emoji"))?;
+                    let thumbnail = thumbnail.ok_or_else(|| anyhow!("No thumbnails found for custom emoji"))?;
 
                     emotes.push(UniChatEmote {
                         id: emoji_id.clone(),
@@ -101,7 +101,7 @@ pub fn parse_message_emojis(message_runs: &MessageRunsWrapper) -> Result<Vec<Uni
                 }
                 Emoji::FontBased { emoji_id, image, .. } => {
                     let thumbnail = image.thumbnails.last();
-                    let thumbnail = thumbnail.ok_or(anyhow!("No thumbnails found for font-based emoji"))?;
+                    let thumbnail = thumbnail.ok_or_else(|| anyhow!("No thumbnails found for font-based emoji"))?;
                     emotes.push(UniChatEmote {
                         id: emoji_id.clone(),
                         code: emoji_id.clone(),
@@ -125,7 +125,7 @@ pub fn parse_message_string(message_runs: &MessageRunsWrapper) -> Result<String,
             }
             MessageRun::Emoji { emoji } => match emoji {
                 Emoji::Custom { shortcuts, .. } => {
-                    let shortcut = shortcuts.first().ok_or(anyhow!("No shortcuts found for custom emoji"))?;
+                    let shortcut = shortcuts.first().ok_or_else(|| anyhow!("No shortcuts found for custom emoji"))?;
                     str_message.push(shortcut.clone());
                 }
                 Emoji::FontBased { emoji_id, .. } => {
@@ -135,5 +135,7 @@ pub fn parse_message_string(message_runs: &MessageRunsWrapper) -> Result<String,
         }
     }
 
-    return Ok(str_message.join(" "));
+    let message = str_message.join(" ");
+    let words: Vec<&str> = message.split_whitespace().collect();
+    return Ok(words.join(" "));
 }

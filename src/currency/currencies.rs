@@ -14,8 +14,6 @@ use std::sync::OnceLock;
 use std::time::Duration;
 
 use anyhow::Error;
-use serde::Deserialize;
-use serde::Serialize;
 
 use crate::cache;
 use crate::currency::UniChatCurrency;
@@ -61,15 +59,11 @@ static ICU_TAKEN: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::new(
 
 static CURRENCIES: OnceLock<Vec<UniChatCurrency>> = OnceLock::new();
 pub fn get() -> Vec<UniChatCurrency> {
-    if let Some(currencies) = CURRENCIES.get() {
-        return currencies.clone();
-    }
-
-    return Vec::new();
+    return CURRENCIES.get().cloned().unwrap_or_default();
 }
 
 fn set(currencies: Vec<UniChatCurrency>) {
-    CURRENCIES.set(currencies).expect("Currency::CURRENCIES already set");
+    CURRENCIES.set(currencies).expect("Currency::CURRENCIES was already initialized");
 }
 
 /* ========================================================================== */
@@ -77,24 +71,13 @@ fn set(currencies: Vec<UniChatCurrency>) {
 const CURRENCIES_URL: &str = "https://api.frankfurter.dev/v2/currencies";
 const CURRENCIES_FILE_TTL: Duration = Duration::from_secs(60 * 60 * 24 * 30);
 
-#[rustfmt::skip]
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct FrankfurterCurrency {
-    pub iso_code: String,
-    // pub iso_numeric: String,
-    pub name: String,
-    pub symbol: String
-    // pub start_date: String,
-    // pub end_date: String
-}
-
 fn fetch_currency_list() -> Result<Vec<UniChatCurrency>, Error> {
-    log::info!("Fetching currency list from '{}'...", CURRENCIES_URL);
+    log::info!("Fetching currency list from '{}'", CURRENCIES_URL);
     let mut response = ureq::get(CURRENCIES_URL).call()?;
     let entries: Vec<serde_json::Value> = response.body_mut().read_json()?;
 
-    let mut parsed: Vec<FrankfurterCurrency> = Vec::new();
-    let mut claims: HashMap<String, Vec<String>> = HashMap::new();
+    let mut list: Vec<UniChatCurrency> = Vec::new();
+    let mut claims: HashMap<String, usize> = HashMap::new();
     for entry in entries.iter() {
         let iso_code = entry.get("iso_code").and_then(|v| v.as_str()).unwrap_or_default();
         let name = entry.get("name").and_then(|v| v.as_str()).unwrap_or_default();
@@ -113,24 +96,14 @@ fn fetch_currency_list() -> Result<Vec<UniChatCurrency>, Error> {
             }
         }
 
-        if let Some(codes) = claims.get_mut(&symbol) {
-            codes.push(iso_code.to_string());
-        } else {
-            claims.insert(symbol.clone(), vec![iso_code.to_string()]);
-        }
-
-        parsed.push(FrankfurterCurrency { iso_code: iso_code.to_string(), name: name.to_string(), symbol });
+        *claims.entry(symbol.clone()).or_default() += 1;
+        list.push(UniChatCurrency { code: iso_code.to_string(), name: name.to_string(), symbol });
     }
 
-    let mut list: Vec<UniChatCurrency> = Vec::new();
-    for mut currency in parsed.into_iter() {
-        if let Some(codes) = claims.get(&currency.symbol) {
-            if codes.len() != 1 {
-                currency.symbol = currency.iso_code.clone();
-            }
+    for currency in list.iter_mut() {
+        if claims[&currency.symbol] > 1 {
+            currency.symbol = currency.code.clone();
         }
-
-        list.push(UniChatCurrency { code: currency.iso_code, name: currency.name, symbol: currency.symbol });
     }
 
     return Ok(list);

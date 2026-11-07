@@ -14,7 +14,7 @@ use std::ffi::c_void;
 use mlua::Error;
 use mlua::Function;
 use mlua::Lua;
-use mlua::LuaSerdeExt as _;
+use mlua::LuaSerdeExt;
 use mlua::Table;
 use mlua::Value;
 use mlua::Variadic;
@@ -24,18 +24,20 @@ use serde::de::DeserializeOwned;
 
 const READONLY_DATA_KEY: &str = "__unichat_readonly_data";
 
-pub fn table_deep_readonly(lua: &Lua, table_name: &Value, table: Table) -> Result<Table, Error> {
+pub fn table_deep_readonly(lua: &Lua, table_name: &str, table: Table) -> Result<Table, Error> {
     for pair in table.pairs::<Value, Value>() {
         let (key, value) = pair?;
         if let Value::Table(inner_table) = value {
-            let readonly_inner_table = table_deep_readonly(lua, &key, inner_table)?;
+            let inner_table_name = key.to_string()?;
+            let readonly_inner_table = table_deep_readonly(lua, &inner_table_name, inner_table)?;
             table.raw_set(key, readonly_inner_table)?;
         }
     }
 
-    let table_name = table_name.to_string()?;
+    let table_name = table_name.to_string();
     let newindex_func = lua.create_function(move |_, _args: Variadic<Value>| -> mlua::Result<()> {
-        return Err(Error::runtime(format!("Immutable table: cannot modify table '{}'", table_name)));
+        let message = format!("Immutable table: cannot modify table '{}'", table_name);
+        return Err(Error::runtime(message));
     })?;
 
     let len_table = table.clone();

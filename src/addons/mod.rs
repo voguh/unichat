@@ -22,9 +22,8 @@ use sha2::Sha256;
 use zip::ZipArchive;
 
 use crate::UNICHAT_VERSION;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
-use crate::utils::semver;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 use crate::utils::semver::Version;
 use crate::utils::semver::VersionRange;
 use crate::utils::ureq;
@@ -35,7 +34,9 @@ pub mod widget;
 
 /* ========================================================================== */
 
+pub use manifest::MANIFEST_FILE;
 pub use manifest::UniChatAddonManifest;
+pub use manifest::is_valid_addon_dir;
 pub use manifest::load_manifest;
 
 /* ========================================================================== */
@@ -56,7 +57,7 @@ struct AddonReleaseAsset {
 #[serde(rename_all = "camelCase")]
 struct AddonRelease {
     pub id: u64,
-    pub name: String,
+    pub name: Version,
     pub description: String,
     pub url: String,
     pub prerelease: bool,
@@ -73,13 +74,13 @@ struct CommunityAddonData {
     pub name: String,
     pub short_description: String,
     pub description: String,
-    pub version: String,
+    pub version: Version,
     pub author: Option<String>,
     pub license: Option<String>,
     pub homepage_url: Option<String>,
     pub repository_url: String,
     #[serde(rename = "requiresUniChat")]
-    pub requires_unichat: Option<String>,
+    pub requires_unichat: Option<VersionRange>,
     pub stars: Option<u64>,
     pub updated_at: Option<String>,
     pub releases: Option<Vec<AddonRelease>>
@@ -93,51 +94,41 @@ struct CommunityAddon {
     name: String,
     short_description: String,
     description: String,
-    version: String,
+    version: Version,
     author: Option<String>,
     license: Option<String>,
     homepage_url: Option<String>,
     repository_url: String,
     #[serde(rename = "requiresUniChat")]
-    requires_unichat: Option<String>,
+    requires_unichat: Option<VersionRange>,
     stars: Option<u64>,
     updated_at: Option<String>,
     releases: Option<Vec<AddonRelease>>,
 
-    installed_version: Option<String>,
+    installed_version: Option<Version>,
     compatible: bool,
     has_update: bool
 }
 
 /* ========================================================================== */
 
-fn is_compatible(requires_unichat: &Option<String>) -> bool {
-    if let Some(requires_unichat) = requires_unichat {
-        let unichat_version = Version::parse(UNICHAT_VERSION).expect("UNICHAT_VERSION is not a valid version");
-        match VersionRange::parse(requires_unichat) {
-            Ok(range) => return range.matches(&unichat_version),
-            Err(e) => {
-                log::warn!("Invalid UniChat version range '{}': {:#?}", requires_unichat, e);
-                return false;
-            }
-        }
+fn is_compatible(requires_unichat: &Option<VersionRange>) -> bool {
+    if let Some(range) = requires_unichat {
+        return range.matches(&UNICHAT_VERSION);
     }
 
     return true;
 }
 
-fn has_update(installed_version: &str, releases: &[AddonRelease]) -> bool {
-    let mut installed_is_prerelease = false;
-    if let Ok(version) = Version::parse(installed_version) {
-        installed_is_prerelease = version.pre_release().is_some();
-    }
+fn has_update(installed_version: &Version, releases: &[AddonRelease]) -> bool {
+    let installed_is_prerelease = installed_version.pre_release().is_some();
 
     for release in releases {
         if release.prerelease && !installed_is_prerelease {
             continue;
         }
 
-        if semver::gt(&release.name, installed_version) {
+        if release.name > *installed_version {
             return true;
         }
     }
@@ -148,14 +139,14 @@ fn has_update(installed_version: &str, releases: &[AddonRelease]) -> bool {
 /* ========================================================================== */
 
 fn community_addon_id(internal_id: &str, prefix: &str) -> String {
-    let repository = internal_id.rsplit(':').next().unwrap_or(internal_id);
+    let repository = internal_id.rsplit_once(':').map_or(internal_id, |(_, repository)| repository);
 
     return repository.strip_prefix(prefix).unwrap_or(repository).to_string();
 }
 
-fn find_installed_version(addons_path: &Path, id: &str) -> Option<String> {
+fn find_installed_version(addons_path: &Path, id: &str) -> Option<Version> {
     let addon_path = addons_path.join(id);
-    if !addon_path.join("manifest.yaml").is_file() {
+    if !addon_path.join(MANIFEST_FILE).is_file() {
         return None;
     }
 
@@ -168,16 +159,12 @@ fn find_installed_version(addons_path: &Path, id: &str) -> Option<String> {
     }
 }
 
-fn build_community_addon(
-    data: CommunityAddonData,
-    id: String,
-    installed_version: Option<String>,
-    releases: &[AddonRelease]
-) -> CommunityAddon {
+fn build_community_addon(data: CommunityAddonData, id: String, installed_version: Option<Version>) -> CommunityAddon {
     let compatible = is_compatible(&data.requires_unichat);
 
     let mut update_available = false;
     if let Some(installed_version) = &installed_version {
+        let releases = data.releases.as_deref().unwrap_or_default();
         update_available = has_update(installed_version, releases);
     }
 
@@ -205,24 +192,25 @@ fn build_community_addon(
 
 /* ========================================================================== */
 
-fn find_release<'a>(data: &'a CommunityAddonData, release: &str) -> Result<&'a AddonRelease, Error> {
+fn find_release<'a>(data: &'a CommunityAddonData, release: &Version) -> Result<&'a AddonRelease, Error> {
     let releases = data.releases.as_deref().unwrap_or_default();
-    let selected = releases.iter().find(|r| r.name == release);
+    let selected = releases.iter().find(|r| r.name == *release);
 
-    return selected.ok_or(anyhow!("Release '{}' not found for '{}'", release, data.name));
+    return selected.ok_or_else(|| anyhow!("Release '{}' not found for '{}'", release, data.name));
 }
 
 fn check_compatibility(data: &CommunityAddonData, release: &AddonRelease) -> Result<(), Error> {
-    if release.name == data.version && !is_compatible(&data.requires_unichat) {
-        let requires_unichat = data.requires_unichat.clone().unwrap_or_default();
-        return Err(anyhow!("'{}' {} requires UniChat {}", data.name, release.name, requires_unichat));
+    if let Some(range) = &data.requires_unichat {
+        if release.name == data.version && !range.matches(&UNICHAT_VERSION) {
+            return Err(anyhow!("'{}' {} requires UniChat {}", data.name, release.name, range));
+        }
     }
 
     return Ok(());
 }
 
 fn download_release_asset(asset: &AddonReleaseAsset) -> Result<Vec<u8>, Error> {
-    log::info!("Downloading '{}' from '{}'...", asset.name, asset.url);
+    log::info!("Downloading '{}' from '{}'", asset.name, asset.url);
     let mut response = ureq::get(&asset.url).call()?;
     let bytes = response.body_mut().read_to_vec()?;
 
@@ -238,10 +226,10 @@ fn download_release_asset(asset: &AddonReleaseAsset) -> Result<Vec<u8>, Error> {
 fn download_release(id: &str, release: &AddonRelease) -> Result<(PathBuf, PathBuf), Error> {
     let asset_name = format!("{}-{}.zip", id, release.name);
     let asset = release.assets.iter().find(|a| a.name == asset_name);
-    let asset = asset.ok_or(anyhow!("Release '{}' of '{}' has no asset '{}'", release.name, id, asset_name))?;
+    let asset = asset.ok_or_else(|| anyhow!("Release '{}' of '{}' has no asset '{}'", release.name, id, asset_name))?;
     let bytes = download_release_asset(asset)?;
 
-    let extract_path = properties::get_app_path(AppPaths::AppCache).join(format!("install_{}", id));
+    let extract_path = paths::get(AppPaths::AppCache).join(format!("install_{}", id));
     if extract_path.exists() {
         fs::remove_dir_all(&extract_path).map_err(|e| anyhow!("Failed to clean '{:?}': {:#?}", extract_path, e))?;
     }
@@ -289,9 +277,7 @@ fn replace_addon(src: &Path, dest: &Path, keep_list: &[PathBuf]) -> Result<(), E
         fs::remove_dir_all(dest).map_err(|e| anyhow!("Failed to remove '{:?}': {:#?}", dest, e))?;
     }
 
-    if let Err(e) = fs::rename(src, dest) {
-        return Err(anyhow!("Failed to move '{:?}' to '{:?}': {:#?}", src, dest, e));
-    }
+    fs::rename(src, dest).map_err(|e| anyhow!("Failed to move '{:?}' to '{:?}': {:#?}", src, dest, e))?;
 
     return Ok(());
 }

@@ -9,6 +9,7 @@
  ******************************************************************************/
 
 use std::fs;
+use std::path::Path;
 use std::path::PathBuf;
 
 use tauri::AppHandle;
@@ -16,35 +17,43 @@ use tauri::Runtime;
 use tauri::Url;
 
 use crate::utils::constants::BASE_URL;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 
 /* ========================================================================== */
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum GalleryItemType {
+    Image,
+    Video,
+    Audio,
+    File
+}
+
+#[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GalleryItem {
     title: String,
     #[serde(rename = "type")]
-    item_type: String,
+    item_type: GalleryItemType,
     preview_url: String,
     url: String
 }
 
-fn choose_file_type_by_path(path: &PathBuf) -> String {
-    let mut item_type = "file";
+fn choose_file_type_by_path(path: &Path) -> GalleryItemType {
     if let Some(kind) = mime_guess::from_path(path).first() {
         let mime = kind.essence_str();
         if mime.starts_with("image/") {
-            item_type = "image";
+            return GalleryItemType::Image;
         } else if mime.starts_with("video/") {
-            item_type = "video";
+            return GalleryItemType::Video;
         } else if mime.starts_with("audio/") {
-            item_type = "audio";
+            return GalleryItemType::Audio;
         }
     }
 
-    return String::from(item_type);
+    return GalleryItemType::File;
 }
 
 fn get_file_url(file_name: &str) -> Url {
@@ -60,7 +69,7 @@ fn get_file_url(file_name: &str) -> Url {
 
 #[tauri::command]
 pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<GalleryItem>, String> {
-    let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
+    let gallery_path = paths::get(AppPaths::UniChatGallery);
 
     let mut gallery_items: Vec<GalleryItem> = Vec::new();
 
@@ -92,19 +101,15 @@ pub async fn get_gallery_items<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Gal
 
 #[tauri::command]
 pub async fn upload_gallery_items<R: Runtime>(_app: AppHandle<R>, files: Vec<String>) -> Result<(), String> {
-    let gallery_path = properties::get_app_path(AppPaths::UniChatGallery);
-    if !gallery_path.exists() {
-        fs::create_dir_all(&gallery_path)
-            .map_err(|e| format!("An error occurred on create gallery directory: {:#?}", e))?;
-    }
+    let gallery_path = paths::get(AppPaths::UniChatGallery);
+    fs::create_dir_all(&gallery_path).map_err(|e| format!("Failed to create gallery directory: {:#?}", e))?;
 
     for file_path_raw in files {
         let file_path = PathBuf::from(&file_path_raw);
         let file_name = file_path.file_name().and_then(|n| n.to_str());
         let file_name = file_name.ok_or("An error occurred on parse gallery item title")?;
         let gallery_file_path = gallery_path.join(file_name);
-        fs::copy(&file_path, &gallery_file_path)
-            .map_err(|e| format!("An error occurred on copy gallery item: {:#?}", e))?;
+        fs::copy(&file_path, &gallery_file_path).map_err(|e| format!("Failed to copy gallery item: {:#?}", e))?;
     }
 
     return Ok(());

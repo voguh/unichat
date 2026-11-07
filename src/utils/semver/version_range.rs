@@ -8,10 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use std::cmp::Ordering;
 use std::fmt::Display;
 
 use anyhow::Error;
 use anyhow::anyhow;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::utils::semver::bound_type::BoundType;
 use crate::utils::semver::version::Version;
@@ -47,25 +50,19 @@ impl VersionRange {
     /* ====================================================================== */
 
     pub fn matches(&self, version: &Version) -> bool {
-        if let (true, Some((_, min_version))) = (self.is_exact(), &self.min) {
-            return version.eq(min_version);
-        }
-
-        let mut min_ok = self.min.is_none();
+        let mut min_ok = true;
         if let Some((min_bound, min_version)) = &self.min {
-            if min_bound == &BoundType::Inclusive {
-                min_ok = version.eq(min_version) || version.gt(min_version);
-            } else if min_bound == &BoundType::Exclusive {
-                min_ok = version.gt(min_version);
+            match min_bound {
+                BoundType::Inclusive => min_ok = version >= min_version,
+                BoundType::Exclusive => min_ok = version > min_version
             }
         }
 
-        let mut max_ok = self.max.is_none();
+        let mut max_ok = true;
         if let Some((max_bound, max_version)) = &self.max {
-            if max_bound == &BoundType::Inclusive {
-                max_ok = version.eq(max_version) || version.lt(max_version);
-            } else if max_bound == &BoundType::Exclusive {
-                max_ok = version.lt(max_version);
+            match max_bound {
+                BoundType::Inclusive => max_ok = version <= max_version,
+                BoundType::Exclusive => max_ok = version < max_version
             }
         }
 
@@ -109,10 +106,8 @@ impl VersionRange {
             let starts_with_inclusive = value.starts_with(INCLUSIVE_START);
             let ends_with_inclusive = value.ends_with(INCLUSIVE_END);
 
-            // Strict version range with both inclusive start and end
             if starts_with_inclusive && ends_with_inclusive {
-                let version = String::from(&value[1..value.len() - 1]);
-                let version = Version::parse(&version)?;
+                let version = Version::parse(&value[1..value.len() - 1])?;
 
                 return Ok(Self {
                     min: Some((BoundType::Inclusive, version.clone())),
@@ -132,60 +127,43 @@ impl VersionRange {
 
         /* ================================================================== */
 
-        let (min_part, max_part) = value.split_once(',').ok_or(anyhow!("Invalid version range format"))?;
+        let (min_part, max_part) = value.split_once(',').expect("Version range has a comma at this point");
 
-        let mut min_bound: Option<BoundType> = None;
-        let mut min_version: Option<Version> = None;
+        let mut min = None;
         if min_part == INCLUSIVE_START {
             return Err(anyhow!("Empty minimum version in version range '{}'", value));
         } else if min_part != EXCLUSIVE_START {
             let bound = BoundType::new(&min_part[0..1])?;
-            let version_str = Version::parse(&min_part[1..])?;
-
-            min_bound = Some(bound);
-            min_version = Some(version_str);
+            let version = Version::parse(&min_part[1..])?;
+            min = Some((bound, version));
         }
 
-        let mut max_bound: Option<BoundType> = None;
-        let mut max_version: Option<Version> = None;
+        let mut max = None;
         if max_part == INCLUSIVE_END {
             return Err(anyhow!("Empty maximum version in version range '{}'", value));
         } else if max_part != EXCLUSIVE_END {
             let bound = BoundType::new(&max_part[max_part.len() - 1..])?;
-            let version_str = Version::parse(&max_part[..max_part.len() - 1])?;
-
-            max_bound = Some(bound);
-            max_version = Some(version_str);
+            let version = Version::parse(&max_part[..max_part.len() - 1])?;
+            max = Some((bound, version));
         }
 
-        if min_version.is_none() && max_version.is_none() {
+        if min.is_none() && max.is_none() {
             return Err(anyhow!("Unbounded version range '{}'", value));
         }
 
-        if let (Some(min_version), Some(max_version)) = (&min_version, &max_version) {
+        if let (Some((min_bound, min_version)), Some((max_bound, max_version))) = (&min, &max) {
             match min_version.cmp(max_version) {
-                std::cmp::Ordering::Greater => {
+                Ordering::Greater => {
                     return Err(anyhow!("Minimum version greater than maximum in version range '{}'", value));
                 }
-                std::cmp::Ordering::Equal => {
-                    let min_inclusive = min_bound == Some(BoundType::Inclusive);
-                    let max_inclusive = max_bound == Some(BoundType::Inclusive);
-                    if !(min_inclusive && max_inclusive) {
+                Ordering::Equal => {
+                    let both_inclusive = min_bound == &BoundType::Inclusive && max_bound == &BoundType::Inclusive;
+                    if !both_inclusive {
                         return Err(anyhow!("Exclusive equal bounds in version range '{}'", value));
                     }
                 }
-                _ => {}
+                Ordering::Less => {}
             }
-        }
-
-        let mut min = None;
-        if let Some(min_version) = &min_version {
-            min = Some((min_bound.expect("Minimum bound is set with minimum version"), min_version.clone()));
-        }
-
-        let mut max = None;
-        if let Some(max_version) = &max_version {
-            max = Some((max_bound.expect("Maximum bound is set with maximum version"), max_version.clone()));
         }
 
         return Ok(VersionRange::new(min, max));
@@ -200,22 +178,33 @@ impl Display for VersionRange {
 
         let mut min_str = String::from(EXCLUSIVE_START);
         if let Some((min_bound, min_version)) = &self.min {
-            if min_bound == &BoundType::Inclusive {
-                min_str = format!("{}{}", INCLUSIVE_START, min_version);
-            } else if min_bound == &BoundType::Exclusive {
-                min_str = format!("{}{}", EXCLUSIVE_START, min_version);
+            match min_bound {
+                BoundType::Inclusive => min_str = format!("{}{}", INCLUSIVE_START, min_version),
+                BoundType::Exclusive => min_str = format!("{}{}", EXCLUSIVE_START, min_version)
             }
         }
 
         let mut max_str = String::from(EXCLUSIVE_END);
         if let Some((max_bound, max_version)) = &self.max {
-            if max_bound == &BoundType::Inclusive {
-                max_str = format!("{}{}", max_version, INCLUSIVE_END);
-            } else if max_bound == &BoundType::Exclusive {
-                max_str = format!("{}{}", max_version, EXCLUSIVE_END);
+            match max_bound {
+                BoundType::Inclusive => max_str = format!("{}{}", max_version, INCLUSIVE_END),
+                BoundType::Exclusive => max_str = format!("{}{}", max_version, EXCLUSIVE_END)
             }
         }
 
         return write!(f, "{},{}", min_str, max_str);
+    }
+}
+
+impl Serialize for VersionRange {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        return serializer.collect_str(self);
+    }
+}
+
+impl<'de> Deserialize<'de> for VersionRange {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let value = String::deserialize(deserializer)?;
+        return VersionRange::parse(&value).map_err(serde::de::Error::custom);
     }
 }

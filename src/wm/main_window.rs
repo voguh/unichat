@@ -9,12 +9,11 @@
  ******************************************************************************/
 
 use anyhow::Error;
+use serde::Serialize;
 use serde_json::json;
-use tauri::Emitter as _;
-use tauri::Manager as _;
-use tauri::WebviewWindow;
-use tauri::Wry;
-use tauri::webview::PageLoadPayload;
+use tauri::Emitter;
+use tauri::Manager;
+use tauri::WebviewUrl;
 
 use crate::UNICHAT_DISPLAY_NAME;
 use crate::UNICHAT_VERSION;
@@ -27,22 +26,16 @@ use crate::wm::window;
 
 pub const MAIN_WINDOW_LABEL: &str = "main";
 
-fn on_page_load(window: WebviewWindow<Wry>, payload: PageLoadPayload<'_>) {
-    if window::show_on_page_finished(&window, &payload) {
-        splash_window::close();
-    }
-}
-
 pub fn create() -> Result<(), Error> {
-    window::new(MAIN_WINDOW_LABEL, "index.html")
-        .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION))
+    window::new(MAIN_WINDOW_LABEL, WebviewUrl::App("index.html".into()))
+        .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, *UNICHAT_VERSION))
         .inner_size(1180.0, 640.0)
         .maximizable(false)
         .resizable(false)
         .center()
         .visible(false)
         .initialization_script(window::webapp_globals_script())
-        .on_page_load(on_page_load)
+        .on_page_load(splash_window::on_page_load_close_splash)
         .build()?;
 
     log::info!("Main window created successfully.");
@@ -52,22 +45,20 @@ pub fn create() -> Result<(), Error> {
 
 /* ========================================================================== */
 
-pub fn emit_notification(title: &str, message: &str) {
+fn emit<S: Serialize + Clone>(event: &str, payload: S) {
     let app_handle = get_app_handle();
 
     if let Some(window) = app_handle.get_webview_window(MAIN_WINDOW_LABEL) {
-        if let Err(err) = window.emit("unichat://notification", json!({ "title": title, "message": message })) {
-            log::error!("An error occurred on emit notification: {:#?}", err);
+        if let Err(err) = window.emit(event, payload) {
+            log::error!("An error occurred on emit '{}': {:#?}", event, err);
         }
     }
 }
 
-pub fn emit_status(event: &ScraperStatusEvent) {
-    let app_handle = get_app_handle();
+pub fn emit_notification(title: &str, message: &str) {
+    emit("unichat://notification", json!({ "title": title, "message": message }));
+}
 
-    if let Some(window) = app_handle.get_webview_window(MAIN_WINDOW_LABEL) {
-        if let Err(err) = window.emit("unichat://status:event", event) {
-            log::error!("An error occurred on emit scraper status: {:#?}", err);
-        }
-    }
+pub fn emit_status(event: &ScraperStatusEvent) {
+    emit("unichat://status:event", event);
 }

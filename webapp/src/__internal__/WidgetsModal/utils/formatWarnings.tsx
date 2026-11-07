@@ -33,6 +33,16 @@ function formatWarning(warning: string): WidgetWarning | undefined {
                 details: "This widget has no 'manifest.yaml'. Its version is unknown.",
                 variant: "warning"
             };
+        case "INCOMPATIBLE_UNICHAT_VERSION":
+            return {
+                message: (
+                    <>
+                        <i className="fas fa-exclamation-triangle" /> Incompatible
+                    </>
+                ),
+                details: "This widget was made for another UniChat version and may not work correctly.",
+                variant: "warning"
+            };
         case "DUPLICATE_HTML_ENTRYPOINT":
             return {
                 message: (

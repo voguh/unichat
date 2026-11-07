@@ -104,12 +104,16 @@ export class CommandService {
         return invoke("get_scraper_stored_url", { scraperId });
     }
 
-    public async getScraperWebviewUrl(scraperId: string): Promise<string> {
+    public async getScraperWebviewUrl(scraperId: string): Promise<string | null> {
         return invoke("get_scraper_webview_url", { scraperId });
     }
 
-    public async setScraperWebviewUrl(scraperId: string, url: string): Promise<void> {
-        await invoke("set_scraper_webview_url", { scraperId, url });
+    public async startScraper(scraperId: string, url: string): Promise<void> {
+        await invoke("start_scraper", { scraperId, url });
+    }
+
+    public async stopScraper(scraperId: string): Promise<void> {
+        await invoke("stop_scraper", { scraperId });
     }
 
     public async toggleScraperWebview(scraperId: string): Promise<boolean> {
@@ -127,8 +131,7 @@ export class CommandService {
     }
 
     public async setWidgetFieldState(widget: string, fieldstate: Record<string, any>): Promise<void> {
-        const data = JSON.stringify(fieldstate);
-        await invoke("set_widget_fieldstate", { widget, data });
+        await invoke("set_widget_fieldstate", { widget, fieldstate });
     }
 }
 

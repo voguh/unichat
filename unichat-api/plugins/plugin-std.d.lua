@@ -28,14 +28,12 @@
 ---@field placeholder_text? string
 ---@field badges? string[]
 ---@field icon? string
----@field on_idle? fun(event: UniChatScraperStatusEvent)
 ---@field on_ready? fun(event: UniChatScraperStatusEvent)
----@field on_ping? fun(event: UniChatScraperStatusEvent)
 ---@field on_error? fun(event: UniChatScraperStatusEvent)
 ---@field on_fatal? fun(event: UniChatScraperStatusEvent)
 
 ---@class UniChatScraperStatusEvent
----@field type "idle" | "ready" | "ping" | "error" | "fatal"
+---@field type "ready" | "error" | "fatal"
 ---@field scraperId string
 ---@field timestamp integer
 ---@field message string?

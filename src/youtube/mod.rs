@@ -8,28 +8,22 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use std::fs;
-use std::io::Write;
 use std::sync::Arc;
 use std::sync::LazyLock;
+use std::sync::RwLock;
 
 use anyhow::Error;
 use anyhow::anyhow;
+use regex::Regex;
 use serde_json::Value;
 
 use crate::events;
 use crate::scraper;
+use crate::scraper::ScraperLogKind;
 use crate::scraper::ScraperStatus;
 use crate::scraper::ScraperStatusEvent;
 use crate::scraper::UniChatScraper;
-use crate::settings;
-use crate::settings::SettingLogEventLevel;
 use crate::shared_emotes;
-use crate::utils::is_valid_youtube_channel_id;
-use crate::utils::is_valid_youtube_video_id;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
-use crate::utils::properties::PropertiesKey;
 
 mod mapper;
 
@@ -40,16 +34,47 @@ static SCRAPER_JS: &str = include_str!("./static/scraper.js");
 
 /* ========================================================================== */
 
+// Thanks to Glenn Slayden which explained the YouTube channel and video ID format
+// on https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video/101153#101153
+static CHANNEL_ID: LazyLock<Regex> = LazyLock::new(|| {
+    return Regex::new(r"^UC[0-9A-Za-z_-]{21}[AQgw]$").expect("YouTube::CHANNEL_ID regex is invalid");
+});
+fn is_valid_channel_id(channel_id: &str) -> bool {
+    return CHANNEL_ID.is_match(channel_id);
+}
+
+static VIDEO_ID: LazyLock<Regex> = LazyLock::new(|| {
+    return Regex::new(r"^[0-9A-Za-z_-]{10}[048AEIMQUYcgkosw]$").expect("YouTube::VIDEO_ID regex is invalid");
+});
+fn is_valid_video_id(video_id: &str) -> bool {
+    return VIDEO_ID.is_match(video_id);
+}
+
+/* ========================================================================== */
+
+static YOUTUBE_CHANNEL_ID: LazyLock<RwLock<Option<String>>> = LazyLock::new(|| RwLock::new(None));
+fn read_channel_id() -> Result<String, Error> {
+    let channel_id = YOUTUBE_CHANNEL_ID.read().expect("YouTube::YOUTUBE_CHANNEL_ID lock poisoned");
+    return channel_id.clone().ok_or_else(|| anyhow!("Missing YouTube channel id"));
+}
+
+fn write_channel_id(channel_id: String) {
+    let mut current_channel_id = YOUTUBE_CHANNEL_ID.write().expect("YouTube::YOUTUBE_CHANNEL_ID lock poisoned");
+    *current_channel_id = Some(channel_id);
+}
+
+/* ========================================================================== */
+
 fn handle_ready_status(event: &ScraperStatusEvent) -> Result<(), Error> {
     let channel_id = event
         .extra_str("channelId")
         .ok_or_else(|| anyhow!("Missing or invalid 'channelId' field in YouTube 'ready' payload"))?;
 
-    if !is_valid_youtube_channel_id(channel_id) {
+    if !is_valid_channel_id(channel_id) {
         return Err(anyhow!("Invalid YouTube channel ID '{}' in 'ready' event payload", channel_id));
     }
 
-    properties::set_item(PropertiesKey::YouTubeChannelId, String::from(channel_id));
+    write_channel_id(String::from(channel_id));
     shared_emotes::fetch_shared_emotes("youtube", channel_id);
 
     return Ok(());
@@ -57,53 +82,30 @@ fn handle_ready_status(event: &ScraperStatusEvent) -> Result<(), Error> {
 
 /* ========================================================================== */
 
-fn log_action(file_name: &str, content: &impl std::fmt::Display) {
-    let app_log_dir = properties::get_app_path(AppPaths::AppLog);
-    let youtube_log_dir = app_log_dir.join(SCRAPER_ID);
-    if !youtube_log_dir.exists() {
-        fs::create_dir_all(&youtube_log_dir).expect("Failed to create YouTube log directory");
-    }
-
-    let log_file = youtube_log_dir.join(file_name);
-    let mut options = fs::OpenOptions::new();
-    options.create(true).append(true);
-    let mut file = options.open(log_file).expect("Failed to open YouTube log file");
-    writeln!(file, "{content}").expect("Failed to write YouTube log file");
-}
-
 fn handle_message_event(event_type: &str, payload: &Value) -> Result<(), Error> {
     let actions = payload
         .get("actions")
         .and_then(|v| v.as_array())
         .ok_or_else(|| anyhow!("Missing or invalid 'actions' field in '{event_type}' event payload"))?;
 
-    let log_events = settings::get_scraper_events_log_level();
-
     for action in actions {
-        if log_events == SettingLogEventLevel::AllEvents {
-            log_action("events-raw.log", &action);
-        }
+        scraper::log_action(SCRAPER_ID, ScraperLogKind::Raw, || action.to_string());
 
         match mapper::parse(action) {
             Ok(Some(parsed)) => {
-                if log_events == SettingLogEventLevel::AllEvents {
-                    let serialized = serde_json::to_string(&parsed).expect("Failed to serialize UniChatEvent");
-                    log_action("events-parsed.log", &serialized);
-                }
+                scraper::log_action(SCRAPER_ID, ScraperLogKind::Parsed, || {
+                    return serde_json::to_string(&parsed).expect("Failed to serialize UniChatEvent");
+                });
 
-                if let Err(err) = events::emit(parsed) {
-                    log::error!("An error occurred on send unichat event: {:#?}", err);
-                }
+                events::emit(parsed);
             }
 
             Ok(None) => {
-                if [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
-                    log_action("events-unknown.log", &action);
-                }
+                scraper::log_action(SCRAPER_ID, ScraperLogKind::Unknown, || action.to_string());
             }
 
             Err(err) => {
-                log_action("events-error.log", &format!("{:#?} -- {}", err, action));
+                scraper::log_action(SCRAPER_ID, ScraperLogKind::Error, || format!("{:#?} -- {}", err, action));
             }
         }
     }
@@ -179,9 +181,11 @@ impl UniChatScraper for YouTubeUniChatScraper {
                     break;
                 }
             }
+        } else {
+            video_id = Some(url);
         }
 
-        if let Some(video_id) = video_id.filter(|video_id| is_valid_youtube_video_id(video_id)) {
+        if let Some(video_id) = video_id.filter(|video_id| is_valid_video_id(video_id)) {
             let formatted_url = format!("https://www.youtube.com/live_chat?v={}", video_id);
             return Ok(formatted_url);
         }

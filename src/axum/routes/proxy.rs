@@ -13,10 +13,12 @@ use axum::extract::Path;
 use axum::extract::Query;
 use axum::extract::Request;
 use axum::http::StatusCode;
+use axum::response::IntoResponse;
 use axum::response::Response;
 
 use crate::utils::base64;
 use crate::utils::ureq;
+use crate::utils::ureq::http::response::Parts;
 
 /* ========================================================================== */
 
@@ -56,36 +58,27 @@ fn normalize_url(url: &str) -> String {
 
 pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryString>, req: Request<Body>) -> Response {
     if encoded_url.trim().is_empty() {
-        return Response::builder()
-            .status(400)
-            .body("Encoded URL path cannot be empty".into())
-            .expect("Failed to build HTTP response");
+        return (StatusCode::BAD_REQUEST, "Encoded URL path cannot be empty").into_response();
     }
 
     let url_path: String;
     match base64::url_safe_decode(encoded_url) {
         Ok(decoded) => url_path = String::from_utf8_lossy(&decoded).to_string(),
-        Err(e) => {
-            log::error!("Failed to decode URL path: {:#?}", e);
-            return Response::builder()
-                .status(400)
-                .body(format!("Failed to decode URL path: {:#?}", e).into())
-                .expect("Failed to build HTTP response");
+        Err(err) => {
+            log::error!("Failed to decode URL path: {:#?}", err);
+            return (StatusCode::BAD_REQUEST, format!("Failed to decode URL path: {:#?}", err)).into_response();
         }
     }
 
     let normalized_url = normalize_url(&url_path);
     if normalized_url.trim() == "https://" {
-        return Response::builder()
-            .status(400)
-            .body("Decoded URL cannot be empty".into())
-            .expect("Failed to build HTTP response");
+        return (StatusCode::BAD_REQUEST, "Decoded URL cannot be empty").into_response();
     }
 
-    let referer = query.referer.clone();
+    let referer = query.referer;
     let range = req.headers().get("Range").and_then(|value| value.to_str().ok()).map(|value| value.to_string());
 
-    let fetched = tauri::async_runtime::spawn_blocking(move || {
+    let fetched = tauri::async_runtime::spawn_blocking(move || -> Result<(Parts, Vec<u8>), ureq::Error> {
         let mut request = ureq::get(&normalized_url).config().max_redirects(0).build();
 
         if let Some(referer) = referer {
@@ -99,7 +92,7 @@ pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryStr
         let mut response = request.call()?;
         let body = response.body_mut().read_to_vec()?;
 
-        return Ok::<(ureq::http::response::Parts, Vec<u8>), ureq::Error>((response.into_parts().0, body));
+        return Ok((response.into_parts().0, body));
     })
     .await;
 
@@ -117,16 +110,10 @@ pub async fn proxy(Path(encoded_url): Path<String>, Query(query): Query<QueryStr
             return builder.body(Body::from(body)).expect("Failed to build HTTP response");
         }
         Ok(Err(err)) => {
-            return Response::builder()
-                .status(502)
-                .body(format!("Failed to fetch proxied url: {:#?}", err).into())
-                .expect("Failed to build HTTP response");
+            return (StatusCode::BAD_GATEWAY, format!("Failed to fetch proxied url: {:#?}", err)).into_response();
         }
         Err(err) => {
-            return Response::builder()
-                .status(500)
-                .body(format!("Proxy task failed: {:#?}", err).into())
-                .expect("Failed to build HTTP response");
+            return (StatusCode::INTERNAL_SERVER_ERROR, format!("Proxy task failed: {:#?}", err)).into_response();
         }
     }
 }

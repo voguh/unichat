@@ -10,6 +10,7 @@
 
 use std::collections::HashSet;
 
+use tauri::AppHandle;
 use tauri::Runtime;
 
 use crate::settings;
@@ -17,7 +18,7 @@ use crate::settings;
 /* ========================================================================== */
 
 #[tauri::command]
-pub async fn get_prev_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
+pub async fn get_prev_tour_steps<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<String>, String> {
     let prev_tour_steps = settings::get_previous_tour_steps();
     return Ok(prev_tour_steps);
 }
@@ -25,7 +26,7 @@ pub async fn get_prev_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Resul
 /* ========================================================================== */
 
 #[tauri::command]
-pub async fn get_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec<String>, String> {
+pub async fn get_tour_steps<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<String>, String> {
     let tour_steps = settings::get_current_tour_steps();
     return Ok(tour_steps);
 }
@@ -33,7 +34,7 @@ pub async fn get_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<Vec
 /* ========================================================================== */
 
 #[tauri::command]
-pub async fn set_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>, new_steps: Vec<String>) -> Result<(), String> {
+pub async fn set_tour_steps<R: Runtime>(_app: AppHandle<R>, new_steps: Vec<String>) -> Result<(), String> {
     let current_tour_steps = settings::get_current_tour_steps();
 
     let current_hash_set: HashSet<_> = current_tour_steps.iter().cloned().collect();
@@ -57,20 +58,9 @@ pub async fn set_tour_steps<R: Runtime>(_app: tauri::AppHandle<R>, new_steps: Ve
 /* ========================================================================== */
 
 #[tauri::command]
-pub async fn tour_steps_has_new<R: Runtime>(_app: tauri::AppHandle<R>) -> Result<bool, String> {
+pub async fn tour_steps_has_new<R: Runtime>(_app: AppHandle<R>) -> Result<bool, String> {
     let prev_tour_steps = settings::get_previous_tour_steps();
     let current_tour_steps = settings::get_current_tour_steps();
 
-    let prev_hash_set: HashSet<_> = prev_tour_steps.iter().cloned().collect();
-    let mut new_hash_set: HashSet<_> = current_tour_steps.iter().cloned().collect();
-
-    if prev_hash_set != new_hash_set {
-        for step in &prev_hash_set {
-            new_hash_set.remove(step);
-        }
-
-        return Ok(!new_hash_set.is_empty());
-    }
-
-    return Ok(false);
+    return Ok(current_tour_steps.iter().any(|step| !prev_tour_steps.contains(step)));
 }

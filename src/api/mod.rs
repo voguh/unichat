@@ -31,8 +31,8 @@ pub fn url(path: &str) -> String {
 
 pub fn get<T: DeserializeOwned>(path: &str) -> Result<T, Error> {
     let full_url = url(path);
-    log::info!("Fetching '{}' from UniChat API...", full_url);
+    log::info!("Fetching '{}' from UniChat API", full_url);
 
-    let mut response = ureq::get(&full_url).header("User-Agent", format!("UniChat/{}", UNICHAT_VERSION)).call()?;
+    let mut response = ureq::get(&full_url).header("User-Agent", format!("UniChat/{}", *UNICHAT_VERSION)).call()?;
     return response.body_mut().read_json().map_err(|e| e.into());
 }

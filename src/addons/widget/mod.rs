@@ -27,8 +27,10 @@ use crate::addons::find_release;
 use crate::addons::replace_addon;
 use crate::api;
 use crate::cache;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
+use crate::utils::semver::Version;
+use crate::widgets::WIDGET_FIELDSTATE_FILE;
 use crate::widgets::reload_user_widgets;
 
 /* ========================================================================== */
@@ -58,22 +60,18 @@ fn fetch(internal_id: &str) -> Result<CommunityAddonData, Error> {
     return cache::get_or_fetch(&key, COMMUNITY_WIDGETS_FILE_TTL, || api::get(&path));
 }
 
-fn build(data: CommunityAddonData, installed_version: Option<String>) -> CommunityWidget {
+fn build(data: CommunityAddonData, installed_version: Option<Version>) -> CommunityWidget {
     let id = community_addon_id(&data.id, COMMUNITY_WIDGET_ID_PREFIX);
     let preview_url = api::url(&format!("{}/{}/preview", COMMUNITY_WIDGETS_PATH, data.id));
-    let releases = data.releases.clone().unwrap_or_default();
 
-    return CommunityWidget {
-        addon: build_community_addon(data, id, installed_version, &releases),
-        preview_url: preview_url
-    };
+    return CommunityWidget { addon: build_community_addon(data, id, installed_version), preview_url: preview_url };
 }
 
 /* ========================================================================== */
 
 pub fn list() -> Result<Vec<CommunityWidget>, Error> {
     let items = fetch_all()?;
-    let widgets_path = properties::get_app_path(AppPaths::UniChatUserWidgets);
+    let widgets_path = paths::get(AppPaths::UniChatUserWidgets);
 
     let mut community_widgets = Vec::new();
     for item in items {
@@ -82,7 +80,12 @@ pub fn list() -> Result<Vec<CommunityWidget>, Error> {
 
         let mut data = item;
         if installed_version.is_some() {
-            data = fetch(&data.id)?;
+            match fetch(&data.id) {
+                Ok(details) => data = details,
+                Err(e) => {
+                    log::warn!("Failed to fetch details of community widget '{}': {:#?}", data.id, e);
+                }
+            }
         }
 
         community_widgets.push(build(data, installed_version));
@@ -94,21 +97,21 @@ pub fn list() -> Result<Vec<CommunityWidget>, Error> {
 pub fn get(internal_id: &str) -> Result<CommunityWidget, Error> {
     let data = fetch(internal_id)?;
     let id = community_addon_id(&data.id, COMMUNITY_WIDGET_ID_PREFIX);
-    let widgets_path = properties::get_app_path(AppPaths::UniChatUserWidgets);
+    let widgets_path = paths::get(AppPaths::UniChatUserWidgets);
     let installed_version = find_installed_version(&widgets_path, &id);
 
     return Ok(build(data, installed_version));
 }
 
-pub fn install(internal_id: &str, release: &str) -> Result<(), Error> {
+pub fn install(internal_id: &str, release: &Version) -> Result<(), Error> {
     let data = fetch(internal_id)?;
     let id = community_addon_id(&data.id, COMMUNITY_WIDGET_ID_PREFIX);
     let selected = find_release(&data, release)?;
     check_compatibility(&data, selected)?;
 
     let (extract_path, extracted_widget_path) = download_release(&id, selected)?;
-    let widget_path = properties::get_app_path(AppPaths::UniChatUserWidgets).join(&id);
-    replace_addon(&extracted_widget_path, &widget_path, &[PathBuf::from("fieldstate.json")])?;
+    let widget_path = paths::get(AppPaths::UniChatUserWidgets).join(&id);
+    replace_addon(&extracted_widget_path, &widget_path, &[PathBuf::from(WIDGET_FIELDSTATE_FILE)])?;
 
     fs::remove_dir_all(&extract_path).map_err(|e| anyhow!("Failed to clean '{:?}': {:#?}", extract_path, e))?;
     reload_user_widgets()?;

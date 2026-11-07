@@ -1,5 +1,5 @@
 {
-    "include": ["./plugins/**/*", "./widgets/**/*"],
+    "include": ["./plugins/**/*", "./scrapers/**/*", "./widgets/**/*"],
     "compilerOptions": {
         /* Visit https://aka.ms/tsconfig to read more about this file */
 
@@ -12,8 +12,8 @@
         // "disableReferencedProjectLoad": false,                          /* Reduce the number of projects loaded automatically by TypeScript. */
 
         /* Language and Environment */
-        "target": "ES2023",                                                /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
-        "lib": ["ES2023", "DOM", "DOM.Iterable"],                          /* Specify a set of bundled library declaration files that describe the target runtime environment. */
+        "target": "ES2025",                                                /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+        "lib": ["ES2025", "DOM", "DOM.Iterable"],                          /* Specify a set of bundled library declaration files that describe the target runtime environment. */
         // "jsx": "react-jsx",                                             /* Specify what JSX code is generated. */
         // "experimentalDecorators": false,                                /* Enable experimental support for legacy experimental decorators. */
         // "emitDecoratorMetadata": false,                                 /* Emit design-type metadata for decorated declarations in source files. */

@@ -8,16 +8,19 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use std::cmp::Ordering;
 use std::fmt::Display;
 
 use anyhow::Error;
 use anyhow::anyhow;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::utils::semver::pre_release_type::PreReleaseType;
 
 /* ========================================================================== */
 
-fn parse_number(value: &str) -> Result<i16, Error> {
+fn parse_number(value: &str) -> Result<u16, Error> {
     if value.is_empty() || !value.bytes().all(|b| b.is_ascii_digit()) {
         return Err(anyhow!("Invalid number: '{}'", value));
     } else if value.len() > 1 && value.starts_with('0') {
@@ -27,44 +30,27 @@ fn parse_number(value: &str) -> Result<i16, Error> {
     return value.parse().map_err(|_| anyhow!("Failed to parse number '{}'", value));
 }
 
-fn pre_release_type_to_number(pre: &Option<(PreReleaseType, i16)>) -> (u8, i16) {
-    let mut pre_type = 4;
-    let mut pre_number = 0;
-
-    if let Some((pre_release_type, pre_num)) = pre {
-        match pre_release_type {
-            PreReleaseType::Alpha => pre_type = 1,
-            PreReleaseType::Beta => pre_type = 2,
-            PreReleaseType::ReleaseCandidate => pre_type = 3
-        }
-
-        pre_number = *pre_num;
-    }
-
-    return (pre_type, pre_number);
-}
-
 /* ========================================================================== */
 
-#[derive(Clone, Debug)]
+#[derive(Default, Clone, Debug)]
 pub struct Version {
-    major: i16,
-    minor: i16,
-    patch: i16,
-    pre_release: Option<(PreReleaseType, i16)>,
+    major: u16,
+    minor: u16,
+    patch: u16,
+    pre_release: Option<(PreReleaseType, u16)>,
     build_metadata: Option<String>
 }
 
 impl Version {
-    pub fn major(&self) -> i16 {
+    pub fn major(&self) -> u16 {
         return self.major;
     }
 
-    pub fn minor(&self) -> i16 {
+    pub fn minor(&self) -> u16 {
         return self.minor;
     }
 
-    pub fn patch(&self) -> i16 {
+    pub fn patch(&self) -> u16 {
         return self.patch;
     }
 
@@ -72,7 +58,7 @@ impl Version {
         return self.pre_release.as_ref().map(|(pre_type, _)| pre_type);
     }
 
-    pub fn pre_release_number(&self) -> Option<i16> {
+    pub fn pre_release_number(&self) -> Option<u16> {
         return self.pre_release.as_ref().map(|(_, pre_num)| *pre_num);
     }
 
@@ -83,10 +69,10 @@ impl Version {
     /* ====================================================================== */
 
     fn new(
-        major: i16,
-        minor: i16,
-        patch: i16,
-        pre_release: Option<(PreReleaseType, i16)>,
+        major: u16,
+        minor: u16,
+        patch: u16,
+        pre_release: Option<(PreReleaseType, u16)>,
         build_metadata: Option<&str>
     ) -> Self {
         return Self { major, minor, patch, pre_release, build_metadata: build_metadata.map(|s| s.to_string()) };
@@ -146,35 +132,31 @@ impl Version {
 }
 
 impl Ord for Version {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        if self.major != other.major {
-            return self.major.cmp(&other.major);
-        } else if self.minor != other.minor {
-            return self.minor.cmp(&other.minor);
-        } else if self.patch != other.patch {
-            return self.patch.cmp(&other.patch);
+    fn cmp(&self, other: &Self) -> Ordering {
+        let numbers = (self.major, self.minor, self.patch).cmp(&(other.major, other.minor, other.patch));
+        if numbers != Ordering::Equal {
+            return numbers;
         }
 
-        let (self_pre_type, self_pre_number) = pre_release_type_to_number(&self.pre_release);
-        let (other_pre_type, other_pre_number) = pre_release_type_to_number(&other.pre_release);
-        if self_pre_type != other_pre_type {
-            return self_pre_type.cmp(&other_pre_type);
-        }
-
-        return self_pre_number.cmp(&other_pre_number);
+        return match (&self.pre_release, &other.pre_release) {
+            (Some(self_pre), Some(other_pre)) => self_pre.cmp(other_pre),
+            (Some(_), None) => Ordering::Less,
+            (None, Some(_)) => Ordering::Greater,
+            (None, None) => Ordering::Equal
+        };
     }
 }
 
 impl PartialEq for Version {
     fn eq(&self, other: &Self) -> bool {
-        return self.cmp(other) == std::cmp::Ordering::Equal;
+        return self.cmp(other) == Ordering::Equal;
     }
 }
 
 impl Eq for Version {}
 
 impl PartialOrd for Version {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         return Some(self.cmp(other));
     }
 }
@@ -192,5 +174,18 @@ impl Display for Version {
         }
 
         return Ok(());
+    }
+}
+
+impl Serialize for Version {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        return serializer.collect_str(self);
+    }
+}
+
+impl<'de> Deserialize<'de> for Version {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let value = String::deserialize(deserializer)?;
+        return Version::parse(&value).map_err(serde::de::Error::custom);
     }
 }

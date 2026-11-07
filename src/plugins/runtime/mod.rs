@@ -12,6 +12,8 @@ use std::sync::OnceLock;
 
 use anyhow::Error;
 use mlua::Lua;
+use mlua::LuaOptions;
+use mlua::StdLib;
 use mlua::Table;
 use mlua::Value;
 
@@ -28,54 +30,38 @@ fn set(lua: Lua) {
 
 /* ========================================================================== */
 
+const MEMORY_LIMIT: usize = 256 * 1024 * 1024;
+
 pub fn initialized() -> bool {
     return LUA_RUNTIME.get().is_some();
 }
 
 pub fn new() -> Result<(), Error> {
     log::info!("Configuring LUA runtime");
-    let lua = Lua::new();
-    let _globals = lua.globals();
+    let libs = StdLib::STRING | StdLib::TABLE | StdLib::MATH | StdLib::UTF8;
+    let lua = Lua::new_with(libs, LuaOptions::default())?;
+    lua.set_memory_limit(MEMORY_LIMIT)?;
 
     /* <======================[ LUA Standard Library ]======================> */
     log::debug!("Configuring LUA standard library");
-    _globals.set("_G", Value::Nil)?;
-    _globals.set("coroutine", Value::Nil)?;
-    _globals.set("debug", Value::Nil)?;
-    _globals.set("dofile", Value::Nil)?;
-    _globals.set("getmetatable", Value::Nil)?;
-    _globals.set("io", Value::Nil)?;
-    _globals.set("load", Value::Nil)?;
-    _globals.set("loadfile", Value::Nil)?;
+    let globals = lua.globals();
+    globals.set("_G", Value::Nil)?;
+    globals.set("dofile", Value::Nil)?;
+    globals.set("getmetatable", Value::Nil)?;
+    globals.set("load", Value::Nil)?;
+    globals.set("loadfile", Value::Nil)?;
+    globals.set("print", Value::Nil)?;
+    globals.set("rawequal", Value::Nil)?;
+    globals.set("rawget", Value::Nil)?;
+    globals.set("rawlen", Value::Nil)?;
+    globals.set("rawset", Value::Nil)?;
+    globals.set("setmetatable", Value::Nil)?;
 
-    let _os: Table = _globals.get("os")?;
-    _os.set("execute", Value::Nil)?;
-    _os.set("exit", Value::Nil)?;
-    _os.set("getenv", Value::Nil)?;
-    _os.set("remove", Value::Nil)?;
-    _os.set("rename", Value::Nil)?;
-    _os.set("setlocale", Value::Nil)?;
-    _os.set("tmpname", Value::Nil)?;
-    _globals.set("os", _os)?;
-
-    _globals.set("package", Value::Nil)?;
-    _globals.set("print", Value::Nil)?;
-    _globals.set("rawequal", Value::Nil)?;
-    _globals.set("rawget", Value::Nil)?;
-    _globals.set("rawlen", Value::Nil)?;
-    _globals.set("rawset", Value::Nil)?;
-    _globals.set("require", Value::Nil)?;
-
-    _globals.set("setmetatable", Value::Nil)?;
-
-    let _string: Table = _globals.get("string")?;
-    _string.set("dump", Value::Nil)?;
-    _globals.set("string", _string)?;
+    let string: Table = globals.get("string")?;
+    string.set("dump", Value::Nil)?;
     /* <====================[ End LUA Standard Library ]====================> */
 
-    lua.set_globals(_globals)?;
     log::debug!("LUA runtime configured successfully");
-
     set(lua);
 
     return Ok(());

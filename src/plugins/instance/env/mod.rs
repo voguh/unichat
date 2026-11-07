@@ -11,7 +11,6 @@
 #![allow(clippy::new_ret_no_self)]
 
 use std::fs;
-use std::sync::Arc;
 
 use mlua::Error;
 use mlua::Function;
@@ -20,6 +19,7 @@ use mlua::Table;
 use mlua::Value;
 use mlua::Variadic;
 
+use crate::plugins::PluginMetadata;
 use crate::plugins::get_plugin;
 use crate::plugins::instance::env::unichat_api::UniChatAPI;
 use crate::plugins::instance::env::unichat_currency::UniChatCurrencyModule;
@@ -66,14 +66,13 @@ const UNICHAT_BADGE_KEY: &str = "UniChatBadge";
 /* ========================================================================== */
 
 fn create_print_fn(lua: &Lua, plugin_id: &str) -> Result<Function, Error> {
-    let plugin_id: Arc<String> = Arc::new(plugin_id.to_string());
+    let plugin_id = plugin_id.to_string();
     let print_func = lua.create_function(move |lua, args: Variadic<Value>| {
         let mut output_parts: Vec<String> = Vec::new();
 
         for arg in args.into_iter() {
             if let Some(arg_str) = lua.coerce_string(arg)? {
-                let str = arg_str.to_string_lossy();
-                output_parts.push(str);
+                output_parts.push(arg_str.to_string_lossy());
             } else {
                 output_parts.push(String::from("<non-stringifiable>"));
             }
@@ -89,59 +88,54 @@ fn create_print_fn(lua: &Lua, plugin_id: &str) -> Result<Function, Error> {
 
 /* ========================================================================== */
 
-fn scoped_modules_require(lua: &Lua, plugin_env: &Table, plugin_id: &str, module: &str) -> mlua::Result<Value> {
-    if module == "unichat:currency" {
-        return UniChatCurrencyModule::new(lua);
-    } else if module == "unichat:http" {
-        return UniChatHttpModule::new(lua);
-    } else if module == "unichat:json" {
-        return UniChatJsonModule::new(lua);
-    } else if module == "unichat:logger" {
-        return UniChatLoggerModule::new(lua, plugin_id);
-    } else if module == "unichat:strings" {
-        return UniChatStringsModule::new(lua);
-    } else if module == "unichat:time" {
-        return UniChatTimeModule::new(lua);
-    } else if module == "unichat:utils" {
-        return UniChatUtilsModule::new(lua);
-    } else if module == "unichat:yaml" {
-        return UniChatYamlModule::new(lua);
-    }
-
-    let manifest = get_plugin(plugin_id).map_err(Error::external)?;
-    let plugin_root = manifest.get_data_path();
+fn load_plugin_module(lua: &Lua, plugin: &PluginMetadata, module: &str) -> mlua::Result<Value> {
     let mut module_path = module.replace('.', "/");
     if !module_path.ends_with(".lua") {
         module_path.push_str(".lua");
     }
 
-    let path = safe_guard_path(&plugin_root, &module_path).map_err(Error::external)?;
+    let path = safe_guard_path(&plugin.get_data_path(), &module_path).map_err(Error::external)?;
     let code = fs::read_to_string(path).map_err(Error::external)?;
-    let result: Value = lua.load(&code).set_environment(plugin_env.clone()).eval()?;
+    let chunk_name = format!("{}/{}", plugin.id, module_path);
+    let result: Value = lua.load(&code).set_name(chunk_name).set_environment(plugin.get_plugin_env()).eval()?;
 
     return Ok(result);
 }
 
+fn scoped_modules_require(lua: &Lua, plugin: &PluginMetadata, module: &str) -> mlua::Result<Value> {
+    return match module {
+        "unichat:currency" => UniChatCurrencyModule::new(lua),
+        "unichat:http" => UniChatHttpModule::new(lua),
+        "unichat:json" => UniChatJsonModule::new(lua),
+        "unichat:logger" => UniChatLoggerModule::new(lua, &plugin.id),
+        "unichat:strings" => UniChatStringsModule::new(lua),
+        "unichat:time" => UniChatTimeModule::new(lua),
+        "unichat:utils" => UniChatUtilsModule::new(lua),
+        "unichat:yaml" => UniChatYamlModule::new(lua),
+        _ => load_plugin_module(lua, plugin, module)
+    };
+}
+
 fn create_require_fn(lua: &Lua, plugin_id: &str) -> Result<Function, Error> {
-    let plugin_id: Arc<String> = Arc::new(plugin_id.to_string());
+    let plugin_id = plugin_id.to_string();
     let require_fn = lua.create_function(move |lua, module: String| -> mlua::Result<Value> {
-        let plugin = get_plugin(&plugin_id).map_err(Error::external)?;
-        if let Ok(cached_module) = plugin.get_cached_loaded_module(&module) {
+        let plugin = get_plugin(&plugin_id);
+        if let Some(cached_module) = plugin.get_cached_loaded_module(&module) {
             return Ok(cached_module);
         }
 
-        let plugin_env = plugin.get_plugin_env();
         if module.contains(':') && !module.starts_with("unichat:") {
-            if let Some(shared_module) = shared_modules::get(&module).map_err(Error::external)? {
+            if let Some(shared_module) = shared_modules::get(&module) {
                 return Ok(shared_module);
             }
         } else {
-            let result = scoped_modules_require(lua, &plugin_env, &plugin_id, &module)?;
+            let result = scoped_modules_require(lua, &plugin, &module)?;
             let saved_module = plugin.set_cached_loaded_module(&module, result);
             return Ok(saved_module);
         }
 
-        return Err(Error::runtime(format!("Module '{}' not found for plugin '{}'", module, plugin_id)));
+        let message = format!("Module '{}' not found for plugin '{}'", module, plugin_id);
+        return Err(Error::runtime(message));
     })?;
 
     return Ok(require_fn);

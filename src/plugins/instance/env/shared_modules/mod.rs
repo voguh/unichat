@@ -11,8 +11,6 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 use std::sync::RwLock;
-use std::sync::RwLockReadGuard;
-use std::sync::RwLockWriteGuard;
 
 use anyhow::Error;
 use anyhow::anyhow;
@@ -21,31 +19,13 @@ use mlua::Value;
 /* ========================================================================== */
 
 static SHARED_MODULES: LazyLock<RwLock<HashMap<String, Value>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
-fn read() -> RwLockReadGuard<'static, HashMap<String, Value>> {
-    return SHARED_MODULES.read().expect("Plugins::SHARED_MODULES lock poisoned");
-}
-
-fn write() -> RwLockWriteGuard<'static, HashMap<String, Value>> {
-    return SHARED_MODULES.write().expect("Plugins::SHARED_MODULES lock poisoned");
-}
-
-/* ========================================================================== */
-
-pub fn get(module_name: &str) -> Result<Option<Value>, Error> {
-    if module_name.is_empty() || !module_name.contains(":") {
-        return Err(anyhow!("Invalid module name '{}'", module_name));
-    }
-
-    let shared_modules = read();
-    return Ok(shared_modules.get(module_name).cloned());
+pub fn get(module_name: &str) -> Option<Value> {
+    let shared_modules = SHARED_MODULES.read().expect("Plugins::SHARED_MODULES lock poisoned");
+    return shared_modules.get(module_name).cloned();
 }
 
 pub fn add(module_name: String, module_table: Value) -> Result<(), Error> {
-    if module_name.is_empty() || !module_name.contains(":") {
-        return Err(anyhow!("Invalid module name '{}'", module_name));
-    }
-
-    let mut shared_modules = write();
+    let mut shared_modules = SHARED_MODULES.write().expect("Plugins::SHARED_MODULES lock poisoned");
     if shared_modules.contains_key(&module_name) {
         return Err(anyhow!("Module '{}' is already exposed", module_name));
     }

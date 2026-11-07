@@ -16,9 +16,7 @@ use serde::Serialize;
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum ScraperStatus {
-    Idle,
     Ready,
-    Ping,
     Error,
     Fatal
 }

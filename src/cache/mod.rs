@@ -16,8 +16,8 @@ use anyhow::Error;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 
 /* ========================================================================== */
 
@@ -26,10 +26,8 @@ pub fn get_or_fetch<T: Serialize + DeserializeOwned>(
     max_age: Duration,
     fetch: impl FnOnce() -> Result<T, Error>
 ) -> Result<T, Error> {
-    let app_cache_dir = properties::get_app_path(AppPaths::AppCache);
-    if !app_cache_dir.exists() {
-        fs::create_dir_all(&app_cache_dir)?;
-    }
+    let app_cache_dir = paths::get(AppPaths::AppCache);
+    fs::create_dir_all(&app_cache_dir)?;
 
     let cache_path = app_cache_dir.join(format!("cached_{}.json", key));
     if let Ok(metadata) = fs::metadata(&cache_path) {
@@ -37,9 +35,16 @@ pub fn get_or_fetch<T: Serialize + DeserializeOwned>(
         let duration = SystemTime::now().duration_since(modified_at)?;
 
         if duration < max_age {
-            log::info!("Using cached '{}' file (age: {} seconds)", key, duration.as_secs());
-            let data = fs::read_to_string(&cache_path)?;
-            return serde_json::from_str(&data).map_err(|e| e.into());
+            let data = fs::read(&cache_path)?;
+            match serde_json::from_slice(&data) {
+                Ok(value) => {
+                    log::info!("Using cached '{}' file (age: {} seconds)", key, duration.as_secs());
+                    return Ok(value);
+                }
+                Err(e) => {
+                    log::warn!("Failed to parse cached '{}' file, fetching again: {:#?}", key, e);
+                }
+            }
         }
     }
 

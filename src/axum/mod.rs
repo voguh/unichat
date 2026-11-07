@@ -25,11 +25,8 @@ mod utils;
 pub async fn start() -> Result<(), Error> {
     let mut host = format!("127.0.0.1:{}", BASE_REST_PORT);
     if settings::get_open_to_lan() {
+        log::warn!("UniChat is running in 'Open to LAN' mode");
         host = format!("0.0.0.0:{}", BASE_REST_PORT);
-    }
-
-    if host != format!("127.0.0.1:{}", BASE_REST_PORT) {
-        log::warn!("UniChat is running in 'Open to LAN' mode.");
     }
 
     let app = Router::new()

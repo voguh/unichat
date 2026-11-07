@@ -22,15 +22,25 @@ use anyhow::anyhow;
 use mlua::Table;
 use mlua::Value;
 
+use crate::addons::MANIFEST_FILE;
 use crate::addons::UniChatAddonManifest;
+use crate::addons::is_valid_addon_dir;
 use crate::addons::load_manifest;
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 use crate::utils::semver::Version;
 use crate::utils::semver::VersionRange;
 
 mod instance;
 mod runtime;
+
+/* ========================================================================== */
+
+const PLUGIN_ASSETS_DIR: &str = "assets";
+const PLUGIN_DATA_DIR: &str = "data";
+const PLUGIN_ENTRYPOINT_FILE: &str = "main.lua";
+const PLUGIN_ICON_FILE: &str = "icon.png";
+pub const PLUGIN_WIDGETS_DIR: &str = "widgets";
 
 /* ========================================================================== */
 
@@ -60,19 +70,13 @@ pub fn runtime_initialized() -> bool {
 
 pub fn get_plugins() -> Vec<Arc<PluginMetadata>> {
     let envs = read();
-
-    let mut plugins: Vec<Arc<PluginMetadata>> = Vec::new();
-    for manifest in envs.values() {
-        plugins.push(manifest.clone());
-    }
-
-    return plugins;
+    return envs.values().cloned().collect();
 }
 
-fn get_plugin(plugin_id: &str) -> Result<Arc<PluginMetadata>, Error> {
+fn get_plugin(plugin_id: &str) -> Arc<PluginMetadata> {
     let envs = read();
-    let manifest = envs.get(plugin_id).ok_or(anyhow!("Plugin '{}' is not loaded", plugin_id))?;
-    return Ok(manifest.clone());
+    let plugin = envs.get(plugin_id).expect("Plugin is registered before its Lua code runs");
+    return plugin.clone();
 }
 
 /* ========================================================================== */
@@ -96,7 +100,7 @@ pub struct PluginMetadata {
     pub author: Option<String>,
     pub license: Option<String>,
     pub homepage: Option<String>,
-    pub dependencies: Vec<(String, VersionRange)>,
+    pub dependencies: HashMap<String, VersionRange>,
 
     status: RwLock<PluginStatus>,
     messages: RwLock<Vec<String>>,
@@ -107,13 +111,8 @@ pub struct PluginMetadata {
 }
 
 impl PluginMetadata {
-    fn new(
-        path: &Path,
-        manifest: &UniChatAddonManifest,
-        dependencies: Vec<(String, VersionRange)>
-    ) -> Result<Self, Error> {
-        let version = Version::parse(&manifest.version)?;
-        let folder_name = path.file_name().ok_or(anyhow!("Invalid plugin folder name '{:?}'", path))?;
+    fn new(path: &Path, manifest: &UniChatAddonManifest) -> Result<Self, Error> {
+        let folder_name = path.file_name().expect("Plugin path comes from a directory entry");
 
         let lua = runtime::get();
         let env = lua.create_table()?;
@@ -122,11 +121,11 @@ impl PluginMetadata {
             id: folder_name.to_string_lossy().to_string(),
             name: manifest.name.clone(),
             description: manifest.description.clone(),
-            version: version,
+            version: manifest.version.clone(),
             author: manifest.author.clone(),
             license: manifest.license.clone(),
             homepage: manifest.homepage.clone(),
-            dependencies: dependencies,
+            dependencies: manifest.dependencies.clone(),
 
             status: RwLock::new(PluginStatus::Loaded),
             messages: RwLock::new(Vec::new()),
@@ -170,13 +169,9 @@ impl PluginMetadata {
 
     /* ====================================================================== */
 
-    fn get_cached_loaded_module(&self, module_name: &str) -> Result<Value, Error> {
+    fn get_cached_loaded_module(&self, module_name: &str) -> Option<Value> {
         let cache = self.loaded_modules_cache.read().expect("Loaded modules cache lock poisoned");
-        if let Some(cached_module) = cache.get(module_name) {
-            return Ok(cached_module.clone());
-        }
-
-        return Err(anyhow!("Module '{}' is not cached", module_name));
+        return cache.get(module_name).cloned();
     }
 
     fn set_cached_loaded_module(&self, module_name: &str, module: Value) -> Value {
@@ -193,24 +188,24 @@ impl PluginMetadata {
     }
 
     pub fn get_assets_path(&self) -> PathBuf {
-        return self.path.join("assets");
+        return self.path.join(PLUGIN_ASSETS_DIR);
     }
 
     fn get_data_path(&self) -> PathBuf {
-        return self.path.join("data");
+        return self.path.join(PLUGIN_DATA_DIR);
     }
 
     fn get_entrypoint_path(&self) -> PathBuf {
-        return self.get_data_path().join("main.lua");
+        return self.get_data_path().join(PLUGIN_ENTRYPOINT_FILE);
     }
 
     pub fn get_widgets_path(&self) -> PathBuf {
-        return self.path.join("widgets");
+        return self.path.join(PLUGIN_WIDGETS_DIR);
     }
 
     fn get_icon_path(&self) -> Option<PathBuf> {
-        let icon_path = self.path.join("icon.png");
-        if icon_path.exists() && icon_path.is_file() {
+        let icon_path = self.path.join(PLUGIN_ICON_FILE);
+        if icon_path.is_file() {
             return Some(icon_path);
         }
 
@@ -220,55 +215,68 @@ impl PluginMetadata {
     /* ====================================================================== */
 
     pub fn get_icon(&self) -> Option<Vec<u8>> {
-        if let Some(icon_path) = self.get_icon_path() {
-            if let Ok(icon_data) = fs::read(icon_path) {
-                return Some(icon_data);
-            }
-        }
-
-        return None;
+        return self.get_icon_path().and_then(|icon_path| fs::read(icon_path).ok());
     }
 }
 
 /* ========================================================================== */
 
+fn has_plugins() -> bool {
+    let user_plugins_dir = paths::get(AppPaths::UniChatUserPlugins);
+    if let Ok(entries) = fs::read_dir(&user_plugins_dir) {
+        for entry in entries.flatten() {
+            let plugin_folder = entry.file_name().to_string_lossy().to_string();
+            let plugin_path = entry.path();
+            if !is_valid_addon_dir(&plugin_folder, &plugin_path) {
+                continue;
+            }
+
+            let has_manifest = plugin_path.join(MANIFEST_FILE).is_file();
+            let has_entrypoint = plugin_path.join(PLUGIN_DATA_DIR).join(PLUGIN_ENTRYPOINT_FILE).is_file();
+            if has_manifest && has_entrypoint {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 pub fn init() -> Result<(), Error> {
+    if !has_plugins() {
+        log::info!("No plugins found, skipping LUA runtime");
+        return Ok(());
+    }
+
     return runtime::new();
 }
 
 fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, UniChatAddonManifest)>, Error> {
-    if !plugins_path.exists() || !plugins_path.is_dir() {
+    if !plugins_path.is_dir() {
         return Ok(Vec::new());
     }
 
     let mut loaded_manifests: Vec<(PathBuf, UniChatAddonManifest)> = Vec::new();
     let entries = fs::read_dir(plugins_path)?;
     for entry in entries.flatten() {
+        let plugin_folder = entry.file_name().to_string_lossy().to_string();
         let plugin_path = entry.path();
+        if !is_valid_addon_dir(&plugin_folder, &plugin_path) {
+            continue;
+        }
 
-        if plugin_path.is_dir() {
-            let plugin_folder = plugin_path.file_name().unwrap_or_default().to_string_lossy().to_string();
-            if plugin_folder.starts_with(".") {
-                continue;
-            } else if plugin_folder.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
-                log::warn!("Skipping plugin with invalid id '{}' from {:?}", plugin_folder, plugin_path);
-                continue;
+        if !plugin_path.join(MANIFEST_FILE).is_file() {
+            log::warn!("Skipping folder '{:?}' as it does not contain a valid '{}'", plugin_path, MANIFEST_FILE);
+            continue;
+        }
+
+        log::debug!("Loading plugin manifest from directory: {:?}", plugin_path);
+        match load_manifest(&plugin_path) {
+            Ok(manifest) => {
+                loaded_manifests.push((plugin_path, manifest));
             }
-
-            let manifest_path = plugin_path.join("manifest.yaml");
-            if !manifest_path.exists() || !manifest_path.is_file() {
-                log::warn!("Skipping folder '{:?}' as it does not contain a valid 'manifest.yaml'", plugin_path);
-                continue;
-            }
-
-            log::debug!("Loading plugin manifest from directory: {:?}", plugin_path);
-            match load_manifest(&plugin_path) {
-                Ok(manifest) => {
-                    loaded_manifests.push((plugin_path, manifest));
-                }
-                Err(e) => {
-                    log::error!("Failed to load plugin manifest: {:#?}", e);
-                }
+            Err(e) => {
+                log::error!("Failed to load plugin manifest: {:#?}", e);
             }
         }
     }
@@ -277,13 +285,14 @@ fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, UniChat
 }
 
 pub fn load_plugins() -> Result<(), Error> {
-    let mut loaded_manifests: Vec<(PathBuf, UniChatAddonManifest)> = Vec::new();
+    if !runtime::initialized() {
+        return Ok(());
+    }
 
-    let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
-    let user_plugins_manifests = load_plugins_from_disk(user_plugins_dir)?;
-    loaded_manifests.extend(user_plugins_manifests);
+    let user_plugins_dir = paths::get(AppPaths::UniChatUserPlugins);
+    let loaded_manifests = load_plugins_from_disk(user_plugins_dir)?;
 
-    for (plugin_path, manifest) in loaded_manifests.iter_mut() {
+    for (plugin_path, manifest) in loaded_manifests.iter() {
         log::info!("Loading plugin: {} v{}", manifest.name, manifest.version);
         if let Err(e) = instance::create(plugin_path, manifest) {
             log::error!("Failed to load user plugin: {:#?}", e);

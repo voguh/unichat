@@ -13,20 +13,21 @@
         "windows": [],
         "security": {
             "csp": {
-                "default-src": ["'self'", "asset:", "http://asset.localhost"],
+                "default-src": ["'self'"],
 
-                "script-src": ["'self'", "'unsafe-inline'", "asset:", "http://asset.localhost"],
-                "script-src-elem": ["'self'", "'unsafe-inline'", "asset:", "http://asset.localhost"],
+                "script-src": ["'self'", "'unsafe-inline'"],
+                "script-src-elem": ["'self'", "'unsafe-inline'"],
                 "script-src-attr": ["'none'"],
 
-                "style-src": ["'self'", "'unsafe-inline'", "asset:", "http://asset.localhost"],
-                "style-src-elem": ["'self'", "'unsafe-inline'", "asset:", "http://asset.localhost"],
+                "style-src": ["'self'", "'unsafe-inline'"],
+                "style-src-elem": ["'self'", "'unsafe-inline'"],
                 "style-src-attr": ["'unsafe-inline'"],
 
-                "img-src": ["'self'", "blob:", "data:", "asset:", "http://asset.localhost", "http://localhost:9527", "https:"],
-                "media-src": ["'self'", "blob:", "data:", "asset:", "http://asset.localhost", "http://localhost:9527", "https:"],
+                "img-src": ["'self'", "data:", "http://localhost:9527", "https:"],
+                "media-src": ["http://localhost:9527", "https:"],
+                "font-src": ["'self'"],
                 "connect-src": ["'self'", "ipc:", "http://ipc.localhost", "https:"],
-                "frame-src": ["'self'", "http://localhost:9527"]
+                "frame-src": ["http://localhost:9527"]
             }
         }
     },

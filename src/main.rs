@@ -20,8 +20,8 @@ use std::time::Instant;
 use anyhow::Error;
 use tauri::Listener;
 
-use crate::utils::properties;
-use crate::utils::properties::AppPaths;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
 
 include!(concat!(env!("CARGO_MANIFEST_DIR"), "/target/gen/metadata.rs"));
 
@@ -46,7 +46,7 @@ mod youtube;
 
 static APP_HANDLE: OnceLock<tauri::AppHandle<tauri::Wry>> = OnceLock::new();
 pub fn get_app_handle() -> &'static tauri::AppHandle<tauri::Wry> {
-    return APP_HANDLE.get().expect("APP_HANDLE is not initialized");
+    return APP_HANDLE.get().expect("APP_HANDLE was not initialized");
 }
 
 fn set_app_handle(app_handle: tauri::AppHandle<tauri::Wry>) {
@@ -79,38 +79,24 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
 /* ========================================================================== */
 
-fn has_plugins() -> bool {
-    let mut has_plugins = false;
-    let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
-
-    if user_plugins_dir.exists() && user_plugins_dir.is_dir() {
-        if let Ok(entries) = fs::read_dir(&user_plugins_dir) {
-            for entry in entries.flatten() {
-                let path = entry.path();
-                if path.is_dir() {
-                    let manifest = path.join("manifest.yaml").exists();
-                    let lua_entrypoint = path.join("data/main.lua").exists();
-
-                    if manifest && lua_entrypoint {
-                        has_plugins = true;
-                        break;
-                    }
-                }
-            }
-        }
+fn ensure_app_dir(app_path: AppPaths) -> Result<(), Error> {
+    let dir = paths::get(app_path);
+    if !dir.exists() {
+        log::info!("Creating directory {:?}", dir);
+        fs::create_dir_all(&dir)?;
     }
 
-    return has_plugins;
+    return Ok(());
 }
 
 fn run_startup() -> Result<(), Error> {
     let start = Instant::now();
-    wm::splash_window::begin(format!("Starting {} v{}...", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION));
+    wm::splash_window::begin(format!("Starting {} v{}...", UNICHAT_DISPLAY_NAME, *UNICHAT_VERSION));
 
     /* ====================================================================== */
 
-    wm::splash_window::stage(1, "Initializing properties...");
-    utils::properties::init()?;
+    wm::splash_window::stage(1, "Initializing paths...");
+    paths::init()?;
 
     wm::splash_window::stage(2, "Initializing settings...");
     settings::init()?;
@@ -118,47 +104,27 @@ fn run_startup() -> Result<(), Error> {
     /* ====================================================================== */
 
     wm::splash_window::stage(3, "Setting up application plugins directory...");
-    let user_plugins_dir = properties::get_app_path(AppPaths::UniChatUserPlugins);
-    if !&user_plugins_dir.exists() {
-        log::info!("Creating user plugins directory at {:?}", user_plugins_dir);
-        fs::create_dir_all(&user_plugins_dir)?;
-    }
-
-    /* ====================================================================== */
+    ensure_app_dir(AppPaths::UniChatUserPlugins)?;
 
     wm::splash_window::stage(4, "Setting up application gallery directory...");
-    let gallery_dir = properties::get_app_path(AppPaths::UniChatGallery);
-    if !&gallery_dir.exists() {
-        log::info!("Creating gallery directory at {:?}", gallery_dir);
-        fs::create_dir_all(&gallery_dir)?;
-    }
-
-    /* ====================================================================== */
+    ensure_app_dir(AppPaths::UniChatGallery)?;
 
     wm::splash_window::stage(5, "Setting up application widgets directory...");
-    let user_widgets_dir = properties::get_app_path(AppPaths::UniChatUserWidgets);
-    if !&user_widgets_dir.exists() {
-        log::info!("Creating user widgets directory at {:?}", user_widgets_dir);
-        fs::create_dir_all(&user_widgets_dir)?;
-    }
+    ensure_app_dir(AppPaths::UniChatUserWidgets)?;
 
     /* ====================================================================== */
 
     wm::splash_window::stage(6, "Initializing events emitter module...");
-    events::init()?;
+    events::init();
 
     wm::splash_window::stage(7, "Initializing currency module...");
-    currency::init()?;
+    currency::init();
 
     wm::splash_window::stage(8, "Fetching global shared emotes...");
     shared_emotes::fetch_global_shared_emotes();
 
-    if has_plugins() {
-        wm::splash_window::stage(9, "Initializing plugins module...");
-        plugins::init()?;
-    } else {
-        wm::splash_window::stage(9, "No plugins found. Skipping plugins initialization.");
-    }
+    wm::splash_window::stage(9, "Initializing plugins module...");
+    plugins::init()?;
 
     wm::splash_window::stage(10, "Initializing userstore module...");
     utils::userstore::init()?;
@@ -168,22 +134,21 @@ fn run_startup() -> Result<(), Error> {
 
     /* ====================================================================== */
 
-    wm::splash_window::stage(12, "Registering Twitch integration...");
+    wm::splash_window::stage(12, "Initializing scraper module...");
+    scraper::init();
+
+    wm::splash_window::stage(13, "Registering Twitch integration...");
     twitch::init()?;
 
-    wm::splash_window::stage(13, "Registering YouTube integration...");
+    wm::splash_window::stage(14, "Registering YouTube integration...");
     youtube::init()?;
 
-    if has_plugins() {
-        wm::splash_window::stage(14, "Loading plugins...");
-        plugins::load_plugins()?;
-    } else {
-        wm::splash_window::stage(14, "No plugins found. Skipping plugin loading.");
-    }
+    wm::splash_window::stage(15, "Loading plugins...");
+    plugins::load_plugins()?;
 
     /* ====================================================================== */
 
-    wm::splash_window::stage(15, "Initializing HTTP server...");
+    wm::splash_window::stage(16, "Initializing HTTP server...");
     tauri::async_runtime::spawn(axum::start());
 
     /* ====================================================================== */
@@ -199,17 +164,21 @@ fn run_startup() -> Result<(), Error> {
     return Ok(());
 }
 
+fn parse_log_level(raw: &str) -> log::LevelFilter {
+    return match raw.to_lowercase().as_str() {
+        "error" => log::LevelFilter::Error,
+        "warn" | "warning" => log::LevelFilter::Warn,
+        "info" => log::LevelFilter::Info,
+        "debug" => log::LevelFilter::Debug,
+        "trace" => log::LevelFilter::Trace,
+        _ => log::LevelFilter::Info
+    };
+}
+
 fn main() {
     let log_level: log::LevelFilter;
     if let Ok(log_level_raw) = env::var("UNICHAT_LOG_LEVEL") {
-        log_level = match log_level_raw.to_lowercase().as_str() {
-            "error" => log::LevelFilter::Error,
-            "warn" | "warning" => log::LevelFilter::Warn,
-            "info" => log::LevelFilter::Info,
-            "debug" => log::LevelFilter::Debug,
-            "trace" => log::LevelFilter::Trace,
-            _ => log::LevelFilter::Info
-        };
+        log_level = parse_log_level(&log_level_raw);
     } else if utils::is_dev() {
         log_level = log::LevelFilter::Debug;
     } else {
@@ -225,7 +194,7 @@ fn main() {
                 .level(log_level)
                 .clear_targets()
                 .rotation_strategy(tauri_plugin_log::RotationStrategy::KeepSome(7))
-                .max_file_size(1e6 as u128) // 1 MB
+                .max_file_size(1024 * 1024)
                 .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout))
                 .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir {
                     file_name: Some(UNICHAT_NAME.to_string())
@@ -253,11 +222,12 @@ fn main() {
             commands::gallery::get_gallery_items,
             commands::gallery::upload_gallery_items,
             commands::plugins::get_plugins,
+            commands::scrapers::get_scraper,
             commands::scrapers::get_scraper_stored_url,
             commands::scrapers::get_scraper_webview_url,
-            commands::scrapers::get_scraper,
             commands::scrapers::get_scrapers,
-            commands::scrapers::set_scraper_webview_url,
+            commands::scrapers::start_scraper,
+            commands::scrapers::stop_scraper,
             commands::scrapers::toggle_scraper_webview,
             commands::scrapers::validate_scraper_url,
             commands::store::settings_get_item,
@@ -276,5 +246,5 @@ fn main() {
             commands::widgets::set_widget_fieldstate
         ])
         .run(tauri::generate_context!())
-        .unwrap_or_else(|e| panic!("Failed to run {} v{}!\n{:#?}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION, e));
+        .unwrap_or_else(|e| panic!("Failed to run {} v{}!\n{:#?}", UNICHAT_DISPLAY_NAME, *UNICHAT_VERSION, e));
 }

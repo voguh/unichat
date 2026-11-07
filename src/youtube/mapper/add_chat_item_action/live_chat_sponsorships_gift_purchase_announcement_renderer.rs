@@ -19,8 +19,6 @@ use crate::events::UniChatEvent;
 use crate::events::UniChatPlatform;
 use crate::events::UniChatSponsorGiftEventPayload;
 use crate::utils::get_current_timestamp;
-use crate::utils::properties;
-use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
 use crate::youtube::mapper::structs::author::AuthorNameWrapper;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
@@ -32,6 +30,7 @@ use crate::youtube::mapper::structs::author::parse_author_type;
 use crate::youtube::mapper::structs::author::parse_author_username;
 use crate::youtube::mapper::structs::message::MessageRun;
 use crate::youtube::mapper::structs::message::MessageRunsWrapper;
+use crate::youtube::read_channel_id;
 
 /* ========================================================================== */
 
@@ -62,7 +61,7 @@ struct LiveChatSponsorshipsHeaderRenderer {
 }
 
 fn parse_count(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<u16, Error> {
-    let run = render.primary_text.runs.get(1).ok_or(anyhow!("No count run found"))?;
+    let run = render.primary_text.runs.get(1).ok_or_else(|| anyhow!("No count run found"))?;
     match run {
         MessageRun::Text { text } => {
             let count: u16 = text.parse()?;
@@ -74,12 +73,12 @@ fn parse_count(render: &LiveChatSponsorshipsHeaderRenderer) -> Result<u16, Error
     }
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
-    let parsed: LiveChatSponsorshipsGiftPurchaseAnnouncementRenderer = serde_json::from_value(value)?;
+pub fn parse(value: &serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
+    let parsed = LiveChatSponsorshipsGiftPurchaseAnnouncementRenderer::deserialize(value)?;
 
-    let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
+    let channel_id = read_channel_id()?;
     let author_id = parsed.author_external_channel_id;
     let render = parsed.header.live_chat_sponsorships_header_renderer;
     let author_username = parse_author_username(&render.author_name);

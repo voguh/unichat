@@ -16,13 +16,10 @@ use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::events::UniChatEmote;
 use crate::events::UniChatEvent;
 use crate::events::UniChatPlatform;
 use crate::events::UniChatSponsorEventPayload;
 use crate::utils::get_current_timestamp;
-use crate::utils::properties;
-use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
 use crate::youtube::mapper::structs::author::AuthorNameWrapper;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
@@ -36,6 +33,7 @@ use crate::youtube::mapper::structs::message::MessageRun;
 use crate::youtube::mapper::structs::message::MessageRunsWrapper;
 use crate::youtube::mapper::structs::message::parse_message_emojis;
 use crate::youtube::mapper::structs::message::parse_message_string;
+use crate::youtube::read_channel_id;
 
 /* ========================================================================== */
 
@@ -61,7 +59,7 @@ struct HeaderSubtext {
     runs: Option<Vec<MessageRun>>
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
 // The membership tier only exists on the milestone format, where headerSubtext is a simpleText
 // holding the tier name (e.g. "Cliente Tier 1").
@@ -93,12 +91,13 @@ fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> Result<u16, Error> {
 
     if let Some(header_primary_text) = &parsed.header_primary_text {
         let runs = &header_primary_text.runs;
-        let run = runs.get(1).or_else(|| runs.first()).ok_or(anyhow!("No valid run found in header primary text"))?;
+        let run = runs.get(1).or_else(|| runs.first());
+        let run = run.ok_or_else(|| anyhow!("No valid run found in header primary text"))?;
 
         match run {
             MessageRun::Text { text } => {
                 let found = MONTHS_REGEX.find(text.trim());
-                let value_raw = found.ok_or(anyhow!("Failed to find months in header primary text"))?;
+                let value_raw = found.ok_or_else(|| anyhow!("Failed to find months in header primary text"))?;
 
                 months = value_raw.as_str().parse()?;
             }
@@ -111,29 +110,10 @@ fn parse_months(parsed: &LiveChatMembershipItemRenderer) -> Result<u16, Error> {
     return Ok(months);
 }
 
-fn optional_build_message(message: &Option<MessageRunsWrapper>) -> Result<Option<String>, Error> {
-    if let Some(message_runs) = message {
-        let message = parse_message_string(message_runs)?;
-        return Ok(Some(message));
-    }
+pub fn parse(value: &serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
+    let parsed = LiveChatMembershipItemRenderer::deserialize(value)?;
 
-    return Ok(None);
-}
-
-fn optional_build_emotes(message: &Option<MessageRunsWrapper>) -> Result<Vec<UniChatEmote>, Error> {
-    if let Some(message_runs) = message {
-        let emotes = parse_message_emojis(message_runs)?;
-        return Ok(emotes);
-    }
-
-    return Ok(Vec::new());
-}
-
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
-    let parsed: LiveChatMembershipItemRenderer = serde_json::from_value(value)?;
-
-    let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
-    let author_id = parsed.author_external_channel_id.clone();
+    let channel_id = read_channel_id()?;
     let author_username = parse_author_username(&parsed.author_name);
     let author_name = parse_author_name(&parsed.author_name);
     let author_color = parse_author_color(&author_name);
@@ -142,8 +122,8 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let author_type = parse_author_type(&parsed.author_badges);
     let tier = parse_tier(&parsed);
     let months = parse_months(&parsed)?;
-    let message = optional_build_message(&parsed.message)?;
-    let emotes = optional_build_emotes(&parsed.message)?;
+    let message = parsed.message.as_ref().map(parse_message_string).transpose()?;
+    let emotes = parsed.message.as_ref().map(parse_message_emojis).transpose()?.unwrap_or_default();
     let timestamp_usec = get_current_timestamp();
 
     let event = UniChatEvent::Sponsor(UniChatSponsorEventPayload {
@@ -153,7 +133,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
         platform: UniChatPlatform::YouTube,
         flags: HashMap::new(),
 
-        author_id: author_id,
+        author_id: parsed.author_external_channel_id,
         author_username: author_username,
         author_display_name: author_name,
         author_display_color: author_color,

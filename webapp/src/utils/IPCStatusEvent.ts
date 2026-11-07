@@ -13,15 +13,10 @@ export enum IPCEvents {
 }
 
 export enum ScraperStatus {
-    IDLE = "idle",
     READY = "ready",
-    PING = "ping",
     ERROR = "error",
     FATAL = "fatal"
 }
-
-export const SCRAPER_LIFECYCLE_STATUSES = [ScraperStatus.IDLE, ScraperStatus.READY, ScraperStatus.PING];
-export const SCRAPER_RUNNING_STATUSES = [ScraperStatus.READY, ScraperStatus.PING];
 
 export interface IPCStatusEvent {
     type: ScraperStatus;

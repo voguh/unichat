@@ -12,7 +12,6 @@ use std::collections::HashMap;
 
 use anyhow::Error;
 use serde::Deserialize;
-use serde::Serialize;
 
 use crate::events::UniChatAuthorType;
 use crate::events::UniChatEvent;
@@ -24,25 +23,24 @@ use crate::utils::get_current_timestamp;
 
 /* ========================================================================== */
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize, Debug)]
 struct WsRewardRedemption {
     id: String,
     user: WsRewardRedemptionUser,
 
     channel_id: String,
     reward: WsRewardRedemptionReward,
-    user_input: Option<String>,
-    redeemed_at: String
+    user_input: Option<String>
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize, Debug)]
 struct WsRewardRedemptionUser {
     id: String,
     login: String,
     display_name: String
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize, Debug)]
 struct WsRewardRedemptionReward {
     id: String,
     title: String,
@@ -52,24 +50,16 @@ struct WsRewardRedemptionReward {
     default_image: HashMap<String, String>
 }
 
-fn parse_reward_icon_url(reward: &WsRewardRedemptionReward) -> String {
-    if let Some(images) = &reward.image {
-        if let Some(url) = images.get("url_1x") {
-            return url.to_owned();
-        }
-    } else {
-        if let Some(url) = reward.default_image.get("url_1x") {
-            return url.to_owned();
-        }
-    }
-
-    return String::new();
+fn parse_reward_icon_url(reward: &WsRewardRedemptionReward) -> Option<String> {
+    let image_url = reward.image.as_ref().and_then(|images| images.get("url_1x"));
+    return image_url.or_else(|| reward.default_image.get("url_1x")).cloned();
 }
 
 pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let parsed: WsRewardRedemption = serde_json::from_value(value)?;
 
-    let display_color = parse_author_color(None, &Some(parsed.user.login.clone()))?;
+    let author_username = Some(parsed.user.login);
+    let display_color = parse_author_color(None, &author_username)?;
     let icon_url = parse_reward_icon_url(&parsed.reward);
     let timestamp_usec = get_current_timestamp();
 
@@ -81,7 +71,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
         flags: HashMap::new(),
 
         author_id: parsed.user.id,
-        author_username: Some(parsed.user.login),
+        author_username: author_username,
         author_display_name: parsed.user.display_name,
         author_display_color: display_color,
         author_profile_picture_url: None,
@@ -92,7 +82,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
         reward_title: parsed.reward.title,
         reward_description: parsed.reward.prompt,
         reward_cost: parsed.reward.cost,
-        reward_icon_url: Some(icon_url),
+        reward_icon_url: icon_url,
 
         message_id: parsed.id,
         message_text: parsed.user_input.clone(),

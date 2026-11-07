@@ -11,7 +11,7 @@
 use anyhow::Error;
 
 use crate::events::UniChatEvent;
-use crate::utils::irc::IRCMessage;
+use crate::twitch::irc::IRCMessage;
 
 mod cheer;
 mod message;
@@ -19,7 +19,7 @@ mod message;
 /* ========================================================================== */
 
 pub fn parse(channel: String, text: String, message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
-    let tags = message.tags.clone();
+    let tags = &message.tags;
 
     if tags.contains_key("bits") {
         return cheer::parse(channel, text, message, tags);

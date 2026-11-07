@@ -8,62 +8,48 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use std::collections::HashMap;
+
 use anyhow::Error;
-use anyhow::anyhow;
 
 use crate::events::FLAG_TWITCH_STREAK_DAYS;
 use crate::events::UniChatEvent;
 use crate::events::UniChatMessageEventPayload;
 use crate::events::UniChatPlatform;
+use crate::twitch::mapper::get_tag;
 use crate::twitch::mapper::require_tag;
 use crate::twitch::mapper::structs::author::parse_author_badges;
 use crate::twitch::mapper::structs::author::parse_author_color;
-use crate::twitch::mapper::structs::author::parse_author_name;
 use crate::twitch::mapper::structs::author::parse_author_type;
-use crate::twitch::mapper::structs::author::parse_author_username;
 use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::twitch::mapper::structs::message::parse_message_emotes;
 use crate::twitch::mapper::structs::message::parse_message_string;
 use crate::utils::get_current_timestamp;
-use crate::utils::irc::IRCCommand;
-use crate::utils::irc::IRCMessage;
 
 /* ========================================================================== */
 
-pub fn parse(message: &IRCMessage) -> Result<Option<UniChatEvent>, Error> {
-    let tags = message.tags.clone();
-    let mut channel: Option<String> = None;
-    let mut text: Option<String> = None;
-    if let IRCCommand::Raw(cmd, args) = &message.command {
-        if cmd != "USERNOTICE" {
-            return Err(anyhow!("Invalid command for USERNOTICE message"));
-        }
+pub fn parse(
+    channel: String,
+    text: Option<&str>,
+    tags: &HashMap<String, Option<String>>
+) -> Result<Option<UniChatEvent>, Error> {
+    let text = text.unwrap_or_default();
 
-        if args.len() < 2 {
-            return Err(anyhow!("Insufficient arguments for USERNOTICE message"));
-        }
-
-        channel = Some(args[0].strip_prefix("#").unwrap_or(&args[0]).to_string());
-        text = Some(args[1].clone());
-    }
-
-    let text = text.ok_or(anyhow!("Missing message text"))?;
-
-    let room_id = require_tag(&tags, "room-id")?;
-    let channel = channel.ok_or(anyhow!("Missing channel name"))?;
-    let mut flags = inject_raw_tags(&tags);
-    let author_id = require_tag(&tags, "user-id")?;
-    let author_username = parse_author_username(&message.prefix);
-    let author_name = parse_author_name(tags.get("display-name"))?;
-    let author_color = parse_author_color(tags.get("color"), &author_username)?;
-    let author_badges = parse_author_badges(tags.get("badges"));
-    let author_type = parse_author_type(&tags);
-    let message_id = require_tag(&tags, "id")?;
-    let message = parse_message_string(&text);
-    let emotes = parse_message_emotes(tags.get("emotes"), &text)?;
+    let room_id = require_tag(tags, "room-id")?;
+    let mut flags = inject_raw_tags(tags);
+    let author_id = require_tag(tags, "user-id")?;
+    let login = require_tag(tags, "login")?;
+    let author_username = Some(login);
+    let author_name = require_tag(tags, "display-name")?;
+    let author_color = parse_author_color(get_tag(tags, "color"), &author_username)?;
+    let author_badges = parse_author_badges(get_tag(tags, "badges"));
+    let author_type = parse_author_type(tags);
+    let message_id = require_tag(tags, "id")?;
+    let message = parse_message_string(text);
+    let emotes = parse_message_emotes(get_tag(tags, "emotes"), text)?;
     let timestamp_usec = get_current_timestamp();
 
-    let streak_days = require_tag(&tags, "msg-param-value")?;
+    let streak_days = require_tag(tags, "msg-param-value")?;
     flags.insert(String::from(FLAG_TWITCH_STREAK_DAYS), Some(streak_days));
 
     let event = UniChatEvent::Message(UniChatMessageEventPayload {

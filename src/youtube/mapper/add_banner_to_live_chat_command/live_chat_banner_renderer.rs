@@ -20,13 +20,12 @@ use crate::events::UniChatEvent;
 use crate::events::UniChatPlatform;
 use crate::events::UniChatRaidEventPayload;
 use crate::utils::get_current_timestamp;
-use crate::utils::properties;
-use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
 use crate::youtube::mapper::structs::author::parse_author_color;
 use crate::youtube::mapper::structs::author::parse_author_name_str;
 use crate::youtube::mapper::structs::author::parse_author_username_str;
 use crate::youtube::mapper::structs::proxy_youtube_url;
+use crate::youtube::read_channel_id;
 
 /* ========================================================================== */
 
@@ -64,20 +63,21 @@ struct BannerMessageRuns {
     bold: Option<bool>
 }
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
-    let parsed: LiveChatBannerRenderer = serde_json::from_value(value)?;
+pub fn parse(value: &serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
+    let parsed = LiveChatBannerRenderer::deserialize(value)?;
     let mut event: Option<UniChatEvent> = None;
 
     if parsed.banner_type == "LIVE_CHAT_BANNER_TYPE_CROSS_CHANNEL_REDIRECT" {
         if let Some(renderer) = parsed.contents.live_chat_banner_redirect_renderer {
-            let first_run = renderer.banner_message.runs.first().ok_or(anyhow!("No runs found in banner message"))?;
+            let runs = &renderer.banner_message.runs;
+            let first_run = runs.first().ok_or_else(|| anyhow!("No runs found in banner message"))?;
 
-            let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
-            let author_username = parse_author_username_str(first_run.text.clone());
-            let author_name = parse_author_name_str(first_run.text.clone());
+            let channel_id = read_channel_id()?;
+            let author_username = parse_author_username_str(&first_run.text);
+            let author_name = parse_author_name_str(&first_run.text);
             let author_color = parse_author_color(&author_name);
             let thumbnails = &renderer.author_photo.thumbnails;
-            let author_photo = thumbnails.last().ok_or(anyhow!("No thumbnails found in author photo"))?;
+            let author_photo = thumbnails.last().ok_or_else(|| anyhow!("No thumbnails found in author photo"))?;
             let timestamp_usec = get_current_timestamp();
 
             if first_run.bold.is_some() {

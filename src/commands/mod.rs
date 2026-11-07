@@ -8,8 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use std::net::Ipv4Addr;
-
 use if_addrs::IfAddr;
 use if_addrs::get_if_addrs;
 use tauri::AppHandle;
@@ -48,7 +46,7 @@ pub async fn dispatch_clear_chat<R: Runtime>(_app: AppHandle<R>) -> Result<(), S
         timestamp: timestamp_usec
     });
 
-    events::emit(event).map_err(|e| format!("An error occurred on emit ClearChat event: {:#?}", e))?;
+    events::emit(event);
 
     return Ok(());
 }
@@ -96,7 +94,7 @@ pub async fn get_system_hosts<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Stri
         }
 
         if let IfAddr::V4(v4) = iface.addr {
-            let ip: Ipv4Addr = v4.ip;
+            let ip = v4.ip;
             if ip.is_private() && !ip.is_loopback() && !ip.is_link_local() {
                 lan_ips.push(ip.to_string());
             }
@@ -115,10 +113,7 @@ pub async fn get_system_hosts<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Stri
 
 #[tauri::command]
 pub async fn get_third_party_licenses<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<serde_json::Value>, String> {
-    let third_party_licenses = serde_json::from_str(THIRD_PARTY_LICENSES)
-        .map_err(|e| format!("Failed to parse third party licenses: {:#?}", e))?;
-
-    return Ok(third_party_licenses);
+    return serde_json::from_str(THIRD_PARTY_LICENSES).map_err(|e| format!("Invalid third party licenses: {:#?}", e));
 }
 
 /* ========================================================================== */

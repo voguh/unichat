@@ -38,23 +38,11 @@ impl UserData for UniChatStringsModule {
         /* ================================================================== */
 
         methods.add_method("strip_prefix", |_lua, _this, (s, prefix): (String, String)| {
-            let result = s.strip_prefix(&prefix);
-
-            if let Some(stripped) = result {
-                return Ok(Some(stripped.to_string()));
-            } else {
-                return Ok(None);
-            }
+            return Ok(s.strip_prefix(&prefix).map(|stripped| stripped.to_string()));
         });
 
         methods.add_method("strip_suffix", |_lua, _this, (s, suffix): (String, String)| {
-            let result = s.strip_suffix(&suffix);
-
-            if let Some(stripped) = result {
-                return Ok(Some(stripped.to_string()));
-            } else {
-                return Ok(None);
-            }
+            return Ok(s.strip_suffix(&suffix).map(|stripped| stripped.to_string()));
         });
 
         /* ================================================================== */
@@ -70,19 +58,11 @@ impl UserData for UniChatStringsModule {
         /* ================================================================== */
 
         methods.add_method("find", |_lua, _this, (s, substring): (String, String)| {
-            if let Some(index) = s.find(&substring) {
-                return Ok(Some(index + 1)); // Convert to 1-based index
-            } else {
-                return Ok(None);
-            }
+            return Ok(s.find(&substring).map(|index| index + 1)); // Convert to 1-based index
         });
 
         methods.add_method("rfind", |_lua, _this, (s, substring): (String, String)| {
-            if let Some(index) = s.rfind(&substring) {
-                return Ok(Some(index + 1)); // Convert to 1-based index
-            } else {
-                return Ok(None);
-            }
+            return Ok(s.rfind(&substring).map(|index| index + 1)); // Convert to 1-based index
         });
 
         /* ================================================================== */
