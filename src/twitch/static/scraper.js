@@ -53,7 +53,8 @@ async function uniChatHandleGraphQLResponse(res) {
                 if (extensions.operationName === "GlobalBadges") {
                     await uniChat.dispatchEvent({ type: "badges", badgesType: "global", badges: data.badges });
                 } else if (extensions.operationName === "ChatList_Badges") {
-                    await uniChat.dispatchEvent({ type: "badges", badgesType: "user", badges: data.user.broadcastBadges });
+                    const badges = data.user.broadcastBadges;
+                    await uniChat.dispatchEvent({ type: "badges", badgesType: "user", badges: badges });
                 } else if (extensions.operationName === "BitsConfigContext_Global") {
                     const cheermotes = new Set();
 

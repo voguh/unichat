@@ -57,9 +57,17 @@ pub enum IRCCommand {
 fn parse_prefix(prefix: &[String]) -> Result<Option<IRCPrefix>, Error> {
     return match prefix {
         [] => Ok(None),
-        [server] => Ok(Some(IRCPrefix::Server(server.clone()))),
-        [nick, user, host] => Ok(Some(IRCPrefix::Nick(nick.clone(), user.clone(), host.clone()))),
-        _ => Err(anyhow!("Invalid IRC prefix '{:?}'", prefix))
+        [server] => {
+            let server = IRCPrefix::Server(server.clone());
+            return Ok(Some(server));
+        }
+        [nick, user, host] => {
+            let nick = IRCPrefix::Nick(nick.clone(), user.clone(), host.clone());
+            return Ok(Some(nick));
+        }
+        _ => {
+            return Err(anyhow!("Invalid IRC prefix '{:?}'", prefix));
+        }
     };
 }
 

@@ -139,11 +139,12 @@ if (window.WebSocket.__WRAPPED__ !== true) {
 
     window.WebSocket = function (url, protocols) {
         const wsInstance = protocols ? new OriginalWebSocket(url, protocols) : new OriginalWebSocket(url);
+        const context = { wsInstance, url, protocols };
 
         wsInstance.addEventListener("message", async (event) => {
             try {
                 if (typeof uniChat.onWebSocketMessage === "function") {
-                    await uniChat.onWebSocketMessage(event, { wsInstance, url, protocols });
+                    await uniChat.onWebSocketMessage(event, context);
                 }
             } catch (err) {
                 uniChatLogger.error(err.message, err);
@@ -153,11 +154,11 @@ if (window.WebSocket.__WRAPPED__ !== true) {
         const originalSend = wsInstance.send;
         wsInstance.send = function (data) {
             if (typeof uniChat.preWebSocketSend === "function") {
-                data = uniChat.preWebSocketSend(data, { wsInstance, url, protocols }) || data;
+                data = uniChat.preWebSocketSend(data, context) || data;
             }
 
             if (typeof uniChat.onWebSocketSend === "function") {
-                Promise.try(() => uniChat.onWebSocketSend(data, { wsInstance, url, protocols })).catch(uniChatLogger.error);
+                Promise.try(() => uniChat.onWebSocketSend(data, context)).catch(uniChatLogger.error);
             }
 
             return originalSend.call(this, data);

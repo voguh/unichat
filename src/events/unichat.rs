@@ -44,7 +44,7 @@ pub enum UniChatEvent {
     Custom(serde_json::Value)
 }
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 pub const FLAG_TWITCH_STREAK_DAYS: &str = "unichat:twitch_streak_days";
 pub const FLAG_TWITCH_GIF: &str = "unichat:twitch_gif";
@@ -60,7 +60,7 @@ pub const FLAG_YOUTUBE_SUPERCHAT_SECONDARY_TEXT_COLOR: &str = "unichat:youtube_s
 
 pub const FLAG_EMULATOR_GENERATED: &str = "unichat:emulator_generated";
 
-/* ============================================================================================== */
+/* ========================================================================== */
 
 #[derive(Clone, Debug)]
 pub enum UniChatPlatform {
