@@ -15,37 +15,37 @@ use anyhow::Error;
 use crate::events::UniChatEvent;
 use crate::events::UniChatPlatform;
 use crate::events::UniChatSponsorEventPayload;
-use crate::twitch::mapper::raw_usernotice::parse_command;
+use crate::twitch::mapper::get_tag;
 use crate::twitch::mapper::require_tag;
 use crate::twitch::mapper::structs::author::parse_author_badges;
 use crate::twitch::mapper::structs::author::parse_author_color;
-use crate::twitch::mapper::structs::author::parse_author_name;
 use crate::twitch::mapper::structs::author::parse_author_type;
-use crate::twitch::mapper::structs::author::parse_author_username_str;
 use crate::twitch::mapper::structs::inject_raw_tags;
 use crate::twitch::mapper::structs::message::parse_message_emotes;
 use crate::twitch::mapper::structs::message::parse_message_string;
 use crate::utils::get_current_timestamp;
-use crate::utils::irc::IRCMessage;
 
 /* ========================================================================== */
 
-pub fn parse(message: &IRCMessage, tags: &HashMap<String, Option<String>>) -> Result<Option<UniChatEvent>, Error> {
-    let (channel, message_text) = parse_command(message)?;
-
+pub fn parse(
+    channel: String,
+    text: Option<&str>,
+    tags: &HashMap<String, Option<String>>
+) -> Result<Option<UniChatEvent>, Error> {
     let room_id = require_tag(tags, "room-id")?;
     let author_id = require_tag(tags, "user-id")?;
-    let author_username = parse_author_username_str(tags.get("login"))?;
-    let author_name = parse_author_name(tags.get("display-name"))?;
-    let author_color = parse_author_color(tags.get("color"), &author_username)?;
-    let author_badges = parse_author_badges(tags.get("badges"));
+    let login = require_tag(tags, "login")?;
+    let author_username = Some(login);
+    let author_name = require_tag(tags, "display-name")?;
+    let author_color = parse_author_color(get_tag(tags, "color"), &author_username)?;
+    let author_badges = parse_author_badges(get_tag(tags, "badges"));
     let author_type = parse_author_type(tags);
     let tier = require_tag(tags, "msg-param-sub-plan")?;
     let months_str = require_tag(tags, "msg-param-cumulative-months")?;
     let months: u16 = months_str.parse()?;
     let message_id = require_tag(tags, "id")?;
-    let message = message_text.map(|text| parse_message_string(&text));
-    let emotes = parse_message_emotes(tags.get("emotes"), &message.clone().unwrap_or_default())?;
+    let message = text.map(parse_message_string);
+    let emotes = parse_message_emotes(get_tag(tags, "emotes"), text.unwrap_or_default())?;
     let timestamp_usec = get_current_timestamp();
 
     let event = UniChatEvent::Sponsor(UniChatSponsorEventPayload {
@@ -67,7 +67,7 @@ pub fn parse(message: &IRCMessage, tags: &HashMap<String, Option<String>>) -> Re
         months: months,
 
         message_id: message_id,
-        message_text: message.clone(),
+        message_text: message,
         emotes: emotes,
 
         timestamp: timestamp_usec

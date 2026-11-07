@@ -19,7 +19,6 @@ use anyhow::anyhow;
 
 pub mod base64;
 pub mod constants;
-pub mod irc;
 pub mod jsonrpc;
 pub mod paths;
 pub mod properties;

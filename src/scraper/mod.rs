@@ -38,7 +38,9 @@ mod utils;
 
 pub use status::ScraperStatus;
 pub use status::ScraperStatusEvent;
+pub use utils::ScraperLogKind;
 pub use utils::decode_url;
+pub use utils::log_action;
 
 /* ========================================================================== */
 

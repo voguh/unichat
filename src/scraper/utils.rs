@@ -8,11 +8,60 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use std::fs;
+use std::io::Write as _;
+
 use anyhow::Error;
 use anyhow::anyhow;
 use url::Url;
 
 use crate::settings;
+use crate::settings::SettingLogEventLevel;
+use crate::utils::paths;
+use crate::utils::paths::AppPaths;
+
+/* ========================================================================== */
+
+pub enum ScraperLogKind {
+    Raw,
+    Parsed,
+    Unknown,
+    Error
+}
+
+impl ScraperLogKind {
+    fn file_name(&self) -> &'static str {
+        return match self {
+            ScraperLogKind::Raw => "events-raw.log",
+            ScraperLogKind::Parsed => "events-parsed.log",
+            ScraperLogKind::Unknown => "events-unknown.log",
+            ScraperLogKind::Error => "events-error.log"
+        };
+    }
+
+    fn is_enabled(&self, level: &SettingLogEventLevel) -> bool {
+        return match self {
+            ScraperLogKind::Raw | ScraperLogKind::Parsed => *level == SettingLogEventLevel::AllEvents,
+            ScraperLogKind::Unknown => *level != SettingLogEventLevel::OnlyErrors,
+            ScraperLogKind::Error => true
+        };
+    }
+}
+
+pub fn log_action(scraper_id: &str, kind: ScraperLogKind, content: impl FnOnce() -> String) {
+    let level = settings::get_scraper_events_log_level();
+    if !kind.is_enabled(&level) {
+        return;
+    }
+
+    let scraper_log_dir = paths::get(AppPaths::AppLog).join(scraper_id);
+    fs::create_dir_all(&scraper_log_dir).expect("Failed to create scraper log directory");
+
+    let mut options = fs::OpenOptions::new();
+    options.create(true).append(true);
+    let mut file = options.open(scraper_log_dir.join(kind.file_name())).expect("Failed to open scraper log file");
+    writeln!(file, "{}", content()).expect("Failed to write scraper log file");
+}
 
 /* ========================================================================== */
 

@@ -8,9 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use std::fs;
-use std::io::Write;
-
 use mlua::Error;
 use mlua::FromLua;
 use mlua::Function;
@@ -24,13 +21,11 @@ use crate::events::UniChatEvent;
 use crate::events::UniChatPlatform;
 use crate::plugins::instance::env::utils::from_lua_value;
 use crate::plugins::runtime;
+use crate::scraper;
+use crate::scraper::ScraperLogKind;
 use crate::scraper::ScraperStatus;
 use crate::scraper::ScraperStatusEvent;
 use crate::scraper::UniChatScraper;
-use crate::settings;
-use crate::settings::SettingLogEventLevel;
-use crate::utils::paths;
-use crate::utils::paths::AppPaths;
 
 /* ========================================================================== */
 
@@ -88,18 +83,6 @@ impl LuaUniChatScraper {
         });
     }
 
-    fn log_action(&self, file_name: &str, content: &impl std::fmt::Display) {
-        let app_log_dir = paths::get(AppPaths::AppLog);
-        let scraper_log_dir = app_log_dir.join(&self.id);
-        fs::create_dir_all(&scraper_log_dir).expect("Failed to create scraper log directory");
-
-        let log_file = scraper_log_dir.join(file_name);
-        let mut options = fs::OpenOptions::new();
-        options.create(true).append(true);
-        let mut file = options.open(log_file).expect("Failed to open scraper log file");
-        writeln!(file, "{content}").expect("Failed to write scraper log file");
-    }
-
     fn status_callback(&self, status: ScraperStatus) -> Option<&Function> {
         return match status {
             ScraperStatus::Ready => self.on_ready.as_ref(),
@@ -145,11 +128,7 @@ impl UniChatScraper for LuaUniChatScraper {
 
     fn on_event(&self, event: serde_json::Value) -> Result<(), anyhow::Error> {
         let lua = runtime::get();
-        let log_events = settings::get_scraper_events_log_level();
-
-        if log_events == SettingLogEventLevel::AllEvents {
-            self.log_action("events-raw.log", &event);
-        }
+        scraper::log_action(&self.id, ScraperLogKind::Raw, || event.to_string());
 
         let table = lua.to_value(&event)?;
 
@@ -178,22 +157,18 @@ impl UniChatScraper for LuaUniChatScraper {
                 }
 
                 let parsed: UniChatEvent = serde_json::from_value(json)?;
-
-                if log_events == SettingLogEventLevel::AllEvents {
-                    let serialized = serde_json::to_string(&parsed)?;
-                    self.log_action("events-parsed.log", &serialized);
-                }
+                scraper::log_action(&self.id, ScraperLogKind::Parsed, || {
+                    return serde_json::to_string(&parsed).expect("Failed to serialize UniChatEvent");
+                });
 
                 events::emit(parsed);
             }
             Ok(None) => {
-                if [SettingLogEventLevel::AllEvents, SettingLogEventLevel::UnknownEvents].contains(&log_events) {
-                    self.log_action("events-unknown.log", &event);
-                }
+                scraper::log_action(&self.id, ScraperLogKind::Unknown, || event.to_string());
             }
             Err(err) => {
                 log::error!(target: &format!("scraper:{}", self.id), "An error occurred on 'on_event' callback: {:#?}", err);
-                self.log_action("events-error.log", &format!("{:#?} -- {:?}", err, event));
+                scraper::log_action(&self.id, ScraperLogKind::Error, || format!("{:#?} -- {:?}", err, event));
             }
         }
 

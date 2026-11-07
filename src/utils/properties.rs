@@ -22,8 +22,7 @@ use anyhow::anyhow;
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum PropertiesKey {
-    YouTubeChannelId,
-    TwitchChannelId
+    YouTubeChannelId
 }
 
 /* ========================================================================== */
