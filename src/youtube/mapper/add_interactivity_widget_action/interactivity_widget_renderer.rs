@@ -20,8 +20,6 @@ use crate::events::UniChatCheerEventPayload;
 use crate::events::UniChatEvent;
 use crate::events::UniChatPlatform;
 use crate::utils::get_current_timestamp;
-use crate::utils::properties;
-use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::Thumbnail;
 use crate::youtube::mapper::structs::author::AuthorPhotoWrapper;
 use crate::youtube::mapper::structs::author::parse_author_color;
@@ -29,6 +27,7 @@ use crate::youtube::mapper::structs::author::parse_author_name_str;
 use crate::youtube::mapper::structs::author::parse_author_photo_vec;
 use crate::youtube::mapper::structs::author::parse_author_username_str;
 use crate::youtube::mapper::structs::proxy_youtube_url;
+use crate::youtube::read_channel_id;
 
 /* ========================================================================== */
 
@@ -133,17 +132,17 @@ fn parse_gift_description(gift: &GiftAttributionItemViewModel) -> Option<String>
     return Some(description.to_owned());
 }
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
+pub fn parse(value: &serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let widget_type = value.get("type").and_then(|widget_type| widget_type.as_str());
 
     if widget_type == Some("INTERACTIVITY_WIDGET_TYPE_GIFT") {
-        let parsed: InteractivityWidgetRenderer = serde_json::from_value(value)?;
+        let parsed = InteractivityWidgetRenderer::deserialize(value)?;
         let gift = parsed.content.gift_attribution_item_view_model;
 
-        let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
+        let channel_id = read_channel_id()?;
         let author_id = parsed.content.element_renderer.compatibility_options.live_chat_author_external_channel_id;
-        let author_username = parse_author_username_str(gift.author_name.content.clone());
-        let author_name = parse_author_name_str(gift.author_name.content.clone());
+        let author_username = parse_author_username_str(&gift.author_name.content);
+        let author_name = parse_author_name_str(&gift.author_name.content);
         let author_color = parse_author_color(&author_name);
         let author_photo = parse_author_photo_vec(&gift.author_avatar.avatar_view_model.image.sources)?;
 

@@ -22,8 +22,6 @@ use crate::events::UniChatEmote;
 use crate::events::UniChatEvent;
 use crate::events::UniChatPlatform;
 use crate::utils::get_current_timestamp;
-use crate::utils::properties;
-use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::PurchaseAmountText;
 use crate::youtube::mapper::structs::ThumbnailsWrapper;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
@@ -37,6 +35,7 @@ use crate::youtube::mapper::structs::author::parse_author_type;
 use crate::youtube::mapper::structs::author::parse_author_username;
 use crate::youtube::mapper::structs::parse_purchase_amount;
 use crate::youtube::mapper::structs::proxy_youtube_url;
+use crate::youtube::read_channel_id;
 
 /* ========================================================================== */
 
@@ -54,12 +53,12 @@ struct LiveChatPaidStickerRenderer {
     sticker: ThumbnailsWrapper
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
-    let parsed: LiveChatPaidStickerRenderer = serde_json::from_value(value)?;
+pub fn parse(value: &serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
+    let parsed = LiveChatPaidStickerRenderer::deserialize(value)?;
 
-    let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
+    let channel_id = read_channel_id()?;
     let author_id = parsed.author_external_channel_id;
     let author_username = parse_author_username(&parsed.author_name);
     let author_name = parse_author_name(&parsed.author_name);
@@ -70,7 +69,7 @@ pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let (purchase_currency, purchase_value) = parse_purchase_amount(&parsed.purchase_amount_text)?;
     let converted = currency::apply(purchase_value, &purchase_currency);
     let (donate_value, donate_currency, original_value, original_currency) = converted;
-    let sticker = parsed.sticker.thumbnails.last().ok_or_else(|| anyhow!("No thumbnails found in author photo"))?;
+    let sticker = parsed.sticker.thumbnails.last().ok_or_else(|| anyhow!("No thumbnails found in sticker"))?;
     let emotes = vec![UniChatEmote {
         id: String::from("sticker"),
         code: String::from("sticker"),

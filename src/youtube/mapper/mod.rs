@@ -33,11 +33,11 @@ pub fn parse(payload: &serde_json::Value) -> Result<Option<UniChatEvent>, Error>
     } else if let Some(value) = payload.get("addChatItemAction") {
         return add_chat_item_action::parse(value);
     } else if let Some(value) = payload.get("removeChatItemAction") {
-        return remove_chat_item_action::parse(value.clone());
+        return remove_chat_item_action::parse(value);
     } else if let Some(value) = payload.get("removeChatItemByAuthorAction") {
-        return remove_chat_item_by_author_action::parse(value.clone());
+        return remove_chat_item_by_author_action::parse(value);
     } else if let Some(value) = get_interactivity_widget_action(payload) {
-        return add_interactivity_widget_action::parse(value.clone());
+        return add_interactivity_widget_action::parse(value);
     }
 
     return Ok(None);

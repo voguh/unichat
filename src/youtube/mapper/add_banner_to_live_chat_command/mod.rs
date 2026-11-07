@@ -21,7 +21,7 @@ pub fn parse(value: &serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
     let banner_renderer = value.get("bannerRenderer").ok_or_else(|| anyhow!("No bannerRenderer found"))?;
 
     if let Some(value) = banner_renderer.get("liveChatBannerRenderer") {
-        return live_chat_banner_renderer::parse(value.clone());
+        return live_chat_banner_renderer::parse(value);
     }
 
     return Ok(None);

@@ -21,7 +21,6 @@ pub mod base64;
 pub mod constants;
 pub mod jsonrpc;
 pub mod paths;
-pub mod properties;
 pub mod semver;
 pub mod ureq;
 pub mod userstore;

@@ -18,8 +18,6 @@ use crate::events::UniChatEvent;
 use crate::events::UniChatMessageEventPayload;
 use crate::events::UniChatPlatform;
 use crate::utils::get_current_timestamp;
-use crate::utils::properties;
-use crate::utils::properties::PropertiesKey;
 use crate::youtube::mapper::structs::author::AuthorBadgeWrapper;
 use crate::youtube::mapper::structs::author::AuthorNameWrapper;
 use crate::youtube::mapper::structs::author::AuthorPhotoThumbnailsWrapper;
@@ -33,6 +31,7 @@ use crate::youtube::mapper::structs::author::parse_author_username;
 use crate::youtube::mapper::structs::message::MessageRunsWrapper;
 use crate::youtube::mapper::structs::message::parse_message_emojis;
 use crate::youtube::mapper::structs::message::parse_message_string;
+use crate::youtube::read_channel_id;
 
 /* ========================================================================== */
 
@@ -51,12 +50,12 @@ struct LiveChatTextMessageRenderer {
     before_content_buttons: Option<Vec<BeforeContentButton>>
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
-pub fn parse(value: serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
-    let parsed: LiveChatTextMessageRenderer = serde_json::from_value(value)?;
+pub fn parse(value: &serde_json::Value) -> Result<Option<UniChatEvent>, Error> {
+    let parsed = LiveChatTextMessageRenderer::deserialize(value)?;
 
-    let channel_id = properties::get_item(PropertiesKey::YouTubeChannelId)?;
+    let channel_id = read_channel_id()?;
     let author_id = parsed.author_external_channel_id;
     let author_username = parse_author_username(&parsed.author_name);
     let author_name = parse_author_name(&parsed.author_name);

@@ -37,7 +37,7 @@ pub fn proxy_youtube_url(url: &str) -> String {
     return format!("/proxy/{}?referer=https://www.youtube.com/", base64::url_safe_encode(url));
 }
 
-/* <============================================================================================> */
+/* ========================================================================== */
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
