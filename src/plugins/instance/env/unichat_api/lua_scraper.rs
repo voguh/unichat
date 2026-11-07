@@ -34,18 +34,8 @@ use crate::utils::paths::AppPaths;
 
 /* ========================================================================== */
 
-fn get_optional_table_property<R: FromLua>(table: &Table, key: &str) -> Option<R> {
+fn get_property<R: FromLua>(table: &Table, key: &str) -> Option<R> {
     return table.get(key).ok();
-}
-
-fn get_table_property<R: FromLua>(table: &Table, key: &str, default_value: Option<R>) -> Result<R, Error> {
-    if let Some(value) = get_optional_table_property(table, key) {
-        return Ok(value);
-    } else if let Some(default_value) = default_value {
-        return Ok(default_value);
-    }
-
-    return Err(Error::external(format!("Missing required table property '{}'", key)));
 }
 
 pub struct LuaUniChatScraper {
@@ -67,22 +57,15 @@ pub struct LuaUniChatScraper {
 impl LuaUniChatScraper {
     pub fn new(id: String, name: String, scraper_js: String, on_event: Function, opts: Table) -> Result<Self, Error> {
         let default_text = format!("Enter {} chat url...", name);
-        let editing_tooltip_message = get_table_property(&opts, "editing_tooltip_message", Some(default_text.clone()))?;
-        let editing_tooltip_urls = get_table_property(&opts, "editing_tooltip_urls", Some(Vec::new()))?;
-        let placeholder_text = get_table_property(&opts, "placeholder_text", Some(default_text))?;
-        let badges = get_table_property(&opts, "badges", Some(Vec::new()))?;
-        let icon = get_table_property(&opts, "icon", Some(String::from("fas fa-video")))?;
-        let validate_url = get_table_property(&opts, "validate_url", None)?;
-        let on_ready = get_optional_table_property(&opts, "on_ready");
-        let on_error = get_optional_table_property(&opts, "on_error");
-        let on_fatal = get_optional_table_property(&opts, "on_fatal");
-
-        if id.trim().is_empty()
-            || id.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-')
-            || !id.trim().ends_with("-chat")
-        {
-            return Err(Error::external(format!("Invalid scraper ID '{}'", id)));
-        }
+        let editing_tooltip_message = get_property(&opts, "editing_tooltip_message").unwrap_or(default_text.clone());
+        let editing_tooltip_urls = get_property(&opts, "editing_tooltip_urls").unwrap_or_default();
+        let placeholder_text = get_property(&opts, "placeholder_text").unwrap_or(default_text);
+        let badges = get_property(&opts, "badges").unwrap_or_default();
+        let icon = get_property(&opts, "icon").unwrap_or_else(|| String::from("fas fa-video"));
+        let validate_url = opts.get("validate_url")?;
+        let on_ready = get_property(&opts, "on_ready");
+        let on_error = get_property(&opts, "on_error");
+        let on_fatal = get_property(&opts, "on_fatal");
 
         if name.trim().is_empty() {
             return Err(Error::external("Empty scraper name"));
@@ -108,9 +91,7 @@ impl LuaUniChatScraper {
     fn log_action(&self, file_name: &str, content: &impl std::fmt::Display) {
         let app_log_dir = paths::get(AppPaths::AppLog);
         let scraper_log_dir = app_log_dir.join(&self.id);
-        if !scraper_log_dir.exists() {
-            fs::create_dir_all(&scraper_log_dir).expect("Failed to create scraper log directory")
-        }
+        fs::create_dir_all(&scraper_log_dir).expect("Failed to create scraper log directory");
 
         let log_file = scraper_log_dir.join(file_name);
         let mut options = fs::OpenOptions::new();
@@ -178,7 +159,7 @@ impl UniChatScraper for LuaUniChatScraper {
 
                 let event_type = json.get("type").and_then(|v| v.as_str()).unwrap_or_default();
                 if event_type == "unichat:userstore_update" {
-                    log::warn!(target: &format!("scraper:{}", self.name), "Event 'unichat:userstore_update' is not allowed");
+                    log::warn!(target: &format!("scraper:{}", self.id), "Event 'unichat:userstore_update' is not allowed");
                     return Ok(());
                 }
 
@@ -187,11 +168,11 @@ impl UniChatScraper for LuaUniChatScraper {
                     let platform = raw_platform.and_then(|v| UniChatPlatform::deserialize(v).ok());
                     if let Some(platform) = &platform {
                         if !matches!(platform, UniChatPlatform::Other(_)) {
-                            log::warn!(target: &format!("scraper:{}", self.name), "Event '{}' with reserved platform {:?} is not allowed", event_type, platform);
+                            log::warn!(target: &format!("scraper:{}", self.id), "Event '{}' with reserved platform {:?} is not allowed", event_type, platform);
                             return Ok(());
                         }
                     } else {
-                        log::warn!(target: &format!("scraper:{}", self.name), "Event '{}' without platform is not allowed", event_type);
+                        log::warn!(target: &format!("scraper:{}", self.id), "Event '{}' without platform is not allowed", event_type);
                         return Ok(());
                     }
                 }
@@ -199,8 +180,8 @@ impl UniChatScraper for LuaUniChatScraper {
                 let parsed: UniChatEvent = serde_json::from_value(json)?;
 
                 if log_events == SettingLogEventLevel::AllEvents {
-                    let str = serde_json::to_string(&parsed)?;
-                    self.log_action("events-parsed.log", &str);
+                    let serialized = serde_json::to_string(&parsed)?;
+                    self.log_action("events-parsed.log", &serialized);
                 }
 
                 events::emit(parsed);
@@ -211,7 +192,7 @@ impl UniChatScraper for LuaUniChatScraper {
                 }
             }
             Err(err) => {
-                log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper 'on_event' callback: {:#?}", self.id, err);
+                log::error!(target: &format!("scraper:{}", self.id), "An error occurred on 'on_event' callback: {:#?}", err);
                 self.log_action("events-error.log", &format!("{:#?} -- {:?}", err, event));
             }
         }
@@ -225,7 +206,7 @@ impl UniChatScraper for LuaUniChatScraper {
             let table = lua.to_value(event)?;
 
             if let Err(err) = callback.call::<()>(table) {
-                log::error!(target: &format!("scraper:{}", self.name), "An error occurred on '{}' scraper '{:?}' status callback: {:#?}", self.id, event.status, err);
+                log::error!(target: &format!("scraper:{}", self.id), "An error occurred on '{:?}' status callback: {:#?}", event.status, err);
             }
         }
 

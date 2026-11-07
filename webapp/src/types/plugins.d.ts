@@ -18,7 +18,7 @@ export interface PluginMetadata {
     author: string | null;
     license: string | null;
     homepage: string | null;
-    dependencies: string[];
+    dependencies: Record<string, string>;
 
     path: string;
     icon: string | null;

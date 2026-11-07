@@ -53,7 +53,7 @@ impl UniChatAPI {
         let listeners: Arc<RwLock<Vec<(u64, Function)>>> = Arc::new(RwLock::new(Vec::new()));
         let next_id = Arc::new(AtomicU64::new(0));
 
-        let logger_name = id.to_string();
+        let logger_name = id.clone();
         let listeners_clone = listeners.clone();
         tauri::async_runtime::spawn(async move {
             let mut rx = events::subscribe();
@@ -106,7 +106,7 @@ impl UserData for UniChatAPI {
         methods.add_method(
             "register_scraper",
             |_lua, this, (id, name, scraper_js_path, on_event, opts): (String, String, String, Function, Table)| {
-                let plugin = get_plugin(&this.plugin_id).map_err(Error::external)?;
+                let plugin = get_plugin(&this.plugin_id);
 
                 let js_path = safe_guard_path(&plugin.get_data_path(), &scraper_js_path).map_err(Error::external)?;
                 let js_content = fs::read_to_string(js_path).map_err(Error::external)?;
@@ -134,8 +134,7 @@ impl UserData for UniChatAPI {
                 emote_table.set("code", emote.code.clone())?;
                 emote_table.set("url", emote.url.clone())?;
 
-                let table_name = lua.create_string("UniChatEmote")?;
-                let locked_emote = table_deep_readonly(lua, &Value::String(table_name), emote_table)?;
+                let locked_emote = table_deep_readonly(lua, "UniChatEmote", emote_table)?;
                 emotes_table.set(code.clone(), locked_emote)?;
             }
 
@@ -143,12 +142,12 @@ impl UserData for UniChatAPI {
         });
 
         methods.add_method("expose_module", |_lua, this, (module_name, module_table): (String, Value)| {
-            let plugin = get_plugin(&this.plugin_id).map_err(Error::external)?;
+            let plugin = get_plugin(&this.plugin_id);
             let plugin_id = this.plugin_id.clone();
             let key = format!("{}:{}", plugin_id, module_name);
 
             if let Err(err) = shared_modules::add(key, module_table) {
-                log::error!(target: &format!("plugin:{}", plugin_id), "Failed to expose shared module '{}' for plugin '{}': {:#?}", module_name, plugin_id, err);
+                log::error!(target: &format!("plugin:{}", plugin_id), "Failed to expose shared module '{}': {:#?}", module_name, err);
                 let msg = format!("Failed to expose shared module '{}': {:#?}", module_name, err);
                 plugin.add_message(msg.clone());
                 return Err(Error::external(msg));
@@ -160,47 +159,44 @@ impl UserData for UniChatAPI {
         });
 
         methods.add_method("add_event_listener", |_lua, this, callback: Function| {
-            let plugin = get_plugin(&this.plugin_id).map_err(Error::external)?;
+            let plugin = get_plugin(&this.plugin_id);
 
             let id = this.next_listener_id.fetch_add(1, Ordering::SeqCst);
             let mut listeners = this.write_event_listeners();
             listeners.push((id, callback));
 
-            plugin.add_message(format!("Added event listener '{:?}'.", id));
+            plugin.add_message(format!("Added event listener '{}'.", id));
 
             return Ok(id);
         });
 
         methods.add_method("remove_event_listener", |_lua, this, listener_id: u64| {
-            let plugin = get_plugin(&this.plugin_id).map_err(Error::external)?;
+            let plugin = get_plugin(&this.plugin_id);
 
             let mut listeners = this.write_event_listeners();
             listeners.retain(|(id, _)| *id != listener_id);
 
-            plugin.add_message(format!("Removed event listener '{:?}'.", listener_id));
+            plugin.add_message(format!("Removed event listener '{}'.", listener_id));
 
             return Ok(());
         });
 
-        methods.add_method("get_userstore_item", |lua, this, key: String| {
+        methods.add_method("get_userstore_item", |_lua, this, key: String| {
             let key = format!("{}:{}", this.plugin_id, key);
             let item: Option<String> = userstore::get_item(&key).map_err(Error::external)?;
-            if let Some(item) = item {
-                let lua_string = lua.create_string(item)?;
-                return Ok(Value::String(lua_string));
-            }
-
-            return Ok(Value::Nil);
+            return Ok(item);
         });
 
         methods.add_method("set_userstore_item", |_lua, this, (key, value): (String, Value)| {
             let str_value: Option<String>;
-            if let Value::String(lua_string) = value {
-                str_value = Some(lua_string.to_string_lossy());
-            } else if let Value::Nil = value {
-                str_value = None;
-            } else {
-                return Err(Error::external("Value must be a string or nil"));
+            match value {
+                Value::String(lua_string) => str_value = Some(lua_string.to_string_lossy()),
+                Value::Nil => {
+                    str_value = None;
+                }
+                _ => {
+                    return Err(Error::external("Value must be a string or nil"));
+                }
             }
 
             let key = format!("{}:{}", this.plugin_id, key);

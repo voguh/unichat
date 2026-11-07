@@ -21,12 +21,16 @@ use anyhow::Error;
 use serde::Serialize;
 use serde_json::Map;
 
+use crate::UNICHAT_VERSION;
 use crate::addons::UniChatAddonManifest;
+use crate::addons::is_valid_addon_dir;
 use crate::addons::load_manifest;
 use crate::plugins::PluginMetadata;
 use crate::utils::constants::BASE_URL;
 use crate::utils::paths;
 use crate::utils::paths::AppPaths;
+use crate::utils::semver::Version;
+use crate::utils::semver::VersionRange;
 
 /* ========================================================================== */
 
@@ -44,11 +48,11 @@ pub struct WidgetMetadata {
     pub id: String,
     pub name: String,
     pub description: Option<String>,
-    pub version: String,
+    pub version: Version,
     pub author: Option<String>,
     pub license: Option<String>,
     pub homepage: Option<String>,
-    pub dependencies: Vec<String>,
+    pub dependencies: HashMap<String, VersionRange>,
 
     pub path: PathBuf,
     pub rest_path: String,
@@ -109,16 +113,34 @@ impl WidgetMetadata {
         return self.path.join(legacy);
     }
 
+    /* ====================================================================== */
+
+    fn widget_css_path(&self) -> PathBuf {
+        return self.entrypoint_path("widget.css", "style.css");
+    }
+
     pub fn widget_css(&self) -> String {
-        return fs::read_to_string(self.entrypoint_path("widget.css", "style.css")).unwrap_or_default();
+        return fs::read_to_string(self.widget_css_path()).unwrap_or_default();
+    }
+
+    /* ====================================================================== */
+
+    fn widget_html_path(&self) -> PathBuf {
+        return self.entrypoint_path("widget.html", "main.html");
     }
 
     pub fn widget_html(&self) -> String {
-        return fs::read_to_string(self.entrypoint_path("widget.html", "main.html")).unwrap_or_default();
+        return fs::read_to_string(self.widget_html_path()).unwrap_or_default();
+    }
+
+    /* ====================================================================== */
+
+    fn widget_js_path(&self) -> PathBuf {
+        return self.entrypoint_path("widget.js", "script.js");
     }
 
     pub fn widget_js(&self) -> String {
-        return fs::read_to_string(self.entrypoint_path("widget.js", "script.js")).unwrap_or_default();
+        return fs::read_to_string(self.widget_js_path()).unwrap_or_default();
     }
 }
 
@@ -151,11 +173,22 @@ fn get_entrypoint_warning(widget_path: &Path, current: &str, legacy: &str, kind:
     return None;
 }
 
-fn get_warnings_for_widget(widget_path: &Path, source_type: &WidgetSource) -> Vec<String> {
+fn get_warnings_for_widget(
+    widget_path: &Path,
+    source_type: &WidgetSource,
+    manifest: &UniChatAddonManifest
+) -> Vec<String> {
     let mut warnings = Vec::new();
 
     if source_type == &WidgetSource::User && !widget_path.join("manifest.yaml").is_file() {
         warnings.push("MISSING_MANIFEST".to_string());
+    }
+
+    if let Some(version_req) = manifest.dependencies.get("unichat") {
+        let version = Version::parse(UNICHAT_VERSION).expect("UNICHAT_VERSION is not a valid version");
+        if !version_req.matches(&version) {
+            warnings.push("INCOMPATIBLE_UNICHAT_VERSION".to_string());
+        }
     }
 
     warnings.extend(get_entrypoint_warning(widget_path, "widget.html", "main.html", "HTML"));
@@ -177,16 +210,9 @@ fn load_widgets_from_disk(
     let mut loaded = Vec::new();
     let entries = fs::read_dir(widgets_path)?;
     for entry in entries.flatten() {
-        let widget_path = entry.path();
-        if !widget_path.is_dir() {
-            continue;
-        }
-
         let widget_id = entry.file_name().to_string_lossy().to_string();
-        if widget_id.starts_with(".") {
-            continue;
-        } else if widget_id.chars().any(|c| !c.is_ascii_alphanumeric() && c != '_' && c != '-') {
-            log::warn!("Skipping widget with invalid id '{}' from {:?}", widget_id, widgets_path);
+        let widget_path = entry.path();
+        if !is_valid_addon_dir(&widget_id, &widget_path) {
             continue;
         }
 
@@ -202,16 +228,16 @@ fn load_widgets_from_disk(
             }
         }
 
-        let warnings = get_warnings_for_widget(&widget_path, &source_type);
         let manifest = manifest.unwrap_or_else(|| UniChatAddonManifest {
             name: widget_id.clone(),
             description: None,
-            version: String::from("0.0.0"),
+            version: Version::default(),
             author: None,
             license: None,
             homepage: None,
-            dependencies: Vec::new()
+            dependencies: HashMap::new()
         });
+        let warnings = get_warnings_for_widget(&widget_path, &source_type, &manifest);
 
         let rest_path;
         if let WidgetSource::UserPlugin(plugin_id) = &source_type {

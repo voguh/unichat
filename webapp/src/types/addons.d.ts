@@ -15,7 +15,7 @@ export interface UniChatAddonManifest {
     author: string | null;
     license: string | null;
     homepage: string | null;
-    dependencies: string[];
+    dependencies: Record<string, string>;
 }
 
 /* ========================================================================== */

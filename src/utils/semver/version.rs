@@ -13,6 +13,8 @@ use std::fmt::Display;
 
 use anyhow::Error;
 use anyhow::anyhow;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::utils::semver::pre_release_type::PreReleaseType;
 
@@ -30,7 +32,7 @@ fn parse_number(value: &str) -> Result<u16, Error> {
 
 /* ========================================================================== */
 
-#[derive(Clone, Debug)]
+#[derive(Default, Clone, Debug)]
 pub struct Version {
     major: u16,
     minor: u16,
@@ -172,5 +174,18 @@ impl Display for Version {
         }
 
         return Ok(());
+    }
+}
+
+impl Serialize for Version {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        return serializer.collect_str(self);
+    }
+}
+
+impl<'de> Deserialize<'de> for Version {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let value = String::deserialize(deserializer)?;
+        return Version::parse(&value).map_err(serde::de::Error::custom);
     }
 }

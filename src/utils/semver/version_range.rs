@@ -13,6 +13,8 @@ use std::fmt::Display;
 
 use anyhow::Error;
 use anyhow::anyhow;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::utils::semver::bound_type::BoundType;
 use crate::utils::semver::version::Version;
@@ -191,5 +193,18 @@ impl Display for VersionRange {
         }
 
         return write!(f, "{},{}", min_str, max_str);
+    }
+}
+
+impl Serialize for VersionRange {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        return serializer.collect_str(self);
+    }
+}
+
+impl<'de> Deserialize<'de> for VersionRange {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let value = String::deserialize(deserializer)?;
+        return VersionRange::parse(&value).map_err(serde::de::Error::custom);
     }
 }

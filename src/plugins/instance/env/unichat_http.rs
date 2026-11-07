@@ -23,6 +23,7 @@ use crate::utils::ureq;
 use crate::utils::ureq::RequestBuilder;
 use crate::utils::ureq::ResponseExt as _;
 use crate::utils::ureq::http::response::Response;
+use crate::utils::ureq::typestate::WithBody;
 
 /* ========================================================================== */
 
@@ -72,14 +73,8 @@ impl UserData for UreqResponse {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("header", |_lua, this, key: String| {
             let headers = this.response.headers();
-            let header = headers.get(key);
-
-            if let Some(header) = header {
-                let value = header.to_str().map_err(Error::external)?;
-                return Ok(Some(value.to_string()));
-            } else {
-                return Ok(None);
-            }
+            let value = headers.get(key).map(|header| header.to_str()).transpose().map_err(Error::external)?;
+            return Ok(value.map(|value| value.to_string()));
         });
 
         methods.add_method_mut("text", |_lua, this, ()| {
@@ -136,6 +131,33 @@ fn apply_args<B>(builder: RequestBuilder<B>, args: Option<Table>) -> Result<Requ
     return Ok(builder);
 }
 
+fn to_response(lua: &Lua, response: Response<ureq::Body>) -> Result<Value, Error> {
+    let userdata = lua.create_userdata(UreqResponse { response })?;
+    return Ok(Value::UserData(userdata));
+}
+
+fn send_with_body(lua: &Lua, request: RequestBuilder<WithBody>, body: Option<Value>) -> Result<Value, Error> {
+    let response;
+    match body {
+        Some(Value::String(s)) => {
+            let body = s.to_string_lossy();
+            response = request.send(&body).map_err(Error::external)?;
+        }
+        Some(Value::Table(t)) => {
+            let value: serde_json::Value = from_lua_value(lua, Value::Table(t))?;
+            response = request.send_json(&value).map_err(Error::external)?;
+        }
+        Some(_) => {
+            return Err(Error::external("Invalid body type. Expected string or table."));
+        }
+        None => {
+            response = request.send_empty().map_err(Error::external)?;
+        }
+    }
+
+    return to_response(lua, response);
+}
+
 /* ========================================================================== */
 
 pub struct UniChatHttpModule;
@@ -154,89 +176,28 @@ impl UserData for UniChatHttpModule {
             request = apply_args(request, args)?;
 
             let response = request.call().map_err(Error::external)?;
-            let userdata = lua.create_userdata(UreqResponse { response })?;
-            return Ok(Value::UserData(userdata));
+            return to_response(lua, response);
         });
 
         methods.add_method("post", |lua, _this, (uri, body, args): (String, Option<Value>, Option<Table>)| {
             let mut request = ureq::post(uri);
             request = apply_args(request, args)?;
 
-            let response;
-            if let Some(body) = body {
-                match body {
-                    Value::String(s) => {
-                        let body = s.to_string_lossy();
-                        response = request.send(&body).map_err(Error::external)?;
-                    }
-                    Value::Table(t) => {
-                        let value: serde_json::Value = from_lua_value(lua, Value::Table(t))?;
-                        response = request.send_json(&value).map_err(Error::external)?;
-                    }
-                    _ => {
-                        return Err(Error::external("Invalid body type. Expected string or table."));
-                    }
-                }
-            } else {
-                response = request.send_empty().map_err(Error::external)?;
-            }
-
-            let userdata = lua.create_userdata(UreqResponse { response })?;
-            return Ok(Value::UserData(userdata));
+            return send_with_body(lua, request, body);
         });
 
         methods.add_method("put", |lua, _this, (uri, body, args): (String, Option<Value>, Option<Table>)| {
             let mut request = ureq::put(uri);
             request = apply_args(request, args)?;
 
-            let response;
-            if let Some(body) = body {
-                match body {
-                    Value::String(s) => {
-                        let body = s.to_string_lossy();
-                        response = request.send(&body).map_err(Error::external)?;
-                    }
-                    Value::Table(t) => {
-                        let value: serde_json::Value = from_lua_value(lua, Value::Table(t))?;
-                        response = request.send_json(&value).map_err(Error::external)?;
-                    }
-                    _ => {
-                        return Err(Error::external("Invalid body type. Expected string or table."));
-                    }
-                }
-            } else {
-                response = request.send_empty().map_err(Error::external)?;
-            }
-
-            let userdata = lua.create_userdata(UreqResponse { response })?;
-            return Ok(Value::UserData(userdata));
+            return send_with_body(lua, request, body);
         });
 
         methods.add_method("patch", |lua, _this, (uri, body, args): (String, Option<Value>, Option<Table>)| {
             let mut request = ureq::patch(uri);
             request = apply_args(request, args)?;
 
-            let response;
-            if let Some(body) = body {
-                match body {
-                    Value::String(s) => {
-                        let body = s.to_string_lossy();
-                        response = request.send(&body).map_err(Error::external)?;
-                    }
-                    Value::Table(t) => {
-                        let value: serde_json::Value = from_lua_value(lua, Value::Table(t))?;
-                        response = request.send_json(&value).map_err(Error::external)?;
-                    }
-                    _ => {
-                        return Err(Error::external("Invalid body type. Expected string or table."));
-                    }
-                }
-            } else {
-                response = request.send_empty().map_err(Error::external)?;
-            }
-
-            let userdata = lua.create_userdata(UreqResponse { response })?;
-            return Ok(Value::UserData(userdata));
+            return send_with_body(lua, request, body);
         });
 
         methods.add_method("delete", |lua, _this, (uri, args): (String, Option<Table>)| {
@@ -244,8 +205,7 @@ impl UserData for UniChatHttpModule {
             request = apply_args(request, args)?;
 
             let response = request.call().map_err(Error::external)?;
-            let userdata = lua.create_userdata(UreqResponse { response })?;
-            return Ok(Value::UserData(userdata));
+            return to_response(lua, response);
         });
 
         methods.add_method("head", |lua, _this, (uri, args): (String, Option<Table>)| {
@@ -253,8 +213,7 @@ impl UserData for UniChatHttpModule {
             request = apply_args(request, args)?;
 
             let response = request.call().map_err(Error::external)?;
-            let userdata = lua.create_userdata(UreqResponse { response })?;
-            return Ok(Value::UserData(userdata));
+            return to_response(lua, response);
         });
     }
 }

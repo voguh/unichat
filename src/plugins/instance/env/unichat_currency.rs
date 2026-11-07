@@ -36,11 +36,7 @@ impl UserData for UniChatCurrencyModule {
         methods.add_method(
             "convert",
             |_lua, _this, (value, token): (f64, String)| -> Result<(Option<f64>, Option<String>)> {
-                if let Some((converted, target)) = currency::convert(value, &token) {
-                    return Ok((Some(converted), Some(target)));
-                }
-
-                return Ok((None, None));
+                return Ok(currency::convert(value, &token).unzip());
             }
         );
     }

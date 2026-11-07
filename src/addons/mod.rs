@@ -24,7 +24,6 @@ use zip::ZipArchive;
 use crate::UNICHAT_VERSION;
 use crate::utils::paths;
 use crate::utils::paths::AppPaths;
-use crate::utils::semver;
 use crate::utils::semver::Version;
 use crate::utils::semver::VersionRange;
 use crate::utils::ureq;
@@ -36,6 +35,7 @@ pub mod widget;
 /* ========================================================================== */
 
 pub use manifest::UniChatAddonManifest;
+pub use manifest::is_valid_addon_dir;
 pub use manifest::load_manifest;
 
 /* ========================================================================== */
@@ -104,7 +104,7 @@ struct CommunityAddon {
     updated_at: Option<String>,
     releases: Option<Vec<AddonRelease>>,
 
-    installed_version: Option<String>,
+    installed_version: Option<Version>,
     compatible: bool,
     has_update: bool
 }
@@ -126,18 +126,15 @@ fn is_compatible(requires_unichat: &Option<String>) -> bool {
     return true;
 }
 
-fn has_update(installed_version: &str, releases: &[AddonRelease]) -> bool {
-    let mut installed_is_prerelease = false;
-    if let Ok(version) = Version::parse(installed_version) {
-        installed_is_prerelease = version.pre_release().is_some();
-    }
+fn has_update(installed_version: &Version, releases: &[AddonRelease]) -> bool {
+    let installed_is_prerelease = installed_version.pre_release().is_some();
 
     for release in releases {
         if release.prerelease && !installed_is_prerelease {
             continue;
         }
 
-        if semver::gt(&release.name, installed_version) {
+        if Version::parse(&release.name).is_ok_and(|release_version| release_version > *installed_version) {
             return true;
         }
     }
@@ -153,7 +150,7 @@ fn community_addon_id(internal_id: &str, prefix: &str) -> String {
     return repository.strip_prefix(prefix).unwrap_or(repository).to_string();
 }
 
-fn find_installed_version(addons_path: &Path, id: &str) -> Option<String> {
+fn find_installed_version(addons_path: &Path, id: &str) -> Option<Version> {
     let addon_path = addons_path.join(id);
     if !addon_path.join("manifest.yaml").is_file() {
         return None;
@@ -171,7 +168,7 @@ fn find_installed_version(addons_path: &Path, id: &str) -> Option<String> {
 fn build_community_addon(
     data: CommunityAddonData,
     id: String,
-    installed_version: Option<String>,
+    installed_version: Option<Version>,
     releases: &[AddonRelease]
 ) -> CommunityAddon {
     let compatible = is_compatible(&data.requires_unichat);

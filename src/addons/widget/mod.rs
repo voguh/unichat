@@ -29,6 +29,7 @@ use crate::api;
 use crate::cache;
 use crate::utils::paths;
 use crate::utils::paths::AppPaths;
+use crate::utils::semver::Version;
 use crate::widgets::reload_user_widgets;
 
 /* ========================================================================== */
@@ -58,7 +59,7 @@ fn fetch(internal_id: &str) -> Result<CommunityAddonData, Error> {
     return cache::get_or_fetch(&key, COMMUNITY_WIDGETS_FILE_TTL, || api::get(&path));
 }
 
-fn build(data: CommunityAddonData, installed_version: Option<String>) -> CommunityWidget {
+fn build(data: CommunityAddonData, installed_version: Option<Version>) -> CommunityWidget {
     let id = community_addon_id(&data.id, COMMUNITY_WIDGET_ID_PREFIX);
     let preview_url = api::url(&format!("{}/{}/preview", COMMUNITY_WIDGETS_PATH, data.id));
     let releases = data.releases.clone().unwrap_or_default();

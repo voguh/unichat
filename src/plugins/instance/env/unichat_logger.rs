@@ -8,6 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
+use log::Level;
 use mlua::Error;
 use mlua::Lua;
 use mlua::LuaSerdeExt as _;
@@ -18,12 +19,10 @@ use mlua::Variadic;
 
 /* ========================================================================== */
 
-fn format_str(lua: &Lua, args: Variadic<Value>) -> Result<(String, Option<Error>), Error> {
+fn format_str(lua: &Lua, mut args: Variadic<Value>) -> Result<(String, Option<Error>), Error> {
     if args.is_empty() {
         return Err(Error::external("No log message provided"));
     }
-
-    let mut args = args;
 
     let msg = args.remove(0);
     let mut msg: String = lua.from_value(msg)?;
@@ -33,22 +32,32 @@ fn format_str(lua: &Lua, args: Variadic<Value>) -> Result<(String, Option<Error>
 
     let mut error: Option<Box<Error>> = None;
     if args.last().is_some_and(|v| v.is_error()) {
-        let last_arg = args.pop().expect("Last argument is checked above");
-        if let Value::Error(e) = last_arg {
+        if let Some(Value::Error(e)) = args.pop() {
             error = Some(e);
         }
     }
 
     for arg in args.into_iter() {
         if let Some(arg_str) = lua.coerce_string(arg)? {
-            let str = arg_str.to_string_lossy();
-            msg = msg.replacen("{}", &str, 1);
+            msg = msg.replacen("{}", &arg_str.to_string_lossy(), 1);
         } else {
             msg = msg.replacen("{}", "<non-stringifiable>", 1);
         }
     }
 
     return Ok((msg, error.map(|e| *e)));
+}
+
+fn write_log(lua: &Lua, plugin_id: &str, level: Level, args: Variadic<Value>) -> Result<(), Error> {
+    let (msg, err) = format_str(lua, args)?;
+    let target = format!("plugin:{}", plugin_id);
+
+    log::log!(target: &target, level, "{}", msg);
+    if let Some(err) = err {
+        log::error!(target: &target, "{:#?}", err);
+    }
+
+    return Ok(());
 }
 
 pub struct UniChatLoggerModule {
@@ -64,48 +73,20 @@ impl UniChatLoggerModule {
 
 impl UserData for UniChatLoggerModule {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("debug", move |lua, this, args: Variadic<Value>| {
-            let (msg, err) = format_str(lua, args)?;
-
-            log::debug!(target: &format!("plugin:{}", this.plugin_id), "{}", msg);
-            if let Some(err) = err {
-                log::error!(target: &format!("plugin:{}", this.plugin_id), "{:#?}", err);
-            }
-
-            return Ok(());
+        methods.add_method("debug", |lua, this, args: Variadic<Value>| {
+            return write_log(lua, &this.plugin_id, Level::Debug, args);
         });
 
-        methods.add_method("info", move |lua, this, args: Variadic<Value>| {
-            let (msg, err) = format_str(lua, args)?;
-
-            log::info!(target: &format!("plugin:{}", this.plugin_id), "{}", msg);
-            if let Some(err) = err {
-                log::error!(target: &format!("plugin:{}", this.plugin_id), "{:#?}", err);
-            }
-
-            return Ok(());
+        methods.add_method("info", |lua, this, args: Variadic<Value>| {
+            return write_log(lua, &this.plugin_id, Level::Info, args);
         });
 
-        methods.add_method("warn", move |lua, this, args: Variadic<Value>| {
-            let (msg, err) = format_str(lua, args)?;
-
-            log::warn!(target: &format!("plugin:{}", this.plugin_id), "{}", msg);
-            if let Some(err) = err {
-                log::error!(target: &format!("plugin:{}", this.plugin_id), "{:#?}", err);
-            }
-
-            return Ok(());
+        methods.add_method("warn", |lua, this, args: Variadic<Value>| {
+            return write_log(lua, &this.plugin_id, Level::Warn, args);
         });
 
-        methods.add_method("error", move |lua, this, args: Variadic<Value>| {
-            let (msg, err) = format_str(lua, args)?;
-
-            log::error!(target: &format!("plugin:{}", this.plugin_id), "{}", msg);
-            if let Some(err) = err {
-                log::error!(target: &format!("plugin:{}", this.plugin_id), "{:#?}", err);
-            }
-
-            return Ok(());
+        methods.add_method("error", |lua, this, args: Variadic<Value>| {
+            return write_log(lua, &this.plugin_id, Level::Error, args);
         });
     }
 }

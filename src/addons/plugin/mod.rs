@@ -30,6 +30,7 @@ use crate::api;
 use crate::cache;
 use crate::utils::paths;
 use crate::utils::paths::AppPaths;
+use crate::utils::semver::Version;
 
 /* ========================================================================== */
 
@@ -58,7 +59,7 @@ fn fetch(internal_id: &str) -> Result<CommunityAddonData, Error> {
     return cache::get_or_fetch(&key, COMMUNITY_PLUGINS_FILE_TTL, || api::get(&path));
 }
 
-fn build(data: CommunityAddonData, installed_version: Option<String>) -> CommunityPlugin {
+fn build(data: CommunityAddonData, installed_version: Option<Version>) -> CommunityPlugin {
     let id = community_addon_id(&data.id, COMMUNITY_PLUGIN_ID_PREFIX);
     let icon_url = api::url(&format!("{}/{}/icon", COMMUNITY_PLUGINS_PATH, data.id));
     let releases = data.releases.clone().unwrap_or_default();

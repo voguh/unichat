@@ -24,31 +24,9 @@ use crate::plugins::PluginStatus;
 use crate::plugins::runtime;
 use crate::utils::get_current_timestamp;
 use crate::utils::semver::Version;
-use crate::utils::semver::VersionRange;
 use crate::widgets;
 
 mod env;
-
-/* ========================================================================== */
-
-fn parse_dependencies(raw_dependencies: &Vec<String>) -> Result<Vec<(String, VersionRange)>, Error> {
-    let mut dependencies: Vec<(String, VersionRange)> = Vec::new();
-
-    for dep in raw_dependencies {
-        let parts: Vec<&str> = dep.splitn(2, '@').collect();
-        if parts.len() != 2 {
-            return Err(anyhow!("Invalid dependency '{}'", dep));
-        }
-
-        let name = parts[0].trim().to_string();
-        let version = parts[1].trim();
-        let version_req = VersionRange::parse(version)?;
-
-        dependencies.push((name, version_req));
-    }
-
-    return Ok(dependencies);
-}
 
 /* ========================================================================== */
 
@@ -62,7 +40,8 @@ fn start(plugin: &Arc<PluginMetadata>) -> Result<(), Error> {
     let start_ms = get_current_timestamp();
     log::info!("Executing plugin entrypoint for plugin: {} v{}", plugin.id, plugin.version);
     let entrypoint_code = fs::read_to_string(plugin.get_entrypoint_path())?;
-    lua.load(&entrypoint_code).set_environment(plugin_env.clone()).exec()?;
+    let chunk_name = format!("{}/main.lua", plugin.id);
+    lua.load(&entrypoint_code).set_name(chunk_name).set_environment(plugin_env).exec()?;
     let end_ms = get_current_timestamp();
     log::info!("Plugin '{}' initialized in {} ms", plugin.id, end_ms - start_ms);
     plugin.add_message(format!("Initialization finished in {}ms", end_ms - start_ms));
@@ -73,8 +52,7 @@ fn start(plugin: &Arc<PluginMetadata>) -> Result<(), Error> {
 /* ========================================================================== */
 
 pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(), Error> {
-    let parsed_dependencies = parse_dependencies(&manifest.dependencies)?;
-    let plugin = PluginMetadata::new(plugin_path, manifest, parsed_dependencies)?;
+    let plugin = PluginMetadata::new(plugin_path, manifest)?;
     let plugin = Arc::new(plugin);
     let mut is_valid = true;
 
@@ -83,14 +61,12 @@ pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(),
         is_valid = false;
     }
 
-    for (key, version_req) in plugin.dependencies.iter() {
-        if key == "unichat" {
-            let version = Version::parse(UNICHAT_VERSION).expect("UNICHAT_VERSION is not a valid version");
-            if !version_req.matches(&version) {
-                let msg = format!("{} required '{}', found '{}'", UNICHAT_DISPLAY_NAME, version_req, version);
-                plugin.add_message(msg);
-                is_valid = false;
-            }
+    if let Some(version_req) = plugin.dependencies.get("unichat") {
+        let version = Version::parse(UNICHAT_VERSION).expect("UNICHAT_VERSION is not a valid version");
+        if !version_req.matches(&version) {
+            let msg = format!("{} required '{}', found '{}'", UNICHAT_DISPLAY_NAME, version_req, version);
+            plugin.add_message(msg);
+            is_valid = false;
         }
     }
 
@@ -101,7 +77,6 @@ pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(),
         return Err(anyhow!("Invalid plugin '{}'", plugin.id));
     }
 
-    plugin.set_status(PluginStatus::Loaded);
     log::info!("Plugin '{}' loaded", plugin.id);
 
     if let Err(e) = widgets::add_plugin_widgets(&plugin) {
@@ -112,7 +87,7 @@ pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(),
     if let Err(e) = start(&plugin) {
         plugin.add_message(format!("An error occurred on start plugin: {:#?}", e));
         plugin.set_status(PluginStatus::Error);
-        return Err(anyhow!("Failed to create LUA environment for plugin '{}': {:#?}", plugin.id, e));
+        return Err(anyhow!("Failed to start plugin '{}': {:#?}", plugin.id, e));
     }
 
     plugin.set_status(PluginStatus::Active);
