@@ -26,10 +26,7 @@ pub async fn get_community_plugin<R: Runtime>(
 ) -> Result<CommunityPlugin, String> {
     return match plugin::get(&internal_id) {
         Ok(community_plugin) => Ok(community_plugin),
-        Err(e) => {
-            let message = format!("Failed to get community plugin '{}': {:#?}", internal_id, e);
-            return Err(message);
-        }
+        Err(e) => Err(format!("Failed to get community plugin '{}': {:#?}", internal_id, e))
     };
 }
 
@@ -49,10 +46,7 @@ pub async fn get_community_widget<R: Runtime>(
 ) -> Result<CommunityWidget, String> {
     return match widget::get(&internal_id) {
         Ok(community_widget) => Ok(community_widget),
-        Err(e) => {
-            let message = format!("Failed to get community widget '{}': {:#?}", internal_id, e);
-            return Err(message);
-        }
+        Err(e) => Err(format!("Failed to get community widget '{}': {:#?}", internal_id, e))
     };
 }
 
@@ -72,8 +66,7 @@ pub async fn install_community_plugin<R: Runtime>(
     release: Version
 ) -> Result<(), String> {
     if let Err(e) = plugin::install(&internal_id, &release) {
-        let message = format!("Failed to install community plugin '{}' version '{}': {:#?}", internal_id, release, e);
-        return Err(message);
+        return Err(format!("Failed to install community plugin '{}' version '{}': {:#?}", internal_id, release, e));
     }
 
     return Ok(());
@@ -88,8 +81,7 @@ pub async fn install_community_widget<R: Runtime>(
     release: Version
 ) -> Result<(), String> {
     if let Err(e) = widget::install(&internal_id, &release) {
-        let message = format!("Failed to install community widget '{}' version '{}': {:#?}", internal_id, release, e);
-        return Err(message);
+        return Err(format!("Failed to install community widget '{}' version '{}': {:#?}", internal_id, release, e));
     }
 
     return Ok(());

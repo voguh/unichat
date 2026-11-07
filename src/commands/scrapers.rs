@@ -20,14 +20,30 @@ use crate::settings;
 
 /* ========================================================================== */
 
+fn ensure_scraper_id(scraper_id: &str) -> Result<(), String> {
+    if !scraper_id.ends_with("-chat") {
+        return Err(format!("Scraper '{}' not recognized", scraper_id));
+    }
+
+    return Ok(());
+}
+
+/* ========================================================================== */
+
+#[tauri::command]
+pub async fn get_scraper<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) -> Result<Option<Value>, String> {
+    let scraper = scraper::get_scraper(scraper_id);
+    return Ok(scraper.map(|scraper| serialize_scraper(&scraper)));
+}
+
+/* ========================================================================== */
+
 #[tauri::command]
 pub async fn get_scraper_stored_url<R: Runtime>(
     _app: AppHandle<R>,
     scraper_id: &str
 ) -> Result<Option<String>, String> {
-    if !scraper_id.ends_with("-chat") {
-        return Err(format!("Scraper webview '{}' not recognized", scraper_id));
-    }
+    ensure_scraper_id(scraper_id)?;
 
     let url = settings::get_scraper_url(scraper_id);
     return Ok(url);
@@ -40,9 +56,7 @@ pub async fn get_scraper_webview_url<R: Runtime>(
     app: AppHandle<R>,
     scraper_id: &str
 ) -> Result<Option<String>, String> {
-    if !scraper_id.ends_with("-chat") {
-        return Err(format!("Webview window '{}' not recognized", scraper_id));
-    }
+    ensure_scraper_id(scraper_id)?;
 
     if let Some(webview) = app.get_webview_window(scraper_id) {
         let url = webview.url().map_err(|e| format!("An error occurred on get scraper webview URL: {:#?}", e))?;
@@ -50,14 +64,6 @@ pub async fn get_scraper_webview_url<R: Runtime>(
     }
 
     return Ok(None);
-}
-
-/* ========================================================================== */
-
-#[tauri::command]
-pub async fn get_scraper<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) -> Result<Option<Value>, String> {
-    let scraper = scraper::get_scraper(scraper_id);
-    return Ok(scraper.map(|scraper| serialize_scraper(&scraper)));
 }
 
 /* ========================================================================== */
@@ -73,9 +79,7 @@ pub async fn get_scrapers<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<Value>, 
 
 #[tauri::command]
 pub async fn start_scraper<R: Runtime>(_app: AppHandle<R>, scraper_id: &str, url: &str) -> Result<(), String> {
-    if !scraper_id.ends_with("-chat") {
-        return Err(format!("Scraper webview '{}' not recognized", scraper_id));
-    }
+    ensure_scraper_id(scraper_id)?;
 
     log::info!("Starting scraper '{}' with URL '{}'", scraper_id, url);
     let parsed_url = decode_url(url).map_err(|e| format!("An error occurred on decode scraper URL: {:#?}", e))?;
@@ -87,9 +91,7 @@ pub async fn start_scraper<R: Runtime>(_app: AppHandle<R>, scraper_id: &str, url
 
 #[tauri::command]
 pub async fn stop_scraper<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) -> Result<(), String> {
-    if !scraper_id.ends_with("-chat") {
-        return Err(format!("Scraper webview '{}' not recognized", scraper_id));
-    }
+    ensure_scraper_id(scraper_id)?;
 
     log::info!("Stopping scraper '{}'", scraper_id);
 
@@ -100,11 +102,10 @@ pub async fn stop_scraper<R: Runtime>(_app: AppHandle<R>, scraper_id: &str) -> R
 
 #[tauri::command]
 pub async fn toggle_scraper_webview<R: Runtime>(app: AppHandle<R>, scraper_id: &str) -> Result<(), String> {
-    if !scraper_id.ends_with("-chat") {
-        return Err(format!("Scraper webview '{}' not recognized", scraper_id));
-    }
+    ensure_scraper_id(scraper_id)?;
 
-    let webview = app.get_webview_window(scraper_id).ok_or_else(|| format!("Scraper webview '{}' not found", scraper_id))?;
+    let webview = app.get_webview_window(scraper_id);
+    let webview = webview.ok_or_else(|| format!("Scraper webview '{}' not found", scraper_id))?;
     let visible = webview.is_visible();
     let visible = visible.map_err(|e| format!("An error occurred on get scraper webview visibility: {:#?}", e))?;
     if visible {
@@ -125,9 +126,7 @@ pub async fn validate_scraper_url<R: Runtime>(
     url: String
 ) -> Result<String, String> {
     let scraper = scraper::get_scraper(scraper_id);
-    if let Some(scraper) = &scraper {
-        return scraper.validate_url(url).map_err(|e| format!("An error occurred on validate scraper URL: {:#?}", e));
-    }
+    let scraper = scraper.ok_or_else(|| format!("Scraper with ID '{}' not found", scraper_id))?;
 
-    return Err(format!("Scraper with ID '{}' not found", scraper_id));
+    return scraper.validate_url(url).map_err(|e| format!("An error occurred on validate scraper URL: {:#?}", e));
 }

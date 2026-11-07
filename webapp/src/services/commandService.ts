@@ -131,8 +131,7 @@ export class CommandService {
     }
 
     public async setWidgetFieldState(widget: string, fieldstate: Record<string, any>): Promise<void> {
-        const data = JSON.stringify(fieldstate);
-        await invoke("set_widget_fieldstate", { widget, data });
+        await invoke("set_widget_fieldstate", { widget, fieldstate });
     }
 }
 

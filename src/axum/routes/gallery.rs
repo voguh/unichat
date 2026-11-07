@@ -8,47 +8,19 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use std::path::PathBuf;
-
 use axum::body::Body;
 use axum::extract::Path;
 use axum::extract::Request;
-use axum::http::StatusCode;
 use axum::response::Response;
 
 use crate::axum::utils::CACHE_REVALIDATE;
-use crate::axum::utils::serve_partial_content;
+use crate::axum::utils::serve_file;
 use crate::utils::paths;
 use crate::utils::paths::AppPaths;
-use crate::utils::safe_guard_path;
 
 /* ========================================================================== */
 
 pub async fn gallery(Path(asset_path): Path<String>, req: Request<Body>) -> Response {
-    let asset_full_path: PathBuf;
     let gallery_path = paths::get(AppPaths::UniChatGallery);
-    match safe_guard_path(&gallery_path, &asset_path) {
-        Ok(path) => asset_full_path = path,
-        Err(err) => {
-            log::error!("Invalid asset path '{}' for gallery: {:#?}", asset_path, err);
-            return Response::builder()
-                .status(StatusCode::BAD_REQUEST)
-                .body(Body::from("Invalid asset path"))
-                .expect("Failed to build HTTP response");
-        }
-    }
-
-    if !asset_full_path.exists() {
-        return Response::builder()
-            .status(StatusCode::NOT_FOUND)
-            .body(Body::from(format!("Asset '{}' not found in gallery", asset_path)))
-            .expect("Failed to build HTTP response");
-    } else if asset_full_path.is_dir() {
-        return Response::builder()
-            .status(StatusCode::BAD_REQUEST)
-            .body(Body::from(format!("Asset '{}' is a directory, not a file", asset_path)))
-            .expect("Failed to build HTTP response");
-    }
-
-    return serve_partial_content(&asset_full_path, req.headers(), CACHE_REVALIDATE);
+    return serve_file(&gallery_path, &asset_path, req.headers(), CACHE_REVALIDATE);
 }

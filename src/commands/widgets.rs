@@ -24,16 +24,22 @@ use crate::widgets::reload_user_widgets;
 
 /* ========================================================================== */
 
-#[tauri::command]
-pub async fn get_widget_fields<R: Runtime>(_app: AppHandle<R>, widget: String) -> Result<Map<String, Value>, String> {
-    let found = get_widget_from_rest_path(&widget);
-    let widget = found.ok_or_else(|| format!("Widget '{}' not found", widget))?;
-    if widget.widget_source == WidgetSource::System {
-        return Err("Cannot get fields of system widgets".into());
+fn find_user_widget(widget: &str) -> Result<WidgetMetadata, String> {
+    let found = get_widget_from_rest_path(widget);
+    let metadata = found.ok_or_else(|| format!("Widget '{}' not found", widget))?;
+    if metadata.widget_source == WidgetSource::System {
+        return Err(format!("Widget '{}' is a system widget", widget));
     }
 
-    let fields = widget.fields();
-    return Ok(fields);
+    return Ok(metadata);
+}
+
+/* ========================================================================== */
+
+#[tauri::command]
+pub async fn get_widget_fields<R: Runtime>(_app: AppHandle<R>, widget: String) -> Result<Map<String, Value>, String> {
+    let metadata = find_user_widget(&widget)?;
+    return Ok(metadata.fields());
 }
 
 /* ========================================================================== */
@@ -43,14 +49,8 @@ pub async fn get_widget_fieldstate<R: Runtime>(
     _app: AppHandle<R>,
     widget: String
 ) -> Result<HashMap<String, Value>, String> {
-    let found = get_widget_from_rest_path(&widget);
-    let widget = found.ok_or_else(|| format!("Widget '{}' not found", widget))?;
-    if widget.widget_source == WidgetSource::System {
-        return Err("Cannot get fieldstate of system widgets".into());
-    }
-
-    let fieldstate = widget.fieldstate();
-    return Ok(fieldstate);
+    let metadata = find_user_widget(&widget)?;
+    return Ok(metadata.fieldstate());
 }
 
 /* ========================================================================== */
@@ -65,15 +65,16 @@ pub async fn get_widgets<R: Runtime>(_app: AppHandle<R>) -> Result<Vec<WidgetMet
 /* ========================================================================== */
 
 #[tauri::command]
-pub async fn set_widget_fieldstate<R: Runtime>(_app: AppHandle<R>, widget: String, data: String) -> Result<(), String> {
-    let found = get_widget_from_rest_path(&widget);
-    let widget = found.ok_or_else(|| format!("Widget '{}' not found", widget))?;
-    if widget.widget_source == WidgetSource::System {
-        return Err("Cannot set fieldstate of system widgets".into());
-    }
+pub async fn set_widget_fieldstate<R: Runtime>(
+    _app: AppHandle<R>,
+    widget: String,
+    fieldstate: HashMap<String, Value>
+) -> Result<(), String> {
+    let metadata = find_user_widget(&widget)?;
 
-    let path = widget.fieldstate_path();
-    fs::write(&path, data).map_err(|e| format!("Failed to write widget '{:?}' fieldstate file: {:#?}", path, e))?;
+    let path = metadata.fieldstate_path();
+    let serialized = serde_json::to_string(&fieldstate).expect("Fieldstate serializes to JSON");
+    fs::write(&path, serialized).map_err(|e| format!("Failed to write fieldstate '{:?}': {:#?}", path, e))?;
 
     return Ok(());
 }
