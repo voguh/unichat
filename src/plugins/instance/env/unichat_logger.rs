@@ -11,7 +11,7 @@
 use log::Level;
 use mlua::Error;
 use mlua::Lua;
-use mlua::LuaSerdeExt as _;
+use mlua::LuaSerdeExt;
 use mlua::UserData;
 use mlua::UserDataMethods;
 use mlua::Value;

@@ -13,7 +13,7 @@ use axum::extract::Path;
 use axum::extract::Query;
 use axum::extract::Request;
 use axum::http::StatusCode;
-use axum::response::IntoResponse as _;
+use axum::response::IntoResponse;
 use axum::response::Response;
 
 use crate::utils::base64;

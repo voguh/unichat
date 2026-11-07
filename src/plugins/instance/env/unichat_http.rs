@@ -10,7 +10,7 @@
 
 use mlua::Error;
 use mlua::Lua;
-use mlua::LuaSerdeExt as _;
+use mlua::LuaSerdeExt;
 use mlua::Table;
 use mlua::UserData;
 use mlua::UserDataFields;
@@ -21,7 +21,7 @@ use crate::plugins::instance::env::utils::from_lua_value;
 use crate::utils::base64;
 use crate::utils::ureq;
 use crate::utils::ureq::RequestBuilder;
-use crate::utils::ureq::ResponseExt as _;
+use crate::utils::ureq::ResponseExt;
 use crate::utils::ureq::http::response::Response;
 use crate::utils::ureq::typestate::WithBody;
 

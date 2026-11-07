@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 
-use tauri::Manager as _;
+use tauri::Manager;
 
 use crate::utils::userstore::flush_userstore;
 

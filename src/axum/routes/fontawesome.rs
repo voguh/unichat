@@ -11,7 +11,7 @@
 use axum::extract::Path;
 use axum::http::StatusCode;
 use axum::http::header;
-use axum::response::IntoResponse as _;
+use axum::response::IntoResponse;
 use axum::response::Response;
 
 use crate::axum::utils::CACHE_IMMUTABLE;

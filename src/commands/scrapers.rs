@@ -10,7 +10,7 @@
 
 use serde_json::Value;
 use tauri::AppHandle;
-use tauri::Manager as _;
+use tauri::Manager;
 use tauri::Runtime;
 
 use crate::scraper;

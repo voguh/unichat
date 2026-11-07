@@ -16,8 +16,8 @@ use std::sync::RwLockReadGuard;
 
 use anyhow::Error;
 use anyhow::anyhow;
-use tauri::Listener as _;
-use tauri::Manager as _;
+use tauri::Listener;
+use tauri::Manager;
 use tauri::WebviewUrl;
 use tauri::WebviewWindow;
 use tauri::Wry;

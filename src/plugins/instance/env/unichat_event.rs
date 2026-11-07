@@ -10,7 +10,7 @@
 
 use mlua::Error;
 use mlua::Lua;
-use mlua::LuaSerdeExt as _;
+use mlua::LuaSerdeExt;
 use mlua::Table;
 use mlua::UserData;
 use mlua::UserDataMethods;

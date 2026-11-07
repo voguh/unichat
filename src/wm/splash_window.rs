@@ -13,8 +13,8 @@ use std::sync::RwLock;
 use std::sync::RwLockReadGuard;
 
 use anyhow::Error;
-use tauri::Emitter as _;
-use tauri::Manager as _;
+use tauri::Emitter;
+use tauri::Manager;
 use tauri::WebviewUrl;
 use tauri::WebviewWindow;
 use tauri::Wry;

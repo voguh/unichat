@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 use std::fs;
-use std::io::Write as _;
+use std::io::Write;
 
 use anyhow::Error;
 use anyhow::anyhow;

@@ -12,7 +12,7 @@
 
 use axum::Json;
 use axum::body::Bytes;
-use axum::response::IntoResponse as _;
+use axum::response::IntoResponse;
 use axum::response::Response;
 
 use crate::utils::jsonrpc::JsonRPCError;

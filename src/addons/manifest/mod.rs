@@ -16,7 +16,7 @@ use anyhow::Error;
 use anyhow::anyhow;
 use serde::Deserialize;
 use serde::Serialize;
-use serde::de::Error as _;
+use serde::de::Error as DeError;
 
 use crate::utils::semver::Version;
 use crate::utils::semver::VersionRange;

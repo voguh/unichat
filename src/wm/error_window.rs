@@ -10,7 +10,7 @@
 
 use anyhow::Error;
 use serde_json::json;
-use tauri::Manager as _;
+use tauri::Manager;
 use tauri::WebviewUrl;
 
 use crate::UNICHAT_DISPLAY_NAME;

@@ -17,7 +17,7 @@ use std::sync::atomic::Ordering;
 
 use mlua::Error;
 use mlua::Function;
-use mlua::LuaSerdeExt as _;
+use mlua::LuaSerdeExt;
 use mlua::Table;
 use mlua::UserData;
 use mlua::UserDataMethods;

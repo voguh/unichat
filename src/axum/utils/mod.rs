@@ -10,8 +10,8 @@
 
 use std::fs::File;
 use std::fs::Metadata;
-use std::io::Read as _;
-use std::io::Seek as _;
+use std::io::Read;
+use std::io::Seek;
 use std::io::SeekFrom;
 use std::path::Path;
 use std::time::UNIX_EPOCH;
@@ -19,7 +19,7 @@ use std::time::UNIX_EPOCH;
 use axum::body::Body;
 use axum::http::HeaderMap;
 use axum::http::StatusCode;
-use axum::response::IntoResponse as _;
+use axum::response::IntoResponse;
 use axum::response::Response;
 
 use crate::utils::safe_guard_path;

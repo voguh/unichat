@@ -11,8 +11,8 @@
 use anyhow::Error;
 use serde::Serialize;
 use serde_json::json;
-use tauri::Emitter as _;
-use tauri::Manager as _;
+use tauri::Emitter;
+use tauri::Manager;
 use tauri::WebviewUrl;
 
 use crate::UNICHAT_DISPLAY_NAME;

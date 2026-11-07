@@ -14,7 +14,7 @@ use std::ffi::c_void;
 use mlua::Error;
 use mlua::Function;
 use mlua::Lua;
-use mlua::LuaSerdeExt as _;
+use mlua::LuaSerdeExt;
 use mlua::Table;
 use mlua::Value;
 use mlua::Variadic;

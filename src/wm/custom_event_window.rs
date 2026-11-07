@@ -10,7 +10,7 @@
 
 use anyhow::Error;
 use anyhow::anyhow;
-use tauri::Manager as _;
+use tauri::Manager;
 use tauri::WebviewUrl;
 use tauri::WebviewWindow;
 use tauri::Wry;
