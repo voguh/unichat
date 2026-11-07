@@ -46,7 +46,7 @@ mod youtube;
 
 static APP_HANDLE: OnceLock<tauri::AppHandle<tauri::Wry>> = OnceLock::new();
 pub fn get_app_handle() -> &'static tauri::AppHandle<tauri::Wry> {
-    return APP_HANDLE.get().expect("APP_HANDLE is not initialized");
+    return APP_HANDLE.get().expect("APP_HANDLE was not initialized");
 }
 
 fn set_app_handle(app_handle: tauri::AppHandle<tauri::Wry>) {
@@ -79,6 +79,16 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
 /* ========================================================================== */
 
+fn ensure_app_dir(app_path: AppPaths) -> Result<(), Error> {
+    let dir = paths::get(app_path);
+    if !dir.exists() {
+        log::info!("Creating directory {:?}", dir);
+        fs::create_dir_all(&dir)?;
+    }
+
+    return Ok(());
+}
+
 fn run_startup() -> Result<(), Error> {
     let start = Instant::now();
     wm::splash_window::begin(format!("Starting {} v{}...", UNICHAT_DISPLAY_NAME, *UNICHAT_VERSION));
@@ -94,29 +104,13 @@ fn run_startup() -> Result<(), Error> {
     /* ====================================================================== */
 
     wm::splash_window::stage(3, "Setting up application plugins directory...");
-    let user_plugins_dir = paths::get(AppPaths::UniChatUserPlugins);
-    if !&user_plugins_dir.exists() {
-        log::info!("Creating user plugins directory at {:?}", user_plugins_dir);
-        fs::create_dir_all(&user_plugins_dir)?;
-    }
-
-    /* ====================================================================== */
+    ensure_app_dir(AppPaths::UniChatUserPlugins)?;
 
     wm::splash_window::stage(4, "Setting up application gallery directory...");
-    let gallery_dir = paths::get(AppPaths::UniChatGallery);
-    if !&gallery_dir.exists() {
-        log::info!("Creating gallery directory at {:?}", gallery_dir);
-        fs::create_dir_all(&gallery_dir)?;
-    }
-
-    /* ====================================================================== */
+    ensure_app_dir(AppPaths::UniChatGallery)?;
 
     wm::splash_window::stage(5, "Setting up application widgets directory...");
-    let user_widgets_dir = paths::get(AppPaths::UniChatUserWidgets);
-    if !&user_widgets_dir.exists() {
-        log::info!("Creating user widgets directory at {:?}", user_widgets_dir);
-        fs::create_dir_all(&user_widgets_dir)?;
-    }
+    ensure_app_dir(AppPaths::UniChatUserWidgets)?;
 
     /* ====================================================================== */
 
@@ -170,17 +164,21 @@ fn run_startup() -> Result<(), Error> {
     return Ok(());
 }
 
+fn parse_log_level(raw: &str) -> log::LevelFilter {
+    return match raw.to_lowercase().as_str() {
+        "error" => log::LevelFilter::Error,
+        "warn" | "warning" => log::LevelFilter::Warn,
+        "info" => log::LevelFilter::Info,
+        "debug" => log::LevelFilter::Debug,
+        "trace" => log::LevelFilter::Trace,
+        _ => log::LevelFilter::Info
+    };
+}
+
 fn main() {
     let log_level: log::LevelFilter;
     if let Ok(log_level_raw) = env::var("UNICHAT_LOG_LEVEL") {
-        log_level = match log_level_raw.to_lowercase().as_str() {
-            "error" => log::LevelFilter::Error,
-            "warn" | "warning" => log::LevelFilter::Warn,
-            "info" => log::LevelFilter::Info,
-            "debug" => log::LevelFilter::Debug,
-            "trace" => log::LevelFilter::Trace,
-            _ => log::LevelFilter::Info
-        };
+        log_level = parse_log_level(&log_level_raw);
     } else if utils::is_dev() {
         log_level = log::LevelFilter::Debug;
     } else {
@@ -196,7 +194,7 @@ fn main() {
                 .level(log_level)
                 .clear_targets()
                 .rotation_strategy(tauri_plugin_log::RotationStrategy::KeepSome(7))
-                .max_file_size(1e6 as u128) // 1 MB
+                .max_file_size(1024 * 1024)
                 .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout))
                 .target(tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir {
                     file_name: Some(UNICHAT_NAME.to_string())
