@@ -22,6 +22,7 @@ use serde::Serialize;
 use serde_json::Map;
 
 use crate::UNICHAT_VERSION;
+use crate::addons::MANIFEST_FILE;
 use crate::addons::UniChatAddonManifest;
 use crate::addons::is_valid_addon_dir;
 use crate::addons::load_manifest;
@@ -31,6 +32,18 @@ use crate::utils::paths;
 use crate::utils::paths::AppPaths;
 use crate::utils::semver::Version;
 use crate::utils::semver::VersionRange;
+
+/* ========================================================================== */
+
+const WIDGET_ASSETS_DIR: &str = "assets";
+const WIDGET_FIELDS_FILE: &str = "fields.json";
+pub const WIDGET_FIELDSTATE_FILE: &str = "fieldstate.json";
+const WIDGET_CSS_FILE: &str = "widget.css";
+const WIDGET_LEGACY_CSS_FILE: &str = "style.css";
+const WIDGET_HTML_FILE: &str = "widget.html";
+const WIDGET_LEGACY_HTML_FILE: &str = "main.html";
+const WIDGET_JS_FILE: &str = "widget.js";
+const WIDGET_LEGACY_JS_FILE: &str = "script.js";
 
 /* ========================================================================== */
 
@@ -62,13 +75,13 @@ pub struct WidgetMetadata {
 
 impl WidgetMetadata {
     pub fn assets_path(&self) -> PathBuf {
-        return self.path.join("assets");
+        return self.path.join(WIDGET_ASSETS_DIR);
     }
 
     /* ====================================================================== */
 
     fn fields_path(&self) -> PathBuf {
-        return self.path.join("fields.json");
+        return self.path.join(WIDGET_FIELDS_FILE);
     }
 
     pub fn fields(&self) -> Map<String, serde_json::Value> {
@@ -77,7 +90,7 @@ impl WidgetMetadata {
         return match serde_json::from_str(&raw) {
             Ok(map) => map,
             Err(err) => {
-                log::error!("Failed to parse fields.json for widget '{:?}': {:#?}", self.path, err);
+                log::error!("Failed to parse {} for widget '{:?}': {:#?}", WIDGET_FIELDS_FILE, self.path, err);
                 return Map::new();
             }
         };
@@ -86,7 +99,7 @@ impl WidgetMetadata {
     /* ====================================================================== */
 
     pub fn fieldstate_path(&self) -> PathBuf {
-        return self.path.join("fieldstate.json");
+        return self.path.join(WIDGET_FIELDSTATE_FILE);
     }
 
     pub fn fieldstate(&self) -> HashMap<String, serde_json::Value> {
@@ -95,7 +108,7 @@ impl WidgetMetadata {
         return match serde_json::from_str(&raw) {
             Ok(map) => map,
             Err(err) => {
-                log::error!("Failed to parse fieldstate.json for widget '{:?}': {:#?}", self.path, err);
+                log::error!("Failed to parse {} for widget '{:?}': {:#?}", WIDGET_FIELDSTATE_FILE, self.path, err);
                 return HashMap::new();
             }
         };
@@ -116,7 +129,7 @@ impl WidgetMetadata {
     /* ====================================================================== */
 
     fn widget_css_path(&self) -> PathBuf {
-        return self.entrypoint_path("widget.css", "style.css");
+        return self.entrypoint_path(WIDGET_CSS_FILE, WIDGET_LEGACY_CSS_FILE);
     }
 
     pub fn widget_css(&self) -> String {
@@ -126,7 +139,7 @@ impl WidgetMetadata {
     /* ====================================================================== */
 
     fn widget_html_path(&self) -> PathBuf {
-        return self.entrypoint_path("widget.html", "main.html");
+        return self.entrypoint_path(WIDGET_HTML_FILE, WIDGET_LEGACY_HTML_FILE);
     }
 
     pub fn widget_html(&self) -> String {
@@ -136,7 +149,7 @@ impl WidgetMetadata {
     /* ====================================================================== */
 
     fn widget_js_path(&self) -> PathBuf {
-        return self.entrypoint_path("widget.js", "script.js");
+        return self.entrypoint_path(WIDGET_JS_FILE, WIDGET_LEGACY_JS_FILE);
     }
 
     pub fn widget_js(&self) -> String {
@@ -180,7 +193,7 @@ fn get_warnings_for_widget(
 ) -> Vec<String> {
     let mut warnings = Vec::new();
 
-    if source_type == &WidgetSource::User && !widget_path.join("manifest.yaml").is_file() {
+    if source_type == &WidgetSource::User && !widget_path.join(MANIFEST_FILE).is_file() {
         warnings.push("MISSING_MANIFEST".to_string());
     }
 
@@ -190,9 +203,9 @@ fn get_warnings_for_widget(
         }
     }
 
-    warnings.extend(get_entrypoint_warning(widget_path, "widget.html", "main.html", "HTML"));
-    warnings.extend(get_entrypoint_warning(widget_path, "widget.js", "script.js", "JS"));
-    warnings.extend(get_entrypoint_warning(widget_path, "widget.css", "style.css", "CSS"));
+    warnings.extend(get_entrypoint_warning(widget_path, WIDGET_HTML_FILE, WIDGET_LEGACY_HTML_FILE, "HTML"));
+    warnings.extend(get_entrypoint_warning(widget_path, WIDGET_JS_FILE, WIDGET_LEGACY_JS_FILE, "JS"));
+    warnings.extend(get_entrypoint_warning(widget_path, WIDGET_CSS_FILE, WIDGET_LEGACY_CSS_FILE, "CSS"));
 
     return warnings;
 }
@@ -216,7 +229,7 @@ fn load_widgets_from_disk(
         }
 
         let mut manifest = None;
-        if widget_path.join("manifest.yaml").is_file() {
+        if widget_path.join(MANIFEST_FILE).is_file() {
             match load_manifest(&widget_path) {
                 Ok(loaded_manifest) => {
                     manifest = Some(loaded_manifest);

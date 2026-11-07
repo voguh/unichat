@@ -28,9 +28,11 @@ use crate::addons::find_release;
 use crate::addons::replace_addon;
 use crate::api;
 use crate::cache;
+use crate::plugins::PLUGIN_WIDGETS_DIR;
 use crate::utils::paths;
 use crate::utils::paths::AppPaths;
 use crate::utils::semver::Version;
+use crate::widgets::WIDGET_FIELDSTATE_FILE;
 
 /* ========================================================================== */
 
@@ -68,9 +70,9 @@ fn build(data: CommunityAddonData, installed_version: Option<Version>) -> Commun
 
 fn widget_fieldstates(plugin_path: &Path) -> Vec<PathBuf> {
     let mut keep_list = Vec::new();
-    if let Ok(entries) = fs::read_dir(plugin_path.join("widgets")) {
+    if let Ok(entries) = fs::read_dir(plugin_path.join(PLUGIN_WIDGETS_DIR)) {
         for entry in entries.flatten() {
-            keep_list.push(PathBuf::from("widgets").join(entry.file_name()).join("fieldstate.json"));
+            keep_list.push(PathBuf::from(PLUGIN_WIDGETS_DIR).join(entry.file_name()).join(WIDGET_FIELDSTATE_FILE));
         }
     }
 

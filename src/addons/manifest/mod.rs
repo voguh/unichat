@@ -23,6 +23,10 @@ use crate::utils::semver::VersionRange;
 
 /* ========================================================================== */
 
+pub const MANIFEST_FILE: &str = "manifest.yaml";
+
+/* ========================================================================== */
+
 fn split_dependency(dep: &str) -> Result<(&str, &str), Error> {
     if let Some((name, range)) = dep.split_once('@') {
         return Ok((name.trim(), range.trim()));
@@ -77,7 +81,7 @@ pub fn is_valid_addon_dir(id: &str, addon_path: &Path) -> bool {
 }
 
 pub fn load_manifest(addon_path: &Path) -> Result<UniChatAddonManifest, Error> {
-    let manifest_path = addon_path.join("manifest.yaml");
+    let manifest_path = addon_path.join(MANIFEST_FILE);
     let manifest_content = fs::read_to_string(&manifest_path)?;
     return serde_saphyr::from_str(&manifest_content).map_err(|e| e.into());
 }

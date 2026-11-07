@@ -19,6 +19,8 @@ use crate::UNICHAT_DISPLAY_NAME;
 use crate::UNICHAT_VERSION;
 use crate::addons::UniChatAddonManifest;
 use crate::plugins;
+use crate::plugins::PLUGIN_DATA_DIR;
+use crate::plugins::PLUGIN_ENTRYPOINT_FILE;
 use crate::plugins::PluginMetadata;
 use crate::plugins::PluginStatus;
 use crate::plugins::runtime;
@@ -39,7 +41,7 @@ fn start(plugin: &Arc<PluginMetadata>) -> Result<(), Error> {
     let start_ms = get_current_timestamp();
     log::info!("Executing plugin entrypoint for plugin: {} v{}", plugin.id, plugin.version);
     let entrypoint_code = fs::read_to_string(plugin.get_entrypoint_path())?;
-    let chunk_name = format!("{}/main.lua", plugin.id);
+    let chunk_name = format!("{}/{}", plugin.id, PLUGIN_ENTRYPOINT_FILE);
     lua.load(&entrypoint_code).set_name(chunk_name).set_environment(plugin_env).exec()?;
     let end_ms = get_current_timestamp();
     log::info!("Plugin '{}' initialized in {} ms", plugin.id, end_ms - start_ms);
@@ -56,7 +58,8 @@ pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(),
     let mut is_valid = true;
 
     if !plugin.get_entrypoint_path().is_file() {
-        plugin.add_message(format!("Plugin '{:?}' is missing required 'data/main.lua'", plugin_path));
+        let entrypoint = Path::new(PLUGIN_DATA_DIR).join(PLUGIN_ENTRYPOINT_FILE);
+        plugin.add_message(format!("Plugin '{:?}' is missing required '{}'", plugin_path, entrypoint.display()));
         is_valid = false;
     }
 

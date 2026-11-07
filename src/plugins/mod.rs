@@ -22,6 +22,7 @@ use anyhow::anyhow;
 use mlua::Table;
 use mlua::Value;
 
+use crate::addons::MANIFEST_FILE;
 use crate::addons::UniChatAddonManifest;
 use crate::addons::is_valid_addon_dir;
 use crate::addons::load_manifest;
@@ -32,6 +33,14 @@ use crate::utils::semver::VersionRange;
 
 mod instance;
 mod runtime;
+
+/* ========================================================================== */
+
+const PLUGIN_ASSETS_DIR: &str = "assets";
+const PLUGIN_DATA_DIR: &str = "data";
+const PLUGIN_ENTRYPOINT_FILE: &str = "main.lua";
+const PLUGIN_ICON_FILE: &str = "icon.png";
+pub const PLUGIN_WIDGETS_DIR: &str = "widgets";
 
 /* ========================================================================== */
 
@@ -179,23 +188,23 @@ impl PluginMetadata {
     }
 
     pub fn get_assets_path(&self) -> PathBuf {
-        return self.path.join("assets");
+        return self.path.join(PLUGIN_ASSETS_DIR);
     }
 
     fn get_data_path(&self) -> PathBuf {
-        return self.path.join("data");
+        return self.path.join(PLUGIN_DATA_DIR);
     }
 
     fn get_entrypoint_path(&self) -> PathBuf {
-        return self.get_data_path().join("main.lua");
+        return self.get_data_path().join(PLUGIN_ENTRYPOINT_FILE);
     }
 
     pub fn get_widgets_path(&self) -> PathBuf {
-        return self.path.join("widgets");
+        return self.path.join(PLUGIN_WIDGETS_DIR);
     }
 
     fn get_icon_path(&self) -> Option<PathBuf> {
-        let icon_path = self.path.join("icon.png");
+        let icon_path = self.path.join(PLUGIN_ICON_FILE);
         if icon_path.is_file() {
             return Some(icon_path);
         }
@@ -212,7 +221,33 @@ impl PluginMetadata {
 
 /* ========================================================================== */
 
+fn has_plugins() -> bool {
+    let user_plugins_dir = paths::get(AppPaths::UniChatUserPlugins);
+    if let Ok(entries) = fs::read_dir(&user_plugins_dir) {
+        for entry in entries.flatten() {
+            let plugin_folder = entry.file_name().to_string_lossy().to_string();
+            let plugin_path = entry.path();
+            if !is_valid_addon_dir(&plugin_folder, &plugin_path) {
+                continue;
+            }
+
+            let has_manifest = plugin_path.join(MANIFEST_FILE).is_file();
+            let has_entrypoint = plugin_path.join(PLUGIN_DATA_DIR).join(PLUGIN_ENTRYPOINT_FILE).is_file();
+            if has_manifest && has_entrypoint {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 pub fn init() -> Result<(), Error> {
+    if !has_plugins() {
+        log::info!("No plugins found, skipping LUA runtime");
+        return Ok(());
+    }
+
     return runtime::new();
 }
 
@@ -230,8 +265,8 @@ fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, UniChat
             continue;
         }
 
-        if !plugin_path.join("manifest.yaml").is_file() {
-            log::warn!("Skipping folder '{:?}' as it does not contain a valid 'manifest.yaml'", plugin_path);
+        if !plugin_path.join(MANIFEST_FILE).is_file() {
+            log::warn!("Skipping folder '{:?}' as it does not contain a valid '{}'", plugin_path, MANIFEST_FILE);
             continue;
         }
 
@@ -250,6 +285,10 @@ fn load_plugins_from_disk(plugins_path: PathBuf) -> Result<Vec<(PathBuf, UniChat
 }
 
 pub fn load_plugins() -> Result<(), Error> {
+    if !runtime::initialized() {
+        return Ok(());
+    }
+
     let user_plugins_dir = paths::get(AppPaths::UniChatUserPlugins);
     let loaded_manifests = load_plugins_from_disk(user_plugins_dir)?;
 

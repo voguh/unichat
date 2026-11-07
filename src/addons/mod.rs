@@ -34,6 +34,7 @@ pub mod widget;
 
 /* ========================================================================== */
 
+pub use manifest::MANIFEST_FILE;
 pub use manifest::UniChatAddonManifest;
 pub use manifest::is_valid_addon_dir;
 pub use manifest::load_manifest;
@@ -145,7 +146,7 @@ fn community_addon_id(internal_id: &str, prefix: &str) -> String {
 
 fn find_installed_version(addons_path: &Path, id: &str) -> Option<Version> {
     let addon_path = addons_path.join(id);
-    if !addon_path.join("manifest.yaml").is_file() {
+    if !addon_path.join(MANIFEST_FILE).is_file() {
         return None;
     }
 

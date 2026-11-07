@@ -30,6 +30,7 @@ use crate::cache;
 use crate::utils::paths;
 use crate::utils::paths::AppPaths;
 use crate::utils::semver::Version;
+use crate::widgets::WIDGET_FIELDSTATE_FILE;
 use crate::widgets::reload_user_widgets;
 
 /* ========================================================================== */
@@ -110,7 +111,7 @@ pub fn install(internal_id: &str, release: &Version) -> Result<(), Error> {
 
     let (extract_path, extracted_widget_path) = download_release(&id, selected)?;
     let widget_path = paths::get(AppPaths::UniChatUserWidgets).join(&id);
-    replace_addon(&extracted_widget_path, &widget_path, &[PathBuf::from("fieldstate.json")])?;
+    replace_addon(&extracted_widget_path, &widget_path, &[PathBuf::from(WIDGET_FIELDSTATE_FILE)])?;
 
     fs::remove_dir_all(&extract_path).map_err(|e| anyhow!("Failed to clean '{:?}': {:#?}", extract_path, e))?;
     reload_user_widgets()?;

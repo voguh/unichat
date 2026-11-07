@@ -79,30 +79,6 @@ fn setup(app: &mut tauri::App<tauri::Wry>) -> Result<(), Box<dyn std::error::Err
 
 /* ========================================================================== */
 
-fn has_plugins() -> bool {
-    let mut has_plugins = false;
-    let user_plugins_dir = paths::get(AppPaths::UniChatUserPlugins);
-
-    if user_plugins_dir.exists() && user_plugins_dir.is_dir() {
-        if let Ok(entries) = fs::read_dir(&user_plugins_dir) {
-            for entry in entries.flatten() {
-                let path = entry.path();
-                if path.is_dir() {
-                    let manifest = path.join("manifest.yaml").exists();
-                    let lua_entrypoint = path.join("data/main.lua").exists();
-
-                    if manifest && lua_entrypoint {
-                        has_plugins = true;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    return has_plugins;
-}
-
 fn run_startup() -> Result<(), Error> {
     let start = Instant::now();
     wm::splash_window::begin(format!("Starting {} v{}...", UNICHAT_DISPLAY_NAME, *UNICHAT_VERSION));
@@ -153,12 +129,8 @@ fn run_startup() -> Result<(), Error> {
     wm::splash_window::stage(8, "Fetching global shared emotes...");
     shared_emotes::fetch_global_shared_emotes();
 
-    if has_plugins() {
-        wm::splash_window::stage(9, "Initializing plugins module...");
-        plugins::init()?;
-    } else {
-        wm::splash_window::stage(9, "No plugins found. Skipping plugins initialization.");
-    }
+    wm::splash_window::stage(9, "Initializing plugins module...");
+    plugins::init()?;
 
     wm::splash_window::stage(10, "Initializing userstore module...");
     utils::userstore::init()?;
@@ -177,12 +149,8 @@ fn run_startup() -> Result<(), Error> {
     wm::splash_window::stage(14, "Registering YouTube integration...");
     youtube::init()?;
 
-    if has_plugins() {
-        wm::splash_window::stage(15, "Loading plugins...");
-        plugins::load_plugins()?;
-    } else {
-        wm::splash_window::stage(15, "No plugins found. Skipping plugin loading.");
-    }
+    wm::splash_window::stage(15, "Loading plugins...");
+    plugins::load_plugins()?;
 
     /* ====================================================================== */
 
