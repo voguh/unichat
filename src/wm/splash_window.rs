@@ -57,7 +57,7 @@ struct SplashProgressEvent {
 
 pub fn create() -> Result<WebviewWindow, Error> {
     let window = window::new(SPLASH_WINDOW_LABEL, WebviewUrl::App("splash-screen.html".into()))
-        .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION))
+        .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, *UNICHAT_VERSION))
         .inner_size(500.0, 300.0)
         .center()
         .focused(true)

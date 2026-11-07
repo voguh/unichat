@@ -105,7 +105,7 @@ fn has_plugins() -> bool {
 
 fn run_startup() -> Result<(), Error> {
     let start = Instant::now();
-    wm::splash_window::begin(format!("Starting {} v{}...", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION));
+    wm::splash_window::begin(format!("Starting {} v{}...", UNICHAT_DISPLAY_NAME, *UNICHAT_VERSION));
 
     /* ====================================================================== */
 
@@ -280,5 +280,5 @@ fn main() {
             commands::widgets::set_widget_fieldstate
         ])
         .run(tauri::generate_context!())
-        .unwrap_or_else(|e| panic!("Failed to run {} v{}!\n{:#?}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION, e));
+        .unwrap_or_else(|e| panic!("Failed to run {} v{}!\n{:#?}", UNICHAT_DISPLAY_NAME, *UNICHAT_VERSION, e));
 }

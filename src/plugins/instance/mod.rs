@@ -23,7 +23,6 @@ use crate::plugins::PluginMetadata;
 use crate::plugins::PluginStatus;
 use crate::plugins::runtime;
 use crate::utils::get_current_timestamp;
-use crate::utils::semver::Version;
 use crate::widgets;
 
 mod env;
@@ -62,9 +61,8 @@ pub fn create(plugin_path: &Path, manifest: &UniChatAddonManifest) -> Result<(),
     }
 
     if let Some(version_req) = plugin.dependencies.get("unichat") {
-        let version = Version::parse(UNICHAT_VERSION).expect("UNICHAT_VERSION is not a valid version");
-        if !version_req.matches(&version) {
-            let msg = format!("{} required '{}', found '{}'", UNICHAT_DISPLAY_NAME, version_req, version);
+        if !version_req.matches(&UNICHAT_VERSION) {
+            let msg = format!("{} required '{}', found '{}'", UNICHAT_DISPLAY_NAME, version_req, *UNICHAT_VERSION);
             plugin.add_message(msg);
             is_valid = false;
         }

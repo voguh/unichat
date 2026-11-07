@@ -61,6 +61,7 @@ pub fn webapp_globals_script() -> String {
     let platform = std::env::consts::OS;
     let plugins_enabled = plugins::runtime_initialized();
 
+    let unichat_version = &*UNICHAT_VERSION;
     let unichat_icon = format!("data:image/png;base64,{}", base64::encode(UNICHAT_ICON_BYTES));
 
     let gallery_dir = path_to_string(&paths::get(AppPaths::UniChatGallery));
@@ -76,7 +77,7 @@ pub fn webapp_globals_script() -> String {
 
             globalThis.UNICHAT_DISPLAY_NAME = "{UNICHAT_DISPLAY_NAME}";
             globalThis.UNICHAT_NAME = "{UNICHAT_NAME}";
-            globalThis.UNICHAT_VERSION = "{UNICHAT_VERSION}";
+            globalThis.UNICHAT_VERSION = "{unichat_version}";
             globalThis.UNICHAT_DESCRIPTION = "{UNICHAT_DESCRIPTION}";
             globalThis.UNICHAT_AUTHORS = "{UNICHAT_AUTHORS}";
             globalThis.UNICHAT_HOMEPAGE = "{UNICHAT_HOMEPAGE}";

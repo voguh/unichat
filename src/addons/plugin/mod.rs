@@ -62,12 +62,8 @@ fn fetch(internal_id: &str) -> Result<CommunityAddonData, Error> {
 fn build(data: CommunityAddonData, installed_version: Option<Version>) -> CommunityPlugin {
     let id = community_addon_id(&data.id, COMMUNITY_PLUGIN_ID_PREFIX);
     let icon_url = api::url(&format!("{}/{}/icon", COMMUNITY_PLUGINS_PATH, data.id));
-    let releases = data.releases.clone().unwrap_or_default();
 
-    return CommunityPlugin {
-        addon: build_community_addon(data, id, installed_version, &releases),
-        icon_url: icon_url
-    };
+    return CommunityPlugin { addon: build_community_addon(data, id, installed_version), icon_url: icon_url };
 }
 
 fn widget_fieldstates(plugin_path: &Path) -> Vec<PathBuf> {
@@ -94,7 +90,12 @@ pub fn list() -> Result<Vec<CommunityPlugin>, Error> {
 
         let mut data = item;
         if installed_version.is_some() {
-            data = fetch(&data.id)?;
+            match fetch(&data.id) {
+                Ok(details) => data = details,
+                Err(e) => {
+                    log::warn!("Failed to fetch details of community plugin '{}': {:#?}", data.id, e);
+                }
+            }
         }
 
         community_plugins.push(build(data, installed_version));
@@ -112,7 +113,7 @@ pub fn get(internal_id: &str) -> Result<CommunityPlugin, Error> {
     return Ok(build(data, installed_version));
 }
 
-pub fn install(internal_id: &str, release: &str) -> Result<(), Error> {
+pub fn install(internal_id: &str, release: &Version) -> Result<(), Error> {
     let data = fetch(internal_id)?;
     let id = community_addon_id(&data.id, COMMUNITY_PLUGIN_ID_PREFIX);
     let selected = find_release(&data, release)?;

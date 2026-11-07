@@ -69,7 +69,7 @@ pub fn fetch_shared_emotes(platform: &str, channel_id: &str) {
     let channel_id = channel_id.to_string();
 
     tauri::async_runtime::spawn_blocking(move || {
-        log::info!("Fetching channel shared emotes ({}:{})...", platform, channel_id);
+        log::info!("Fetching channel shared emotes ({}:{})", platform, channel_id);
 
         let results = thread::scope(|scope| {
             let bttv = scope.spawn(|| betterttv::fetch_channel_emotes(&platform, &channel_id));

@@ -72,7 +72,7 @@ const CURRENCIES_URL: &str = "https://api.frankfurter.dev/v2/currencies";
 const CURRENCIES_FILE_TTL: Duration = Duration::from_secs(60 * 60 * 24 * 30);
 
 fn fetch_currency_list() -> Result<Vec<UniChatCurrency>, Error> {
-    log::info!("Fetching currency list from '{}'...", CURRENCIES_URL);
+    log::info!("Fetching currency list from '{}'", CURRENCIES_URL);
     let mut response = ureq::get(CURRENCIES_URL).call()?;
     let entries: Vec<serde_json::Value> = response.body_mut().read_json()?;
 

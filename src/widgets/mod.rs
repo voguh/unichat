@@ -185,8 +185,7 @@ fn get_warnings_for_widget(
     }
 
     if let Some(version_req) = manifest.dependencies.get("unichat") {
-        let version = Version::parse(UNICHAT_VERSION).expect("UNICHAT_VERSION is not a valid version");
-        if !version_req.matches(&version) {
+        if !version_req.matches(&UNICHAT_VERSION) {
             warnings.push("INCOMPATIBLE_UNICHAT_VERSION".to_string());
         }
     }

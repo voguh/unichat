@@ -15,7 +15,7 @@ use anyhow::Error;
 use crate::UNICHAT_VERSION;
 use crate::api;
 use crate::cache;
-use crate::utils::semver;
+use crate::utils::semver::Version;
 
 /* ========================================================================== */
 
@@ -25,7 +25,7 @@ const TTL: Duration = Duration::from_secs(60 * 60);
 #[serde(rename_all = "camelCase")]
 struct UniChatRelease {
     id: u64,
-    name: String,
+    name: Version,
     description: String,
 
     url: String,
@@ -47,10 +47,10 @@ pub struct UniChatReleaseInfo {
 pub fn get_release_info() -> Result<UniChatReleaseInfo, Error> {
     let mut releases: Vec<UniChatRelease> = cache::get_or_fetch("releases", TTL, || api::get("/unichat-releases"))?;
 
-    releases.sort_by(|a, b| semver::rcompare(&a.name, &b.name));
+    releases.sort_by(|a, b| b.name.cmp(&a.name));
     let latest_stable = releases.iter().find(|r| !r.prerelease);
     let latest_unstable = releases.iter().find(|r| r.prerelease);
-    let has_update = latest_stable.is_some_and(|r| semver::gt(&r.name, UNICHAT_VERSION));
+    let has_update = latest_stable.is_some_and(|r| r.name > *UNICHAT_VERSION);
 
     return Ok(UniChatReleaseInfo {
         has_update: has_update,

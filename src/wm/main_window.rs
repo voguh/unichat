@@ -28,7 +28,7 @@ pub const MAIN_WINDOW_LABEL: &str = "main";
 
 pub fn create() -> Result<(), Error> {
     window::new(MAIN_WINDOW_LABEL, WebviewUrl::App("index.html".into()))
-        .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION))
+        .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, *UNICHAT_VERSION))
         .inner_size(1180.0, 640.0)
         .maximizable(false)
         .resizable(false)

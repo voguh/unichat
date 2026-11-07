@@ -77,7 +77,7 @@ fn fetch_rate_list(target: &str) -> Result<Vec<(String, String, f64)>, Error> {
     }
 
     let url = format!("{}?base={}", RATES_URL, target);
-    log::info!("Fetching currency rates from '{}'...", url);
+    log::info!("Fetching currency rates from '{}'", url);
     let mut response = ureq::get(url).call()?;
     let entries: Vec<FrankfurterRate> = response.body_mut().read_json()?;
 

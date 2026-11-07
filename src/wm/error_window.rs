@@ -36,7 +36,7 @@ pub fn open(err: &Error) {
 
     let payload = json!({
         "displayName": UNICHAT_DISPLAY_NAME,
-        "version": UNICHAT_VERSION,
+        "version": *UNICHAT_VERSION,
         "step": step,
         "total": splash_window::TOTAL_STAGES,
         "stageMessage": stage_message,
@@ -46,7 +46,7 @@ pub fn open(err: &Error) {
     });
 
     let result = window::new(ERROR_WINDOW_LABEL, WebviewUrl::App("error.html".into()))
-        .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, UNICHAT_VERSION))
+        .title(format!("{} v{}", UNICHAT_DISPLAY_NAME, *UNICHAT_VERSION))
         .inner_size(640.0, 460.0)
         .center()
         .focused(true)
