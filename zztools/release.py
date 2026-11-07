@@ -52,38 +52,17 @@ def main():
 
     # ============================================================================================ #
 
-    logger.info("Checking working directory status...")
-    git_status = exec(["git", "status", "--porcelain"]).stdout.strip()
-    if git_status:
-        logger.error("Working directory is not clean. Please commit or stash your changes before releasing.")
+    logger.info("Checking license headers...")
+    license_result = exec([TOOLS_PATH / "check-license-header.py"], check=False)
+    if license_result.returncode != 0:
+        logger.error("Files with missing or invalid license headers found. Fix them and commit the changes.")
         return
 
-    # ============================================================================================ #
-
-    logger.info("Checking current git branch...")
-    current_branch = exec(["git", "rev-parse", "--abbrev-ref", "HEAD"]).stdout.strip()
-    if next_version.patch != 0:
-        expected_branch = f"stable/{next_version.major}.{next_version.minor}.x"
-
-        if current_branch != expected_branch:
-            logger.error("You must be on branch '\033[33m{}\033[0m' to release patch versions but current branch is '\033[33m{}\033[0m'.", expected_branch, current_branch)
-            return
-    else:
-        expected_branch = "main"
-
-        if current_branch != expected_branch:
-            logger.error("You must be on branch '\033[33m{}\033[0m' to release major/minor versions but current branch is '\033[33m{}\033[0m'.", expected_branch, current_branch)
-            return
-    logger.info("Current git branch is '\033[33m{}\033[0m'.", current_branch)
-
-    logger.info("Checking version tag uniqueness...")
-    existing_tags = exec(["git", "tag"]).stdout.strip().splitlines()
-    if str(next_version) in existing_tags:
-        logger.error("Version tag '\033[33m{}\033[0m' already exists. Please choose a different version.", next_version)
+    logger.info("Checking event contract parity...")
+    parity_result = exec([TOOLS_PATH / "check-events-parity.py"], check=False)
+    if parity_result.returncode != 0:
+        logger.error("Event contracts are out of sync with '\033[33munichat-api\033[0m'. Fix them and commit the changes.")
         return
-    logger.info("Version tag '\033[33m{}\033[0m' is unique.", next_version)
-
-    # ============================================================================================ #
 
     logger.info("Scanning dependencies for vulnerabilities...")
     osv_result = exec(["osv-scanner", "--config=osv-scanner.toml", "--lockfile=Cargo.lock", "--lockfile=webapp/pnpm-lock.yaml"], check=False)
@@ -114,6 +93,39 @@ def main():
     if clippy_result.returncode != 0:
         logger.error("Clippy reported warnings. Fix them and commit the changes.")
         return
+
+    # ============================================================================================ #
+
+    logger.info("Checking working directory status...")
+    git_status = exec(["git", "status", "--porcelain"]).stdout.strip()
+    if git_status:
+        logger.error("Working directory is not clean. Please commit or stash your changes before releasing.")
+        return
+
+    # ============================================================================================ #
+
+    logger.info("Checking current git branch...")
+    current_branch = exec(["git", "rev-parse", "--abbrev-ref", "HEAD"]).stdout.strip()
+    if next_version.patch != 0:
+        expected_branch = f"stable/{next_version.major}.{next_version.minor}.x"
+
+        if current_branch != expected_branch:
+            logger.error("You must be on branch '\033[33m{}\033[0m' to release patch versions but current branch is '\033[33m{}\033[0m'.", expected_branch, current_branch)
+            return
+    else:
+        expected_branch = "main"
+
+        if current_branch != expected_branch:
+            logger.error("You must be on branch '\033[33m{}\033[0m' to release major/minor versions but current branch is '\033[33m{}\033[0m'.", expected_branch, current_branch)
+            return
+    logger.info("Current git branch is '\033[33m{}\033[0m'.", current_branch)
+
+    logger.info("Checking version tag uniqueness...")
+    existing_tags = exec(["git", "tag"]).stdout.strip().splitlines()
+    if str(next_version) in existing_tags:
+        logger.error("Version tag '\033[33m{}\033[0m' already exists. Please choose a different version.", next_version)
+        return
+    logger.info("Version tag '\033[33m{}\033[0m' is unique.", next_version)
 
     # ============================================================================================ #
 
