@@ -94,6 +94,7 @@ module.exports = {
     entry: path.resolve(__dirname, "src/main.tsx"),
     output: {
         path: path.resolve(__dirname, "dist"),
+        clean: true,
         publicPath: "/",
         filename: `js/[name]${fileHash}.js`,
         chunkFilename: `js/[name]${fileHash}.js`,
