@@ -20,7 +20,7 @@ from utils.constants import ROOT_PATH
 RUST_PATH = ROOT_PATH / "src" / "events" / "unichat.rs"
 TYPESCRIPT_PATH = ROOT_PATH / "unichat-api" / "widgets" / "events.d.ts"
 LUA_PATH = ROOT_PATH / "unichat-api" / "plugins" / "events.d.lua"
-LUA_STD_PATH = ROOT_PATH / "unichat-api" / "plugins" / "plugin-std.d.lua"
+LUA_STD_PATH = ROOT_PATH / "unichat-api" / "plugins" / "globals.d.lua"
 
 STATUS_RUST_PATH = ROOT_PATH / "src" / "scraper" / "status.rs"
 STATUS_TYPESCRIPT_PATH = ROOT_PATH / "webapp" / "src" / "utils" / "IPCStatusEvent.ts"

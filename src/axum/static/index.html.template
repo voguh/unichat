@@ -73,7 +73,7 @@
                 }
 
                 globalThis.UniChatAPI = {
-                    getUserStoreItem: async (key) => {
+                    async getUserStoreItem(key) {
                         return jsonrpcSendCommand("userstore:get", [key]);
                     }
                 }

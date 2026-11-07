@@ -9,20 +9,20 @@
  ******************************************************************************/
 
 /// <reference types="jquery" />
-import type { UniChatEvent } from "./events"
+import type { UniChatEvent, UniChatEventUserstoreUpdate } from "./events"
 
 declare global {
-    declare interface UniChatAPI {
-        getUserStoreItem: (key: string) => Promise<string | null>;
+    interface UniChatAPI {
+        getUserStoreItem(key: string): Promise<string | null>;
     }
 
-    declare interface UniChatCurrency {
+    interface UniChatCurrency {
         code: string;
         name: string;
         symbol: string;
     }
 
-    declare interface UniChatWidgetConnectedEvent {
+    interface UniChatWidgetConnectedEvent {
         userstore: Record<string, string>;
         fieldstate: Record<string, any>;
         currency: UniChatCurrency | null;
@@ -34,5 +34,6 @@ declare global {
         "unichat:loaded": CustomEvent<UniChatWidgetConnectedEvent>;
         "unichat:connected": CustomEvent<UniChatWidgetConnectedEvent>;
         "unichat:event": CustomEvent<UniChatEvent>;
+        "unichat:userstore_update": CustomEvent<UniChatEventUserstoreUpdate["data"]>;
     }
 }
