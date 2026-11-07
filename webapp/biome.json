@@ -42,6 +42,7 @@
             }
         }
     },
+    "yaml": { "formatter": {"enabled": false} },
     "javascript": {
         "formatter": {
             "quoteStyle": "double",
